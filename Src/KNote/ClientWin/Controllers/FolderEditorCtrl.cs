@@ -55,7 +55,7 @@ public class FolderEditorCtrl : CtrlNoteEditorBase<IViewEditor<FolderDto>, Folde
         return Task.FromResult(true);
     }
 
-    public override async Task<bool> SaveModel()
+    protected override async Task<bool> SaveModelCore()
     {
         View.RefreshModel();
 

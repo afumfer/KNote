@@ -153,7 +153,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         return false;
     }
 
-    public override async Task<bool> SaveModel()
+    protected override async Task<bool> SaveModelCore()
     {
         View.RefreshModel();
 

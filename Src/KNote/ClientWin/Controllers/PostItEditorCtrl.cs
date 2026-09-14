@@ -232,7 +232,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
         _pendingResources.Clear();
     }
 
-    public async override Task<bool> SaveModel()
+    protected async override Task<bool> SaveModelCore()
     {
         View.RefreshModel();
 

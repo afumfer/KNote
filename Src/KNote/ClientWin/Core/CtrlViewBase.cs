@@ -408,7 +408,46 @@ abstract public class CtrlNoteEditorBase<TView, TEntity> : CtrlEditorBase<TView,
 
     }
 
-    #endregion 
+    #endregion
+
+    #region SaveModel re-entrancy guard
+
+    // NoteEditorCtrl/PostItEditorCtrl's save can be entered twice concurrently: the
+    // MessagesManagmentCtrl autosave timer calls it via Store.SaveActiveNotes() while a manual
+    // save (toolbar button, Ctrl+S, form close, ...) is already awaiting its own call on the SAME
+    // controller instance. Both run on the UI thread, so there's no true multi-threading here, but
+    // the network/DB "await" inside SaveModelCore() yields back to the WinForms message loop,
+    // letting the second trigger start SaveModelCore() again before the first has finished - e.g.
+    // PostItEditorCtrl.FlushPendingResources() would then iterate/Clear() the same
+    // _pendingResources list from two overlapping calls (duplicate resource uploads or a
+    // "Collection was modified" exception), and both calls' "Model = response.Entity"
+    // reassignment races on which one wins.
+    //
+    // Sealed here so every subclass (NoteEditorCtrl, PostItEditorCtrl, FolderEditorCtrl) gets this
+    // for free by implementing SaveModelCore() instead of SaveModel() directly: a call made while
+    // one is already in flight awaits that SAME in-flight save instead of starting a redundant,
+    // overlapping one.
+    private Task<bool> _saveInFlight;
+
+    public sealed override async Task<bool> SaveModel()
+    {
+        if (_saveInFlight != null)
+            return await _saveInFlight;
+
+        _saveInFlight = SaveModelCore();
+        try
+        {
+            return await _saveInFlight;
+        }
+        finally
+        {
+            _saveInFlight = null;
+        }
+    }
+
+    protected abstract Task<bool> SaveModelCore();
+
+    #endregion
 
     public virtual FolderInfoDto GetFolder(Guid? currentFolderId = null)
     {
