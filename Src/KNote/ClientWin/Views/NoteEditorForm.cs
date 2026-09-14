@@ -1,5 +1,6 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Repository.EntityFramework.Entities;
@@ -25,7 +26,21 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     private string _textSearch = "";
     private int _indexTextSearch = 0;
 
-    #endregion 
+    // Primary/growing column per sub-list, for ListViewColumnResizer.
+    private const int AttributesPrimaryColumnIndex = 1;  // Value
+    private const int ResourcesPrimaryColumnIndex = 0;   // Name
+    private const int TasksPrimaryColumnIndex = 0;       // Topic/Tags
+    private const int AlarmsPrimaryColumnIndex = 6;      // Comment
+    private const int TraceNotePrimaryColumnIndex = 1;   // Topic
+
+    private ListViewColumnSorter _attributesSorter;
+    private ListViewColumnSorter _resourcesSorter;
+    private ListViewColumnSorter _tasksSorter;
+    private ListViewColumnSorter _alarmsSorter;
+    private ListViewColumnSorter _traceNoteFromSorter;
+    private ListViewColumnSorter _traceNoteToSorter;
+
+    #endregion
 
     #region Constructor
 
@@ -422,41 +437,25 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         }
     }
 
+    // Shared by listViewAttributes/listViewTasks/listViewAlarms - each grows a different column
+    // (its own identifying/descriptive field), so dispatch on which ListView actually resized.
     private void listView_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn((ListView)sender);
+        var lv = (ListView)sender;
+        int primaryColumnIndex = lv == listViewTasks ? TasksPrimaryColumnIndex
+            : lv == listViewAlarms ? AlarmsPrimaryColumnIndex
+            : AttributesPrimaryColumnIndex;
+        ListViewColumnResizer.Resize(lv, primaryColumnIndex);
     }
 
     private void listViewTraceNote_Resize(object sender, EventArgs e)
     {
-        // Topic (column 1) absorbs the extra width; every other column keeps its fixed size.
-        var lv = (ListView)sender;
-        if (lv.Columns.Count < 5)
-            return;
-
-        int otherColumnsWidth = 0;
-        for (int i = 0; i < lv.Columns.Count; i++)
-            if (i != 1)
-                otherColumnsWidth += lv.Columns[i].Width;
-
-        int topicWidth = lv.ClientSize.Width - otherColumnsWidth;
-        if (topicWidth > 100)
-            lv.Columns[1].Width = topicWidth;
+        ListViewColumnResizer.Resize((ListView)sender, TraceNotePrimaryColumnIndex);
     }
 
     private void listViewResources_Resize(object sender, EventArgs e)
     {
-        // Unlike listView_Resize (which stretches the last column), here the "Name" column
-        // absorbs the extra width so File type/Order keep their fixed size instead of leaving
-        // dead space to their right.
-        var lv = (ListView)sender;
-        if (lv.Columns.Count < 3)
-            return;
-
-        int otherColumnsWidth = lv.Columns[1].Width + lv.Columns[2].Width;
-        int nameWidth = lv.ClientSize.Width - otherColumnsWidth;
-        if (nameWidth > 50)
-            lv.Columns[0].Width = nameWidth;
+        ListViewColumnResizer.Resize(listViewResources, ResourcesPrimaryColumnIndex);
     }
 
     private void toolDescriptionHtml_Click(object sender, EventArgs e)
@@ -644,8 +643,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         var message = await _ctrl.NewMessage();
         if (message != null)
+        {
             listViewAlarms.Items.Add(MessageDtoToListViewItem(message));
-
+            ListViewSelectionHelper.SelectByKey(listViewAlarms, message.KMessageId.ToString(), _alarmsSorter);
+        }
     }
 
     private void buttonEditAlarm_Click(object sender, EventArgs e)
@@ -665,6 +666,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         if (res)
         {
             listViewAlarms.Items[messageId.ToString()].Remove();
+            ListViewSelectionHelper.SelectFirst(listViewAlarms, _alarmsSorter);
         }
     }
 
@@ -699,8 +701,13 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         bool res = _ctrl.DeleteTask(Guid.Parse(delTsk));
         if (res)
         {
-            await kntEditViewTask.ClearWebView();
             listViewTasks.Items[delTsk].Remove();
+            if (listViewTasks.Items.Count > 0)
+                // Triggers listViewTasks_SelectedIndexChanged, which refreshes the task description
+                // preview for the newly selected task - no separate ClearWebView()/update needed here.
+                ListViewSelectionHelper.SelectFirst(listViewTasks, _tasksSorter);
+            else
+                await kntEditViewTask.ClearWebView();
         }
     }
 
@@ -902,6 +909,13 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         PersonalizeListView(listViewTraceNoteFrom);
         PersonalizeListView(listViewTraceNoteTo);
 
+        _attributesSorter = ListViewSortHelper.Attach(listViewAttributes);
+        _resourcesSorter = ListViewSortHelper.Attach(listViewResources);
+        _tasksSorter = ListViewSortHelper.Attach(listViewTasks);
+        _alarmsSorter = ListViewSortHelper.Attach(listViewAlarms);
+        _traceNoteFromSorter = ListViewSortHelper.Attach(listViewTraceNoteFrom);
+        _traceNoteToSorter = ListViewSortHelper.Attach(listViewTraceNoteTo);
+
         kntEditView.NavigationStart += KntEditView_NavigationStart;
         kntEditView.NavigationEnd += KntEditView_NavigationEnd; 
     }
@@ -985,17 +999,17 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         textNoteType.Text = _ctrl.Model.NoteTypeDto.Name;
         ModelToControlsAttributes();
 
-        // Resources 
+        // Resources
         ModelToControlsResources();
         if (_ctrl.Model.Resources.Count > 0)
-            listViewResources.Items[0].Selected = true;
+            ListViewSelectionHelper.SelectFirst(listViewResources, _resourcesSorter);
         else
             UpdatePreviewResource(null);
 
         // Tasks
         ModelToControlsTasks();
         if (_ctrl.Model.Tasks.Count > 0)
-            listViewTasks.Items[0].Selected = true;
+            ListViewSelectionHelper.SelectFirst(listViewTasks, _tasksSorter);
         else
             await kntEditViewTask.ClearWebView();
 
@@ -1029,6 +1043,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         // Width of -2 indicates auto-size.
         listViewAttributes.Columns.Add("Name", 250, HorizontalAlignment.Left);
         listViewAttributes.Columns.Add("Value", -2, HorizontalAlignment.Left);
+        listView_Resize(listViewAttributes, EventArgs.Empty);
     }
 
     private void ModelToControlsResources()
@@ -1072,6 +1087,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("User", 250, HorizontalAlignment.Left);
+        listView_Resize(listViewTasks, EventArgs.Empty);
     }
 
     private void ModelToControlsAlarms()
@@ -1092,6 +1108,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         listViewAlarms.Columns.Add("Min", 50, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Notification type", 120, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);
+        listView_Resize(listViewAlarms, EventArgs.Empty);
     }
 
     private async Task ModelToControlsTraceNotes()
@@ -1161,7 +1178,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         var added = await _ctrl.NewTraceNote(ownerIsFromSide: false);
         if (added != null)
+        {
             await ModelToControlsTraceNotes();
+            ListViewSelectionHelper.SelectByKey(listViewTraceNoteFrom, added.TraceNoteId.ToString(), _traceNoteFromSorter);
+        }
     }
 
     private async void buttonTraceFromEdit_Click(object sender, EventArgs e)
@@ -1178,7 +1198,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         var added = await _ctrl.NewTraceNote(ownerIsFromSide: true);
         if (added != null)
+        {
             await ModelToControlsTraceNotes();
+            ListViewSelectionHelper.SelectByKey(listViewTraceNoteTo, added.TraceNoteId.ToString(), _traceNoteToSorter);
+        }
     }
 
     private async void buttonTraceToEdit_Click(object sender, EventArgs e)
@@ -1201,7 +1224,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         var traceNoteId = Guid.Parse(listView.SelectedItems[0].Name);
         var edited = await _ctrl.EditTraceNote(traceNoteId, ownerIsFromSide);
         if (edited != null)
+        {
             await ModelToControlsTraceNotes();
+            ListViewSelectionHelper.SelectByKey(listView, edited.TraceNoteId.ToString(), TraceNoteSorterFor(listView));
+        }
     }
 
     private async Task RemoveTraceNote(ListView listView, bool ownerIsFromSide)
@@ -1214,8 +1240,16 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         var traceNoteId = Guid.Parse(listView.SelectedItems[0].Name);
         var res = _ctrl.DeleteTraceNote(traceNoteId, ownerIsFromSide);
         if (res)
+        {
             await ModelToControlsTraceNotes();
+            ListViewSelectionHelper.SelectFirst(listView, TraceNoteSorterFor(listView));
+        }
     }
+
+    // EditTraceNote/RemoveTraceNote are shared by both the "From" and "To" lists (called with either
+    // as the listView parameter) - each list has its own ListViewColumnSorter, so look up the right one.
+    private ListViewColumnSorter TraceNoteSorterFor(ListView listView) =>
+        listView == listViewTraceNoteFrom ? _traceNoteFromSorter : _traceNoteToSorter;
 
     #endregion
 
@@ -1420,18 +1454,6 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         return itemList;
     }
 
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception)
-        {
-        }
-    }
-
     private void EnableHtmlView()
     {
         buttonEditMarkdown.Enabled = true;
@@ -1525,9 +1547,8 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         item.SubItems[10].Text = task.UserFullName.ToString();
         listViewTasks.Scrollable = true;
 
+        ListViewSelectionHelper.SelectByKey(listViewTasks, task.NoteTaskId.ToString(), _tasksSorter);
         await UpdateTaskDescription(task.Description);
-
-
     }
 
     private async Task EditResource()
@@ -1621,7 +1642,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
         _selectedResource = resource;
-        listViewResources.Items[resource.ResourceId.ToString()].Selected = true;
+        ListViewSelectionHelper.SelectByKey(listViewResources, resource.ResourceId.ToString(), _resourcesSorter);
     }
 
     private void InsertLinkSelectedResource(bool prependSeparator = false)
@@ -1807,6 +1828,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         item.Text = resource.NameOut;
         item.SubItems[1].Text = resource.FileType;
         item.SubItems[2].Text = resource.Order.ToString();
+        ListViewSelectionHelper.SelectByKey(listViewResources, resource.ResourceId.ToString(), _resourcesSorter);
         UpdatePreviewResource(resource);
     }
 
@@ -1815,6 +1837,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         var item = listViewAttributes.Items[noteAttribute.NoteKAttributeId.ToString()];
         item.Text = noteAttribute.Name;
         item.SubItems[1].Text = noteAttribute.Value;
+        ListViewSelectionHelper.SelectByKey(listViewAttributes, noteAttribute.NoteKAttributeId.ToString(), _attributesSorter);
     }
 
     private async Task UpdateTaskDescription(string description)
@@ -1849,7 +1872,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         if (task != null)
         {
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
-            listViewTasks.Items[listViewTasks.Items.Count - 1].Selected = true;
+            ListViewSelectionHelper.SelectByKey(listViewTasks, task.NoteTaskId.ToString(), _tasksSorter);
             await UpdateTaskDescription(task.Description);
             return true;
         }
@@ -1874,7 +1897,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
             panelPreview.Visible = true;
             textDescriptionResource.Text = "";
             if (listViewResources.Items.Count > 0)
-                listViewResources.Items[0].Selected = true;
+                ListViewSelectionHelper.SelectFirst(listViewResources, _resourcesSorter);
             else
             {
                 await webViewResource.ShowNavigationContent("");
