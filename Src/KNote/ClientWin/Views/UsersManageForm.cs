@@ -80,16 +80,21 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
     {
         listViewUsers.Clear();
 
+        // Only the primary column (see PrimaryColumnIndex) is ever resized dynamically - every other
+        // column needs a real, fixed pixel width here: a "-2" (native auto-size) width on a column
+        // nothing else manages is what used to leave "Roles" collapsed to ~0px.
         listViewUsers.Columns.Add("User name", 130, HorizontalAlignment.Left);
         listViewUsers.Columns.Add("Full name", 180, HorizontalAlignment.Left);
         listViewUsers.Columns.Add("Email", 180, HorizontalAlignment.Left);
-        listViewUsers.Columns.Add("Roles", -2, HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("Roles", 200, HorizontalAlignment.Left);
 
         if (_ctrl.ListEntities != null)
         {
             foreach (var item in _ctrl.ListEntities)
                 listViewUsers.Items.Add(UserToListViewItem(item));
         }
+
+        ListViewSortHelper.ApplyInitialOrder(listViewUsers, _sorter);
 
         // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
         // time the panel becomes visible, so size the primary column explicitly right after populating.

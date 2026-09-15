@@ -92,6 +92,8 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
                 listViewTraceNoteTypes.Items.Add(TraceNoteTypeDtoToListViewItem(item));
         }
 
+        ListViewSortHelper.ApplyInitialOrder(listViewTraceNoteTypes, _sorter);
+
         // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
         // time the panel becomes visible, so size the primary column explicitly right after populating.
         ListViewColumnResizer.Resize(listViewTraceNoteTypes, PrimaryColumnIndex);

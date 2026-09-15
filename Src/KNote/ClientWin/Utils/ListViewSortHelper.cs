@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Runtime.InteropServices;
 
 namespace KNote.ClientWin.Utils;
@@ -24,14 +26,77 @@ public static class ListViewSortHelper
 
     /// <summary>
     /// Re-sorts the list using the sorter's current column/direction. Call after Add/Update/Remove so a
-    /// previously applied sort survives the mutation. No-op while no column has been clicked yet.
+    /// previously applied sort survives the mutation. No-op while no column has been clicked yet, or if
+    /// sorter is null (list has no interactive sort wired - e.g. a Form that hasn't called Attach for
+    /// this ListView, or called it after this list was already populated).
     /// </summary>
-    public static void ReapplySort(ListView listView, ListViewColumnSorter sorter)
+    public static void ReapplySort(ListView listView, ListViewColumnSorter? sorter)
     {
-        if (sorter.Order == SortOrder.None)
+        if (sorter == null || sorter.Order == SortOrder.None)
             return;
 
         listView.Sort();
+    }
+
+    /// <summary>
+    /// Call right after (re)populating a list: if the user hasn't clicked a column header yet
+    /// (sorter.Order == None) - or this list has no interactive sort wired at all (sorter is null) -
+    /// applies the app-wide default order (ascending by column 0, then 1, then 2, ... left to right -
+    /// see ApplyDefaultSort); otherwise re-applies whichever column/direction the user already chose,
+    /// so their sort survives the reload.
+    /// </summary>
+    public static void ApplyInitialOrder(ListView listView, ListViewColumnSorter? sorter)
+    {
+        if (sorter == null || sorter.Order == SortOrder.None)
+            ApplyDefaultSort(listView);
+        else
+            ReapplySort(listView, sorter);
+    }
+
+    /// <summary>
+    /// Physically reorders listView.Items ascending by column 0, then column 1, then column 2, ... (all
+    /// columns, left to right, each compared with the same numeric/date/text logic as
+    /// ListViewColumnSorter.CompareValues) - the unified default order every ListView+CRUD screen in the
+    /// app now shows before the user clicks any column header, replacing whatever ad-hoc order (DB
+    /// insertion order, a screen-specific pre-sort, ...) it used to show.
+    /// </summary>
+    public static void ApplyDefaultSort(ListView listView)
+    {
+        if (listView.Items.Count < 2)
+            return;
+
+        var items = new ListViewItem[listView.Items.Count];
+        for (int i = 0; i < items.Length; i++)
+            items[i] = listView.Items[i];
+        Array.Sort(items, new DefaultMultiColumnComparer(listView.Columns.Count));
+
+        listView.BeginUpdate();
+        listView.Items.Clear();
+        listView.Items.AddRange(items);
+        listView.EndUpdate();
+    }
+
+    private sealed class DefaultMultiColumnComparer : IComparer<ListViewItem>
+    {
+        private readonly int _columnCount;
+
+        public DefaultMultiColumnComparer(int columnCount) => _columnCount = columnCount;
+
+        public int Compare(ListViewItem? x, ListViewItem? y)
+        {
+            if (x == null || y == null)
+                return 0;
+
+            for (int column = 0; column < _columnCount; column++)
+            {
+                int result = ListViewColumnSorter.CompareValues(
+                    ListViewColumnSorter.GetColumnText(x, column),
+                    ListViewColumnSorter.GetColumnText(y, column));
+                if (result != 0)
+                    return result;
+            }
+            return 0;
+        }
     }
 
     private static void OnColumnClick(ListView listView, ListViewColumnSorter sorter, int column)

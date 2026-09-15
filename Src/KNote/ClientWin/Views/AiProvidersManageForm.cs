@@ -88,6 +88,8 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
                 listViewProviders.Items.Add(AiProviderRefToListViewItem(item));
         }
 
+        ListViewSortHelper.ApplyInitialOrder(listViewProviders, _sorter);
+
         // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
         // time the panel becomes visible, so size the primary column explicitly right after populating.
         ListViewColumnResizer.Resize(listViewProviders, PrimaryColumnIndex);

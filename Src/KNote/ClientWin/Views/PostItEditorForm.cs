@@ -681,7 +681,14 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
     private async void RefreshStatus()
     {
         var status = string.IsNullOrEmpty(_ctrl.Model.InternalTags) ? "" : $" - ({_ctrl.Model.InternalTags})";
-        var folderPath = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
+
+        // Guid.Empty (no folder assigned yet) or no ServiceRef can never resolve to a real folder -
+        // skip the round-trip instead of asking Store.GetKNoteFolerPath to look up "no folder" (same
+        // reasoning as NoteEditorForm.RefreshFolderAndRepositoryDisplayAsync).
+        var folderPath = _ctrl.ServiceRef == null || _ctrl.Model.FolderId == Guid.Empty
+            ? string.Empty
+            : await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
+
         labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{folderPath}] {status}";
     }
 

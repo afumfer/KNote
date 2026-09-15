@@ -92,6 +92,8 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
                 listViewNoteTypes.Items.Add(NoteTypeDtoToListViewItem(item));
         }
 
+        ListViewSortHelper.ApplyInitialOrder(listViewNoteTypes, _sorter);
+
         // Reparenting into RepositoryEditorForm's TabPage doesn't reliably raise Resize the first
         // time the panel becomes visible, so size the primary column explicitly right after populating.
         ListViewColumnResizer.Resize(listViewNoteTypes, PrimaryColumnIndex);

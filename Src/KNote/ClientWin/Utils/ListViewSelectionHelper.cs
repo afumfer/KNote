@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace KNote.ClientWin.Utils;
 
 /// <summary>

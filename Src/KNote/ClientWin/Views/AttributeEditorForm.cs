@@ -235,11 +235,15 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         comboDataType.SelectedIndex = dataTypeIndex >= 0 ? dataTypeIndex : 0;
 
         listViewTabulatedValues.Clear();
+        // Only the primary column (see PrimaryColumnIndex) is ever resized dynamically - every other
+        // column needs a real, fixed pixel width here: a "-2" (native auto-size) width on a column
+        // nothing else manages is what used to leave "Order" collapsed.
         listViewTabulatedValues.Columns.Add("Value", 150, HorizontalAlignment.Left);
         listViewTabulatedValues.Columns.Add("Description", 150, HorizontalAlignment.Left);
-        listViewTabulatedValues.Columns.Add("Order", -2, HorizontalAlignment.Left);
+        listViewTabulatedValues.Columns.Add("Order", 60, HorizontalAlignment.Left);
         foreach (var value in _ctrl.Model.KAttributeValues)
             listViewTabulatedValues.Items.Add(TabulatedValueToListViewItem(value));
+        ListViewSortHelper.ApplyInitialOrder(listViewTabulatedValues, _sorter);
         ListViewColumnResizer.Resize(listViewTabulatedValues, PrimaryColumnIndex);
 
         RefreshTabulatedValuesVisibility();

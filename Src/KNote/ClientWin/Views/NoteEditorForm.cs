@@ -27,13 +27,12 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     private int _indexTextSearch = 0;
 
     // Primary/growing column per sub-list, for ListViewColumnResizer.
-    private const int AttributesPrimaryColumnIndex = 1;  // Value
-    private const int ResourcesPrimaryColumnIndex = 0;   // Name
-    private const int TasksPrimaryColumnIndex = 0;       // Topic/Tags
+    private const int AttributesPrimaryColumnIndex = 2;  // Value (columns: Order[hidden], Name, Value)
+    private const int ResourcesPrimaryColumnIndex = 1;   // Name (columns: Order, Name, File type)
+    private const int TasksPrimaryColumnIndex = 1;       // Topic/Tags (columns: Priority, Topic/Tags, ...)
     private const int AlarmsPrimaryColumnIndex = 6;      // Comment
     private const int TraceNotePrimaryColumnIndex = 1;   // Topic
 
-    private ListViewColumnSorter _attributesSorter;
     private ListViewColumnSorter _resourcesSorter;
     private ListViewColumnSorter _tasksSorter;
     private ListViewColumnSorter _alarmsSorter;
@@ -49,6 +48,29 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        // Must happen here, not in PersonalizeControls() (which only runs on this Form's Load event):
+        // CtrlEditorBase.OnInitialized() calls View.RefreshView() - and hence ModelToControls(), which
+        // reads _resourcesSorter/_tasksSorter/etc. via ListViewSortHelper.ApplyInitialOrder - BEFORE
+        // CtrlViewBase.Run() gets to View.ShowView(), which is what triggers Load. Attaching here
+        // instead guarantees these fields are never null by the time the first RefreshView() runs, the
+        // same reasoning that already has the "manage list" Forms (UsersManageForm, ...) do their
+        // PersonalizeListView/Attach in the constructor instead of on Load.
+        PersonalizeListView(listViewAttributes);
+        PersonalizeListView(listViewResources);
+        PersonalizeListView(listViewTasks);
+        PersonalizeListView(listViewAlarms);
+        PersonalizeListView(listViewTraceNoteFrom);
+        PersonalizeListView(listViewTraceNoteTo);
+
+        // listViewAttributes has no interactive click-to-sort: it's always shown sorted by its
+        // (hidden) Order column - see ModelToControlsAttributes - not by whatever column the user
+        // last clicked, so it never gets a ListViewColumnSorter/ColumnClick wiring like the others.
+        _resourcesSorter = ListViewSortHelper.Attach(listViewResources);
+        _tasksSorter = ListViewSortHelper.Attach(listViewTasks);
+        _alarmsSorter = ListViewSortHelper.Attach(listViewAlarms);
+        _traceNoteFromSorter = ListViewSortHelper.Attach(listViewTraceNoteFrom);
+        _traceNoteToSorter = ListViewSortHelper.Attach(listViewTraceNoteTo);
 
         foreach (var scriptType in ScriptTypes)
             comboScriptType.Items.Add(scriptType.Text);
@@ -164,7 +186,15 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     public async Task RefreshFolderAndRepositoryDisplayAsync()
     {
         Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
-        textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
+
+        // No note is loaded yet (e.g. KNoteManagmentCtrl.NoteEditorCtrl - the embedded main-window
+        // editor - runs its first RefreshView() before any note has been selected into it) or the
+        // note genuinely has no folder assigned: Guid.Empty can never resolve to a real folder, so
+        // skip the round-trip to Store.GetKNoteFolerPath entirely instead of asking it to look up
+        // "no folder" and report back "not found" - same end result (empty path), no wasted DB call.
+        textFolder.Text = _ctrl.ServiceRef == null || _ctrl.Model.FolderId == Guid.Empty
+            ? string.Empty
+            : await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
     }
 
     public async void RefreshModel()
@@ -902,19 +932,8 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         kntEditViewTask.ShowNavigationTools = false;
         kntEditViewTask.BorderStyle = BorderStyle.FixedSingle;
 
-        PersonalizeListView(listViewAttributes);
-        PersonalizeListView(listViewResources);
-        PersonalizeListView(listViewTasks);
-        PersonalizeListView(listViewAlarms);
-        PersonalizeListView(listViewTraceNoteFrom);
-        PersonalizeListView(listViewTraceNoteTo);
-
-        _attributesSorter = ListViewSortHelper.Attach(listViewAttributes);
-        _resourcesSorter = ListViewSortHelper.Attach(listViewResources);
-        _tasksSorter = ListViewSortHelper.Attach(listViewTasks);
-        _alarmsSorter = ListViewSortHelper.Attach(listViewAlarms);
-        _traceNoteFromSorter = ListViewSortHelper.Attach(listViewTraceNoteFrom);
-        _traceNoteToSorter = ListViewSortHelper.Attach(listViewTraceNoteTo);
+        // ListView setup (PersonalizeListView + ListViewSortHelper.Attach) happens in the
+        // constructor, not here - see the comment there.
 
         kntEditView.NavigationStart += KntEditView_NavigationStart;
         kntEditView.NavigationEnd += KntEditView_NavigationEnd; 
@@ -1033,16 +1052,24 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
 
         foreach (var atr in _ctrl.Model.KAttributesDto)
         {
-            var itemList = new ListViewItem(atr.Name);
+            // Order (column 0) is intentionally hidden (Width=0 below). Unlike every other
+            // ListView+CRUD screen, this list has no interactive column-click sort: it must always
+            // stay ordered by the attribute's defined display sequence (Order), which editing a
+            // note's attribute Value never changes - see the class-level exception noted where
+            // listViewAttributes is set up in PersonalizeControls().
+            var itemList = new ListViewItem(atr.Order.ToString());
             itemList.Name = atr.NoteKAttributeId.ToString();
-            //itemList.BackColor = Color.LightGray;
+            itemList.SubItems.Add(atr.Name);
             itemList.SubItems.Add(atr.Value);
             listViewAttributes.Items.Add(itemList);
         }
 
         // Width of -2 indicates auto-size.
+        listViewAttributes.Columns.Add("Order", 0, HorizontalAlignment.Left);
         listViewAttributes.Columns.Add("Name", 250, HorizontalAlignment.Left);
         listViewAttributes.Columns.Add("Value", -2, HorizontalAlignment.Left);
+        // Always ascending by Order (column 0) - see the comment above; no user-driven sort to respect.
+        ListViewSortHelper.ApplyDefaultSort(listViewAttributes);
         listView_Resize(listViewAttributes, EventArgs.Empty);
     }
 
@@ -1059,9 +1086,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
                 listViewResources.Items.Add(ResourceDtoToListViewItem(res));
         }
 
+        listViewResources.Columns.Add("Order", 70, HorizontalAlignment.Left);
         listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
         listViewResources.Columns.Add("File type", 100, HorizontalAlignment.Left);
-        listViewResources.Columns.Add("Order", 70, HorizontalAlignment.Left);
+        ListViewSortHelper.ApplyInitialOrder(listViewResources, _resourcesSorter);
         listViewResources_Resize(listViewResources, EventArgs.Empty);
     }
 
@@ -1076,8 +1104,8 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         }
 
         // Width of -2 indicates auto-size.
-        listViewTasks.Columns.Add("Topic/Tags", 250, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Topic/Tags", 250, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Resolved", 60, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("End", 120, HorizontalAlignment.Left);
@@ -1087,6 +1115,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
         listViewTasks.Columns.Add("User", 250, HorizontalAlignment.Left);
+        ListViewSortHelper.ApplyInitialOrder(listViewTasks, _tasksSorter);
         listView_Resize(listViewTasks, EventArgs.Empty);
     }
 
@@ -1100,14 +1129,15 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
                 listViewAlarms.Items.Add(MessageDtoToListViewItem(msg));
         }
 
-        // Width of -2 indicates auto-size.            
+        // Width of -2 indicates auto-size.
+        listViewAlarms.Columns.Add("Date time", 130, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("User", 130, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Activated", 80, HorizontalAlignment.Left);
-        listViewAlarms.Columns.Add("Date time", 130, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Alarm periodicity", 120, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Min", 50, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Notification type", 120, HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);
+        ListViewSortHelper.ApplyInitialOrder(listViewAlarms, _alarmsSorter);
         listView_Resize(listViewAlarms, EventArgs.Empty);
     }
 
@@ -1149,6 +1179,9 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         listViewTraceNoteTo.Columns.Add("Type", 110, HorizontalAlignment.Left);
         listViewTraceNoteTo.Columns.Add("Order", 55, HorizontalAlignment.Left);
         listViewTraceNoteTo.Columns.Add("Weight", 55, HorizontalAlignment.Left);
+
+        ListViewSortHelper.ApplyInitialOrder(listViewTraceNoteFrom, _traceNoteFromSorter);
+        ListViewSortHelper.ApplyInitialOrder(listViewTraceNoteTo, _traceNoteToSorter);
 
         listViewTraceNote_Resize(listViewTraceNoteFrom, EventArgs.Empty);
         listViewTraceNote_Resize(listViewTraceNoteTo, EventArgs.Empty);
@@ -1403,10 +1436,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
 
     private ListViewItem MessageDtoToListViewItem(KMessageDto message)
     {
-        var itemList = new ListViewItem(message.UserFullName);
+        var itemList = new ListViewItem(message.AlarmDateTime.ToString());
         itemList.Name = message.KMessageId.ToString();
+        itemList.SubItems.Add(message.UserFullName);
         itemList.SubItems.Add(message.AlarmActivated.ToString());
-        itemList.SubItems.Add(message.AlarmDateTime.ToString());
         itemList.SubItems.Add(message.AlarmType.ToString());
         itemList.SubItems.Add(message.AlarmMinutes.ToString());
         itemList.SubItems.Add(message.NotificationType.ToString());
@@ -1429,9 +1462,9 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         //itemList.SubItems.Add(task.ExpectedEndDate.ToString());
         //return itemList;
 
-        var itemList = new ListViewItem(task.Tags);
+        var itemList = new ListViewItem(task.Priority.ToString());
         itemList.Name = task.NoteTaskId.ToString();
-        itemList.SubItems.Add(task.Priority.ToString());
+        itemList.SubItems.Add(task.Tags);
         itemList.SubItems.Add(task.Resolved.ToString());
         itemList.SubItems.Add(task.StartDate.ToString());
         itemList.SubItems.Add(task.EndDate.ToString());
@@ -1447,10 +1480,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
 
     private ListViewItem ResourceDtoToListViewItem(ResourceDto resource)
     {
-        var itemList = new ListViewItem(resource.NameOut);
+        var itemList = new ListViewItem(resource.Order.ToString());
         itemList.Name = resource.ResourceId.ToString();
+        itemList.SubItems.Add(resource.NameOut);
         itemList.SubItems.Add(resource.FileType);
-        itemList.SubItems.Add(resource.Order.ToString());
         return itemList;
     }
 
@@ -1510,8 +1543,10 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     private void UpdateMessage(KMessageDto message)
     {
         var item = listViewAlarms.Items[message.KMessageId.ToString()];
-        item.SubItems[1].Text = message.AlarmActivated.ToString();
-        item.SubItems[2].Text = message.AlarmDateTime.ToString();
+        // SubItems[1] (User) is left untouched, same as before this reorder - it was never patched
+        // here (not editable via the message/alarm editor).
+        item.Text = message.AlarmDateTime.ToString();
+        item.SubItems[2].Text = message.AlarmActivated.ToString();
         item.SubItems[3].Text = message.AlarmType.ToString();
         item.SubItems[4].Text = message.AlarmMinutes.ToString();
         item.SubItems[5].Text = message.NotificationType.ToString();
@@ -1534,8 +1569,8 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     private async Task UpdateTask(NoteTaskDto task)
     {
         var item = listViewTasks.Items[task.NoteTaskId.ToString()];
-        item.SubItems[0].Text = task.Tags.ToString();
-        item.SubItems[1].Text = task.Priority.ToString();
+        item.SubItems[0].Text = task.Priority.ToString();
+        item.SubItems[1].Text = task.Tags.ToString();
         item.SubItems[2].Text = task.Resolved.ToString();
         item.SubItems[3].Text = task.StartDate.ToString();
         item.SubItems[4].Text = task.EndDate.ToString();
@@ -1825,9 +1860,9 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     private void UpdateResource(ResourceDto resource)
     {
         var item = listViewResources.Items[resource.ResourceId.ToString()];
-        item.Text = resource.NameOut;
-        item.SubItems[1].Text = resource.FileType;
-        item.SubItems[2].Text = resource.Order.ToString();
+        item.Text = resource.Order.ToString();
+        item.SubItems[1].Text = resource.NameOut;
+        item.SubItems[2].Text = resource.FileType;
         ListViewSelectionHelper.SelectByKey(listViewResources, resource.ResourceId.ToString(), _resourcesSorter);
         UpdatePreviewResource(resource);
     }
@@ -1835,9 +1870,12 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     private void UpdateNoteAttribute(NoteKAttributeDto noteAttribute)
     {
         var item = listViewAttributes.Items[noteAttribute.NoteKAttributeId.ToString()];
-        item.Text = noteAttribute.Name;
-        item.SubItems[1].Text = noteAttribute.Value;
-        ListViewSelectionHelper.SelectByKey(listViewAttributes, noteAttribute.NoteKAttributeId.ToString(), _attributesSorter);
+        // item.Text (column 0, Order) is left untouched - editing a note attribute's Value never
+        // changes its defined Order, and this list has no interactive sort to reapply (see
+        // ModelToControlsAttributes), so the row's position never needs to move.
+        item.SubItems[1].Text = noteAttribute.Name;
+        item.SubItems[2].Text = noteAttribute.Value;
+        ListViewSelectionHelper.SelectByKey(listViewAttributes, noteAttribute.NoteKAttributeId.ToString());
     }
 
     private async Task UpdateTaskDescription(string description)

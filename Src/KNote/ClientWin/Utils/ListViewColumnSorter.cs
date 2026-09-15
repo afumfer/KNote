@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections;
 using System.Globalization;
 
@@ -34,12 +36,16 @@ public class ListViewColumnSorter : IComparer
 
         int result = _customComparers != null && _customComparers.TryGetValue(SortColumn, out var comparer)
             ? comparer(itemX, itemY)
-            : CompareDefault(GetColumnText(itemX, SortColumn), GetColumnText(itemY, SortColumn));
+            : CompareValues(GetColumnText(itemX, SortColumn), GetColumnText(itemY, SortColumn));
 
         return Order == SortOrder.Descending ? -result : result;
     }
 
-    private static int CompareDefault(string textX, string textY)
+    /// <summary>
+    /// The same numeric/date/text comparison used above, exposed for reuse by
+    /// ListViewSortHelper.ApplyDefaultSort's multi-column comparer.
+    /// </summary>
+    public static int CompareValues(string textX, string textY)
     {
         if (double.TryParse(textX, NumberStyles.Number, CultureInfo.CurrentCulture, out var numberX) &&
             double.TryParse(textY, NumberStyles.Number, CultureInfo.CurrentCulture, out var numberY))
@@ -52,7 +58,8 @@ public class ListViewColumnSorter : IComparer
         return string.Compare(textX, textY, StringComparison.CurrentCultureIgnoreCase);
     }
 
-    private static string GetColumnText(ListViewItem item, int columnIndex)
+    /// <summary>Exposed for reuse by ListViewSortHelper.ApplyDefaultSort's multi-column comparer.</summary>
+    public static string GetColumnText(ListViewItem item, int columnIndex)
     {
         if (columnIndex == 0)
             return item.Text;
