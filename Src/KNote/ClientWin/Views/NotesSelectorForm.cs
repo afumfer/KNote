@@ -48,7 +48,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         SetUndoFilterButtonIcon();
     }
 
-    // Resources\undo_16.png embedded as a resource (KNote.ClientWin.KNote.ClientWin.csproj) rather
+    // Resources\Icons\undo_16.png embedded as a resource (KNote.ClientWin.KNote.ClientWin.csproj) rather
     // than wired through the Designer's .resx machinery, since this button is built by hand here,
     // not via the Forms Designer. Falls back to "X" if the resource can't be found/loaded, so a
     // packaging mistake degrades gracefully instead of leaving the button unlabeled.
@@ -57,7 +57,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         try
         {
             using var iconStream = System.Reflection.Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("KNote.ClientWin.Resources.undo_16.png");
+                .GetManifestResourceStream("KNote.ClientWin.Resources.Icons.undo_16.png");
             if (iconStream != null)
             {
                 buttonUndoFilter.Image = Image.FromStream(iconStream);

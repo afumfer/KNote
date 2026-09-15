@@ -78,9 +78,9 @@ public class Store
         {
             if (_kNoteWebViewStyle == null)
             {
-                if (File.Exists(@$"{AppContext.BaseDirectory}\KNoteWebViewStyle.css"))
+                if (File.Exists(@$"{AppContext.BaseDirectory}\Resources\KNoteWebViewStyle.css"))
                 {
-                    var css = File.ReadAllText(@$"{AppContext.BaseDirectory}\KNoteWebViewStyle.css");
+                    var css = File.ReadAllText(@$"{AppContext.BaseDirectory}\Resources\KNoteWebViewStyle.css");
                     _kNoteWebViewStyle = $"<style>{css}</style>";
                 }
                 else
