@@ -120,12 +120,14 @@ namespace KNote.ClientWin.Views
             //
             splitChat.Panel1.Controls.Add(kntEditViewResult);
             splitChat.Panel1.Controls.Add(panelResultHeader);
+            splitChat.Panel1.Padding = new Padding(4);
             splitChat.Panel1MinSize = 200;
             //
             // splitChat.Panel2
             //
             splitChat.Panel2.Controls.Add(textPrompt);
             splitChat.Panel2.Controls.Add(panelPromptHeader);
+            splitChat.Panel2.Padding = new Padding(4);
             splitChat.Panel2MinSize = 50;
             splitChat.Size = new Size(858, 601);
             splitChat.SplitterDistance = 409;
