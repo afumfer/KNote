@@ -15,7 +15,19 @@ namespace KntWebView
             InitializeEditorsComponent();
         }
 
-        #endregion 
+        #endregion
+
+        #region Static configuration
+
+        /// <summary>
+        /// Folder WebView2 uses to store its browser profile/cache (CoreWebView2Environment's
+        /// userDataFolder). Host applications should set this once at startup, before the first
+        /// KntEditView is shown, to keep it out of the app's binaries folder. Falls back to the
+        /// historical default (next to the executable) if left unset.
+        /// </summary>
+        public static string? WebView2UserDataFolder { get; set; }
+
+        #endregion
 
         #region Public properties
 
@@ -337,8 +349,11 @@ namespace KntWebView
             // WebView2's default UserDataFolder is derived from the hosting process's exe path.
             // When launched via "dotnet exec" (e.g. VS Code's coreclr debugger), the host is
             // dotnet.exe under Program Files, which is not writable, causing E_ACCESSDENIED.
-            // Pinning the folder next to the app avoids that regardless of how it was launched.
-            var userDataFolder = Path.Combine(Application.StartupPath, "WebView2Cache");
+            // Pinning an explicit folder avoids that regardless of how it was launched. Prefer the
+            // host-configured WebView2UserDataFolder (set by ClientWin's Program.cs to a per-user
+            // AppData folder) so the cache doesn't pile up next to the application binaries; fall
+            // back to the historical location if the host never set it.
+            var userDataFolder = WebView2UserDataFolder ?? Path.Combine(Application.StartupPath, "WebView2Cache");
             var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
             await webView.EnsureCoreWebView2Async(environment);
 

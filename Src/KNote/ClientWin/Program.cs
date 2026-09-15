@@ -104,6 +104,10 @@ static class Program
         AppUserDataPath.EnsureExists();
         var appFileConfig = AppUserDataPath.ConfigFile;
 
+        // Keep WebView2's browser profile/cache out of the app's binaries folder, consistent with
+        // Data/ResourcesCache/config/log already living under AppUserDataPath.Directory.
+        KntWebView.KntEditView.WebView2UserDataFolder = Path.Combine(AppUserDataPath.Directory, "WebView2Cache");
+
         // One-time migration: older versions kept KNoteData.config next to the application binaries.
         // If the user data folder doesn't have a config yet but a legacy one is found, copy it over;
         // once the copy is confirmed to have landed correctly, remove the legacy file so it doesn't
