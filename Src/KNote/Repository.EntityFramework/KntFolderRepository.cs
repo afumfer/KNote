@@ -68,9 +68,25 @@ public class KntFolderRepository: KntRepositoryEFBase, IKntFolderRepository
             Result<Folder> resRep;
             if(folderId != null)
                 resRep = await folders.GetAsync((object)folderId);
-            else 
+            else
                 resRep = await folders.GetAsync(f => f.FolderNumber == folderNumber);
-            
+
+            // folderId/folderNumber can point at a folder that no longer exists (e.g. a note whose
+            // FolderId was left stale after its folder was deleted) - resRep.Entity is then null, and
+            // LoadReference(null, ...) would throw ArgumentNullException instead of a graceful "not
+            // found" result. Mirrors Repository.Dapper's KntFolderRepository.GetAsync, which already
+            // treats a missing folder as "add an error message, skip loading parent/children" rather
+            // than as an exception.
+            if (resRep.Entity == null)
+            {
+                result.AddErrorMessage("Entity not found.");
+                result.AddListErrorMessage(resRep.ListErrorMessage);
+
+                await CloseIsTempConnection(ctx);
+
+                return result;
+            }
+
             // KNote template ... load here aditionals properties for FolderDto
             resRep = folders.LoadReference(resRep.Entity, n => n.ParentFolder);
 
@@ -85,7 +101,7 @@ public class KntFolderRepository: KntRepositoryEFBase, IKntFolderRepository
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
             await CloseIsTempConnection(ctx);
-        
+
             return result;
         }
         catch (Exception ex)
