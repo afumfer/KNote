@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KNote.Repository.EntityFramework.Entities
 {
-    public class KMessage: EntityModelBase
+    public class KMessage: EntityModelBase, IAlarmSchedule
     {
         #region Constructor
 

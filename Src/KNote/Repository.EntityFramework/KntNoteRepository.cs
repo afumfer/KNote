@@ -981,8 +981,8 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
             foreach (var m in resRep.Entity)
             {
-                ApplyAlarmControl(m);
-                await UpdateMessageAsync(m.GetSimpleDto<KMessageDto>());                    
+                m.ApplyAlarmControl();
+                await UpdateMessageAsync(m.GetSimpleDto<KMessageDto>());
             }
 
             result.Entity = resRep.Entity?.Select(w => (Guid)w.NoteId).ToList();
@@ -1187,39 +1187,6 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         catch (Exception ex)
         {
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
-    }
-
-    // TODO refactor (duplicated code in dapper repository )
-    private void ApplyAlarmControl(KMessage message)
-    {
-        switch (message.AlarmType)
-        {
-            case EnumAlarmType.Standard:
-                message.AlarmActivated = false;                                        
-                break;
-            case EnumAlarmType.Annual:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);                    
-                break;
-            case EnumAlarmType.Monthly:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);                    
-                break;
-            case EnumAlarmType.Weekly:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);                    
-                break;
-            case EnumAlarmType.Daily:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);                    
-                break;
-            case EnumAlarmType.InMinutes:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);                    
-                break;
-            default:                    
-                break;
         }
     }
 

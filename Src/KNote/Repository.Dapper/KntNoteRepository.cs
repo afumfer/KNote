@@ -1386,7 +1386,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             foreach (var m in messageList)
             {
-                ApplyAlarmControl(m);
+                m.ApplyAlarmControl();
                 await UpdateMessageAsync(m);
             }
 
@@ -1477,40 +1477,6 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
     #endregion
 
     #region Private methods
-
-    // TODO refactor (duplicated code in EntityFramework repository)
-    private void ApplyAlarmControl(KMessageDto message)
-    {
-        switch (message.AlarmType)
-        {
-            case EnumAlarmType.Standard:
-                message.AlarmActivated = false;
-                break;
-            case EnumAlarmType.Annual:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddYears(1);                    
-                break;
-            case EnumAlarmType.Monthly:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMonths(1);                    
-                break;
-            case EnumAlarmType.Weekly:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(7);                    
-                break;
-            case EnumAlarmType.Daily:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddDays(1);                    
-                break;
-            case EnumAlarmType.InMinutes:
-                while (message.AlarmDateTime < DateTime.Now)
-                    message.AlarmDateTime = ((DateTime)message.AlarmDateTime).AddMinutes((int)message.AlarmMinutes);                    
-                break;
-            default:
-                message.AlarmActivated = false;
-                break;
-        }
-    }
 
     private int GetNextNoteNumber(DbConnection db)
     {
