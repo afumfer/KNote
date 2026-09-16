@@ -53,6 +53,13 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
         Store.AppConfig.CompactViewNoteslist = Model.CompactViewNoteslist;
         Store.AppConfig.ChatHubUrl = Model.ChatHubUrl;
         Store.AppConfig.ChatHubAutoConnectDisabled = Model.ChatHubAutoConnectDisabled;
+        Store.AppConfig.SmtpHost = Model.SmtpHost;
+        Store.AppConfig.SmtpPort = Model.SmtpPort;
+        Store.AppConfig.SmtpEnableSsl = Model.SmtpEnableSsl;
+        Store.AppConfig.SmtpFromAddress = Model.SmtpFromAddress;
+        Store.AppConfig.SmtpFromDisplayName = Model.SmtpFromDisplayName;
+        Store.AppConfig.SmtpUsername = Model.SmtpUsername;
+        Store.AppConfig.SmtpPassword = Model.SmtpPassword;
         Store.SaveConfig();
 
         return Task.FromResult(true);

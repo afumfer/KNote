@@ -441,6 +441,108 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    // SMTP account used to send Email-type alarm notifications (one account per installation). The
+    // password is stored in clear text in this same local config file, next to the AI providers'
+    // ApiKey - protecting that file is the user's responsibility, same as for those keys.
+    private string _smtpHost;
+    public string SmtpHost
+    {
+        get { return _smtpHost; }
+        set
+        {
+            if (_smtpHost != value)
+            {
+                _smtpHost = value;
+                OnPropertyChanged("SmtpHost");
+            }
+        }
+    }
+
+    private int _smtpPort = 587;
+    public int SmtpPort
+    {
+        get { return _smtpPort; }
+        set
+        {
+            if (_smtpPort != value)
+            {
+                _smtpPort = value;
+                OnPropertyChanged("SmtpPort");
+            }
+        }
+    }
+
+    private bool _smtpEnableSsl = true;
+    public bool SmtpEnableSsl
+    {
+        get { return _smtpEnableSsl; }
+        set
+        {
+            if (_smtpEnableSsl != value)
+            {
+                _smtpEnableSsl = value;
+                OnPropertyChanged("SmtpEnableSsl");
+            }
+        }
+    }
+
+    private string _smtpFromAddress;
+    public string SmtpFromAddress
+    {
+        get { return _smtpFromAddress; }
+        set
+        {
+            if (_smtpFromAddress != value)
+            {
+                _smtpFromAddress = value;
+                OnPropertyChanged("SmtpFromAddress");
+            }
+        }
+    }
+
+    private string _smtpFromDisplayName;
+    public string SmtpFromDisplayName
+    {
+        get { return _smtpFromDisplayName; }
+        set
+        {
+            if (_smtpFromDisplayName != value)
+            {
+                _smtpFromDisplayName = value;
+                OnPropertyChanged("SmtpFromDisplayName");
+            }
+        }
+    }
+
+    private string _smtpUsername;
+    public string SmtpUsername
+    {
+        get { return _smtpUsername; }
+        set
+        {
+            if (_smtpUsername != value)
+            {
+                _smtpUsername = value;
+                OnPropertyChanged("SmtpUsername");
+            }
+        }
+    }
+
+    // Optional: when empty, SmtpFromAddress is used as the SMTP auth username (the common case).
+    private string _smtpPassword;
+    public string SmtpPassword
+    {
+        get { return _smtpPassword; }
+        set
+        {
+            if (_smtpPassword != value)
+            {
+                _smtpPassword = value;
+                OnPropertyChanged("SmtpPassword");
+            }
+        }
+    }
+
     #endregion
 
     #region TODO: ... other params

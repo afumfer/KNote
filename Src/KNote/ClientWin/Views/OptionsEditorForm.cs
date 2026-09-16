@@ -130,7 +130,52 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
             _formIsDisty = true;
     }
 
-    #endregion 
+    private async void buttonTestSmtp_Click(object sender, EventArgs e)
+    {
+        var to = textTestEmailTo.Text?.Trim();
+        if (string.IsNullOrEmpty(to))
+        {
+            ShowInfo("Enter a recipient address for the test email first.");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(textSmtpHost.Text) || string.IsNullOrEmpty(textSmtpFromAddress.Text))
+        {
+            ShowInfo("Enter at least the SMTP host and the from address first.");
+            return;
+        }
+
+        var settings = new SmtpSettings
+        {
+            Host = textSmtpHost.Text,
+            Port = string.IsNullOrWhiteSpace(textSmtpPort.Text) ? 587 : _ctrl.Store.KntTextUtils.TextToInt(textSmtpPort.Text),
+            EnableSsl = checkSmtpEnableSsl.Checked,
+            FromAddress = textSmtpFromAddress.Text,
+            FromDisplayName = textSmtpFromDisplayName.Text,
+            Username = string.IsNullOrEmpty(textSmtpUsername.Text) ? textSmtpFromAddress.Text : textSmtpUsername.Text,
+            Password = textSmtpPassword.Text
+        };
+
+        buttonTestSmtp.Enabled = false;
+        this.Cursor = Cursors.WaitCursor;
+        try
+        {
+            await Task.Run(() => new SmtpEmailSender().Send(settings, to, $"{KntConst.AppName} test email",
+                "This is a test email sent from the KNote options dialog."));
+            ShowInfo("Test email sent successfully.");
+        }
+        catch (Exception ex)
+        {
+            ShowInfo($"The test email could not be sent. Error: {ex.Message}");
+        }
+        finally
+        {
+            this.Cursor = Cursors.Default;
+            buttonTestSmtp.Enabled = true;
+        }
+    }
+
+    #endregion
 
     #region Private methods
 
@@ -155,12 +200,19 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
         textAutosaveSeconds.Text = _ctrl.Model.AutoSaveSeconds.ToString();
         checkCompactViewNotesList.Checked = _ctrl.Model.CompactViewNoteslist;
         textChatHubUrl.Text = _ctrl.Model.ChatHubUrl;
+        textSmtpHost.Text = _ctrl.Model.SmtpHost;
+        textSmtpPort.Text = _ctrl.Model.SmtpPort.ToString();
+        checkSmtpEnableSsl.Checked = _ctrl.Model.SmtpEnableSsl;
+        textSmtpFromAddress.Text = _ctrl.Model.SmtpFromAddress;
+        textSmtpFromDisplayName.Text = _ctrl.Model.SmtpFromDisplayName;
+        textSmtpUsername.Text = _ctrl.Model.SmtpUsername;
+        textSmtpPassword.Text = _ctrl.Model.SmtpPassword;
 
         //var x5 = _ctrl.Model.LogActivated;
         //var x6 = _ctrl.Model.LogFile;
     }
 
-    private void ControlsToModel() 
+    private void ControlsToModel()
     {
         _ctrl.Model.AlarmActivated = checkAlarmActivated.Checked;
         _ctrl.Model.AlarmSeconds = int.Parse(textAlarmSeconds.Text);
@@ -168,6 +220,13 @@ public partial class OptionsEditorForm : Form, IViewEditor<AppConfig>
         _ctrl.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
         _ctrl.Model.CompactViewNoteslist = checkCompactViewNotesList.Checked;
         _ctrl.Model.ChatHubUrl = textChatHubUrl.Text;
+        _ctrl.Model.SmtpHost = textSmtpHost.Text;
+        _ctrl.Model.SmtpPort = _ctrl.Store.KntTextUtils.TextToInt(textSmtpPort.Text);
+        _ctrl.Model.SmtpEnableSsl = checkSmtpEnableSsl.Checked;
+        _ctrl.Model.SmtpFromAddress = textSmtpFromAddress.Text;
+        _ctrl.Model.SmtpFromDisplayName = textSmtpFromDisplayName.Text;
+        _ctrl.Model.SmtpUsername = textSmtpUsername.Text;
+        _ctrl.Model.SmtpPassword = textSmtpPassword.Text;
     }
 
     #endregion
