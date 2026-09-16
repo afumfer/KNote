@@ -119,6 +119,15 @@ public partial class MessageEditorForm : Form, IViewEditor<KMessageDto>
             textAlarmDateTime.Text = dateSelector.Date.ToString("dd/MM/yyyy HH:mm");
     }
 
+    private async void buttonSelectUser_Click(object sender, EventArgs e)
+    {
+        if (await _ctrl.SelectUser())
+        {
+            _formIsDisty = true;
+            textUserFullName.Text = _ctrl.Model.UserFullName;
+        }
+    }
+
     #endregion
 
     #region Private methods

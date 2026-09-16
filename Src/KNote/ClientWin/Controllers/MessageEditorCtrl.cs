@@ -157,5 +157,33 @@ public class MessageEditorCtrl : CtrlEditorBase<IViewEditor<KMessageDto>, KMessa
         return await DeleteModel(Service, Model.KMessageId);
     }
 
-    #endregion 
+    #endregion
+
+    #region Controller extra methods
+
+    public async Task<bool> SelectUser()
+    {
+        var usersSelector = new UsersSelectorCtrl(Store);
+        usersSelector.SelectedUserId = Model.UserId;
+
+        var resCanLoadEntities = await usersSelector.LoadEntities(Service, false);
+        if (!resCanLoadEntities)
+        {
+            View.ShowInfo("Cannot load the list of users");
+            return false;
+        }
+
+        var res = usersSelector.RunModal();
+        if (res.Entity == EControllerResult.Executed && usersSelector.SelectedEntity != null)
+        {
+            Model.UserId = usersSelector.SelectedEntity.UserId;
+            Model.UserFullName = usersSelector.SelectedEntity.FullName;
+            Model.SetIsDirty(true);
+            return true;
+        }
+
+        return false;
+    }
+
+    #endregion
 }

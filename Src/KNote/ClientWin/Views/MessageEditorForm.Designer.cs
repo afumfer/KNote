@@ -42,6 +42,7 @@ namespace KNote.ClientWin.Views
             this.textAlarmDateTime = new System.Windows.Forms.TextBox();
             this.textContent = new System.Windows.Forms.TextBox();
             this.textUserFullName = new System.Windows.Forms.TextBox();
+            this.buttonSelectUser = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.labelMinutes = new System.Windows.Forms.Label();
@@ -68,6 +69,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.textAlarmDateTime);
             this.panelForm.Controls.Add(this.textContent);
             this.panelForm.Controls.Add(this.textUserFullName);
+            this.panelForm.Controls.Add(this.buttonSelectUser);
             this.panelForm.Location = new System.Drawing.Point(5, 12);
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(407, 325);
@@ -173,13 +175,23 @@ namespace KNote.ClientWin.Views
             this.textContent.TabIndex = 6;
             // 
             // textUserFullName
-            // 
+            //
             this.textUserFullName.Enabled = false;
             this.textUserFullName.Location = new System.Drawing.Point(127, 38);
             this.textUserFullName.Name = "textUserFullName";
-            this.textUserFullName.Size = new System.Drawing.Size(273, 23);
+            this.textUserFullName.Size = new System.Drawing.Size(243, 23);
             this.textUserFullName.TabIndex = 1;
-            // 
+            //
+            // buttonSelectUser
+            //
+            this.buttonSelectUser.Location = new System.Drawing.Point(376, 38);
+            this.buttonSelectUser.Name = "buttonSelectUser";
+            this.buttonSelectUser.Size = new System.Drawing.Size(24, 24);
+            this.buttonSelectUser.TabIndex = 2;
+            this.buttonSelectUser.Text = "...";
+            this.buttonSelectUser.UseVisualStyleBackColor = true;
+            this.buttonSelectUser.Click += new System.EventHandler(this.buttonSelectUser_Click);
+            //
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -252,6 +264,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.TextBox textContent;
         private System.Windows.Forms.TextBox textUserFullName;
+        private System.Windows.Forms.Button buttonSelectUser;
         private System.Windows.Forms.Button buttonSelectDate;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;

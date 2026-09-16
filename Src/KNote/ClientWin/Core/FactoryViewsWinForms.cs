@@ -34,6 +34,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<TaskEditorCtrl, IViewEditor<NoteTaskDto>>(c => new TaskEditorForm(c));
         Registry.Register<TraceNoteEditorCtrl, IViewEditor<TraceNoteDto>>(c => new TraceNoteEditorForm(c));
         Registry.Register<NoteTypesSelectorCtrl, IViewEmbeddable>(c => new NoteTypesSelectorForm(c));
+        Registry.Register<UsersSelectorCtrl, IViewEmbeddable>(c => new UsersSelectorForm(c));
         Registry.Register<NoteTypeEditorCtrl, IViewEditor<NoteTypeDto>>(c => new NoteTypeEditorForm(c));
         Registry.Register<NoteTypesManageCtrl, IViewManageList<NoteTypeDto>>(c => new NoteTypesManageForm(c));
         Registry.Register<TraceNoteTypeEditorCtrl, IViewEditor<TraceNoteTypeDto>>(c => new TraceNoteTypeEditorForm(c));
