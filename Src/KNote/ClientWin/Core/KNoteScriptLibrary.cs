@@ -1,7 +1,6 @@
 ﻿using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
-using System.Net.Mail;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Controllers;
 using KNote.Model.Dto;
@@ -254,25 +253,20 @@ public class KNoteScriptLibrary: Library
         List<object> toUsers, string subject, string body, bool isBodyHtml,
         int port, string host, bool enbleSsl)
     {
-        var msg = new MailMessage();
-        var client = new SmtpClient();
-
         try
         {
-            foreach (string s in toUsers)
-                msg.To.Add(s.ToString());
+            var settings = new SmtpSettings
+            {
+                Host = host,
+                Port = port,
+                EnableSsl = enbleSsl,
+                Username = fromEmail,
+                Password = fromPwd,
+                FromAddress = fromEmail,
+                FromDisplayName = fromName
+            };
 
-            msg.From = new System.Net.Mail.MailAddress(fromEmail, fromName);
-            msg.Subject = subject;
-            msg.Body = body;
-            msg.IsBodyHtml = isBodyHtml;
-
-            client.Credentials = new System.Net.NetworkCredential(fromEmail, fromPwd);
-            client.Port = port;
-            client.Host = host;
-            client.EnableSsl = enbleSsl;
-
-            client.Send(msg);
+            new SmtpEmailSender().Send(settings, toUsers.Select(u => u.ToString()), subject, body, isBodyHtml);
 
             return true;
         }

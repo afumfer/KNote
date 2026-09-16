@@ -28,7 +28,7 @@ public class MessagesManagmentCtrl : CtrlBase
 
     public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> PostItVisible;
     public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> PostItAlarm;
-    //public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> EMailAlarm;
+    public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> EMailAlarm;
     //public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> AppAlarm;
     public event EventHandler<ControllerEventArgs<ServiceWithNoteId>> ExecuteKntScript;
 
@@ -112,9 +112,9 @@ public class MessagesManagmentCtrl : CtrlBase
             foreach (var id in resPostIt.Entity)                            
                 PostItAlarm?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
             
-            //var resEMail = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.Email);
-            //foreach (var id in resEMail.Entity)
-            //    EMailAlarm?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+            var resEMail = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.Email);
+            foreach (var id in resEMail.Entity)
+                EMailAlarm?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
 
             //var resAppInfo = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.AppInfo);
             //foreach (var id in resAppInfo.Entity)

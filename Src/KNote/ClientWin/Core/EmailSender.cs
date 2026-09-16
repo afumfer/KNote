@@ -36,11 +36,17 @@ public class SmtpSettings
 public interface IEmailSender
 {
     void Send(SmtpSettings settings, string toAddress, string subject, string body, bool isBodyHtml = false);
+    void Send(SmtpSettings settings, IEnumerable<string> toAddresses, string subject, string body, bool isBodyHtml = false);
 }
 
 public class SmtpEmailSender : IEmailSender
 {
     public void Send(SmtpSettings settings, string toAddress, string subject, string body, bool isBodyHtml = false)
+    {
+        Send(settings, new[] { toAddress }, subject, body, isBodyHtml);
+    }
+
+    public void Send(SmtpSettings settings, IEnumerable<string> toAddresses, string subject, string body, bool isBodyHtml = false)
     {
         using var message = new MailMessage
         {
@@ -49,7 +55,8 @@ public class SmtpEmailSender : IEmailSender
             Body = body,
             IsBodyHtml = isBodyHtml
         };
-        message.To.Add(toAddress);
+        foreach (var toAddress in toAddresses)
+            message.To.Add(toAddress);
 
         using var client = new SmtpClient(settings.Host, settings.Port)
         {

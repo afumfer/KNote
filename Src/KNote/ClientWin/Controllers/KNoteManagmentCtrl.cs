@@ -501,8 +501,8 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 _messagesManagmentCtrl = new MessagesManagmentCtrl(Store);
                 _messagesManagmentCtrl.PostItVisible += _messagesManagment_PostItVisible;                    
                 _messagesManagmentCtrl.PostItAlarm += _messagesManagment_PostItAlarm;
-                //_messagesManagmentCtrl.EMailAlarm += _messagesManagment_EMailAlarm;
-                //_messagesManagmentCtrl.AppAlarm += _messagesManagment_AppAlarm;    
+                _messagesManagmentCtrl.EMailAlarm += _messagesManagment_EMailAlarm;
+                //_messagesManagmentCtrl.AppAlarm += _messagesManagment_AppAlarm;
                 _messagesManagmentCtrl.ExecuteKntScript += _messagesManagmentCtrl_ExecuteKntScript;
             }
             return _messagesManagmentCtrl;
@@ -523,10 +523,47 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         throw new NotImplementedException();
     }
 
-    private void _messagesManagment_EMailAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagment_EMailAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
-        // TODO: ... for next major version 
-        throw new NotImplementedException();
+        var service = e.Entity.Service;
+        var noteId = e.Entity.NoteId;
+
+        var note = (await service.Notes.GetAsync(noteId)).Entity;
+        var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
+
+        var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+
+        // GetAlarmNotesIdAsync only reports which note had a due Email alarm, not which of its
+        // messages fired (the repository already consumed/rescheduled it as a side effect of the
+        // query) - so, like PostIt/ExecuteKntScript already do at note granularity, every Email
+        // message on this note still assigned to the current user is (re)sent here.
+        foreach (var message in messages.Where(m => m.NotificationType == EnumNotificationType.Email && m.UserId == currentUser.UserId))
+            await SendEmailAlarm(service, note, message);
+    }
+
+    private async Task SendEmailAlarm(IKntService service, NoteDto note, KMessageDto message)
+    {
+        try
+        {
+            var recipient = (await service.Users.GetAsync(message.UserId ?? Guid.Empty)).Entity;
+            if (recipient == null || string.IsNullOrEmpty(recipient.EMail))
+                throw new InvalidOperationException("The assigned user has no valid email address.");
+
+            var settings = SmtpSettings.FromAppConfig(Store.AppConfig);
+            var subject = note.Topic;
+            var body = $"{message.Comment}\r\n\r\n{note.Description}";
+
+            await Task.Run(() => new SmtpEmailSender().Send(settings, recipient.EMail, subject, body));
+        }
+        catch (Exception ex)
+        {
+            // Fire-and-forget by design (see plan): on failure the send is simply lost, and the
+            // error is recorded in the message's own Comment so the user finds out next time they
+            // open the note's alarm list - no retry.
+            message.Comment = $"[Email failed {DateTime.Now:dd/MM/yyyy HH:mm}: {ex.Message}] {message.Comment}";
+            message.SetIsDirty(true);
+            await service.Notes.SaveMessageAsync(message, false);
+        }
     }
 
     private async void _messagesManagment_PostItAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
