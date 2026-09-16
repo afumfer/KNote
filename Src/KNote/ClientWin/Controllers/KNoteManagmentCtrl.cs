@@ -280,6 +280,13 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 NoteEditorCtrl.Run();
                 MessagesManagmentCtrl.Run();
 
+                // Show the Application info alarms panel on startup if the user left it with
+                // undismissed rows from a previous session, so they aren't left wondering where
+                // their pending reminders went - same intent as PostIts reopening themselves via
+                // MessagesManagmentCtrl.VisibleWindows().
+                if (Store.AppConfig.AppInfoAlarmsRows.Count > 0)
+                    AppInfoAlarmsCtrl.Activate();
+
                 NotifyView.ShowView();
 
                 // TODO: Experimental ---------------------------------
@@ -502,7 +509,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 _messagesManagmentCtrl.PostItVisible += _messagesManagment_PostItVisible;                    
                 _messagesManagmentCtrl.PostItAlarm += _messagesManagment_PostItAlarm;
                 _messagesManagmentCtrl.EMailAlarm += _messagesManagment_EMailAlarm;
-                //_messagesManagmentCtrl.AppAlarm += _messagesManagment_AppAlarm;
+                _messagesManagmentCtrl.AppAlarm += _messagesManagment_AppAlarm;
                 _messagesManagmentCtrl.ExecuteKntScript += _messagesManagmentCtrl_ExecuteKntScript;
             }
             return _messagesManagmentCtrl;
@@ -517,11 +524,74 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await Store.RunCode(note, caller: this);
     }
 
-    private void _messagesManagment_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    #endregion
+
+    #region Application info alarms controller
+
+    // Kept alive for the whole session once first needed (either the user opens it from the menu, or
+    // an AppInfo alarm fires) so it keeps accumulating rows in the background - see AppInfoAlarmsCtrl.
+    private AppInfoAlarmsCtrl _appInfoAlarmsCtrl;
+    public AppInfoAlarmsCtrl AppInfoAlarmsCtrl
     {
-        // TODO: ... for next major version 
-        throw new NotImplementedException();
+        get
+        {
+            if (_appInfoAlarmsCtrl == null)
+            {
+                _appInfoAlarmsCtrl = new AppInfoAlarmsCtrl(Store);
+                _appInfoAlarmsCtrl.OpenNoteRequested += _appInfoAlarmsCtrl_OpenNoteRequested;
+                _appInfoAlarmsCtrl.Run();
+            }
+            return _appInfoAlarmsCtrl;
+        }
     }
+
+    public void ShowAppInfoAlarms()
+    {
+        AppInfoAlarmsCtrl.Activate();
+    }
+
+    private async void _appInfoAlarmsCtrl_OpenNoteRequested(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    {
+        await EditNote(e.Entity.Service, e.Entity.NoteId);
+    }
+
+    private async void _messagesManagment_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    {
+        var service = e.Entity.Service;
+        var noteId = e.Entity.NoteId;
+
+        var note = (await service.Notes.GetAsync(noteId)).Entity;
+        var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
+
+        var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+        var repositoryAlias = Store.GetServiceRef(service.IdServiceRef)?.Alias;
+
+        // Same note-level granularity caveat as Email alarms (see _messagesManagment_EMailAlarm):
+        // GetAlarmNotesIdAsync only reports the note, not which specific message fired.
+        var appInfoMessages = messages.Where(m => m.NotificationType == EnumNotificationType.AppInfo && m.UserId == currentUser.UserId).ToList();
+        if (appInfoMessages.Count == 0)
+            return;
+
+        foreach (var message in appInfoMessages)
+        {
+            AppInfoAlarmsCtrl.AddOrUpdateRow(new AppInfoAlarmRowConfig
+            {
+                KMessageId = message.KMessageId,
+                NoteId = noteId,
+                RepositoryAlias = repositoryAlias,
+                NoteTopic = note.Topic,
+                Comment = message.Comment,
+                UserFullName = currentUser.FullName,
+                NotifiedAt = DateTime.Now
+            });
+        }
+
+        AppInfoAlarmsCtrl.Activate();
+    }
+
+    #endregion
+
+    #region Messages Managment alarm handlers
 
     private async void _messagesManagment_EMailAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {

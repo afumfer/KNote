@@ -73,6 +73,11 @@ public partial class NotifyForm : Form, IViewBase
             _ctrl.Store.HidePostIts();
     }
 
+    private void menuAppInfoAlarms_Click(object sender, EventArgs e)
+    {
+        _ctrl.ShowAppInfoAlarms();
+    }
+
     private void menuKNoteOptions_Click(object sender, EventArgs e)
     {
         _ctrl.Options();

@@ -35,6 +35,7 @@
             menuNewNote = new ToolStripMenuItem();
             menuShowKNoteManagment = new ToolStripMenuItem();
             menuPostItsVisibles = new ToolStripMenuItem();
+            menuAppInfoAlarms = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             menuKNoteOptions = new ToolStripMenuItem();
             menuHelp = new ToolStripMenuItem();
@@ -56,7 +57,7 @@
             // 
             // contextKNoteMenu
             // 
-            contextKNoteMenu.Items.AddRange(new ToolStripItem[] { menuNewNote, menuShowKNoteManagment, menuPostItsVisibles, toolStripMenuItem1, menuKNoteOptions, menuHelp, menuAbout, toolStripMenuItem2, menuExit });
+            contextKNoteMenu.Items.AddRange(new ToolStripItem[] { menuNewNote, menuShowKNoteManagment, menuPostItsVisibles, menuAppInfoAlarms, toolStripMenuItem1, menuKNoteOptions, menuHelp, menuAbout, toolStripMenuItem2, menuExit });
             contextKNoteMenu.Name = "contextMenuStrip1";
             contextKNoteMenu.Size = new Size(226, 170);
             // 
@@ -83,7 +84,14 @@
             menuPostItsVisibles.Size = new Size(225, 22);
             menuPostItsVisibles.Text = "Post-Its visibles";
             menuPostItsVisibles.Click += menuPostItsVisibles_Click;
-            // 
+            //
+            // menuAppInfoAlarms
+            //
+            menuAppInfoAlarms.Name = "menuAppInfoAlarms";
+            menuAppInfoAlarms.Size = new Size(225, 22);
+            menuAppInfoAlarms.Text = "Application info alarms ...";
+            menuAppInfoAlarms.Click += menuAppInfoAlarms_Click;
+            //
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
@@ -145,6 +153,7 @@
         private System.Windows.Forms.ToolStripMenuItem menuNewNote;
         private System.Windows.Forms.ToolStripMenuItem menuShowKNoteManagment;
         private System.Windows.Forms.ToolStripMenuItem menuPostItsVisibles;
+        private System.Windows.Forms.ToolStripMenuItem menuAppInfoAlarms;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem menuKNoteOptions;
         private System.Windows.Forms.ToolStripMenuItem menuHelp;

@@ -137,6 +137,18 @@ public interface IViewServerCOM : IViewChat
     void RefreshStatus();
 }
 
+// AppInfoAlarmsCtrl's view: a single persistent window that accumulates rows over time (added from
+// the alarms timer, see MessagesManagmentCtrl.AppAlarm) rather than being loaded/replaced as a
+// whole, so it gets its own AddOrUpdateRow instead of the pull-based IViewSelector<T>/
+// IViewManageList<T> shapes.
+public interface IViewAppInfoAlarms : IViewEmbeddable
+{
+    void AddOrUpdateRow(AppInfoAlarmRowConfig row);
+    void RemoveRow(Guid kMessageId);
+    void HideView();
+    void ActivateView();
+}
+
 public interface IViewHeavyProcess : IViewBase
 {
     CancellationTokenSource CancellationToken { get; set; }

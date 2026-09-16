@@ -347,6 +347,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         {
             _ctrl.ShowKNoteAIAssistantConsole();
         }
+        else if (menuSel == menuAppInfoAlarms)
+        {
+            _ctrl.ShowAppInfoAlarms();
+        }
         else if (menuSel == menuAIProviders)
         {
             await _ctrl.ManageAiProviders();

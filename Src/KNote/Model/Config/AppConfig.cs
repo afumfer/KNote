@@ -543,6 +543,86 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    // Location/size of the "Application info" alarms panel (ClientWin/Views/AppInfoAlarmsForm),
+    // remembered across sessions the same way as ManagmentLocX/Y/Width/Height above. 0 means "never
+    // moved/resized by the user yet" so the window centers itself instead.
+    private int _appInfoAlarmsLocX;
+    public int AppInfoAlarmsLocX
+    {
+        get { return _appInfoAlarmsLocX; }
+        set
+        {
+            if (_appInfoAlarmsLocX != value)
+            {
+                _appInfoAlarmsLocX = value;
+                OnPropertyChanged("AppInfoAlarmsLocX");
+            }
+        }
+    }
+
+    private int _appInfoAlarmsLocY;
+    public int AppInfoAlarmsLocY
+    {
+        get { return _appInfoAlarmsLocY; }
+        set
+        {
+            if (_appInfoAlarmsLocY != value)
+            {
+                _appInfoAlarmsLocY = value;
+                OnPropertyChanged("AppInfoAlarmsLocY");
+            }
+        }
+    }
+
+    private int _appInfoAlarmsWidth;
+    public int AppInfoAlarmsWidth
+    {
+        get { return _appInfoAlarmsWidth; }
+        set
+        {
+            if (_appInfoAlarmsWidth != value)
+            {
+                _appInfoAlarmsWidth = value;
+                OnPropertyChanged("AppInfoAlarmsWidth");
+            }
+        }
+    }
+
+    private int _appInfoAlarmsHeight;
+    public int AppInfoAlarmsHeight
+    {
+        get { return _appInfoAlarmsHeight; }
+        set
+        {
+            if (_appInfoAlarmsHeight != value)
+            {
+                _appInfoAlarmsHeight = value;
+                OnPropertyChanged("AppInfoAlarmsHeight");
+            }
+        }
+    }
+
+    // Rows currently shown in the "Application info" alarms panel, kept here so they survive app
+    // restarts - they stay until the user explicitly removes them ("Remove from list").
+    private List<AppInfoAlarmRowConfig> _appInfoAlarmsRows;
+    public List<AppInfoAlarmRowConfig> AppInfoAlarmsRows
+    {
+        get
+        {
+            if (_appInfoAlarmsRows == null)
+                _appInfoAlarmsRows = new List<AppInfoAlarmRowConfig>();
+            return _appInfoAlarmsRows;
+        }
+        set
+        {
+            if (_appInfoAlarmsRows != value)
+            {
+                _appInfoAlarmsRows = value;
+                OnPropertyChanged("AppInfoAlarmsRows");
+            }
+        }
+    }
+
     #endregion
 
     #region TODO: ... other params

@@ -79,6 +79,7 @@
             menuKntScriptConsole = new ToolStripMenuItem();
             menuChat = new ToolStripMenuItem();
             menuAIAssistant = new ToolStripMenuItem();
+            menuAppInfoAlarms = new ToolStripMenuItem();
             menuAIProviders = new ToolStripMenuItem();
             menuCOMPortServer = new ToolStripMenuItem();
             menuKNoteLab = new ToolStripMenuItem();
@@ -448,7 +449,7 @@
             //
             // menuTools
             // 
-            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuAIAssistant, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuOptions });
+            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuAIAssistant, menuAppInfoAlarms, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuOptions });
             menuTools.Name = "menuTools";
             menuTools.Size = new Size(46, 20);
             menuTools.Text = "&Tools";
@@ -487,6 +488,13 @@
             menuAIAssistant.Size = new Size(185, 22);
             menuAIAssistant.Text = "AI Assistant ...";
             menuAIAssistant.Click += menu_Click;
+            //
+            // menuAppInfoAlarms
+            //
+            menuAppInfoAlarms.Name = "menuAppInfoAlarms";
+            menuAppInfoAlarms.Size = new Size(185, 22);
+            menuAppInfoAlarms.Text = "Application info alarms ...";
+            menuAppInfoAlarms.Click += menu_Click;
             //
             // menuAIProviders
             //
@@ -1014,6 +1022,7 @@
         private ToolStripMenuItem menuToolbarVisible;
         private ToolStripMenuItem menuChat;
         private ToolStripMenuItem menuAIAssistant;
+        private ToolStripMenuItem menuAppInfoAlarms;
         private ToolStripMenuItem menuAIProviders;
         private ToolStripProgressBar progressBar;
         private ToolStripMenuItem menuCOMPortServer;
