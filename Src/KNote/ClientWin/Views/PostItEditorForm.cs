@@ -351,6 +351,7 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
             return;
 
         var ct = _ctrl.Model.GetContentTypeExt();
+        kntEditView.ContentLocked = ct.DescriptionBlocked;
 
         labelCaption.Text = _ctrl.Model.Topic;
         RefreshStatus();
@@ -452,10 +453,13 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
         if (_ctrl.Model is null)
             return;
 
-        if (_ctrl.Model.GetContentTypeExt().ForDescription == "html")
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
-        else
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
+        if (!_ctrl.Model.GetContentTypeExt().DescriptionBlocked)
+        {
+            if (_ctrl.Model.GetContentTypeExt().ForDescription == "html")
+                _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
+            else
+                _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
+        }
 
         _ctrl.Model.FolderId = _selectedFolderId;
         _ctrl.Model.Topic = labelCaption.Text;
@@ -488,10 +492,18 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
         if (!e.Data.GetDataPresent(DataFormats.FileDrop))
             return;
 
+        var ct = _ctrl.Model.GetContentTypeExt();
+
+        if (ct.DescriptionBlocked)
+        {
+            ShowInfo("This note is locked and cannot be edited.", KntConst.AppName);
+            return;
+        }
+
         // "navigation" content shows a read-only rendered URL/webpage - there is no caret to
         // insert a link into and, with no resource list in this window, an attached-but-unlinked
         // resource would be effectively invisible to the user.
-        if (_ctrl.Model.GetContentTypeExt().ForDescription == "navigation")
+        if (ct.ForDescription == "navigation")
         {
             ShowInfo("Switch this post-it to edit mode before dropping a file onto it.", KntConst.AppName);
             return;

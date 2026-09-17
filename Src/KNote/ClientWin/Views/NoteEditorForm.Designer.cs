@@ -402,7 +402,7 @@
             // 
             buttonLockFormat.Name = "buttonLockFormat";
             buttonLockFormat.Size = new Size(325, 22);
-            buttonLockFormat.Text = "Lock format";
+            buttonLockFormat.Text = "Lock note editing";
             buttonLockFormat.Click += buttonToolBar_Click;
             // 
             // imageListTabNoteData

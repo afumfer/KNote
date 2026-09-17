@@ -120,27 +120,37 @@ namespace KntWebView
         }
 
 
-        private bool _htmlEditorEditMode;
+        // Defaults to editable: HtmlEditorEditMode is historically only ever set to false (to force
+        // a read-only embedded note view); nothing sets it to true, relying on this default instead.
+        private bool _htmlEditorEditMode = true;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool HtmlEditorEditMode 
+        public bool HtmlEditorEditMode
         {
             get { return _htmlEditorEditMode; }
-            set 
+            set
             {
                 _htmlEditorEditMode = value;
-                if (_htmlEditorEditMode)
-                {
-                    htmlContent.ToolbarVisible = true;
-                    htmlContent.ReadOnly = false;
-                }
-                else
-                {
-                    htmlContent.ToolbarVisible = false;
-                    htmlContent.ReadOnly = true;
-                }
+                ApplyHtmlEditorState();
             }
         }
-        
+
+        private bool _contentLocked;
+        /// <summary>
+        /// When true, the markdown/html sub-controls become read-only regardless of
+        /// HtmlEditorEditMode, independently of which content mode (markdown/html/navigation) is shown.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ContentLocked
+        {
+            get { return _contentLocked; }
+            set
+            {
+                _contentLocked = value;
+                textContent.ReadOnly = _contentLocked;
+                ApplyHtmlEditorState();
+            }
+        }
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public HtmlEditorControl HtmlContentControl
         {
@@ -390,6 +400,13 @@ namespace KntWebView
                 EnableMarkdownView();
             else if (_contentType.Contains("html"))
                 EnableHtmlView();
+        }
+
+        private void ApplyHtmlEditorState()
+        {
+            bool editable = _htmlEditorEditMode && !_contentLocked;
+            htmlContent.ToolbarVisible = editable;
+            htmlContent.ReadOnly = !editable;
         }
 
         private void EnableMarkdownView()

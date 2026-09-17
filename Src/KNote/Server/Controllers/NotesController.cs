@@ -219,7 +219,6 @@ public class NotesController : ControllerBase
             {
                 if (note.Description.StartsWith(@"<BODY"))
                 {
-                    ct.DescriptionBlocked = true;
                     ct.ForDescription = "html";
                     note.SetContentTypeExt(ct);
                 }

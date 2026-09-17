@@ -314,6 +314,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
             ct.DescriptionBlocked = !ct.DescriptionBlocked;
             buttonLockFormat.Checked = ct.DescriptionBlocked;
             _ctrl.Model.SetContentTypeExt(ct);
+            ApplyDescriptionLockUI(ct.DescriptionBlocked);
         }
         else if (menuSel == buttonInsertTemplate)
         {
@@ -357,14 +358,14 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         try
         {
             var ct = _ctrl.Model.GetContentTypeExt();
+            if (ct.DescriptionBlocked)
+            {
+                ShowInfo($"This note is locked and cannot be edited.");
+                return;
+            }
+
             if (kntEditView.ContentType == "html")
             {
-                if (ct.DescriptionBlocked)
-                {
-                    ShowInfo($"This note cannot be changed to another format, the format is locked.");
-                    return;
-                }
-
                 kntEditView.ShowMarkdownContent(_ctrl.Service.Notes.UtilHtmlToMarkdown(kntEditView.BodyHtml));
             }
             else
@@ -387,11 +388,9 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         try
         {
             var ct = _ctrl.Model.GetContentTypeExt();
-            /// ct
-            //if (_ctrl.Model.ContentType.Contains('#'))
             if (ct.DescriptionBlocked)
             {
-                ShowInfo($"This note cannot be changed to another format, the format is locked.");
+                ShowInfo($"This note is locked and cannot be edited.");
                 return;
             }
 
@@ -432,7 +431,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
             var ct = _ctrl.Model.GetContentTypeExt();
             if (ct.DescriptionBlocked)
             {
-                ShowInfo($"This note cannot be changed to another format, the format is locked.");
+                ShowInfo($"This note is locked and cannot be edited.");
                 return;
             }
 
@@ -954,7 +953,9 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
         textFolderNumber.Text = "#" + _ctrl.Model.FolderDto.FolderNumber.ToString();
         textStatus.Text = _ctrl.Model.InternalTags;
-        buttonLockFormat.Checked = _ctrl.Model.ContentType != null && _ctrl.Model.ContentType.Contains('#');
+        var ct = _ctrl.Model.GetContentTypeExt();
+        buttonLockFormat.Checked = ct.DescriptionBlocked;
+        ApplyDescriptionLockUI(ct.DescriptionBlocked);
 
         this.Update();
         this.Refresh();
@@ -1013,8 +1014,9 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         }
 
         buttonLockFormat.Checked = ct.DescriptionBlocked;
+        ApplyDescriptionLockUI(ct.DescriptionBlocked);
 
-        // KAttributes           
+        // KAttributes
         textNoteType.Text = _ctrl.Model.NoteTypeDto.Name;
         ModelToControlsAttributes();
 
@@ -1331,10 +1333,13 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         _ctrl.Model.Tags = textTags.Text;
         _ctrl.Model.InternalTags = textStatus.Text;
 
-        if (ct.ForDescription == "html")
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
-        else
-            _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
+        if (!ct.DescriptionBlocked)
+        {
+            if (ct.ForDescription == "html")
+                _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.BodyHtml, true);
+            else
+                _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
+        }
 
         int p;
         if (int.TryParse(textPriority.Text, out p))
@@ -1485,6 +1490,19 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         itemList.SubItems.Add(resource.NameOut);
         itemList.SubItems.Add(resource.FileType);
         return itemList;
+    }
+
+    // Note: buttonEditMarkdown/buttonViewHtml/buttonNavigate are intentionally left alone here -
+    // their Enabled flag doubles as a mode proxy read from several other places (InsertLinkSelectedResource,
+    // TextSearch, InsertTemplate, ...), so this method must not repurpose it for the lock state.
+    // Mode switching while locked is instead rejected inside each button's own Click handler.
+    private void ApplyDescriptionLockUI(bool locked)
+    {
+        kntEditView.ContentLocked = locked;
+        toolDescription.Enabled = !locked;
+        buttonInsertLink.Enabled = !locked;
+        buttonInsertTemplate.Enabled = !locked;
+        buttonAddTaskSelectedText.Enabled = !locked;
     }
 
     private void EnableHtmlView()
@@ -1655,13 +1673,15 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         // ConfigureEmbededMode() (e.g. the note shown inside KNoteManagment) sets EditMode = false
         // and makes the description read-only - dropping a file there would silently attach a
-        // resource nobody could reference into the text, so reject the drop outright.
-        e.Effect = (_ctrl.EditMode && e.Data.GetDataPresent(DataFormats.FileDrop)) ? DragDropEffects.Copy : DragDropEffects.None;
+        // resource nobody could reference into the text, so reject the drop outright. Same reasoning
+        // applies when the note itself is locked for editing.
+        var allowDrop = _ctrl.EditMode && !_ctrl.Model.GetContentTypeExt().DescriptionBlocked && e.Data.GetDataPresent(DataFormats.FileDrop);
+        e.Effect = allowDrop ? DragDropEffects.Copy : DragDropEffects.None;
     }
 
     private void Content_DragDrop(object sender, DragEventArgs e)
     {
-        if (!_ctrl.EditMode || !e.Data.GetDataPresent(DataFormats.FileDrop))
+        if (!_ctrl.EditMode || _ctrl.Model.GetContentTypeExt().DescriptionBlocked || !e.Data.GetDataPresent(DataFormats.FileDrop))
             return;
 
         var files = (string[])e.Data.GetData(DataFormats.FileDrop);
@@ -1682,6 +1702,14 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
 
     private void InsertLinkSelectedResource(bool prependSeparator = false)
     {
+        // Reached both from toolbar buttons (already disabled while locked) and from
+        // Content_DragDrop (a drag&drop is not gated by any button's Enabled state).
+        if (_ctrl.Model.GetContentTypeExt().DescriptionBlocked)
+        {
+            ShowInfo("This note is locked and cannot be edited.");
+            return;
+        }
+
         // If navigate mode then msgbox and return
         if (!buttonNavigate.Enabled)
         {
@@ -1802,6 +1830,12 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
 
     private async Task InsertTemplate()
     {
+        if (_ctrl.Model.GetContentTypeExt().DescriptionBlocked)
+        {
+            ShowInfo("This note is locked and cannot be edited.");
+            return;
+        }
+
         // If navigate mode then msgbox and return
         if (!buttonNavigate.Enabled)
         {
@@ -1888,6 +1922,12 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
 
     private async Task AddTaskFromSelectedText()
     {
+        if (_ctrl.Model.GetContentTypeExt().DescriptionBlocked)
+        {
+            ShowInfo("This note is locked and cannot be edited.");
+            return;
+        }
+
         var selText = kntEditView.MarkdownContentControl.SelectedText;
         if (!string.IsNullOrEmpty(selText))
         {
