@@ -1496,6 +1496,8 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     // their Enabled flag doubles as a mode proxy read from several other places (InsertLinkSelectedResource,
     // TextSearch, InsertTemplate, ...), so this method must not repurpose it for the lock state.
     // Mode switching while locked is instead rejected inside each button's own Click handler.
+    private const string LockedTitleIndicator = " \U0001F512 Locked";
+
     private void ApplyDescriptionLockUI(bool locked)
     {
         kntEditView.ContentLocked = locked;
@@ -1503,6 +1505,14 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         buttonInsertLink.Enabled = !locked;
         buttonInsertTemplate.Enabled = !locked;
         buttonAddTaskSelectedText.Enabled = !locked;
+
+        // RefreshFolderAndRepositoryDisplayAsync() resets Text to its base form on every
+        // ModelToControls() run, before this method is called - so this only ever adds/removes
+        // the suffix once, regardless of how many times it runs.
+        if (locked && !Text.EndsWith(LockedTitleIndicator))
+            Text += LockedTitleIndicator;
+        else if (!locked && Text.EndsWith(LockedTitleIndicator))
+            Text = Text.Substring(0, Text.Length - LockedTitleIndicator.Length);
     }
 
     private void EnableHtmlView()

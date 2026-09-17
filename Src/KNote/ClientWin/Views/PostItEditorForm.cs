@@ -701,7 +701,8 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
             ? string.Empty
             : await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
 
-        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{folderPath}] {status}";
+        var lockIndicator = _ctrl.Model.GetContentTypeExt().DescriptionBlocked ? " \U0001F512 Locked" : "";
+        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{folderPath}] {status}{lockIndicator}";
     }
 
     #endregion
