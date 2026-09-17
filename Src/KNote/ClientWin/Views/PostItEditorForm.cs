@@ -57,11 +57,13 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
         else
             ConfigurePostItView(false);
 
-        // Drag & drop a file onto the post-it or its description editor uploads it as a
-        // resource. Unlike NoteEditorForm there is no resource list to fall back on here, so
-        // Content_DragDrop rejects the drop while in read-only "navigation" content (see
-        // ModelToControls) instead of attaching a resource the user could never find again.
-        foreach (Control dropTarget in new Control[] { this, kntEditView, kntEditView.MarkdownContentControl, kntEditView.HtmlContentControl, kntEditView.WebViewControl })
+        // Drag & drop a file onto the post-it or its markdown editor uploads it as a resource.
+        // Unlike NoteEditorForm there is no resource list to fall back on here, so Content_DragDrop
+        // rejects the drop while in read-only "navigation" content (see ModelToControls) instead of
+        // attaching a resource the user could never find again. HtmlContentControl (MSHTML) and
+        // WebViewControl (WebView2) are intentionally left out - both manage OS drag&drop natively
+        // on their own embedded surface, and we want that native behavior instead of intercepting it.
+        foreach (Control dropTarget in new Control[] { this, kntEditView, kntEditView.MarkdownContentControl })
         {
             dropTarget.AllowDrop = true;
             dropTarget.DragEnter += Content_DragEnter;

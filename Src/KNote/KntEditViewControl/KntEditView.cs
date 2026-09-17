@@ -374,11 +374,9 @@ namespace KntWebView
                 webView.NavigationStarting += EnsureHttps;
                 webView.NavigationCompleted += webView2_NavigationCompleted;
 
-                // By default WebView2 handles an OS file drop itself (navigating to the dropped
-                // file) instead of letting it reach this control's own WinForms DragDrop event.
-                // Disabling that lets callers (NoteEditorForm/PostItEditorForm) wire AllowDrop +
-                // DragEnter/DragDrop on WebViewControl like any other WinForms control.
-                webView.AllowExternalDrop = false;
+                // Left at its default (true): callers (NoteEditorForm/PostItEditorForm) no longer
+                // wire WinForms DragDrop on WebViewControl, so the browser handles OS drops itself
+                // as it normally would.
             }
             else
             {

@@ -95,13 +95,14 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         panelTraceToHeader.Resize += (s, e) => AlignButtonsRight(panelTraceToHeader, 3, 3,
             buttonTraceToAdd, buttonTraceToRemove, buttonTraceToEdit);
 
-        // Drag & drop a file onto the form or the description editor uploads it as a resource,
-        // the same way the "upload"/"paste from clipboard" toolbar buttons already do. WinForms
+        // Drag & drop a file onto the form or the markdown editor uploads it as a resource, the
+        // same way the "upload"/"paste from clipboard" toolbar buttons already do. WinForms
         // drag&drop does not bubble to parent controls, so each real drop surface needs its own
-        // AllowDrop + handlers; kntEditView's WebView2 sub-control additionally needs
-        // AllowExternalDrop = false (set in KntEditView itself) or the browser would intercept
-        // the OS drop before this event ever fires.
-        foreach (Control dropTarget in new Control[] { this, kntEditView, kntEditView.MarkdownContentControl, kntEditView.HtmlContentControl, kntEditView.WebViewControl })
+        // AllowDrop + handlers. kntEditView's HtmlContentControl (MSHTML) and WebViewControl
+        // (WebView2) are intentionally left out: both manage OS drag&drop natively on their own
+        // embedded surface, and we want that native behavior (e.g. WebView2's own drop handling)
+        // instead of intercepting it here.
+        foreach (Control dropTarget in new Control[] { this, kntEditView, kntEditView.MarkdownContentControl })
         {
             dropTarget.AllowDrop = true;
             dropTarget.DragEnter += Content_DragEnter;
