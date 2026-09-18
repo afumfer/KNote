@@ -32,7 +32,7 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
         return panelForm;
     }
 
-    public async void RefreshView()
+    public override async void RefreshView()
     {            
         using (new WaitCursor())
         {               

@@ -24,20 +24,6 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 
     #endregion
 
-    #region IEditorView implementation
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form events handler
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -61,7 +47,7 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 
     #region Private methods
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         var alias = _ctrl.ServiceRef?.RepositoryRef?.Alias ?? "this repository";
         labelInfo.Text = $"The Windows user '{_ctrl.Model.UserName}' is not registered in '{alias}'. " +
@@ -73,7 +59,7 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
         textPassword.Text = _ctrl.Model.Password;
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.FullName = textFullName.Text;
         _ctrl.Model.EMail = textEMail.Text;

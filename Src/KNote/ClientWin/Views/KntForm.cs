@@ -43,6 +43,27 @@ public class KntForm : Form
     {
     }
 
+    // IViewBase.RefreshView / IViewEditor.RefreshModel for the views that map a model to controls:
+    // they only override ModelToControls/ControlsToModel. Views that refresh differently override
+    // RefreshView itself.
+    public virtual void RefreshView()
+    {
+        ModelToControls();
+    }
+
+    public virtual void RefreshModel()
+    {
+        ControlsToModel();
+    }
+
+    protected virtual void ModelToControls()
+    {
+    }
+
+    protected virtual void ControlsToModel()
+    {
+    }
+
     // Called when the user (not the controller, see OnClosingView) closes the window. Derived views
     // override it to finalize their controller, or to hide instead of closing (e.Cancel = true).
     protected virtual void OnUserClosing(FormClosingEventArgs e)

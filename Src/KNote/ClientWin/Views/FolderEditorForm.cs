@@ -60,20 +60,6 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
 
     #endregion
 
-    #region IView implementation
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form events handler
 
     private void FolderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -171,7 +157,7 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
         return true;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         textName.Text = _ctrl.Model.Name;
         textNumber.Text = "#" + _ctrl.Model.FolderNumber.ToString();
@@ -183,7 +169,7 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
         _selectedParentFolder = _ctrl.Model.ParentFolderDto;
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.Name = textName.Text;
         _ctrl.Model.Tags = textTags.Text;

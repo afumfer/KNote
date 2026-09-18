@@ -32,20 +32,6 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
 
     #endregion 
 
-    #region IEditorView implementation 
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form events handler
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -190,7 +176,7 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
 
     #region Private methods
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         switch (_ctrl.EditorMode)
         {
@@ -254,7 +240,7 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
 
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.Alias = textAliasName.Text;
         _ctrl.Model.ResourcesContainer = textResourcesContainer.Text;

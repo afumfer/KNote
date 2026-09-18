@@ -60,10 +60,5 @@ public partial class MonitorForm : KntForm, IViewBase
         listBoxMessages.Items.Clear();
     }
 
-    public void RefreshView()
-    {
-        //
-    }
-
     #endregion 
 }

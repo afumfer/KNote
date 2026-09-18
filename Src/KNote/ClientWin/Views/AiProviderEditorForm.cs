@@ -29,20 +29,6 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
 
     #endregion
 
-    #region IEditorView implementation
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form event handlers
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -119,7 +105,7 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
         textHost.Enabled = isOllama;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         textAlias.Text = _ctrl.Model.Alias;
         comboProvider.SelectedItem = _ctrl.Model.Provider;
@@ -129,7 +115,7 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
         UpdateHostEnabled();
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.Alias = textAlias.Text;
         _ctrl.Model.Provider = comboProvider.SelectedItem as string;

@@ -48,7 +48,7 @@ public partial class UsersManageForm : KntForm, IViewManageList<UserDto>
         return panelForm;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         listViewUsers.Clear();
 

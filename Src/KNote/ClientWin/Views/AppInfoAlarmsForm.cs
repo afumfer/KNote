@@ -83,10 +83,6 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         this.Activate();
     }
 
-    public void RefreshView()
-    {
-    }
-
     public Control PanelView()
     {
         return panelForm;

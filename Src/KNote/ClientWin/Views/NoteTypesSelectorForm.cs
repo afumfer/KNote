@@ -29,7 +29,7 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
 
     #region ISelectorView interface 
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         if (_ctrl.ListEntities == null)
             return;

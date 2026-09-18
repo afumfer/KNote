@@ -25,7 +25,7 @@ public partial class KntChatForm : KntForm, IViewChat
 
     #region IView implementation
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         this.Refresh();
     }

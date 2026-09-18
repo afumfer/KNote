@@ -34,7 +34,7 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
         base.OnClosingView();
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         Refresh();
         RefreshStatus();

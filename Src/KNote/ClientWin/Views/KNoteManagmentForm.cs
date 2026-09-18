@@ -111,7 +111,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         return DialogResult.OK;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         throw new NotImplementedException();
     }

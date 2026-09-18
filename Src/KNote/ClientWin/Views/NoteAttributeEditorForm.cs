@@ -26,20 +26,6 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
 
     #endregion 
 
-    #region IEditorView implementation 
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    #endregion
-
     #region Form events handlers
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -87,7 +73,7 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
 
     #region Private methods
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         labelDescription.Text = "* " + _ctrl.Model.Description;
         labelAttribute.Text = _ctrl.Model.Name;
@@ -224,7 +210,7 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
         listView.Sorting = SortOrder.None;            
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {            
         switch (_ctrl.Model.KAttributeDataType)
         {

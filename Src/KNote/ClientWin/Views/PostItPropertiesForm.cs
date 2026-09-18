@@ -28,16 +28,6 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
 
     #region IView
 
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
     public void HideView()
     {
         throw new NotImplementedException();
@@ -94,7 +84,7 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
         return await _ctrl.SaveModel();
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         FontStyle style = new FontStyle();
         if (_ctrl.Model.FontBold)
@@ -117,7 +107,7 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
         labelText.ForeColor = ColorTranslator.FromHtml(_ctrl.Model.TextNoteColor);
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.TitleColor = ColorTranslator.ToHtml(labelCaption.BackColor);
         _ctrl.Model.TextTitleColor = ColorTranslator.ToHtml(labelCaption.ForeColor);

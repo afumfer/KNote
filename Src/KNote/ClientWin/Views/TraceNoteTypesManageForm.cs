@@ -51,7 +51,7 @@ public partial class TraceNoteTypesManageForm : KntForm, IViewManageList<TraceNo
         return panelForm;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         listViewTraceNoteTypes.Clear();
 

@@ -26,20 +26,6 @@ public partial class KAttributeTabulatedValueEditorForm : KntForm, IViewEditor<K
 
     #endregion
 
-    #region IEditorView implementation
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form event handlers
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -95,14 +81,14 @@ public partial class KAttributeTabulatedValueEditorForm : KntForm, IViewEditor<K
         return true;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         textValue.Text = _ctrl.Model.Value;
         textDescription.Text = _ctrl.Model.Description;
         numericOrder.Value = _ctrl.Model.Order;
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.Value = textValue.Text;
         _ctrl.Model.Description = textDescription.Text;

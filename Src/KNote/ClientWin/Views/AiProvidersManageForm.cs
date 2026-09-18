@@ -51,7 +51,7 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
         StartPosition = FormStartPosition.CenterParent;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         listViewProviders.Clear();
 

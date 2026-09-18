@@ -120,7 +120,7 @@ window.chrome.webview.postMessage(retValue);";
 
     #region IViewBase interface
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         Refresh();
     }

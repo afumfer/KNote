@@ -27,20 +27,6 @@ public partial class MessageEditorForm : KntForm, IViewEditor<KMessageDto>
 
     #endregion
 
-    #region IEditorView implementation 
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form event handlers
 
     private void MessageEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -138,7 +124,7 @@ public partial class MessageEditorForm : KntForm, IViewEditor<KMessageDto>
         comboNotificationType.SelectedIndex = 0;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         textUserFullName.Text = _ctrl.Model.UserFullName?.ToString();
         textAlarmDateTime.Text = _ctrl.Model.AlarmDateTime.ToString();
@@ -149,7 +135,7 @@ public partial class MessageEditorForm : KntForm, IViewEditor<KMessageDto>
         textMinutes.Text = _ctrl.Model.AlarmMinutes?.ToString();            
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.AlarmDateTime = _ctrl.Store.KntTextUtils.TextToDateTime(textAlarmDateTime.Text);
         _ctrl.Model.AlarmType = (EnumAlarmType)comboAlarmPeriodicity.SelectedIndex;

@@ -26,20 +26,6 @@ public partial class TaskEditorForm : KntForm, IViewEditor<NoteTaskDto>
 
     #endregion
 
-    #region IEditorView implementation 
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form event handelrs
 
     private void TaskEditorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -131,7 +117,7 @@ public partial class TaskEditorForm : KntForm, IViewEditor<NoteTaskDto>
         return true;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         textUser.Text = _ctrl.Model.UserFullName;
         textTags.Text = _ctrl.Model.Tags;
@@ -147,7 +133,7 @@ public partial class TaskEditorForm : KntForm, IViewEditor<NoteTaskDto>
         textDescription.Text = _ctrl.Model.Description;
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.UserFullName = textUser.Text;
         _ctrl.Model.Tags = textTags.Text;

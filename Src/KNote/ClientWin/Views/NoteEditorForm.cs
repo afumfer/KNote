@@ -163,11 +163,6 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         listViewTraceNoteTo.Clear();
     }
 
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
     public void RefreshViewOnlyRequiredCtrl()
     {
         ModelToControlsOnlyRequiredComponents();
@@ -187,9 +182,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             : await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
     }
 
-    public async void RefreshModel()
+    public override async void RefreshModel()
     {
-        await ControlsToModel();
+        await ControlsToModelAsync();
     }
 
     public override void ConfigureEmbededMode()
@@ -945,7 +940,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         this.Refresh();
     }
 
-    private async void ModelToControls()
+    protected override async void ModelToControls()
     {
         var ct = _ctrl.Model.GetContentTypeExt();
 
@@ -1301,7 +1296,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
     }
 
-    private async Task ControlsToModel()
+    private async Task ControlsToModelAsync()
     {
         // Basic data
         var ct = _ctrl.Model.GetContentTypeExt();
@@ -1879,7 +1874,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     private async void ExecKNoteAssistant()
     {
         ProgressBarOn();
-        await ControlsToModel();
+        await ControlsToModelAsync();
         await _ctrl.ExecKNoteAssistant();
         RefreshView();
         ProgressBarOff();

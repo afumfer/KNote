@@ -442,7 +442,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
 
     #region IView interface 
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         throw new NotImplementedException();
     }

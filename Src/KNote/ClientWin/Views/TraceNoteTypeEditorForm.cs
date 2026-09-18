@@ -26,20 +26,6 @@ public partial class TraceNoteTypeEditorForm : KntForm, IViewEditor<TraceNoteTyp
 
     #endregion
 
-    #region IEditorView implementation
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form event handlers
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -95,13 +81,13 @@ public partial class TraceNoteTypeEditorForm : KntForm, IViewEditor<TraceNoteTyp
         return true;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         textName.Text = _ctrl.Model.Name;
         textDescription.Text = _ctrl.Model.Description;
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.Name = textName.Text;
         _ctrl.Model.Description = textDescription.Text;

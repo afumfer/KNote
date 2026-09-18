@@ -66,7 +66,7 @@ public partial class HeavyProcessForm : KntForm, IViewHeavyProcess
         Show();
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         Refresh();
     }

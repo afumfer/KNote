@@ -52,7 +52,7 @@ public partial class KAttributesManageForm : KntForm, IViewManageList<KAttribute
         return panelForm;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         RebuildList();
     }

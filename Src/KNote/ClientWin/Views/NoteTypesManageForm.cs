@@ -51,7 +51,7 @@ public partial class NoteTypesManageForm : KntForm, IViewManageList<NoteTypeDto>
         return panelForm;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         listViewNoteTypes.Clear();
 

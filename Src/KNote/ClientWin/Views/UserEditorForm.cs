@@ -26,20 +26,6 @@ public partial class UserEditorForm : KntForm, IViewEditor<UserDto>
 
     #endregion
 
-    #region IEditorView implementation
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form event handlers
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -103,7 +89,7 @@ public partial class UserEditorForm : KntForm, IViewEditor<UserDto>
         return true;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         var isNew = _ctrl.Model.UserId == Guid.Empty;
 
@@ -125,7 +111,7 @@ public partial class UserEditorForm : KntForm, IViewEditor<UserDto>
         buttonResetPassword.Visible = !isNew;
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.UserName = textUserName.Text;
         _ctrl.Model.EMail = textEMail.Text;

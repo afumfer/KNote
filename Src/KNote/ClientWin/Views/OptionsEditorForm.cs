@@ -26,20 +26,6 @@ public partial class OptionsEditorForm : KntForm, IViewEditor<AppConfig>
 
     #endregion 
 
-    #region IEditorView implementation 
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form events handler
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -171,7 +157,7 @@ public partial class OptionsEditorForm : KntForm, IViewEditor<AppConfig>
         return true;
     }
 
-    private void ModelToControls() 
+    protected override void ModelToControls() 
     {
         checkAlarmActivated.Checked = _ctrl.Model.AlarmActivated;
         textAlarmSeconds.Text = _ctrl.Model.AlarmSeconds.ToString();
@@ -191,7 +177,7 @@ public partial class OptionsEditorForm : KntForm, IViewEditor<AppConfig>
         //var x6 = _ctrl.Model.LogFile;
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.AlarmActivated = checkAlarmActivated.Checked;
         _ctrl.Model.AlarmSeconds = int.Parse(textAlarmSeconds.Text);

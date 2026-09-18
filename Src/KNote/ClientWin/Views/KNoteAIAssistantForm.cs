@@ -64,7 +64,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         this.Show();
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         kntEditViewResult.MarkdownContentControl.Text = _ctrl.ChatTextMessasges.ToString();
         kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;

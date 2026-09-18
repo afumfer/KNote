@@ -83,7 +83,7 @@ public partial class NotifyForm : KntForm, IViewBase
         _ctrl?.FinalizeApp();
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         this.Refresh();        
     }

@@ -31,20 +31,6 @@ public partial class TraceNoteEditorForm : KntForm, IViewEditor<TraceNoteDto>
 
     #endregion
 
-    #region IEditorView implementation
-
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
-    }
-
-    #endregion
-
     #region Form event handlers
 
     private async void buttonAccept_Click(object sender, EventArgs e)
@@ -118,7 +104,7 @@ public partial class TraceNoteEditorForm : KntForm, IViewEditor<TraceNoteDto>
         return true;
     }
 
-    private void ModelToControls()
+    protected override void ModelToControls()
     {
         textRelatedNote.Text = _ctrl.RelatedNoteDisplay;
 
@@ -137,7 +123,7 @@ public partial class TraceNoteEditorForm : KntForm, IViewEditor<TraceNoteDto>
         textWeight.Text = _ctrl.Model.Weight.ToString();
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         var selectedType = comboTraceNoteType.SelectedItem as TraceNoteTypeDto;
         _ctrl.Model.TraceNoteTypeId = (selectedType == null || selectedType.TraceNoteTypeId == Guid.Empty) ? null : selectedType.TraceNoteTypeId;

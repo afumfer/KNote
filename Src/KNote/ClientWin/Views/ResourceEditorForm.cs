@@ -33,14 +33,9 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
 
     #region IEditorView implementation
 
-    public async void RefreshView()
+    public override async void RefreshView()
     {
-        await ModelToControls();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
+        await ModelToControlsAsync();
     }
 
     #endregion
@@ -128,7 +123,7 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
         return true;
     }
 
-    private async Task ModelToControls()
+    private async Task ModelToControlsAsync()
     {
         textFileName.Text = _ctrl.Model.NameOut;
         varName = _ctrl.Model.Name;
@@ -150,7 +145,7 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
         await ShowPreview(_ctrl.Model.FullUrl, false);
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         _ctrl.Model.Name = varName;
         _ctrl.Model.Description = textDescription.Text;

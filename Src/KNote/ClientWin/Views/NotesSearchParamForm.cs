@@ -32,7 +32,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         return panelForm;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         PersonalizeControls();
     }

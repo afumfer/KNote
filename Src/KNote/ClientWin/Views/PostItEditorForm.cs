@@ -74,11 +74,6 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
     #region IView interface
 
-    public void RefreshView()
-    {
-        ModelToControls();
-    }
-
     public void HideView()
     {
         this.Hide();
@@ -87,11 +82,6 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     public void ActivateView()
     {
         this.Show();
-    }
-
-    public void RefreshModel()
-    {
-        ControlsToModel();
     }
 
     public Task RefreshFolderAndRepositoryDisplayAsync()
@@ -327,7 +317,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
     private const string LockedCaptionIndicator = " \U0001F512 Locked";
 
-    private async void ModelToControls()
+    protected override async void ModelToControls()
     {
         if (_ctrl.Model is null)
             return;
@@ -430,7 +420,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         labelStatus.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
     }
 
-    private void ControlsToModel()
+    protected override void ControlsToModel()
     {
         if (_ctrl.Model is null)
             return;

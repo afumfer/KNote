@@ -81,7 +81,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         return panelForm;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         if (!string.IsNullOrEmpty(_ctrl.ViewTitle))
             this.Text = _ctrl.ViewTitle;

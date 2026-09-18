@@ -48,7 +48,7 @@ public partial class KNoteAboutForm : KntForm, IViewBase
         this.DialogResult = DialogResult.OK;
     }
 
-    public void RefreshView()
+    public override void RefreshView()
     {
         throw new NotImplementedException();
     }
