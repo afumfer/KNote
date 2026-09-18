@@ -16,8 +16,35 @@ public class KntEditorForm : KntForm
 
     protected override void OnKeyPress(KeyPressEventArgs e)
     {
-        FormIsDirty = true;
+        if (ChangesContent(e.KeyChar, IsEditingMultilineText()))
+            FormIsDirty = true;
+
         base.OnKeyPress(e);
+    }
+
+    // Tab only moves the focus and Escape only cancels/closes, and Enter only changes content where it
+    // inserts a line break (an editable multiline text box) - elsewhere it just activates a button or
+    // the default one.
+    internal static bool ChangesContent(char keyChar, bool focusIsMultilineText)
+    {
+        return keyChar switch
+        {
+            '\t' => false,
+            '' => false,
+            '\r' => focusIsMultilineText,
+            _ => true
+        };
+    }
+
+    // Follows the focus down through nested containers (user controls, split panels...) to the
+    // control that actually receives the key.
+    private bool IsEditingMultilineText()
+    {
+        Control focused = this;
+        while (focused is ContainerControl container && container.ActiveControl != null)
+            focused = container.ActiveControl;
+
+        return focused is TextBoxBase { Multiline: true, ReadOnly: false };
     }
 
     protected override void OnKeyUp(KeyEventArgs e)
