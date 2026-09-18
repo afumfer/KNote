@@ -16,7 +16,6 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
     private static readonly NoteTypeDto NoNoteTypeItem = new() { NoteTypeId = Guid.Empty, Name = "(none)" };
 
     private readonly NotesFilterParamCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     private Guid? _folderId;
     private readonly List<AtrFilterDto> _attributesFilter = new();
@@ -50,29 +49,12 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         return panelForm;
     }
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
-        return res;
-    }
-
     public void RefreshView()
     {
         PersonalizeControls();
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
-    public void ConfigureEmbededMode()
+    public override void ConfigureEmbededMode()
     {
         TopLevel = false;
         Dock = DockStyle.Fill;
@@ -80,7 +62,7 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         panelBottom.Visible = false;
     }
 
-    public void ConfigureWindowMode()
+    public override void ConfigureWindowMode()
     {
         TopLevel = true;
         Dock = DockStyle.None;
@@ -95,7 +77,7 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
 
     private void NotesFilterParamForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 

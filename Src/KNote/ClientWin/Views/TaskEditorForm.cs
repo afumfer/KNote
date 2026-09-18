@@ -11,7 +11,6 @@ public partial class TaskEditorForm : KntForm, IViewEditor<NoteTaskDto>
     #region Private fields
 
     private readonly TaskEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -29,23 +28,6 @@ public partial class TaskEditorForm : KntForm, IViewEditor<NoteTaskDto>
 
     #region IEditorView implementation 
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
-        return res;
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -62,7 +44,7 @@ public partial class TaskEditorForm : KntForm, IViewEditor<NoteTaskDto>
 
     private void TaskEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCandelEdition();
             if (!confirmExit)

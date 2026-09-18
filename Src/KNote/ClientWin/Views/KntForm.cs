@@ -1,4 +1,6 @@
+using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
@@ -11,6 +13,36 @@ namespace KNote.ClientWin.Views;
 // satisfies the interface member by inheritance) and reference no Store/controller.
 public class KntForm : Form
 {
+    // True once the controller has asked the view to close (OnClosingView), as opposed to the user
+    // closing the window itself: closing handlers use it to tell the two apart.
+    protected bool ViewFinalized { get; set; }
+
+    // IViewBase / IViewEmbeddable plumbing common to every view. Virtual for the views that do more
+    // (or something else) than the default.
+    public virtual void ShowView()
+    {
+        Show();
+    }
+
+    public virtual Result<EControllerResult> ShowModalView()
+    {
+        return ShowDialog().ToControllerResult();
+    }
+
+    public virtual void OnClosingView()
+    {
+        ViewFinalized = true;
+        Close();
+    }
+
+    public virtual void ConfigureEmbededMode()
+    {
+    }
+
+    public virtual void ConfigureWindowMode()
+    {
+    }
+
     // Virtual for the few views with special needs (e.g. MonitorForm marshals to the UI thread).
     public virtual DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {

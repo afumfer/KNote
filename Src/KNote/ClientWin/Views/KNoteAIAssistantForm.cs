@@ -11,7 +11,6 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     #region Private fields
 
     private readonly KNoteAIAssistantCtrl _ctrl;
-    private bool _viewFinalized = false;
     private int _countNRres;
     private StringBuilder _sbResult = new StringBuilder();
     private const string ViewCaptionText = "KNote AI Assistant";
@@ -51,7 +50,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     #region IViewBase interface
 
-    public void ShowView()
+    public override void ShowView()
     {
         toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
         PopulateProviders();
@@ -63,17 +62,6 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         // sync the display to it instead of assuming a fresh, empty ctrl.
         RefreshView();
         this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     public void RefreshView()
@@ -104,7 +92,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private async void KNoteAIAssistantForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             if (_ctrl.AutoSaveChatMessagesOnViewExit && !string.IsNullOrEmpty(kntEditViewResult.MarkdownText))
             {

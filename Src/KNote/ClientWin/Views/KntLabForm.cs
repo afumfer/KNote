@@ -24,7 +24,6 @@ public partial class KntLabForm : KntForm, IViewBase
     #region Private fields
 
     private readonly KntLabCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     private string _pathSampleScripts = @"..\..\..\AutoKntScripts\";
     private string _selectedFile;
@@ -116,7 +115,7 @@ window.chrome.webview.postMessage(retValue);";
 
     private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 
@@ -124,25 +123,9 @@ window.chrome.webview.postMessage(retValue);";
 
     #region IViewBase interface
 
-    public void ShowView()
-    {
-        Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(ShowDialog());
-    }
-
     public void RefreshView()
     {
         Refresh();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion

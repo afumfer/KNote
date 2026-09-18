@@ -12,7 +12,6 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
     #region Private fields
 
     private readonly KntScriptConsoleCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     private string _sourceCodeDirWork;
 
@@ -313,7 +312,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
 
     private void KntScriptConsoleForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 
@@ -445,22 +444,6 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
     #endregion
 
     #region IView interface 
-
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
 
     public void RefreshView()
     {

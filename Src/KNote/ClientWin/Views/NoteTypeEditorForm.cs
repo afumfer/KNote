@@ -11,7 +11,6 @@ public partial class NoteTypeEditorForm : KntForm, IViewEditor<NoteTypeDto>
     #region Private fields
 
     private readonly NoteTypeEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -29,16 +28,6 @@ public partial class NoteTypeEditorForm : KntForm, IViewEditor<NoteTypeDto>
 
     #region IEditorView implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -47,12 +36,6 @@ public partial class NoteTypeEditorForm : KntForm, IViewEditor<NoteTypeDto>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -76,7 +59,7 @@ public partial class NoteTypeEditorForm : KntForm, IViewEditor<NoteTypeDto>
 
     private void NoteTypeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCancelEdition();
             if (!confirmExit)

@@ -11,7 +11,6 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
     #region Private fields
 
     private readonly PostItPropertiesCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -29,15 +28,6 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
 
     #region IView
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
     public void RefreshView()
     {
         ModelToControls();
@@ -46,12 +36,6 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     public void HideView()
@@ -70,7 +54,7 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
 
     private async void PostItPropertiesForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var savedOk = await SaveModel();
             if (!savedOk)

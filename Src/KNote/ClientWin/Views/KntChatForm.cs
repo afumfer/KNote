@@ -9,7 +9,6 @@ public partial class KntChatForm : KntForm, IViewChat
     #region Private fields
 
     private readonly KntChatCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -25,22 +24,6 @@ public partial class KntChatForm : KntForm, IViewChat
     #endregion
 
     #region IView implementation
-
-    public void ShowView()
-    {
-        Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
 
     public void RefreshView()
     {
@@ -76,7 +59,7 @@ public partial class KntChatForm : KntForm, IViewChat
 
     private void KntChatForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             if (_ctrl.AutoCloseCtrlOnViewExit)
                 _ctrl.Finalize();

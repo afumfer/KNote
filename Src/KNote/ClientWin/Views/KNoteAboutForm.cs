@@ -27,17 +27,7 @@ public partial class KNoteAboutForm : KntForm, IViewBase
 
     #region IViewBase implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
+    public override void OnClosingView()
     {
 
     }

@@ -10,7 +10,6 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
     #region Private fields
 
     private readonly AiProviderEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -32,16 +31,6 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
 
     #region IEditorView implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -50,12 +39,6 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -79,7 +62,7 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
 
     private void AiProviderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCancelEdition();
             if (!confirmExit)

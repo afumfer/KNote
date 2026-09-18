@@ -11,7 +11,6 @@ public partial class UsersSelectorForm : KntForm, IViewEmbeddable
     #region Private fields
 
     private readonly UsersSelectorCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -27,22 +26,6 @@ public partial class UsersSelectorForm : KntForm, IViewEmbeddable
     #endregion
 
     #region ISelectorView interface
-
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
 
     public void RefreshView()
     {
@@ -80,25 +63,13 @@ public partial class UsersSelectorForm : KntForm, IViewEmbeddable
         return panelForm;
     }
 
-    // UsersSelectorCtrl only ever runs in window mode (a modal RunModal() picker, e.g. from
-    // MessageEditorCtrl.SelectUser); EmbededMode is never set true for it, so ConfigureEmbededMode()
-    // never actually executes. ConfigureWindowMode() does run on every open but has nothing to
-    // configure here. Kept empty only to satisfy IViewEmbeddable.
-    public void ConfigureEmbededMode()
-    {
-    }
-
-    public void ConfigureWindowMode()
-    {
-    }
-
     #endregion
 
     #region Form events handlers
 
     private void UsersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 

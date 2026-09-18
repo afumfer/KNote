@@ -11,7 +11,6 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
     #region Private fields
 
     private readonly NotesSearchParamCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -33,29 +32,12 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         return panelForm;
     }
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
-        return res;
-    }
-
     public void RefreshView()
     {
         PersonalizeControls();
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
-    public void ConfigureEmbededMode()
+    public override void ConfigureEmbededMode()
     {
         TopLevel = false;
         Dock = DockStyle.Fill;
@@ -63,7 +45,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         panelBottom.Visible = false;
     }
 
-    public void ConfigureWindowMode()
+    public override void ConfigureWindowMode()
     {
         TopLevel = true;
         Dock = DockStyle.None;
@@ -78,7 +60,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
 
     private void NotesSearchParamForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 

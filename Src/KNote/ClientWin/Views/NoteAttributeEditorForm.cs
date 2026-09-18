@@ -11,7 +11,6 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
     #region Private fields
 
     private readonly NoteAttributeEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -29,17 +28,6 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
 
     #region IEditorView implementation 
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {            
-        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
-        return res;
-    }
-
     public void RefreshModel()
     {
         ControlsToModel();
@@ -48,12 +36,6 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
     public void RefreshView()
     {
         ModelToControls();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -93,7 +75,7 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
 
     private void NoteAttributeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCandelEdition();
             if (!confirmExit)

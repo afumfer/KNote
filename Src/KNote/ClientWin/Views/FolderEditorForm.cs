@@ -14,7 +14,6 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
     private readonly FolderEditorCtrl _ctrl;
     private Guid? _selectedParentFolderId;
     private FolderDto _selectedParentFolder;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     // What ModelToControls() last parsed from Model.OrderNotes - used by ControlsToModel() to
@@ -63,17 +62,6 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
 
     #region IView implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
-        return res;
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -84,19 +72,13 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
         ControlsToModel();
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
     #endregion
 
     #region Form events handler
 
     private void FolderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCancelEdition();
             if (!confirmExit)

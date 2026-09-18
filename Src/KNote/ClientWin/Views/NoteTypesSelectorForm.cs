@@ -13,7 +13,6 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
     #region Private fields
 
     private readonly NoteTypesSelectorCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -29,22 +28,6 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
     #endregion 
 
     #region ISelectorView interface 
-
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
 
     public void RefreshView()
     {
@@ -77,25 +60,13 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
         return panelForm;
     }
 
-    // NoteTypesSelectorCtrl only ever runs in window mode (a modal RunModal() picker, e.g. from
-    // NoteEditorCtrl.RequestChangeNoteType); EmbededMode is never set true for it, so
-    // ConfigureEmbededMode() never actually executes. ConfigureWindowMode() does run on every open
-    // but has nothing to configure here. Kept empty only to satisfy IViewEmbeddable.
-    public void ConfigureEmbededMode()
-    {
-    }
-
-    public void ConfigureWindowMode()
-    {
-    }
-
     #endregion
 
     #region Form events handlers
 
     private void NoteTypesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 

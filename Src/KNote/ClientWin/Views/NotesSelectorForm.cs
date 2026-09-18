@@ -13,7 +13,6 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     #region Private fields 
 
     private readonly NotesSelectorCtrl _ctrl;
-    private bool _viewFinalized = false;        
     private UInt32 _countRepetition = 0;
     private bool _skipSelectionChanged = false;        
     private BindingSource _source = new BindingSource();
@@ -82,16 +81,6 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         return panelForm;
     }
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    Result<EControllerResult> IViewBase.ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         if (!string.IsNullOrEmpty(_ctrl.ViewTitle))
@@ -135,13 +124,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[0].Visible = false;
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
-    public void ConfigureEmbededMode()
+    public override void ConfigureEmbededMode()
     {
         TopLevel = false;
         Dock = DockStyle.Fill;
@@ -153,7 +136,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Dock = DockStyle.Fill;
     }
 
-    public void ConfigureWindowMode()
+    public override void ConfigureWindowMode()
     {
         TopLevel = true;
         Dock = DockStyle.None;
@@ -217,7 +200,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
 
     private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 

@@ -11,7 +11,6 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
     #region Private fields
 
     private readonly FoldersSelectorCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -31,16 +30,6 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
     public Control PanelView()
     {
         return panelForm;
-    }
-
-    public void ShowView()
-    {                         
-        this.Show();
-    }
-
-    Result<EControllerResult> IViewBase.ShowModalView()
-    {            
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public async void RefreshView()
@@ -79,13 +68,7 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
         }
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
-    public void ConfigureEmbededMode()
+    public override void ConfigureEmbededMode()
     {
         TopLevel = false;
         Dock = DockStyle.Fill;
@@ -94,7 +77,7 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
         panelForm.Padding = new Padding(0);
     }
 
-    public void ConfigureWindowMode()
+    public override void ConfigureWindowMode()
     {
         TopLevel = true;
         Dock = DockStyle.None;
@@ -261,7 +244,7 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
 
     private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 

@@ -18,7 +18,6 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     #region Private fields
 
     private readonly NoteEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     private FolderInfoDto _changedFolder = null;
     private ResourceDto _selectedResource;
@@ -130,17 +129,12 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         return panelForm;
     }
 
-    public void ShowView()
+    public override void ShowView()
     {
         this.Show();
         if (_ctrl.EditMode == false)
             // for contract extended view
             labelExpandContent_Click(this, new EventArgs());
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
     public async void CleanView()
@@ -198,13 +192,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         await ControlsToModel();
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
-    public void ConfigureEmbededMode()
+    public override void ConfigureEmbededMode()
     {
         TopLevel = false;
         Dock = DockStyle.Fill;
@@ -216,7 +204,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _ctrl.EditMode = false;
     }
 
-    public void ConfigureWindowMode()
+    public override void ConfigureWindowMode()
     {
         TopLevel = true;
         Dock = DockStyle.None;
@@ -248,7 +236,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var savedOk = await SaveModel();
             if (!savedOk)

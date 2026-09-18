@@ -10,7 +10,6 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
     #region Private fields
 
     private readonly AppInfoAlarmsCtrl _ctrl;
-    private bool _viewFinalized = false;
     private ListViewColumnSorter _sorter;
 
     #endregion
@@ -71,16 +70,6 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
 
     #region IViewAppInfoAlarms implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void HideView()
     {
         this.Hide();
@@ -98,24 +87,9 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
     {
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
     public Control PanelView()
     {
         return panelForm;
-    }
-
-    // AppInfoAlarmsCtrl only ever runs in window mode, kept alive for the whole session.
-    public void ConfigureEmbededMode()
-    {
-    }
-
-    public void ConfigureWindowMode()
-    {
     }
 
     public void AddOrUpdateRow(AppInfoAlarmRowConfig row)
@@ -153,7 +127,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         // This panel is meant to stay alive for the whole session (like the tray icon) so it keeps
         // accumulating rows in the background - closing the window (X button) only hides it. It is
         // only really closed when KNoteManagmentCtrl.Finalize() cascades into it at app shutdown.
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             e.Cancel = true;
             SaveWindowBounds();

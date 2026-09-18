@@ -11,7 +11,6 @@ public partial class MessageEditorForm : KntForm, IViewEditor<KMessageDto>
     #region Private fields
 
     private readonly MessageEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -30,17 +29,6 @@ public partial class MessageEditorForm : KntForm, IViewEditor<KMessageDto>
 
     #region IEditorView implementation 
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
-        return res;
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -51,19 +39,13 @@ public partial class MessageEditorForm : KntForm, IViewEditor<KMessageDto>
         ControlsToModel();
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
     #endregion
 
     #region Form event handlers
 
     private void MessageEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCandelEdition();
             if (!confirmExit)

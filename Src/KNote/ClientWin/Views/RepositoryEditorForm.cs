@@ -10,7 +10,6 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
     #region Fields
 
     private readonly RepositoryEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -35,16 +34,6 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
 
     #region IEditorView implementation 
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -53,12 +42,6 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -82,7 +65,7 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
 
     private void RepositoryEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCancelEdition();
             if (!confirmExit)

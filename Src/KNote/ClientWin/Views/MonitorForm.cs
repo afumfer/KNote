@@ -9,7 +9,6 @@ public partial class MonitorForm : KntForm, IViewBase
     #region Private fields 
 
     private readonly MonitorCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -25,12 +24,6 @@ public partial class MonitorForm : KntForm, IViewBase
     #endregion
 
     #region IViewBase implementation
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
 
     public override DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
@@ -54,19 +47,14 @@ public partial class MonitorForm : KntForm, IViewBase
         return DialogResult.OK;
     }
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    Result<EControllerResult> IViewBase.ShowModalView()
+    public override Result<EControllerResult> ShowModalView()
     {
         return null;
     }
 
     private void MonitorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();           
     }
 

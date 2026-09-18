@@ -11,7 +11,6 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
     #region Private methods
 
     private readonly KNoteManagmentCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -51,7 +50,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
 
     #region IViewBase interface 
 
-    public void ShowView()
+    public override void ShowView()
     {
         LinkComponents();
         ApplyNotesFilterSetting();
@@ -72,17 +71,11 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
             this.WindowState = FormWindowState.Normal;
     }
 
-    Result<EControllerResult> IViewBase.ShowModalView()
+    public override Result<EControllerResult> ShowModalView()
     {
         LinkComponents();
         Application.DoEvents();
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
+        return base.ShowModalView();
     }
 
     public override DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -172,7 +165,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
 
     private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             this.Hide();
             if (e.CloseReason == CloseReason.WindowsShutDown)

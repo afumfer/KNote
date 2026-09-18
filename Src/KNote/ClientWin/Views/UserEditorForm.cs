@@ -11,7 +11,6 @@ public partial class UserEditorForm : KntForm, IViewEditor<UserDto>
     #region Private fields
 
     private readonly UserEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -29,16 +28,6 @@ public partial class UserEditorForm : KntForm, IViewEditor<UserDto>
 
     #region IEditorView implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -47,12 +36,6 @@ public partial class UserEditorForm : KntForm, IViewEditor<UserDto>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -84,7 +67,7 @@ public partial class UserEditorForm : KntForm, IViewEditor<UserDto>
 
     private void UserEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCancelEdition();
             if (!confirmExit)

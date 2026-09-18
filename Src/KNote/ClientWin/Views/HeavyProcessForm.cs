@@ -10,7 +10,6 @@ public partial class HeavyProcessForm : KntForm, IViewHeavyProcess
     #region Private fields 
 
     private readonly HeavyProcessCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -34,7 +33,7 @@ public partial class HeavyProcessForm : KntForm, IViewHeavyProcess
 
     private void HeavyProcessForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.Finalize();
     }
 
@@ -64,26 +63,15 @@ public partial class HeavyProcessForm : KntForm, IViewHeavyProcess
         labelInfo.Text = info;        
     }
 
-    public void ShowView()
+    public override void ShowView()
     {
         TopMost = true;
         Show();
     }
 
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(ShowDialog());
-    }
-
     public void RefreshView()
     {
         Refresh();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     public void HideView()

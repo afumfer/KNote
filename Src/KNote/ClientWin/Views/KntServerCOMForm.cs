@@ -10,7 +10,6 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
     #region Private members
 
     private readonly KntServerCOMCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -29,21 +28,10 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
 
     #region IViewChat implementation
 
-    public void ShowView()
+    public override void OnClosingView()
     {
-        Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
         _ctrl.ReceiveMessage -= _com_ReceiveMessage;
-        Close();
+        base.OnClosingView();
     }
 
     public void RefreshView()
@@ -108,7 +96,7 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
 
     private void KntServerCOMForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             if (_ctrl.AutoCloseCtrlOnViewExit)
                 _ctrl.Finalize();

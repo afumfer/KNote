@@ -46,32 +46,9 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
         return panelForm;
     }
 
-    // AiProvidersManageCtrl only ever runs in window mode (Tools menu -> RunModal()); EmbededMode is
-    // never set true for it, so ConfigureEmbededMode() never actually executes. ConfigureWindowMode()
-    // does run on every open but has nothing to configure here. Kept empty only to satisfy
-    // IViewEmbeddable (pulled in via IViewManageList<T>).
-    public void ConfigureEmbededMode()
-    {
-    }
-
-    public void ConfigureWindowMode()
+    public override void ConfigureWindowMode()
     {
         StartPosition = FormStartPosition.CenterParent;
-    }
-
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        this.Close();
     }
 
     public void RefreshView()

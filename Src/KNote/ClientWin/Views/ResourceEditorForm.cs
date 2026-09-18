@@ -11,7 +11,6 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
     #region Private fields
 
     private readonly ResourceEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     private string varFileType;
@@ -34,17 +33,6 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
 
     #region IEditorView implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
-        return res;
-    }
-
     public async void RefreshView()
     {
         await ModelToControls();
@@ -53,12 +41,6 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -72,7 +54,7 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
 
     private void ResourceEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCandelEdition();
             if (!confirmExit)

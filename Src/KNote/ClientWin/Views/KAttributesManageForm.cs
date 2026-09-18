@@ -52,34 +52,6 @@ public partial class KAttributesManageForm : KntForm, IViewManageList<KAttribute
         return panelForm;
     }
 
-    // Empty by design, not by omission: as the class doc above explains, only panelForm gets
-    // reparented into RepositoryEditorForm's TabPage - this Form itself is never Show()n, so there is
-    // no TopLevel/Dock/FormBorderStyle switch to make here (contrast with FoldersSelectorForm/
-    // NoteEditorForm, which embed by making the whole Form non-TopLevel instead). Kept only to
-    // satisfy IViewEmbeddable (pulled in via IViewManageList<T>).
-    public void ConfigureEmbededMode()
-    {
-    }
-
-    public void ConfigureWindowMode()
-    {
-    }
-
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public void OnClosingView()
-    {
-        this.Close();
-    }
-
     public void RefreshView()
     {
         RebuildList();

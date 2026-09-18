@@ -10,7 +10,6 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
     #region Fields
 
     private readonly UserRegisterCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     #endregion
 
@@ -27,16 +26,6 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 
     #region IEditorView implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -45,12 +34,6 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -73,7 +56,7 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 
     private void UserRegisterForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
             _ctrl.CancelEdition();
     }
 

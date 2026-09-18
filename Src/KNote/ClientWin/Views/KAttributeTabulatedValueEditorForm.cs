@@ -11,7 +11,6 @@ public partial class KAttributeTabulatedValueEditorForm : KntForm, IViewEditor<K
     #region Private fields
 
     private readonly KAttributeTabulatedValueEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
     private bool _formIsDisty = false;
 
     #endregion
@@ -29,16 +28,6 @@ public partial class KAttributeTabulatedValueEditorForm : KntForm, IViewEditor<K
 
     #region IEditorView implementation
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -47,12 +36,6 @@ public partial class KAttributeTabulatedValueEditorForm : KntForm, IViewEditor<K
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
     }
 
     #endregion
@@ -76,7 +59,7 @@ public partial class KAttributeTabulatedValueEditorForm : KntForm, IViewEditor<K
 
     private void KAttributeTabulatedValueEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             var confirmExit = OnCancelEdition();
             if (!confirmExit)

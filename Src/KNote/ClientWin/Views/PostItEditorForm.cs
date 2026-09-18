@@ -12,7 +12,6 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     #region Private fields
 
     private readonly PostItEditorCtrl _ctrl;
-    private bool _viewFinalized = false;
 
     private int _leftPosition;
     private int _topPosition;
@@ -75,16 +74,6 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
     #region IView interface
 
-    public void ShowView()
-    {
-        this.Show();
-    }
-
-    public Result<EControllerResult> ShowModalView()
-    {
-        return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
     public void RefreshView()
     {
         ModelToControls();
@@ -111,12 +100,6 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         return Task.CompletedTask;
     }
 
-    public void OnClosingView()
-    {
-        _viewFinalized = true;
-        this.Close();
-    }
-
     #endregion
 
     #region Form events handlers
@@ -128,7 +111,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
     private async void PostItEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (!_viewFinalized)
+        if (!ViewFinalized)
         {
             bool savedOk;
             if (e.CloseReason == CloseReason.WindowsShutDown)
