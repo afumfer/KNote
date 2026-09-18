@@ -552,6 +552,11 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     private async void _appInfoAlarmsCtrl_OpenNoteRequested(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
+        if (await Store.CheckNoteIsOpenOnDesktop(e.Entity.NoteId))
+        {
+            View.ShowInfo("This note is already active.");
+            return;
+        }
         await EditNote(e.Entity.Service, e.Entity.NoteId);
     }
 
@@ -638,7 +643,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     private async void _messagesManagment_PostItAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {                        
-        if (await Store.CheckPostItIsActive(e.Entity.NoteId) || await Store.CheckNoteIsActive(e.Entity.NoteId))
+        if (await Store.CheckNoteIsOpenOnDesktop(e.Entity.NoteId))
             return;
         await EditNotePostIt(e.Entity.Service, e.Entity.NoteId, true);
     }
@@ -834,7 +839,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             View.ShowInfo("There is no note selected to edit.");
             return;
         }            
-        if (await Store.CheckNoteIsActive(SelectedNoteInfo.NoteId) || await Store.CheckPostItIsActive(SelectedNoteInfo.NoteId))
+        if (await Store.CheckNoteIsOpenOnDesktop(SelectedNoteInfo.NoteId))
         {
             lock (lockObject)
                 loadingNote = false;
@@ -855,7 +860,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             View.ShowInfo("There is no note selected to edit.");
             return;
         }
-        if (await Store.CheckNoteIsActive(SelectedNoteInfo.NoteId) || await Store.CheckPostItIsActive(SelectedNoteInfo.NoteId))
+        if (await Store.CheckNoteIsOpenOnDesktop(SelectedNoteInfo.NoteId))
         {
             View.ShowInfo("This note is already active. Add task with editor form.");
             return;
@@ -904,7 +909,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             View.ShowInfo("There is no note selected to edit.");
             return;
         }
-        if (await Store.CheckNoteIsActive(SelectedNoteInfo.NoteId) || await Store.CheckPostItIsActive(SelectedNoteInfo.NoteId))
+        if (await Store.CheckNoteIsOpenOnDesktop(SelectedNoteInfo.NoteId))
         {
             View.ShowInfo("This note is already active.");
             return;

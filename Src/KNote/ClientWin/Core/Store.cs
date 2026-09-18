@@ -319,6 +319,15 @@ public class Store
         return Task.FromResult(false);
     }
 
+    // Single rule for "this note is already open on the user's desktop" (in a NoteEditor being
+    // edited or in a PostIt) - a note must never have more than one open instance. Every entry
+    // point that opens a note from outside its own editor/PostIt (management window, alarms
+    // timer, Application info panel, ...) goes through this instead of repeating the two checks.
+    public async Task<bool> CheckNoteIsOpenOnDesktop(Guid noteId)
+    {
+        return await CheckNoteIsActive(noteId) || await CheckPostItIsActive(noteId);
+    }
+
     public async Task<bool> SaveActiveNotes()
     {
         try
