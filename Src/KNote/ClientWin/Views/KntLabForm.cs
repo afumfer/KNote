@@ -5,16 +5,13 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.Web.WebView2.Core;
 using NLog;
 using System.Data;
 using System.Diagnostics;
-using System.Resources.Tools;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Serialization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 
 namespace KNote.ClientWin.Views;

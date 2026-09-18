@@ -3,13 +3,10 @@ using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
-using KNote.Repository.EntityFramework.Entities;
 using KntScript;
-using KntWebView;
 using System;
 using System.Data;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace KNote.ClientWin.Views;
 

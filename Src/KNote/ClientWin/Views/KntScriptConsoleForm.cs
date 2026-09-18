@@ -1,6 +1,5 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
-using KNote.Model;
 using KntScript;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Utils;

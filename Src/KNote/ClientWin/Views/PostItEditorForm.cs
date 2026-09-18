@@ -2,7 +2,6 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
-using System.Diagnostics.Eventing.Reader;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace KNote.ClientWin.Views;
