@@ -11,7 +11,7 @@ namespace KNote.ClientWin.Views;
 /// inside RepositoryEditorForm). ConfigureWindowMode()/ConfigureEmbededMode() are still
 /// implemented (the IViewEmbeddable contract), but only window mode is actually exercised today.
 /// </summary>
-public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef>
+public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProviderRef>
 {
     #region Private fields
 
@@ -115,11 +115,6 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
         ListViewSelectionHelper.SelectFirst(listViewProviders, _sorter);
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     #endregion
 
     #region Form event handlers
@@ -134,7 +129,7 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no AI provider selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no AI provider selected.", KntConst.AppName);
             return;
         }
         await _ctrl.DeleteItemAsync(item);
@@ -164,7 +159,7 @@ public partial class AiProvidersManageForm : Form, IViewManageList<AiProviderRef
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no AI provider selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no AI provider selected.", KntConst.AppName);
             return;
         }
         await _ctrl.EditItemAsync(item);

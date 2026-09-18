@@ -2,10 +2,11 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
+public partial class TaskEditorForm : KntForm, IViewEditor<NoteTaskDto>
 {
     #region Private fields
 
@@ -37,11 +38,6 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
     {
         var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
         return res;
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void OnClosingView()
@@ -144,7 +140,7 @@ public partial class TaskEditorForm : Form, IViewEditor<NoteTaskDto>
     {
         if (_formIsDisty)
         {
-            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
+            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
                 return false;
         }
 

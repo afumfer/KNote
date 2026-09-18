@@ -6,7 +6,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
+public partial class AttributeEditorForm : KntForm, IViewEditor<KAttributeDto>
 {
     #region Private fields
 
@@ -51,11 +51,6 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
     {
         var res = _ctrl.DialogResultToControllerResult(this.ShowDialog());
         return res;
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()
@@ -134,7 +129,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         var selected = SelectedTabulatedValue();
         if (selected == Guid.Empty)
         {
-            MessageBox.Show("There is no tabulated value selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no tabulated value selected.", KntConst.AppName);
             return;
         }
         if (_ctrl.DeleteTabulatedValue(selected))
@@ -168,7 +163,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
         var selected = SelectedTabulatedValue();
         if (selected == Guid.Empty)
         {
-            MessageBox.Show("There is no tabulated value selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no tabulated value selected.", KntConst.AppName);
             return;
         }
         var value = _ctrl.EditTabulatedValue(selected);
@@ -187,7 +182,7 @@ public partial class AttributeEditorForm : Form, IViewEditor<KAttributeDto>
     {
         if (_formIsDisty)
         {
-            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
+            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
                 return false;
         }
 

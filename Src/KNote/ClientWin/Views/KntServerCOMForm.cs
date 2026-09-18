@@ -1,10 +1,11 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.ClientWin.Controllers;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KntServerCOMForm : Form, IViewServerCOM
+public partial class KntServerCOMForm : KntForm, IViewServerCOM
 {
     #region Private members
 
@@ -43,11 +44,6 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
         _viewFinalized = true;
         _ctrl.ReceiveMessage -= _com_ReceiveMessage;
         Close();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()
@@ -97,13 +93,13 @@ public partial class KntServerCOMForm : Form, IViewServerCOM
     {
         if (!_ctrl.RunningService)
         {
-            MessageBox.Show("The service is not running. Press Start button.");
+            KntMessageBox.Show("The service is not running. Press Start button.");
             return;
         }
 
         if (_ctrl.MessageSending)
         {
-            MessageBox.Show("Sending message now ... try later");
+            KntMessageBox.Show("Sending message now ... try later");
             return;
         }
 

@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KntChatForm : Form, IViewChat
+public partial class KntChatForm : KntForm, IViewChat
 {
     #region Private fields
 
@@ -40,11 +40,6 @@ public partial class KntChatForm : Form, IViewChat
     {
         _viewFinalized = true;
         this.Close();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()

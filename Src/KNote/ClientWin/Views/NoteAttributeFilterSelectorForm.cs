@@ -1,4 +1,5 @@
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -40,7 +41,7 @@ public partial class NoteAttributeFilterSelectorForm : Form
         var selected = comboAttribute.SelectedItem as KAttributeInfoDto;
         if (selected == null || string.IsNullOrWhiteSpace(textValue.Text))
         {
-            MessageBox.Show(this, "Select an attribute and enter a value.", "KNote", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            KntMessageBox.Show(this, "Select an attribute and enter a value.", "KNote", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 

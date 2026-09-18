@@ -7,7 +7,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace KNote.ClientWin.Views;
 
-public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
+public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 {
     #region Private fields
 
@@ -83,11 +83,6 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
     public Result<EControllerResult> ShowModalView()
     {
         return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()

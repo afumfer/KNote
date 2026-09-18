@@ -7,7 +7,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NotesFilterParamForm : Form, IViewEmbeddable
+public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
 {
     #region Private fields
 
@@ -87,11 +87,6 @@ public partial class NotesFilterParamForm : Form, IViewEmbeddable
         FormBorderStyle = FormBorderStyle.Sizable;
         panelBottom.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     #endregion

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Xml.Serialization;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Core;
 
@@ -519,7 +520,7 @@ public class Store
 
         if (noteType == null)
         {
-            MessageBox.Show(
+            KntMessageBox.Show(
                 $"No note type named \"{item}\" was found. Create one with that exact name first (open the repository and go to its \"NoteTypes\" tab).",
                 "KNote", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return null;

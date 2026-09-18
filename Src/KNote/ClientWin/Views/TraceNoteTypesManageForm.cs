@@ -12,7 +12,7 @@ namespace KNote.ClientWin.Views;
 /// NoteTypesManageForm. Always used embedded (PanelView()) inside RepositoryEditorForm's TabPage,
 /// never shown as a standalone window.
 /// </summary>
-public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteTypeDto>
+public partial class TraceNoteTypesManageForm : KntForm, IViewManageList<TraceNoteTypeDto>
 {
     #region Private fields
 
@@ -123,11 +123,6 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
         ListViewSelectionHelper.SelectFirst(listViewTraceNoteTypes, _sorter);
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     #endregion
 
     #region Form event handlers
@@ -142,7 +137,7 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no trace note type selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no trace note type selected.", KntConst.AppName);
             return;
         }
         await _ctrl.DeleteItemAsync(item);
@@ -172,7 +167,7 @@ public partial class TraceNoteTypesManageForm : Form, IViewManageList<TraceNoteT
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no trace note type selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no trace note type selected.", KntConst.AppName);
             return;
         }
         await _ctrl.EditItemAsync(item);

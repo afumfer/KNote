@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NotifyForm : Form, IViewBase
+public partial class NotifyForm : KntForm, IViewBase
 {
     #region Private fields
 
@@ -35,11 +35,6 @@ public partial class NotifyForm : Form, IViewBase
     Result<EControllerResult> IViewBase.ShowModalView()
     {
         return _ctrl.DialogResultToControllerResult(this.ShowDialog());
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KeyNotex", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void OnClosingView()

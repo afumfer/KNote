@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class MonitorForm : Form, IViewBase
+public partial class MonitorForm : KntForm, IViewBase
 {
     #region Private fields 
 
@@ -32,7 +32,7 @@ public partial class MonitorForm : Form, IViewBase
         this.Close();
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public override DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         // MonitorCtrl.Store_ServiceCommandExecuting/Executed fire synchronously on whatever thread
         // executed the command - including a KntScript running via Store.RunKntSCodeInNewThread's

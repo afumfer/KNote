@@ -5,7 +5,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class AppInfoAlarmsForm : Form, IViewAppInfoAlarms
+public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
 {
     #region Private fields
 
@@ -92,11 +92,6 @@ public partial class AppInfoAlarmsForm : Form, IViewAppInfoAlarms
             this.WindowState = FormWindowState.Normal;
         this.Show();
         this.Activate();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()

@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace KNote.ClientWin.Views;
 
-public partial class HeavyProcessForm : Form, IViewHeavyProcess
+public partial class HeavyProcessForm : KntForm, IViewHeavyProcess
 {
     #region Private fields 
 
@@ -84,11 +84,6 @@ public partial class HeavyProcessForm : Form, IViewHeavyProcess
     {
         _viewFinalized = true;
         this.Close();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void HideView()

@@ -6,7 +6,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
 
-public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithServiceRef>
+public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServiceRef>
 {
     #region Private fields
 
@@ -119,11 +119,6 @@ public partial class FoldersSelectorForm : Form, IViewSelector<FolderWithService
         }
         else
             return null;
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     #region Extensions managment ... 

@@ -12,7 +12,7 @@ namespace KNote.ClientWin.Views;
 /// in NoteEditorForm. Always used embedded (PanelView()) inside RepositoryEditorForm's TabPage, never
 /// shown as a standalone window.
 /// </summary>
-public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
+public partial class NoteTypesManageForm : KntForm, IViewManageList<NoteTypeDto>
 {
     #region Private fields
 
@@ -123,11 +123,6 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
         ListViewSelectionHelper.SelectFirst(listViewNoteTypes, _sorter);
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     #endregion
 
     #region Form event handlers
@@ -142,7 +137,7 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no note type selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no note type selected.", KntConst.AppName);
             return;
         }
         await _ctrl.DeleteItemAsync(item);
@@ -172,7 +167,7 @@ public partial class NoteTypesManageForm : Form, IViewManageList<NoteTypeDto>
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no note type selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no note type selected.", KntConst.AppName);
             return;
         }
         await _ctrl.EditItemAsync(item);

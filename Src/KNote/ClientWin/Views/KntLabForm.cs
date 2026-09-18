@@ -1,5 +1,6 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
@@ -18,7 +19,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KntLabForm : Form, IViewBase
+public partial class KntLabForm : KntForm, IViewBase
 {
     #region Private fields
 
@@ -144,11 +145,6 @@ window.chrome.webview.postMessage(retValue);";
         this.Close();
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     #endregion
 
     #region Form events handlers (KntScript)
@@ -204,7 +200,7 @@ window.chrome.webview.postMessage(retValue);";
         kntScript.Run(code);
 
         var b = (FolderDto)kntScript.GetVar("_a");  // -> a 
-        MessageBox.Show(a.Name + " <==> " + b.Name);
+        KntMessageBox.Show(a.Name + " <==> " + b.Name);
     }
 
     private void buttonRunBackground_Click(object sender, EventArgs e)
@@ -239,7 +235,7 @@ window.chrome.webview.postMessage(retValue);";
     {
         if (string.IsNullOrEmpty(_selectedFile))
         {
-            MessageBox.Show("File no seleted.");
+            KntMessageBox.Show("File no seleted.");
             return;
         }
 
@@ -252,7 +248,7 @@ window.chrome.webview.postMessage(retValue);";
     {
         if (string.IsNullOrEmpty(_selectedFile))
         {
-            MessageBox.Show("File no seleted.");
+            KntMessageBox.Show("File no seleted.");
             return;
         }
 
@@ -303,11 +299,11 @@ window.chrome.webview.postMessage(retValue);";
         var result = formReadVar.ShowDialog();
 
         if (result == DialogResult.Cancel)
-            MessageBox.Show("Cancel");
+            KntMessageBox.Show("Cancel");
         else
         {
             var xx = listVars[0].VarNewValueText;
-            MessageBox.Show(xx);
+            KntMessageBox.Show(xx);
         }
 
     }
@@ -429,7 +425,7 @@ window.chrome.webview.postMessage(retValue);";
     {
         if (_store.ActiveFolderWithServiceRef == null)
         {
-            MessageBox.Show("There is no archive selected ");
+            KntMessageBox.Show("There is no archive selected ");
             return;
         }
 
@@ -443,7 +439,7 @@ window.chrome.webview.postMessage(retValue);";
 
         if (userId == null)
         {
-            MessageBox.Show("There is no valid user to import data ");
+            KntMessageBox.Show("There is no valid user to import data ");
             return;
         }
 
@@ -460,7 +456,7 @@ window.chrome.webview.postMessage(retValue);";
         {
             if (!File.Exists(xmlFile))
             {
-                MessageBox.Show("Invalid file");
+                KntMessageBox.Show("Invalid file");
                 return;
             }
 
@@ -501,10 +497,10 @@ window.chrome.webview.postMessage(retValue);";
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message);
+            KntMessageBox.Show(ex.Message);
         }
 
-        MessageBox.Show("Process finished ");
+        KntMessageBox.Show("Process finished ");
 
     }
 
@@ -935,7 +931,7 @@ window.chrome.webview.postMessage(retValue);";
                 {
                     label2.Text = $"Added note: ERROR invalid note.";
                     var msgErr = newNote.GetErrorMessage();
-                    MessageBox.Show($"ERROR invalid note: {msgErr}");
+                    KntMessageBox.Show($"ERROR invalid note: {msgErr}");
                 }
 
                 label2.Refresh();
@@ -946,7 +942,7 @@ window.chrome.webview.postMessage(retValue);";
                 // TODO: hack, hay un registro erróneo en la exportación. 
                 nErrors++;
                 if (nErrors > 1)
-                    MessageBox.Show($"Más de error. Error: {ex.Message}");
+                    KntMessageBox.Show($"Más de error. Error: {ex.Message}");
                 //throw;
             }
 
@@ -976,7 +972,7 @@ window.chrome.webview.postMessage(retValue);";
                 listSamples.Items.Add(file.Name);
         }
         else
-            MessageBox.Show("{0} is not a valid directory.", _pathSampleScripts);
+            KntMessageBox.Show("{0} is not a valid directory.", _pathSampleScripts);
     }
 
     private (string, string) ExtractAnTScriptCode(string descriptionIn)
@@ -1064,7 +1060,7 @@ window.chrome.webview.postMessage(retValue);";
     private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         var text = e.TryGetWebMessageAsString();
-        MessageBox.Show(text);
+        KntMessageBox.Show(text);
     }
 
     #endregion
@@ -1089,7 +1085,7 @@ window.chrome.webview.postMessage(retValue);";
     {
         if (_service is null)
         {
-            MessageBox.Show("_service is null here.");
+            KntMessageBox.Show("_service is null here.");
             return;
         }
 
@@ -1193,9 +1189,9 @@ window.chrome.webview.postMessage(retValue);";
         var res = _notesSelector.RunModal();
 
         if (res.Entity == EControllerResult.Executed)
-            MessageBox.Show(_notesSelector.SelectedEntity.Topic);
+            KntMessageBox.Show(_notesSelector.SelectedEntity.Topic);
         else
-            MessageBox.Show("not selected");
+            KntMessageBox.Show("not selected");
     }
 
     #endregion
@@ -1207,7 +1203,7 @@ window.chrome.webview.postMessage(retValue);";
 
         if (_store.ActiveFolderWithServiceRef == null)
         {
-            MessageBox.Show("There is no archive selected ");
+            KntMessageBox.Show("There is no archive selected ");
             return;
         }
 
@@ -1253,13 +1249,13 @@ window.chrome.webview.postMessage(retValue);";
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error al leer {file}:\n{ex.Message}");
+                        KntMessageBox.Show($"Error al leer {file}:\n{ex.Message}");
                     }
                 }
             }
         }
 
-        MessageBox.Show("End");
+        KntMessageBox.Show("End");
     }
 
     #endregion
@@ -1299,9 +1295,9 @@ Console.WriteLine(FiggleFonts.Standard.Render(""QChat AI""));
                
         if (redirectStandardOut)
             if(!string.IsNullOrEmpty(error))
-                MessageBox.Show(error);
+                KntMessageBox.Show(error);
             else
-                MessageBox.Show(result);
+                KntMessageBox.Show(result);
 
         File.Delete(tempFullFileName);
     }

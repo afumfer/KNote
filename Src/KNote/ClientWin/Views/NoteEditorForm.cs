@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtendedDto>
+public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExtendedDto>
 {
     #region Private fields
 
@@ -143,11 +143,6 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         return _ctrl.DialogResultToControllerResult(this.ShowDialog());
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     public async void CleanView()
     {
         // Basic data
@@ -258,7 +253,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
             var savedOk = await SaveModel();
             if (!savedOk)
             {
-                if (MessageBox.Show("Do yo want exit?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (KntMessageBox.Show("Do yo want exit?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     _ctrl.Finalize();
                     return;
@@ -688,7 +683,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listViewAlarms.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no selected alert.", KntConst.AppName);
+            KntMessageBox.Show("There is no selected alert.", KntConst.AppName);
             return;
         }
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
@@ -724,7 +719,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listViewTasks.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no task selected .", KntConst.AppName);
+            KntMessageBox.Show("There is no task selected .", KntConst.AppName);
             return;
         }
         string delTsk = listViewTasks.SelectedItems[0].Name;
@@ -792,7 +787,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listViewResources.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no resource selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no resource selected.", KntConst.AppName);
             return;
         }
 
@@ -858,7 +853,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"OnSelectedTaskItemChanged error: {ex.Message}");
+            KntMessageBox.Show($"OnSelectedTaskItemChanged error: {ex.Message}");
         }
     }
 
@@ -1254,7 +1249,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listView.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no trace note selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no trace note selected.", KntConst.AppName);
             return;
         }
         var traceNoteId = Guid.Parse(listView.SelectedItems[0].Name);
@@ -1270,7 +1265,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listView.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no trace note selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no trace note selected.", KntConst.AppName);
             return;
         }
         var traceNoteId = Guid.Parse(listView.SelectedItems[0].Name);
@@ -1364,7 +1359,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
 
     private void UndoChanges()
     {
-        var res = MessageBox.Show("Are you sure you want to undo changes?", KntConst.AppName, MessageBoxButtons.YesNo);
+        var res = KntMessageBox.Show("Are you sure you want to undo changes?", KntConst.AppName, MessageBoxButtons.YesNo);
         if (res == DialogResult.Yes)
         {
             ModelToControls();
@@ -1560,7 +1555,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listViewAlarms.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no alert selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no alert selected.", KntConst.AppName);
             return;
         }
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
@@ -1586,7 +1581,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listViewTasks.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no task selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no task selected.", KntConst.AppName);
             return;
         }
         var idTask = Guid.Parse(listViewTasks.SelectedItems[0].Name);
@@ -1619,7 +1614,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (_selectedResource == null)
         {
-            MessageBox.Show("There is no resource selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no resource selected.", KntConst.AppName);
             return;
         }
         var idResource = _selectedResource.ResourceId;
@@ -1636,7 +1631,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listViewAttributes.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no attribute selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no attribute selected.", KntConst.AppName);
             return;
         }
         var idAttribute = Guid.Parse(listViewAttributes.SelectedItems[0].Name);
@@ -1972,7 +1967,7 @@ public partial class NoteEditorForm : Form, IViewNoteEditorEmbeddable<NoteExtend
     {
         if (listViewResources.SelectedItems.Count == 0)
         {
-            MessageBox.Show("There is no task selected .", KntConst.AppName);
+            KntMessageBox.Show("There is no task selected .", KntConst.AppName);
             return;
         }
         var delRes = listViewResources.SelectedItems[0].Name;

@@ -2,10 +2,11 @@ using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KAttributeTabulatedValueEditorForm : Form, IViewEditor<KAttributeTabulatedValueDto>
+public partial class KAttributeTabulatedValueEditorForm : KntForm, IViewEditor<KAttributeTabulatedValueDto>
 {
     #region Private fields
 
@@ -46,11 +47,6 @@ public partial class KAttributeTabulatedValueEditorForm : Form, IViewEditor<KAtt
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void OnClosingView()
@@ -107,7 +103,7 @@ public partial class KAttributeTabulatedValueEditorForm : Form, IViewEditor<KAtt
     {
         if (_formIsDisty)
         {
-            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
+            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
                 return false;
         }
 

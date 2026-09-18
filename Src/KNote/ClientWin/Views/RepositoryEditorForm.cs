@@ -1,10 +1,11 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
+public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
 {
     #region Fields
 
@@ -52,11 +53,6 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void OnClosingView()
@@ -302,7 +298,7 @@ public partial class RepositoryEditorForm : Form, IViewEditor<RepositoryRef>
     {
         if (_formIsDisty)
         {
-            if (MessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
+            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
                 return false;
         }
 

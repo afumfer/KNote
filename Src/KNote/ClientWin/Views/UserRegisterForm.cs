@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class UserRegisterForm : Form, IViewEditor<UserRegisterDto>
+public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 {
     #region Fields
 
@@ -45,11 +45,6 @@ public partial class UserRegisterForm : Form, IViewEditor<UserRegisterDto>
     public void RefreshModel()
     {
         ControlsToModel();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Asterisk)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void OnClosingView()

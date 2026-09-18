@@ -1,4 +1,5 @@
 ﻿using KntScript;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -102,7 +103,7 @@ public partial class InOutDeviceForm : Form, IInOutDevice
     {
         if (FlagClose)
         {
-            MessageBox.Show("You can not close this window until script execution is finished.", "KntScript");
+            KntMessageBox.Show("You can not close this window until script execution is finished.", "KntScript");
             e.Cancel = true;
         }
     }

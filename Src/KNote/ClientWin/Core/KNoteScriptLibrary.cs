@@ -7,6 +7,7 @@ using KNote.Model.Dto;
 using KNote.Model;
 using KntScript;
 using KNote.Service.Core;
+using KNote.ClientWin.Utils;
 
 
 namespace KNote.ClientWin.Core;
@@ -237,7 +238,7 @@ public class KNoteScriptLibrary: Library
         catch (Exception ex)
         {
             if (showError == true)
-                MessageBox.Show(dest.ToString() + " >> " + ex.Message.ToString());
+                KntMessageBox.Show(dest.ToString() + " >> " + ex.Message.ToString());
             else
                 throw;
         }
@@ -278,7 +279,7 @@ public class KNoteScriptLibrary: Library
 
     public DialogResult ShowMessageBox(string info, string caption, int buttons, int icon)
     {
-        return MessageBox.Show(info, caption, (MessageBoxButtons)buttons, (MessageBoxIcon)icon);
+        return KntMessageBox.Show(info, caption, (MessageBoxButtons)buttons, (MessageBoxIcon)icon);
     }
 
     public void SetParameter(SqlCommand cmd, SqlParameter par)
@@ -300,7 +301,7 @@ public class KNoteScriptLibrary: Library
         catch (Exception ex)
         {
             if (showError == true)
-                MessageBox.Show("The following error has occurred: " + ex.Message, KntConst.AppName);
+                KntMessageBox.Show("The following error has occurred: " + ex.Message, KntConst.AppName);
             else
                 throw;
         }
@@ -510,12 +511,12 @@ public class KNoteScriptLibrary: Library
 
     public void TestMsg()
     {
-        MessageBox.Show("TEST KNoteScriptLibrary Method");
+        KntMessageBox.Show("TEST KNoteScriptLibrary Method");
     }
 
     public static void TestStatic()
     {
-        MessageBox.Show("Static");
+        KntMessageBox.Show("Static");
     }
 
     #endregion

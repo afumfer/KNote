@@ -13,7 +13,7 @@ namespace KNote.ClientWin.Views;
 /// TabPage, never shown as a standalone window - so, like NoteTypesManageForm, ListView setup
 /// happens in the constructor, not Load (which never fires for a form that's never Show()n).
 /// </summary>
-public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInfoDto>
+public partial class KAttributesManageForm : KntForm, IViewManageList<KAttributeInfoDto>
 {
     #region Private fields
 
@@ -107,11 +107,6 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         ListViewSelectionHelper.SelectFirst(listViewAttributes, _sorter);
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     #endregion
 
     #region Form event handlers
@@ -126,7 +121,7 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no attribute selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no attribute selected.", KntConst.AppName);
             return;
         }
         await _ctrl.DeleteItemAsync(item);
@@ -156,7 +151,7 @@ public partial class KAttributesManageForm : Form, IViewManageList<KAttributeInf
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no attribute selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no attribute selected.", KntConst.AppName);
             return;
         }
         await _ctrl.EditItemAsync(item);

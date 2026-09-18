@@ -29,90 +29,87 @@ namespace KNote.ClientWin.Views
         /// </summary>
         private void InitializeComponent()
         {
-            this.panelBottom = new System.Windows.Forms.Panel();
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonAccept = new System.Windows.Forms.Button();
-            this.panelForm = new System.Windows.Forms.Panel();
-            this.listViewUsers = new System.Windows.Forms.ListView();
-            this.panelBottom.SuspendLayout();
-            this.panelForm.SuspendLayout();
-            this.SuspendLayout();
-            //
+            panelBottom = new Panel();
+            buttonCancel = new Button();
+            buttonAccept = new Button();
+            panelForm = new Panel();
+            listViewUsers = new ListView();
+            panelBottom.SuspendLayout();
+            panelForm.SuspendLayout();
+            SuspendLayout();
+            // 
             // panelBottom
-            //
-            this.panelBottom.Controls.Add(this.buttonCancel);
-            this.panelBottom.Controls.Add(this.buttonAccept);
-            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 387);
-            this.panelBottom.Name = "panelBottom";
-            this.panelBottom.Size = new System.Drawing.Size(408, 44);
-            this.panelBottom.TabIndex = 2;
-            //
+            // 
+            panelBottom.Controls.Add(buttonCancel);
+            panelBottom.Controls.Add(buttonAccept);
+            panelBottom.Dock = DockStyle.Bottom;
+            panelBottom.Location = new Point(0, 387);
+            panelBottom.Name = "panelBottom";
+            panelBottom.Size = new Size(408, 44);
+            panelBottom.TabIndex = 2;
+            // 
             // buttonCancel
-            //
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(317, 8);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(79, 24);
-            this.buttonCancel.TabIndex = 5;
-            this.buttonCancel.Text = "&Cancel";
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
-            //
+            // 
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(317, 8);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(79, 24);
+            buttonCancel.TabIndex = 5;
+            buttonCancel.Text = "&Cancel";
+            buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += buttonCancel_Click;
+            // 
             // buttonAccept
-            //
-            this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonAccept.Location = new System.Drawing.Point(232, 8);
-            this.buttonAccept.Name = "buttonAccept";
-            this.buttonAccept.Size = new System.Drawing.Size(79, 24);
-            this.buttonAccept.TabIndex = 4;
-            this.buttonAccept.Text = "&Accept";
-            this.buttonAccept.UseVisualStyleBackColor = true;
-            this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
-            //
+            // 
+            buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAccept.DialogResult = DialogResult.OK;
+            buttonAccept.Location = new Point(232, 8);
+            buttonAccept.Name = "buttonAccept";
+            buttonAccept.Size = new Size(79, 24);
+            buttonAccept.TabIndex = 4;
+            buttonAccept.Text = "&Accept";
+            buttonAccept.UseVisualStyleBackColor = true;
+            buttonAccept.Click += buttonAccept_Click;
+            // 
             // panelForm
-            //
-            this.panelForm.Controls.Add(this.listViewUsers);
-            this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelForm.Location = new System.Drawing.Point(0, 0);
-            this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(408, 387);
-            this.panelForm.TabIndex = 3;
-            //
+            // 
+            panelForm.Controls.Add(listViewUsers);
+            panelForm.Dock = DockStyle.Fill;
+            panelForm.Location = new Point(0, 0);
+            panelForm.Name = "panelForm";
+            panelForm.Size = new Size(408, 387);
+            panelForm.TabIndex = 3;
+            // 
             // listViewUsers
-            //
-            this.listViewUsers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listViewUsers.HideSelection = false;
-            this.listViewUsers.Location = new System.Drawing.Point(6, 6);
-            this.listViewUsers.MultiSelect = false;
-            this.listViewUsers.Name = "listViewUsers";
-            this.listViewUsers.Size = new System.Drawing.Size(396, 372);
-            this.listViewUsers.TabIndex = 0;
-            this.listViewUsers.UseCompatibleStateImageBehavior = false;
-            this.listViewUsers.SelectedIndexChanged += new System.EventHandler(this.listViewUsers_SelectedIndexChanged);
-            this.listViewUsers.Resize += new System.EventHandler(this.listViewUsers_Resize);
-            //
+            // 
+            listViewUsers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listViewUsers.Location = new Point(6, 6);
+            listViewUsers.MultiSelect = false;
+            listViewUsers.Name = "listViewUsers";
+            listViewUsers.Size = new Size(396, 372);
+            listViewUsers.TabIndex = 0;
+            listViewUsers.UseCompatibleStateImageBehavior = false;
+            listViewUsers.SelectedIndexChanged += listViewUsers_SelectedIndexChanged;
+            listViewUsers.Resize += listViewUsers_Resize;
+            // 
             // UsersSelectorForm
-            //
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(408, 431);
-            this.Controls.Add(this.panelForm);
-            this.Controls.Add(this.panelBottom);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "UsersSelectorForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "User selector";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UsersSelectorForm_FormClosing);
-            this.Load += new System.EventHandler(this.UsersSelectorForm_Load);
-            this.panelBottom.ResumeLayout(false);
-            this.panelForm.ResumeLayout(false);
-            this.ResumeLayout(false);
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(408, 431);
+            Controls.Add(panelForm);
+            Controls.Add(panelBottom);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "UsersSelectorForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "User selector";
+            FormClosing += UsersSelectorForm_FormClosing;
+            Load += UsersSelectorForm_Load;
+            panelBottom.ResumeLayout(false);
+            panelForm.ResumeLayout(false);
+            ResumeLayout(false);
 
         }
 

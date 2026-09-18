@@ -3,10 +3,11 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KntScript;
 using System.Runtime.InteropServices;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-internal partial class KntScriptConsoleForm : Form, IViewBase
+internal partial class KntScriptConsoleForm : KntForm, IViewBase
 {
     #region Private fields
 
@@ -70,7 +71,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     {
         if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
-            MessageBox.Show("No code found to run", "KntScript");
+            KntMessageBox.Show("No code found to run", "KntScript");
             return;
         }
 
@@ -82,7 +83,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
         catch (Exception err)
         {
-            MessageBox.Show(err.Message);
+            KntMessageBox.Show(err.Message);
         }
         finally
         {
@@ -105,7 +106,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     {
         if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
-            MessageBox.Show("No code found to run", "KntScript");
+            KntMessageBox.Show("No code found to run", "KntScript");
             return;
         }
 
@@ -116,7 +117,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
         catch (Exception err)
         {
-            MessageBox.Show(err.Message);
+            KntMessageBox.Show(err.Message);
         }
         finally
         {
@@ -136,7 +137,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     {
         if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
-            MessageBox.Show("No code found to run", "KntScript");
+            KntMessageBox.Show("No code found to run", "KntScript");
             return;
         }
 
@@ -147,7 +148,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
         catch (Exception err)
         {
-            MessageBox.Show(err.Message);
+            KntMessageBox.Show(err.Message);
         }
         finally
         {
@@ -167,7 +168,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     {
         if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
-            MessageBox.Show("No code found to run", "KntScript");
+            KntMessageBox.Show("No code found to run", "KntScript");
             return;
         }
 
@@ -178,7 +179,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
         catch (Exception err)
         {
-            MessageBox.Show(err.Message);
+            KntMessageBox.Show(err.Message);
         }
         finally
         {
@@ -190,7 +191,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     {
         if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
-            MessageBox.Show("No code found to run", "KntScript");
+            KntMessageBox.Show("No code found to run", "KntScript");
             return;
         }
 
@@ -201,7 +202,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
         catch (Exception err)
         {
-            MessageBox.Show(err.Message);
+            KntMessageBox.Show(err.Message);
         }
         finally
         {
@@ -358,7 +359,7 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
         }
         catch (Exception err)
         {
-            MessageBox.Show(err.Message);
+            KntMessageBox.Show(err.Message);
         }
     }
 
@@ -386,13 +387,13 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     {
         if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
         {
-            MessageBox.Show("No code found to run", "KntScript");
+            KntMessageBox.Show("No code found to run", "KntScript");
             return false;
         }
 
         if (_ctrl.IsScriptRunning)
         {
-            MessageBox.Show("A script is already running - use \"Close stdin\" or wait for it to finish before starting another one.", "KntScript");
+            KntMessageBox.Show("A script is already running - use \"Close stdin\" or wait for it to finish before starting another one.", "KntScript");
             return false;
         }
 
@@ -459,11 +460,6 @@ internal partial class KntScriptConsoleForm : Form, IViewBase
     {
         _viewFinalized = true;
         this.Close();
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public void RefreshView()

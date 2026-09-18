@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 
 using KNote.Model;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Core;
 
@@ -252,17 +253,17 @@ abstract public class CtrlBase : IDisposable
 
     public DialogResult ShowMessage(string messageText, string title)
     {
-        return MessageBox.Show(messageText, title);
+        return KntMessageBox.Show(messageText, title);
     }
 
     public DialogResult ShowMessage(string messageText, string title, MessageBoxButtons buttons)
     {
-        return MessageBox.Show(messageText, title, buttons);
+        return KntMessageBox.Show(messageText, title, buttons);
     }
 
     public DialogResult ShowMessage(string messageText, string title, MessageBoxButtons buttons, MessageBoxIcon icon)
     {
-        return MessageBox.Show(messageText, title, buttons, icon);
+        return KntMessageBox.Show(messageText, title, buttons, icon);
     }
 
     #endregion

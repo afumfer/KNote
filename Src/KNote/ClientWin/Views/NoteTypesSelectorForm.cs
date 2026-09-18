@@ -4,10 +4,11 @@ using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteTypesSelectorForm : Form, IViewEmbeddable
+public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
 {
     #region Private fields
 
@@ -69,11 +70,6 @@ public partial class NoteTypesSelectorForm : Form, IViewEmbeddable
         itemList.Name = type.NoteTypeId.ToString();
         itemList.SubItems.Add(type.Description?.ToString());
         return itemList;            
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     public Control PanelView()
@@ -158,7 +154,7 @@ public partial class NoteTypesSelectorForm : Form, IViewEmbeddable
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"OnSelectedItemChanged error: {ex.Message}");
+            KntMessageBox.Show($"OnSelectedItemChanged error: {ex.Message}");
         }
     }
 

@@ -2,10 +2,11 @@ using System.Text;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KNoteAIAssistantForm : Form, IViewBase
+public partial class KNoteAIAssistantForm : KntForm, IViewBase
 {
     #region Private fields
 
@@ -75,11 +76,6 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         this.Close();
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     public void RefreshView()
     {
         kntEditViewResult.MarkdownContentControl.Text = _ctrl.ChatTextMessasges.ToString();
@@ -102,7 +98,7 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message);
+            KntMessageBox.Show(ex.Message);
         }
     }
 
@@ -133,7 +129,7 @@ public partial class KNoteAIAssistantForm : Form, IViewBase
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message);
+            KntMessageBox.Show(ex.Message);
         }
         finally
         {

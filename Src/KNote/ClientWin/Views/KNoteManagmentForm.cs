@@ -2,10 +2,11 @@
 using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KntScript;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KNoteManagmentForm : Form, IViewKNoteManagment
+public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
 {
     #region Private methods
 
@@ -84,10 +85,10 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
         this.Close();
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KeyNoteX", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public override DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         if (info != null)
-            return MessageBox.Show(info, caption, buttons, icon);
+            return base.ShowInfo(info, caption, buttons, icon);
 
         string msg1;
         string msg2;
@@ -360,7 +361,7 @@ public partial class KNoteManagmentForm : Form, IViewKNoteManagment
             _ctrl.ShowKntCOMPortServerConsole();
         }
         else
-            MessageBox.Show("In construction ... ");
+            KntMessageBox.Show("In construction ... ");
     }
 
     private void menuView_DropDownOpening(object sender, EventArgs e)

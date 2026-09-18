@@ -13,7 +13,7 @@ namespace KNote.ClientWin.Views;
 /// never shown as a standalone window - so ListView setup happens in the constructor, not Load
 /// (which never fires for a form that's never Show()n).
 /// </summary>
-public partial class UsersManageForm : Form, IViewManageList<UserDto>
+public partial class UsersManageForm : KntForm, IViewManageList<UserDto>
 {
     #region Private fields
 
@@ -127,11 +127,6 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         ListViewSelectionHelper.SelectFirst(listViewUsers, _sorter);
     }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
-    }
-
     #endregion
 
     #region Form event handlers
@@ -146,7 +141,7 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no user selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no user selected.", KntConst.AppName);
             return;
         }
         await _ctrl.DeleteItemAsync(item);
@@ -176,7 +171,7 @@ public partial class UsersManageForm : Form, IViewManageList<UserDto>
         var item = SelectedItem();
         if (item == null)
         {
-            MessageBox.Show("There is no user selected.", KntConst.AppName);
+            KntMessageBox.Show("There is no user selected.", KntConst.AppName);
             return;
         }
         await _ctrl.EditItemAsync(item);

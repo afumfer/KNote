@@ -4,10 +4,11 @@ using KNote.Model;
 using KNote.Model.Core;
 using KNote.Model.Dto;
 using System.Data;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
+public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
 {
     #region Private fields 
 
@@ -162,11 +163,6 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         panelDataGridNotes.Dock = DockStyle.Fill;
         panelDataGridNotes.Padding = new Padding(3); // independent/modal selector only
         dataGridNotes.Dock = DockStyle.Fill;
-    }
-
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
-    {
-        return MessageBox.Show(info, caption, buttons, icon);
     }
 
     #region Extension methods ...
@@ -371,7 +367,7 @@ public partial class NotesSelectorForm : Form, IViewSelector<NoteMinimalDto>
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"OnSelectedNoteItemChanged error: {ex.Message}");
+            KntMessageBox.Show($"OnSelectedNoteItemChanged error: {ex.Message}");
         }
     }
 
