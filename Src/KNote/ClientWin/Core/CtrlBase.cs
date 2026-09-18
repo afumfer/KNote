@@ -141,12 +141,7 @@ abstract public class CtrlBase : IDisposable
 
     public virtual Result<EControllerResult> DialogResultToControllerResult(DialogResult dialogResult)
     {
-        var result = new Result<EControllerResult>();
-        if (dialogResult == DialogResult.OK || dialogResult == DialogResult.Yes)
-            result.Entity = EControllerResult.Executed;
-        else
-            result.Entity = EControllerResult.Canceled;
-        return result;
+        return dialogResult.ToControllerResult();
     }
 
     public virtual void Dispose()
