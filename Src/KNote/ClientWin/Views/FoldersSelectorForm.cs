@@ -242,11 +242,8 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
         _ctrl.Cancel();
     }
 
-    private void FoldersSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     #endregion
 

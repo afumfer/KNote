@@ -64,11 +64,8 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
 
     #region Form events handlers
 
-    private void NoteTypesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     private void buttonAccept_Click(object sender, EventArgs e)
     {

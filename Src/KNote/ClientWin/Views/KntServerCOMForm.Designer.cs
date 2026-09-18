@@ -163,7 +163,6 @@
             Margin = new Padding(4, 3, 4, 3);
             Name = "KntServerCOMForm";
             Text = "KNote ServerCOM";
-            FormClosing += KntServerCOMForm_FormClosing;
             Load += KntServerCOMForm_Load;
             statusInfo.ResumeLayout(false);
             statusInfo.PerformLayout();

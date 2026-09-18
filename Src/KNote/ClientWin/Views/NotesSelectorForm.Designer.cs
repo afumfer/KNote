@@ -183,7 +183,6 @@
             Margin = new Padding(3, 4, 3, 4);
             Name = "NotesSelectorForm";
             Text = "Notes selector";
-            FormClosing += NotesSelectorForm_FormClosing;
             panelForm.ResumeLayout(false);
             panelTextFilter.ResumeLayout(false);
             panelTextFilter.PerformLayout();

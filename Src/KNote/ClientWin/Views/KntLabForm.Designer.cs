@@ -600,7 +600,6 @@
             Name = "KntLabForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "KNote Lab";
-            FormClosing += KntLabForm_FormClosing;
             Load += LabForm_Load;
             tabWebView2.ResumeLayout(false);
             tabWebView2.PerformLayout();

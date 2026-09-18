@@ -124,7 +124,6 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "FoldersSelectorForm";
             Text = "Folders selector";
-            FormClosing += FoldersSelectorForm_FormClosing;
             panelForm.ResumeLayout(false);
             panelBottom.ResumeLayout(false);
             ResumeLayout(false);

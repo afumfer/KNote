@@ -85,7 +85,6 @@ namespace KNote.ClientWin.Views
             this.ShowInTaskbar = true;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Application info alarms";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AppInfoAlarmsForm_FormClosing);
             this.Load += new System.EventHandler(this.AppInfoAlarmsForm_Load);
             this.Move += new System.EventHandler(this.AppInfoAlarmsForm_Move);
             this.Resize += new System.EventHandler(this.AppInfoAlarmsForm_Resize);

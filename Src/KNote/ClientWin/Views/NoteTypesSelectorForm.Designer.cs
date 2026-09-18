@@ -108,7 +108,6 @@ namespace KNote.ClientWin.Views
             this.Name = "NoteTypesSelectorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Note types selector";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NoteTypesSelectorForm_FormClosing);
             this.Load += new System.EventHandler(this.NoteTypesSelectorForm_Load);
             this.panelBottom.ResumeLayout(false);
             this.panelForm.ResumeLayout(false);

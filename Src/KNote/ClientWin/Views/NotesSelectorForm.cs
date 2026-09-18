@@ -198,11 +198,8 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
 
     #region Form events handlers 
 
-    private void NotesSelectorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     private void dataGridNotes_SelectionChanged(object sender, EventArgs e)
     {

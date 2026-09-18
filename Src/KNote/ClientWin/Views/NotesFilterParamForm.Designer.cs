@@ -387,7 +387,6 @@ namespace KNote.ClientWin.Views
             this.MinimizeBox = false;
             this.Name = "NotesFilterParamForm";
             this.Text = "Filter parameters";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NotesFilterParamForm_FormClosing);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

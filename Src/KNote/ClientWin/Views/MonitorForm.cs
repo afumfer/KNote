@@ -52,11 +52,8 @@ public partial class MonitorForm : KntForm, IViewBase
         return null;
     }
 
-    private void MonitorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();           
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     private void buttonClearMessages_Click(object sender, EventArgs e)
     {

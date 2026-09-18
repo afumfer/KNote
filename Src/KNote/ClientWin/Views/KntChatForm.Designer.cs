@@ -122,7 +122,6 @@
             Name = "KntChatForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Simple chat";
-            FormClosing += KntChatForm_FormClosing;
             Load += ChatForm_Load;
             ResumeLayout(false);
             PerformLayout();

@@ -217,7 +217,6 @@ namespace KNote.ClientWin.Views
             this.MinimizeBox = false;
             this.Name = "NotesSearchParamForm";
             this.Text = "Search parameters";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NotesSearchParamForm_FormClosing);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

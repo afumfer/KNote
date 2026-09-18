@@ -105,7 +105,6 @@ namespace KNote.ClientWin.Views
             Name = "UsersSelectorForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "User selector";
-            FormClosing += UsersSelectorForm_FormClosing;
             Load += UsersSelectorForm_Load;
             panelBottom.ResumeLayout(false);
             panelForm.ResumeLayout(false);

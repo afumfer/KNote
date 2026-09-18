@@ -75,11 +75,8 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
 
     #region Form events handlers
 
-    private void NotesFilterParamForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     private void buttonClean_Click(object sender, EventArgs e)
     {

@@ -305,7 +305,6 @@
             Name = "KntScriptConsoleForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "KntScript - Console";
-            FormClosing += KntScriptConsoleForm_FormClosing;
             Load += KntScriptForm_Load;
             KeyUp += KntScriptForm_KeyUp;
             toolStripConsole.ResumeLayout(false);

@@ -310,11 +310,8 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
             SaveFile(_ctrl.CodeFile);
     }
 
-    private void KntScriptConsoleForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     #endregion
 

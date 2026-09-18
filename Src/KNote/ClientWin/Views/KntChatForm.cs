@@ -57,17 +57,14 @@ public partial class KntChatForm : KntForm, IViewChat
         textMessage.Text = "";
     }
 
-    private void KntChatForm_FormClosing(object sender, FormClosingEventArgs e)
+    protected override void OnUserClosing(FormClosingEventArgs e)
     {
-        if (!ViewFinalized)
+        if (_ctrl.AutoCloseCtrlOnViewExit)
+            _ctrl.Finalize();
+        else
         {
-            if (_ctrl.AutoCloseCtrlOnViewExit)
-                _ctrl.Finalize();
-            else
-            {
-                Hide();
-                e.Cancel = true;
-            }
+            Hide();
+            e.Cancel = true;
         }
     }
 

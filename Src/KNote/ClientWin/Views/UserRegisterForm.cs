@@ -54,11 +54,8 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
         this.DialogResult = DialogResult.Cancel;
     }
 
-    private void UserRegisterForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.CancelEdition();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.CancelEdition();
 
     #endregion
 

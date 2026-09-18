@@ -176,7 +176,6 @@ namespace KNote.ClientWin.Views
             Name = "UserRegisterForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Register user";
-            FormClosing += UserRegisterForm_FormClosing;
             ResumeLayout(false);
             PerformLayout();
         }

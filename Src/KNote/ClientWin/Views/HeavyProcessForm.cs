@@ -31,11 +31,8 @@ public partial class HeavyProcessForm : KntForm, IViewHeavyProcess
         CancellationToken.Cancel();
     }
 
-    private void HeavyProcessForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     #endregion 
 

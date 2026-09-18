@@ -94,17 +94,14 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
         _ctrl.Send(textBoxSend.Text);
     }
 
-    private void KntServerCOMForm_FormClosing(object sender, FormClosingEventArgs e)
+    protected override void OnUserClosing(FormClosingEventArgs e)
     {
-        if (!ViewFinalized)
+        if (_ctrl.AutoCloseCtrlOnViewExit)
+            _ctrl.Finalize();
+        else
         {
-            if (_ctrl.AutoCloseCtrlOnViewExit)
-                _ctrl.Finalize();
-            else
-            {
-                Hide();
-                e.Cancel = true;
-            }
+            Hide();
+            e.Cancel = true;
         }
     }
 

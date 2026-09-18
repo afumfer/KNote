@@ -113,11 +113,8 @@ window.chrome.webview.postMessage(retValue);";
         #endregion 
     }
 
-    private void KntLabForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-            _ctrl.Finalize();
-    }
+    protected override void OnUserClosing(FormClosingEventArgs e)
+        => _ctrl.Finalize();
 
     #endregion
 

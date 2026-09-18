@@ -43,6 +43,20 @@ public class KntForm : Form
     {
     }
 
+    // Called when the user (not the controller, see OnClosingView) closes the window. Derived views
+    // override it to finalize their controller, or to hide instead of closing (e.Cancel = true).
+    protected virtual void OnUserClosing(FormClosingEventArgs e)
+    {
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        if (!ViewFinalized)
+            OnUserClosing(e);
+
+        base.OnFormClosing(e);
+    }
+
     // Virtual for the few views with special needs (e.g. MonitorForm marshals to the UI thread).
     public virtual DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {

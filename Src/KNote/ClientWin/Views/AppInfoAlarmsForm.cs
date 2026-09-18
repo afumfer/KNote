@@ -122,17 +122,14 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         PersonalizeListView(listViewAlarms);
     }
 
-    private void AppInfoAlarmsForm_FormClosing(object sender, FormClosingEventArgs e)
+    // This panel is meant to stay alive for the whole session (like the tray icon) so it keeps
+    // accumulating rows in the background - closing the window (X button) only hides it. It is
+    // only really closed when KNoteManagmentCtrl.Finalize() cascades into it at app shutdown.
+    protected override void OnUserClosing(FormClosingEventArgs e)
     {
-        // This panel is meant to stay alive for the whole session (like the tray icon) so it keeps
-        // accumulating rows in the background - closing the window (X button) only hides it. It is
-        // only really closed when KNoteManagmentCtrl.Finalize() cascades into it at app shutdown.
-        if (!ViewFinalized)
-        {
-            e.Cancel = true;
-            SaveWindowBounds();
-            this.Hide();
-        }
+        e.Cancel = true;
+        SaveWindowBounds();
+        this.Hide();
     }
 
     private void AppInfoAlarmsForm_Move(object sender, EventArgs e)
