@@ -33,7 +33,7 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
 
         _ctrl = ctrl;
 
-        PersonalizeListView(listViewProviders);
+        ListViewStyle.ApplyStandard(listViewProviders);
         _sorter = ListViewSortHelper.Attach(listViewProviders);
     }
 
@@ -157,17 +157,6 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
         item.SubItems.Add(providerRef.Provider);
         item.SubItems.Add(providerRef.Model);
         return item;
-    }
-
-    private void PersonalizeListView(ListView listView)
-    {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
     }
 
     #endregion

@@ -38,7 +38,7 @@ public partial class TraceNoteTypesManageForm : KntForm, IViewManageList<TraceNo
         // PanelView() into RepositoryEditorForm's TabPage (panelForm gets reparented out of this
         // Form entirely). Personalizing the ListView here instead - a plain property setter, safe
         // before the control's window handle exists - is what actually makes it apply.
-        PersonalizeListView(listViewTraceNoteTypes);
+        ListViewStyle.ApplyStandard(listViewTraceNoteTypes);
         _sorter = ListViewSortHelper.Attach(listViewTraceNoteTypes);
     }
 
@@ -159,17 +159,6 @@ public partial class TraceNoteTypesManageForm : KntForm, IViewManageList<TraceNo
         var item = new ListViewItem(type.Name) { Name = type.TraceNoteTypeId.ToString() };
         item.SubItems.Add(type.Description);
         return item;
-    }
-
-    private void PersonalizeListView(ListView listView)
-    {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
     }
 
     #endregion

@@ -12,6 +12,10 @@ public partial class UsersSelectorForm : KntForm, IViewEmbeddable
 
     private readonly UsersSelectorCtrl _ctrl;
 
+    // Primary/growing column for ListViewColumnResizer - the last one, which used to be stretched
+    // with the old "Width = -2" hack.
+    private const int PrimaryColumnIndex = 2;
+
     #endregion
 
     #region Constructor
@@ -87,27 +91,17 @@ public partial class UsersSelectorForm : KntForm, IViewEmbeddable
 
     private void listViewUsers_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn((ListView)sender);
+        ListViewColumnResizer.Resize(listViewUsers, PrimaryColumnIndex);
     }
 
     private void UsersSelectorForm_Load(object sender, EventArgs e)
     {
-        PersonalizeListView(listViewUsers);
+        ListViewStyle.ApplyStandard(listViewUsers);
     }
 
     #endregion
 
     #region Private methods
-
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
-    }
 
     private void OnSelectedItemChanged()
     {
@@ -127,17 +121,6 @@ public partial class UsersSelectorForm : KntForm, IViewEmbeddable
         {
             KntMessageBox.Show($"OnSelectedItemChanged error: {ex.Message}");
         }
-    }
-
-    private void PersonalizeListView(ListView listView)
-    {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
     }
 
     #endregion

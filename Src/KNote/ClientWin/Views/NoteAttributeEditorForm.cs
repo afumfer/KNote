@@ -199,15 +199,9 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
 
     private void PersonalizeListView(ListView listView)
     {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = true;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
+        ListViewStyle.ApplyStandard(listView, checkBoxes: true);
         listView.MultiSelect = true;
         listView.HeaderStyle = ColumnHeaderStyle.None;
-        listView.Sorting = SortOrder.None;            
     }
 
     protected override void ControlsToModel()

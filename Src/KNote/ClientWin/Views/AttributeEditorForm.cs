@@ -167,13 +167,7 @@ public partial class AttributeEditorForm : KntForm, IViewEditor<KAttributeDto>
             comboDataType.Items.Add(dataType);
 
         comboNoteType.DisplayMember = "Name";
-        listViewTabulatedValues.View = View.Details;
-        listViewTabulatedValues.LabelEdit = false;
-        listViewTabulatedValues.AllowColumnReorder = false;
-        listViewTabulatedValues.CheckBoxes = false;
-        listViewTabulatedValues.FullRowSelect = true;
-        listViewTabulatedValues.GridLines = true;
-        listViewTabulatedValues.Sorting = SortOrder.None;
+        ListViewStyle.ApplyStandard(listViewTabulatedValues);
         _sorter = ListViewSortHelper.Attach(listViewTabulatedValues);
     }
 

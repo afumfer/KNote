@@ -55,12 +55,12 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         // instead guarantees these fields are never null by the time the first RefreshView() runs, the
         // same reasoning that already has the "manage list" Forms (UsersManageForm, ...) do their
         // PersonalizeListView/Attach in the constructor instead of on Load.
-        PersonalizeListView(listViewAttributes);
-        PersonalizeListView(listViewResources);
-        PersonalizeListView(listViewTasks);
-        PersonalizeListView(listViewAlarms);
-        PersonalizeListView(listViewTraceNoteFrom);
-        PersonalizeListView(listViewTraceNoteTo);
+        ListViewStyle.ApplyStandard(listViewAttributes);
+        ListViewStyle.ApplyStandard(listViewResources);
+        ListViewStyle.ApplyStandard(listViewTasks);
+        ListViewStyle.ApplyStandard(listViewAlarms);
+        ListViewStyle.ApplyStandard(listViewTraceNoteFrom);
+        ListViewStyle.ApplyStandard(listViewTraceNoteTo);
 
         // listViewAttributes has no interactive click-to-sort: it's always shown sorted by its
         // (hidden) Order column - see ModelToControlsAttributes - not by whatever column the user
@@ -1405,17 +1405,6 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             }
             return;
         }
-    }
-
-    private void PersonalizeListView(ListView listView)
-    {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
     }
 
     private ListViewItem MessageDtoToListViewItem(KMessageDto message)

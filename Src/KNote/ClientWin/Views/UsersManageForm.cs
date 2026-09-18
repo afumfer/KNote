@@ -35,7 +35,7 @@ public partial class UsersManageForm : KntForm, IViewManageList<UserDto>
 
         _ctrl = ctrl;
 
-        PersonalizeListView(listViewUsers);
+        ListViewStyle.ApplyStandard(listViewUsers);
         _sorter = ListViewSortHelper.Attach(listViewUsers);
     }
 
@@ -165,17 +165,6 @@ public partial class UsersManageForm : KntForm, IViewManageList<UserDto>
         listItem.SubItems.Add(item.EMail);
         listItem.SubItems.Add(item.RoleDefinition);
         return listItem;
-    }
-
-    private void PersonalizeListView(ListView listView)
-    {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
     }
 
     #endregion

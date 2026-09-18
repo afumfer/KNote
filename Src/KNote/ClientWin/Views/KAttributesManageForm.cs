@@ -36,7 +36,7 @@ public partial class KAttributesManageForm : KntForm, IViewManageList<KAttribute
 
         _ctrl = ctrl;
 
-        PersonalizeListView(listViewAttributes);
+        ListViewStyle.ApplyStandard(listViewAttributes);
 
         // "Order" (column 2) sorts correctly with no custom comparer - ListViewColumnSorter's default
         // already compares numeric-looking columns numerically, not as text.
@@ -175,17 +175,6 @@ public partial class KAttributesManageForm : KntForm, IViewManageList<KAttribute
         listItem.SubItems.Add(KntConst.KAttributes[item.KAttributeDataType]);
         listItem.SubItems.Add(item.RequiredValueYesNo);
         return listItem;
-    }
-
-    private void PersonalizeListView(ListView listView)
-    {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
     }
 
     #endregion

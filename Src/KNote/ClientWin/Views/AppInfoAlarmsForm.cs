@@ -10,6 +10,10 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
     #region Private fields
 
     private readonly AppInfoAlarmsCtrl _ctrl;
+
+    // Primary/growing column for ListViewColumnResizer - the last one, which used to be stretched
+    // with the old "Width = -2" hack.
+    private const int PrimaryColumnIndex = 4;
     private ListViewColumnSorter _sorter;
 
     #endregion
@@ -144,7 +148,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
             _ctrl.Store.AppConfig.AppInfoAlarmsWidth = Width;
             _ctrl.Store.AppConfig.AppInfoAlarmsHeight = Height;
         }
-        SizeLastColumn(listViewAlarms);
+        ListViewColumnResizer.Resize(listViewAlarms, PrimaryColumnIndex);
     }
 
     // Fires once when the user releases the mouse after dragging/resizing (as opposed to Move/Resize,
@@ -197,16 +201,6 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         return _ctrl.Store.AppConfig.AppInfoAlarmsRows.FirstOrDefault(r => r.KMessageId == selectedId);
     }
 
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
-    }
-
     private ListViewItem RowToListViewItem(AppInfoAlarmRowConfig row)
     {
         var item = new ListViewItem(row.NotifiedAt.ToString("dd/MM/yyyy HH:mm"));
@@ -236,13 +230,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
 
     private void PersonalizeListView(ListView listView)
     {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
+        ListViewStyle.ApplyStandard(listView);
         listView.MultiSelect = false;
 
         listView.Columns.Add("Notified", 130, HorizontalAlignment.Left);

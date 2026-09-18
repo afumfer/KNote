@@ -14,6 +14,10 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
 
     private readonly NoteTypesSelectorCtrl _ctrl;
 
+    // Primary/growing column for ListViewColumnResizer - the last one, which used to be stretched
+    // with the old "Width = -2" hack.
+    private const int PrimaryColumnIndex = 1;
+
     #endregion
 
     #region Constructor
@@ -84,27 +88,17 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
 
     private void listViewNoteTypes_Resize(object sender, EventArgs e)
     {
-        SizeLastColumn((ListView)sender);
+        ListViewColumnResizer.Resize(listViewNoteTypes, PrimaryColumnIndex);
     }
 
     private void NoteTypesSelectorForm_Load(object sender, EventArgs e)
     {
-        PersonalizeListView(listViewNoteTypes);
+        ListViewStyle.ApplyStandard(listViewNoteTypes);
     }
 
     #endregion
 
     #region Private methods
-
-    private void SizeLastColumn(ListView lv)
-    {
-        // Hack for control undeterminated error
-        try
-        {
-            lv.Columns[lv.Columns.Count - 1].Width = -2;
-        }
-        catch (Exception) { }
-    }
 
     private void OnSelectedItemChanged()
     {              
@@ -124,17 +118,6 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
         {
             KntMessageBox.Show($"OnSelectedItemChanged error: {ex.Message}");
         }
-    }
-
-    private void PersonalizeListView(ListView listView)
-    {
-        listView.View = View.Details;
-        listView.LabelEdit = false;
-        listView.AllowColumnReorder = false;
-        listView.CheckBoxes = false;
-        listView.FullRowSelect = true;
-        listView.GridLines = true;
-        listView.Sorting = SortOrder.None;
     }
 
     #endregion 
