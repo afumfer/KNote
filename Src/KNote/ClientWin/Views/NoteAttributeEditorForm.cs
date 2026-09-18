@@ -6,12 +6,11 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttributeDto>
+public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKAttributeDto>
 {
     #region Private fields
 
     private readonly NoteAttributeEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     #endregion
 
@@ -29,44 +28,24 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
     #region Form events handlers
 
     private async void buttonAccept_Click(object sender, EventArgs e)
-    {            
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+    {
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCandelEdition();
+        TryCancelEdition();
     }
+
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
+
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     private void buttonSelDate_Click(object sender, EventArgs e)
     {
         textValue.Text = SelDate(textValue.Text);
-    }
-
-    private void NoteAttributeEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
-    }
-
-    private void NoteAttributeEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
-    private void NoteAttributeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCandelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
     }
 
     #endregion
@@ -238,19 +217,6 @@ public partial class NoteAttributeEditorForm : KntForm, IViewEditor<NoteKAttribu
             default:
                 break;
         }
-    }
-
-    private bool OnCandelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
     }
 
     private string SelDate(string date)

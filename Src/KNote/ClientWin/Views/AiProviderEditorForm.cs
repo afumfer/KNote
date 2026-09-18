@@ -5,12 +5,11 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
+public partial class AiProviderEditorForm : KntEditorForm, IViewEditor<AiProviderRef>
 {
     #region Private fields
 
     private readonly AiProviderEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     #endregion
 
@@ -33,39 +32,19 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCancelEdition();
+        TryCancelEdition();
     }
 
-    private void AiProviderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCancelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
 
-    private void AiProviderEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
-    private void AiProviderEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
-    }
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     // Fires on both user selection and programmatic assignment (DataSource binding,
     // ModelToControls): only updates the Host field's enabled state, never the dirty flag.
@@ -78,25 +57,12 @@ public partial class AiProviderEditorForm : KntForm, IViewEditor<AiProviderRef>
     // SelectedIndexChanged - this is what should mark the form as modified.
     private void comboProvider_SelectionChangeCommitted(object sender, EventArgs e)
     {
-        _formIsDisty = true;
+        FormIsDirty = true;
     }
 
     #endregion
 
     #region Private methods
-
-    private bool OnCancelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
-    }
 
     private void UpdateHostEnabled()
     {

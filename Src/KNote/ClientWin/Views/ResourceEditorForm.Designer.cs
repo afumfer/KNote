@@ -182,10 +182,7 @@ namespace KNote.ClientWin.Views
             Name = "ResourceEditorForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Resource editor";
-            FormClosing += ResourceEditorForm_FormClosing;
             Load += ResourceEditorForm_Load;
-            KeyPress += ResourceEditorForm_KeyPress;
-            KeyUp += ResourceEditorForm_KeyUp;
             panelForm.ResumeLayout(false);
             panelForm.PerformLayout();
             ResumeLayout(false);

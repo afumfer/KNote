@@ -123,9 +123,6 @@ namespace KNote.ClientWin.Views
             this.Name = "NoteTypeEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Note type editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NoteTypeEditorForm_FormClosing);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.NoteTypeEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.NoteTypeEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             this.ResumeLayout(false);

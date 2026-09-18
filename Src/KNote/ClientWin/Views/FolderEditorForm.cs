@@ -7,14 +7,13 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
+public partial class FolderEditorForm : KntEditorForm, IViewEditor<FolderDto>
 {
     #region Private fields
 
     private readonly FolderEditorCtrl _ctrl;
     private Guid? _selectedParentFolderId;
     private FolderDto _selectedParentFolder;
-    private bool _formIsDisty = false;
 
     // What ModelToControls() last parsed from Model.OrderNotes - used by ControlsToModel() to
     // preserve the cached Auto column/direction when the user leaves the mode combo on "Auto"
@@ -62,41 +61,21 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
 
     #region Form events handler
 
-    private void FolderEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCancelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
-
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCancelEdition();
+        TryCancelEdition();
     }
 
-    private void FolderEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
-    }
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
 
-    private void FolderEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     private void buttonFolderSearch_Click(object sender, EventArgs e)
     {
@@ -137,25 +116,12 @@ public partial class FolderEditorForm : KntForm, IViewEditor<FolderDto>
     // modified. SelectionChangeCommitted fires only for an actual user-driven selection.
     private void comboOrder_SelectionChangeCommitted(object sender, EventArgs e)
     {
-        _formIsDisty = true;
+        FormIsDirty = true;
     }
 
     #endregion
 
     #region Private methods
-
-    private bool OnCancelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
-    }
 
     protected override void ModelToControls()
     {

@@ -144,9 +144,6 @@ namespace KNote.ClientWin.Views
             this.Name = "KAttributeTabulatedValueEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Tabulated value editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KAttributeTabulatedValueEditorForm_FormClosing);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KAttributeTabulatedValueEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.KAttributeTabulatedValueEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericOrder)).EndInit();

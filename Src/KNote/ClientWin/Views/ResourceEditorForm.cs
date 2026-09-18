@@ -6,12 +6,11 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
+public partial class ResourceEditorForm : KntEditorForm, IViewEditor<ResourceDto>
 {
     #region Private fields
 
     private readonly ResourceEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     private string varFileType;
     private byte[] varContentArrayBytes;
@@ -47,27 +46,6 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
         PersonalizeControls();
     }
 
-    private void ResourceEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCandelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
-
-    private void ResourceEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
-    }
-
-    private void ResourceEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
         var res = await _ctrl.SaveModel();
@@ -75,15 +53,18 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
         {
             await kntView.ClearWebView();
             kntView.Refresh();
-            _formIsDisty = false;
+            FormIsDirty = false;
             this.DialogResult = DialogResult.OK;
         }
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCandelEdition();
+        TryCancelEdition();
     }
+
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     private async void buttonSelectFile_Click(object sender, EventArgs e)
     {
@@ -108,19 +89,6 @@ public partial class ResourceEditorForm : KntForm, IViewEditor<ResourceDto>
     {
         kntView.ShowStatusInfo = false;
         kntView.ShowNavigationTools = false;
-    }
-
-    private bool OnCandelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", "KNote", MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
     }
 
     private async Task ModelToControlsAsync()

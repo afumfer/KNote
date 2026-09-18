@@ -6,7 +6,7 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class TraceNoteEditorForm : KntForm, IViewEditor<TraceNoteDto>
+public partial class TraceNoteEditorForm : KntEditorForm, IViewEditor<TraceNoteDto>
 {
     #region Private fields
 
@@ -16,7 +16,6 @@ public partial class TraceNoteEditorForm : KntForm, IViewEditor<TraceNoteDto>
     private static readonly TraceNoteTypeDto NoTraceNoteTypeItem = new() { TraceNoteTypeId = Guid.Empty, Name = "(none)" };
 
     private readonly TraceNoteEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     #endregion
 
@@ -35,18 +34,19 @@ public partial class TraceNoteEditorForm : KntForm, IViewEditor<TraceNoteDto>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCancelEdition();
+        TryCancelEdition();
     }
+
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
+
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     private async void buttonSelectRelatedNote_Click(object sender, EventArgs e)
     {
@@ -62,47 +62,13 @@ public partial class TraceNoteEditorForm : KntForm, IViewEditor<TraceNoteDto>
         {
             await _ctrl.SetRelatedNoteAsync(notesSelector.SelectedEntity.NoteId);
             textRelatedNote.Text = _ctrl.RelatedNoteDisplay;
-            _formIsDisty = true;
+            FormIsDirty = true;
         }
-    }
-
-    private void TraceNoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCancelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
-
-    private void TraceNoteEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
-    private void TraceNoteEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
     }
 
     #endregion
 
     #region Private methods
-
-    private bool OnCancelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
-    }
 
     protected override void ModelToControls()
     {

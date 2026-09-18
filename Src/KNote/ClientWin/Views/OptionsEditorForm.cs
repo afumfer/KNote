@@ -5,12 +5,11 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class OptionsEditorForm : KntForm, IViewEditor<AppConfig>
+public partial class OptionsEditorForm : KntEditorForm, IViewEditor<AppConfig>
 {
     #region Privage Fields
 
     private readonly OptionsEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     #endregion
 
@@ -30,18 +29,19 @@ public partial class OptionsEditorForm : KntForm, IViewEditor<AppConfig>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCancelEdition();
+        TryCancelEdition();
     }
+
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
+
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     private async void buttonTestChatHubUrl_Click(object sender, EventArgs e)
     {
@@ -72,27 +72,6 @@ public partial class OptionsEditorForm : KntForm, IViewEditor<AppConfig>
             this.Cursor = Cursors.Default;
             buttonTestChatHubUrl.Enabled = true;
         }
-    }
-
-    private void OptionsEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCancelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
-
-    private void OptionsEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
-    private void OptionsEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
     }
 
     private async void buttonTestSmtp_Click(object sender, EventArgs e)
@@ -143,19 +122,6 @@ public partial class OptionsEditorForm : KntForm, IViewEditor<AppConfig>
     #endregion
 
     #region Private methods
-
-    private bool OnCancelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
-    }
 
     protected override void ModelToControls() 
     {

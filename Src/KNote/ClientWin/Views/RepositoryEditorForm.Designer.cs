@@ -474,10 +474,7 @@ namespace KNote.ClientWin.Views
             Name = "RepositoryEditorForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Repository editor";
-            FormClosing += RepositoryEditorForm_FormClosing;
             Load += RepositoryEditorForm_Load;
-            KeyPress += RepositoryEditorForm_KeyPress;
-            KeyUp += RepositoryEditorForm_KeyUp;
             tabControlMain.ResumeLayout(false);
             tabPageGeneral.ResumeLayout(false);
             tabPageUsers.ResumeLayout(false);

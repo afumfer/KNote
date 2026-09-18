@@ -5,12 +5,11 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
+public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<RepositoryRef>
 {
     #region Fields
 
     private readonly RepositoryEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     #endregion
 
@@ -36,39 +35,19 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCancelEdition();
+        TryCancelEdition();
     }
 
-    private void RepositoryEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCancelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
 
-    private void RepositoryEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
-    private void RepositoryEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
-    }
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     private void RepositoryEditorForm_Load(object sender, EventArgs e)
     {
@@ -261,19 +240,6 @@ public partial class RepositoryEditorForm : KntForm, IViewEditor<RepositoryRef>
         // TODO: hack, EntityFramework is default orm when repository is created. (Dapper version no suport create repository). 
         if (_ctrl.EditorMode == EnumRepositoryEditorMode.AddLink || _ctrl.EditorMode == EnumRepositoryEditorMode.Create)
             _ctrl.Model.Orm = "EntityFramework";
-    }
-
-    private bool OnCancelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
     }
 
     private void RefreshRadioDatabase()

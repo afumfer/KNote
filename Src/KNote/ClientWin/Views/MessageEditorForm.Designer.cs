@@ -247,10 +247,7 @@ namespace KNote.ClientWin.Views
             this.Name = "MessageEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Message editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MessageEditorForm_FormClosing);
             this.Load += new System.EventHandler(this.MessageEditorForm_Load);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MessageEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MessageEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             this.ResumeLayout(false);

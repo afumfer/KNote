@@ -403,10 +403,7 @@ namespace KNote.ClientWin.Views
             Name = "TaskEditorForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Task editor";
-            FormClosing += TaskEditorForm_FormClosing;
             Shown += TaskEditorForm_Shown;
-            KeyPress += TaskEditorForm_KeyPress;
-            KeyUp += TaskEditorForm_KeyUp;
             tabTaskData.ResumeLayout(false);
             tabPageBasicData.ResumeLayout(false);
             tabPageBasicData.PerformLayout();

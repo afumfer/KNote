@@ -123,9 +123,6 @@ namespace KNote.ClientWin.Views
             this.Name = "TraceNoteTypeEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Trace note type editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TraceNoteTypeEditorForm_FormClosing);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TraceNoteTypeEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TraceNoteTypeEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             this.ResumeLayout(false);

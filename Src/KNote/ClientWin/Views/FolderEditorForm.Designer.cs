@@ -251,9 +251,6 @@ namespace KNote.ClientWin.Views
             this.Name = "FolderEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Folder editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FolderEditorForm_FormClosing);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.FolderEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.FolderEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             this.groupOrderNotes.ResumeLayout(false);

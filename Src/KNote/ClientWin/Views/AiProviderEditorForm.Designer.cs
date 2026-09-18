@@ -187,9 +187,6 @@ namespace KNote.ClientWin.Views
             this.Name = "AiProviderEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "AI provider editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AiProviderEditorForm_FormClosing);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.AiProviderEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.AiProviderEditorForm_KeyUp);
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             this.ResumeLayout(false);

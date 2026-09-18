@@ -6,12 +6,11 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-public partial class AttributeEditorForm : KntForm, IViewEditor<KAttributeDto>
+public partial class AttributeEditorForm : KntEditorForm, IViewEditor<KAttributeDto>
 {
     #region Private fields
 
     private readonly AttributeEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     // Sentinel item for "no note type" (KAttributeInfoDto.NoteTypeId is nullable): a real
     // NoteTypeDto so comboNoteType.DisplayMember="Name" works uniformly for every item, with an
@@ -43,39 +42,19 @@ public partial class AttributeEditorForm : KntForm, IViewEditor<KAttributeDto>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCandelEdition();
+        TryCancelEdition();
     }
 
-    private void AttributeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCandelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
 
-    private void AttributeEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
-    private void AttributeEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
-    }
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     private void comboDataType_SelectedIndexChanged(object sender, EventArgs e)
     {
@@ -144,19 +123,6 @@ public partial class AttributeEditorForm : KntForm, IViewEditor<KAttributeDto>
         if (listViewTabulatedValues.SelectedItems.Count == 0)
             return Guid.Empty;
         return Guid.Parse(listViewTabulatedValues.SelectedItems[0].Name);
-    }
-
-    private bool OnCandelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
     }
 
     private void PersonalizeControls()

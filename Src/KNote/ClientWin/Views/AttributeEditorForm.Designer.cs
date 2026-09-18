@@ -284,9 +284,6 @@ namespace KNote.ClientWin.Views
             this.Name = "AttributeEditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Attribute editor";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AttributeEditorForm_FormClosing);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.AttributeEditorForm_KeyPress);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.AttributeEditorForm_KeyUp);
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericOrder)).EndInit();

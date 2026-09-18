@@ -6,12 +6,11 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteTypeEditorForm : KntForm, IViewEditor<NoteTypeDto>
+public partial class NoteTypeEditorForm : KntEditorForm, IViewEditor<NoteTypeDto>
 {
     #region Private fields
 
     private readonly NoteTypeEditorCtrl _ctrl;
-    private bool _formIsDisty = false;
 
     #endregion
 
@@ -30,56 +29,23 @@ public partial class NoteTypeEditorForm : KntForm, IViewEditor<NoteTypeDto>
 
     private async void buttonAccept_Click(object sender, EventArgs e)
     {
-        var res = await _ctrl.SaveModel();
-        if (res)
-        {
-            _formIsDisty = false;
-            this.DialogResult = DialogResult.OK;
-        }
+        await AcceptEditionAsync();
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
-        OnCancelEdition();
+        TryCancelEdition();
     }
 
-    private void NoteTypeEditorForm_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (!ViewFinalized)
-        {
-            var confirmExit = OnCancelEdition();
-            if (!confirmExit)
-                e.Cancel = true;
-        }
-    }
+    protected override Task<bool> SaveModelAsync()
+        => _ctrl.SaveModel();
 
-    private void NoteTypeEditorForm_KeyPress(object sender, KeyPressEventArgs e)
-    {
-        _formIsDisty = true;
-    }
-
-    private void NoteTypeEditorForm_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            _formIsDisty = true;
-    }
+    protected override void CancelEdition()
+        => _ctrl.CancelEdition();
 
     #endregion
 
     #region Private methods
-
-    private bool OnCancelEdition()
-    {
-        if (_formIsDisty)
-        {
-            if (KntMessageBox.Show("You have modified this entity, are you sure you want to exit without recording?", KntConst.AppName, MessageBoxButtons.YesNo) == DialogResult.No)
-                return false;
-        }
-
-        this.DialogResult = DialogResult.Cancel;
-        _ctrl.CancelEdition();
-        return true;
-    }
 
     protected override void ModelToControls()
     {
