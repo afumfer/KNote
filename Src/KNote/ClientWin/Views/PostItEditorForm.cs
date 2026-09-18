@@ -347,6 +347,8 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
 
     #region Private Methods
 
+    private const string LockedCaptionIndicator = " \U0001F512 Locked";
+
     private async void ModelToControls()
     {
         if (_ctrl.Model is null)
@@ -355,7 +357,7 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
         var ct = _ctrl.Model.GetContentTypeExt();
         kntEditView.ContentLocked = ct.DescriptionBlocked;
 
-        labelCaption.Text = _ctrl.Model.Topic;
+        labelCaption.Text = _ctrl.Model.Topic + (ct.DescriptionBlocked ? LockedCaptionIndicator : "");
         RefreshStatus();
         _selectedFolderId = _ctrl.Model.FolderId;
 
@@ -463,8 +465,9 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
                 _ctrl.Model.Description = _ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForWrite(kntEditView.MarkdownText, true);
         }
 
+        // Topic is deliberately not read back from labelCaption: it's a display-only mirror of
+        // Model.Topic that may carry the lock indicator suffix.
         _ctrl.Model.FolderId = _selectedFolderId;
-        _ctrl.Model.Topic = labelCaption.Text;
 
         ControlsToModelPostIt();
     }
@@ -703,8 +706,7 @@ public partial class PostItEditorForm : Form, IViewPostItEditor<NoteDto>
             ? string.Empty
             : await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
 
-        var lockIndicator = _ctrl.Model.GetContentTypeExt().DescriptionBlocked ? " \U0001F512 Locked" : "";
-        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{folderPath}] {status}{lockIndicator}";
+        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{folderPath}] {status}";
     }
 
     #endregion
