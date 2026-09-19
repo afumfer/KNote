@@ -1,6 +1,6 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
-using System.Collections;
+using System.Collections.Concurrent;
 using System.IO.Ports;
 using System.Text;
 
@@ -11,18 +11,20 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
     #region Private fields
 
     private SerialPort _serialPort;
-    private Queue _messageQueue;
+    // Shared by the reader thread (responses), the sender thread and the AI streaming callbacks.
+    private readonly ConcurrentQueue<string> _messageQueue = new();
     private readonly KNoteAIAssistantCtrl _aiAssistant;
 
     private CancellationTokenSource _cancellationTokenSource;    
     private bool _showViewMessage;
-    private readonly Dictionary<char, byte> _convTable;
+    private static readonly Dictionary<char, byte> _convTable = LoadQDOSCharacterSetTable();
 
     #endregion
 
     #region Constants
 
     private const byte EofByte = 26;
+    private static readonly string EofMessage = ((char)EofByte).ToString();
 
     // Wire commands (protocol contract with the retro clients).
     private const string CmdAi = "#ai";
@@ -44,8 +46,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         private set 
         { 
             _runningService = value;
-            if (_serverCOMView != null)
-                _serverCOMView.RefreshStatus();
+            NotifyStatusChanged();
         }
     }
 
@@ -68,8 +69,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         private set
         {
             _messageSending = value;
-            if (_serverCOMView != null)
-                _serverCOMView.RefreshStatus();
+            NotifyStatusChanged();
         }
     }
 
@@ -113,12 +113,13 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         ShowErrorMessagesOnInitialize = false;
         _showViewMessage = true;
                 
-        _convTable = LoadQDOSCharacterSetTable();
-
         // AI Assistant included controller (any provider/model: OpenAI, Anthropic, Ollama).
         // Must stay a field: CtrlBase.FinalizeViewsController finalizes CtrlBase fields by reflection.
         _aiAssistant = new KNoteAIAssistantCtrl(store);
-        _aiAssistant.Run();
+        // Without configured providers Run() would pop up an error dialog from inside this constructor;
+        // the requests are answered with an explanatory message instead (see ExecuteAiRequest).
+        if (store.AppConfig.AiProviderRefs.Count > 0)
+            _aiAssistant.Run();
     }
 
     #endregion
@@ -133,26 +134,13 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     protected override Result<EControllerResult> OnInitialized()
     {
-        try
-        {            
-            StartService();            
-            return new Result<EControllerResult>(EControllerResult.Executed);
-        }
-        catch (OperationCanceledException)
-        {
-            // not doing anything
-            var res = new Result<EControllerResult>(EControllerResult.Error);
-            return res;
-        }
-        catch (Exception ex)
-        {
-            var res = new Result<EControllerResult>(EControllerResult.Error);
-            var _statusInfo = $"KntServerCOM controller. The connection could not be started. Error: {ex.Message}.";
-            res.AddErrorMessage(_statusInfo);            
-            if (ShowErrorMessagesOnInitialize)
-                ServerCOMView.ShowInfo(_statusInfo, KntConst.AppName);
-            return res;
-        }
+        // Starting the service is best effort: a missing or busy COM port must not make the controller
+        // fail. It stays available (with the service stopped, and the reason in Error/StatusInfo) so the
+        // view can still be shown and the user can fix the settings and start the service later.
+        if (!StartService() && ShowErrorMessagesOnInitialize)
+            ServerCOMView.ShowInfo(_error, KntConst.AppName);
+
+        return new Result<EControllerResult>(EControllerResult.Executed);
     }
     
     protected override Result<EControllerResult> OnFinalized()
@@ -169,94 +157,126 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public void Send(string message)
     {
+        if (!RunningService)
+            return;
+
         _messageQueue.Enqueue(message);
-        _messageQueue.Enqueue((char)EofByte);
+        _messageQueue.Enqueue(EofMessage);
     }
 
     public void StopService()
     {
         if (RunningService == false)
         {
-            if (_serverCOMView != null)   
+            if (_serverCOMView != null)
                 if(_showViewMessage)
                     _serverCOMView.ShowInfo("The service is already stopped.");
             return;
         }
-        
+
         try
         {
+            // Cancel first so the worker threads leave their loops before the port is closed.
+            _cancellationTokenSource?.Cancel();
             RunningService = false;
 
-            if (_serialPort != null && _serialPort.IsOpen)
-                _serialPort.Close();
-            _statusInfo = "Com and servide closed ...";
-
-            if (_cancellationTokenSource != null)
+            if (_serialPort != null)
             {
-                _cancellationTokenSource.Cancel();
+                if (_serialPort.IsOpen)
+                    _serialPort.Close();
+                _serialPort.Dispose();
             }
+            _statusInfo = "Com and service closed ...";
         }
         catch { }
     }
 
-    public void StartService()
+    // Returns false (with the reason in Error/StatusInfo) instead of throwing when the service cannot be
+    // started, typically because the port does not exist on this computer or is in use.
+    public bool StartService()
     {
         if(RunningService == true)
         {
             if (_serverCOMView != null)
                 _serverCOMView.ShowInfo("Service is already running.");
-            return;
+            return true;
+        }
+
+        _error = null;
+
+        try
+        {
+            if (!SerialPort.GetPortNames().Contains(PortName, StringComparer.OrdinalIgnoreCase))
+                return FailStart($"The port '{PortName}' is not available on this computer.");
+
+            _serialPort = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.Two);
+            _serialPort.Handshake = (Handshake)HandShake;
+            _serialPort.ReadTimeout = 5000;
+            _serialPort.WriteTimeout = 5000;
+            _serialPort.Encoding = Encoding.ASCII;
+            _serialPort.Open();
+        }
+        catch (Exception ex)
+        {
+            _serialPort?.Dispose();
+            return FailStart($"The port '{PortName}' could not be opened: {ex.Message}");
         }
 
         _cancellationTokenSource = new CancellationTokenSource();
-        CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-        _serialPort = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.Two);
-        _serialPort.Handshake = (Handshake)HandShake;        
-        _serialPort.ReadTimeout = 5000;
-        _serialPort.WriteTimeout = 5000;
-        _serialPort.Encoding = Encoding.ASCII;
-        _serialPort.Open();   
-        
-        _messageQueue = new Queue();
-        _aiAssistant.RestartAIAssistant();
+        _messageQueue.Clear();
+        _aiAssistant?.RestartAIAssistant();
 
         _statusInfo = "Com started ...";
 
-        Task.Factory.StartNew(() => Server(cancellationToken), cancellationToken);        
-        
+        // RunningService must be true before the worker threads start: they loop while it is set.
         RunningService = true;
+
+        var port = _serialPort;
+        var cancellationToken = _cancellationTokenSource.Token;
+        Task.Factory.StartNew(() => Server(port, cancellationToken), cancellationToken,
+            TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        return true;
     }
 
     #endregion
 
     #region Private methods
 
-    private void Server(CancellationToken cancellationToken)
+    private void NotifyStatusChanged()
     {
-        Task.Factory.StartNew(() => Read(cancellationToken), cancellationToken);                        
-
-        while (RunningService)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                throw new OperationCanceledException();
-            }
-
-            if (_messageQueue.Count > 0)
-            {
-                var msg = _messageQueue.Dequeue();
-                if (msg != null)
-                {
-                    SendMessage(msg.ToString());
-                }
-            }
-            else
-                Thread.Sleep(RetroDelay);
-        }        
+        // Local copy: the field is reset to null when the controller is finalized.
+        var view = _serverCOMView;
+        view?.RefreshStatus();
     }
 
-    private void SendMessage(string messageSource)
+    private bool FailStart(string error)
+    {
+        _error = error;
+        _statusInfo = $"KntServerCOM controller. The service could not be started. {error}";
+        NotifyStatusChanged();
+        return false;
+    }
+
+    private void Server(SerialPort port, CancellationToken cancellationToken)
+    {
+        Task.Factory.StartNew(() => Read(port, cancellationToken), cancellationToken,
+            TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        while (RunningService && !cancellationToken.IsCancellationRequested)
+        {
+            if (_messageQueue.TryDequeue(out var msg))
+            {
+                if (msg != null)
+                    SendMessage(port, msg);
+            }
+            else
+                Thread.Sleep(Math.Max(RetroDelay, 1));
+        }
+    }
+
+    private void SendMessage(SerialPort port, string messageSource)
     {
         _statusInfo = "Sending ...";
         MessageSending = true;        
@@ -286,7 +306,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
                 {
                     if (i + chunkSize > bMessage.Length)
                         chunkSize = bMessage.Length - i;
-                    _serialPort.Write(bMessage, i, chunkSize);
+                    port.Write(bMessage, i, chunkSize);
                     Thread.Sleep(RetroDelay);
                 }
             }
@@ -298,41 +318,59 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         MessageSending = false;
     }
 
-    private void Read(CancellationToken cancellationToken)
+    private void Read(SerialPort port, CancellationToken cancellationToken)
     {
-        string messageIn;
+        var messageIn = new StringBuilder();
 
-        while (RunningService)
+        while (RunningService && !cancellationToken.IsCancellationRequested)
         {
             try
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    throw new OperationCanceledException();
-                }
-                                
-                messageIn = "";
+                messageIn.Clear();
 
-                while (true)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    if(_serialPort.BytesToRead > 0)
+                    if (port.BytesToRead == 0)
                     {
-                        byte b = (byte)_serialPort.ReadByte();
-                        if (b == EofByte)
-                            break;                                                 
-                        messageIn += ConvertByteToClientCSChar(b);                        
+                        Thread.Sleep(1);
+                        continue;
                     }
-                }
-               
-                _statusInfo = $"Recived: {messageIn}";
-                ReceiveMessage?.Invoke(this, new ControllerEventArgs<string>(messageIn));
-                
-                DispatchRequest(GetKComRequest(messageIn));
 
-                messageIn = "";
+                    byte b = (byte)port.ReadByte();
+                    if (b == EofByte)
+                        break;
+                    messageIn.Append(ConvertByteToClientCSChar(b));
+                }
+
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                var messageText = messageIn.ToString();
+                _statusInfo = $"Recived: {messageText}";
+                try
+                {
+                    ReceiveMessage?.Invoke(this, new ControllerEventArgs<string>(messageText));
+                }
+                catch (Exception e) { _error = e.Message; }  // a failing subscriber must not lose the request
+
+                DispatchRequest(GetKComRequest(messageText));
             }
             catch (TimeoutException) { }
-            catch (Exception e) { _error = e.Message; }
+            catch (Exception e)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                _error = e.Message;
+                if (!port.IsOpen)
+                {
+                    // The port went away while running (e.g. a USB adapter was unplugged).
+                    StopService();
+                    _statusInfo = $"The port '{PortName}' was closed unexpectedly: {e.Message}";
+                    NotifyStatusChanged();
+                    break;
+                }
+            }
         }
     }
 
@@ -411,64 +449,81 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         _messageQueue.Enqueue($"Echo for request [{request}]");
 
         // Signal for end of stream.  
-        _messageQueue.Enqueue((char)EofByte);
+        _messageQueue.Enqueue(EofMessage);
     }
 
     private void ExecuteAiRestartRequest()
     {
-        _aiAssistant.RestartAIAssistant();
-        _messageQueue.Enqueue((char)EofByte);
+        _aiAssistant?.RestartAIAssistant();
+        _messageQueue.Enqueue(EofMessage);
     }
 
+    // async void: nothing awaits it, so every failure (no provider configured, invalid API key, network
+    // error...) must be handled here or it would take the whole application down. The error is sent back
+    // to the device as the answer.
     private async void ExecuteAiRequest(string request)
     {
-        _aiAssistant.StreamToken += _aiAssistant_StreamToken;
-        await _aiAssistant.StreamCompletionAsync(request);
-        _aiAssistant.StreamToken -= _aiAssistant_StreamToken;
+        // Local copy: the field is reset to null when the controller is finalized.
+        var aiAssistant = _aiAssistant;
 
-        _messageQueue.Enqueue((char)EofByte);
+        try
+        {
+            if (aiAssistant?.CurrentProviderRef == null)
+                throw new InvalidOperationException("No AI provider is configured. Add one in the KNote AI providers options.");
+
+            aiAssistant.StreamToken += _aiAssistant_StreamToken;
+            try
+            {
+                await aiAssistant.StreamCompletionAsync(request);
+            }
+            finally
+            {
+                aiAssistant.StreamToken -= _aiAssistant_StreamToken;
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            _messageQueue.Enqueue($"AI assistant error: {ex.Message}");
+        }
+        finally
+        {
+            _messageQueue.Enqueue(EofMessage);
+        }
     }
 
     private void _aiAssistant_StreamToken(object sender, ControllerEventArgs<string> e)
     {
-        _messageQueue.Enqueue(e.Entity?.ToString());        
+        var token = e.Entity?.ToString();
+        if (!string.IsNullOrEmpty(token))
+            _messageQueue.Enqueue(token);
     }
 
     #endregion 
 
     #region Utils 
 
-    private byte[] ConverUtf8StringToClientOSBytes(string sourceText)
+    // internal (not private) only so ClientWin.Tests can exercise the conversion without a COM port.
+    internal static byte[] ConverUtf8StringToClientOSBytes(string sourceText)
     {
-        List<byte> outQDos = new List<byte>();
+        var outQDos = new List<byte>(sourceText.Length);
 
-        byte[] utf8EncodedBytes = Encoding.UTF8.GetBytes(sourceText);
-        string utf8DecodedString = Encoding.UTF8.GetString(utf8EncodedBytes);
-
-        var charArray = utf8DecodedString.ToCharArray();
-
-        for (var i = 0; i < charArray.Count(); i++)
+        for (var i = 0; i < sourceText.Length; i++)
         {
-            var c = charArray[i];
+            var c = sourceText[i];
             if (c == '\r')
             {
-                var c2 = charArray[++i];
-                if (c2 == '\n')                    
-                    outQDos.Add(ConvertCharToClientCSByte(c2));
-                else
-                {
-                    outQDos.Add(ConvertCharToClientCSByte('\n'));
-                    outQDos.Add(ConvertCharToClientCSByte(c2));
-                }
+                // CRLF -> LF (the '\n' is converted in the next iteration); a lone CR -> LF.
+                if (i + 1 < sourceText.Length && sourceText[i + 1] == '\n')
+                    continue;
+                c = '\n';
             }
-            else
-                outQDos.Add(ConvertCharToClientCSByte(c));
-
+            outQDos.Add(ConvertCharToClientCSByte(c));
         }
         return outQDos.ToArray();
     }
 
-    private byte ConvertCharToClientCSByte(char c)
+    private static byte ConvertCharToClientCSByte(char c)
     {
         if (_convTable.ContainsKey(c))
             return _convTable[c];
@@ -476,15 +531,15 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
             return (byte)c;
     }
 
-    private char ConvertByteToClientCSChar(byte b)
+    private static char ConvertByteToClientCSChar(byte b)
     {
         if (b < 128)  // ASCII standard
             return (char)b;
-        else        
-            return _convTable.Where(v => v.Value == b).FirstOrDefault().Key;    
+        else
+            return _convTable.Where(v => v.Value == b).FirstOrDefault().Key;
     }
 
-    private Dictionary<char, byte> LoadQDOSCharacterSetTable()
+    private static Dictionary<char, byte> LoadQDOSCharacterSetTable()
     {
         // QDOS (Sinclair QL) character set table  
 

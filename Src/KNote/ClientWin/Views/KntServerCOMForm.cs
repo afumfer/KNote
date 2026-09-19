@@ -49,9 +49,13 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
 
     public void RefreshStatus()
     {
+        // Can be called from the service threads before the handle exists or after the form is gone.
+        if (!IsHandleCreated || IsDisposed)
+            return;
+
         statusInfo.Invoke((MethodInvoker)delegate
         {
-            // Running on the UI thread                        
+            // Running on the UI thread
             statusLabelInfo.Text = $"Runing service: {_ctrl.RunningService} | Message sending: {_ctrl.MessageSending}";
         });
 
@@ -68,7 +72,8 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
 
     private void buttonStart_Click(object sender, EventArgs e)
     {
-        _ctrl.StartService();
+        if (!_ctrl.StartService())
+            KntMessageBox.Show(_ctrl.Error);
     }
 
     private void buttonStop_Click(object sender, EventArgs e)
@@ -106,6 +111,9 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
 
     private void _com_ReceiveMessage(object sender, ControllerEventArgs<string> e)
     {
+        if (!IsHandleCreated || IsDisposed)
+            return;
+
         listBoxEcho.Invoke((MethodInvoker)delegate
         {
             // Running on the UI thread                        
