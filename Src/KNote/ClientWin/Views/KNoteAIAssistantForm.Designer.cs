@@ -70,7 +70,7 @@ namespace KNote.ClientWin.Views
             statusStripChat.Location = new Point(0, 601);
             statusStripChat.Name = "statusStripChat";
             statusStripChat.Size = new Size(858, 22);
-            statusStripChat.TabIndex = 22;
+            statusStripChat.TabIndex = 1;
             //
             // toolStripStatusServiceRef
             //
@@ -121,6 +121,7 @@ namespace KNote.ClientWin.Views
             splitChat.Panel1.Controls.Add(kntEditViewResult);
             splitChat.Panel1.Controls.Add(panelResultHeader);
             splitChat.Panel1.Padding = new Padding(4);
+            splitChat.Panel1.TabIndex = 1;
             splitChat.Panel1MinSize = 200;
             //
             // splitChat.Panel2
@@ -128,11 +129,12 @@ namespace KNote.ClientWin.Views
             splitChat.Panel2.Controls.Add(textPrompt);
             splitChat.Panel2.Controls.Add(panelPromptHeader);
             splitChat.Panel2.Padding = new Padding(4);
+            splitChat.Panel2.TabIndex = 0;
             splitChat.Panel2MinSize = 50;
             splitChat.Size = new Size(858, 601);
             splitChat.SplitterDistance = 409;
             splitChat.SplitterWidth = 6;
-            splitChat.TabIndex = 25;
+            splitChat.TabIndex = 0;
             //
             // panelResultHeader
             //
@@ -145,7 +147,7 @@ namespace KNote.ClientWin.Views
             panelResultHeader.Location = new Point(0, 0);
             panelResultHeader.Name = "panelResultHeader";
             panelResultHeader.Size = new Size(858, 34);
-            panelResultHeader.TabIndex = 29;
+            panelResultHeader.TabIndex = 0;
             //
             // buttonNavigate
             //
@@ -153,7 +155,7 @@ namespace KNote.ClientWin.Views
             buttonNavigate.Location = new Point(769, 4);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(82, 26);
-            buttonNavigate.TabIndex = 28;
+            buttonNavigate.TabIndex = 4;
             buttonNavigate.Text = "Navigate";
             buttonNavigate.UseVisualStyleBackColor = true;
             buttonNavigate.Click += buttonNavigate_Click;
@@ -164,7 +166,7 @@ namespace KNote.ClientWin.Views
             buttonMarkDown.Location = new Point(682, 4);
             buttonMarkDown.Name = "buttonMarkDown";
             buttonMarkDown.Size = new Size(82, 26);
-            buttonMarkDown.TabIndex = 27;
+            buttonMarkDown.TabIndex = 3;
             buttonMarkDown.Text = "Markdown";
             buttonMarkDown.UseVisualStyleBackColor = true;
             buttonMarkDown.Click += buttonMarkDown_Click;
@@ -176,7 +178,7 @@ namespace KNote.ClientWin.Views
             kntEditViewResult.Margin = new Padding(3, 4, 3, 4);
             kntEditViewResult.Name = "kntEditViewResult";
             kntEditViewResult.Size = new Size(858, 567);
-            kntEditViewResult.TabIndex = 26;
+            kntEditViewResult.TabIndex = 1;
             //
             // radioGetStream
             //
@@ -186,7 +188,7 @@ namespace KNote.ClientWin.Views
             radioGetStream.Location = new Point(455, 9);
             radioGetStream.Name = "radioGetStream";
             radioGetStream.Size = new Size(81, 17);
-            radioGetStream.TabIndex = 5;
+            radioGetStream.TabIndex = 1;
             radioGetStream.TabStop = true;
             radioGetStream.Text = "Get Stream";
             radioGetStream.UseVisualStyleBackColor = true;
@@ -198,7 +200,7 @@ namespace KNote.ClientWin.Views
             radioGetCompletion.Location = new Point(557, 9);
             radioGetCompletion.Name = "radioGetCompletion";
             radioGetCompletion.Size = new Size(106, 17);
-            radioGetCompletion.TabIndex = 6;
+            radioGetCompletion.TabIndex = 2;
             radioGetCompletion.Text = "Get Completion";
             radioGetCompletion.UseVisualStyleBackColor = true;
             //
@@ -209,7 +211,7 @@ namespace KNote.ClientWin.Views
             labelResult.Location = new Point(8, 12);
             labelResult.Name = "labelResult";
             labelResult.Size = new Size(46, 17);
-            labelResult.TabIndex = 25;
+            labelResult.TabIndex = 0;
             labelResult.Text = "Result:";
             //
             // panelPromptHeader
@@ -226,23 +228,23 @@ namespace KNote.ClientWin.Views
             panelPromptHeader.Location = new Point(0, 0);
             panelPromptHeader.Name = "panelPromptHeader";
             panelPromptHeader.Size = new Size(858, 34);
-            panelPromptHeader.TabIndex = 30;
+            panelPromptHeader.TabIndex = 1;
             //
             // panelSeparator
             //
             panelSeparator.BackColor = SystemColors.ControlDarkDark;
-            panelSeparator.Location = new Point(569, 5);
+            panelSeparator.Location = new Point(309, 5);
             panelSeparator.Name = "panelSeparator";
             panelSeparator.Size = new Size(3, 25);
-            panelSeparator.TabIndex = 27;
+            panelSeparator.TabIndex = 3;
             //
             // buttonViewSystem
             //
             buttonViewSystem.Font = new Font("Segoe UI", 8.25F);
-            buttonViewSystem.Location = new Point(738, 4);
+            buttonViewSystem.Location = new Point(740, 4);
             buttonViewSystem.Name = "buttonViewSystem";
             buttonViewSystem.Size = new Size(114, 26);
-            buttonViewSystem.TabIndex = 26;
+            buttonViewSystem.TabIndex = 7;
             buttonViewSystem.Text = "&View system root";
             buttonViewSystem.UseVisualStyleBackColor = true;
             buttonViewSystem.Click += buttonViewSystem_Click;
@@ -250,10 +252,10 @@ namespace KNote.ClientWin.Views
             // buttonCatalogPrompts
             //
             buttonCatalogPrompts.Font = new Font("Segoe UI", 8.25F);
-            buttonCatalogPrompts.Location = new Point(578, 4);
+            buttonCatalogPrompts.Location = new Point(580, 4);
             buttonCatalogPrompts.Name = "buttonCatalogPrompts";
             buttonCatalogPrompts.Size = new Size(154, 26);
-            buttonCatalogPrompts.TabIndex = 25;
+            buttonCatalogPrompts.TabIndex = 6;
             buttonCatalogPrompts.Text = "Get prompt from &catalog";
             buttonCatalogPrompts.UseVisualStyleBackColor = true;
             buttonCatalogPrompts.Click += buttonCatalogPrompts_Click;
@@ -261,10 +263,10 @@ namespace KNote.ClientWin.Views
             // buttonRestart
             //
             buttonRestart.Font = new Font("Segoe UI", 8.25F);
-            buttonRestart.Location = new Point(506, 4);
+            buttonRestart.Location = new Point(246, 4);
             buttonRestart.Name = "buttonRestart";
             buttonRestart.Size = new Size(56, 26);
-            buttonRestart.TabIndex = 3;
+            buttonRestart.TabIndex = 2;
             buttonRestart.Text = "&Restart";
             buttonRestart.UseVisualStyleBackColor = true;
             buttonRestart.Click += buttonRestart_Click;
@@ -276,7 +278,7 @@ namespace KNote.ClientWin.Views
             labelPrompt.Location = new Point(8, 12);
             labelPrompt.Name = "labelPrompt";
             labelPrompt.Size = new Size(54, 17);
-            labelPrompt.TabIndex = 24;
+            labelPrompt.TabIndex = 0;
             labelPrompt.Text = "Prompt:";
             //
             // comboProviders
@@ -284,19 +286,19 @@ namespace KNote.ClientWin.Views
             comboProviders.DropDownStyle = ComboBoxStyle.DropDownList;
             comboProviders.Font = new Font("Segoe UI", 8.25F);
             comboProviders.FormattingEnabled = true;
-            comboProviders.Location = new Point(184, 7);
+            comboProviders.Location = new Point(318, 7);
             comboProviders.Name = "comboProviders";
             comboProviders.Size = new Size(180, 23);
-            comboProviders.TabIndex = 1;
+            comboProviders.TabIndex = 4;
             comboProviders.SelectedIndexChanged += comboProviders_SelectedIndexChanged;
             //
             // buttonManageProviders
             //
             buttonManageProviders.Font = new Font("Segoe UI", 8.25F);
-            buttonManageProviders.Location = new Point(370, 4);
+            buttonManageProviders.Location = new Point(504, 4);
             buttonManageProviders.Name = "buttonManageProviders";
             buttonManageProviders.Size = new Size(70, 26);
-            buttonManageProviders.TabIndex = 4;
+            buttonManageProviders.TabIndex = 5;
             buttonManageProviders.Text = "&Manage...";
             buttonManageProviders.UseVisualStyleBackColor = true;
             buttonManageProviders.Click += buttonManageProviders_Click;
@@ -316,10 +318,10 @@ namespace KNote.ClientWin.Views
             // buttonSend
             //
             buttonSend.Font = new Font("Segoe UI", 8.25F);
-            buttonSend.Location = new Point(444, 4);
+            buttonSend.Location = new Point(184, 4);
             buttonSend.Name = "buttonSend";
             buttonSend.Size = new Size(56, 26);
-            buttonSend.TabIndex = 2;
+            buttonSend.TabIndex = 1;
             buttonSend.Text = "&Send";
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;

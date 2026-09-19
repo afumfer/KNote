@@ -978,7 +978,7 @@
             buttonDeleteType.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteType.Name = "buttonDeleteType";
             buttonDeleteType.Size = new Size(27, 26);
-            buttonDeleteType.TabIndex = 47;
+            buttonDeleteType.TabIndex = 2;
             buttonDeleteType.Text = "X";
             toolTipHelps.SetToolTip(buttonDeleteType, "Delete type");
             buttonDeleteType.UseVisualStyleBackColor = false;
@@ -991,7 +991,7 @@
             listViewAttributes.MultiSelect = false;
             listViewAttributes.Name = "listViewAttributes";
             listViewAttributes.Size = new Size(775, 476);
-            listViewAttributes.TabIndex = 46;
+            listViewAttributes.TabIndex = 6;
             listViewAttributes.UseCompatibleStateImageBehavior = false;
             listViewAttributes.DoubleClick += listViewAttributes_DoubleClick;
             listViewAttributes.Resize += listView_Resize;
@@ -1006,7 +1006,7 @@
             textNoteType.Name = "textNoteType";
             textNoteType.ShortcutsEnabled = false;
             textNoteType.Size = new Size(625, 23);
-            textNoteType.TabIndex = 44;
+            textNoteType.TabIndex = 1;
             // 
             // buttonNoteType
             // 
@@ -1018,7 +1018,7 @@
             buttonNoteType.Margin = new Padding(4, 3, 4, 3);
             buttonNoteType.Name = "buttonNoteType";
             buttonNoteType.Size = new Size(27, 26);
-            buttonNoteType.TabIndex = 45;
+            buttonNoteType.TabIndex = 3;
             buttonNoteType.Text = "...";
             toolTipHelps.SetToolTip(buttonNoteType, "Select new type");
             buttonNoteType.UseVisualStyleBackColor = false;
@@ -1030,7 +1030,7 @@
             label15.Margin = new Padding(4, 0, 4, 0);
             label15.Name = "label15";
             label15.Size = new Size(85, 18);
-            label15.TabIndex = 43;
+            label15.TabIndex = 0;
             label15.Text = "Node type:";
             label15.TextAlign = ContentAlignment.MiddleLeft;
             // 
@@ -1042,7 +1042,7 @@
             buttonAttributeEdit.Margin = new Padding(4, 3, 4, 3);
             buttonAttributeEdit.Name = "buttonAttributeEdit";
             buttonAttributeEdit.Size = new Size(27, 26);
-            buttonAttributeEdit.TabIndex = 12;
+            buttonAttributeEdit.TabIndex = 4;
             buttonAttributeEdit.Text = "...";
             buttonAttributeEdit.UseVisualStyleBackColor = true;
             buttonAttributeEdit.Click += buttonAttributeEdit_Click;
@@ -1054,7 +1054,7 @@
             label10.Margin = new Padding(4, 0, 4, 0);
             label10.Name = "label10";
             label10.Size = new Size(62, 15);
-            label10.TabIndex = 3;
+            label10.TabIndex = 5;
             label10.Text = "Attributes:";
             // 
             // tabResources
@@ -1412,7 +1412,7 @@
             listViewAlarms.MultiSelect = false;
             listViewAlarms.Name = "listViewAlarms";
             listViewAlarms.Size = new Size(782, 523);
-            listViewAlarms.TabIndex = 11;
+            listViewAlarms.TabIndex = 4;
             listViewAlarms.UseCompatibleStateImageBehavior = false;
             listViewAlarms.DoubleClick += listViewAlarms_DoubleClick;
             listViewAlarms.Resize += listView_Resize;
@@ -1425,7 +1425,7 @@
             buttonEditAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonEditAlarm.Name = "buttonEditAlarm";
             buttonEditAlarm.Size = new Size(27, 26);
-            buttonEditAlarm.TabIndex = 11;
+            buttonEditAlarm.TabIndex = 3;
             buttonEditAlarm.Text = "...";
             buttonEditAlarm.UseVisualStyleBackColor = true;
             buttonEditAlarm.Click += buttonEditAlarm_Click;
@@ -1438,7 +1438,7 @@
             buttonDeleteAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteAlarm.Name = "buttonDeleteAlarm";
             buttonDeleteAlarm.Size = new Size(27, 26);
-            buttonDeleteAlarm.TabIndex = 10;
+            buttonDeleteAlarm.TabIndex = 2;
             buttonDeleteAlarm.Text = "-";
             buttonDeleteAlarm.UseVisualStyleBackColor = true;
             buttonDeleteAlarm.Click += buttonDeleteAlarm_Click;
@@ -1451,7 +1451,7 @@
             buttonAddAlarm.Margin = new Padding(4, 3, 4, 3);
             buttonAddAlarm.Name = "buttonAddAlarm";
             buttonAddAlarm.Size = new Size(27, 26);
-            buttonAddAlarm.TabIndex = 9;
+            buttonAddAlarm.TabIndex = 1;
             buttonAddAlarm.Text = "+";
             buttonAddAlarm.UseVisualStyleBackColor = true;
             buttonAddAlarm.Click += buttonAddAlarm_Click;
@@ -1489,7 +1489,7 @@
             comboScriptType.Location = new Point(628, 10);
             comboScriptType.Name = "comboScriptType";
             comboScriptType.Size = new Size(160, 23);
-            comboScriptType.TabIndex = 8;
+            comboScriptType.TabIndex = 2;
             comboScriptType.SelectedIndexChanged += comboScriptType_SelectedIndexChanged;
             //
             // labelCodeType
@@ -1500,7 +1500,7 @@
             labelCodeType.Margin = new Padding(4, 0, 4, 0);
             labelCodeType.Name = "labelCodeType";
             labelCodeType.Size = new Size(64, 15);
-            labelCodeType.TabIndex = 7;
+            labelCodeType.TabIndex = 1;
             labelCodeType.Text = "Code type:";
             //
             // textScriptCode
@@ -1513,7 +1513,7 @@
             textScriptCode.Name = "textScriptCode";
             textScriptCode.ScrollBars = ScrollBars.Both;
             textScriptCode.Size = new Size(781, 525);
-            textScriptCode.TabIndex = 6;
+            textScriptCode.TabIndex = 3;
             textScriptCode.WordWrap = false;
             // 
             // labelScriptCode
@@ -1523,7 +1523,7 @@
             labelScriptCode.Margin = new Padding(4, 0, 4, 0);
             labelScriptCode.Name = "labelScriptCode";
             labelScriptCode.Size = new Size(69, 15);
-            labelScriptCode.TabIndex = 4;
+            labelScriptCode.TabIndex = 0;
             labelScriptCode.Text = "Script code:";
             //
             // tabTraceNotes

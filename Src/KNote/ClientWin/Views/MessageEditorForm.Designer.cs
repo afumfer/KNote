@@ -91,7 +91,7 @@ namespace KNote.ClientWin.Views
             this.label5.Location = new System.Drawing.Point(9, 129);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(99, 15);
-            this.label5.TabIndex = 8;
+            this.label5.TabIndex = 11;
             this.label5.Text = "Notification type:";
             // 
             // comboNotificationType
@@ -101,14 +101,14 @@ namespace KNote.ClientWin.Views
             this.comboNotificationType.Location = new System.Drawing.Point(127, 126);
             this.comboNotificationType.Name = "comboNotificationType";
             this.comboNotificationType.Size = new System.Drawing.Size(273, 23);
-            this.comboNotificationType.TabIndex = 5;
+            this.comboNotificationType.TabIndex = 12;
             // 
             // buttonSelectDate
             // 
             this.buttonSelectDate.Location = new System.Drawing.Point(376, 67);
             this.buttonSelectDate.Name = "buttonSelectDate";
             this.buttonSelectDate.Size = new System.Drawing.Size(24, 24);
-            this.buttonSelectDate.TabIndex = 2;
+            this.buttonSelectDate.TabIndex = 6;
             this.buttonSelectDate.Text = "...";
             this.buttonSelectDate.UseVisualStyleBackColor = true;
             this.buttonSelectDate.Click += new System.EventHandler(this.buttonSelectDate_Click);
@@ -119,7 +119,7 @@ namespace KNote.ClientWin.Views
             this.label4.Location = new System.Drawing.Point(9, 158);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(64, 15);
-            this.label4.TabIndex = 5;
+            this.label4.TabIndex = 13;
             this.label4.Text = "Comment:";
             // 
             // label3
@@ -128,7 +128,7 @@ namespace KNote.ClientWin.Views
             this.label3.Location = new System.Drawing.Point(9, 100);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(101, 15);
-            this.label3.TabIndex = 6;
+            this.label3.TabIndex = 7;
             this.label3.Text = "Alarm periodicity:";
             // 
             // comboAlarmPeriodicity
@@ -138,7 +138,7 @@ namespace KNote.ClientWin.Views
             this.comboAlarmPeriodicity.Location = new System.Drawing.Point(127, 97);
             this.comboAlarmPeriodicity.Name = "comboAlarmPeriodicity";
             this.comboAlarmPeriodicity.Size = new System.Drawing.Size(175, 23);
-            this.comboAlarmPeriodicity.TabIndex = 3;
+            this.comboAlarmPeriodicity.TabIndex = 8;
             this.comboAlarmPeriodicity.SelectedIndexChanged += new System.EventHandler(this.comboAlarmPeriodicity_SelectedIndexChanged);
             // 
             // label2
@@ -156,7 +156,7 @@ namespace KNote.ClientWin.Views
             this.label1.Location = new System.Drawing.Point(9, 41);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(33, 15);
-            this.label1.TabIndex = 3;
+            this.label1.TabIndex = 1;
             this.label1.Text = "User:";
             // 
             // textAlarmDateTime
@@ -164,7 +164,7 @@ namespace KNote.ClientWin.Views
             this.textAlarmDateTime.Location = new System.Drawing.Point(127, 67);
             this.textAlarmDateTime.Name = "textAlarmDateTime";
             this.textAlarmDateTime.Size = new System.Drawing.Size(243, 23);
-            this.textAlarmDateTime.TabIndex = 1;
+            this.textAlarmDateTime.TabIndex = 5;
             // 
             // textContent
             // 
@@ -172,7 +172,7 @@ namespace KNote.ClientWin.Views
             this.textContent.Multiline = true;
             this.textContent.Name = "textContent";
             this.textContent.Size = new System.Drawing.Size(273, 162);
-            this.textContent.TabIndex = 6;
+            this.textContent.TabIndex = 14;
             // 
             // textUserFullName
             //
@@ -180,14 +180,14 @@ namespace KNote.ClientWin.Views
             this.textUserFullName.Location = new System.Drawing.Point(127, 38);
             this.textUserFullName.Name = "textUserFullName";
             this.textUserFullName.Size = new System.Drawing.Size(243, 23);
-            this.textUserFullName.TabIndex = 1;
+            this.textUserFullName.TabIndex = 2;
             //
             // buttonSelectUser
             //
             this.buttonSelectUser.Location = new System.Drawing.Point(376, 38);
             this.buttonSelectUser.Name = "buttonSelectUser";
             this.buttonSelectUser.Size = new System.Drawing.Size(24, 24);
-            this.buttonSelectUser.TabIndex = 2;
+            this.buttonSelectUser.TabIndex = 3;
             this.buttonSelectUser.Text = "...";
             this.buttonSelectUser.UseVisualStyleBackColor = true;
             this.buttonSelectUser.Click += new System.EventHandler(this.buttonSelectUser_Click);
@@ -198,7 +198,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel.Location = new System.Drawing.Point(324, 343);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 8;
+            this.buttonCancel.TabIndex = 2;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -209,7 +209,7 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.Location = new System.Drawing.Point(237, 343);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 7;
+            this.buttonAccept.TabIndex = 1;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
@@ -229,7 +229,7 @@ namespace KNote.ClientWin.Views
             this.textMinutes.Location = new System.Drawing.Point(348, 96);
             this.textMinutes.Name = "textMinutes";
             this.textMinutes.Size = new System.Drawing.Size(52, 23);
-            this.textMinutes.TabIndex = 4;
+            this.textMinutes.TabIndex = 10;
             this.textMinutes.Visible = false;
             // 
             // MessageEditorForm

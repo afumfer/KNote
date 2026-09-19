@@ -65,7 +65,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
             this.panelForm.Size = new System.Drawing.Size(437, 338);
-            this.panelForm.TabIndex = 8;
+            this.panelForm.TabIndex = 0;
             //
             // labelHelp
             //
@@ -75,7 +75,7 @@ namespace KNote.ClientWin.Views
             this.labelHelp.Location = new System.Drawing.Point(7, 49);
             this.labelHelp.Name = "labelHelp";
             this.labelHelp.Size = new System.Drawing.Size(423, 32);
-            this.labelHelp.TabIndex = 7;
+            this.labelHelp.TabIndex = 3;
             this.labelHelp.Text = "Free-text search across the note topic (and description, if checked below).";
             //
             // checkSearchInDescription
@@ -86,7 +86,7 @@ namespace KNote.ClientWin.Views
             this.checkSearchInDescription.Location = new System.Drawing.Point(7, 181);
             this.checkSearchInDescription.Name = "checkSearchInDescription";
             this.checkSearchInDescription.Size = new System.Drawing.Size(163, 19);
-            this.checkSearchInDescription.TabIndex = 1;
+            this.checkSearchInDescription.TabIndex = 8;
             this.checkSearchInDescription.Text = "Search in note description";
             this.checkSearchInDescription.UseVisualStyleBackColor = true;
             //
@@ -96,7 +96,7 @@ namespace KNote.ClientWin.Views
             this.checkSearchInNoteTasks.Location = new System.Drawing.Point(7, 205);
             this.checkSearchInNoteTasks.Name = "checkSearchInNoteTasks";
             this.checkSearchInNoteTasks.Size = new System.Drawing.Size(133, 19);
-            this.checkSearchInNoteTasks.TabIndex = 8;
+            this.checkSearchInNoteTasks.TabIndex = 9;
             this.checkSearchInNoteTasks.Text = "Search in note tasks";
             this.checkSearchInNoteTasks.UseVisualStyleBackColor = true;
             //
@@ -108,7 +108,7 @@ namespace KNote.ClientWin.Views
             this.pictureBox1.Location = new System.Drawing.Point(5, 40);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(425, 1);
-            this.pictureBox1.TabIndex = 6;
+            this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             //
             // buttonClean
@@ -116,7 +116,7 @@ namespace KNote.ClientWin.Views
             this.buttonClean.Location = new System.Drawing.Point(7, 9);
             this.buttonClean.Name = "buttonClean";
             this.buttonClean.Size = new System.Drawing.Size(65, 27);
-            this.buttonClean.TabIndex = 3;
+            this.buttonClean.TabIndex = 0;
             this.buttonClean.Text = "&Clean";
             this.buttonClean.UseVisualStyleBackColor = true;
             this.buttonClean.Click += new System.EventHandler(this.buttonClean_Click);
@@ -138,7 +138,7 @@ namespace KNote.ClientWin.Views
             this.buttonSearch.Location = new System.Drawing.Point(301, 9);
             this.buttonSearch.Name = "buttonSearch";
             this.buttonSearch.Size = new System.Drawing.Size(130, 27);
-            this.buttonSearch.TabIndex = 4;
+            this.buttonSearch.TabIndex = 1;
             this.buttonSearch.Text = "&Apply search";
             this.buttonSearch.UseVisualStyleBackColor = true;
             this.buttonSearch.Click += new System.EventHandler(this.buttonSearch_Click);
@@ -152,7 +152,7 @@ namespace KNote.ClientWin.Views
             this.comboRepositories.Location = new System.Drawing.Point(5, 101);
             this.comboRepositories.Name = "comboRepositories";
             this.comboRepositories.Size = new System.Drawing.Size(424, 23);
-            this.comboRepositories.TabIndex = 2;
+            this.comboRepositories.TabIndex = 5;
             // 
             // textTextSearch
             // 
@@ -161,7 +161,7 @@ namespace KNote.ClientWin.Views
             this.textTextSearch.Location = new System.Drawing.Point(7, 152);
             this.textTextSearch.Name = "textTextSearch";
             this.textTextSearch.Size = new System.Drawing.Size(422, 23);
-            this.textTextSearch.TabIndex = 0;
+            this.textTextSearch.TabIndex = 7;
             this.textTextSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textTextSearch_KeyUp);
             // 
             // label1
@@ -170,7 +170,7 @@ namespace KNote.ClientWin.Views
             this.label1.Location = new System.Drawing.Point(7, 134);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(68, 15);
-            this.label1.TabIndex = 0;
+            this.label1.TabIndex = 6;
             this.label1.Text = "Text search:";
             // 
             // panelBottom
@@ -181,7 +181,7 @@ namespace KNote.ClientWin.Views
             this.panelBottom.Location = new System.Drawing.Point(0, 338);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(437, 50);
-            this.panelBottom.TabIndex = 11;
+            this.panelBottom.TabIndex = 1;
             // 
             // buttonCancel
             // 
@@ -189,7 +189,7 @@ namespace KNote.ClientWin.Views
             this.buttonCancel.Location = new System.Drawing.Point(347, 11);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 6;
+            this.buttonCancel.TabIndex = 1;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -200,7 +200,7 @@ namespace KNote.ClientWin.Views
             this.buttonAccept.Location = new System.Drawing.Point(260, 11);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 5;
+            this.buttonAccept.TabIndex = 0;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);

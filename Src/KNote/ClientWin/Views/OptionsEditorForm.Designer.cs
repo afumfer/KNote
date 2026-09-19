@@ -299,7 +299,7 @@ namespace KNote.ClientWin.Views
             this.labelInfo.Location = new System.Drawing.Point(6, 217);
             this.labelInfo.Name = "labelInfo";
             this.labelInfo.Size = new System.Drawing.Size(181, 15);
-            this.labelInfo.TabIndex = 25;
+            this.labelInfo.TabIndex = 10;
             this.labelInfo.Text = "(*) Application restart is required ";
             // 
             // checkCompactViewNotesList
@@ -308,7 +308,7 @@ namespace KNote.ClientWin.Views
             this.checkCompactViewNotesList.Location = new System.Drawing.Point(13, 88);
             this.checkCompactViewNotesList.Name = "checkCompactViewNotesList";
             this.checkCompactViewNotesList.Size = new System.Drawing.Size(181, 19);
-            this.checkCompactViewNotesList.TabIndex = 24;
+            this.checkCompactViewNotesList.TabIndex = 6;
             this.checkCompactViewNotesList.Text = "Compact view in notes list (*)";
             this.checkCompactViewNotesList.UseVisualStyleBackColor = true;
             // 
@@ -317,14 +317,14 @@ namespace KNote.ClientWin.Views
             this.textAutosaveSeconds.Location = new System.Drawing.Point(309, 47);
             this.textAutosaveSeconds.Name = "textAutosaveSeconds";
             this.textAutosaveSeconds.Size = new System.Drawing.Size(58, 23);
-            this.textAutosaveSeconds.TabIndex = 23;
+            this.textAutosaveSeconds.TabIndex = 5;
             // 
             // textAlarmSeconds
             // 
             this.textAlarmSeconds.Location = new System.Drawing.Point(309, 12);
             this.textAlarmSeconds.Name = "textAlarmSeconds";
             this.textAlarmSeconds.Size = new System.Drawing.Size(58, 23);
-            this.textAlarmSeconds.TabIndex = 22;
+            this.textAlarmSeconds.TabIndex = 2;
             // 
             // label2
             // 
@@ -332,7 +332,7 @@ namespace KNote.ClientWin.Views
             this.label2.Location = new System.Drawing.Point(198, 51);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(105, 15);
-            this.label2.TabIndex = 21;
+            this.label2.TabIndex = 4;
             this.label2.Text = "Autosave seconds:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -342,7 +342,7 @@ namespace KNote.ClientWin.Views
             this.labelAlarmSeconds.Location = new System.Drawing.Point(198, 16);
             this.labelAlarmSeconds.Name = "labelAlarmSeconds";
             this.labelAlarmSeconds.Size = new System.Drawing.Size(88, 15);
-            this.labelAlarmSeconds.TabIndex = 20;
+            this.labelAlarmSeconds.TabIndex = 1;
             this.labelAlarmSeconds.Text = "Alarm seconds:";
             this.labelAlarmSeconds.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -352,7 +352,7 @@ namespace KNote.ClientWin.Views
             this.checkAutoSaveActivated.Location = new System.Drawing.Point(13, 51);
             this.checkAutoSaveActivated.Name = "checkAutoSaveActivated";
             this.checkAutoSaveActivated.Size = new System.Drawing.Size(158, 19);
-            this.checkAutoSaveActivated.TabIndex = 19;
+            this.checkAutoSaveActivated.TabIndex = 3;
             this.checkAutoSaveActivated.Text = "Autosave notes activated";
             this.checkAutoSaveActivated.UseVisualStyleBackColor = true;
             // 
@@ -362,7 +362,7 @@ namespace KNote.ClientWin.Views
             this.checkAlarmActivated.Location = new System.Drawing.Point(13, 16);
             this.checkAlarmActivated.Name = "checkAlarmActivated";
             this.checkAlarmActivated.Size = new System.Drawing.Size(109, 19);
-            this.checkAlarmActivated.TabIndex = 18;
+            this.checkAlarmActivated.TabIndex = 0;
             this.checkAlarmActivated.Text = "Alarm activated";
             this.checkAlarmActivated.UseVisualStyleBackColor = true;
             // 
@@ -395,7 +395,7 @@ namespace KNote.ClientWin.Views
             this.label1.Location = new System.Drawing.Point(13, 128);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(76, 15);
-            this.label1.TabIndex = 26;
+            this.label1.TabIndex = 7;
             this.label1.Text = "Chat hub url:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -404,14 +404,14 @@ namespace KNote.ClientWin.Views
             this.textChatHubUrl.Location = new System.Drawing.Point(95, 125);
             this.textChatHubUrl.Name = "textChatHubUrl";
             this.textChatHubUrl.Size = new System.Drawing.Size(295, 23);
-            this.textChatHubUrl.TabIndex = 27;
+            this.textChatHubUrl.TabIndex = 8;
             //
             // buttonTestChatHubUrl
             //
             this.buttonTestChatHubUrl.Location = new System.Drawing.Point(396, 124);
             this.buttonTestChatHubUrl.Name = "buttonTestChatHubUrl";
             this.buttonTestChatHubUrl.Size = new System.Drawing.Size(66, 25);
-            this.buttonTestChatHubUrl.TabIndex = 28;
+            this.buttonTestChatHubUrl.TabIndex = 9;
             this.buttonTestChatHubUrl.Text = "&Test";
             this.buttonTestChatHubUrl.UseVisualStyleBackColor = true;
             this.buttonTestChatHubUrl.Click += new System.EventHandler(this.buttonTestChatHubUrl_Click);

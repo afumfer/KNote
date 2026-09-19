@@ -81,7 +81,7 @@ namespace KNote.ClientWin.Views
             this.groupOrderNotes.Location = new System.Drawing.Point(8, 175);
             this.groupOrderNotes.Name = "groupOrderNotes";
             this.groupOrderNotes.Size = new System.Drawing.Size(480, 135);
-            this.groupOrderNotes.TabIndex = 9;
+            this.groupOrderNotes.TabIndex = 7;
             this.groupOrderNotes.TabStop = false;
             this.groupOrderNotes.Text = "Notes order";
             //
@@ -129,7 +129,7 @@ namespace KNote.ClientWin.Views
             this.label5.Location = new System.Drawing.Point(8, 320);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(78, 15);
-            this.label5.TabIndex = 10;
+            this.label5.TabIndex = 8;
             this.label5.Text = "Parent folder:";
             //
             // label3
@@ -138,7 +138,7 @@ namespace KNote.ClientWin.Views
             this.label3.Location = new System.Drawing.Point(8, 124);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(40, 15);
-            this.label3.TabIndex = 8;
+            this.label3.TabIndex = 5;
             this.label3.Text = "Order:";
             //
             // label2
@@ -147,7 +147,7 @@ namespace KNote.ClientWin.Views
             this.label2.Location = new System.Drawing.Point(8, 64);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(33, 15);
-            this.label2.TabIndex = 7;
+            this.label2.TabIndex = 3;
             this.label2.Text = "Tags:";
             //
             // label1
@@ -156,7 +156,7 @@ namespace KNote.ClientWin.Views
             this.label1.Location = new System.Drawing.Point(8, 11);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(42, 15);
-            this.label1.TabIndex = 6;
+            this.label1.TabIndex = 0;
             this.label1.Text = "Name:";
             //
             // textNumber
@@ -166,7 +166,7 @@ namespace KNote.ClientWin.Views
             this.textNumber.Name = "textNumber";
             this.textNumber.ReadOnly = true;
             this.textNumber.Size = new System.Drawing.Size(49, 23);
-            this.textNumber.TabIndex = 5;
+            this.textNumber.TabIndex = 2;
             this.textNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             //
             // textParentFolder
@@ -176,7 +176,7 @@ namespace KNote.ClientWin.Views
             this.textParentFolder.Name = "textParentFolder";
             this.textParentFolder.ReadOnly = true;
             this.textParentFolder.Size = new System.Drawing.Size(448, 23);
-            this.textParentFolder.TabIndex = 4;
+            this.textParentFolder.TabIndex = 9;
             this.textParentFolder.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textParentFolder_KeyUp);
             //
             // textOrder
@@ -184,21 +184,21 @@ namespace KNote.ClientWin.Views
             this.textOrder.Location = new System.Drawing.Point(8, 142);
             this.textOrder.Name = "textOrder";
             this.textOrder.Size = new System.Drawing.Size(72, 23);
-            this.textOrder.TabIndex = 2;
+            this.textOrder.TabIndex = 6;
             //
             // textTags
             //
             this.textTags.Location = new System.Drawing.Point(8, 82);
             this.textTags.Name = "textTags";
             this.textTags.Size = new System.Drawing.Size(480, 23);
-            this.textTags.TabIndex = 1;
+            this.textTags.TabIndex = 4;
             //
             // textName
             //
             this.textName.Location = new System.Drawing.Point(8, 29);
             this.textName.Name = "textName";
             this.textName.Size = new System.Drawing.Size(434, 23);
-            this.textName.TabIndex = 0;
+            this.textName.TabIndex = 1;
             //
             // buttonAccept
             //
@@ -231,7 +231,7 @@ namespace KNote.ClientWin.Views
             this.buttonFolderSearch.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.buttonFolderSearch.Name = "buttonFolderSearch";
             this.buttonFolderSearch.Size = new System.Drawing.Size(27, 25);
-            this.buttonFolderSearch.TabIndex = 11;
+            this.buttonFolderSearch.TabIndex = 10;
             this.buttonFolderSearch.Text = "...";
             this.buttonFolderSearch.UseVisualStyleBackColor = false;
             this.buttonFolderSearch.Click += new System.EventHandler(this.buttonFolderSearch_Click);

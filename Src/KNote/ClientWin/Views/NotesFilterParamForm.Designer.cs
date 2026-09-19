@@ -108,7 +108,7 @@ namespace KNote.ClientWin.Views
             this.listViewAttributes.MultiSelect = false;
             this.listViewAttributes.Name = "listViewAttributes";
             this.listViewAttributes.Size = new System.Drawing.Size(424, 175);
-            this.listViewAttributes.TabIndex = 21;
+            this.listViewAttributes.TabIndex = 22;
             this.listViewAttributes.UseCompatibleStateImageBehavior = false;
             this.listViewAttributes.View = System.Windows.Forms.View.Details;
             //
@@ -128,7 +128,7 @@ namespace KNote.ClientWin.Views
             this.buttonRemoveAttribute.Location = new System.Drawing.Point(401, 407);
             this.buttonRemoveAttribute.Name = "buttonRemoveAttribute";
             this.buttonRemoveAttribute.Size = new System.Drawing.Size(27, 23);
-            this.buttonRemoveAttribute.TabIndex = 20;
+            this.buttonRemoveAttribute.TabIndex = 21;
             this.buttonRemoveAttribute.Text = "-";
             this.buttonRemoveAttribute.UseVisualStyleBackColor = true;
             this.buttonRemoveAttribute.Click += new System.EventHandler(this.buttonRemoveAttribute_Click);
@@ -139,7 +139,7 @@ namespace KNote.ClientWin.Views
             this.buttonAddAttribute.Location = new System.Drawing.Point(373, 407);
             this.buttonAddAttribute.Name = "buttonAddAttribute";
             this.buttonAddAttribute.Size = new System.Drawing.Size(27, 23);
-            this.buttonAddAttribute.TabIndex = 19;
+            this.buttonAddAttribute.TabIndex = 20;
             this.buttonAddAttribute.Text = "+";
             this.buttonAddAttribute.UseVisualStyleBackColor = true;
             this.buttonAddAttribute.Click += new System.EventHandler(this.buttonAddAttribute_Click);
@@ -150,7 +150,7 @@ namespace KNote.ClientWin.Views
             this.labelAttributes.Location = new System.Drawing.Point(7, 411);
             this.labelAttributes.Name = "labelAttributes";
             this.labelAttributes.Size = new System.Drawing.Size(67, 15);
-            this.labelAttributes.TabIndex = 18;
+            this.labelAttributes.TabIndex = 19;
             this.labelAttributes.Text = "Attributes:";
             //
             // buttonFolderSelect
@@ -192,7 +192,7 @@ namespace KNote.ClientWin.Views
             this.checkIncludeChildFolders.Location = new System.Drawing.Point(7, 377);
             this.checkIncludeChildFolders.Name = "checkIncludeChildFolders";
             this.checkIncludeChildFolders.Size = new System.Drawing.Size(105, 19);
-            this.checkIncludeChildFolders.TabIndex = 22;
+            this.checkIncludeChildFolders.TabIndex = 18;
             this.checkIncludeChildFolders.Text = "Include subfolders";
             this.checkIncludeChildFolders.UseVisualStyleBackColor = true;
             //
