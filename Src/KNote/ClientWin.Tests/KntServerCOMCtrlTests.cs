@@ -1,4 +1,6 @@
 using KNote.ClientWin.Controllers;
+using KNote.ClientWin.Core;
+using KNote.ClientWin.Tests.Fakes;
 
 namespace KNote.ClientWin.Tests;
 
@@ -6,6 +8,56 @@ namespace KNote.ClientWin.Tests;
 public class KntServerCOMCtrlTests
 {
     private static byte[] Convert(string text) => KntServerCOMCtrl.ConverUtf8StringToClientOSBytes(text);
+
+    // A port name that can't exist, so these tests behave the same on machines with or without COM ports.
+    private const string MissingPort = "COM_NOT_THERE";
+
+    private static KntServerCOMCtrl CreateCtrl()
+    {
+        // No AI providers configured, so the inner assistant is not started (no dialog, no network).
+        // SaveSettings() is deliberately not called by these tests: it writes the real KNoteData.config.
+        return new KntServerCOMCtrl(new Store(new TestFactoryViews())) { PortName = MissingPort };
+    }
+
+    [TestMethod]
+    public void StartService_PortNotAvailable_ReturnsFalseWithoutThrowing()
+    {
+        var ctrl = CreateCtrl();
+
+        Assert.IsFalse(ctrl.StartService());
+
+        Assert.IsFalse(ctrl.RunningService);
+        StringAssert.Contains(ctrl.Error, MissingPort);
+        StringAssert.Contains(ctrl.StatusInfo, "could not be started");
+    }
+
+    [TestMethod]
+    public void Run_PortNotAvailable_ControllerStartsWithTheServiceStopped()
+    {
+        var ctrl = CreateCtrl();
+
+        var result = ctrl.Run();
+
+        Assert.IsTrue(result.IsValid);
+        Assert.AreEqual(EControllerState.Started, ctrl.ControllerState);
+        Assert.IsFalse(ctrl.RunningService);
+    }
+
+    [TestMethod]
+    public void StopSendAndDispose_ServiceNeverStarted_DoNotThrow()
+    {
+        var ctrl = CreateCtrl();
+
+        ctrl.StopService();
+        ctrl.Send("hello");
+        ctrl.Dispose();
+    }
+
+    [TestMethod]
+    public void SetAiProvider_NullProvider_ReturnsFalse()
+    {
+        Assert.IsFalse(CreateCtrl().SetAiProvider(null!));
+    }
 
     [TestMethod]
     public void Convert_CrLf_BecomesSingleLf()
