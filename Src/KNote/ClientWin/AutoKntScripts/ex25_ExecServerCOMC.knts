@@ -2,6 +2,9 @@
 
 var serverCom = GetServerCOMCtrl();
 
+' The serial settings (PortName, BaudRate, HandShake, Parity, DataBits, StopBits, RetroDelay) are read
+' from KNoteData.config. Setting the properties below only overrides them for this run.
+
 ' (Default value for PortName: "COM1")
 'serverCom.PortName = "COM1"; 
 
