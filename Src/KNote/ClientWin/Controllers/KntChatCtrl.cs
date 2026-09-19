@@ -14,6 +14,11 @@ public class KntChatCtrl : CtrlBase, IDisposable
     // ChatHubUrl must never be allowed to hang the app (see HandleConnectionFailure).
     private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(8);
 
+    // SignalR raises hub callbacks and the Closed event on thread-pool threads. Everything that ends
+    // up touching the UI (ReceiveMessage subscribers, error notifications) is posted to this context,
+    // captured in OnInitialized (always the UI thread). Internal so tests can substitute it.
+    internal SynchronizationContext UiContext { get; set; }
+
     #endregion
 
     #region Properties 
@@ -59,22 +64,19 @@ public class KntChatCtrl : CtrlBase, IDisposable
                 return res;
             }
 
+            UiContext = SynchronizationContext.Current;
+
             _hubConnection = new HubConnectionBuilder()
                            .WithUrl(Store.AppConfig.ChatHubUrl)
                            .Build();
 
-            _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-            {
-                var encodeMessage = $"{user}: {message}";
-                ReceiveMessage?.Invoke(this, new ControllerEventArgs<string>(encodeMessage));
-            });
+            _hubConnection.On<string, string>("ReceiveMessage", DispatchReceivedMessage);
 
             _hubConnection.Closed += OnHubConnectionClosedAsync;
 
-            // Fire-and-forget: connecting must never block startup. Relies on the WinForms
-            // SynchronizationContext (captured here, on the UI thread) to bring the continuation
-            // - including HandleConnectionFailure - back to the UI thread, same as the rest of
-            // this codebase's async/await usage.
+            // Fire-and-forget: connecting must never block startup. The await continuations of
+            // ConnectWithTimeoutAsync - including HandleConnectionFailure - return to the UI thread
+            // through the WinForms SynchronizationContext captured here.
             _ = ConnectWithTimeoutAsync();
 
             return new Result<EControllerResult>(EControllerResult.Executed);
@@ -149,6 +151,22 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     #region Private methods
 
+    // Runs on a thread-pool thread (SignalR callback): hand the event over to the UI thread so every
+    // ReceiveMessage subscriber can safely touch views.
+    internal void DispatchReceivedMessage(string user, string message)
+    {
+        var encodeMessage = $"{user}: {message}";
+        PostToUi(() => ReceiveMessage?.Invoke(this, new ControllerEventArgs<string>(encodeMessage)));
+    }
+
+    private void PostToUi(Action action)
+    {
+        if (UiContext != null)
+            UiContext.Post(_ => action(), null);
+        else
+            action();
+    }
+
     private async Task ConnectWithTimeoutAsync()
     {
         try
@@ -163,6 +181,8 @@ public class KntChatCtrl : CtrlBase, IDisposable
         }
     }
 
+    // Raised on a thread-pool thread, and the awaits below do not return to the UI thread: the
+    // outcome handlers touch views and config, so they are posted explicitly.
     private async Task OnHubConnectionClosedAsync(Exception error)
     {
         try
@@ -170,11 +190,11 @@ public class KntChatCtrl : CtrlBase, IDisposable
             await Task.Delay(5000);
             using var cts = new CancellationTokenSource(ConnectTimeout);
             await _hubConnection.StartAsync(cts.Token);
-            HandleConnectionSuccess();
+            PostToUi(HandleConnectionSuccess);
         }
         catch (Exception ex)
         {
-            HandleConnectionFailure(ex);
+            PostToUi(() => HandleConnectionFailure(ex));
         }
     }
 
