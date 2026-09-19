@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Utils;
+using KNote.Model;
 using System.IO.Ports;
 
 namespace KNote.ClientWin.Views;
@@ -23,6 +24,7 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
 
         InitializeSettingsControls();
         ShowSettings();
+        PopulateAiProviders();
         SetButtonIcons();
 
         _ctrl.ReceiveMessage += _com_ReceiveMessage;
@@ -140,6 +142,28 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
         labelSaveResult.Text = "";
     }
 
+    private void comboAiProviders_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (comboAiProviders.SelectedItem is not AiProviderRef providerRef || providerRef == _ctrl.CurrentAiProviderRef)
+            return;
+
+        if (!_ctrl.SetAiProvider(providerRef))
+        {
+            KntMessageBox.Show(_ctrl.Error);
+            SelectCurrentAiProvider();
+        }
+    }
+
+    private async void buttonManageProviders_Click(object sender, EventArgs e)
+    {
+        var manageCtrl = new AiProvidersManageCtrl(_ctrl.Store);
+        await manageCtrl.LoadEntitiesAsync(null, false);
+        manageCtrl.RunModal();
+
+        // Providers may have been added/edited/removed: refresh the picker in place.
+        PopulateAiProviders();
+    }
+
     protected override void OnUserClosing(FormClosingEventArgs e)
     {
         if (_ctrl.AutoCloseCtrlOnViewExit)
@@ -161,6 +185,38 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
             // Running on the UI thread                        
             listBoxEcho.Items.Add("Recived: " + e.Entity.ToString());
         });
+    }
+
+    #endregion
+
+    #region AI provider selector
+
+    private void PopulateAiProviders()
+    {
+        // Detach first: setting DataSource auto-selects an item and would otherwise fire
+        // comboAiProviders_SelectedIndexChanged (which resets the conversation) during startup.
+        comboAiProviders.SelectedIndexChanged -= comboAiProviders_SelectedIndexChanged;
+
+        comboAiProviders.DataSource = null;
+        comboAiProviders.DisplayMember = nameof(AiProviderRef.Alias);
+        comboAiProviders.DataSource = _ctrl.AiProviderRefs;
+        ShowCurrentAiProvider();
+
+        comboAiProviders.SelectedIndexChanged += comboAiProviders_SelectedIndexChanged;
+    }
+
+    // Puts the combo back on the provider in use when a change was refused.
+    private void SelectCurrentAiProvider()
+    {
+        comboAiProviders.SelectedIndexChanged -= comboAiProviders_SelectedIndexChanged;
+        ShowCurrentAiProvider();
+        comboAiProviders.SelectedIndexChanged += comboAiProviders_SelectedIndexChanged;
+    }
+
+    private void ShowCurrentAiProvider()
+    {
+        comboAiProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
+        comboAiProviders.SelectedItem = _ctrl.CurrentAiProviderRef;
     }
 
     #endregion

@@ -64,6 +64,9 @@ namespace KNote.ClientWin.Views
             buttonRestoreDefaults = new Button();
             buttonSaveSettings = new Button();
             labelSaveResult = new Label();
+            labelAiProvider = new Label();
+            comboAiProviders = new ComboBox();
+            buttonManageProviders = new Button();
             statusInfo.SuspendLayout();
             tabControlMain.SuspendLayout();
             tabPageService.SuspendLayout();
@@ -430,12 +433,47 @@ namespace KNote.ClientWin.Views
             labelSaveResult.Size = new Size(0, 15);
             labelSaveResult.TabIndex = 12;
             //
+            // labelAiProvider
+            //
+            labelAiProvider.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelAiProvider.AutoSize = true;
+            labelAiProvider.Location = new Point(253, 15);
+            labelAiProvider.Name = "labelAiProvider";
+            labelAiProvider.Size = new Size(57, 15);
+            labelAiProvider.TabIndex = 5;
+            labelAiProvider.Text = "AI model:";
+            //
+            // comboAiProviders
+            //
+            comboAiProviders.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            comboAiProviders.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboAiProviders.FormattingEnabled = true;
+            comboAiProviders.Location = new Point(316, 12);
+            comboAiProviders.Name = "comboAiProviders";
+            comboAiProviders.Size = new Size(184, 23);
+            comboAiProviders.TabIndex = 6;
+            comboAiProviders.SelectedIndexChanged += comboAiProviders_SelectedIndexChanged;
+            //
+            // buttonManageProviders
+            //
+            buttonManageProviders.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonManageProviders.Location = new Point(506, 8);
+            buttonManageProviders.Name = "buttonManageProviders";
+            buttonManageProviders.Size = new Size(68, 28);
+            buttonManageProviders.TabIndex = 7;
+            buttonManageProviders.Text = "&Manage...";
+            buttonManageProviders.UseVisualStyleBackColor = true;
+            buttonManageProviders.Click += buttonManageProviders_Click;
+            //
             // KntServerCOMForm
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(584, 461);
             Controls.Add(tabControlMain);
+            Controls.Add(buttonManageProviders);
+            Controls.Add(comboAiProviders);
+            Controls.Add(labelAiProvider);
             Controls.Add(panelLine);
             Controls.Add(statusInfo);
             Controls.Add(buttonStop);
@@ -499,5 +537,8 @@ namespace KNote.ClientWin.Views
         private Button buttonRestoreDefaults;
         private Button buttonSaveSettings;
         private Label labelSaveResult;
+        private Label labelAiProvider;
+        private ComboBox comboAiProviders;
+        private Button buttonManageProviders;
     }
 }

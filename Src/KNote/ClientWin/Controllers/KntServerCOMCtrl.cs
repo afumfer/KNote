@@ -87,6 +87,15 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public int RetroDelay { get; set; }
 
+    // AI providers/models the requests received through the port can be answered with (the same
+    // collection the KNoteAIAssistant view offers).
+    public List<AiProviderRef> AiProviderRefs => Store.AppConfig.AiProviderRefs;
+
+    public AiProviderRef CurrentAiProviderRef => _aiAssistant?.CurrentProviderRef;
+
+    private int _aiRequestsInProgress;
+    public bool AiRequestInProgress => Volatile.Read(ref _aiRequestsInProgress) > 0;
+
     public bool AutoCloseCtrlOnViewExit { get; set; }
 
     public bool ShowErrorMessagesOnInitialize { get; set; }
@@ -190,6 +199,34 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         Store.AppConfig.ServerCOM = config;
         Store.SaveConfig();
         return true;
+    }
+
+    // Selects the AI provider/model that answers the requests from the device. The choice is remembered
+    // (see KNoteAIAssistantCtrl.SetProvider) and resets the conversation. Returns false, with the reason
+    // in Error, if the provider can't be used now (a request is being answered, or it can't be created,
+    // e.g. no API key).
+    public bool SetAiProvider(AiProviderRef providerRef)
+    {
+        if (_aiAssistant == null || providerRef == null)
+            return false;
+
+        if (AiRequestInProgress)
+        {
+            _error = "An AI request is being answered now. Try again when it finishes.";
+            return false;
+        }
+
+        try
+        {
+            _aiAssistant.SetProvider(providerRef);
+            _error = null;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _error = $"The AI provider '{providerRef.Alias}' could not be selected: {ex.Message}";
+            return false;
+        }
     }
 
     // Restores Parity, DataBits and StopBits to the values the component used to have fixed.
@@ -512,10 +549,11 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         // Local copy: the field is reset to null when the controller is finalized.
         var aiAssistant = _aiAssistant;
 
+        Interlocked.Increment(ref _aiRequestsInProgress);
         try
         {
             if (aiAssistant?.CurrentProviderRef == null)
-                throw new InvalidOperationException("No AI provider is configured. Add one in the KNote AI providers options.");
+                throw new InvalidOperationException("No AI provider is selected. Choose one in the KNote ServerCOM window (Manage... adds new ones).");
 
             aiAssistant.StreamToken += _aiAssistant_StreamToken;
             try
@@ -534,6 +572,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         }
         finally
         {
+            Interlocked.Decrement(ref _aiRequestsInProgress);
             _messageQueue.Enqueue(EofMessage);
         }
     }
