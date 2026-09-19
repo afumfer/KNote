@@ -61,5 +61,9 @@
     <EmbeddedResource Include="Resources\Icons\undo_16.png" />
     <None Remove="Resources\Icons\alarm_24.png" />
     <EmbeddedResource Include="Resources\Icons\alarm_24.png" />
+    <None Remove="Resources\Icons\play_16.png" />
+    <EmbeddedResource Include="Resources\Icons\play_16.png" />
+    <None Remove="Resources\Icons\stop_16.png" />
+    <EmbeddedResource Include="Resources\Icons\stop_16.png" />
   </ItemGroup>
 </Project>
