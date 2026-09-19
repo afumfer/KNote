@@ -44,7 +44,7 @@
             panelButtons.Location = new Point(0, 325);
             panelButtons.Name = "panelButtons";
             panelButtons.Size = new Size(586, 50);
-            panelButtons.TabIndex = 2;
+            panelButtons.TabIndex = 1;
             // 
             // buttonCancel
             // 
@@ -63,7 +63,7 @@
             buttonAcept.Location = new Point(409, 11);
             buttonAcept.Name = "buttonAcept";
             buttonAcept.Size = new Size(81, 29);
-            buttonAcept.TabIndex = 1;
+            buttonAcept.TabIndex = 0;
             buttonAcept.Text = "&Acept";
             buttonAcept.UseVisualStyleBackColor = true;
             buttonAcept.Click += buttonAccept_Click;
@@ -75,7 +75,7 @@
             panelControls.Location = new Point(0, 0);
             panelControls.Name = "panelControls";
             panelControls.Size = new Size(586, 325);
-            panelControls.TabIndex = 3;
+            panelControls.TabIndex = 0;
             // 
             // ReadVarForm
             // 

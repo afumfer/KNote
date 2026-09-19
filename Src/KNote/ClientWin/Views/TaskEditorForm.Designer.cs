@@ -73,7 +73,7 @@ namespace KNote.ClientWin.Views
             buttonCancel.Location = new Point(538, 455);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(81, 29);
-            buttonCancel.TabIndex = 10;
+            buttonCancel.TabIndex = 2;
             buttonCancel.Text = "&Cancel";
             buttonCancel.UseVisualStyleBackColor = true;
             buttonCancel.Click += buttonCancel_Click;
@@ -84,7 +84,7 @@ namespace KNote.ClientWin.Views
             buttonAccept.Location = new Point(451, 455);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(81, 29);
-            buttonAccept.TabIndex = 9;
+            buttonAccept.TabIndex = 1;
             buttonAccept.Text = "&Accept";
             buttonAccept.UseVisualStyleBackColor = true;
             buttonAccept.Click += buttonAccept_Click;
@@ -98,7 +98,7 @@ namespace KNote.ClientWin.Views
             tabTaskData.Name = "tabTaskData";
             tabTaskData.SelectedIndex = 0;
             tabTaskData.Size = new Size(623, 434);
-            tabTaskData.TabIndex = 11;
+            tabTaskData.TabIndex = 0;
             // 
             // tabPageBasicData
             // 

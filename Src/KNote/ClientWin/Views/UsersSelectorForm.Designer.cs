@@ -46,7 +46,7 @@ namespace KNote.ClientWin.Views
             panelBottom.Location = new Point(0, 387);
             panelBottom.Name = "panelBottom";
             panelBottom.Size = new Size(408, 44);
-            panelBottom.TabIndex = 2;
+            panelBottom.TabIndex = 1;
             // 
             // buttonCancel
             // 
@@ -79,7 +79,7 @@ namespace KNote.ClientWin.Views
             panelForm.Location = new Point(0, 0);
             panelForm.Name = "panelForm";
             panelForm.Size = new Size(408, 387);
-            panelForm.TabIndex = 3;
+            panelForm.TabIndex = 0;
             // 
             // listViewUsers
             // 

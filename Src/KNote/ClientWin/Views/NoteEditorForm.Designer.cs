@@ -476,7 +476,7 @@
             panelDescription.Location = new Point(4, 124);
             panelDescription.Name = "panelDescription";
             panelDescription.Size = new Size(789, 435);
-            panelDescription.TabIndex = 9;
+            panelDescription.TabIndex = 2;
             panelDescription.Visible = false;
             // 
             // kntEditView
@@ -712,7 +712,7 @@
             panelContentHeader.Location = new Point(4, 94);
             panelContentHeader.Name = "panelContentHeader";
             panelContentHeader.Size = new Size(789, 30);
-            panelContentHeader.TabIndex = 70;
+            panelContentHeader.TabIndex = 1;
             // 
             // progressStatus
             // 
@@ -808,7 +808,7 @@
             panelHeaderData.Location = new Point(4, 3);
             panelHeaderData.Name = "panelHeaderData";
             panelHeaderData.Size = new Size(789, 91);
-            panelHeaderData.TabIndex = 58;
+            panelHeaderData.TabIndex = 0;
             // 
             // textStatus
             // 

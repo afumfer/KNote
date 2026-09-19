@@ -84,7 +84,7 @@ namespace KNote.ClientWin.Views
             buttonCancel.Margin = new Padding(4, 5, 4, 5);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(91, 48);
-            buttonCancel.TabIndex = 15;
+            buttonCancel.TabIndex = 2;
             buttonCancel.Text = "&Cancel";
             buttonCancel.UseVisualStyleBackColor = true;
             buttonCancel.Click += buttonCancel_Click;
@@ -96,7 +96,7 @@ namespace KNote.ClientWin.Views
             buttonAccept.Margin = new Padding(4, 5, 4, 5);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(91, 48);
-            buttonAccept.TabIndex = 14;
+            buttonAccept.TabIndex = 1;
             buttonAccept.Text = "&Accept";
             buttonAccept.UseVisualStyleBackColor = true;
             buttonAccept.Click += buttonAccept_Click;
@@ -114,7 +114,7 @@ namespace KNote.ClientWin.Views
             tabControlMain.Name = "tabControlMain";
             tabControlMain.SelectedIndex = 0;
             tabControlMain.Size = new Size(905, 970);
-            tabControlMain.TabIndex = 16;
+            tabControlMain.TabIndex = 0;
             //
             // tabPageGeneral
             //
@@ -201,7 +201,7 @@ namespace KNote.ClientWin.Views
             checkResourceContentInDB.Margin = new Padding(4, 5, 4, 5);
             checkResourceContentInDB.Name = "checkResourceContentInDB";
             checkResourceContentInDB.Size = new Size(418, 29);
-            checkResourceContentInDB.TabIndex = 4;
+            checkResourceContentInDB.TabIndex = 5;
             checkResourceContentInDB.Text = "Save a copy of the resource content in database";
             checkResourceContentInDB.UseVisualStyleBackColor = true;
             // 
@@ -212,7 +212,7 @@ namespace KNote.ClientWin.Views
             buttonSelectDirectoryResources.Margin = new Padding(4, 5, 4, 5);
             buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
             buttonSelectDirectoryResources.Size = new Size(34, 38);
-            buttonSelectDirectoryResources.TabIndex = 6;
+            buttonSelectDirectoryResources.TabIndex = 8;
             buttonSelectDirectoryResources.Text = "...";
             buttonSelectDirectoryResources.UseVisualStyleBackColor = true;
             buttonSelectDirectoryResources.Click += buttonSelectDirectoryResources_Click;
@@ -223,7 +223,7 @@ namespace KNote.ClientWin.Views
             textResourcesContainer.Margin = new Padding(4, 5, 4, 5);
             textResourcesContainer.Name = "textResourcesContainer";
             textResourcesContainer.Size = new Size(410, 31);
-            textResourcesContainer.TabIndex = 3;
+            textResourcesContainer.TabIndex = 4;
             // 
             // textResourcesContainerUrl
             // 
@@ -232,7 +232,7 @@ namespace KNote.ClientWin.Views
             textResourcesContainerUrl.Margin = new Padding(4, 5, 4, 5);
             textResourcesContainerUrl.Name = "textResourcesContainerUrl";
             textResourcesContainerUrl.Size = new Size(874, 31);
-            textResourcesContainerUrl.TabIndex = 7;
+            textResourcesContainerUrl.TabIndex = 10;
             // 
             // textResourcesContainerRoot
             // 
@@ -241,7 +241,7 @@ namespace KNote.ClientWin.Views
             textResourcesContainerRoot.Margin = new Padding(4, 5, 4, 5);
             textResourcesContainerRoot.Name = "textResourcesContainerRoot";
             textResourcesContainerRoot.Size = new Size(831, 31);
-            textResourcesContainerRoot.TabIndex = 5;
+            textResourcesContainerRoot.TabIndex = 7;
             // 
             // labelContainerUrl
             // 
@@ -250,7 +250,7 @@ namespace KNote.ClientWin.Views
             labelContainerUrl.Margin = new Padding(4, 0, 4, 0);
             labelContainerUrl.Name = "labelContainerUrl";
             labelContainerUrl.Size = new Size(276, 25);
-            labelContainerUrl.TabIndex = 17;
+            labelContainerUrl.TabIndex = 9;
             labelContainerUrl.Text = "Resources container root file URL:";
             // 
             // labelContainerRoot
@@ -260,7 +260,7 @@ namespace KNote.ClientWin.Views
             labelContainerRoot.Margin = new Padding(4, 0, 4, 0);
             labelContainerRoot.Name = "labelContainerRoot";
             labelContainerRoot.Size = new Size(264, 25);
-            labelContainerRoot.TabIndex = 16;
+            labelContainerRoot.TabIndex = 6;
             labelContainerRoot.Text = "Resources container root folder:";
             // 
             // labelContainer
@@ -270,7 +270,7 @@ namespace KNote.ClientWin.Views
             labelContainer.Margin = new Padding(4, 0, 4, 0);
             labelContainer.Name = "labelContainer";
             labelContainer.Size = new Size(222, 25);
-            labelContainer.TabIndex = 15;
+            labelContainer.TabIndex = 3;
             labelContainer.Text = "Resources container name:";
             // 
             // panelMSSqlServer
@@ -285,7 +285,7 @@ namespace KNote.ClientWin.Views
             panelMSSqlServer.Margin = new Padding(4, 5, 4, 5);
             panelMSSqlServer.Name = "panelMSSqlServer";
             panelMSSqlServer.Size = new Size(891, 194);
-            panelMSSqlServer.TabIndex = 14;
+            panelMSSqlServer.TabIndex = 12;
             // 
             // textSQLDataBase
             // 
@@ -339,7 +339,7 @@ namespace KNote.ClientWin.Views
             panelSqLite.Margin = new Padding(4, 5, 4, 5);
             panelSqLite.Name = "panelSqLite";
             panelSqLite.Size = new Size(891, 200);
-            panelSqLite.TabIndex = 13;
+            panelSqLite.TabIndex = 11;
             // 
             // buttonSelectFile
             // 
@@ -409,7 +409,7 @@ namespace KNote.ClientWin.Views
             groupRepositoryType.Name = "groupRepositoryType";
             groupRepositoryType.Padding = new Padding(4, 5, 4, 5);
             groupRepositoryType.Size = new Size(879, 102);
-            groupRepositoryType.TabIndex = 12;
+            groupRepositoryType.TabIndex = 0;
             groupRepositoryType.TabStop = false;
             groupRepositoryType.Text = "Reposoty database type";
             // 
@@ -446,7 +446,7 @@ namespace KNote.ClientWin.Views
             labelAlias.Margin = new Padding(4, 0, 4, 0);
             labelAlias.Name = "labelAlias";
             labelAlias.Size = new Size(102, 25);
-            labelAlias.TabIndex = 6;
+            labelAlias.TabIndex = 1;
             labelAlias.Text = "Alias name:";
             // 
             // textAliasName

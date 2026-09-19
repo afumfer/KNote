@@ -96,7 +96,7 @@ namespace KNote.ClientWin.Views
             panelContent.Name = "panelContent";
             panelContent.Padding = new Padding(4);
             panelContent.Size = new Size(684, 501);
-            panelContent.TabIndex = 8;
+            panelContent.TabIndex = 1;
             //
             // kntEditView
             //
@@ -117,7 +117,7 @@ namespace KNote.ClientWin.Views
             panelFooter.Margin = new Padding(4, 5, 4, 5);
             panelFooter.Name = "panelFooter";
             panelFooter.Size = new Size(684, 33);
-            panelFooter.TabIndex = 6;
+            panelFooter.TabIndex = 2;
             // 
             // labelStatus
             // 
@@ -167,7 +167,7 @@ namespace KNote.ClientWin.Views
             panelCaptionHeader.Name = "panelCaptionHeader";
             panelCaptionHeader.Padding = new Padding(2);
             panelCaptionHeader.Size = new Size(684, 37);
-            panelCaptionHeader.TabIndex = 9;
+            panelCaptionHeader.TabIndex = 0;
             //
             // labelCaption
             //

@@ -77,7 +77,7 @@
             treeViewFolders.Name = "treeViewFolders";
             treeViewFolders.SelectedImageIndex = 0;
             treeViewFolders.Size = new Size(460, 424);
-            treeViewFolders.TabIndex = 1;
+            treeViewFolders.TabIndex = 0;
             treeViewFolders.AfterSelect += treeViewFolders_AfterSelect;
             // 
             // panelBottom
@@ -88,7 +88,7 @@
             panelBottom.Location = new Point(0, 424);
             panelBottom.Name = "panelBottom";
             panelBottom.Size = new Size(460, 44);
-            panelBottom.TabIndex = 0;
+            panelBottom.TabIndex = 1;
             // 
             // buttonCancel
             // 

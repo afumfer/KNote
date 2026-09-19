@@ -68,7 +68,7 @@
             panelTextFilter.Margin = new Padding(3, 4, 3, 4);
             panelTextFilter.Name = "panelTextFilter";
             panelTextFilter.Size = new Size(760, 40);
-            panelTextFilter.TabIndex = 3;
+            panelTextFilter.TabIndex = 0;
             panelTextFilter.Visible = false;
             //
             // textFilter
@@ -101,7 +101,7 @@
             panelDataGridNotes.Margin = new Padding(3, 4, 3, 4);
             panelDataGridNotes.Name = "panelDataGridNotes";
             panelDataGridNotes.Size = new Size(759, 557);
-            panelDataGridNotes.TabIndex = 2;
+            panelDataGridNotes.TabIndex = 1;
             // 
             // dataGridNotes
             // 
@@ -145,7 +145,7 @@
             panelBottom.Margin = new Padding(3, 4, 3, 4);
             panelBottom.Name = "panelBottom";
             panelBottom.Size = new Size(760, 59);
-            panelBottom.TabIndex = 1;
+            panelBottom.TabIndex = 2;
             // 
             // buttonCancel
             // 
