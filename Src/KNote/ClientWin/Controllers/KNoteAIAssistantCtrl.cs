@@ -119,7 +119,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
                 throw new Exception(message);
             }
 
-            SetProvider(AiProviderRefs[0]);
+            // The provider the user picked last (AppConfig.LastAiProviderAlias), else the first one.
+            ApplyProvider(GetPreferredProvider());
 
             return new Result<EControllerResult>(EControllerResult.Executed);
         }
@@ -176,7 +177,26 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // Switching provider mid-session invalidates the in-flight conversation (a different
     // provider/model can't continue the same message history), so this always resets it.
     // The view is responsible for confirming with the user first if there is one in progress.
+    // The choice is remembered in KNoteData.config (AppConfig.LastAiProviderAlias) so the next session
+    // - of this assistant or of any other component built on it, like KntServerCOMCtrl - starts with it.
     public void SetProvider(AiProviderRef providerRef)
+    {
+        ApplyProvider(providerRef);
+        SaveLastProviderAlias(providerRef.Alias);
+    }
+
+    // The provider to start with: the last one chosen by the user if it still exists, else the first
+    // configured one, else null (no providers configured).
+    public AiProviderRef GetPreferredProvider()
+    {
+        var lastAlias = Store.AppConfig.LastAiProviderAlias;
+        var preferred = string.IsNullOrEmpty(lastAlias) ? null :
+            AiProviderRefs.FirstOrDefault(p => string.Equals(p.Alias, lastAlias, StringComparison.OrdinalIgnoreCase));
+
+        return preferred ?? AiProviderRefs.FirstOrDefault();
+    }
+
+    private void ApplyProvider(AiProviderRef providerRef)
     {
         if (providerRef is null)
             throw new ArgumentNullException(nameof(providerRef));
@@ -184,6 +204,23 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _currentProviderRef = providerRef;
         _chatClient = AiChatClientFactory.Create(providerRef, ServiceRef, Store);
         RestartAIAssistant();
+    }
+
+    private void SaveLastProviderAlias(string alias)
+    {
+        if (Store.AppConfig.LastAiProviderAlias == alias)
+            return;
+
+        Store.AppConfig.LastAiProviderAlias = alias;
+        try
+        {
+            Store.SaveConfig();
+        }
+        catch (Exception)
+        {
+            // Remembering the choice is a convenience: failing to write the config file must not
+            // undo a provider switch that already succeeded.
+        }
     }
 
     // Test seam (ClientWin.Tests): sets the chat client directly, bypassing AiChatClientFactory, so

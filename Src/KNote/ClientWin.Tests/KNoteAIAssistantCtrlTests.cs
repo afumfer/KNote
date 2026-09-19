@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
+using KNote.Model;
 using Microsoft.Extensions.AI;
 
 namespace KNote.ClientWin.Tests;
@@ -104,6 +105,52 @@ public class KNoteAIAssistantCtrlTests
         Assert.AreEqual("", ctrl.ChatTextMessasges.ToString());
         Assert.AreEqual(0, ctrl.TotalTokens);
         Assert.AreEqual(TimeSpan.Zero, ctrl.TotalProcessingTime);
+    }
+
+    // GetPreferredProvider only reads AppConfig; SetProvider is deliberately not exercised here because it
+    // persists the choice with Store.SaveConfig(), which writes the real KNoteData.config of the user.
+    private static KNoteAIAssistantCtrl CreateCtrlWithProviders(string lastAlias, params string[] aliases)
+    {
+        var store = new Store(new TestFactoryViews());
+        foreach (var alias in aliases)
+            store.AppConfig.AiProviderRefs.Add(new AiProviderRef { Alias = alias, Provider = EnumAiProvider.Ollama, Model = "m", Host = "http://localhost" });
+        store.AppConfig.LastAiProviderAlias = lastAlias;
+        return new KNoteAIAssistantCtrl(store);
+    }
+
+    [TestMethod]
+    public void GetPreferredProvider_LastAliasStillConfigured_ReturnsIt()
+    {
+        var ctrl = CreateCtrlWithProviders("second", "first", "second");
+
+        Assert.AreEqual("second", ctrl.GetPreferredProvider().Alias);
+    }
+
+    [TestMethod]
+    public void GetPreferredProvider_AliasComparisonIgnoresCase()
+    {
+        var ctrl = CreateCtrlWithProviders("SECOND", "first", "second");
+
+        Assert.AreEqual("second", ctrl.GetPreferredProvider().Alias);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("removed provider")]
+    public void GetPreferredProvider_NoUsableLastAlias_FallsBackToTheFirstProvider(string lastAlias)
+    {
+        var ctrl = CreateCtrlWithProviders(lastAlias, "first", "second");
+
+        Assert.AreEqual("first", ctrl.GetPreferredProvider().Alias);
+    }
+
+    [TestMethod]
+    public void GetPreferredProvider_NoProviders_ReturnsNull()
+    {
+        var ctrl = CreateCtrlWithProviders("anything");
+
+        Assert.IsNull(ctrl.GetPreferredProvider());
     }
 
     private static async IAsyncEnumerable<ChatResponseUpdate> StreamOf(params string[] chunks)
