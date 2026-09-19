@@ -50,6 +50,14 @@ public partial class KntChatForm : KntForm, IViewChat
         labelServer.Text = _ctrl.Store.AppConfig.ChatHubUrl;
     }
 
+    // Load subscribes; the form is only really closed when the controller finalizes it (user close
+    // just hides it), so this is where the subscription must be released.
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        _ctrl.ReceiveMessage -= _com_ReceiveMessage;
+        base.OnFormClosed(e);
+    }
+
     private async void buttonSend_Click(object sender, EventArgs e)
     {
         await _ctrl.SendMessageAsync(textMessage.Text);
