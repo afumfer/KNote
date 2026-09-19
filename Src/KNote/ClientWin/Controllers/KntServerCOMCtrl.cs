@@ -12,7 +12,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     private SerialPort _serialPort;
     private Queue _messageQueue;
-    private readonly KNoteAIAssistantCtrl _chatGPT;
+    private readonly KNoteAIAssistantCtrl _aiAssistant;
 
     private CancellationTokenSource _cancellationTokenSource;    
     private bool _showViewMessage;
@@ -23,6 +23,15 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
     #region Constants
 
     private const byte EofByte = 26;
+
+    // Wire commands (protocol contract with the retro clients).
+    private const string CmdAi = "#ai";
+    private const string CmdAiRestart = "#airestart";
+    private const string CmdEcho = "#echo";
+
+    // Deprecated names kept as aliases of the new commands for already written retro programs.
+    private const string CmdAiLegacy = "#chatgpt";
+    private const string CmdAiRestartLegacy = "#restartchatgpt";
 
     #endregion 
 
@@ -106,10 +115,10 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
                 
         _convTable = LoadQDOSCharacterSetTable();
 
-        // AI Assistant included controller (formerly KntChatGPTCtrl; the "#chatgpt"/"#restartchatgpt"
-        // wire commands below are unchanged, an external client's protocol contract)
-        _chatGPT = new KNoteAIAssistantCtrl(store);
-        _chatGPT.Run();
+        // AI Assistant included controller (any provider/model: OpenAI, Anthropic, Ollama).
+        // Must stay a field: CtrlBase.FinalizeViewsController finalizes CtrlBase fields by reflection.
+        _aiAssistant = new KNoteAIAssistantCtrl(store);
+        _aiAssistant.Run();
     }
 
     #endregion
@@ -210,7 +219,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         _serialPort.Open();   
         
         _messageQueue = new Queue();
-        _chatGPT.RestartAIAssistant();
+        _aiAssistant.RestartAIAssistant();
 
         _statusInfo = "Com started ...";
 
@@ -334,11 +343,11 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         KComRequest kComReq = new KComRequest();
 
         if (string.IsNullOrEmpty(messageIn))
-            messageIn = "#echo:\nError, invalid message.";
+            messageIn = $"{CmdEcho}:\nError, invalid message.";
 
-        // If there is no command, the default command is chatgpt
+        // If there is no command, the default command is the AI assistant
         if (!messageIn.StartsWith("#"))
-            messageIn = "#chatgpt:\n" + messageIn;
+            messageIn = $"{CmdAi}:\n" + messageIn;
 
         try
         {
@@ -373,7 +382,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         }
         catch (Exception)
         {
-            kComReq.Command = "#echo";
+            kComReq.Command = CmdEcho;
             kComReq.Body = "Error, invalid message.";
             return kComReq;
         }
@@ -384,11 +393,11 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         // Dispatch actions:
         // TODO: Select the correct action, use the command pattern here.
 
-        if (req.Command == "#chatgpt")
-            ExecuteChatGptRequest(req.Body);
-        else if (req.Command == "#restartchatgpt")
-            ExecuteRestartChatGptRequest();
-        else if (req.Command == "#echo")
+        if (req.Command == CmdAi || req.Command == CmdAiLegacy)
+            ExecuteAiRequest(req.Body);
+        else if (req.Command == CmdAiRestart || req.Command == CmdAiRestartLegacy)
+            ExecuteAiRestartRequest();
+        else if (req.Command == CmdEcho)
             ExecuteEchoRequest(req.Body);
         else
             ExecuteEchoRequest(req.Body);
@@ -405,22 +414,22 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         _messageQueue.Enqueue((char)EofByte);
     }
 
-    private void ExecuteRestartChatGptRequest()
+    private void ExecuteAiRestartRequest()
     {
-        _chatGPT.RestartAIAssistant();
+        _aiAssistant.RestartAIAssistant();
         _messageQueue.Enqueue((char)EofByte);
     }
 
-    private async void ExecuteChatGptRequest(string request)
+    private async void ExecuteAiRequest(string request)
     {
-        _chatGPT.StreamToken += _chatGPT_StreamToken;        
-        await _chatGPT.StreamCompletionAsync(request);
-        _chatGPT.StreamToken -= _chatGPT_StreamToken;
-        
-        _messageQueue.Enqueue((char)EofByte); 
+        _aiAssistant.StreamToken += _aiAssistant_StreamToken;
+        await _aiAssistant.StreamCompletionAsync(request);
+        _aiAssistant.StreamToken -= _aiAssistant_StreamToken;
+
+        _messageQueue.Enqueue((char)EofByte);
     }
 
-    private void _chatGPT_StreamToken(object sender, ControllerEventArgs<string> e)
+    private void _aiAssistant_StreamToken(object sender, ControllerEventArgs<string> e)
     {
         _messageQueue.Enqueue(e.Entity?.ToString());        
     }
