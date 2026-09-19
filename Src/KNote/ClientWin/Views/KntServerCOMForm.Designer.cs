@@ -52,7 +52,7 @@
             textBoxSend.Name = "textBoxSend";
             textBoxSend.ScrollBars = ScrollBars.Vertical;
             textBoxSend.Size = new Size(562, 173);
-            textBoxSend.TabIndex = 0;
+            textBoxSend.TabIndex = 5;
             // 
             // buttonStart
             // 
@@ -60,7 +60,7 @@
             buttonStart.Margin = new Padding(4, 3, 4, 3);
             buttonStart.Name = "buttonStart";
             buttonStart.Size = new Size(86, 28);
-            buttonStart.TabIndex = 1;
+            buttonStart.TabIndex = 0;
             buttonStart.Text = "&Start service";
             buttonStart.UseVisualStyleBackColor = true;
             buttonStart.Click += buttonStart_Click;
@@ -72,7 +72,7 @@
             buttonSend.Margin = new Padding(4, 3, 4, 3);
             buttonSend.Name = "buttonSend";
             buttonSend.Size = new Size(189, 24);
-            buttonSend.TabIndex = 2;
+            buttonSend.TabIndex = 4;
             buttonSend.Text = "Send text &to client";
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
@@ -86,7 +86,7 @@
             listBoxEcho.Margin = new Padding(4, 3, 4, 3);
             listBoxEcho.Name = "listBoxEcho";
             listBoxEcho.Size = new Size(562, 124);
-            listBoxEcho.TabIndex = 3;
+            listBoxEcho.TabIndex = 7;
             // 
             // buttonStop
             // 
@@ -94,7 +94,7 @@
             buttonStop.Margin = new Padding(4, 3, 4, 3);
             buttonStop.Name = "buttonStop";
             buttonStop.Size = new Size(86, 28);
-            buttonStop.TabIndex = 4;
+            buttonStop.TabIndex = 1;
             buttonStop.Text = "Sto&p service";
             buttonStop.UseVisualStyleBackColor = true;
             buttonStop.Click += buttonStop_Click;
@@ -106,7 +106,7 @@
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(97, 15);
-            label1.TabIndex = 5;
+            label1.TabIndex = 6;
             label1.Text = "Echo from client:";
             // 
             // label2
@@ -116,7 +116,7 @@
             label2.Margin = new Padding(4, 0, 4, 0);
             label2.Name = "label2";
             label2.Size = new Size(81, 15);
-            label2.TabIndex = 6;
+            label2.TabIndex = 3;
             label2.Text = "Text for client:";
             // 
             // statusInfo
@@ -143,7 +143,7 @@
             panelLine.Location = new Point(11, 42);
             panelLine.Name = "panelLine";
             panelLine.Size = new Size(561, 2);
-            panelLine.TabIndex = 9;
+            panelLine.TabIndex = 2;
             // 
             // KntServerCOMForm
             // 

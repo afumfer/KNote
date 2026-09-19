@@ -47,7 +47,7 @@
             this.listBoxMessages.Location = new System.Drawing.Point(2, 42);
             this.listBoxMessages.Name = "listBoxMessages";
             this.listBoxMessages.Size = new System.Drawing.Size(942, 274);
-            this.listBoxMessages.TabIndex = 0;
+            this.listBoxMessages.TabIndex = 1;
             // 
             // buttonClearMessages
             // 
@@ -55,7 +55,7 @@
             this.buttonClearMessages.Location = new System.Drawing.Point(817, 9);
             this.buttonClearMessages.Name = "buttonClearMessages";
             this.buttonClearMessages.Size = new System.Drawing.Size(119, 27);
-            this.buttonClearMessages.TabIndex = 1;
+            this.buttonClearMessages.TabIndex = 0;
             this.buttonClearMessages.Text = "Clear messages";
             this.buttonClearMessages.UseVisualStyleBackColor = true;
             this.buttonClearMessages.Click += new System.EventHandler(this.buttonClearMessages_Click);

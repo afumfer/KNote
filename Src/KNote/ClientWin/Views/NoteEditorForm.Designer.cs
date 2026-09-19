@@ -1098,7 +1098,7 @@
             listViewResources.MultiSelect = false;
             listViewResources.Name = "listViewResources";
             listViewResources.Size = new Size(395, 528);
-            listViewResources.TabIndex = 14;
+            listViewResources.TabIndex = 1;
             listViewResources.UseCompatibleStateImageBehavior = false;
             listViewResources.SelectedIndexChanged += listViewResources_SelectedIndexChanged;
             listViewResources.DoubleClick += listViewResources_DoubleClick;
@@ -1116,7 +1116,7 @@
             panelResourcesLeftHeader.Location = new Point(0, 0);
             panelResourcesLeftHeader.Name = "panelResourcesLeftHeader";
             panelResourcesLeftHeader.Size = new Size(395, 34);
-            panelResourcesLeftHeader.TabIndex = 26;
+            panelResourcesLeftHeader.TabIndex = 0;
             // 
             // label12
             // 
@@ -1202,7 +1202,7 @@
             webViewResource.Margin = new Padding(3, 4, 3, 4);
             webViewResource.Name = "webViewResource";
             webViewResource.Size = new Size(398, 481);
-            webViewResource.TabIndex = 21;
+            webViewResource.TabIndex = 2;
             webViewResource.Visible = false;
             // 
             // panelPreview
@@ -1213,7 +1213,7 @@
             panelPreview.Location = new Point(0, 34);
             panelPreview.Name = "panelPreview";
             panelPreview.Size = new Size(398, 481);
-            panelPreview.TabIndex = 18;
+            panelPreview.TabIndex = 1;
             panelPreview.Visible = false;
             // 
             // linkViewFile
@@ -1235,7 +1235,7 @@
             textDescriptionResource.Multiline = true;
             textDescriptionResource.Name = "textDescriptionResource";
             textDescriptionResource.Size = new Size(398, 47);
-            textDescriptionResource.TabIndex = 19;
+            textDescriptionResource.TabIndex = 3;
             // 
             // panelResourcesRightHeader
             // 
@@ -1244,7 +1244,7 @@
             panelResourcesRightHeader.Location = new Point(0, 0);
             panelResourcesRightHeader.Name = "panelResourcesRightHeader";
             panelResourcesRightHeader.Size = new Size(398, 34);
-            panelResourcesRightHeader.TabIndex = 28;
+            panelResourcesRightHeader.TabIndex = 0;
             // 
             // labelPreview
             // 
@@ -1294,7 +1294,7 @@
             listViewTasks.MultiSelect = false;
             listViewTasks.Name = "listViewTasks";
             listViewTasks.Size = new Size(372, 528);
-            listViewTasks.TabIndex = 18;
+            listViewTasks.TabIndex = 1;
             listViewTasks.UseCompatibleStateImageBehavior = false;
             listViewTasks.SelectedIndexChanged += listViewTasks_SelectedIndexChanged;
             listViewTasks.DoubleClick += listViewTasks_DoubleClick;
@@ -1310,7 +1310,7 @@
             panelTasksHeader.Location = new Point(0, 0);
             panelTasksHeader.Name = "panelTasksHeader";
             panelTasksHeader.Size = new Size(372, 34);
-            panelTasksHeader.TabIndex = 19;
+            panelTasksHeader.TabIndex = 0;
             // 
             // label11
             // 
@@ -1368,7 +1368,7 @@
             kntEditViewTask.Margin = new Padding(4, 5, 4, 5);
             kntEditViewTask.Name = "kntEditViewTask";
             kntEditViewTask.Size = new Size(421, 528);
-            kntEditViewTask.TabIndex = 21;
+            kntEditViewTask.TabIndex = 1;
             // 
             // panelTaskDescHeader
             // 
@@ -1377,7 +1377,7 @@
             panelTaskDescHeader.Location = new Point(0, 0);
             panelTaskDescHeader.Name = "panelTaskDescHeader";
             panelTaskDescHeader.Size = new Size(421, 34);
-            panelTaskDescHeader.TabIndex = 22;
+            panelTaskDescHeader.TabIndex = 0;
             // 
             // label16
             // 
@@ -1565,7 +1565,7 @@
             listViewTraceNoteFrom.MultiSelect = false;
             listViewTraceNoteFrom.Name = "listViewTraceNoteFrom";
             listViewTraceNoteFrom.Size = new Size(797, 246);
-            listViewTraceNoteFrom.TabIndex = 43;
+            listViewTraceNoteFrom.TabIndex = 1;
             listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
             listViewTraceNoteFrom.Resize += listViewTraceNote_Resize;
             //
@@ -1579,7 +1579,7 @@
             panelTraceFromHeader.Location = new Point(0, 0);
             panelTraceFromHeader.Name = "panelTraceFromHeader";
             panelTraceFromHeader.Size = new Size(797, 34);
-            panelTraceFromHeader.TabIndex = 46;
+            panelTraceFromHeader.TabIndex = 0;
             //
             // label14
             //
@@ -1634,7 +1634,7 @@
             listViewTraceNoteTo.MultiSelect = false;
             listViewTraceNoteTo.Name = "listViewTraceNoteTo";
             listViewTraceNoteTo.Size = new Size(797, 249);
-            listViewTraceNoteTo.TabIndex = 44;
+            listViewTraceNoteTo.TabIndex = 1;
             listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
             listViewTraceNoteTo.Resize += listViewTraceNote_Resize;
             //
@@ -1648,7 +1648,7 @@
             panelTraceToHeader.Location = new Point(0, 0);
             panelTraceToHeader.Name = "panelTraceToHeader";
             panelTraceToHeader.Size = new Size(797, 34);
-            panelTraceToHeader.TabIndex = 47;
+            panelTraceToHeader.TabIndex = 0;
             //
             // label13
             //
