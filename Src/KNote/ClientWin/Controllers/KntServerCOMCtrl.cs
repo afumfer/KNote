@@ -79,6 +79,12 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public int HandShake { get; set; }
 
+    public int Parity { get; set; }
+
+    public int DataBits { get; set; }
+
+    public int StopBits { get; set; }
+
     public int RetroDelay { get; set; }
 
     public bool AutoCloseCtrlOnViewExit { get; set; }
@@ -93,21 +99,12 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
     {
         ControllerName = "KntServerCOM Controller";
 
-        // --- BaudRate and HandShake
+        // --- Serial settings: the ones saved in KNoteData.config (defaults: Q68 -BaudRate=115200,
+        // HandShake=None-, COM1, RetroDelay=60 ms). The properties can be overridden afterwards
+        // (e.g. from KntScript) without persisting; SaveSettings() persists them.
+        //   QL: BaudRate = 19200 (or 4800, 9600), HandShake = 2 (RequestToSend) or 3 (RequestToSendXOnXOff)
+        LoadSettings();
 
-        // Q68            
-        BaudRate = 115200;
-        HandShake = (int)Handshake.None;  // 0
-
-        // QL             
-        //BaudRate = 19200; //  4800; // 9600; // 19200; 
-        //HandShake = (int)Handshake.None;  // HandShake: => // 2 (RequestToSend) // 3 (RequestToSendXOnXOff ) // 0 (None)) ??
-
-        PortName = "COM1";
-
-        // Delay for retrocomputers (in miliseconds)
-        RetroDelay = 20;
-        
         // --- Control flags
         AutoCloseCtrlOnViewExit = false;
         ShowErrorMessagesOnInitialize = false;
@@ -154,6 +151,54 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
     #endregion
 
     #region Public methods
+
+    // Loads the serial settings from AppConfig (KNoteData.config), discarding any unsaved change.
+    public void LoadSettings()
+    {
+        var config = Store.AppConfig.ServerCOM;
+
+        PortName = config.PortName;
+        BaudRate = config.BaudRate;
+        HandShake = config.HandShake;
+        Parity = config.Parity;
+        DataBits = config.DataBits;
+        StopBits = config.StopBits;
+        RetroDelay = config.RetroDelay;
+    }
+
+    // Persists the current serial settings in KNoteData.config. Returns false (reason in Error) if invalid.
+    public bool SaveSettings()
+    {
+        var config = new ServerCOMConfig
+        {
+            PortName = PortName,
+            BaudRate = BaudRate,
+            HandShake = HandShake,
+            Parity = Parity,
+            DataBits = DataBits,
+            StopBits = StopBits,
+            RetroDelay = RetroDelay
+        };
+
+        var validationError = config.Validate();
+        if (validationError != null)
+        {
+            _error = validationError;
+            return false;
+        }
+
+        Store.AppConfig.ServerCOM = config;
+        Store.SaveConfig();
+        return true;
+    }
+
+    // Restores Parity, DataBits and StopBits to the values the component used to have fixed.
+    public void ResetSerialDefaults()
+    {
+        Parity = ServerCOMConfig.DefaultParity;
+        DataBits = ServerCOMConfig.DefaultDataBits;
+        StopBits = ServerCOMConfig.DefaultStopBits;
+    }
 
     public void Send(string message)
     {
@@ -209,7 +254,8 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
             if (!SerialPort.GetPortNames().Contains(PortName, StringComparer.OrdinalIgnoreCase))
                 return FailStart($"The port '{PortName}' is not available on this computer.");
 
-            _serialPort = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.Two);
+            _serialPort = new SerialPort(PortName, BaudRate, (System.IO.Ports.Parity)Parity, DataBits,
+                (System.IO.Ports.StopBits)StopBits);
             _serialPort.Handshake = (Handshake)HandShake;
             _serialPort.ReadTimeout = 5000;
             _serialPort.WriteTimeout = 5000;

@@ -458,6 +458,42 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    // Alias of the AI provider/model the user picked last (shared by KNoteAIAssistantCtrl and
+    // KntServerCOMCtrl). When empty, or no longer in AiProviderRefs, the first provider is used.
+    private string _lastAiProviderAlias;
+    public string LastAiProviderAlias
+    {
+        get { return _lastAiProviderAlias; }
+        set
+        {
+            if (_lastAiProviderAlias != value)
+            {
+                _lastAiProviderAlias = value;
+                OnPropertyChanged("LastAiProviderAlias");
+            }
+        }
+    }
+
+    // RS-232 settings of the KntServerCOM component.
+    private ServerCOMConfig _serverCOM;
+    public ServerCOMConfig ServerCOM
+    {
+        get
+        {
+            if (_serverCOM == null)
+                _serverCOM = new ServerCOMConfig();
+            return _serverCOM;
+        }
+        set
+        {
+            if (_serverCOM != value)
+            {
+                _serverCOM = value;
+                OnPropertyChanged("ServerCOM");
+            }
+        }
+    }
+
     // SMTP account used to send Email-type alarm notifications (one account per installation). The
     // password is stored in clear text in this same local config file, next to the AI providers'
     // ApiKey - protecting that file is the user's responsibility, same as for those keys.
