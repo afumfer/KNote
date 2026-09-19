@@ -128,7 +128,6 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<AppConfig>
         textAlarmSeconds.Text = _ctrl.Model.AlarmSeconds.ToString();
         checkAutoSaveActivated.Checked = _ctrl.Model.AutoSaveActivated;
         textAutosaveSeconds.Text = _ctrl.Model.AutoSaveSeconds.ToString();
-        checkCompactViewNotesList.Checked = _ctrl.Model.CompactViewNoteslist;
         textChatHubUrl.Text = _ctrl.Model.ChatHubUrl;
         textSmtpHost.Text = _ctrl.Model.SmtpHost;
         textSmtpPort.Text = _ctrl.Model.SmtpPort.ToString();
@@ -148,7 +147,6 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<AppConfig>
         _ctrl.Model.AlarmSeconds = int.Parse(textAlarmSeconds.Text);
         _ctrl.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
         _ctrl.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
-        _ctrl.Model.CompactViewNoteslist = checkCompactViewNotesList.Checked;
         _ctrl.Model.ChatHubUrl = textChatHubUrl.Text;
         _ctrl.Model.SmtpHost = textSmtpHost.Text;
         _ctrl.Model.SmtpPort = _ctrl.Store.KntTextUtils.TextToInt(textSmtpPort.Text);

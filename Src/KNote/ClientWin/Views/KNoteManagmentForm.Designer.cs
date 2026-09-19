@@ -71,6 +71,7 @@
             menuHeaderPanelVisible = new ToolStripMenuItem();
             menuToolbarVisible = new ToolStripMenuItem();
             menuMainVisible = new ToolStripMenuItem();
+            menuCompactViewNotesList = new ToolStripMenuItem();
             menuViewS2 = new ToolStripSeparator();
             menuListFilterVisible = new ToolStripMenuItem();
             menuTools = new ToolStripMenuItem();
@@ -365,7 +366,7 @@
             // 
             // menuView
             // 
-            menuView.DropDownItems.AddRange(new ToolStripItem[] { menuFoldersExplorer, menuSearchPanel, menuViewS1, menuVerticalPanelForNotes, menuHeaderPanelVisible, menuToolbarVisible, menuMainVisible, menuViewS2, menuListFilterVisible });
+            menuView.DropDownItems.AddRange(new ToolStripItem[] { menuFoldersExplorer, menuSearchPanel, menuViewS1, menuVerticalPanelForNotes, menuHeaderPanelVisible, menuToolbarVisible, menuMainVisible, menuCompactViewNotesList, menuViewS2, menuListFilterVisible });
             menuView.Name = "menuView";
             menuView.Size = new Size(44, 20);
             menuView.Text = "&View";
@@ -433,6 +434,14 @@
             menuMainVisible.Size = new Size(237, 22);
             menuMainVisible.Text = "Show main menu";
             menuMainVisible.Click += menu_Click;
+            //
+            // menuCompactViewNotesList
+            //
+            menuCompactViewNotesList.Name = "menuCompactViewNotesList";
+            menuCompactViewNotesList.ShortcutKeys = Keys.Control | Keys.Alt | Keys.F12;
+            menuCompactViewNotesList.Size = new Size(237, 22);
+            menuCompactViewNotesList.Text = "Compact view in notes list";
+            menuCompactViewNotesList.Click += menu_Click;
             //
             // menuViewS2
             //
@@ -1015,6 +1024,7 @@
         private ToolStripMenuItem menuEditNoteAsPostIt;
         private ToolStripMenuItem menuHeaderPanelVisible;
         private ToolStripMenuItem menuMainVisible;
+        private ToolStripMenuItem menuCompactViewNotesList;
         private ToolStripMenuItem menuVerticalPanelForNotes;
         private ToolStripMenuItem menuListFilterVisible;
         private ToolStripSeparator menuViewS1;

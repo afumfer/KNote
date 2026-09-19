@@ -55,3 +55,10 @@ public record ControllerNotification(CtrlBase Controller, string Message);
 public record ServiceRefAdded(ServiceRef ServiceRef);
 
 public record ServiceRefRemoved(ServiceRef ServiceRef);
+
+/// <summary>
+/// Published by OptionsEditorCtrl.SaveModel when an option that changes how the notes list is laid out
+/// (currently "Compact view in notes list") has been changed and saved: NotesSelectorForm listens to it
+/// to apply the change to the already-open list instead of waiting for a restart.
+/// </summary>
+public record NotesListViewOptionsChanged;

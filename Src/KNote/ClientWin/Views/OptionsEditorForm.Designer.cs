@@ -52,8 +52,6 @@ namespace KNote.ClientWin.Views
             this.labelTestEmailTo = new System.Windows.Forms.Label();
             this.textTestEmailTo = new System.Windows.Forms.TextBox();
             this.buttonTestSmtp = new System.Windows.Forms.Button();
-            this.labelInfo = new System.Windows.Forms.Label();
-            this.checkCompactViewNotesList = new System.Windows.Forms.CheckBox();
             this.textAutosaveSeconds = new System.Windows.Forms.TextBox();
             this.textAlarmSeconds = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -118,8 +116,6 @@ namespace KNote.ClientWin.Views
             this.tabGlobalOptions.Controls.Add(this.textChatHubUrl);
             this.tabGlobalOptions.Controls.Add(this.buttonTestChatHubUrl);
             this.tabGlobalOptions.Controls.Add(this.label1);
-            this.tabGlobalOptions.Controls.Add(this.labelInfo);
-            this.tabGlobalOptions.Controls.Add(this.checkCompactViewNotesList);
             this.tabGlobalOptions.Controls.Add(this.textAutosaveSeconds);
             this.tabGlobalOptions.Controls.Add(this.textAlarmSeconds);
             this.tabGlobalOptions.Controls.Add(this.label2);
@@ -292,25 +288,6 @@ namespace KNote.ClientWin.Views
             this.buttonTestSmtp.Text = "&Test";
             this.buttonTestSmtp.UseVisualStyleBackColor = true;
             this.buttonTestSmtp.Click += new System.EventHandler(this.buttonTestSmtp_Click);
-            //
-            // labelInfo
-            // 
-            this.labelInfo.AutoSize = true;
-            this.labelInfo.Location = new System.Drawing.Point(6, 217);
-            this.labelInfo.Name = "labelInfo";
-            this.labelInfo.Size = new System.Drawing.Size(181, 15);
-            this.labelInfo.TabIndex = 10;
-            this.labelInfo.Text = "(*) Application restart is required ";
-            // 
-            // checkCompactViewNotesList
-            // 
-            this.checkCompactViewNotesList.AutoSize = true;
-            this.checkCompactViewNotesList.Location = new System.Drawing.Point(13, 88);
-            this.checkCompactViewNotesList.Name = "checkCompactViewNotesList";
-            this.checkCompactViewNotesList.Size = new System.Drawing.Size(181, 19);
-            this.checkCompactViewNotesList.TabIndex = 6;
-            this.checkCompactViewNotesList.Text = "Compact view in notes list (*)";
-            this.checkCompactViewNotesList.UseVisualStyleBackColor = true;
             // 
             // textAutosaveSeconds
             // 
@@ -392,7 +369,7 @@ namespace KNote.ClientWin.Views
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 128);
+            this.label1.Location = new System.Drawing.Point(13, 88);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(76, 15);
             this.label1.TabIndex = 7;
@@ -401,14 +378,14 @@ namespace KNote.ClientWin.Views
             // 
             // textChatHubUrl
             //
-            this.textChatHubUrl.Location = new System.Drawing.Point(95, 125);
+            this.textChatHubUrl.Location = new System.Drawing.Point(95, 85);
             this.textChatHubUrl.Name = "textChatHubUrl";
             this.textChatHubUrl.Size = new System.Drawing.Size(295, 23);
             this.textChatHubUrl.TabIndex = 8;
             //
             // buttonTestChatHubUrl
             //
-            this.buttonTestChatHubUrl.Location = new System.Drawing.Point(396, 124);
+            this.buttonTestChatHubUrl.Location = new System.Drawing.Point(396, 84);
             this.buttonTestChatHubUrl.Name = "buttonTestChatHubUrl";
             this.buttonTestChatHubUrl.Size = new System.Drawing.Size(66, 25);
             this.buttonTestChatHubUrl.TabIndex = 9;
@@ -457,8 +434,6 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelAlarmSeconds;
         private System.Windows.Forms.CheckBox checkAutoSaveActivated;
         private System.Windows.Forms.CheckBox checkAlarmActivated;
-        private CheckBox checkCompactViewNotesList;
-        private Label labelInfo;
         private OpenFileDialog openFileDialog;
         private TextBox textChatHubUrl;
         private Label label1;

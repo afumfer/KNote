@@ -312,6 +312,13 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
             _ctrl.Store.AppConfig.ShowMainMenu = menuMangment.Visible;
             UpdateMenuHintVisibility();
         }
+        else if (menuSel == menuCompactViewNotesList)
+        {
+            var cfg = _ctrl.Store.AppConfig;
+            cfg.CompactViewNoteslist = !cfg.CompactViewNoteslist;
+            menuCompactViewNotesList.Checked = cfg.CompactViewNoteslist;
+            _ctrl.Store.Events.Publish(new NotesListViewOptionsChanged());
+        }
         else if (menuSel == menuToolbarVisible)
         {
             menuToolbarVisible.Checked = !menuToolbarVisible.Checked;
@@ -424,6 +431,8 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         menuMangment.Visible = cfg.ShowMainMenu;
         menuMainVisible.Checked = cfg.ShowMainMenu;
         UpdateMenuHintVisibility();
+
+        menuCompactViewNotesList.Checked = cfg.CompactViewNoteslist;
 
         SetVerticalPanelForNotes(cfg.VerticalPanelForNotes);
     }

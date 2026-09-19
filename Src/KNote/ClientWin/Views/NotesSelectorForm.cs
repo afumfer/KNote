@@ -53,6 +53,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.SizeChanged += (s, e) => FitTopicColumn();
         dataGridNotes.ColumnWidthChanged += dataGridNotes_ColumnWidthChanged;
         dataGridNotes.DataBindingComplete += dataGridNotes_DataBindingComplete;
+        _ctrl.Store.Events.Subscribe<NotesListViewOptionsChanged>(OnNotesListViewOptionsChanged);
 
         SetUndoFilterButtonIcon();
     }
@@ -420,8 +421,6 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[1].Width = 80; // room for the sort glyph next to right-aligned numbers
         dataGridNotes.Columns[1].HeaderText = "Number";        
         dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if(_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("NoteNumber"))
-            dataGridNotes.Columns[1].Visible = false;
 
         dataGridNotes.Columns[2].DataPropertyName = "Topic";
         dataGridNotes.Columns[2].MinimumWidth = 380;
@@ -435,20 +434,14 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[3].Width = 70;
         dataGridNotes.Columns[3].HeaderText = "Priority";
         dataGridNotes.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if (IsColumnHidden("Priority"))
-            dataGridNotes.Columns[3].Visible = false;
 
         dataGridNotes.Columns[4].DataPropertyName = "Tags";
         dataGridNotes.Columns[4].Width = 140;
         dataGridNotes.Columns[4].HeaderText = "Tags";
-        if (IsColumnHidden("Tags"))
-            dataGridNotes.Columns[4].Visible = false;
 
         dataGridNotes.Columns[5].DataPropertyName = "InternalTags";
         dataGridNotes.Columns[5].Width = 150;
         dataGridNotes.Columns[5].HeaderText = "Status";
-        if (IsColumnHidden("InternalTags"))
-            dataGridNotes.Columns[5].Visible = false;
 
         dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
         dataGridNotes.Columns[6].Width = 160;
@@ -456,15 +449,11 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         // Widths of the two date columns are fitted to their content once data is loaded
         // (FitDateColumns); a fixed pixel width doesn't follow the font/DPI and wastes space.
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("ModificationDateTime"))
-            dataGridNotes.Columns[6].Visible = false;
 
         dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
         dataGridNotes.Columns[7].Width = 150;
         dataGridNotes.Columns[7].HeaderText = "Creation date";
         dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        if (_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("CreationDateTime"))
-            dataGridNotes.Columns[7].Visible = false;
 
         dataGridNotes.Columns[8].DataPropertyName = "FolderId";
         dataGridNotes.Columns[8].Visible = false;
@@ -477,11 +466,58 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
             }
         }
 
+        ApplyColumnVisibility();
+
         if (_ctrl.EmbededMode)
             ApplySavedColumnWidths();
 
         FitTopicColumn();
         _columnWidthsTracked = true;
+    }
+
+    // Which columns are shown: the "Compact view in notes list" option (Number and both dates) plus the
+    // caller's HiddenColumns. Also re-run when that option changes, see OnNotesListViewOptionsChanged.
+    private void ApplyColumnVisibility()
+    {
+        var compact = _ctrl.Store.AppConfig.CompactViewNoteslist;
+
+        dataGridNotes.Columns["NoteNumber"].Visible = !(compact || IsColumnHidden("NoteNumber"));
+        dataGridNotes.Columns["Priority"].Visible = !IsColumnHidden("Priority");
+        dataGridNotes.Columns["Tags"].Visible = !IsColumnHidden("Tags");
+        dataGridNotes.Columns["InternalTags"].Visible = !IsColumnHidden("InternalTags");
+        dataGridNotes.Columns["ModificationDateTime"].Visible = !(compact || IsColumnHidden("ModificationDateTime"));
+        dataGridNotes.Columns["CreationDateTime"].Visible = !(compact || IsColumnHidden("CreationDateTime"));
+    }
+
+    private void OnNotesListViewOptionsChanged(NotesListViewOptionsChanged message)
+    {
+        if (IsHandleCreated && InvokeRequired)
+            BeginInvoke(RefreshColumnsLayout);
+        else
+            RefreshColumnsLayout();
+    }
+
+    // Applies a changed column layout option to the already-configured grid. Columns that become
+    // visible get their saved width back (embedded) or are fitted to their content (dates).
+    private void RefreshColumnsLayout()
+    {
+        if (IsDisposed || dataGridNotes.Columns.Count < 3)
+            return; // grid not configured yet: CoonfigureGridStd will read the current option
+
+        ApplyColumnVisibility();
+
+        if (_ctrl.EmbededMode)
+            ApplySavedColumnWidths();
+
+        _dateColumnsFitted = false;
+        FitDateColumns();
+        FitTopicColumn();
+    }
+
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        _ctrl.Store.Events.Unsubscribe<NotesListViewOptionsChanged>(OnNotesListViewOptionsChanged);
+        base.OnFormClosed(e);
     }
 
     // Restores the widths the user left in the embedded list. Hidden columns are skipped (their saved

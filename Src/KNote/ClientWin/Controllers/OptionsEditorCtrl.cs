@@ -50,7 +50,6 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
         Store.AppConfig.AlarmSeconds = Model.AlarmSeconds;
         Store.AppConfig.AutoSaveActivated = Model.AutoSaveActivated;
         Store.AppConfig.AutoSaveSeconds = Model.AutoSaveSeconds;
-        Store.AppConfig.CompactViewNoteslist = Model.CompactViewNoteslist;
         Store.AppConfig.ChatHubUrl = Model.ChatHubUrl;
         Store.AppConfig.ChatHubAutoConnectDisabled = Model.ChatHubAutoConnectDisabled;
         Store.AppConfig.SmtpHost = Model.SmtpHost;
