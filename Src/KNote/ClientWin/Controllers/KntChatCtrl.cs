@@ -48,8 +48,14 @@ public class KntChatCtrl : CtrlBase, IDisposable
             if (string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
             {
                 var res = new Result<EControllerResult>(EControllerResult.Error);
-                var message = "Chat hub url is not defined. Set the chat hub url y Options menú.";
+                var message = "Chat hub url is not defined. Set the chat hub url in the Options menu.";
                 res.AddErrorMessage(message);
+
+                // Opened manually by the user: tell them why nothing happens. At startup the caller
+                // already skips the chat when the url is empty, so this stays silent there.
+                if (ShowErrorMessagesOnInitialize)
+                    ChatView.ShowInfo(message, KntConst.AppName);
+
                 return res;
             }
 
