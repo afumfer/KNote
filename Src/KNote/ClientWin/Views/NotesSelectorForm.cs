@@ -17,6 +17,9 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     private BindingSource _source = new BindingSource();
     private SortOrder _sortOrder;
     private string _textFilter = "";
+    private int _topicPreferredWidth;      // width the user gave to Topic by dragging its header edge
+    private bool _adjustingTopicWidth;
+    private bool _dateColumnsFitted;
 
     #endregion
 
@@ -43,6 +46,10 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        dataGridNotes.SizeChanged += (s, e) => FitTopicColumn();
+        dataGridNotes.ColumnWidthChanged += dataGridNotes_ColumnWidthChanged;
+        dataGridNotes.DataBindingComplete += dataGridNotes_DataBindingComplete;
 
         SetUndoFilterButtonIcon();
     }
@@ -238,6 +245,19 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         }
     }
 
+    private void dataGridNotes_ColumnWidthChanged(object sender, DataGridViewColumnEventArgs e)
+    {
+        if (!_adjustingTopicWidth && e.Column.Name == "Topic")
+            _topicPreferredWidth = e.Column.Width;
+    }
+
+    // Rows (and so the vertical scrollbar) only exist once the data is bound, hence Topic is refitted here too.
+    private void dataGridNotes_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+    {
+        FitDateColumns();
+        FitTopicColumn();
+    }
+
     private void textFilter_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.KeyCode != Keys.Enter)
@@ -384,8 +404,8 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[2].DataPropertyName = "Topic";
         dataGridNotes.Columns[2].MinimumWidth = 380;
 
-        if(_ctrl.EmbededMode == false) // ### Hack for selector view
-            dataGridNotes.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        // Not AutoSizeMode.Fill: that would forbid the user from widening Topic. Instead FitTopicColumn
+        // stretches it over any free space on the right whenever the grid is resized.
         dataGridNotes.Columns[2].Resizable = DataGridViewTriState.True;
         dataGridNotes.Columns[2].HeaderText = "Topic";        
 
@@ -412,11 +432,8 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[6].Width = 160;
         dataGridNotes.Columns[6].HeaderText = "Modification date";
         dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        // Fixed pixel widths don't grow with the header font at higher Windows scale factors
-        // (DataGridView column Width isn't rescaled by AutoScaleMode like a Control's own bounds
-        // are), so the header text was wrapping to two lines at 150%+. AllCells sizes the column
-        // to whatever the header/cell text actually needs at the current DPI, so it never wraps.
-        dataGridNotes.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+        // Widths of the two date columns are fitted to their content once data is loaded
+        // (FitDateColumns); a fixed pixel width doesn't follow the font/DPI and wastes space.
         if (_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("ModificationDateTime"))
             dataGridNotes.Columns[6].Visible = false;
 
@@ -424,7 +441,6 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[7].Width = 150;
         dataGridNotes.Columns[7].HeaderText = "Creation date";
         dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        dataGridNotes.Columns[7].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
         if (_ctrl.Store.AppConfig.CompactViewNoteslist || IsColumnHidden("CreationDateTime"))
             dataGridNotes.Columns[7].Visible = false;
 
@@ -438,6 +454,53 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             }
         }
+
+        FitTopicColumn();
+    }
+
+    // One-off: sizes the date columns to their header/cell text (both wrap-free), so they take no more
+    // room than needed. Done once so it doesn't undo a width the user later sets by hand.
+    private void FitDateColumns()
+    {
+        if (_dateColumnsFitted || dataGridNotes.Rows.Count == 0)
+            return;
+
+        foreach (var name in new[] { "ModificationDateTime", "CreationDateTime" })
+        {
+            var col = dataGridNotes.Columns[name];
+            if (col.Visible)
+                dataGridNotes.AutoResizeColumn(col.Index, DataGridViewAutoSizeColumnMode.AllCells);
+        }
+        _dateColumnsFitted = true;
+    }
+
+    // Topic gets the widest of: its minimum, the width the user chose, or whatever space the other
+    // (fixed-width) visible columns leave free, so no empty area shows on the right.
+    private void FitTopicColumn()
+    {
+        if (dataGridNotes.Columns.Count < 3 || dataGridNotes.ClientSize.Width <= 0)
+            return;
+
+        var topic = dataGridNotes.Columns["Topic"];
+        var othersWidth = dataGridNotes.Columns.Cast<DataGridViewColumn>()
+            .Where(c => c != topic && c.Visible)
+            .Sum(c => c.Width);
+
+        var rowsHeight = dataGridNotes.Rows.GetRowsHeight(DataGridViewElementStates.Visible)
+            + dataGridNotes.ColumnHeadersHeight;
+        var vScrollWidth = rowsHeight > dataGridNotes.ClientSize.Height ? SystemInformation.VerticalScrollBarWidth : 0;
+
+        // The trailing "- 1" is needed: DataGridView shows the horizontal scrollbar as soon as the
+        // columns' total width equals (not just exceeds) the available width.
+        var free = dataGridNotes.ClientSize.Width - othersWidth - vScrollWidth - 1;
+        var width = Math.Max(topic.MinimumWidth, Math.Max(_topicPreferredWidth, free));
+
+        if (topic.Width == width)
+            return;
+
+        _adjustingTopicWidth = true;
+        try { topic.Width = width; }
+        finally { _adjustingTopicWidth = false; }
     }
 
     // _ctrl.HiddenColumns is a free-form comma-separated string (e.g. "Priority, InternalTags,
