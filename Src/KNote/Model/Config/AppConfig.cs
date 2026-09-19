@@ -219,6 +219,23 @@ public class AppConfig : SmartModelDtoBase
         }
     }
 
+    // Column widths the user gave to the notes list embedded in the management window, as
+    // "ColumnName=width;ColumnName=width" (keyed by name, not position, so entries of currently
+    // hidden columns survive). XmlSerializer can't handle a Dictionary, hence a plain string.
+    private string _notesListColumnWidths;
+    public string NotesListColumnWidths
+    {
+        get { return _notesListColumnWidths; }
+        set
+        {
+            if (_notesListColumnWidths != value)
+            {
+                _notesListColumnWidths = value;
+                OnPropertyChanged("NotesListColumnWidths");
+            }
+        }
+    }
+
     // Management window's View menu toggles, persisted so panel visibility survives a restart
     // exactly as the user left it (see KNoteManagmentForm.ApplyViewPanelSettings/menu handlers).
     // Backed by bool? rather than bool so that a config file saved before these fields existed

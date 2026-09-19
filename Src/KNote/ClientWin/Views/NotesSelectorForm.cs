@@ -18,8 +18,11 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     private SortOrder _sortOrder;
     private string _textFilter = "";
     private int _topicPreferredWidth;      // width the user gave to Topic by dragging its header edge
-    private bool _adjustingTopicWidth;
+    private bool _applyingColumnWidths;    // true while the code (not the user) is changing column widths
+    private bool _columnWidthsTracked;     // user resizes are only recorded once the grid is fully set up
     private bool _dateColumnsFitted;
+    // Widths persisted in AppConfig.NotesListColumnWidths - only used (read and written) when embedded.
+    private Dictionary<string, int> _savedColumnWidths = new();
 
     #endregion
 
@@ -245,10 +248,29 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         }
     }
 
+    // Only user-driven changes matter here: the code's own adjustments (fill of Topic, fit of the date
+    // columns, restore of saved widths) are wrapped in _applyingColumnWidths.
     private void dataGridNotes_ColumnWidthChanged(object sender, DataGridViewColumnEventArgs e)
     {
-        if (!_adjustingTopicWidth && e.Column.Name == "Topic")
+        if (_applyingColumnWidths || !_columnWidthsTracked)
+            return;
+
+        if (e.Column.Name == "Topic")
             _topicPreferredWidth = e.Column.Width;
+
+        if (_ctrl.EmbededMode && e.Column.Visible)
+            SaveColumnWidth(e.Column);
+
+        // Other columns changed size: Topic absorbs the difference (it is refitted itself only on
+        // grid resize / data binding, so a width the user just gave it is left alone).
+        if (e.Column.Name != "Topic")
+            FitTopicColumn();
+    }
+
+    private void SaveColumnWidth(DataGridViewColumn column)
+    {
+        _savedColumnWidths[column.Name] = column.Width;
+        _ctrl.Store.AppConfig.NotesListColumnWidths = ColumnWidthSettings.Format(_savedColumnWidths);
     }
 
     // Rows (and so the vertical scrollbar) only exist once the data is bound, hence Topic is refitted here too.
@@ -455,7 +477,30 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
             }
         }
 
+        if (_ctrl.EmbededMode)
+            ApplySavedColumnWidths();
+
         FitTopicColumn();
+        _columnWidthsTracked = true;
+    }
+
+    // Restores the widths the user left in the embedded list. Hidden columns are skipped (their saved
+    // entry is kept in _savedColumnWidths, so it comes back if they are shown again).
+    private void ApplySavedColumnWidths()
+    {
+        _savedColumnWidths = ColumnWidthSettings.Parse(_ctrl.Store.AppConfig.NotesListColumnWidths);
+
+        _applyingColumnWidths = true;
+        try
+        {
+            foreach (DataGridViewColumn col in dataGridNotes.Columns)
+                if (col.Visible && _savedColumnWidths.TryGetValue(col.Name, out var width))
+                    col.Width = Math.Max(width, col.MinimumWidth);
+        }
+        finally { _applyingColumnWidths = false; }
+
+        if (_savedColumnWidths.TryGetValue("Topic", out var topicWidth))
+            _topicPreferredWidth = topicWidth;
     }
 
     // One-off: sizes the date columns to their header/cell text (both wrap-free), so they take no more
@@ -465,12 +510,17 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         if (_dateColumnsFitted || dataGridNotes.Rows.Count == 0)
             return;
 
-        foreach (var name in new[] { "ModificationDateTime", "CreationDateTime" })
+        _applyingColumnWidths = true;
+        try
         {
-            var col = dataGridNotes.Columns[name];
-            if (col.Visible)
-                dataGridNotes.AutoResizeColumn(col.Index, DataGridViewAutoSizeColumnMode.AllCells);
+            foreach (var name in new[] { "ModificationDateTime", "CreationDateTime" })
+            {
+                var col = dataGridNotes.Columns[name];
+                if (col.Visible && !_savedColumnWidths.ContainsKey(name))
+                    dataGridNotes.AutoResizeColumn(col.Index, DataGridViewAutoSizeColumnMode.AllCells);
+            }
         }
+        finally { _applyingColumnWidths = false; }
         _dateColumnsFitted = true;
     }
 
@@ -498,9 +548,9 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         if (topic.Width == width)
             return;
 
-        _adjustingTopicWidth = true;
+        _applyingColumnWidths = true;
         try { topic.Width = width; }
-        finally { _adjustingTopicWidth = false; }
+        finally { _applyingColumnWidths = false; }
     }
 
     // _ctrl.HiddenColumns is a free-form comma-separated string (e.g. "Priority, InternalTags,
