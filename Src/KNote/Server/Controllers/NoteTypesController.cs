@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KNote.Server.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
@@ -43,7 +44,7 @@ public class NoteTypesController : ControllerBase
         {
             _logger.LogError(ex, "Get at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTypeDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -67,7 +68,7 @@ public class NoteTypesController : ControllerBase
         {
             _logger.LogError(ex, "Get {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<NoteTypeDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -92,7 +93,7 @@ public class NoteTypesController : ControllerBase
         {
             _logger.LogError(ex, "Post {name} at {dateTime}.", noteType.Name?.ToString(), DateTime.Now);
             var kresApi = new Result<NoteTypeDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -115,7 +116,7 @@ public class NoteTypesController : ControllerBase
         {
             _logger.LogError(ex, "Delete {id} at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<NoteTypeDto>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }

@@ -31,6 +31,20 @@ public class NoteTypesInProcessTests
     }
 
     [TestMethod]
+    public async Task Post_WithNonExistentParent_ReturnsRootCauseNotServiceWrapper()
+    {
+        NoteTypeDto noteType = new() { NoteTypeId = Guid.Empty, Name = "__TEST_NOTETYPE_BAD_PARENT__", Description = "__TEST_NOTETYPE_BAD_PARENT__", ParenNoteTypeId = Guid.NewGuid() };
+
+        var httpRes = await _httpClient.PostAsJsonAsync("api/notetypes", noteType);
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTypeDto>>();
+
+        Assert.IsFalse(httpRes.IsSuccessStatusCode);
+        Assert.IsNotNull(res);
+        Assert.IsTrue(res!.ErrorMessage.StartsWith("Generic error:"), res.ErrorMessage);
+        Assert.IsFalse(res.ErrorMessage.Contains("KNote service error"), res.ErrorMessage);
+    }
+
+    [TestMethod]
     public async Task Execute_BasicCRUD()
     {
         // Create
