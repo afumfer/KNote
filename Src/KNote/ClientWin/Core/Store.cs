@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
-using System.Xml.Serialization;
 using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Core;
@@ -259,14 +258,11 @@ public class Store
             configFile = AppUserDataPath.ConfigFile;
         try
         {
-            TextWriter w = new StreamWriter(configFile);
-            XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
-            serializer.Serialize(w, AppConfig);
-            w.Close();
+            XmlConfigFile.Save(AppConfig, configFile);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "SaveConfig: {message}", configFile?.ToString());
+            Logger?.LogError(ex, "SaveConfig: {message}", configFile?.ToString());
             throw;
         }
     }
@@ -278,20 +274,20 @@ public class Store
             if (string.IsNullOrEmpty(configFile))
                 configFile = AppUserDataPath.ConfigFile;
 
-
-            if (!File.Exists(configFile))
+            var config = XmlConfigFile.Load<AppConfig>(configFile, out var recoveredFromBackup);
+            if (config == null)
                 return;
-            
-            TextReader reader = new StreamReader(configFile);
-            XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
-            AppConfig = (AppConfig)serializer.Deserialize(reader);
-            reader.Close();                
+
+            if (recoveredFromBackup)
+                Logger?.LogWarning("LoadConfig: {message} was unreadable, loaded its backup instead", configFile);
+
+            AppConfig = config;
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "LoadConfig: {message}", configFile?.ToString());
+            Logger?.LogError(ex, "LoadConfig: {message}", configFile?.ToString());
             throw;
-        }            
+        }
     }
 
     public Task<bool> CheckNoteIsActive(Guid noteId)
