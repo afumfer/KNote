@@ -3,7 +3,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Controllers;
 
-public class MessagesManagmentCtrl : CtrlBase
+public class MessagesManagementCtrl : CtrlBase
 {
     #region Fields
 
@@ -17,9 +17,9 @@ public class MessagesManagmentCtrl : CtrlBase
 
     #region Constructor 
 
-    public MessagesManagmentCtrl(Store store): base(store)
+    public MessagesManagementCtrl(Store store): base(store)
     {
-        ControllerName = "Messages Managment Controller";
+        ControllerName = "Messages Management Controller";
     }
 
     #endregion

@@ -51,7 +51,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
     // Auto-run mode has no "Run KntScript" action (toolStripConsole is hidden - there's no KntScript
     // source here, textSourceCode holds the note's cs/py/js AutoRunCode instead). Without this guard,
     // an F5 KeyUp can still land on this form right after it opens (it grabs focus mid-keystroke from
-    // the very F5 press in NoteEditor/KNoteManagment that triggered the auto-run), firing
+    // the very F5 press in NoteEditor/KNoteManagement that triggered the auto-run), firing
     // buttonRunKntSCode_Click and running the cs/py/js source through the KntScript engine by mistake.
     // KntSEngine.Run swallows the resulting parser/scanner exception and prints its message straight
     // into the shared KntScriptInOutDevice with no trailing newline, so it lands concatenated with
@@ -407,7 +407,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
             textInput.Clear();
     }
 
-    // Opened programmatically (Store.RunCode, for a note/alarm/KNoteManagment-triggered cs/py/js
+    // Opened programmatically (Store.RunCode, for a note/alarm/KNoteManagement-triggered cs/py/js
     // script) instead of by the user picking "KntScript console" from the Tools menu: nothing here
     // came from typing into this window, and there's nothing to New/Open/Save, so that whole
     // toolbar - and the source editor next to it, which would otherwise sit there empty/unused -

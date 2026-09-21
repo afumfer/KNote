@@ -15,7 +15,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<KntScriptConsoleCtrl, IViewBase>(c => new KntScriptConsoleForm(c));
         Registry.Register<FoldersSelectorCtrl, IViewSelector<FolderWithServiceRef>>(c => new FoldersSelectorForm(c));
         Registry.Register<NotesSelectorCtrl, IViewSelector<NoteMinimalDto>>(c => new NotesSelectorForm(c));
-        Registry.Register<KNoteManagmentCtrl, IViewKNoteManagment>(c => new KNoteManagmentForm(c));
+        Registry.Register<KNoteManagementCtrl, IViewKNoteManagement>(c => new KNoteManagementForm(c));
         Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
         Registry.Register<PostItEditorCtrl, IViewPostItEditor<NoteDto>>(c => new PostItEditorForm(c));
         Registry.Register<PostItPropertiesCtrl, IViewPostIt<WindowDto>>(c => new PostItPropertiesForm(c));
@@ -24,8 +24,8 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<UserRegisterCtrl, IViewEditor<UserRegisterDto>>(c => new UserRegisterForm(c));
         Registry.Register<UserEditorCtrl, IViewEditor<UserDto>>(c => new UserEditorForm(c));
         Registry.Register<UsersManageCtrl, IViewManageList<UserDto>>(c => new UsersManageForm(c));
-        Registry.Register<KNoteManagmentCtrl, IViewBase>(c => new NotifyForm(c), key: "Notify");
-        Registry.Register<KNoteManagmentCtrl, IViewBase>(c => new KNoteAboutForm(c), key: "About");
+        Registry.Register<KNoteManagementCtrl, IViewBase>(c => new NotifyForm(c), key: "Notify");
+        Registry.Register<KNoteManagementCtrl, IViewBase>(c => new KNoteAboutForm(c), key: "About");
         Registry.Register<MessageEditorCtrl, IViewEditor<KMessageDto>>(c => new MessageEditorForm(c));
         Registry.Register<ResourceEditorCtrl, IViewEditor<ResourceDto>>(c => new ResourceEditorForm(c));
         Registry.Register<AttributeEditorCtrl, IViewEditor<KAttributeDto>>(c => new AttributeEditorForm(c));

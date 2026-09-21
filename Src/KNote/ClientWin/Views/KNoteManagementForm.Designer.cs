@@ -1,6 +1,6 @@
 ﻿namespace KNote.ClientWin.Views
 {
-    partial class KNoteManagmentForm
+    partial class KNoteManagementForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KNoteManagmentForm));
-            menuMangment = new MenuStrip();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KNoteManagementForm));
+            menuManagement = new MenuStrip();
             menuFile = new ToolStripMenuItem();
             menuRepositories = new ToolStripMenuItem();
             menuCreateRepository = new ToolStripMenuItem();
-            menuManagmentRepository = new ToolStripMenuItem();
+            menuManagementRepository = new ToolStripMenuItem();
             menuAddRepositoryLink = new ToolStripMenuItem();
             menuRemoveRepositoryLink = new ToolStripMenuItem();
             toolMenuIRepositoryS1 = new ToolStripSeparator();
@@ -89,13 +89,13 @@
             menuHelp = new ToolStripMenuItem();
             menuHelpDoc = new ToolStripMenuItem();
             menuAbout = new ToolStripMenuItem();
-            statusBarManagment = new StatusStrip();
+            statusBarManagement = new StatusStrip();
             statusLabel1 = new ToolStripStatusLabel();
             statusS1 = new ToolStripStatusLabel();
             statusLabel2 = new ToolStripStatusLabel();
             statusLabelMenuHint = new ToolStripStatusLabel();
             progressBar = new ToolStripProgressBar();
-            toolBarManagment = new ToolStrip();
+            toolBarManagement = new ToolStrip();
             toolNewNote = new ToolStripButton();
             toolEditNote = new ToolStripButton();
             toolDeleteNote = new ToolStripButton();
@@ -103,7 +103,7 @@
             toolPrintReports = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
             toolConfiguration = new ToolStripButton();
-            panelSupManagment = new Panel();
+            panelSupManagement = new Panel();
             labelReResources = new Label();
             labelRepAliasCon = new Label();
             labelFolderDetail = new Label();
@@ -121,10 +121,10 @@
             buttonQuickSearchMode = new Button();
             buttonFilterMode = new Button();
             panelSearchContent = new Panel();
-            menuMangment.SuspendLayout();
-            statusBarManagment.SuspendLayout();
-            toolBarManagment.SuspendLayout();
-            panelSupManagment.SuspendLayout();
+            menuManagement.SuspendLayout();
+            statusBarManagement.SuspendLayout();
+            toolBarManagement.SuspendLayout();
+            panelSupManagement.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxFolder).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -137,15 +137,15 @@
             splitContainer2.SuspendLayout();
             SuspendLayout();
             // 
-            // menuMangment
+            // menuManagement
             // 
-            menuMangment.Items.AddRange(new ToolStripItem[] { menuFile, menuEdit, menuView, menuTools, menuHelp });
-            menuMangment.Location = new Point(0, 0);
-            menuMangment.Name = "menuMangment";
-            menuMangment.Padding = new Padding(7, 2, 0, 2);
-            menuMangment.Size = new Size(1014, 24);
-            menuMangment.TabIndex = 2;
-            menuMangment.Text = "KNote menu managment";
+            menuManagement.Items.AddRange(new ToolStripItem[] { menuFile, menuEdit, menuView, menuTools, menuHelp });
+            menuManagement.Location = new Point(0, 0);
+            menuManagement.Name = "menuManagement";
+            menuManagement.Padding = new Padding(7, 2, 0, 2);
+            menuManagement.Size = new Size(1014, 24);
+            menuManagement.TabIndex = 2;
+            menuManagement.Text = "KNote menu management";
             // 
             // menuFile
             // 
@@ -156,7 +156,7 @@
             // 
             // menuRepositories
             // 
-            menuRepositories.DropDownItems.AddRange(new ToolStripItem[] { menuCreateRepository, menuManagmentRepository, menuAddRepositoryLink, menuRemoveRepositoryLink, toolMenuIRepositoryS1, menuRefreshTreeFolders, toolMenuIRepositoryS2, menuImportData });
+            menuRepositories.DropDownItems.AddRange(new ToolStripItem[] { menuCreateRepository, menuManagementRepository, menuAddRepositoryLink, menuRemoveRepositoryLink, toolMenuIRepositoryS1, menuRefreshTreeFolders, toolMenuIRepositoryS2, menuImportData });
             menuRepositories.Name = "menuRepositories";
             menuRepositories.Size = new Size(203, 22);
             menuRepositories.Text = "&Repositories";
@@ -168,12 +168,12 @@
             menuCreateRepository.Text = "Create new repository ,,,";
             menuCreateRepository.Click += menu_Click;
             // 
-            // menuManagmentRepository
+            // menuManagementRepository
             // 
-            menuManagmentRepository.Name = "menuManagmentRepository";
-            menuManagmentRepository.Size = new Size(282, 22);
-            menuManagmentRepository.Text = "Edit repository properties ...";
-            menuManagmentRepository.Click += menu_Click;
+            menuManagementRepository.Name = "menuManagementRepository";
+            menuManagementRepository.Size = new Size(282, 22);
+            menuManagementRepository.Text = "Edit repository properties ...";
+            menuManagementRepository.Click += menu_Click;
             // 
             // menuAddRepositoryLink
             // 
@@ -252,7 +252,7 @@
             // 
             menuHide.Name = "menuHide";
             menuHide.Size = new Size(203, 22);
-            menuHide.Text = "&Hide KNote managment";
+            menuHide.Text = "&Hide KNote management";
             menuHide.Click += menu_Click;
             // 
             // menuFilesS2
@@ -560,15 +560,15 @@
             menuAbout.Text = "&About ...";
             menuAbout.Click += menu_Click;
             // 
-            // statusBarManagment
+            // statusBarManagement
             // 
-            statusBarManagment.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2, statusLabelMenuHint, progressBar });
-            statusBarManagment.Location = new Point(0, 668);
-            statusBarManagment.Name = "statusBarManagment";
-            statusBarManagment.Padding = new Padding(1, 0, 16, 0);
-            statusBarManagment.Size = new Size(1014, 22);
-            statusBarManagment.TabIndex = 3;
-            statusBarManagment.Text = "statusStrip1";
+            statusBarManagement.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2, statusLabelMenuHint, progressBar });
+            statusBarManagement.Location = new Point(0, 668);
+            statusBarManagement.Name = "statusBarManagement";
+            statusBarManagement.Padding = new Padding(1, 0, 16, 0);
+            statusBarManagement.Size = new Size(1014, 22);
+            statusBarManagement.TabIndex = 3;
+            statusBarManagement.Text = "statusStrip1";
             // 
             // statusLabel1
             // 
@@ -607,14 +607,14 @@
             progressBar.Size = new Size(100, 16);
             progressBar.Visible = false;
             // 
-            // toolBarManagment
+            // toolBarManagement
             // 
-            toolBarManagment.Items.AddRange(new ToolStripItem[] { toolNewNote, toolEditNote, toolDeleteNote, toolStripSeparator1, toolPrintReports, toolStripSeparator2, toolConfiguration });
-            toolBarManagment.Location = new Point(0, 24);
-            toolBarManagment.Name = "toolBarManagment";
-            toolBarManagment.Size = new Size(1014, 25);
-            toolBarManagment.TabIndex = 4;
-            toolBarManagment.Text = "toolStrip1";
+            toolBarManagement.Items.AddRange(new ToolStripItem[] { toolNewNote, toolEditNote, toolDeleteNote, toolStripSeparator1, toolPrintReports, toolStripSeparator2, toolConfiguration });
+            toolBarManagement.Location = new Point(0, 24);
+            toolBarManagement.Name = "toolBarManagement";
+            toolBarManagement.Size = new Size(1014, 25);
+            toolBarManagement.TabIndex = 4;
+            toolBarManagement.Text = "toolStrip1";
             // 
             // toolNewNote
             // 
@@ -676,20 +676,20 @@
             toolConfiguration.ToolTipText = "Repository configuration";
             toolConfiguration.Click += buttonToolBar_Click;
             // 
-            // panelSupManagment
+            // panelSupManagement
             // 
-            panelSupManagment.BackColor = SystemColors.ControlDarkDark;
-            panelSupManagment.Controls.Add(labelReResources);
-            panelSupManagment.Controls.Add(labelRepAliasCon);
-            panelSupManagment.Controls.Add(labelFolderDetail);
-            panelSupManagment.Controls.Add(labelFolder);
-            panelSupManagment.Controls.Add(pictureBoxFolder);
-            panelSupManagment.Dock = DockStyle.Top;
-            panelSupManagment.Location = new Point(0, 49);
-            panelSupManagment.Margin = new Padding(4, 3, 4, 3);
-            panelSupManagment.Name = "panelSupManagment";
-            panelSupManagment.Size = new Size(1014, 50);
-            panelSupManagment.TabIndex = 5;
+            panelSupManagement.BackColor = SystemColors.ControlDarkDark;
+            panelSupManagement.Controls.Add(labelReResources);
+            panelSupManagement.Controls.Add(labelRepAliasCon);
+            panelSupManagement.Controls.Add(labelFolderDetail);
+            panelSupManagement.Controls.Add(labelFolder);
+            panelSupManagement.Controls.Add(pictureBoxFolder);
+            panelSupManagement.Dock = DockStyle.Top;
+            panelSupManagement.Location = new Point(0, 49);
+            panelSupManagement.Margin = new Padding(4, 3, 4, 3);
+            panelSupManagement.Name = "panelSupManagement";
+            panelSupManagement.Size = new Size(1014, 50);
+            panelSupManagement.TabIndex = 5;
             // 
             // labelReResources
             // 
@@ -909,30 +909,30 @@
             menuExecuteCodeStdOutConsole.Text = "Execute code for selected notes in stdout console";
             menuExecuteCodeStdOutConsole.Click += menu_Click;
             //
-            // KNoteManagmentForm
+            // KNoteManagementForm
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1014, 690);
             Controls.Add(splitContainer1);
-            Controls.Add(panelSupManagment);
-            Controls.Add(toolBarManagment);
-            Controls.Add(statusBarManagment);
-            Controls.Add(menuMangment);
+            Controls.Add(panelSupManagement);
+            Controls.Add(toolBarManagement);
+            Controls.Add(statusBarManagement);
+            Controls.Add(menuManagement);
             Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Margin = new Padding(4, 3, 4, 3);
-            Name = "KNoteManagmentForm";
-            Text = "KNote Managment";
-            FormClosing += KNoteManagmentForm_FormClosing;
-            Load += KNoteManagmentForm_Load;
-            menuMangment.ResumeLayout(false);
-            menuMangment.PerformLayout();
-            statusBarManagment.ResumeLayout(false);
-            statusBarManagment.PerformLayout();
-            toolBarManagment.ResumeLayout(false);
-            toolBarManagment.PerformLayout();
-            panelSupManagment.ResumeLayout(false);
+            Name = "KNoteManagementForm";
+            Text = "KNote Management";
+            FormClosing += KNoteManagementForm_FormClosing;
+            Load += KNoteManagementForm_Load;
+            menuManagement.ResumeLayout(false);
+            menuManagement.PerformLayout();
+            statusBarManagement.ResumeLayout(false);
+            statusBarManagement.PerformLayout();
+            toolBarManagement.ResumeLayout(false);
+            toolBarManagement.PerformLayout();
+            panelSupManagement.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBoxFolder).EndInit();
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
@@ -947,12 +947,12 @@
             PerformLayout();
         }
 
-        private MenuStrip menuMangment;
+        private MenuStrip menuManagement;
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuRepositories;
         private ToolStripMenuItem menuCreateRepository;
         private ToolStripMenuItem menuAddRepositoryLink;
-        private ToolStripMenuItem menuManagmentRepository;
+        private ToolStripMenuItem menuManagementRepository;
         private ToolStripMenuItem menuRemoveRepositoryLink;
         private ToolStripSeparator toolMenuIRepositoryS1;
         private ToolStripMenuItem menuRefreshTreeFolders;
@@ -991,12 +991,12 @@
         private ToolStripMenuItem menuHelp;
         private ToolStripMenuItem menuHelpDoc;
         private ToolStripMenuItem menuAbout;
-        private StatusStrip statusBarManagment;
+        private StatusStrip statusBarManagement;
         private ToolStripStatusLabel statusLabel1;
         private ToolStripStatusLabel statusS1;
         private ToolStripStatusLabel statusLabel2;
         private ToolStripStatusLabel statusLabelMenuHint;
-        private ToolStrip toolBarManagment;
+        private ToolStrip toolBarManagement;
         private ToolStripButton toolNewNote;
         private ToolStripButton toolEditNote;
         private ToolStripButton toolDeleteNote;
@@ -1004,7 +1004,7 @@
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripButton toolPrintReports;
         private ToolStripButton toolConfiguration;
-        private Panel panelSupManagment;
+        private Panel panelSupManagement;
         private Label labelFolderDetail;
         private Label labelFolder;
         private PictureBox pictureBoxFolder;

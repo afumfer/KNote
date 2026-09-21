@@ -9,7 +9,7 @@ using KntScript;
 
 namespace KNote.ClientWin.Controllers;
 
-public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
+public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 {
     #region Private fields
 
@@ -75,7 +75,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #region Constructor, Dispose, ...
 
-    public KNoteManagmentCtrl(Store store) : base(store)
+    public KNoteManagementCtrl(Store store) : base(store)
     {
         Store.ChangedActiveFolderWithServiceRef += Store_ChangedActiveFolderWithServiceRef;
         Store.ChangedActiveFilterWithServiceRef += Store_ChangedActiveFilterWithServiceRef;
@@ -224,9 +224,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #region Views
 
-    protected override IViewKNoteManagment CreateView()
+    protected override IViewKNoteManagement CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<KNoteManagmentCtrl, IViewKNoteManagment>(this);
+        return Store.FactoryViews.Registry.Resolve<KNoteManagementCtrl, IViewKNoteManagement>(this);
     }
 
     private IViewBase _notifyView;
@@ -236,7 +236,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         {
             if (_notifyView == null)
             {
-                _notifyView = Store.FactoryViews.Registry.Resolve<KNoteManagmentCtrl, IViewBase>(this, key: "Notify");
+                _notifyView = Store.FactoryViews.Registry.Resolve<KNoteManagementCtrl, IViewBase>(this, key: "Notify");
             }
             return _notifyView;
         }
@@ -249,7 +249,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         {
             if (_aboutView == null)
             {
-                _aboutView = Store.FactoryViews.Registry.Resolve<KNoteManagmentCtrl, IViewBase>(this, key: "About");
+                _aboutView = Store.FactoryViews.Registry.Resolve<KNoteManagementCtrl, IViewBase>(this, key: "About");
             }
             return _aboutView;
         }
@@ -262,7 +262,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     protected override Result<EControllerResult> OnInitialized()
     {
-        ControllerName = $"{KntConst.AppName} managment";
+        ControllerName = $"{KntConst.AppName} management";
 
         var result = base.OnInitialized();
 
@@ -278,12 +278,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 NotesSearchParamCtrl.Run();
                 NotesFilterParamCtrl.Run();
                 NoteEditorCtrl.Run();
-                MessagesManagmentCtrl.Run();
+                MessagesManagementCtrl.Run();
 
                 // Show the Application info alarms panel on startup if the user left it with
                 // undismissed rows from a previous session, so they aren't left wondering where
                 // their pending reminders went - same intent as PostIts reopening themselves via
-                // MessagesManagmentCtrl.VisibleWindows().
+                // MessagesManagementCtrl.VisibleWindows().
                 if (Store.State.AppInfoAlarmsWindow.Rows.Count > 0)
                     AppInfoAlarmsCtrl.Activate();
 
@@ -496,27 +496,27 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region Messages Managment controller
+    #region Messages Management controller
 
-    private MessagesManagmentCtrl _messagesManagmentCtrl;
-    public MessagesManagmentCtrl MessagesManagmentCtrl
+    private MessagesManagementCtrl _messagesManagementCtrl;
+    public MessagesManagementCtrl MessagesManagementCtrl
     {
         get
         {
-            if(_messagesManagmentCtrl == null)
+            if(_messagesManagementCtrl == null)
             {
-                _messagesManagmentCtrl = new MessagesManagmentCtrl(Store);
-                _messagesManagmentCtrl.PostItVisible += _messagesManagment_PostItVisible;                    
-                _messagesManagmentCtrl.PostItAlarm += _messagesManagment_PostItAlarm;
-                _messagesManagmentCtrl.EMailAlarm += _messagesManagment_EMailAlarm;
-                _messagesManagmentCtrl.AppAlarm += _messagesManagment_AppAlarm;
-                _messagesManagmentCtrl.ExecuteKntScript += _messagesManagmentCtrl_ExecuteKntScript;
+                _messagesManagementCtrl = new MessagesManagementCtrl(Store);
+                _messagesManagementCtrl.PostItVisible += _messagesManagement_PostItVisible;                    
+                _messagesManagementCtrl.PostItAlarm += _messagesManagement_PostItAlarm;
+                _messagesManagementCtrl.EMailAlarm += _messagesManagement_EMailAlarm;
+                _messagesManagementCtrl.AppAlarm += _messagesManagement_AppAlarm;
+                _messagesManagementCtrl.ExecuteKntScript += _messagesManagementCtrl_ExecuteKntScript;
             }
-            return _messagesManagmentCtrl;
+            return _messagesManagementCtrl;
         }
     }
 
-    private async void _messagesManagmentCtrl_ExecuteKntScript(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagementCtrl_ExecuteKntScript(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         var service = e.Entity.Service;
         var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
@@ -560,7 +560,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await EditNote(e.Entity.Service, e.Entity.NoteId);
     }
 
-    private async void _messagesManagment_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagement_AppAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         var service = e.Entity.Service;
         var noteId = e.Entity.NoteId;
@@ -571,7 +571,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
         var repositoryAlias = Store.GetServiceRef(service.IdServiceRef)?.Alias;
 
-        // Same note-level granularity caveat as Email alarms (see _messagesManagment_EMailAlarm):
+        // Same note-level granularity caveat as Email alarms (see _messagesManagement_EMailAlarm):
         // GetAlarmNotesIdAsync only reports the note, not which specific message fired.
         var appInfoMessages = messages.Where(m => m.NotificationType == EnumNotificationType.AppInfo && m.UserId == currentUser.UserId).ToList();
         if (appInfoMessages.Count == 0)
@@ -596,9 +596,9 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
 
     #endregion
 
-    #region Messages Managment alarm handlers
+    #region Messages Management alarm handlers
 
-    private async void _messagesManagment_EMailAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagement_EMailAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         var service = e.Entity.Service;
         var noteId = e.Entity.NoteId;
@@ -641,14 +641,14 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         }
     }
 
-    private async void _messagesManagment_PostItAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagement_PostItAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {                        
         if (await Store.CheckNoteIsOpenOnDesktop(e.Entity.NoteId))
             return;
         await EditNotePostIt(e.Entity.Service, e.Entity.NoteId, true);
     }
 
-    private async void _messagesManagment_PostItVisible(object sender, ControllerEventArgs<ServiceWithNoteId> e)
+    private async void _messagesManagement_PostItVisible(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
         if (await Store.CheckPostItIsActive(e.Entity.NoteId))
             return;
@@ -1052,7 +1052,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         await NewRepository(EnumRepositoryEditorMode.Create);
     }
 
-    public async Task ManagmentRepository()
+    public async Task ManagementRepository()
     {
         if (SelectedServiceRef == null)
         {
@@ -1060,7 +1060,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             return;
         }                        
         var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
-        repositoryEditorCtrl.EditorMode = EnumRepositoryEditorMode.Managment;
+        repositoryEditorCtrl.EditorMode = EnumRepositoryEditorMode.Management;
         await repositoryEditorCtrl.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
         var res = repositoryEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
@@ -1109,12 +1109,12 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         View.DeactivateWaitState();
     }
 
-    public void ShowKNoteManagment() 
+    public void ShowKNoteManagement() 
     {
         View.ActivateView();            
     }
 
-    public void HideKNoteManagment()
+    public void HideKNoteManagement()
     {                        
         View.HideView();            
     }
@@ -1345,7 +1345,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         var res = optionsEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {
-            // TODO: refresh context managment
+            // TODO: refresh context management
             // ... for next major version
         }
     }

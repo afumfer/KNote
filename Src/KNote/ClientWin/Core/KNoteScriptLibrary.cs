@@ -40,9 +40,16 @@ public class KNoteScriptLibrary: Library
         return new NotesSelectorCtrl(_store);
     }
 
-    public KNoteManagmentCtrl GetKNoteManagmentCtrl()
+    public KNoteManagementCtrl GetKNoteManagementCtrl()
     {
-        return new KNoteManagmentCtrl(_store);
+        return new KNoteManagementCtrl(_store);
+    }
+
+    // Former, misspelled name: scripts saved in users' notes may still call it.
+    [Obsolete("Misspelled name kept only so existing scripts keep working; use GetKNoteManagementCtrl.")]
+    public KNoteManagementCtrl GetKNoteManagmentCtrl()
+    {
+        return GetKNoteManagementCtrl();
     }
 
     public MonitorCtrl GetMonitorCtrl()
@@ -91,7 +98,7 @@ public class KNoteScriptLibrary: Library
         var aiAssistant = new KNoteAIAssistantCtrl(_store);
         aiAssistant.Run();
         Task.Run(() => aiAssistant.GetCompletionAsync(prompt)).Wait();
-        return aiAssistant.ChatTextMessasges.ToString();
+        return aiAssistant.ChatTextMessages.ToString();
     }
 
     public KntChatCtrl GetKntChatCtrl()

@@ -134,7 +134,7 @@ public class KntService : IKntService, IDisposable
 
     public RepositoryRef RepositoryRef
     {
-        get { return _repository.RespositoryRef; }
+        get { return _repository.RepositoryRef; }
     }
 
     public string UserIdentityName { get; set; }
@@ -421,9 +421,9 @@ public class KntService : IKntService, IDisposable
         foreach (var r in noteInput.Resources)
         {            
             noteInput.Description = noteInput.Description.Replace(r.Container.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar), 
-                Repository.RespositoryRef.ResourcesContainer);            
-            r.Container = Repository.RespositoryRef.ResourcesContainer;
-            r.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
+                Repository.RepositoryRef.ResourcesContainer);            
+            r.Container = Repository.RepositoryRef.ResourcesContainer;
+            r.ContentInDB = Repository.RepositoryRef.ResourceContentInDB;
         }
         
         Task.Run(() => Notes.SaveExtendedAsync(noteInput)).Wait();

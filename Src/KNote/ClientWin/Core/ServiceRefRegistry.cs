@@ -12,7 +12,7 @@ public class ServiceRefRegistry
     // Same shape of bug as ControllerRegistry/DomainEventBus: Add/Remove normally run on the UI
     // thread, but nothing stops a KntScript running on its own background Thread
     // (Store.RunKntSCodeInNewThread) from reaching a code path that adds/removes a ServiceRef while
-    // MessagesManagmentCtrl's autosave/alarm timers (UI thread) call GetAll()/GetById()/etc. GetAll
+    // MessagesManagementCtrl's autosave/alarm timers (UI thread) call GetAll()/GetById()/etc. GetAll
     // already returned a copy, which hid the most common symptom (a live-list foreach throwing),
     // but the copy itself - and every other read here - was still an unsynchronized read racing an
     // unsynchronized write.

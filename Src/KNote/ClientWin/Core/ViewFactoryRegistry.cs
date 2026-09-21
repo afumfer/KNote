@@ -9,7 +9,7 @@ namespace KNote.ClientWin.Core;
 /// left in place unchanged (single implementation, nothing else depends on adding to it).
 ///
 /// The optional "key" disambiguates controller types that need more than one view (e.g.
-/// KNoteManagmentCtrl has a main view, a notify view and an about view).
+/// KNoteManagementCtrl has a main view, a notify view and an about view).
 /// </summary>
 public class ViewFactoryRegistry
 {

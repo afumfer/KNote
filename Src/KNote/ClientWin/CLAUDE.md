@@ -106,7 +106,7 @@ CtrlBase
 
 Algunos controladores no encajan en editor/selector y heredan directamente de `CtrlBase`
 (`HeavyProcessCtrl`, `KntChatCtrl`, `KNoteAIAssistantCtrl`, `KntHttpClientCtrl`, `KntLabCtrl`,
-`KntServerCOMCtrl`, `MessagesManagmentCtrl`), gestionando su vista manualmente si la necesitan.
+`KntServerCOMCtrl`, `MessagesManagementCtrl`), gestionando su vista manualmente si la necesitan.
 
 Al crear un nuevo caso de uso: elige la clase base según la familia (editor/selector/nota) — no repliques
 lógica de guardado/selección genérica dentro del Ctrl concreto, eso vive en la base.
@@ -138,23 +138,23 @@ public interface IViewEditorEmbeddable<T> : IViewEmbeddable { ... }
 public interface IViewSelector<TItem> : IViewEmbeddable { ... }
 ```
 
-Más interfaces específicas de un caso de uso concreto: `IViewKNoteManagment`, `IViewPostIt<T>`,
+Más interfaces específicas de un caso de uso concreto: `IViewKNoteManagement`, `IViewPostIt<T>`,
 `IViewChat`, `IViewServerCOM`, `IViewHeavyProcess`.
 
 `IFactoryViews` (`Core/IFactoryViews.cs`) históricamente declaraba **una sobrecarga de `View(...)` por cada
 Ctrl concreto** (resolución por el tipo estático del controlador), más un par de vistas auxiliares de
-`KNoteManagmentCtrl` (`NotifyView`, `AboutView`) — con el inconveniente de que cada caso de uso nuevo
+`KNoteManagementCtrl` (`NotifyView`, `AboutView`) — con el inconveniente de que cada caso de uso nuevo
 obligaba a tocar esa interfaz. Tras el refactor (Fases 4 y 4b), **`IFactoryViews` ya no declara ninguna
 sobrecarga**: se ha quedado reducida a un único miembro, `ViewFactoryRegistry Registry { get; }`
 (`Core/ViewFactoryRegistry.cs`), un mapa genérico `(tipo de Ctrl, key opcional) → Func<Ctrl, View>` (la
-`key` distingue los tres registros de `KNoteManagmentCtrl`: vista principal, `Notify`, `About`).
+`key` distingue los tres registros de `KNoteManagementCtrl`: vista principal, `Notify`, `About`).
 `FactoryViewsWinForms` (`Core/FactoryViewsWinForms.cs`), su única implementación, registra las 25
 fábricas existentes en su constructor y no expone ya ningún método `View(...)`:
 
 ```csharp
 // Constructor de FactoryViewsWinForms — todo lo que queda de la fábrica
 Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(c => new NoteEditorForm(c));
-Registry.Register<KNoteManagmentCtrl, IViewBase>(c => new NotifyForm(c), key: "Notify");
+Registry.Register<KNoteManagementCtrl, IViewBase>(c => new NotifyForm(c), key: "Notify");
 ...
 ```
 
@@ -226,7 +226,7 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
   (mensajes específicos de la transición nota↔post-it) desde sus propios `OnPostItEdit`/`OnExtendedEdit`.
   **`Store.AddController`/`RemoveController` ya no conocen ningún tipo concreto de controlador** — el
   antiguo relé especial-caseado (`if (controller is NoteEditorCtrl) ...` más los eventos
-  `Store.SavedNote`/`DeletedNote`/`AddedPostIt`/etc.) se ha retirado; `KNoteManagmentCtrl` y los propios
+  `Store.SavedNote`/`DeletedNote`/`AddedPostIt`/etc.) se ha retirado; `KNoteManagementCtrl` y los propios
   `NoteEditorCtrl`/`PostItEditorCtrl` (que necesitan enterarse de que una nota se borró en otra ventana)
   ahora se suscriben directamente a `Store.Events`. Un controlador nuevo que quiera difundir sus cambios
   no necesita tocar `Store`: le basta con heredar de `CtrlEditorBase` (para Saved/Added/Deleted) o publicar
@@ -257,13 +257,13 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
 ```csharp
 // Program.cs — composition root
 Store appStore = new Store(new FactoryViewsWinForms());
-var knoteManagment = new KNoteManagmentCtrl(appStore);
-knoteManagment.Run();
-Application.Run(new ApplicationContext { MainForm = (Form)knoteManagment.View });
+var knoteManagement = new KNoteManagementCtrl(appStore);
+knoteManagement.Run();
+Application.Run(new ApplicationContext { MainForm = (Form)knoteManagement.View });
 ```
 
 ```csharp
-// Controllers/KNoteManagmentCtrl.cs — un caso de uso lanza otro
+// Controllers/KNoteManagementCtrl.cs — un caso de uso lanza otro
 public async Task AddNote(IKntService service)
 {
     var noteEditorCtrl = new NoteEditorCtrl(Store);   // construcción manual, sin DI

@@ -8,7 +8,7 @@ namespace KNote.Model;
 public static class KntConst
 {
     public static string AppName { get; } = "KNote";
-    public static string AppDescription { get; } = "Another keynotes managment";
+    public static string AppDescription { get; } = "Another keynotes management";
     public static int DefaultFolderNumber { get; } = 1;
     public static string SupportedMimeTypes { get; } = @"image/jpeg;image/png;application/pdf;video/mp4;audio/mp3;text/plain";
     public static string HelpUrl { get; } = @"https://github.com/afumfer/KNote/blob/master/Docs/Manual.md";

@@ -27,7 +27,7 @@ public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
     public bool IsScriptRunning => _activeSession != null && _activeSession.IsRunning;
 
     // Set via ConfigureAutoRun before Run() - lets the view know it was opened programmatically
-    // (Store.RunCode, for a script triggered from a note/alarm/KNoteManagment) rather than by the
+    // (Store.RunCode, for a script triggered from a note/alarm/KNoteManagement) rather than by the
     // user picking "KntScript console" from the Tools menu, so it can hide the editor/toolbar
     // (nothing to edit or save - the code came from the note, not from the user typing it here)
     // and start the run immediately instead of waiting for a manual "Run" click.

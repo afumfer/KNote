@@ -10,7 +10,7 @@ buena.
 
 ## Arranque y configuración
 
-- [ ] La app arranca sin excepciones y muestra `KNoteManagmentForm`.
+- [ ] La app arranca sin excepciones y muestra `KNoteManagementForm`.
 - [ ] Se puede añadir/editar/eliminar un repositorio (`RepositoryEditorCtrl`) y aparece en la lista
       de servicios configurados.
 - [ ] Cambiar entre dos repositorios/bases de datos abiertas simultáneamente actualiza correctamente
@@ -22,7 +22,7 @@ buena.
 - [ ] Abrir una nota existente por doble clic, editarla y guardar los cambios.
 - [ ] Cancelar la edición de una nota no persiste cambios.
 - [ ] Eliminar una nota la hace desaparecer del listado y de cualquier panel embebido abierto.
-- [ ] El editor de notas embebido (panel dentro de `KNoteManagmentForm`) funciona igual que una nota
+- [ ] El editor de notas embebido (panel dentro de `KNoteManagementForm`) funciona igual que una nota
       abierta en ventana flotante.
 - [ ] Añadir/editar/eliminar un adjunto (`ResourceEditorCtrl`), una tarea (`TaskEditorCtrl`), un
       mensaje (`MessageEditorCtrl`) y un atributo (`NoteAttributeEditorCtrl`) desde dentro del editor

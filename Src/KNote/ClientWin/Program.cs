@@ -40,7 +40,7 @@ static class Program
         try
         {
             // LoadAppStore does real async I/O (repository access) and can show a modal dialog
-            // (Store.EnsureCurrentUserRegistered). It must finish before KNoteManagmentCtrl is
+            // (Store.EnsureCurrentUserRegistered). It must finish before KNoteManagementCtrl is
             // created. Kicking it off from SplashForm.Shown, under a real Application.Run(splashForm)
             // message loop, lets every "await" marshal its continuation back onto this UI thread the
             // normal WinForms way. A manual Application.DoEvents() polling loop here instead (run
@@ -70,19 +70,19 @@ static class Program
             if (loadException != null)
                 ExceptionDispatchInfo.Capture(loadException).Throw();
 
-            // knoteManagment.Run() can end up displaying a note whose content uses WebView2 (e.g. it
+            // knoteManagement.Run() can end up displaying a note whose content uses WebView2 (e.g. it
             // now reactivates the last active folder, see Store.ChangeActiveFolderWithServiceRef): if
             // its first note uses the WebView2 content mode, CoreWebView2Environment.CreateAsync needs
             // a real message loop already pumping on this thread. Called here, before Application.Run
             // below starts one, WebView2's own marshaling can complete off the UI thread, so every
             // await further up the call chain (up to NoteEditorForm.ModelToControls) then resumes
             // off-thread too and throws a cross-thread InvalidOperationException. Deferring to
-            // IViewKNoteManagment.ViewShown, raised once that loop is running, is the same fix already
+            // IViewKNoteManagement.ViewShown, raised once that loop is running, is the same fix already
             // applied to LoadAppStore/SplashForm above, for the same reason.
-            var knoteManagment = new KNoteManagmentCtrl(appStore);
-            knoteManagment.View.ViewShown += (s, e) => knoteManagment.Run();
+            var knoteManagement = new KNoteManagementCtrl(appStore);
+            knoteManagement.View.ViewShown += (s, e) => knoteManagement.Run();
 
-            Application.Run((Form)knoteManagment.View);
+            Application.Run((Form)knoteManagement.View);
 
             appStore.Logger?.LogInformation("KNote finalized");
         }
@@ -159,7 +159,7 @@ static class Program
 
             var r0 = new RepositoryRef
             {
-                Alias = "Personal respository",                    
+                Alias = "Personal repository",                    
                 ConnectionString = $"Data Source={dbFile}",
                 Provider = "Microsoft.Data.Sqlite",
                 Orm = "EntityFramework",
@@ -236,7 +236,7 @@ static class Program
 
     public static void BringToFront()
     {
-        IntPtr handle = FindWindow(null, $"{KntConst.AppName} Managment");
+        IntPtr handle = FindWindow(null, $"{KntConst.AppName} Management");
 
         if (handle == IntPtr.Zero)
             return;

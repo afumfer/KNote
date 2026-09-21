@@ -15,5 +15,5 @@ chat.GetCompletion("¿Que es la cotangente?");
 printline chat.Result;
 
 printline "-- All conversation --";
-printline chat.ChatTextMessasges.ToString();
+printline chat.ChatTextMessages.ToString();
 printline "-- END --";

@@ -29,7 +29,7 @@ public class SessionState
 
     public int RunCounter { get; set; }
 
-    // Repository/folder the user had active when the application was last closed, so KNoteManagmentCtrl
+    // Repository/folder the user had active when the application was last closed, so KNoteManagementCtrl
     // can reactivate it on the next startup instead of showing no selection.
     public string LastActiveRepositoryAlias { get; set; }
 

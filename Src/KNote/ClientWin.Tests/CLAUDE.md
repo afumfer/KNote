@@ -56,7 +56,7 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
   el `KntService` real que el propio constructor de `ServiceRef` ya construyó de forma perezosa.
 - `KNoteAIAssistantCtrlTests.cs` — `RestartAIAssistant`, y sobre todo el **rollback de turno huérfano**: si
   `IChatClient` lanza una excepción, `GetCompletionAsync`/`StreamCompletionAsync` no deben dejar un mensaje
-  de usuario sin respuesta en `ChatMessages`/`ChatTextMessasges` (bug real que se coló y arregló en
+  de usuario sin respuesta en `ChatMessages`/`ChatTextMessages` (bug real que se coló y arregló en
   `KNoteAIAssistantCtrl` — este test evita que vuelva). Usa
   `KNoteAIAssistantCtrl.SetChatClientForTesting(chatClient, providerRef)` — un seam `internal` que
   bypassa `AiChatClientFactory` — habilitado por

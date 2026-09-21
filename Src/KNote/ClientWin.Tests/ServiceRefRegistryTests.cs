@@ -104,7 +104,7 @@ public class ServiceRefRegistryTests
     // Regression coverage for ServiceRefRegistry's underlying List<ServiceRef> not being
     // synchronized: Add/Remove normally run on the UI thread, but a KntScript running on its own
     // background Thread (Store.RunKntSCodeInNewThread) is not prevented from reaching a code path
-    // that adds/removes a ServiceRef, while MessagesManagmentCtrl's autosave/alarm timers (UI
+    // that adds/removes a ServiceRef, while MessagesManagementCtrl's autosave/alarm timers (UI
     // thread) call GetAll/GetById/GetByAlias/GetFirst - see the class-level comment in
     // ServiceRefRegistry.cs. This is a plain in-memory class with no Control/STA dependency, so this
     // genuinely exercises real OS thread parallelism (via Task.Run), not just async interleaving on

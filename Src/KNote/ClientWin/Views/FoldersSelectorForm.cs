@@ -85,7 +85,7 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
         panelBottom.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
         // Only give the treeview some breathing room as a standalone/modal window - when embedded
-        // (e.g. KNoteManagmentForm's "Tree folders" tab) it should keep touching its container's
+        // (e.g. KNoteManagementForm's "Tree folders" tab) it should keep touching its container's
         // edges exactly as before, matching the rest of that host form's layout.
         panelForm.Padding = new Padding(4);
     }
@@ -104,9 +104,9 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
             return null;
     }
 
-    #region Extensions managment ... 
+    #region Extensions management ... 
 
-    // TODO: extensions managment here ... 
+    // TODO: extensions management here ... 
     // ....
 
     public void AddItem(FolderWithServiceRef item)

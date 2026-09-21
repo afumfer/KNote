@@ -39,7 +39,7 @@ public class KNoteAIAssistantCtrlTests
         Assert.AreEqual(5, ctrl.TotalTokens);
         // System + User + Assistant
         Assert.AreEqual(3, ctrl.ChatMessages.Count);
-        StringAssert.Contains(ctrl.ChatTextMessasges.ToString(), "Hi there");
+        StringAssert.Contains(ctrl.ChatTextMessages.ToString(), "Hi there");
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public class KNoteAIAssistantCtrlTests
         // No orphaned "User" message left over: a retry (or a provider switch) must not resend it
         // without a matching assistant reply.
         Assert.AreEqual(messagesBeforeSend, ctrl.ChatMessages.Count);
-        Assert.AreEqual("", ctrl.ChatTextMessasges.ToString());
+        Assert.AreEqual("", ctrl.ChatTextMessages.ToString());
     }
 
     [TestMethod]
@@ -73,7 +73,7 @@ public class KNoteAIAssistantCtrlTests
 
         Assert.AreEqual("Hi there", ctrl.Result);
         Assert.AreEqual(3, ctrl.ChatMessages.Count);
-        StringAssert.Contains(ctrl.ChatTextMessasges.ToString(), "Hi there");
+        StringAssert.Contains(ctrl.ChatTextMessages.ToString(), "Hi there");
     }
 
     [TestMethod]
@@ -85,12 +85,12 @@ public class KNoteAIAssistantCtrlTests
         };
         var ctrl = CreateCtrl(chatClient);
         var messagesBeforeSend = ctrl.ChatMessages.Count;
-        var transcriptBeforeSend = ctrl.ChatTextMessasges.ToString();
+        var transcriptBeforeSend = ctrl.ChatTextMessages.ToString();
 
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => ctrl.StreamCompletionAsync("Hello"));
 
         Assert.AreEqual(messagesBeforeSend, ctrl.ChatMessages.Count);
-        Assert.AreEqual(transcriptBeforeSend, ctrl.ChatTextMessasges.ToString());
+        Assert.AreEqual(transcriptBeforeSend, ctrl.ChatTextMessages.ToString());
     }
 
     [TestMethod]
@@ -102,7 +102,7 @@ public class KNoteAIAssistantCtrlTests
         ctrl.RestartAIAssistant();
 
         Assert.AreEqual(1, ctrl.ChatMessages.Count); // just the system message
-        Assert.AreEqual("", ctrl.ChatTextMessasges.ToString());
+        Assert.AreEqual("", ctrl.ChatTextMessages.ToString());
         Assert.AreEqual(0, ctrl.TotalTokens);
         Assert.AreEqual(TimeSpan.Zero, ctrl.TotalProcessingTime);
     }

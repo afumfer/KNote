@@ -13,5 +13,5 @@ public interface IKntRepository: IDisposable
     IKntTraceNoteRepository TraceNotes { get; }
     IKntTraceNoteTypeRepository TraceNoteTypes { get; }
     Task<bool> TestDbConnection();
-    RepositoryRef RespositoryRef { get;  }
+    RepositoryRef RepositoryRef { get;  }
 }

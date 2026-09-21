@@ -162,7 +162,7 @@ public class KntRepository : IKntRepository
         }
     }
 
-    public RepositoryRef RespositoryRef
+    public RepositoryRef RepositoryRef
     {
         get { return _repositoryRef; }
     }

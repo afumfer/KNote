@@ -32,7 +32,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         // Applied here, before the window is ever shown, rather than in Load: this form starts
         // life as StartPosition=CenterScreen (see Designer), and switching a form away from
         // CenterScreen/CenterParent after the fact (e.g. from its own Load handler) is unreliable -
-        // unlike Manual/WindowsDefaultLocation forms (such as KNoteManagmentForm), whose Location can
+        // unlike Manual/WindowsDefaultLocation forms (such as KNoteManagementForm), whose Location can
         // be safely restored in Load because nothing else is competing to (re)position them.
         var bounds = _ctrl.Store.State.AppInfoAlarmsWindow.Bounds;
         if (bounds.Width > 0)
@@ -124,7 +124,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
 
     // This panel is meant to stay alive for the whole session (like the tray icon) so it keeps
     // accumulating rows in the background - closing the window (X button) only hides it. It is
-    // only really closed when KNoteManagmentCtrl.Finalize() cascades into it at app shutdown.
+    // only really closed when KNoteManagementCtrl.Finalize() cascades into it at app shutdown.
     protected override void OnUserClosing(FormClosingEventArgs e)
     {
         e.Cancel = true;

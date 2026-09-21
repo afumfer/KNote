@@ -49,7 +49,7 @@ public class RepositoriesConfig
 {
     public List<RepositoryRef> Items { get; set; } = new();
 
-    // Same semantic as the old AssistantRespositoryRef: never null, and "not configured" means a
+    // Same semantic as the old AssistantRepositoryRef: never null, and "not configured" means a
     // ConnectionString of null.
     public RepositoryRef Assistant { get; set; } = new();
 }

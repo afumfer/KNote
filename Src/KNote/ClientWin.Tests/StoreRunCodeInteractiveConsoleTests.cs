@@ -9,7 +9,7 @@ namespace KNote.ClientWin.Tests;
 
 /// <summary>
 /// Store.RunCode's cs/py/js dispatch (Phase 3 of the interactive-console work: scripts triggered
-/// from a note/alarm/KNoteManagment, with runInNewTask=false - F5 in NoteEditor/KNoteManagment -
+/// from a note/alarm/KNoteManagement, with runInNewTask=false - F5 in NoteEditor/KNoteManagement -
 /// now open the same interactive KntScriptConsole already used by its own "Run" menu, instead of
 /// shelling out to a bare, non-capturing process). This only tests that RunCode opens a
 /// KntScriptConsoleCtrl correctly configured via ConfigureAutoRun - the console itself
@@ -59,7 +59,7 @@ public class StoreRunCodeInteractiveConsoleTests
 
         var note = CreateNote("print('hi')", forScript);
 
-        // F5 in NoteEditor/KNoteManagment (buttonExecuteKntScript/menuExecuteCode) -> the embedded
+        // F5 in NoteEditor/KNoteManagement (buttonExecuteKntScript/menuExecuteCode) -> the embedded
         // console. Ctrl+F5 (.../InNewTask) -> the standalone OS console instead, see class summary.
         await store.RunCode(note, runInNewTask: false);
 
