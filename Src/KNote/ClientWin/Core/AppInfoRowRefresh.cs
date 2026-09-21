@@ -1,0 +1,72 @@
+using KNote.Model;
+using KNote.Model.Dto;
+
+namespace KNote.ClientWin.Core;
+
+/// <summary>
+/// Pure decision logic used by AppInfoAlarmsCtrl to keep the "Application info" rows in sync with the
+/// note/alarm data published by the editors (EntitySaved events). No UI, no database: the new values
+/// come from the event payload. The display-only fields of the affected rows are updated in place and
+/// every row that actually changed (or must leave the list) is reported back, so the caller only
+/// touches the view/state for those.
+/// </summary>
+public static class AppInfoRowRefresh
+{
+    public enum ChangeKind
+    {
+        Updated,
+        Removed
+    }
+
+    public sealed record RowChange(AppInfoAlarmRowConfig Row, ChangeKind Kind);
+
+    /// <summary>
+    /// A note was saved with its full message list (NoteEditor). A row is removed when its message no
+    /// longer exists, is no longer an AppInfo alarm, or is no longer addressed to the row repository's
+    /// active user; otherwise its Topic/Comment are refreshed.
+    /// </summary>
+    /// <param name="activeUserIdOf">Active user id for a repository alias (null when unknown).</param>
+    public static List<RowChange> ApplyNoteSaved(IEnumerable<AppInfoAlarmRowConfig> rows, NoteExtendedDto note, Func<string, Guid?> activeUserIdOf)
+    {
+        var changes = new List<RowChange>();
+
+        foreach (var row in rows.Where(r => r.NoteId == note.NoteId).ToList())
+        {
+            var message = note.Messages?.FirstOrDefault(m => m.KMessageId == row.KMessageId);
+
+            if (message == null
+                || message.NotificationType != EnumNotificationType.AppInfo
+                || message.UserId == null
+                || message.UserId != activeUserIdOf(row.RepositoryAlias))
+            {
+                changes.Add(new RowChange(row, ChangeKind.Removed));
+                continue;
+            }
+
+            var changed = row.NoteTopic != note.Topic || row.Comment != message.Comment;
+            row.NoteTopic = note.Topic;
+            row.Comment = message.Comment;
+
+            if (changed)
+                changes.Add(new RowChange(row, ChangeKind.Updated));
+        }
+
+        return changes;
+    }
+
+    /// <summary>
+    /// A note was saved without its messages (PostIt): only the Topic can have changed.
+    /// </summary>
+    public static List<RowChange> ApplyNoteTopicSaved(IEnumerable<AppInfoAlarmRowConfig> rows, NoteDto note)
+    {
+        var changes = new List<RowChange>();
+
+        foreach (var row in rows.Where(r => r.NoteId == note.NoteId && r.NoteTopic != note.Topic).ToList())
+        {
+            row.NoteTopic = note.Topic;
+            changes.Add(new RowChange(row, ChangeKind.Updated));
+        }
+
+        return changes;
+    }
+}
