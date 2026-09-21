@@ -21,7 +21,7 @@ public static class AppInfoRowRefresh
     public sealed record RowChange(AppInfoAlarmRowConfig Row, ChangeKind Kind);
 
     /// <summary>
-    /// A note was saved with its full message list (NoteEditor). A row is removed when its message no
+    /// A note was saved with its full message list (NoteEditor, the only editor that can change what the rows show). A row is removed when its message no
     /// longer exists, is no longer an AppInfo alarm, or is no longer addressed to the row repository's
     /// active user; otherwise its Topic/Comment are refreshed.
     /// </summary>
@@ -49,22 +49,6 @@ public static class AppInfoRowRefresh
 
             if (changed)
                 changes.Add(new RowChange(row, ChangeKind.Updated));
-        }
-
-        return changes;
-    }
-
-    /// <summary>
-    /// A note was saved without its messages (PostIt): only the Topic can have changed.
-    /// </summary>
-    public static List<RowChange> ApplyNoteTopicSaved(IEnumerable<AppInfoAlarmRowConfig> rows, NoteDto note)
-    {
-        var changes = new List<RowChange>();
-
-        foreach (var row in rows.Where(r => r.NoteId == note.NoteId && r.NoteTopic != note.Topic).ToList())
-        {
-            row.NoteTopic = note.Topic;
-            changes.Add(new RowChange(row, ChangeKind.Updated));
         }
 
         return changes;

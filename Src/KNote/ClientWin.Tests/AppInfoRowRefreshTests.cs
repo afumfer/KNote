@@ -156,29 +156,4 @@ public class AppInfoRowRefreshTests
         Assert.AreSame(dropped, changes[0].Row);
         Assert.AreEqual(AppInfoRowRefresh.ChangeKind.Removed, changes[0].Kind);
     }
-
-    [TestMethod]
-    public void ApplyNoteTopicSaved_TopicChanged_UpdatesRowsOfThatNoteOnly()
-    {
-        var mine = NewRow();
-        var other = NewRow(Guid.NewGuid());
-
-        var changes = AppInfoRowRefresh.ApplyNoteTopicSaved([mine, other], new NoteDto { NoteId = NoteId, Topic = "new topic" });
-
-        Assert.AreEqual(1, changes.Count);
-        Assert.AreSame(mine, changes[0].Row);
-        Assert.AreEqual("new topic", mine.NoteTopic);
-        Assert.AreEqual("old topic", other.NoteTopic);
-        Assert.AreEqual("old comment", mine.Comment);
-    }
-
-    [TestMethod]
-    public void ApplyNoteTopicSaved_TopicUnchanged_ReportsNoChanges()
-    {
-        var row = NewRow();
-
-        var changes = AppInfoRowRefresh.ApplyNoteTopicSaved([row], new NoteDto { NoteId = NoteId, Topic = "old topic" });
-
-        Assert.AreEqual(0, changes.Count);
-    }
 }

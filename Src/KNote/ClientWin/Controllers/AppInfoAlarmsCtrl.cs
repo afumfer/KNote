@@ -2,6 +2,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.ClientWin.Controllers;
 
@@ -29,12 +30,17 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         // same as PostIt windows already do for themselves (see PostItEditorCtrl.OnNoteDeletedElsewhere).
         Store.Events.Subscribe<EntityDeleted<NoteDto>>(OnNoteDeletedElsewhere);
         Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhereExtended);
+
+        // ...and its displayed data must follow note/alarm edits made in the full editor (the PostIt
+        // can't change the topic or the alarms shown here, so its EntitySaved<NoteDto> is not needed).
+        Store.Events.Subscribe<EntitySaved<NoteExtendedDto>>(OnNoteSavedElsewhereExtended);
     }
 
     public override void Dispose()
     {
         Store.Events.Unsubscribe<EntityDeleted<NoteDto>>(OnNoteDeletedElsewhere);
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhereExtended);
+        Store.Events.Unsubscribe<EntitySaved<NoteExtendedDto>>(OnNoteSavedElsewhereExtended);
         base.Dispose();
     }
 
@@ -150,6 +156,46 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     private void OnNoteDeletedElsewhere(EntityDeleted<NoteDto> e) => RemoveRowsForNote(e.Entity.NoteId);
 
     private void OnNoteDeletedElsewhereExtended(EntityDeleted<NoteExtendedDto> e) => RemoveRowsForNote(e.Entity.NoteId);
+
+    // Async void: Store.Events handlers are synchronous Action<T>. Everything before the first await
+    // (and after it, since the event is published from the UI thread) runs on the UI thread, like the
+    // other Store.Events subscribers.
+    private async void OnNoteSavedElsewhereExtended(EntitySaved<NoteExtendedDto> e)
+    {
+        try
+        {
+            var rows = Store.State.AppInfoAlarmsWindow.Rows;
+            if (!rows.Any(r => r.NoteId == e.Entity.NoteId))
+                return;
+
+            // Which user is the "active" one is per repository; resolve it once per repository involved.
+            var activeUsers = new Dictionary<string, Guid?>();
+            foreach (var alias in rows.Where(r => r.NoteId == e.Entity.NoteId).Select(r => r.RepositoryAlias).Distinct())
+            {
+                var serviceRef = Store.GetServiceRef(alias);
+                activeUsers[alias] = serviceRef == null ? null : await Store.GetUserId(serviceRef.Service);
+            }
+
+            ApplyChanges(AppInfoRowRefresh.ApplyNoteSaved(rows, e.Entity, alias => activeUsers.GetValueOrDefault(alias)));
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "OnNoteSavedElsewhereExtended: {message}", ex.Message);
+        }
+    }
+
+    // Updated rows only change [XmlIgnore] display fields, so there is nothing to persist; a removed
+    // row goes through RemoveRow, which also updates the state file.
+    private void ApplyChanges(IEnumerable<AppInfoRowRefresh.RowChange> changes)
+    {
+        foreach (var change in changes.ToList())
+        {
+            if (change.Kind == AppInfoRowRefresh.ChangeKind.Removed)
+                RemoveRow(change.Row.KMessageId);
+            else
+                View.AddOrUpdateRow(change.Row);
+        }
+    }
 
     private void RemoveRowsForNote(Guid noteId)
     {
