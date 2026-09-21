@@ -55,7 +55,7 @@ public class UsersController : ControllerBase
         {
             _logger.LogError(ex, "User pagination {page} getPagination at {dateTime}.", pagination.PageNumber, DateTime.Now);
             var kresApi = new Result<List<UserDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -79,7 +79,7 @@ public class UsersController : ControllerBase
         {
             _logger.LogError(ex, "User {id} get at {dateTime}", id, DateTime.Now);
             var kresApi = new Result<UserDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -103,7 +103,7 @@ public class UsersController : ControllerBase
         {
             _logger.LogError(ex, "User {user} post/put at {dateTime}.", userDto.FullName?.ToString(), DateTime.Now);
             var kresApi = new Result<UserDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -126,7 +126,7 @@ public class UsersController : ControllerBase
         {
             _logger.LogError(ex, "User {id} delete at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<UserDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -154,8 +154,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "User {user} register at {dateTime}.", user.UserName?.ToString(), DateTime.Now);
-            // The service layer wraps command exceptions in a generic KntServiceException; report the root cause.
-            return BadRequest(new UserTokenDto { success = false, token = "", error = ex.GetBaseException().Message });
+            return BadRequest(new UserTokenDto { success = false, token = "", error = ex.GetRootMessage() });
         }
     }
 
@@ -181,7 +180,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "User {user} login at {dateTime}.", credentials.UserName, DateTime.Now);
-            return BadRequest(new UserTokenDto { success = false, token = "", uid = "", error = ex.Message });
+            return BadRequest(new UserTokenDto { success = false, token = "", uid = "", error = ex.GetRootMessage() });
         }
     }
 
