@@ -8,6 +8,8 @@ namespace KNote.ClientWin.Core;
 /// connection strings that carry a password) and encrypts them for KNoteData.config / decrypts them on
 /// load. In memory the settings always hold plain text; only the file holds the encrypted form.
 /// </summary>
+public sealed record SecretsReadResult(IReadOnlyList<string> Undecryptable, bool FoundPlainText);
+
 public sealed class AppUserSettingsSecrets
 {
     private readonly ISecretProtector _protector;
@@ -38,26 +40,37 @@ public sealed class AppUserSettingsSecrets
     }
 
     /// <summary>
-    /// Decrypts, in place, the secrets of settings just read from disk (plain-text ones are kept as they
-    /// are and get encrypted on the next save). A secret that cannot be decrypted is cleared, and its
-    /// description is returned so the caller can tell the user to enter it again.
+    /// Decrypts, in place, the secrets of settings just read from disk. A secret that cannot be decrypted
+    /// is cleared and reported so the caller can tell the user to enter it again. Secrets found in plain
+    /// text (an old config, or one edited by hand) are kept as they are and flagged, so the caller can
+    /// rewrite the file with them encrypted.
     /// </summary>
-    public IReadOnlyList<string> Unprotect(AppUserSettings settings)
+    public SecretsReadResult Unprotect(AppUserSettings settings)
     {
-        var failed = new List<string>();
+        var undecryptable = new List<string>();
+        var foundPlainText = false;
 
         foreach (var secret in Secrets(settings))
         {
-            if (_protector.TryUnprotect(secret.Get(), out var plainText))
+            var stored = secret.Get();
+
+            if (!_protector.IsProtected(stored))
+            {
+                if (!string.IsNullOrEmpty(stored) && (!secret.OnlyWhenPasswordInside || ConnectionStringSecrets.HasPassword(stored)))
+                    foundPlainText = true;
+                continue;
+            }
+
+            if (_protector.TryUnprotect(stored, out var plainText))
                 secret.Set(plainText);
             else
             {
                 secret.Set(null);
-                failed.Add(secret.Description);
+                undecryptable.Add(secret.Description);
             }
         }
 
-        return failed;
+        return new SecretsReadResult(undecryptable, foundPlainText);
     }
 
     private sealed record Secret(string Description, Func<string> Get, Action<string> Set, bool OnlyWhenPasswordInside = false);

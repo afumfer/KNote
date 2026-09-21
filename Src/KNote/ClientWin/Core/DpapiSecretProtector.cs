@@ -23,6 +23,9 @@ public sealed class DpapiSecretProtector : ISecretProtector
         return Prefix + Convert.ToBase64String(encrypted);
     }
 
+    public bool IsProtected(string storedValue)
+        => !string.IsNullOrEmpty(storedValue) && storedValue.StartsWith(Prefix, StringComparison.Ordinal);
+
     public bool TryUnprotect(string storedValue, out string plainText)
     {
         if (string.IsNullOrEmpty(storedValue) || !storedValue.StartsWith(Prefix, StringComparison.Ordinal))

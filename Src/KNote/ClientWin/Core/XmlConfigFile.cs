@@ -13,7 +13,11 @@ public static class XmlConfigFile
     public const string BackupExtension = ".bak";
     private const string TempExtension = ".tmp";
 
-    public static void Save<T>(T config, string file)
+    /// <param name="keepBackup">
+    /// When false the file being replaced is not kept as "&lt;file&gt;.bak" - for the one case where that
+    /// previous content must not linger on disk (a pre-migration file holding plain-text secrets).
+    /// </param>
+    public static void Save<T>(T config, string file, bool keepBackup = true)
     {
         var tempFile = file + TempExtension;
 
@@ -23,7 +27,7 @@ public static class XmlConfigFile
         }
 
         if (File.Exists(file))
-            File.Replace(tempFile, file, file + BackupExtension);
+            File.Replace(tempFile, file, keepBackup ? file + BackupExtension : null);
         else
             File.Move(tempFile, file);
     }

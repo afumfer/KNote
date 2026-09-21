@@ -9,6 +9,9 @@ public interface ISecretProtector
     /// <summary>Returns the stored form of a secret; null or empty is returned unchanged.</summary>
     string Protect(string plainText);
 
+    /// <summary>True when the value is in the protected stored form (whether or not it can be decrypted here).</summary>
+    bool IsProtected(string storedValue);
+
     /// <summary>
     /// True when <paramref name="storedValue"/> was decrypted or was not protected in the first place
     /// (returned as is). False when it is protected but cannot be decrypted - written by another Windows

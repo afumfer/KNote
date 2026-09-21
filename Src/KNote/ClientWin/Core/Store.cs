@@ -257,18 +257,29 @@ public class Store
         Events.Publish(new ControllerRemoved(controller));
     }
 
+    // Both files live next to each other; see AppConfigStorage.
+    private AppConfigStorage _configStorage;
+
+    private AppConfigStorage GetConfigStorage(string configFile)
+    {
+        if (string.IsNullOrEmpty(configFile))
+            configFile = AppUserDataPath.ConfigFile;
+
+        if (_configStorage == null || !string.Equals(_configStorage.SettingsFile, configFile, StringComparison.OrdinalIgnoreCase))
+            _configStorage = new AppConfigStorage(configFile, new DpapiSecretProtector());
+
+        return _configStorage;
+    }
+
     public void SaveConfig(string configFile = null)
     {
-        if(string.IsNullOrEmpty(configFile))
-            configFile = AppUserDataPath.ConfigFile;
         try
         {
-            // Until the V2 files are written to disk (see AppConfigMigrator.ToV1), the flat V1 file is kept.
-            XmlConfigFile.Save(AppConfigMigrator.ToV1(Settings, State), configFile);
+            GetConfigStorage(configFile).Save(Settings, State);
         }
         catch (Exception ex)
         {
-            Logger?.LogError(ex, "SaveConfig: {message}", configFile?.ToString());
+            Logger?.LogError(ex, "SaveConfig: {message}", configFile ?? AppUserDataPath.ConfigFile);
             throw;
         }
     }
@@ -277,23 +288,33 @@ public class Store
     {
         try
         {
-            if (string.IsNullOrEmpty(configFile))
-                configFile = AppUserDataPath.ConfigFile;
-
-            var config = XmlConfigFile.Load<AppConfigV1>(configFile, out var recoveredFromBackup);
-            if (config == null)
+            var result = GetConfigStorage(configFile).Load();
+            if (result == null)
                 return;
 
-            if (recoveredFromBackup)
-                Logger?.LogWarning("LoadConfig: {message} was unreadable, loaded its backup instead", configFile);
+            Settings = result.Settings;
+            State = result.State;
+            _configNotices.AddRange(result.Notices);
 
-            (Settings, State) = AppConfigMigrator.FromV1(config);
+            foreach (var notice in result.Notices)
+                Logger?.LogWarning("LoadConfig: {message}", notice);
         }
         catch (Exception ex)
         {
-            Logger?.LogError(ex, "LoadConfig: {message}", configFile?.ToString());
+            Logger?.LogError(ex, "LoadConfig: {message}", configFile ?? AppUserDataPath.ConfigFile);
             throw;
         }
+    }
+
+    // Things worth telling the user that were found while loading the configuration (it was upgraded, a
+    // backup had to be used, secrets must be entered again...). Returned once, then cleared.
+    private readonly List<string> _configNotices = new();
+
+    public IReadOnlyList<string> TakeConfigNotices()
+    {
+        var notices = _configNotices.ToList();
+        _configNotices.Clear();
+        return notices;
     }
 
     public Task<bool> CheckNoteIsActive(Guid noteId)

@@ -309,6 +309,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             result.AddErrorMessage(ex.Message);
         }
 
+        var configNotices = Store.TakeConfigNotices();
+        if (configNotices.Count > 0)
+            View.ShowInfo(string.Join(Environment.NewLine + Environment.NewLine, configNotices));
+
         return result;
     }
 

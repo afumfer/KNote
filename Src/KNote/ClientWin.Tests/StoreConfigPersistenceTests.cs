@@ -3,6 +3,8 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Tests;
 
+// Store-level behaviour of the configuration files (uses the real DPAPI protector, as production does).
+// The details of the file handling live in AppConfigStorageTests.
 [TestClass]
 public class StoreConfigPersistenceTests
 {
@@ -20,34 +22,45 @@ public class StoreConfigPersistenceTests
     [TestCleanup]
     public void Cleanup() => Directory.Delete(_dir, recursive: true);
 
+    private void CopyFixtureAsCurrentConfig()
+        => File.Copy(Path.Combine(AppContext.BaseDirectory, "Fixtures", "KNoteData.v1.config"), _file);
+
     [TestMethod]
-    public void LoadConfig_V1Fixture_PopulatesSettingsAndState()
+    public void LoadConfig_OldFlatFile_IsMigratedAndPopulatesSettingsAndState()
     {
+        CopyFixtureAsCurrentConfig();
         var store = new Store(factoryViews: null!);
 
-        store.LoadConfig(Path.Combine(AppContext.BaseDirectory, "Fixtures", "KNoteData.v1.config"));
+        store.LoadConfig(_file);
 
         Assert.AreEqual(35, store.Settings.General.AlarmSeconds);
         Assert.AreEqual("smtp.example.com", store.Settings.Notifications.Email.Host);
+        Assert.AreEqual("test-smtp-password", store.Settings.Notifications.Email.Password);
         Assert.AreEqual(2, store.Settings.Repositories.Items.Count);
         Assert.AreEqual(3929, store.State.Session.RunCounter);
         Assert.AreEqual(1363, store.State.ManagementWindow.Bounds.Width);
+        Assert.IsTrue(File.Exists(Path.Combine(_dir, "KNoteState.config")));
+        Assert.AreEqual(1, store.TakeConfigNotices().Count, "the user is told about the upgrade, once");
+        Assert.AreEqual(0, store.TakeConfigNotices().Count);
     }
 
     [TestMethod]
-    public void SaveConfig_KeepsTheFlatV1FormatOnDisk_AndReloadsWithoutLosingValues()
+    public void SaveConfig_WritesTwoFiles_AndReloadsWithoutLosingValues()
     {
+        CopyFixtureAsCurrentConfig();
         var store = new Store(factoryViews: null!);
-        store.LoadConfig(Path.Combine(AppContext.BaseDirectory, "Fixtures", "KNoteData.v1.config"));
+        store.LoadConfig(_file);
         store.State.Session.RunCounter += 1;
         store.State.ManagementWindow.Bounds.X = 42;
         store.Settings.Notifications.Email.Password = "new-password";
 
         store.SaveConfig(_file);
 
-        var xml = File.ReadAllText(_file);
-        StringAssert.Contains(xml, "<AppConfig");           // still the pre-V2 file: no format change yet
-        StringAssert.Contains(xml, "<ManagmentLocX>42</ManagmentLocX>");
+        var settingsXml = File.ReadAllText(_file);
+        StringAssert.Contains(settingsXml, "<AppUserSettings");
+        Assert.IsFalse(settingsXml.Contains("new-password"), "the SMTP password must not be stored in clear text");
+        StringAssert.Contains(File.ReadAllText(Path.Combine(_dir, "KNoteState.config")), "<X>42</X>");
+
         var reloaded = new Store(factoryViews: null!);
         reloaded.LoadConfig(_file);
         Assert.AreEqual(3930, reloaded.State.Session.RunCounter);
@@ -56,6 +69,7 @@ public class StoreConfigPersistenceTests
         Assert.AreEqual(2, reloaded.Settings.Repositories.Items.Count);
         Assert.AreEqual(2, reloaded.State.AppInfoAlarmsWindow.Rows.Count);
         Assert.AreEqual("COM7", reloaded.Settings.Connectivity.ServerCOM.PortName);
+        Assert.AreEqual(0, reloaded.TakeConfigNotices().Count, "a normal load has nothing to report");
     }
 
     [TestMethod]
@@ -67,6 +81,19 @@ public class StoreConfigPersistenceTests
 
         Assert.AreEqual(587, store.Settings.Notifications.Email.Port);
         Assert.IsTrue(store.State.ManagementWindow.Panels.Toolbar);
+        Assert.AreEqual(0, store.TakeConfigNotices().Count);
+    }
+
+    [TestMethod]
+    public void SaveConfig_FirstRun_CreatesBothFiles()
+    {
+        var store = new Store(factoryViews: null!);
+        store.Settings.General.AlarmSeconds = 45;
+
+        store.SaveConfig(_file);
+
+        Assert.IsTrue(File.Exists(_file));
+        Assert.IsTrue(File.Exists(Path.Combine(_dir, "KNoteState.config")));
     }
 
     [TestMethod]

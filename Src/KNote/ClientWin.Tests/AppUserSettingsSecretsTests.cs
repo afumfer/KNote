@@ -76,9 +76,10 @@ public class AppUserSettingsSecretsTests
         var loaded = (AppUserSettings)new XmlSerializer(typeof(AppUserSettings))
             .Deserialize(new StringReader(ToXml(secrets.Protect(original))))!;
 
-        var failed = secrets.Unprotect(loaded);
+        var read = secrets.Unprotect(loaded);
 
-        Assert.AreEqual(0, failed.Count);
+        Assert.AreEqual(0, read.Undecryptable.Count);
+        Assert.IsFalse(read.FoundPlainText);
         Assert.AreEqual(ToXml(original), ToXml(loaded));
     }
 
@@ -88,9 +89,10 @@ public class AppUserSettingsSecretsTests
         // What a migrated V1 config (or a hand-edited file) looks like: secrets in clear text.
         var settings = NewSettings();
 
-        var failed = new AppUserSettingsSecrets(new FakeSecretProtector()).Unprotect(settings);
+        var read = new AppUserSettingsSecrets(new FakeSecretProtector()).Unprotect(settings);
 
-        Assert.AreEqual(0, failed.Count);
+        Assert.AreEqual(0, read.Undecryptable.Count);
+        Assert.IsTrue(read.FoundPlainText, "plain-text secrets must be flagged so the file gets rewritten encrypted");
         Assert.AreEqual("smtp-pwd", settings.Notifications.Email.Password);
         Assert.AreEqual("key-1", settings.Ai.Providers[0].ApiKey);
         Assert.AreEqual(SqlAuthConnectionString, settings.Repositories.Items[1].ConnectionString);
@@ -104,13 +106,25 @@ public class AppUserSettingsSecretsTests
         var settings = secrets.Protect(NewSettings());
         protector.Undecryptable.Add(settings.Ai.Providers[0].ApiKey);   // e.g. file copied from another user
 
-        var failed = secrets.Unprotect(settings);
+        var failed = secrets.Unprotect(settings).Undecryptable;
 
         Assert.AreEqual(1, failed.Count);
         StringAssert.Contains(failed[0], "OpenAI");
         Assert.IsNull(settings.Ai.Providers[0].ApiKey);
         Assert.AreEqual("smtp-pwd", settings.Notifications.Email.Password);
         Assert.AreEqual(SqlAuthConnectionString, settings.Repositories.Items[1].ConnectionString);
+    }
+
+    [TestMethod]
+    public void Unprotect_NoSecretsInPlainText_DoesNotFlagAnything()
+    {
+        // Empty secrets and connection strings without a password are not "plain-text secrets".
+        var settings = new AppUserSettings();
+        settings.Repositories.Items.Add(new RepositoryRef { Alias = "Sqlite", ConnectionString = @"Data Source=C:.db" });
+
+        var read = new AppUserSettingsSecrets(new FakeSecretProtector()).Unprotect(settings);
+
+        Assert.IsFalse(read.FoundPlainText);
     }
 
     [TestMethod]
@@ -166,9 +180,9 @@ public class AppUserSettingsSecretsTests
 
         var stored = secrets.Protect(original);
         Assert.IsTrue(stored.Notifications.Email.Password.StartsWith(DpapiSecretProtector.Prefix));
-        var failed = secrets.Unprotect(stored);
+        var read = secrets.Unprotect(stored);
 
-        Assert.AreEqual(0, failed.Count);
+        Assert.AreEqual(0, read.Undecryptable.Count);
         Assert.AreEqual(ToXml(original), ToXml(stored));
     }
 

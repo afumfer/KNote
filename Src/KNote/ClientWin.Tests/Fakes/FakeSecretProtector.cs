@@ -15,6 +15,9 @@ internal class FakeSecretProtector : ISecretProtector
     public string Protect(string plainText)
         => string.IsNullOrEmpty(plainText) ? plainText : Prefix + new string(plainText.Reverse().ToArray());
 
+    public bool IsProtected(string storedValue)
+        => !string.IsNullOrEmpty(storedValue) && storedValue.StartsWith(Prefix, StringComparison.Ordinal);
+
     public bool TryUnprotect(string storedValue, out string plainText)
     {
         if (string.IsNullOrEmpty(storedValue) || !storedValue.StartsWith(Prefix, StringComparison.Ordinal))
