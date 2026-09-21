@@ -91,6 +91,40 @@ public class UsersInProcessTests
     }
 
     [TestMethod]
+    public async Task Execute_Register_DuplicateEmail_ReturnsFriendlyError()
+    {
+        string userEmail = $"{Guid.NewGuid():N}@knote.tests";
+        UserRegisterDto NewUser(string prefix) => new()
+        {
+            UserId = Guid.Empty,
+            UserName = $"{prefix}{Guid.NewGuid():N}"[..24],
+            EMail = userEmail,
+            FullName = "__TEST_DUPEMAIL_FULLNAME_###__",
+            RoleDefinition = "Public",
+            Password = "pass12345abcd!!"
+        };
+
+        var httpRes1 = await _httpClient.PostAsJsonAsync("api/users/register", NewUser("itest-dup1-"));
+        var res1 = await httpRes1.Content.ReadFromJsonAsync<UserTokenDto>();
+        Assert.IsTrue(res1?.success);
+
+        try
+        {
+            // Same email, different username: the error must name the email, not the generic service wrapper.
+            var httpRes2 = await _httpClient.PostAsJsonAsync("api/users/register", NewUser("itest-dup2-"));
+            var res2 = await httpRes2.Content.ReadFromJsonAsync<UserTokenDto>();
+
+            Assert.IsFalse(res2?.success);
+            Assert.IsTrue(string.IsNullOrEmpty(res2!.token));
+            Assert.IsTrue(res2.error?.Contains(userEmail, StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/users/{Guid.Parse(res1!.uid)}");
+        }
+    }
+
+    [TestMethod]
     public async Task Execute_BasicCRUD()
     {
         // Create
