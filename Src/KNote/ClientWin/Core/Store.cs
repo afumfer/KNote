@@ -28,7 +28,11 @@ public class Store
 
     #region Public properties, application state 
 
-    public AppConfig AppConfig { get; protected set; }
+    // What the user configures (persisted in KNoteData.config) and what the application remembers by
+    // itself between sessions (window positions, last active repository...).
+    public AppUserSettings Settings { get; protected set; }
+
+    public AppUserState State { get; protected set; }
 
     public string AppUserName { get; set; }
 
@@ -96,17 +100,18 @@ public class Store
 
     public Store(IFactoryViews factoryViews)
     {
-        if (AppConfig == null)
-            AppConfig = new AppConfig();
+        Settings = new AppUserSettings();
+        State = new AppUserState();
 
         _controllerRegistry = new ControllerRegistry();
         _serviceRefRegistry = new ServiceRefRegistry();
         FactoryViews = factoryViews; //
     }
 
-    public Store(AppConfig config, IFactoryViews factoryViews) : this (factoryViews)
+    public Store(AppUserSettings settings, AppUserState state, IFactoryViews factoryViews) : this (factoryViews)
     {
-        AppConfig = config;
+        Settings = settings;
+        State = state;
     }
 
     #endregion
@@ -125,8 +130,8 @@ public class Store
             // KNoteManagmentCtrl.OnInitialized). Actually written to disk by the next SaveConfig().
             if (activeFolderWithServiceRef?.FolderInfo != null && activeFolderWithServiceRef.ServiceRef != null)
             {
-                AppConfig.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Alias;
-                AppConfig.LastActiveFolderId = activeFolderWithServiceRef.FolderInfo.FolderId;
+                State.Session.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Alias;
+                State.Session.LastActiveFolderId = activeFolderWithServiceRef.FolderInfo.FolderId;
             }
 
             ChangedActiveFolderWithServiceRef?.Invoke(this, new ControllerEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
@@ -166,12 +171,12 @@ public class Store
     private void ServiceRef_CommandExecuted(object sender, CommandExecutedEventArgs e)
         => Events.Publish(new ServiceCommandExecuted(e));
 
-    public void AddServiceRefInAppConfig(ServiceRef serviceRef)
+    public void AddServiceRefInSettings(ServiceRef serviceRef)
     {
         if (serviceRef is null)
             throw new ArgumentNullException(nameof(serviceRef));
 
-        AppConfig.RespositoryRefs.Add(serviceRef.RepositoryRef);
+        Settings.Repositories.Items.Add(serviceRef.RepositoryRef);
     }
 
     public void RemoveServiceRef(ServiceRef serviceRef)
@@ -184,7 +189,7 @@ public class Store
 
         _serviceRefRegistry.Remove(serviceRef);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
-        AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);
+        Settings.Repositories.Items.Remove(serviceRef.RepositoryRef);
         Events.Publish(new ServiceRefRemoved(serviceRef));
     }
 
@@ -258,7 +263,8 @@ public class Store
             configFile = AppUserDataPath.ConfigFile;
         try
         {
-            XmlConfigFile.Save(AppConfig, configFile);
+            // Until the V2 files are written to disk (see AppConfigMigrator.ToV1), the flat V1 file is kept.
+            XmlConfigFile.Save(AppConfigMigrator.ToV1(Settings, State), configFile);
         }
         catch (Exception ex)
         {
@@ -274,14 +280,14 @@ public class Store
             if (string.IsNullOrEmpty(configFile))
                 configFile = AppUserDataPath.ConfigFile;
 
-            var config = XmlConfigFile.Load<AppConfig>(configFile, out var recoveredFromBackup);
+            var config = XmlConfigFile.Load<AppConfigV1>(configFile, out var recoveredFromBackup);
             if (config == null)
                 return;
 
             if (recoveredFromBackup)
                 Logger?.LogWarning("LoadConfig: {message} was unreadable, loaded its backup instead", configFile);
 
-            AppConfig = config;
+            (Settings, State) = AppConfigMigrator.FromV1(config);
         }
         catch (Exception ex)
         {

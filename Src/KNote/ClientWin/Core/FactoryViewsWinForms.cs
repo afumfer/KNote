@@ -43,7 +43,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<NoteAttributeEditorCtrl, IViewEditor<NoteKAttributeDto>>(c => new NoteAttributeEditorForm(c));
         Registry.Register<NotesSearchParamCtrl, IViewEmbeddable>(c => new NotesSearchParamForm(c));
         Registry.Register<NotesFilterParamCtrl, IViewEmbeddable>(c => new NotesFilterParamForm(c));
-        Registry.Register<OptionsEditorCtrl, IViewEditor<AppConfig>>(c => new OptionsEditorForm(c));
+        Registry.Register<OptionsEditorCtrl, IViewEditor<OptionsModel>>(c => new OptionsEditorForm(c));
         Registry.Register<KNoteAIAssistantCtrl, IViewBase>(c => new KNoteAIAssistantForm(c));
         Registry.Register<AiProviderEditorCtrl, IViewEditor<AiProviderRef>>(c => new AiProviderEditorForm(c));
         Registry.Register<AiProvidersManageCtrl, IViewManageList<AiProviderRef>>(c => new AiProvidersManageForm(c));

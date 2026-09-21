@@ -19,7 +19,7 @@ public class KntChatCtrlTests
         factoryViews.Registry.Register<KntChatCtrl, IViewChat>(c => view);
 
         var store = new Store(factoryViews) { AppUserName = "jdoe" };
-        store.AppConfig.ChatHubUrl = chatHubUrl;
+        store.Settings.Connectivity.ChatHub.Url = chatHubUrl;
 
         return (new KntChatCtrl(store), view);
     }

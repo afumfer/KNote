@@ -119,6 +119,18 @@ public class AppConfigMigratorTests
         Assert.AreEqual(v1.AppInfoAlarmsRows[1].NotifiedAt, alarms.Rows[1].NotifiedAt);
     }
 
+    // The temporary V1 bridge must not lose or move any value: V1 -> V2 -> V1 gives back the same file.
+    [TestMethod]
+    public void ToV1_RoundTripsTheFixtureThroughV2WithoutChanges()
+    {
+        var original = LoadFixture();
+
+        var (settings, state) = AppConfigMigrator.FromV1(original);
+        var back = AppConfigMigrator.ToV1(settings, state);
+
+        Assert.AreEqual(ToXml(original), ToXml(back));
+    }
+
     [TestMethod]
     public void FromV1_SmtpHostWithStrayWhitespace_IsTrimmed()
     {

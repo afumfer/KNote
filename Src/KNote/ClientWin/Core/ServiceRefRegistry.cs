@@ -5,7 +5,7 @@ namespace KNote.ClientWin.Core;
 /// <summary>
 /// Storage and lookup for the ServiceRef instances (repository/database connections) configured
 /// in the running app (Fase 2 of the ClientWin architecture refactor, see ClientWin/CLAUDE.md).
-/// Logging, events and AppConfig persistence stay in Store; this class only owns the collection.
+/// Logging, events and config persistence stay in Store; this class only owns the collection.
 /// </summary>
 public class ServiceRefRegistry
 {

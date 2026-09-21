@@ -50,7 +50,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
     {
         try
         {
-            if (string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
+            if (string.IsNullOrEmpty(Store.Settings.Connectivity.ChatHub.Url))
             {
                 var res = new Result<EControllerResult>(EControllerResult.Error);
                 var message = "Chat hub url is not defined. Set the chat hub url in the Options menu.";
@@ -67,7 +67,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
             UiContext = SynchronizationContext.Current;
 
             _hubConnection = new HubConnectionBuilder()
-                           .WithUrl(Store.AppConfig.ChatHubUrl)
+                           .WithUrl(Store.Settings.Connectivity.ChatHub.Url)
                            .Build();
 
             _hubConnection.On<string, string>("ReceiveMessage", DispatchReceivedMessage);
@@ -124,7 +124,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     // Standalone connection attempt against a candidate url, bounded by the same timeout used at
     // startup. Used by OptionsEditorForm's "Test connection" button so the user can verify a fix
-    // and re-enable auto-connect (AppConfig.ChatHubAutoConnectDisabled) without restarting the app.
+    // and re-enable auto-connect (State.Session.ChatHubAutoConnectDisabled) without restarting the app.
     public static async Task<Result> TestConnectionAsync(string url)
     {
         var result = new Result();
@@ -203,16 +203,16 @@ public class KntChatCtrl : CtrlBase, IDisposable
     // applies.
     private void HandleConnectionSuccess()
     {
-        if (Store.AppConfig.ChatHubAutoConnectDisabled)
+        if (Store.State.Session.ChatHubAutoConnectDisabled)
         {
-            Store.AppConfig.ChatHubAutoConnectDisabled = false;
+            Store.State.Session.ChatHubAutoConnectDisabled = false;
             Store.SaveConfig();
         }
     }
 
     // Startup (ShowErrorMessagesOnInitialize == false) must never freeze or interrupt the user
     // again for a chat hub that is known to be unreachable: the failure is reported through the
-    // non-blocking notification channel and auto-connect is disabled in AppConfig so the next
+    // non-blocking notification channel and auto-connect is disabled in the state so the next
     // startup does not retry it - the user re-enables it from Options once the url is fixed (see
     // OptionsEditorForm's "Test connection" button, which clears ChatHubAutoConnectDisabled on
     // success). Opening the chat manually (ShowErrorMessagesOnInitialize == true) keeps showing
@@ -227,7 +227,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
         }
         else
         {
-            Store.AppConfig.ChatHubAutoConnectDisabled = true;
+            Store.State.Session.ChatHubAutoConnectDisabled = true;
             Store.SaveConfig();
 
             NotifyMessage($"{resMessage} Chat auto-connect has been disabled; fix the chat hub url and test it from Options to re-enable it.");

@@ -23,7 +23,7 @@ public class XmlConfigFileTests
     [TestMethod]
     public void Load_MissingFile_ReturnsNull()
     {
-        var config = XmlConfigFile.Load<AppConfig>(_file, out var recovered);
+        var config = XmlConfigFile.Load<AppConfigV1>(_file, out var recovered);
 
         Assert.IsNull(config);
         Assert.IsFalse(recovered);
@@ -32,9 +32,9 @@ public class XmlConfigFileTests
     [TestMethod]
     public void Save_NewFile_RoundTripsAndLeavesNoTempOrBackup()
     {
-        XmlConfigFile.Save(new AppConfig { RunCounter = 7 }, _file);
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 7 }, _file);
 
-        var config = XmlConfigFile.Load<AppConfig>(_file, out var recovered);
+        var config = XmlConfigFile.Load<AppConfigV1>(_file, out var recovered);
 
         Assert.AreEqual(7, config!.RunCounter);
         Assert.IsFalse(recovered);
@@ -53,22 +53,22 @@ public class XmlConfigFileTests
     [TestMethod]
     public void Save_ExistingFile_KeepsPreviousVersionAsBackup()
     {
-        XmlConfigFile.Save(new AppConfig { RunCounter = 1 }, _file);
-        XmlConfigFile.Save(new AppConfig { RunCounter = 2 }, _file);
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 1 }, _file);
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 2 }, _file);
 
-        Assert.AreEqual(2, XmlConfigFile.Load<AppConfig>(_file, out _)!.RunCounter);
-        Assert.AreEqual(1, XmlConfigFile.Load<AppConfig>(_file + XmlConfigFile.BackupExtension, out _)!.RunCounter);
+        Assert.AreEqual(2, XmlConfigFile.Load<AppConfigV1>(_file, out _)!.RunCounter);
+        Assert.AreEqual(1, XmlConfigFile.Load<AppConfigV1>(_file + XmlConfigFile.BackupExtension, out _)!.RunCounter);
         Assert.IsFalse(File.Exists(_file + ".tmp"));
     }
 
     [TestMethod]
     public void Load_CorruptFileWithBackup_RecoversFromBackup()
     {
-        XmlConfigFile.Save(new AppConfig { RunCounter = 1 }, _file);
-        XmlConfigFile.Save(new AppConfig { RunCounter = 2 }, _file);
-        File.WriteAllText(_file, "<AppConfig><RunCounter>");   // truncated write
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 1 }, _file);
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 2 }, _file);
+        File.WriteAllText(_file, "<AppConfigV1><RunCounter>");   // truncated write
 
-        var config = XmlConfigFile.Load<AppConfig>(_file, out var recovered);
+        var config = XmlConfigFile.Load<AppConfigV1>(_file, out var recovered);
 
         Assert.IsTrue(recovered);
         Assert.AreEqual(1, config!.RunCounter);
@@ -79,7 +79,7 @@ public class XmlConfigFileTests
     {
         File.WriteAllText(_file, "not xml at all");
 
-        Assert.ThrowsExactly<InvalidOperationException>(() => XmlConfigFile.Load<AppConfig>(_file, out _));
+        Assert.ThrowsExactly<InvalidOperationException>(() => XmlConfigFile.Load<AppConfigV1>(_file, out _));
     }
 
     [TestMethod]
@@ -88,7 +88,7 @@ public class XmlConfigFileTests
         File.WriteAllText(_file, "not xml at all");
         File.WriteAllText(_file + XmlConfigFile.BackupExtension, "also broken");
 
-        Assert.ThrowsExactly<InvalidOperationException>(() => XmlConfigFile.Load<AppConfig>(_file, out _));
+        Assert.ThrowsExactly<InvalidOperationException>(() => XmlConfigFile.Load<AppConfigV1>(_file, out _));
     }
 
     // The frozen sample of a real (anonymized) V1 file. The restructuring must keep loading it
@@ -96,7 +96,7 @@ public class XmlConfigFileTests
     [TestMethod]
     public void Load_V1Fixture_LoadsEveryValue()
     {
-        var config = XmlConfigFile.Load<AppConfig>(Path.Combine(AppContext.BaseDirectory, "Fixtures", "KNoteData.v1.config"), out _)!;
+        var config = XmlConfigFile.Load<AppConfigV1>(Path.Combine(AppContext.BaseDirectory, "Fixtures", "KNoteData.v1.config"), out _)!;
 
         Assert.AreEqual(3929, config.RunCounter);
         Assert.AreEqual(35, config.AlarmSeconds);

@@ -7,9 +7,9 @@ namespace KNote.ClientWin.Controllers;
 /// <summary>
 /// Single AI provider add/edit popup, used by AiProvidersManageCtrl. Unlike NoteTypeEditorCtrl/
 /// RepositoryEditorCtrl, AiProviderRef is not persisted through IKntService nor identified by a
-/// Guid: it lives purely in Store.AppConfig.AiProviderRefs (an in-memory List<AiProviderRef>,
+/// Guid: it lives purely in Store.Settings.Ai.Providers (an in-memory List<AiProviderRef>,
 /// same reference as AiProvidersManageCtrl.ListEntities) and is saved to KNoteData.config via
-/// Store.SaveConfig() - same approach as OptionsEditorCtrl for the rest of AppConfig.
+/// Store.SaveConfig() - same approach as OptionsEditorCtrl for the rest of the settings.
 /// </summary>
 public class AiProviderEditorCtrl : CtrlEditorBase<IViewEditor<AiProviderRef>, AiProviderRef>
 {
@@ -55,9 +55,9 @@ public class AiProviderEditorCtrl : CtrlEditorBase<IViewEditor<AiProviderRef>, A
             return Task.FromResult(false);
         }
 
-        var isNew = !Store.AppConfig.AiProviderRefs.Contains(Model);
+        var isNew = !Store.Settings.Ai.Providers.Contains(Model);
         if (isNew)
-            Store.AppConfig.AiProviderRefs.Add(Model);
+            Store.Settings.Ai.Providers.Add(Model);
 
         Store.SaveConfig();
         Model.SetIsDirty(false);
@@ -84,7 +84,7 @@ public class AiProviderEditorCtrl : CtrlEditorBase<IViewEditor<AiProviderRef>, A
         if (result != DialogResult.Yes)
             return Task.FromResult(false);
 
-        Store.AppConfig.AiProviderRefs.Remove(Model);
+        Store.Settings.Ai.Providers.Remove(Model);
         Store.SaveConfig();
         OnDeletedEntity(Model);
         return Task.FromResult(true);

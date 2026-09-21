@@ -58,7 +58,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 
     #region Controller methods
 
-    // Only KMessageId/RepositoryAlias/NotifiedAt actually come back from AppConfig deserialization
+    // Only KMessageId/RepositoryAlias/NotifiedAt actually come back from the state file
     // (see AppInfoAlarmRowConfig) - the rest is looked up fresh from the owning repository so the
     // list never shows a stale note title/comment/user. A message that no longer exists (note or
     // message deleted while the app was closed) quietly drops its row instead of showing a blank one.
@@ -66,7 +66,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     // MessagesManagmentCtrl.OnInitialized() kicking off VisibleWindows().
     private async void LoadPersistedRows()
     {
-        foreach (var saved in Store.AppConfig.AppInfoAlarmsRows.ToList())
+        foreach (var saved in Store.State.AppInfoAlarmsWindow.Rows.ToList())
         {
             var serviceRef = Store.GetServiceRef(saved.RepositoryAlias);
             if (serviceRef == null)
@@ -74,7 +74,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 
             if (!await TryHydrateRowAsync(serviceRef.Service, saved))
             {
-                Store.AppConfig.AppInfoAlarmsRows.Remove(saved);
+                Store.State.AppInfoAlarmsWindow.Rows.Remove(saved);
                 continue;
             }
 
@@ -104,8 +104,8 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 
     public void AddOrUpdateRow(AppInfoAlarmRowConfig row)
     {
-        Store.AppConfig.AppInfoAlarmsRows.RemoveAll(r => r.KMessageId == row.KMessageId);
-        Store.AppConfig.AppInfoAlarmsRows.Add(row);
+        Store.State.AppInfoAlarmsWindow.Rows.RemoveAll(r => r.KMessageId == row.KMessageId);
+        Store.State.AppInfoAlarmsWindow.Rows.Add(row);
         Store.SaveConfig();
 
         View.AddOrUpdateRow(row);
@@ -115,7 +115,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     // - the only two ways a row is meant to leave the list.
     public void RemoveRow(Guid kMessageId)
     {
-        Store.AppConfig.AppInfoAlarmsRows.RemoveAll(r => r.KMessageId == kMessageId);
+        Store.State.AppInfoAlarmsWindow.Rows.RemoveAll(r => r.KMessageId == kMessageId);
         Store.SaveConfig();
 
         View.RemoveRow(kMessageId);
@@ -127,7 +127,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     }
 
     // The row only keeps its RepositoryAlias (it must stay a plain, serializable Model type to live
-    // in AppConfig) - the live IKntService needed to actually reopen the note is resolved here, on
+    // in the state file) - the live IKntService needed to actually reopen the note is resolved here, on
     // demand, instead of being cached on the row for the row's whole (persisted, cross-session)
     // lifetime, where it could go stale if the repository were removed/reconnected meanwhile.
     public void RequestOpenNote(AppInfoAlarmRowConfig row)
@@ -153,7 +153,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 
     private void RemoveRowsForNote(Guid noteId)
     {
-        var affected = Store.AppConfig.AppInfoAlarmsRows.Where(r => r.NoteId == noteId).Select(r => r.KMessageId).ToList();
+        var affected = Store.State.AppInfoAlarmsWindow.Rows.Where(r => r.NoteId == noteId).Select(r => r.KMessageId).ToList();
         foreach (var kMessageId in affected)
             RemoveRow(kMessageId);
     }

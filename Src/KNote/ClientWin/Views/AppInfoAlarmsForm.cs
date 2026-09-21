@@ -34,13 +34,13 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         // CenterScreen/CenterParent after the fact (e.g. from its own Load handler) is unreliable -
         // unlike Manual/WindowsDefaultLocation forms (such as KNoteManagmentForm), whose Location can
         // be safely restored in Load because nothing else is competing to (re)position them.
-        var cfg = _ctrl.Store.AppConfig;
-        if (cfg.AppInfoAlarmsWidth > 0)
-            Size = new Size(cfg.AppInfoAlarmsWidth, cfg.AppInfoAlarmsHeight);
-        if (cfg.AppInfoAlarmsLocX > 0 || cfg.AppInfoAlarmsLocY > 0)
+        var bounds = _ctrl.Store.State.AppInfoAlarmsWindow.Bounds;
+        if (bounds.Width > 0)
+            Size = new Size(bounds.Width, bounds.Height);
+        if (bounds.X > 0 || bounds.Y > 0)
         {
             StartPosition = FormStartPosition.Manual;
-            Location = new Point(cfg.AppInfoAlarmsLocX, cfg.AppInfoAlarmsLocY);
+            Location = new Point(bounds.X, bounds.Y);
         }
     }
 
@@ -139,8 +139,8 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
     {
         if (_ctrl != null && WindowState == FormWindowState.Normal)
         {
-            _ctrl.Store.AppConfig.AppInfoAlarmsLocX = Location.X;
-            _ctrl.Store.AppConfig.AppInfoAlarmsLocY = Location.Y;
+            _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.X = Location.X;
+            _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.Y = Location.Y;
         }
     }
 
@@ -148,8 +148,8 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
     {
         if (_ctrl != null && WindowState == FormWindowState.Normal)
         {
-            _ctrl.Store.AppConfig.AppInfoAlarmsWidth = Width;
-            _ctrl.Store.AppConfig.AppInfoAlarmsHeight = Height;
+            _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.Width = Width;
+            _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.Height = Height;
         }
         ListViewColumnResizer.Resize(listViewAlarms, PrimaryColumnIndex);
     }
@@ -167,10 +167,10 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         if (WindowState != FormWindowState.Normal)
             return;
 
-        _ctrl.Store.AppConfig.AppInfoAlarmsLocX = Location.X;
-        _ctrl.Store.AppConfig.AppInfoAlarmsLocY = Location.Y;
-        _ctrl.Store.AppConfig.AppInfoAlarmsWidth = Width;
-        _ctrl.Store.AppConfig.AppInfoAlarmsHeight = Height;
+        _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.X = Location.X;
+        _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.Y = Location.Y;
+        _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.Width = Width;
+        _ctrl.Store.State.AppInfoAlarmsWindow.Bounds.Height = Height;
         _ctrl.Store.SaveConfig();
     }
 
@@ -192,7 +192,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
 
     #region Private methods
 
-    // Looks up the row via the Ctrl's own canonical list (Store.AppConfig.AppInfoAlarmsRows) rather
+    // Looks up the row via the Ctrl's own canonical list (Store.State.AppInfoAlarmsWindow.Rows) rather
     // than a private Form-side index, the same convention NoteTypesSelectorForm uses against
     // _ctrl.ListEntities.
     private AppInfoAlarmRowConfig GetSelectedRow()
@@ -201,7 +201,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
             return null;
 
         var selectedId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
-        return _ctrl.Store.AppConfig.AppInfoAlarmsRows.FirstOrDefault(r => r.KMessageId == selectedId);
+        return _ctrl.Store.State.AppInfoAlarmsWindow.Rows.FirstOrDefault(r => r.KMessageId == selectedId);
     }
 
     private ListViewItem RowToListViewItem(AppInfoAlarmRowConfig row)

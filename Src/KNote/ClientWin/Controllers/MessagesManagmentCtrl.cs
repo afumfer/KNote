@@ -45,12 +45,12 @@ public class MessagesManagmentCtrl : CtrlBase
 
             kntTimerAlarms = new System.Windows.Forms.Timer();
             kntTimerAlarms.Tick += kntTimerAlarms_Tick;
-            kntTimerAlarms.Interval = Store.AppConfig.AlarmSeconds * 1000;
+            kntTimerAlarms.Interval = Store.Settings.General.AlarmSeconds * 1000;
             kntTimerAlarms.Start();
 
             kntTimerAutoSave = new System.Windows.Forms.Timer();
             kntTimerAutoSave.Tick += KntTimerAutoSave_Tick;
-            kntTimerAutoSave.Interval = Store.AppConfig.AutoSaveSeconds * 1000; 
+            kntTimerAutoSave.Interval = Store.Settings.General.AutoSaveSeconds * 1000; 
             kntTimerAutoSave.Start();
 
             return new Result<EControllerResult>(EControllerResult.Executed);
@@ -69,7 +69,7 @@ public class MessagesManagmentCtrl : CtrlBase
 
     private async void KntTimerAutoSave_Tick(object sender, EventArgs e)
     {
-        if (!Store.AppConfig.AutoSaveActivated)
+        if (!Store.Settings.General.AutoSaveActivated)
             return;
         kntTimerAutoSave.Enabled = false; 
         await SaveNotes();
@@ -78,7 +78,7 @@ public class MessagesManagmentCtrl : CtrlBase
 
     private async void kntTimerAlarms_Tick(object sender, EventArgs e)
     {
-        if (!Store.AppConfig.AlarmActivated)
+        if (!Store.Settings.General.AlarmActivated)
             return;
         kntTimerAlarms.Enabled = false;
         await AlarmsWindows();

@@ -158,7 +158,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 if (await newService.Service.TestDbConnection())
                 {
                     Store.AddServiceRef(newService);
-                    Store.AddServiceRefInAppConfig(newService);
+                    Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
                     await Store.EnsureCurrentUserRegistered(newService.Service);
@@ -178,7 +178,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 if (await newService.Service.CreateDataBase(SystemInformation.UserName))
                 {
                     Store.AddServiceRef(newService);
-                    Store.AddServiceRefInAppConfig(newService);
+                    Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
                     OnAddedEntity(Model);

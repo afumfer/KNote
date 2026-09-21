@@ -107,14 +107,14 @@ public class KNoteAIAssistantCtrlTests
         Assert.AreEqual(TimeSpan.Zero, ctrl.TotalProcessingTime);
     }
 
-    // GetPreferredProvider only reads AppConfig; SetProvider is deliberately not exercised here because it
+    // GetPreferredProvider only reads the config; SetProvider is deliberately not exercised here because it
     // persists the choice with Store.SaveConfig(), which writes the real KNoteData.config of the user.
     private static KNoteAIAssistantCtrl CreateCtrlWithProviders(string lastAlias, params string[] aliases)
     {
         var store = new Store(new TestFactoryViews());
         foreach (var alias in aliases)
-            store.AppConfig.AiProviderRefs.Add(new AiProviderRef { Alias = alias, Provider = EnumAiProvider.Ollama, Model = "m", Host = "http://localhost" });
-        store.AppConfig.LastAiProviderAlias = lastAlias;
+            store.Settings.Ai.Providers.Add(new AiProviderRef { Alias = alias, Provider = EnumAiProvider.Ollama, Model = "m", Host = "http://localhost" });
+        store.State.Session.LastAiProviderAlias = lastAlias;
         return new KNoteAIAssistantCtrl(store);
     }
 

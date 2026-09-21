@@ -47,7 +47,7 @@ public partial class KntChatForm : KntForm, IViewChat
         _ctrl.ReceiveMessage += _com_ReceiveMessage;
 
         Text += $" [{_ctrl.Store.AppUserName}]";
-        labelServer.Text = _ctrl.Store.AppConfig.ChatHubUrl;
+        labelServer.Text = _ctrl.Store.Settings.Connectivity.ChatHub.Url;
     }
 
     // Load subscribes; the form is only really closed when the controller finalizes it (user close

@@ -74,7 +74,7 @@ Hay dos suites de test independientes, en dos `.slnx` distintos, con propósitos
 ### Grafo de dependencias entre proyectos
 
 ```
-Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppConfig — sin referencias a otros proyectos)
+Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSettings/AppUserState — sin referencias a otros proyectos)
   ├─ Repository                       (solo interfaces: IKntNoteRepository, IKntFolderRepository, ...)
   │    ├─ Repository.Dapper           (implementación con Dapper de las mismas interfaces)
   │    └─ Repository.EntityFramework  (implementación con EF Core + KntDbContext + Entities/)
@@ -144,7 +144,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
 
 ### Model
 
-`Model/` contiene tipos compartidos transversales (`AppConfig`, `RepositoryRef`, `Result`/`ResultBase`,
+`Model/` contiene tipos compartidos transversales (`AppUserSettings`/`AppUserState`, `RepositoryRef`, `Result`/`ResultBase`,
 `EntityModelBase`, métodos de extensión) y `Model/Dto/` contiene los DTOs de la API (`NoteDto`, `FolderDto`,
 `UserDto`, `KAttributeDto`, etc.) compartidos entre las interfaces de `Repository` y la superficie de la API
 de `Server`. Las entidades de EF Core son un concepto aparte, viven en `Repository.EntityFramework/Entities`,

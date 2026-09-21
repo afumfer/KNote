@@ -273,7 +273,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             using (new WaitCursor())
             {
                 NotesSelectorCtrl.Run();
-                FoldersSelectorCtrl.SelectedFolderId = Store.AppConfig.LastActiveFolderId;
+                FoldersSelectorCtrl.SelectedFolderId = Store.State.Session.LastActiveFolderId;
                 FoldersSelectorCtrl.Run();
                 NotesSearchParamCtrl.Run();
                 NotesFilterParamCtrl.Run();
@@ -284,21 +284,21 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
                 // undismissed rows from a previous session, so they aren't left wondering where
                 // their pending reminders went - same intent as PostIts reopening themselves via
                 // MessagesManagmentCtrl.VisibleWindows().
-                if (Store.AppConfig.AppInfoAlarmsRows.Count > 0)
+                if (Store.State.AppInfoAlarmsWindow.Rows.Count > 0)
                     AppInfoAlarmsCtrl.Activate();
 
                 NotifyView.ShowView();
 
                 // TODO: Experimental ---------------------------------
-                if (!string.IsNullOrEmpty(Store.AppConfig.ChatHubUrl))
+                if (!string.IsNullOrEmpty(Store.Settings.Connectivity.ChatHub.Url))
                 {
-                    if (!Store.AppConfig.ChatHubAutoConnectDisabled)
+                    if (!Store.State.Session.ChatHubAutoConnectDisabled)
                     {
                         RunKntChatCtrl(false);
                     }
                     else
                     {
-                        NotifyMessage($"Chat auto-connect is disabled because the last connection to '{Store.AppConfig.ChatHubUrl}' failed. Fix the url and test it from Options to re-enable it.");
+                        NotifyMessage($"Chat auto-connect is disabled because the last connection to '{Store.Settings.Connectivity.ChatHub.Url}' failed. Fix the url and test it from Options to re-enable it.");
                     }
                 }
                 //-----------------------------------------------------
@@ -624,7 +624,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
             if (recipient == null || string.IsNullOrEmpty(recipient.EMail))
                 throw new InvalidOperationException("The assigned user has no valid email address.");
 
-            var settings = SmtpSettings.FromAppConfig(Store.AppConfig);
+            var settings = SmtpSettings.FromConfig(Store.Settings.Notifications.Email);
             var subject = note.Topic;
             var body = $"{message.Comment}\r\n\r\n{note.Description}";
 
@@ -1340,7 +1340,7 @@ public class KNoteManagmentCtrl : CtrlViewBase<IViewKNoteManagment>
         
         optionsEditorCtrl.LoadModel(
             SelectedServiceRef?.Service,
-            Store.AppConfig.GetSimpleDto<AppConfig>(), 
+            OptionsModel.From(Store.Settings, Store.State),
             true);
         var res = optionsEditorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)

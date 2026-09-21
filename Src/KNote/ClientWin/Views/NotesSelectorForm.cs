@@ -21,7 +21,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     private bool _applyingColumnWidths;    // true while the code (not the user) is changing column widths
     private bool _columnWidthsTracked;     // user resizes are only recorded once the grid is fully set up
     private bool _dateColumnsFitted;
-    // Widths persisted in AppConfig.NotesListColumnWidths - only used (read and written) when embedded.
+    // Widths persisted in State.ManagementWindow.NotesList.ColumnWidths - only used (read and written) when embedded.
     private Dictionary<string, int> _savedColumnWidths = new();
 
     #endregion
@@ -30,14 +30,14 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
 
     protected int OrderColNumber
     {
-        get { return _ctrl.Store.AppConfig.ColOrderNotes; }
-        set { _ctrl.Store.AppConfig.ColOrderNotes = value; }
+        get { return _ctrl.Store.State.ManagementWindow.NotesList.SortColumn; }
+        set { _ctrl.Store.State.ManagementWindow.NotesList.SortColumn = value; }
     }
 
     protected bool AscendigOrderNotes
     {
-        get { return _ctrl.Store.AppConfig.AscendigOrderNotes; }
-        set { _ctrl.Store.AppConfig.AscendigOrderNotes = value; }
+        get { return _ctrl.Store.State.ManagementWindow.NotesList.SortAscending; }
+        set { _ctrl.Store.State.ManagementWindow.NotesList.SortAscending = value; }
     }
 
     #endregion
@@ -271,7 +271,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     private void SaveColumnWidth(DataGridViewColumn column)
     {
         _savedColumnWidths[column.Name] = column.Width;
-        _ctrl.Store.AppConfig.NotesListColumnWidths = ColumnWidthSettings.Format(_savedColumnWidths);
+        _ctrl.Store.State.ManagementWindow.NotesList.ColumnWidths = ColumnWidthSettings.Format(_savedColumnWidths);
     }
 
     // Rows (and so the vertical scrollbar) only exist once the data is bound, hence Topic is refitted here too.
@@ -479,7 +479,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     // caller's HiddenColumns. Also re-run when that option changes, see OnNotesListViewOptionsChanged.
     private void ApplyColumnVisibility()
     {
-        var compact = _ctrl.Store.AppConfig.CompactViewNoteslist;
+        var compact = _ctrl.Store.State.ManagementWindow.NotesList.CompactView;
 
         dataGridNotes.Columns["NoteNumber"].Visible = !(compact || IsColumnHidden("NoteNumber"));
         dataGridNotes.Columns["Priority"].Visible = !IsColumnHidden("Priority");
@@ -524,7 +524,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     // entry is kept in _savedColumnWidths, so it comes back if they are shown again).
     private void ApplySavedColumnWidths()
     {
-        _savedColumnWidths = ColumnWidthSettings.Parse(_ctrl.Store.AppConfig.NotesListColumnWidths);
+        _savedColumnWidths = ColumnWidthSettings.Parse(_ctrl.Store.State.ManagementWindow.NotesList.ColumnWidths);
 
         _applyingColumnWidths = true;
         try

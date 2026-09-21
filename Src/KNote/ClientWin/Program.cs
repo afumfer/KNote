@@ -175,19 +175,18 @@ static class Program
             {                    
                 store.AddServiceRef(initialServiceRef);
                 store.SetAssistantServiceRef(null);
-                store.AppConfig.RespositoryRefs.Add(r0);
-                store.AppConfig.AssistantRespositoryRef = null;
+                store.Settings.Repositories.Items.Add(r0);
             }
 
             // Default values
-            store.AppConfig.AutoSaveActivated = true;
-            store.AppConfig.AutoSaveSeconds = 105;
-            store.AppConfig.AlarmActivated = true;
-            store.AppConfig.AlarmSeconds = 30;
-            store.AppConfig.LastDateTimeStart = DateTime.Now;
-            store.AppConfig.RunCounter = 1;
-            store.AppConfig.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
-            store.AppConfig.LogActivated = false;
+            store.Settings.General.AutoSaveActivated = true;
+            store.Settings.General.AutoSaveSeconds = 105;
+            store.Settings.General.AlarmActivated = true;
+            store.Settings.General.AlarmSeconds = 30;
+            store.State.Session.LastDateTimeStart = DateTime.Now;
+            store.State.Session.RunCounter = 1;
+            store.Settings.General.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
+            store.Settings.General.LogActivated = false;
         }
         // Load sevices references
         else
@@ -196,25 +195,25 @@ static class Program
 
             // Migrate LogFile away from the old default location next to the binaries, if still set to it.
             var legacyLogFile = Path.Combine(pathApp, "KNoteWinApp.log");
-            if (store.AppConfig.LogFile == legacyLogFile)
-                store.AppConfig.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
+            if (store.Settings.General.LogFile == legacyLogFile)
+                store.Settings.General.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
 
-            foreach (var r in store.AppConfig.RespositoryRefs)
+            foreach (var r in store.Settings.Repositories.Items)
             {
-                var serviceRef = new ServiceRef(r, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger);
+                var serviceRef = new ServiceRef(r, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger);
                 store.AddServiceRef(serviceRef);
                 await store.EnsureCurrentUserRegistered(serviceRef.Service);
             }
 
 
-            if (store.AppConfig.AssistantRespositoryRef?.ConnectionString != null)
-                store.SetAssistantServiceRef(new ServiceRef(store.AppConfig.AssistantRespositoryRef, store.AppUserName, store.AppConfig.ActivateMessageBroker, store.Logger));
+            if (store.Settings.Repositories.Assistant?.ConnectionString != null)
+                store.SetAssistantServiceRef(new ServiceRef(store.Settings.Repositories.Assistant, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger));
             else
                 store.SetAssistantServiceRef(null);
         }
 
-        store.AppConfig.LastDateTimeStart = DateTime.Now;
-        store.AppConfig.RunCounter += 1;
+        store.State.Session.LastDateTimeStart = DateTime.Now;
+        store.State.Session.RunCounter += 1;
 
         store.SaveConfig(appFileConfig);
 

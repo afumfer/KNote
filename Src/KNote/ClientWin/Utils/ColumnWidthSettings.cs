@@ -3,7 +3,7 @@ using System.Globalization;
 namespace KNote.ClientWin.Utils;
 
 /// <summary>
-/// Text form ("Number=80;Topic=520") in which grid column widths are persisted in AppConfig.
+/// Text form ("Number=80;Topic=520") in which grid column widths are persisted in the app state.
 /// Keyed by column name so a width survives while its column is hidden or columns are reordered.
 /// </summary>
 public static class ColumnWidthSettings

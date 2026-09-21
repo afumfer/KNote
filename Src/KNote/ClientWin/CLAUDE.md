@@ -248,7 +248,7 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
   ActiveFilterWithServiceRef` — selección activa compartida (carpeta/filtro actuales), cambiada vía
   `ChangeActiveFolderWithServiceRef(...)` con sus eventos `ChangedActiveFolderWithServiceRef`. Estos dos
   siguen siendo `event EventHandler<T>` propios de `Store` (no migrados a `Store.Events`).
-- `AppConfig` (serializado a `KNoteData.config`), `Logger` (NLog), helpers de scripting (`RunKntSCode`,
+- `Settings` (`AppUserSettings`, lo que configura el usuario) y `State` (`AppUserState`, lo que recuerda la app), persistidos en `KNoteData.config`, `Logger` (NLog), helpers de scripting (`RunKntSCode`,
   `RunCSCode`, `ExecuteCommand`) para el motor KntScript.
 - Constructor: `Store(IFactoryViews factoryViews)` — la factory se inyecta aquí, no vía DI.
 

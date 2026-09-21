@@ -6,7 +6,7 @@ using KNote.Model;
 namespace KNote.ClientWin.Core;
 
 // The settings needed to send a message through the single, per-installation SMTP account
-// configured in AppConfig (Options > Email). Kept separate from AppConfig itself so this project's
+// configured in the settings (Options > Email). Kept separate from EmailConfig itself so this project's
 // email sending code isn't tied to the specific shape of the app configuration.
 public class SmtpSettings
 {
@@ -18,17 +18,17 @@ public class SmtpSettings
     public string FromAddress { get; set; }
     public string FromDisplayName { get; set; }
 
-    public static SmtpSettings FromAppConfig(AppConfig config)
+    public static SmtpSettings FromConfig(EmailConfig config)
     {
         return new SmtpSettings
         {
-            Host = config.SmtpHost,
-            Port = config.SmtpPort,
-            EnableSsl = config.SmtpEnableSsl,
-            Username = string.IsNullOrEmpty(config.SmtpUsername) ? config.SmtpFromAddress : config.SmtpUsername,
-            Password = config.SmtpPassword,
-            FromAddress = config.SmtpFromAddress,
-            FromDisplayName = config.SmtpFromDisplayName
+            Host = config.Host,
+            Port = config.Port,
+            EnableSsl = config.EnableSsl,
+            Username = string.IsNullOrEmpty(config.Username) ? config.FromAddress : config.Username,
+            Password = config.Password,
+            FromAddress = config.FromAddress,
+            FromDisplayName = config.FromDisplayName
         };
     }
 }

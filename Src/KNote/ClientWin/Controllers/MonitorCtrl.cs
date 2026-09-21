@@ -125,10 +125,10 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
     {
         View.ShowInfo(info);
 
-        if (!Store.AppConfig.LogActivated)
+        if (!Store.Settings.General.LogActivated)
             return;
 
-        using (StreamWriter outputFile = new StreamWriter(Store.AppConfig.LogFile, true))
+        using (StreamWriter outputFile = new StreamWriter(Store.Settings.General.LogFile, true))
         {
             outputFile.WriteLine(info);
         }

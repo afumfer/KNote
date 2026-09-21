@@ -78,10 +78,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
     public EAiResponseMode ResponseMode { get; set; } = EAiResponseMode.Stream;
 
     // KNoteAIAssistant plan (Phase 3): the configured provider/model collection and the one
-    // currently active. AiProviderRefs is exposed live from AppConfig so the view's picker
+    // currently active. AiProviderRefs is exposed live from the settings so the view's picker
     // always reflects whatever is currently in KNoteData.config (Phase 4 will add a maintenance
     // UI for it; for now entries are added by hand to the config file).
-    public List<AiProviderRef> AiProviderRefs => Store.AppConfig.AiProviderRefs;
+    public List<AiProviderRef> AiProviderRefs => Store.Settings.Ai.Providers;
 
     private AiProviderRef _currentProviderRef;
     public AiProviderRef CurrentProviderRef => _currentProviderRef;
@@ -113,13 +113,13 @@ public class KNoteAIAssistantCtrl : CtrlBase
         {
             if (AiProviderRefs.Count == 0)
             {
-                var message = "No AI providers are configured yet (AppConfig.AiProviderRefs is empty). " +
+                var message = "No AI providers are configured yet (Settings.Ai.Providers is empty). " +
                     "Add at least one entry to the <AiProviderRefs> section of KNoteData.config " +
                     "(a maintenance screen for this is planned for a later phase).";
                 throw new Exception(message);
             }
 
-            // The provider the user picked last (AppConfig.LastAiProviderAlias), else the first one.
+            // The provider the user picked last (State.Session.LastAiProviderAlias), else the first one.
             ApplyProvider(GetPreferredProvider());
 
             return new Result<EControllerResult>(EControllerResult.Executed);
@@ -177,7 +177,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // Switching provider mid-session invalidates the in-flight conversation (a different
     // provider/model can't continue the same message history), so this always resets it.
     // The view is responsible for confirming with the user first if there is one in progress.
-    // The choice is remembered in KNoteData.config (AppConfig.LastAiProviderAlias) so the next session
+    // The choice is remembered in KNoteData.config (State.Session.LastAiProviderAlias) so the next session
     // - of this assistant or of any other component built on it, like KntServerCOMCtrl - starts with it.
     public void SetProvider(AiProviderRef providerRef)
     {
@@ -189,7 +189,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // configured one, else null (no providers configured).
     public AiProviderRef GetPreferredProvider()
     {
-        var lastAlias = Store.AppConfig.LastAiProviderAlias;
+        var lastAlias = Store.State.Session.LastAiProviderAlias;
         var preferred = string.IsNullOrEmpty(lastAlias) ? null :
             AiProviderRefs.FirstOrDefault(p => string.Equals(p.Alias, lastAlias, StringComparison.OrdinalIgnoreCase));
 
@@ -208,10 +208,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     private void SaveLastProviderAlias(string alias)
     {
-        if (Store.AppConfig.LastAiProviderAlias == alias)
+        if (Store.State.Session.LastAiProviderAlias == alias)
             return;
 
-        Store.AppConfig.LastAiProviderAlias = alias;
+        Store.State.Session.LastAiProviderAlias = alias;
         try
         {
             Store.SaveConfig();
