@@ -154,7 +154,8 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "User {user} register at {dateTime}.", user.UserName?.ToString(), DateTime.Now);
-            return BadRequest(new UserTokenDto { success = false, token = "", error = ex.Message });
+            // The service layer wraps command exceptions in a generic KntServiceException; report the root cause.
+            return BadRequest(new UserTokenDto { success = false, token = "", error = ex.GetBaseException().Message });
         }
     }
 
