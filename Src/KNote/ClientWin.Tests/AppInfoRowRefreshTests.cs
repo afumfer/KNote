@@ -38,6 +38,47 @@ public class AppInfoRowRefreshTests
     };
 
     [TestMethod]
+    public void ApplyUserSaved_FullNameChanged_UpdatesRowsOfThatUserOnly()
+    {
+        var mine = NewRow();
+        mine.UserFullName = "old name";
+        var otherRepo = NewRow();
+        otherRepo.RepositoryAlias = "other";
+        otherRepo.UserFullName = "old name";
+
+        var changes = AppInfoRowRefresh.ApplyUserSaved([mine, otherRepo], new UserDto { UserId = UserId, FullName = "new name" }, ActiveUserOf);
+
+        Assert.AreEqual(1, changes.Count);
+        Assert.AreSame(mine, changes[0].Row);
+        Assert.AreEqual(AppInfoRowRefresh.ChangeKind.Updated, changes[0].Kind);
+        Assert.AreEqual("new name", mine.UserFullName);
+        Assert.AreEqual("old name", otherRepo.UserFullName);
+    }
+
+    [TestMethod]
+    public void ApplyUserSaved_FullNameUnchanged_ReportsNoChanges()
+    {
+        var row = NewRow();
+        row.UserFullName = "same";
+
+        var changes = AppInfoRowRefresh.ApplyUserSaved([row], new UserDto { UserId = UserId, FullName = "same" }, ActiveUserOf);
+
+        Assert.AreEqual(0, changes.Count);
+    }
+
+    [TestMethod]
+    public void ApplyUserSaved_AnotherUser_ReportsNoChanges()
+    {
+        var row = NewRow();
+        row.UserFullName = "old name";
+
+        var changes = AppInfoRowRefresh.ApplyUserSaved([row], new UserDto { UserId = Guid.NewGuid(), FullName = "new name" }, ActiveUserOf);
+
+        Assert.AreEqual(0, changes.Count);
+        Assert.AreEqual("old name", row.UserFullName);
+    }
+
+    [TestMethod]
     public void ApplyNoteSaved_TopicAndCommentChanged_UpdatesRow()
     {
         var row = NewRow();

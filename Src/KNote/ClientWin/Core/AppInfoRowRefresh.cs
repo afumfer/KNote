@@ -53,4 +53,21 @@ public static class AppInfoRowRefresh
 
         return changes;
     }
+
+    /// <summary>
+    /// A user was saved: refresh the User column of the rows addressed to them. A row only exists for
+    /// messages addressed to its repository's active user, so that user is the row's recipient.
+    /// </summary>
+    public static List<RowChange> ApplyUserSaved(IEnumerable<AppInfoAlarmRowConfig> rows, UserDto user, Func<string, Guid?> activeUserIdOf)
+    {
+        var changes = new List<RowChange>();
+
+        foreach (var row in rows.Where(r => r.UserFullName != user.FullName && activeUserIdOf(r.RepositoryAlias) == user.UserId).ToList())
+        {
+            row.UserFullName = user.FullName;
+            changes.Add(new RowChange(row, ChangeKind.Updated));
+        }
+
+        return changes;
+    }
 }

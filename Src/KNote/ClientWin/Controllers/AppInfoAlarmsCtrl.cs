@@ -34,6 +34,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         // ...and its displayed data must follow note/alarm edits made in the full editor (the PostIt
         // can't change the topic or the alarms shown here, so its EntitySaved<NoteDto> is not needed).
         Store.Events.Subscribe<EntitySaved<NoteExtendedDto>>(OnNoteSavedElsewhereExtended);
+        Store.Events.Subscribe<EntitySaved<UserDto>>(OnUserSavedElsewhere);
     }
 
     public override void Dispose()
@@ -41,6 +42,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         Store.Events.Unsubscribe<EntityDeleted<NoteDto>>(OnNoteDeletedElsewhere);
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhereExtended);
         Store.Events.Unsubscribe<EntitySaved<NoteExtendedDto>>(OnNoteSavedElsewhereExtended);
+        Store.Events.Unsubscribe<EntitySaved<UserDto>>(OnUserSavedElsewhere);
         base.Dispose();
     }
 
@@ -165,23 +167,46 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         try
         {
             var rows = Store.State.AppInfoAlarmsWindow.Rows;
-            if (!rows.Any(r => r.NoteId == e.Entity.NoteId))
+            var noteRows = rows.Where(r => r.NoteId == e.Entity.NoteId).ToList();
+            if (noteRows.Count == 0)
                 return;
 
-            // Which user is the "active" one is per repository; resolve it once per repository involved.
-            var activeUsers = new Dictionary<string, Guid?>();
-            foreach (var alias in rows.Where(r => r.NoteId == e.Entity.NoteId).Select(r => r.RepositoryAlias).Distinct())
-            {
-                var serviceRef = Store.GetServiceRef(alias);
-                activeUsers[alias] = serviceRef == null ? null : await Store.GetUserId(serviceRef.Service);
-            }
-
+            var activeUsers = await GetActiveUserIdsAsync(noteRows);
             ApplyChanges(AppInfoRowRefresh.ApplyNoteSaved(rows, e.Entity, alias => activeUsers.GetValueOrDefault(alias)));
         }
         catch (Exception ex)
         {
             Store.Logger?.LogError(ex, "OnNoteSavedElsewhereExtended: {message}", ex.Message);
         }
+    }
+
+    private async void OnUserSavedElsewhere(EntitySaved<UserDto> e)
+    {
+        try
+        {
+            var rows = Store.State.AppInfoAlarmsWindow.Rows;
+            if (rows.Count == 0)
+                return;
+
+            var activeUsers = await GetActiveUserIdsAsync(rows);
+            ApplyChanges(AppInfoRowRefresh.ApplyUserSaved(rows, e.Entity, alias => activeUsers.GetValueOrDefault(alias)));
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "OnUserSavedElsewhere: {message}", ex.Message);
+        }
+    }
+
+    // Which user is the "active" one is per repository; resolve it once per repository involved.
+    private async Task<Dictionary<string, Guid?>> GetActiveUserIdsAsync(IEnumerable<AppInfoAlarmRowConfig> rows)
+    {
+        var activeUsers = new Dictionary<string, Guid?>();
+        foreach (var alias in rows.Select(r => r.RepositoryAlias).Distinct())
+        {
+            var serviceRef = Store.GetServiceRef(alias);
+            activeUsers[alias] = serviceRef == null ? null : await Store.GetUserId(serviceRef.Service);
+        }
+        return activeUsers;
     }
 
     // Updated rows only change [XmlIgnore] display fields, so there is nothing to persist; a removed
