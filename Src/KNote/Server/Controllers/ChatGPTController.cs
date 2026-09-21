@@ -9,6 +9,7 @@ using OpenAI.Chat;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KNote.Server.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
@@ -72,7 +73,7 @@ public class ChatGPTController : Controller
         {
             _logger.LogError(ex, "Post chatMessage at {dateTime}.", DateTime.Now);
             var kresApi = new Result<string>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }

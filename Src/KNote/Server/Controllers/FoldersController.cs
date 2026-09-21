@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KNote.Server.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
@@ -46,7 +47,7 @@ public class FoldersController : ControllerBase
         {
             _logger.LogError(ex, "Get at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<FolderInfoDto>>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -69,7 +70,7 @@ public class FoldersController : ControllerBase
         {
             _logger.LogError(ex, "Tree at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<FolderInfoDto>>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -91,7 +92,7 @@ public class FoldersController : ControllerBase
         {
             _logger.LogError(ex, "Get {id }at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<FolderInfoDto>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -115,7 +116,7 @@ public class FoldersController : ControllerBase
         {
             _logger.LogError(ex, "Post {name} at {dateTime}.", folder.Name?.ToString(), DateTime.Now);
             var resApi = new Result<FolderInfoDto>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -138,7 +139,7 @@ public class FoldersController : ControllerBase
         {
             _logger.LogError(ex, "Delete {id} at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<FolderInfoDto>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }

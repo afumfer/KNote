@@ -55,6 +55,20 @@ public class FoldersInProcessTests
     }
 
     [TestMethod]
+    public async Task Post_WithNonExistentParent_ReturnsRootCauseNotServiceWrapper()
+    {
+        FolderDto folder = new() { FolderId = Guid.Empty, FolderNumber = 0, Name = "__TEST FOLDER BAD PARENT__", ParentId = Guid.NewGuid() };
+
+        var httpRes = await _httpClient.PostAsJsonAsync("api/folders", folder);
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<FolderDto>>();
+
+        Assert.IsFalse(httpRes.IsSuccessStatusCode);
+        Assert.IsNotNull(res);
+        Assert.IsTrue(res!.ErrorMessage.StartsWith("Generic error:"), res.ErrorMessage);
+        Assert.IsFalse(res.ErrorMessage.Contains("KNote service error"), res.ErrorMessage);
+    }
+
+    [TestMethod]
     public async Task Execute_BasicCRUD()
     {
         // Create

@@ -31,6 +31,20 @@ public class KAttributesInProcessTests
     }
 
     [TestMethod]
+    public async Task Post_WithNonExistentNoteType_ReturnsRootCauseNotServiceWrapper()
+    {
+        KAttributeInfoDto kAttribute = new() { KAttributeId = Guid.Empty, Name = "__TEST_KATTRIBUTE_BAD_NOTETYPE__", Description = "__TEST_KATTRIBUTE_BAD_NOTETYPE__", NoteTypeId = Guid.NewGuid() };
+
+        var httpRes = await _httpClient.PostAsJsonAsync("api/kattributes", kAttribute);
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<KAttributeInfoDto>>();
+
+        Assert.IsFalse(httpRes.IsSuccessStatusCode);
+        Assert.IsNotNull(res);
+        Assert.IsTrue(res!.ErrorMessage.StartsWith("Generic error:"), res.ErrorMessage);
+        Assert.IsFalse(res.ErrorMessage.Contains("KNote service error"), res.ErrorMessage);
+    }
+
+    [TestMethod]
     public async Task Execute_BasicCRUD()
     {
         // Create

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KNote.Server.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
@@ -44,7 +45,7 @@ public class KAttributesController : ControllerBase
         {
             _logger.LogError(ex, "Get at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTypeDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -66,7 +67,7 @@ public class KAttributesController : ControllerBase
         {
             _logger.LogError(ex, "GetForNoteType at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTypeDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -90,7 +91,7 @@ public class KAttributesController : ControllerBase
         {
             _logger.LogError(ex, "Get {id} get at {dateTime}", id, DateTime.Now);
             var kresApi = new Result<KAttributeInfoDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -114,7 +115,7 @@ public class KAttributesController : ControllerBase
         {
             _logger.LogError(ex, "Post {name} get at {dateTime}", entity.Name?.ToString(), DateTime.Now);
             var kresApi = new Result<KAttributeInfoDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -137,7 +138,7 @@ public class KAttributesController : ControllerBase
         {
             _logger.LogError(ex, "Delete {id} delete at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<NoteTypeDto>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -159,7 +160,7 @@ public class KAttributesController : ControllerBase
         {
             _logger.LogError(ex, "GetTabulatedValues {id} delete at {dateTime}.", id, DateTime.Now);
             var resApi = new Result<NoteTypeDto>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
