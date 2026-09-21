@@ -60,7 +60,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "GetAll at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<NoteInfoDto>>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -84,7 +84,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Filter at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteInfoDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -114,7 +114,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Search at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteInfoDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -143,7 +143,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "HomeNotes at {dateTime}.", DateTime.Now);
             var resApi = new Result<List<NoteInfoDto>>();
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -172,7 +172,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Get {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -197,7 +197,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "New at {dateTime}.", DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -245,7 +245,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Post/Put {topic} at {dateTime}.", note.Topic?.ToString(), DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -268,7 +268,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Delete {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<NoteInfoDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -294,7 +294,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Resources(post/put) at {dateTime}.", DateTime.Now);
             var kresApi = new Result<ResourceDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -317,7 +317,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Resources {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<List<ResourceDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -340,7 +340,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "DeleteResources {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<ResourceDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -367,7 +367,7 @@ public class NotesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "SaveFile at {dateTime}.", DateTime.Now);
-            resApi.AddErrorMessage("Generic error: " + ex.Message);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }
     }
@@ -393,7 +393,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Tasks at {dateTime}.", DateTime.Now);
             var kresApi = new Result<NoteTaskDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -418,7 +418,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "Tasks {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<List<NoteTaskDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -446,7 +446,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "GetStartedTasksByDateTimeRage at {dateTime}.", DateTime.Now);
             var kresApi = new Result<List<NoteTaskDto>>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }
@@ -469,7 +469,7 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "DeleteTask at {dateTime}.", DateTime.Now);
             var kresApi = new Result<NoteTaskDto>();
-            kresApi.AddErrorMessage("Generic error: " + ex.Message);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
     }

@@ -81,6 +81,29 @@ public class NotesInProcessTests
     }
 
     [TestMethod]
+    public async Task Post_WithNonExistentFolder_ReturnsRootCauseNotServiceWrapper()
+    {
+        NoteDto note = new()
+        {
+            NoteId = Guid.Empty,
+            Topic = "__TEST NOTE BAD FOLDER__",
+            Description = "Created by NotesInProcessTests.",
+            FolderId = Guid.NewGuid(),
+            FolderDto = _folder, // see CreateNoteAsync's comment about this nested property
+            CreationDateTime = DateTime.Now,
+            ModificationDateTime = DateTime.Now
+        };
+
+        var httpRes = await _httpClient.PostAsJsonAsync("api/notes", note);
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteDto>>();
+
+        Assert.IsFalse(httpRes.IsSuccessStatusCode);
+        Assert.IsNotNull(res);
+        Assert.IsTrue(res!.ErrorMessage.StartsWith("Generic error:"), res.ErrorMessage);
+        Assert.IsFalse(res.ErrorMessage.Contains("KNote service error"), res.ErrorMessage);
+    }
+
+    [TestMethod]
     public async Task Execute_BasicCRUD()
     {
         // Create
