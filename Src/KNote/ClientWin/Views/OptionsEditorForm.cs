@@ -4,7 +4,7 @@ using KNote.Model;
 
 namespace KNote.ClientWin.Views;
 
-public partial class OptionsEditorForm : KntEditorForm, IViewEditor<AppConfig>
+public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel>
 {
     #region Privage Fields
 

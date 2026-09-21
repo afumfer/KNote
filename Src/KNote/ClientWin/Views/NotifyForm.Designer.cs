@@ -33,7 +33,7 @@
             notifyKNote = new NotifyIcon(components);
             contextKNoteMenu = new ContextMenuStrip(components);
             menuNewNote = new ToolStripMenuItem();
-            menuShowKNoteManagment = new ToolStripMenuItem();
+            menuShowKNoteManagement = new ToolStripMenuItem();
             menuPostItsVisibles = new ToolStripMenuItem();
             menuAppInfoAlarms = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
@@ -57,7 +57,7 @@
             // 
             // contextKNoteMenu
             // 
-            contextKNoteMenu.Items.AddRange(new ToolStripItem[] { menuNewNote, menuShowKNoteManagment, menuPostItsVisibles, menuAppInfoAlarms, toolStripMenuItem1, menuKNoteOptions, menuHelp, menuAbout, toolStripMenuItem2, menuExit });
+            contextKNoteMenu.Items.AddRange(new ToolStripItem[] { menuNewNote, menuShowKNoteManagement, menuPostItsVisibles, menuAppInfoAlarms, toolStripMenuItem1, menuKNoteOptions, menuHelp, menuAbout, toolStripMenuItem2, menuExit });
             contextKNoteMenu.Name = "contextMenuStrip1";
             contextKNoteMenu.Size = new Size(226, 170);
             // 
@@ -68,12 +68,12 @@
             menuNewNote.Text = "New note";
             menuNewNote.Click += menuNewNote_Click;
             // 
-            // menuShowKNoteManagment
+            // menuShowKNoteManagement
             // 
-            menuShowKNoteManagment.Name = "menuShowKNoteManagment";
-            menuShowKNoteManagment.Size = new Size(225, 22);
-            menuShowKNoteManagment.Text = "Show KNote managment ...";
-            menuShowKNoteManagment.Click += menuShowKNoteManagment_Click;
+            menuShowKNoteManagement.Name = "menuShowKNoteManagement";
+            menuShowKNoteManagement.Size = new Size(225, 22);
+            menuShowKNoteManagement.Text = "Show KNote management ...";
+            menuShowKNoteManagement.Click += menuShowKNoteManagement_Click;
             // 
             // menuPostItsVisibles
             // 
@@ -151,7 +151,7 @@
         internal System.Windows.Forms.NotifyIcon notifyKNote;
         private System.Windows.Forms.ContextMenuStrip contextKNoteMenu;
         private System.Windows.Forms.ToolStripMenuItem menuNewNote;
-        private System.Windows.Forms.ToolStripMenuItem menuShowKNoteManagment;
+        private System.Windows.Forms.ToolStripMenuItem menuShowKNoteManagement;
         private System.Windows.Forms.ToolStripMenuItem menuPostItsVisibles;
         private System.Windows.Forms.ToolStripMenuItem menuAppInfoAlarms;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;

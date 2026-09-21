@@ -169,7 +169,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     {
         Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
 
-        // No note is loaded yet (e.g. KNoteManagmentCtrl.NoteEditorCtrl - the embedded main-window
+        // No note is loaded yet (e.g. KNoteManagementCtrl.NoteEditorCtrl - the embedded main-window
         // editor - runs its first RefreshView() before any note has been selected into it) or the
         // note genuinely has no folder assigned: Guid.Empty can never resolve to a real folder, so
         // skip the round-trip to Store.GetKNoteFolerPath entirely instead of asking it to look up
@@ -642,7 +642,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         comboScriptType.SelectedIndex = index >= 0 ? index : 0;
     }
 
-    #region Messages managment
+    #region Messages management
 
     private async void buttonAddAlarm_Click(object sender, EventArgs e)
     {
@@ -683,7 +683,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     #endregion
 
-    #region Tasks managment
+    #region Tasks management
 
     private async void buttonTaskAdd_Click(object sender, EventArgs e)
     {
@@ -724,7 +724,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     #endregion
 
-    #region Resource managment
+    #region Resource management
 
     private async void buttonResourceAdd_Click(object sender, EventArgs e)
     {
@@ -1646,7 +1646,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private void Content_DragEnter(object sender, DragEventArgs e)
     {
-        // ConfigureEmbededMode() (e.g. the note shown inside KNoteManagment) sets EditMode = false
+        // ConfigureEmbededMode() (e.g. the note shown inside KNoteManagement) sets EditMode = false
         // and makes the description read-only - dropping a file there would silently attach a
         // resource nobody could reference into the text, so reject the drop outright. Same reasoning
         // applies when the note itself is locked for editing.

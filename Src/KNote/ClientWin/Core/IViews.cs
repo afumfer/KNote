@@ -91,22 +91,22 @@ public interface IViewManageList<TEntity> : IViewEmbeddable
 
 #region Specific views
 
-public interface IViewKNoteManagment : IViewBase
+public interface IViewKNoteManagement : IViewBase
 {
     void HideView();
     void ActivateView();
     void ActivateWaitState();
     void DeactivateWaitState();
-    void ReportProgressKNoteManagment(int porcentaje);
+    void ReportProgressKNoteManagement(int porcentaje);
     void SetVisibleProgressBar(bool visible);
 
-    // Single-value input prompt (backed by ReadVarForm), used by KNoteManagmentCtrl.ChangeTags so the
+    // Single-value input prompt (backed by ReadVarForm), used by KNoteManagementCtrl.ChangeTags so the
     // controller doesn't have to reference a concrete WinForms Form to ask the user for the tag text.
     // Returns the value the user typed, or null if the dialog was canceled.
     string PromptForValue(string label, string caption);
 
     // Raised once this view is actually visible under a running message loop. The app bootstrap
-    // (Program.cs) needs this to defer KNoteManagmentCtrl.Run() until Application.Run's loop is
+    // (Program.cs) needs this to defer KNoteManagementCtrl.Run() until Application.Run's loop is
     // truly pumping (some notes need it, e.g. WebView2 content), without knowing this view is a
     // WinForms Form or anything about its native Shown event.
     event EventHandler ViewShown;
@@ -138,7 +138,7 @@ public interface IViewServerCOM : IViewChat
 }
 
 // AppInfoAlarmsCtrl's view: a single persistent window that accumulates rows over time (added from
-// the alarms timer, see MessagesManagmentCtrl.AppAlarm) rather than being loaded/replaced as a
+// the alarms timer, see MessagesManagementCtrl.AppAlarm) rather than being loaded/replaced as a
 // whole, so it gets its own AddOrUpdateRow instead of the pull-based IViewSelector<T>/
 // IViewManageList<T> shapes.
 public interface IViewAppInfoAlarms : IViewEmbeddable

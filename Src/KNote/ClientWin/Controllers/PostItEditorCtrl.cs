@@ -518,7 +518,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
 
         var random = new Random();
 
-        // TODO: get default values from Store.AppConfig ...
+        // TODO: get default values from Store.Settings ...
         return new WindowDto {
             NoteId = Model.NoteId,
             UserId = await PostItGetUserId(),

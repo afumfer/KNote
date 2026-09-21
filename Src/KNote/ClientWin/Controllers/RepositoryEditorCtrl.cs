@@ -12,7 +12,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
     /// <summary>
     /// Whether the current Windows user (Store.AppUserName) has the Admin role in the repository being
-    /// managed. Only meaningful in EnumRepositoryEditorMode.Managment (a repository must already be
+    /// managed. Only meaningful in EnumRepositoryEditorMode.Management (a repository must already be
     /// linked to have a Users table to check against); gates the Users/Note types/Attributes tabs.
     /// </summary>
     public bool CurrentUserIsAdmin { get; private set; }
@@ -84,7 +84,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             Model.ResourcesContainerRootUrl = repositoryForEdit.ResourcesContainerRootUrl;
             Model.SetIsDirty(false);
 
-            CurrentUserIsAdmin = EditorMode == EnumRepositoryEditorMode.Managment
+            CurrentUserIsAdmin = EditorMode == EnumRepositoryEditorMode.Management
                 && await Store.IsCurrentUserAdminAsync(service);
 
             if (CurrentUserIsAdmin)
@@ -135,7 +135,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
         try
         {
-            if (EditorMode == EnumRepositoryEditorMode.Managment)
+            if (EditorMode == EnumRepositoryEditorMode.Management)
             {
                 var repositoryForEdit = Store.GetServiceRef(Service.IdServiceRef).RepositoryRef;
                 repositoryForEdit.Alias = Model.Alias;
@@ -158,7 +158,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 if (await newService.Service.TestDbConnection())
                 {
                     Store.AddServiceRef(newService);
-                    Store.AddServiceRefInAppConfig(newService);
+                    Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
                     await Store.EnsureCurrentUserRegistered(newService.Service);
@@ -178,7 +178,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 if (await newService.Service.CreateDataBase(SystemInformation.UserName))
                 {
                     Store.AddServiceRef(newService);
-                    Store.AddServiceRefInAppConfig(newService);
+                    Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
                     OnAddedEntity(Model);
@@ -239,7 +239,7 @@ public enum EnumRepositoryEditorMode
 {
     AddLink,
     Create,
-    Managment
+    Management
 }
 
 #endregion

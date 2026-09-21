@@ -5,11 +5,11 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// KNoteAIAssistant plan (Phase 4): maintenance screen for Store.AppConfig.AiProviderRefs (the
+/// KNoteAIAssistant plan (Phase 4): maintenance screen for Store.Settings.Ai.Providers (the
 /// provider/model/apiKey/host collection consumed by KNoteAIAssistantCtrl's provider picker).
 /// Unlike NoteTypesManageCtrl/UsersManageCtrl (embedded tabs of RepositoryEditorCtrl, backed by
 /// IKntService), this is shown standalone (window mode, the default for CtrlViewEmbeddableBase)
-/// straight from the Tools menu, and ListEntities is Store.AppConfig.AiProviderRefs itself (no
+/// straight from the Tools menu, and ListEntities is Store.Settings.Ai.Providers itself (no
 /// service call needed to load it).
 /// </summary>
 public class AiProvidersManageCtrl : CtrlManageListBase<IViewManageList<AiProviderRef>, AiProviderRef>
@@ -34,7 +34,7 @@ public class AiProvidersManageCtrl : CtrlManageListBase<IViewManageList<AiProvid
     {
         // AiProviderRefs is not IKntService-backed: `service` is accepted only to satisfy the
         // CtrlManageListBase contract and is otherwise unused.
-        ListEntities = Store.AppConfig.AiProviderRefs;
+        ListEntities = Store.Settings.Ai.Providers;
 
         if (refreshView)
             View.RefreshView();
@@ -50,7 +50,7 @@ public class AiProvidersManageCtrl : CtrlManageListBase<IViewManageList<AiProvid
         var res = editorCtrl.RunModal();
         if (res.Entity == EControllerResult.Executed)
         {
-            // editorCtrl.SaveModel() already added it to Store.AppConfig.AiProviderRefs, which is
+            // editorCtrl.SaveModel() already added it to Store.Settings.Ai.Providers, which is
             // the same List<T> instance as ListEntities.
             View.AddItem(editorCtrl.Model);
             OnListChanged();

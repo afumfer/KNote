@@ -164,7 +164,7 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
             case EnumRepositoryEditorMode.Create:
                 Text = "Create new repository";
                 break;
-            case EnumRepositoryEditorMode.Managment:
+            case EnumRepositoryEditorMode.Management:
                 Text = "Edit repository properties";
                 groupRepositoryType.Enabled = false;
                 panelSqLite.Enabled = false;
@@ -173,13 +173,13 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         }
 
         // Users/Note types/Trace note types/Attributes administration only makes sense for an
-        // already-linked repository (Managment mode) and only for a repository user with the Admin role.
+        // already-linked repository (Management mode) and only for a repository user with the Admin role.
         tabPageUsers.Enabled = _ctrl.CurrentUserIsAdmin;
         tabPageNoteTypes.Enabled = _ctrl.CurrentUserIsAdmin;
         tabPageTraceNoteTypes.Enabled = _ctrl.CurrentUserIsAdmin;
         tabPageAttributes.Enabled = _ctrl.CurrentUserIsAdmin;
 
-        var adminTabsHint = _ctrl.EditorMode != EnumRepositoryEditorMode.Managment
+        var adminTabsHint = _ctrl.EditorMode != EnumRepositoryEditorMode.Management
             ? "Available once the repository is linked."
             : (_ctrl.CurrentUserIsAdmin ? "" : "Requires the Admin role in this repository.");
 

@@ -6,15 +6,15 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
+public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 {
     #region Private methods
 
-    private readonly KNoteManagmentCtrl _ctrl;
+    private readonly KNoteManagementCtrl _ctrl;
 
     #endregion
 
-    #region IViewKNoteManagment events
+    #region IViewKNoteManagement events
 
     public event EventHandler ViewShown;
 
@@ -22,13 +22,13 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
 
     #region Constructor
 
-    public KNoteManagmentForm(KNoteManagmentCtrl ctrl)
+    public KNoteManagementForm(KNoteManagementCtrl ctrl)
     {
         InitializeComponent();
-        menuMangment.Text = $"{KntConst.AppName} menu managment";
-        menuHide.Text = $"&Hide {KntConst.AppName} managment";
+        menuManagement.Text = $"{KntConst.AppName} menu management";
+        menuHide.Text = $"&Hide {KntConst.AppName} management";
         menuKNoteLab.Text = $"{KntConst.AppName} &lab ...";
-        Text = $"{KntConst.AppName} Managment";
+        Text = $"{KntConst.AppName} Management";
 
         _ctrl = ctrl;
 
@@ -126,7 +126,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         this.Cursor = Cursors.Default;
     }
 
-    public void ReportProgressKNoteManagment(int porcentaje)
+    public void ReportProgressKNoteManagement(int porcentaje)
     {
         progressBar.Value = porcentaje;
     }
@@ -157,13 +157,13 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
 
     #region Form events handlers
 
-    private void KNoteManagmentForm_Load(object sender, EventArgs e)
+    private void KNoteManagementForm_Load(object sender, EventArgs e)
     {
         SetViewPositionAndSize();
         ApplyStartupPanelVisibility();
     }
 
-    private async void KNoteManagmentForm_FormClosing(object sender, FormClosingEventArgs e)
+    private async void KNoteManagementForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         if (!ViewFinalized)
         {
@@ -213,13 +213,13 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         {
             await _ctrl.CreateRepository();
         }
-        else if (menuSel == menuManagmentRepository)
+        else if (menuSel == menuManagementRepository)
         {
-            await _ctrl.ManagmentRepository();
+            await _ctrl.ManagementRepository();
         }
         else if (menuSel == menuRefreshTreeFolders)
         {
-            Text = $"{KntConst.AppName} Managment";
+            Text = $"{KntConst.AppName} Management";
             _ctrl.RefreshRepositoryAndFolderTree();
         }
         else if (menuSel == menuEditNote)
@@ -248,7 +248,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         }
         else if (menuSel == menuHide)
         {
-            _ctrl.HideKNoteManagment();
+            _ctrl.HideKNoteManagement();
         }
         else if (menuSel == menuAbout)
         {
@@ -300,30 +300,30 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         }
         else if (menuSel == menuHeaderPanelVisible)
         {
-            if (!panelSupManagment.Visible)
-                Text = $"{KntConst.AppName} Managment";
-            panelSupManagment.Visible = !panelSupManagment.Visible;
-            _ctrl.Store.AppConfig.ShowHeaderPanel = panelSupManagment.Visible;
+            if (!panelSupManagement.Visible)
+                Text = $"{KntConst.AppName} Management";
+            panelSupManagement.Visible = !panelSupManagement.Visible;
+            _ctrl.Store.State.ManagementWindow.Panels.Header = panelSupManagement.Visible;
         }
         else if (menuSel == menuMainVisible)
         {
-            menuMangment.Visible = !menuMangment.Visible;
-            menuMainVisible.Checked = menuMangment.Visible;
-            _ctrl.Store.AppConfig.ShowMainMenu = menuMangment.Visible;
+            menuManagement.Visible = !menuManagement.Visible;
+            menuMainVisible.Checked = menuManagement.Visible;
+            _ctrl.Store.State.ManagementWindow.Panels.MainMenu = menuManagement.Visible;
             UpdateMenuHintVisibility();
         }
         else if (menuSel == menuCompactViewNotesList)
         {
-            var cfg = _ctrl.Store.AppConfig;
-            cfg.CompactViewNoteslist = !cfg.CompactViewNoteslist;
-            menuCompactViewNotesList.Checked = cfg.CompactViewNoteslist;
+            var notesList = _ctrl.Store.State.ManagementWindow.NotesList;
+            notesList.CompactView = !notesList.CompactView;
+            menuCompactViewNotesList.Checked = notesList.CompactView;
             _ctrl.Store.Events.Publish(new NotesListViewOptionsChanged());
         }
         else if (menuSel == menuToolbarVisible)
         {
             menuToolbarVisible.Checked = !menuToolbarVisible.Checked;
-            toolBarManagment.Visible = menuToolbarVisible.Checked;
-            _ctrl.Store.AppConfig.ShowToolbar = menuToolbarVisible.Checked;
+            toolBarManagement.Visible = menuToolbarVisible.Checked;
+            _ctrl.Store.State.ManagementWindow.Panels.Toolbar = menuToolbarVisible.Checked;
         }
         else if (menuSel == menuVerticalPanelForNotes)
         {
@@ -333,7 +333,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         {
             _ctrl.ToggleNotesListFilter();
             menuListFilterVisible.Checked = _ctrl.NotesSelectorCtrl.EnableTextFilter;
-            _ctrl.Store.AppConfig.ShowListFilter = menuListFilterVisible.Checked;
+            _ctrl.Store.State.ManagementWindow.NotesList.ShowFilter = menuListFilterVisible.Checked;
         }
         else if (menuSel == menuExit)
         {
@@ -382,7 +382,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         else if (menuSel == toolDeleteNote)
             await _ctrl.DeleteNote();
         else if (menuSel == toolConfiguration)
-            await _ctrl.ManagmentRepository();
+            await _ctrl.ManagementRepository();
     }
 
     private async void tabExplorers_SelectedIndexChanged(object sender, EventArgs e)
@@ -398,51 +398,51 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         else
             comName = "";
         statusLabel2.Text = $" {comName} {e?.Message}";
-        statusBarManagment.Refresh();
+        statusBarManagement.Refresh();
     }
 
     #endregion
 
     #region Private methods
 
-    // Applies the View menu's persisted state (Store.AppConfig) as early as possible - Form.Load,
+    // Applies the View menu's persisted state (Store.State) as early as possible - Form.Load,
     // before this window is ever shown - so panels don't visibly flash from their Designer defaults
     // to their configured state right after startup. Everything here touches only this Form's own
     // native controls (menu items, toolbar, header panel, tab selection, splitter orientation), none
     // of which need _ctrl's sub-controllers to exist yet. Only the visible tab itself is restored
     // here: the actual "active folder" content is already handled independently via
-    // Store.AppConfig.LastActiveFolderId (see KNoteManagmentCtrl.OnInitialized), and there is no
+    // Store.State.Session.LastActiveFolderId (see KNoteManagementCtrl.OnInitialized), and there is no
     // persisted "active filter" state to restore for the other tab.
     // See ApplyNotesFilterSetting() for the one View menu setting that does need a sub-controller.
     private void ApplyStartupPanelVisibility()
     {
-        var cfg = _ctrl.Store.AppConfig;
+        var panels = _ctrl.Store.State.ManagementWindow.Panels;
 
-        tabExplorers.SelectedTab = cfg.ShowFoldersExplorerTab ? tabExplorers.TabPages[0] : tabExplorers.TabPages[1];
-        menuFoldersExplorer.Checked = cfg.ShowFoldersExplorerTab;
-        menuSearchPanel.Checked = !cfg.ShowFoldersExplorerTab;
+        tabExplorers.SelectedTab = panels.FoldersExplorer ? tabExplorers.TabPages[0] : tabExplorers.TabPages[1];
+        menuFoldersExplorer.Checked = panels.FoldersExplorer;
+        menuSearchPanel.Checked = !panels.FoldersExplorer;
 
-        panelSupManagment.Visible = cfg.ShowHeaderPanel;
-        menuHeaderPanelVisible.Checked = cfg.ShowHeaderPanel;
+        panelSupManagement.Visible = panels.Header;
+        menuHeaderPanelVisible.Checked = panels.Header;
 
-        toolBarManagment.Visible = cfg.ShowToolbar;
-        menuToolbarVisible.Checked = cfg.ShowToolbar;
+        toolBarManagement.Visible = panels.Toolbar;
+        menuToolbarVisible.Checked = panels.Toolbar;
 
-        menuMangment.Visible = cfg.ShowMainMenu;
-        menuMainVisible.Checked = cfg.ShowMainMenu;
+        menuManagement.Visible = panels.MainMenu;
+        menuMainVisible.Checked = panels.MainMenu;
         UpdateMenuHintVisibility();
 
-        menuCompactViewNotesList.Checked = cfg.CompactViewNoteslist;
+        menuCompactViewNotesList.Checked = _ctrl.Store.State.ManagementWindow.NotesList.CompactView;
 
-        SetVerticalPanelForNotes(cfg.VerticalPanelForNotes);
+        SetVerticalPanelForNotes(panels.VerticalNotesPanel);
     }
 
     // The one View menu setting that needs _ctrl.NotesSelectorCtrl to already exist (created by
-    // KNoteManagmentCtrl.OnInitialized()) - called from ShowView(), after LinkComponents() has docked
+    // KNoteManagementCtrl.OnInitialized()) - called from ShowView(), after LinkComponents() has docked
     // it. See ApplyStartupPanelVisibility() for everything else, applied earlier from Form.Load.
     private void ApplyNotesFilterSetting()
     {
-        var cfg = _ctrl.Store.AppConfig;
+        var notesList = _ctrl.Store.State.ManagementWindow.NotesList;
 
         // EnableTextFilter alone only takes visible effect the next time NotesSelectorCtrl's View
         // actually refreshes with real data (see NotesSelectorForm.RefreshView) - which, depending on
@@ -451,8 +451,8 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         // happening afterwards. Calling RefreshView() here covers both orderings: it's a no-op while
         // ListEntities is still null (not loaded yet - the later real refresh applies it then), and
         // immediately re-applies the correct visibility if the notes have already loaded.
-        _ctrl.NotesSelectorCtrl.EnableTextFilter = cfg.ShowListFilter;
-        menuListFilterVisible.Checked = cfg.ShowListFilter;
+        _ctrl.NotesSelectorCtrl.EnableTextFilter = notesList.ShowFilter;
+        menuListFilterVisible.Checked = notesList.ShowFilter;
         _ctrl.NotesSelectorCtrl.View.RefreshView();
     }
 
@@ -471,7 +471,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         }
 
         menuVerticalPanelForNotes.Checked = vertical;
-        _ctrl.Store.AppConfig.VerticalPanelForNotes = vertical;
+        _ctrl.Store.State.ManagementWindow.Panels.VerticalNotesPanel = vertical;
     }
 
     // Reminder shown in the status bar while the main menu is hidden, so Shift+F12 (the only way to
@@ -480,7 +480,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
     // status bar message is the more conventional place for this kind of transient reminder.
     private void UpdateMenuHintVisibility()
     {
-        statusLabelMenuHint.Visible = !menuMangment.Visible;
+        statusLabelMenuHint.Visible = !menuManagement.Visible;
     }
 
     private async Task SelectTab(int tabIndex)
@@ -490,7 +490,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
             tabExplorers.SelectedTab = tabExplorers.TabPages[0];
             menuFoldersExplorer.Checked = true;
             menuSearchPanel.Checked = false;
-            _ctrl.Store.AppConfig.ShowFoldersExplorerTab = true;
+            _ctrl.Store.State.ManagementWindow.Panels.FoldersExplorer = true;
             await _ctrl.GoActiveFolder();
         }
         else if (tabIndex == 1)
@@ -498,7 +498,7 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
             tabExplorers.SelectedTab = tabExplorers.TabPages[1];
             menuFoldersExplorer.Checked = false;
             menuSearchPanel.Checked = true;
-            _ctrl.Store.AppConfig.ShowFoldersExplorerTab = false;
+            _ctrl.Store.State.ManagementWindow.Panels.FoldersExplorer = false;
             await _ctrl.GoActiveFilter();
         }
     }
@@ -547,27 +547,30 @@ public partial class KNoteManagmentForm : KntForm, IViewKNoteManagment
         if (WindowState == FormWindowState.Minimized)
             return;
 
-        _ctrl.Store.AppConfig.ManagmentLocX = Location.X;
-        _ctrl.Store.AppConfig.ManagmentLocY = Location.Y;
-        _ctrl.Store.AppConfig.ManagmentWidth = Width;
-        _ctrl.Store.AppConfig.ManagmentHeight = Height;
+        var bounds = _ctrl.Store.State.ManagementWindow.Bounds;
+        bounds.X = Location.X;
+        bounds.Y = Location.Y;
+        bounds.Width = Width;
+        bounds.Height = Height;
     }
 
     private void SetViewPositionAndSize()
     {
-        if (_ctrl.Store.AppConfig.ManagmentLocX > SystemInformation.VirtualScreen.Width - 100)
-            _ctrl.Store.AppConfig.ManagmentLocX = 100;
-        if (_ctrl.Store.AppConfig.ManagmentLocY > SystemInformation.VirtualScreen.Height - 100)
-            _ctrl.Store.AppConfig.ManagmentLocY = 100;
+        var bounds = _ctrl.Store.State.ManagementWindow.Bounds;
 
-        if (_ctrl.Store.AppConfig.ManagmentLocY > 0)
-            Top = _ctrl.Store.AppConfig.ManagmentLocY;
-        if (_ctrl.Store.AppConfig.ManagmentLocX > 0)
-            Left = _ctrl.Store.AppConfig.ManagmentLocX;
-        if (_ctrl.Store.AppConfig.ManagmentWidth > 0)
-            Width = _ctrl.Store.AppConfig.ManagmentWidth;
-        if (_ctrl.Store.AppConfig.ManagmentHeight > 0)
-            Height = _ctrl.Store.AppConfig.ManagmentHeight;
+        if (bounds.X > SystemInformation.VirtualScreen.Width - 100)
+            bounds.X = 100;
+        if (bounds.Y > SystemInformation.VirtualScreen.Height - 100)
+            bounds.Y = 100;
+
+        if (bounds.Y > 0)
+            Top = bounds.Y;
+        if (bounds.X > 0)
+            Left = bounds.X;
+        if (bounds.Width > 0)
+            Width = bounds.Width;
+        if (bounds.Height > 0)
+            Height = bounds.Height;
     }
 
     #endregion

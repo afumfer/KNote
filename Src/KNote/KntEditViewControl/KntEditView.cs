@@ -187,7 +187,7 @@ namespace KntWebView
 
         public event EventHandler NavigationEnd;        
 
-        #region Form events managment 
+        #region Form events management 
 
         private async void KntEditView_Load(object sender, EventArgs e)
         {

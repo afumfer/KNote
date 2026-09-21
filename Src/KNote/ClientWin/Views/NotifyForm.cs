@@ -8,17 +8,17 @@ public partial class NotifyForm : KntForm, IViewBase
 {
     #region Private fields
 
-    private readonly KNoteManagmentCtrl _ctrl;
+    private readonly KNoteManagementCtrl _ctrl;
 
     #endregion
 
     #region Constructor
 
-    public NotifyForm(KNoteManagmentCtrl ctrl)
+    public NotifyForm(KNoteManagementCtrl ctrl)
     {
         InitializeComponent();
         notifyKNote.Text = KntConst.AppName;
-        menuShowKNoteManagment.Text = $"Show {KntConst.AppName} managment ...";
+        menuShowKNoteManagement.Text = $"Show {KntConst.AppName} management ...";
 
         _ctrl = ctrl;
     }
@@ -45,9 +45,9 @@ public partial class NotifyForm : KntForm, IViewBase
         await _ctrl.AddDefaultNotePostIt();
     }
 
-    private void menuShowKNoteManagment_Click(object sender, EventArgs e)
+    private void menuShowKNoteManagement_Click(object sender, EventArgs e)
     {
-        _ctrl.ShowKNoteManagment();
+        _ctrl.ShowKNoteManagement();
     }
 
     private void menuPostItsVisibles_Click(object sender, EventArgs e)

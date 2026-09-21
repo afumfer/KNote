@@ -4,7 +4,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfig>
+public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<OptionsModel>, OptionsModel>
 {
     #region Constructor 
 
@@ -17,9 +17,9 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
 
     #region Controller editor implementation 
 
-    protected override IViewEditor<AppConfig> CreateView()
+    protected override IViewEditor<OptionsModel> CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<OptionsEditorCtrl, IViewEditor<AppConfig>>(this);
+        return Store.FactoryViews.Registry.Resolve<OptionsEditorCtrl, IViewEditor<OptionsModel>>(this);
     }
 
     public override Task<bool> LoadModelById(IKntService service, Guid id, bool refreshView = true)
@@ -46,19 +46,7 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<AppConfig>, AppConfi
             return Task.FromResult(false);
         }
 
-        Store.AppConfig.AlarmActivated = Model.AlarmActivated;
-        Store.AppConfig.AlarmSeconds = Model.AlarmSeconds;
-        Store.AppConfig.AutoSaveActivated = Model.AutoSaveActivated;
-        Store.AppConfig.AutoSaveSeconds = Model.AutoSaveSeconds;
-        Store.AppConfig.ChatHubUrl = Model.ChatHubUrl;
-        Store.AppConfig.ChatHubAutoConnectDisabled = Model.ChatHubAutoConnectDisabled;
-        Store.AppConfig.SmtpHost = Model.SmtpHost;
-        Store.AppConfig.SmtpPort = Model.SmtpPort;
-        Store.AppConfig.SmtpEnableSsl = Model.SmtpEnableSsl;
-        Store.AppConfig.SmtpFromAddress = Model.SmtpFromAddress;
-        Store.AppConfig.SmtpFromDisplayName = Model.SmtpFromDisplayName;
-        Store.AppConfig.SmtpUsername = Model.SmtpUsername;
-        Store.AppConfig.SmtpPassword = Model.SmtpPassword;
+        Model.ApplyTo(Store.Settings, Store.State);
         Store.SaveConfig();
 
         return Task.FromResult(true);

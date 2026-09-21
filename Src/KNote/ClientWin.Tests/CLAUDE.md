@@ -28,6 +28,18 @@ lo pida (`LoadModelById(service, id)`, `NewModel(service)`, ...) — nunca un `I
 Al añadir un miembro nuevo a un fake existente, sigue el mismo patrón (delegado opcional + throw por
 defecto) en vez de sustituir el `throw new NotSupportedException()` por una implementación fija.
 
+## Tests de configuración (`AppConfigStorage`, migración, secretos)
+
+- `Fixtures/KNoteData.v1.config` es un `KNoteData.config` del formato antiguo con **datos sintéticos** (nunca
+  copies aquí el fichero real de un usuario: contiene secretos). Se copia al directorio de salida
+  (`KNote.ClientWin.Tests.csproj`) y lo usan `AppConfigMigratorTests`, `AppConfigStorageTests` y
+  `StoreConfigPersistenceTests`.
+- Los tests que escriben ficheros de configuración usan siempre un directorio temporal propio; **nunca** el
+  `%LocalAppData%\KNote` real (por eso los tests de `KntServerCOMCtrl`/`KNoteAIAssistantCtrl` no llaman a
+  `SaveConfig()`).
+- `Fakes/FakeSecretProtector` sustituye a DPAPI en `AppConfigStorageTests`/`AppUserSettingsSecretsTests`; los
+  tests de `DpapiSecretProtector` y de `StoreConfigPersistenceTests` usan DPAPI real (solo Windows).
+
 ## Tests de IA (`KNoteAIAssistant`)
 
 Dos capas con propósitos distintos — **capa 1 no requiere nada especial y corre siempre**; **capa 2
@@ -56,7 +68,7 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
   el `KntService` real que el propio constructor de `ServiceRef` ya construyó de forma perezosa.
 - `KNoteAIAssistantCtrlTests.cs` — `RestartAIAssistant`, y sobre todo el **rollback de turno huérfano**: si
   `IChatClient` lanza una excepción, `GetCompletionAsync`/`StreamCompletionAsync` no deben dejar un mensaje
-  de usuario sin respuesta en `ChatMessages`/`ChatTextMessasges` (bug real que se coló y arregló en
+  de usuario sin respuesta en `ChatMessages`/`ChatTextMessages` (bug real que se coló y arregló en
   `KNoteAIAssistantCtrl` — este test evita que vuelva). Usa
   `KNoteAIAssistantCtrl.SetChatClientForTesting(chatClient, providerRef)` — un seam `internal` que
   bypassa `AiChatClientFactory` — habilitado por

@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
-using System.Xml.Serialization;
 using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Core;
@@ -29,7 +28,11 @@ public class Store
 
     #region Public properties, application state 
 
-    public AppConfig AppConfig { get; protected set; }
+    // What the user configures (persisted in KNoteData.config) and what the application remembers by
+    // itself between sessions (window positions, last active repository...).
+    public AppUserSettings Settings { get; protected set; }
+
+    public AppUserState State { get; protected set; }
 
     public string AppUserName { get; set; }
 
@@ -51,11 +54,11 @@ public class Store
         }
     }
 
-    public FolderWithServiceRef _dafaultFolderWithServiceRef;
+    public FolderWithServiceRef _defaultFolderWithServiceRef;
     public FolderWithServiceRef DefaultFolderWithServiceRef
     {
-        set { _dafaultFolderWithServiceRef = value; }
-        get { return _dafaultFolderWithServiceRef; }
+        set { _defaultFolderWithServiceRef = value; }
+        get { return _defaultFolderWithServiceRef; }
     }
 
     public FolderWithServiceRef _activeFolderWithServiceRef;
@@ -97,17 +100,18 @@ public class Store
 
     public Store(IFactoryViews factoryViews)
     {
-        if (AppConfig == null)
-            AppConfig = new AppConfig();
+        Settings = new AppUserSettings();
+        State = new AppUserState();
 
         _controllerRegistry = new ControllerRegistry();
         _serviceRefRegistry = new ServiceRefRegistry();
         FactoryViews = factoryViews; //
     }
 
-    public Store(AppConfig config, IFactoryViews factoryViews) : this (factoryViews)
+    public Store(AppUserSettings settings, AppUserState state, IFactoryViews factoryViews) : this (factoryViews)
     {
-        AppConfig = config;
+        Settings = settings;
+        State = state;
     }
 
     #endregion
@@ -123,11 +127,11 @@ public class Store
             Logger?.LogTrace("ChangeActiveFolderWithServiceRef {message}", activeFolderWithServiceRef?.ToString());
 
             // Remembered so the next startup can reactivate the same repository/folder (see
-            // KNoteManagmentCtrl.OnInitialized). Actually written to disk by the next SaveConfig().
+            // KNoteManagementCtrl.OnInitialized). Actually written to disk by the next SaveConfig().
             if (activeFolderWithServiceRef?.FolderInfo != null && activeFolderWithServiceRef.ServiceRef != null)
             {
-                AppConfig.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Alias;
-                AppConfig.LastActiveFolderId = activeFolderWithServiceRef.FolderInfo.FolderId;
+                State.Session.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Alias;
+                State.Session.LastActiveFolderId = activeFolderWithServiceRef.FolderInfo.FolderId;
             }
 
             ChangedActiveFolderWithServiceRef?.Invoke(this, new ControllerEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
@@ -167,12 +171,12 @@ public class Store
     private void ServiceRef_CommandExecuted(object sender, CommandExecutedEventArgs e)
         => Events.Publish(new ServiceCommandExecuted(e));
 
-    public void AddServiceRefInAppConfig(ServiceRef serviceRef)
+    public void AddServiceRefInSettings(ServiceRef serviceRef)
     {
         if (serviceRef is null)
             throw new ArgumentNullException(nameof(serviceRef));
 
-        AppConfig.RespositoryRefs.Add(serviceRef.RepositoryRef);
+        Settings.Repositories.Items.Add(serviceRef.RepositoryRef);
     }
 
     public void RemoveServiceRef(ServiceRef serviceRef)
@@ -185,7 +189,7 @@ public class Store
 
         _serviceRefRegistry.Remove(serviceRef);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
-        AppConfig.RespositoryRefs.Remove(serviceRef.RepositoryRef);
+        Settings.Repositories.Items.Remove(serviceRef.RepositoryRef);
         Events.Publish(new ServiceRefRemoved(serviceRef));
     }
 
@@ -253,20 +257,29 @@ public class Store
         Events.Publish(new ControllerRemoved(controller));
     }
 
+    // Both files live next to each other; see AppConfigStorage.
+    private AppConfigStorage _configStorage;
+
+    private AppConfigStorage GetConfigStorage(string configFile)
+    {
+        if (string.IsNullOrEmpty(configFile))
+            configFile = AppUserDataPath.ConfigFile;
+
+        if (_configStorage == null || !string.Equals(_configStorage.SettingsFile, configFile, StringComparison.OrdinalIgnoreCase))
+            _configStorage = new AppConfigStorage(configFile, new DpapiSecretProtector());
+
+        return _configStorage;
+    }
+
     public void SaveConfig(string configFile = null)
     {
-        if(string.IsNullOrEmpty(configFile))
-            configFile = AppUserDataPath.ConfigFile;
         try
         {
-            TextWriter w = new StreamWriter(configFile);
-            XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
-            serializer.Serialize(w, AppConfig);
-            w.Close();
+            GetConfigStorage(configFile).Save(Settings, State);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "SaveConfig: {message}", configFile?.ToString());
+            Logger?.LogError(ex, "SaveConfig: {message}", configFile ?? AppUserDataPath.ConfigFile);
             throw;
         }
     }
@@ -275,23 +288,33 @@ public class Store
     {
         try
         {
-            if (string.IsNullOrEmpty(configFile))
-                configFile = AppUserDataPath.ConfigFile;
-
-
-            if (!File.Exists(configFile))
+            var result = GetConfigStorage(configFile).Load();
+            if (result == null)
                 return;
-            
-            TextReader reader = new StreamReader(configFile);
-            XmlSerializer serializer = new XmlSerializer(typeof(AppConfig));
-            AppConfig = (AppConfig)serializer.Deserialize(reader);
-            reader.Close();                
+
+            Settings = result.Settings;
+            State = result.State;
+            _configNotices.AddRange(result.Notices);
+
+            foreach (var notice in result.Notices)
+                Logger?.LogWarning("LoadConfig: {message}", notice);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "LoadConfig: {message}", configFile?.ToString());
+            Logger?.LogError(ex, "LoadConfig: {message}", configFile ?? AppUserDataPath.ConfigFile);
             throw;
-        }            
+        }
+    }
+
+    // Things worth telling the user that were found while loading the configuration (it was upgraded, a
+    // backup had to be used, secrets must be entered again...). Returned once, then cleared.
+    private readonly List<string> _configNotices = new();
+
+    public IReadOnlyList<string> TakeConfigNotices()
+    {
+        var notices = _configNotices.ToList();
+        _configNotices.Clear();
+        return notices;
     }
 
     public Task<bool> CheckNoteIsActive(Guid noteId)
@@ -589,7 +612,7 @@ public class Store
 
         // Minor UX indicator that a script is running (Fase A+B: wait cursor, always reliable even
         // when the engine below blocks the UI thread synchronously; status bar message via the
-        // existing ControllerNotification "toast" channel, shown by KNoteManagmentForm when visible -
+        // existing ControllerNotification "toast" channel, shown by KNoteManagementForm when visible -
         // best-effort only for the "knt" + runInNewTask=true case, which fires the script on its own
         // thread and returns immediately, and for cs/py/js/ln below, which just open their own
         // window and return - the indicator only covers the hand-off, not the full run, for those).
@@ -661,7 +684,7 @@ public class Store
     // For cs/py/js, F5 already opens the (always non-blocking) embedded console, so "in new task"
     // there is now just an alternate name for what "...in stdout console" already does explicitly -
     // redundant, not a real alternative - and for "ln" RunCode ignores runInNewTask entirely. Used
-    // by the UI (NoteEditorForm, KNoteManagmentCtrl) to disable/skip that option everywhere it no
+    // by the UI (NoteEditorForm, KNoteManagementCtrl) to disable/skip that option everywhere it no
     // longer adds anything.
     public static bool SupportsNewTaskMode(string forScript) => forScript == "knt";
 
@@ -672,7 +695,7 @@ public class Store
         t.Start();
     }
 
-    // Only ever reached from a note/alarm/KNoteManagment-triggered "knt" run (F5/Ctrl+F5 or an
+    // Only ever reached from a note/alarm/KNoteManagement-triggered "knt" run (F5/Ctrl+F5 or an
     // alarm) - the manually-opened KntScript console (Tools menu) has its own separate, embedded
     // KntSEngine/InOutDeviceForm (KntScriptConsoleCtrl's _kntSEngine) and never calls this. So,
     // same as cs/py/js's auto-run console, this window is always a single unattended run: closing
@@ -712,7 +735,7 @@ public class Store
 
     // cs/py/js script engine: opens KntScriptConsole pre-loaded with the note's code and running
     // it immediately (ConfigureAutoRun), instead of shelling out to a bare, non-capturing process
-    // the way this used to. Gives scripts triggered from a note/alarm/KNoteManagment the same
+    // the way this used to. Gives scripts triggered from a note/alarm/KNoteManagement the same
     // live output + stdin interaction already available from the console's own "Run" menu. A
     // fresh Ctrl per execution, same as the other engines - none of them carry state between runs.
     private void ShowInteractiveScriptConsole(string code, string forScript)
@@ -735,7 +758,7 @@ public class Store
         }
     }
 
-    // Explicit "Shift+F5" entry point (NoteEditor/KNoteManagment): always runs in a standalone OS
+    // Explicit "Shift+F5" entry point (NoteEditor/KNoteManagement): always runs in a standalone OS
     // console, regardless of runInNewTask - unlike RunCode, which only takes that path when
     // runInNewTask happens to be true. Returns false (does nothing) for engines with no OS-process
     // console to speak of (knt, ln) - SupportsStdOutConsole - so the caller can tell the user this

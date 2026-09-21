@@ -89,7 +89,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     // AI providers/models the requests received through the port can be answered with (the same
     // collection the KNoteAIAssistant view offers).
-    public List<AiProviderRef> AiProviderRefs => Store.AppConfig.AiProviderRefs;
+    public List<AiProviderRef> AiProviderRefs => Store.Settings.Ai.Providers;
 
     public AiProviderRef CurrentAiProviderRef => _aiAssistant?.CurrentProviderRef;
 
@@ -124,7 +124,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         _aiAssistant = new KNoteAIAssistantCtrl(store);
         // Without configured providers Run() would pop up an error dialog from inside this constructor;
         // the requests are answered with an explanatory message instead (see ExecuteAiRequest).
-        if (store.AppConfig.AiProviderRefs.Count > 0)
+        if (store.Settings.Ai.Providers.Count > 0)
             _aiAssistant.Run();
     }
 
@@ -161,10 +161,10 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     #region Public methods
 
-    // Loads the serial settings from AppConfig (KNoteData.config), discarding any unsaved change.
+    // Loads the serial settings from the settings (KNoteData.config), discarding any unsaved change.
     public void LoadSettings()
     {
-        var config = Store.AppConfig.ServerCOM;
+        var config = Store.Settings.Connectivity.ServerCOM;
 
         PortName = config.PortName;
         BaudRate = config.BaudRate;
@@ -196,7 +196,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
             return false;
         }
 
-        Store.AppConfig.ServerCOM = config;
+        Store.Settings.Connectivity.ServerCOM = config;
         Store.SaveConfig();
         return true;
     }

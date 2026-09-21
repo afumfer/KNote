@@ -8,13 +8,13 @@ public partial class KNoteAboutForm : KntForm, IViewBase
 {
     #region Private fields 
 
-    private readonly KNoteManagmentCtrl _ctrl;
+    private readonly KNoteManagementCtrl _ctrl;
 
     #endregion
 
     #region Constructor
 
-    public KNoteAboutForm(KNoteManagmentCtrl ctrl)
+    public KNoteAboutForm(KNoteManagementCtrl ctrl)
     {
         InitializeComponent();
         Text = KntConst.AppName;

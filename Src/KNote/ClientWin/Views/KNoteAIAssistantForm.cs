@@ -66,7 +66,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     public override void RefreshView()
     {
-        kntEditViewResult.MarkdownContentControl.Text = _ctrl.ChatTextMessasges.ToString();
+        kntEditViewResult.MarkdownContentControl.Text = _ctrl.ChatTextMessages.ToString();
         kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
         kntEditViewResult.MarkdownContentControl.ScrollToCaret();
         textPrompt.Text = "";
@@ -165,7 +165,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (comboProviders.SelectedItem is not AiProviderRef providerRef || providerRef == _ctrl.CurrentProviderRef)
             return;
 
-        if (!string.IsNullOrEmpty(_ctrl.ChatTextMessasges.ToString()))
+        if (!string.IsNullOrEmpty(_ctrl.ChatTextMessages.ToString()))
         {
             var result = ShowInfo("Switching the AI provider resets the current conversation. Continue?",
                 "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -225,7 +225,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             var noteEditor = new NoteEditorCtrl(_ctrl.Store);
             await noteEditor.NewModel(_ctrl.Store.GetActiveOrDefaultService());
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
-            noteEditor.Model.Description = _ctrl.ChatTextMessasges.ToString();
+            noteEditor.Model.Description = _ctrl.ChatTextMessages.ToString();
             noteEditor.Model.Tags = "[AIAssistant]";
             noteEditor.Run();
         }
@@ -239,7 +239,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
-        kntEditViewResult.SetMarkdownContent(_ctrl.ChatTextMessasges.ToString());
+        kntEditViewResult.SetMarkdownContent(_ctrl.ChatTextMessages.ToString());
         MarkDownView();
         _sbResult.Clear();
         textPrompt.Text = "";

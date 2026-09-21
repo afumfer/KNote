@@ -3,7 +3,7 @@ using System;
 namespace KNote.Model;
 
 // RS-232 settings of the KntServerCOM component (ClientWin/Controllers/KntServerCOMCtrl), persisted in
-// KNoteData.config as AppConfig.ServerCOM. Enum-like values (HandShake, Parity, StopBits) are stored as the
+// KNoteData.config as AppUserSettings.Connectivity.ServerCOM. Enum-like values (HandShake, Parity, StopBits) are stored as the
 // int values of the System.IO.Ports enums of the same name: this project can't reference System.IO.Ports.
 // Every property has a default, so a config file saved before this section existed loads with them.
 [Serializable]

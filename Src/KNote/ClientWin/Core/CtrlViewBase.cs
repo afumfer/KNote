@@ -413,7 +413,7 @@ abstract public class CtrlNoteEditorBase<TView, TEntity> : CtrlEditorBase<TView,
     #region SaveModel re-entrancy guard
 
     // NoteEditorCtrl/PostItEditorCtrl's save can be entered twice concurrently: the
-    // MessagesManagmentCtrl autosave timer calls it via Store.SaveActiveNotes() while a manual
+    // MessagesManagementCtrl autosave timer calls it via Store.SaveActiveNotes() while a manual
     // save (toolbar button, Ctrl+S, form close, ...) is already awaiting its own call on the SAME
     // controller instance. Both run on the UI thread, so there's no true multi-threading here, but
     // the network/DB "await" inside SaveModelCore() yields back to the WinForms message loop,

@@ -46,16 +46,17 @@ public class ColumnWidthSettingsTests
     }
 
     [TestMethod]
-    public void AppConfig_NotesListColumnWidths_SurvivesXmlRoundTrip()
+    public void AppUserState_NotesListColumnWidths_SurvivesXmlRoundTrip()
     {
-        var config = new AppConfig { NotesListColumnWidths = "Number=80;Topic=520" };
-        var serializer = new XmlSerializer(typeof(AppConfig));
+        var state = new AppUserState();
+        state.ManagementWindow.NotesList.ColumnWidths = "Number=80;Topic=520";
+        var serializer = new XmlSerializer(typeof(AppUserState));
         using var stream = new MemoryStream();
 
-        serializer.Serialize(stream, config);
+        serializer.Serialize(stream, state);
         stream.Position = 0;
-        var roundTripped = (AppConfig)serializer.Deserialize(stream);
+        var roundTripped = (AppUserState)serializer.Deserialize(stream);
 
-        Assert.AreEqual("Number=80;Topic=520", roundTripped.NotesListColumnWidths);
+        Assert.AreEqual("Number=80;Topic=520", roundTripped.ManagementWindow.NotesList.ColumnWidths);
     }
 }

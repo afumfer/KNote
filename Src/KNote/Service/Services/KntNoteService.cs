@@ -360,13 +360,13 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         if (resource == null)
             return false;
 
-        string rootCacheResource = Repository.RespositoryRef.ResourcesContainerRootPath;
+        string rootCacheResource = Repository.RepositoryRef.ResourcesContainerRootPath;
         if (string.IsNullOrEmpty(resource.Container))
         {
             if (forceUpdateDto)
             {
                 resource.Container = UtilGetDefaultNewResourceContainer();
-                resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
+                resource.ContentInDB = Repository.RepositoryRef.ResourceContentInDB;
             }
         }
         
@@ -408,14 +408,14 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     public (string, string) UtilGetResourceUrls(ResourceDto resource)
     {
-        string rootUrl = Repository.RespositoryRef.ResourcesContainerRootUrl;
+        string rootUrl = Repository.RepositoryRef.ResourcesContainerRootUrl;
         string relativeUrl;
         string fullUrl;
 
         if (string.IsNullOrEmpty(resource.Container))
         {
             resource.Container = UtilGetDefaultNewResourceContainer();
-            resource.ContentInDB = Repository.RespositoryRef.ResourceContentInDB;
+            resource.ContentInDB = Repository.RepositoryRef.ResourceContentInDB;
         }
 
         if (string.IsNullOrEmpty(rootUrl) || string.IsNullOrEmpty(resource.Container) || string.IsNullOrEmpty(resource.Name))
@@ -429,7 +429,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     public string UtilGetResourceDirPath(ResourceDto resource)
     {
-        string rootPath = Repository.RespositoryRef.ResourcesContainerRootPath;        
+        string rootPath = Repository.RepositoryRef.ResourcesContainerRootPath;        
 
         if (string.IsNullOrEmpty(rootPath) || string.IsNullOrEmpty(resource.Container))
             return "";
@@ -456,12 +456,12 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         if (replaceString == null)
             return fileUrl;
         return fileUrl?
-            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString).Replace(@"\", @"/");
+            .Replace(Repository.RepositoryRef.ResourcesContainer, replaceString).Replace(@"\", @"/");
     }
 
     public string UtilGetDefaultNewResourceContainer()
     {
-        return Repository.RespositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
+        return Repository.RepositoryRef.ResourcesContainer + @"/" + DateTime.Now.Year.ToString();
     }
 
     public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false)
@@ -471,7 +471,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         if (replaceString == null)
             return description;
         return description?
-            .Replace(Repository.RespositoryRef.ResourcesContainer, replaceString);
+            .Replace(Repository.RepositoryRef.ResourcesContainer, replaceString);
     }
 
     public string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false)
@@ -482,7 +482,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
             return description;
         else
             return description?
-                .Replace(replaceString, Repository.RespositoryRef.ResourcesContainer);
+                .Replace(replaceString, Repository.RepositoryRef.ResourcesContainer);
     }
 
     public string UtilHtmlToMarkdown(string html)
@@ -513,22 +513,22 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     private string GetReplaceResourceString(bool considerRootPath = false)
     {
-        if (Repository.RespositoryRef == null || string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainer))
+        if (Repository.RepositoryRef == null || string.IsNullOrEmpty(Repository.RepositoryRef?.ResourcesContainer))
             return null;
 
         string replaceString = null;
 
-        if (!string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootUrl))
+        if (!string.IsNullOrEmpty(Repository.RepositoryRef?.ResourcesContainerRootUrl))
         {
-            replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootUrl, Repository.RespositoryRef?.ResourcesContainer);
+            replaceString = Path.Combine(Repository.RepositoryRef?.ResourcesContainerRootUrl, Repository.RepositoryRef?.ResourcesContainer);
             replaceString = replaceString.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
         else
         {
             if (considerRootPath)
             {
-                if (!string.IsNullOrEmpty(Repository.RespositoryRef?.ResourcesContainerRootPath))
-                    replaceString = Path.Combine(Repository.RespositoryRef?.ResourcesContainerRootPath, Repository.RespositoryRef?.ResourcesContainer);
+                if (!string.IsNullOrEmpty(Repository.RepositoryRef?.ResourcesContainerRootPath))
+                    replaceString = Path.Combine(Repository.RepositoryRef?.ResourcesContainerRootPath, Repository.RepositoryRef?.ResourcesContainer);
             }
         }
 

@@ -8,7 +8,7 @@ namespace KNote.ClientWin.Tests;
 
 /// <summary>
 /// Regression coverage for CtrlNoteEditorBase.SaveModel's re-entrancy guard (see CtrlViewBase.cs):
-/// MessagesManagmentCtrl's autosave timer calls Store.SaveActiveNotes(), which calls SaveModel() on
+/// MessagesManagementCtrl's autosave timer calls Store.SaveActiveNotes(), which calls SaveModel() on
 /// every open NoteEditorCtrl/PostItEditorCtrl, while a manual save (toolbar button, Ctrl+S, closing
 /// the form, ...) may already be awaiting its own SaveModel() call on that same controller instance.
 /// Both run on the WinForms UI thread, so this is never true multi-threading, but the network/DB
