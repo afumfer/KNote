@@ -132,9 +132,12 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         this.Hide();
     }
 
+    // Move/Resize are wired in InitializeComponent, and WinForms raises them from inside it when the
+    // form is auto-scaled (display scale other than 100%) - i.e. before the constructor has assigned
+    // _ctrl. Those early events carry no user-chosen bounds, so they are ignored.
     private void AppInfoAlarmsForm_Move(object sender, EventArgs e)
     {
-        if (WindowState == FormWindowState.Normal)
+        if (_ctrl != null && WindowState == FormWindowState.Normal)
         {
             _ctrl.Store.AppConfig.AppInfoAlarmsLocX = Location.X;
             _ctrl.Store.AppConfig.AppInfoAlarmsLocY = Location.Y;
@@ -143,7 +146,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
 
     private void AppInfoAlarmsForm_Resize(object sender, EventArgs e)
     {
-        if (WindowState == FormWindowState.Normal)
+        if (_ctrl != null && WindowState == FormWindowState.Normal)
         {
             _ctrl.Store.AppConfig.AppInfoAlarmsWidth = Width;
             _ctrl.Store.AppConfig.AppInfoAlarmsHeight = Height;
