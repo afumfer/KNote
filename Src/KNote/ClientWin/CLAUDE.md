@@ -248,9 +248,47 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
   ActiveFilterWithServiceRef` — selección activa compartida (carpeta/filtro actuales), cambiada vía
   `ChangeActiveFolderWithServiceRef(...)` con sus eventos `ChangedActiveFolderWithServiceRef`. Estos dos
   siguen siendo `event EventHandler<T>` propios de `Store` (no migrados a `Store.Events`).
-- `Settings` (`AppUserSettings`, lo que configura el usuario) y `State` (`AppUserState`, lo que recuerda la app), persistidos en `KNoteData.config`, `Logger` (NLog), helpers de scripting (`RunKntSCode`,
+- `Settings` (`AppUserSettings`, lo que configura el usuario) y `State` (`AppUserState`, lo que recuerda la
+  app), persistidos en dos ficheros (ver "Configuración persistida" más abajo), `Logger` (NLog), helpers de
+  scripting (`RunKntSCode`,
   `RunCSCode`, `ExecuteCommand`) para el motor KntScript.
 - Constructor: `Store(IFactoryViews factoryViews)` — la factory se inyecta aquí, no vía DI.
+
+## Configuración persistida (`Settings` / `State`)
+
+La configuración vive en `%LocalAppData%\KNote` (`AppUserDataPath`), en **dos ficheros XML** que `Store`
+carga/guarda con `LoadConfig`/`SaveConfig` delegando en `Core/AppConfigStorage.cs`:
+
+- `KNoteData.config` ← `Store.Settings` (`AppUserSettings`, en `Model/Config`): lo que **configura el usuario**
+  (`General`, `Repositories`, `Ai`, `Notifications/Email`, `Connectivity` con `ChatHub`/`MessageBroker`/
+  `ServerCOM`). Solo se reescribe cuando los ajustes cambian de verdad (`AppConfigStorage` compara con lo
+  último leído/escrito), así que llamar a `SaveConfig()` por un cambio de estado no lo toca.
+- `KNoteState.config` ← `Store.State` (`AppUserState`): lo que **la app recuerda sola** (`Session`,
+  `ManagementWindow` con `Bounds`/`NotesList`/`Panels`, `AppInfoAlarmsWindow`). Se reescribe en cada
+  `SaveConfig()`.
+
+Ambos se leen/escriben con `Core/XmlConfigFile` (guardado atómico vía fichero temporal, deja el anterior como
+`.bak` y, si el fichero no se puede leer, carga ese `.bak`).
+
+**Secretos**: `SmtpPassword` (`Email.Password`), `AiProviderRef.ApiKey` y las `ConnectionString` que llevan
+`Password=`/`Pwd=` se guardan cifrados con DPAPI (usuario actual) como `dpapi:<base64>`. El cifrado ocurre solo
+en la capa de fichero (`AppUserSettingsSecrets` + `ISecretProtector`/`DpapiSecretProtector`); en memoria y en la
+UI son texto plano. `Model` no conoce el cifrado (lo comparten `Server` y `Client`). Un valor sin prefijo se lee
+como texto plano y se cifra en el siguiente guardado; uno que no se puede descifrar (otro usuario/equipo) se
+vacía y se avisa al usuario.
+
+**Añadir un ajuste nuevo**: decide si lo escribe el usuario (→ una sección de `AppUserSettings`) o la app
+(→ `AppUserState`), y ponle un valor por defecto en la propia clase: un fichero guardado antes de que existiera
+el ajuste debe cargar sin él. Si es un secreto, añádelo a `AppUserSettingsSecrets.Secrets(...)`. Si el diálogo
+de Opciones lo edita, añádelo también a `Core/OptionsModel` (`From`/`ApplyTo`). Tests en
+`AppConfigStorageTests`/`ConfigSerializationTests`.
+
+**Formato antiguo (V1)**: hasta esta reestructuración todo iba en un único `KNoteData.config` plano (raíz
+`<AppConfig>`). `AppConfigStorage.Load` lo detecta por el elemento raíz y lo migra: escribe los dos ficheros
+nuevos y deja `KNoteData.config.v1.bak` (copia **sin secretos**). `Model/Config/Legacy/AppConfigV1` es el lector
+**congelado** de ese formato (conserva sus nombres con erratas: `Respository`, `Managment`, `Ascendig`) y
+`AppConfigMigrator` la conversión: no los renombres ni los elimines mientras haya instalaciones por migrar.
+El fixture `ClientWin.Tests/Fixtures/KNoteData.v1.config` (datos sintéticos) cubre esa migración.
 
 ## Ejemplo de flujo completo: `NoteEditorCtrl`
 

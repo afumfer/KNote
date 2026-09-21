@@ -156,6 +156,11 @@ no en `Model`.
   → `Repository` (interfaz) → `Repository.Dapper` **y** `Repository.EntityFramework` (ambas
   implementaciones) → `Service/Interfaces` + `Service/Services` → `Server/Controllers` (si se expone vía
   API) y/o `Service/ServicesCommands` (si se expone a KntScript).
+- Configuración de `ClientWin`: dos ficheros (`KNoteData.config` = ajustes del usuario, con secretos cifrados con
+  DPAPI; `KNoteState.config` = estado recordado por la app), modelo en `Model/Config` (`AppUserSettings`,
+  `AppUserState`) y E/S + cifrado en `ClientWin/Core`. Antes de tocarlo lee "Configuración persistida" en
+  `ClientWin/CLAUDE.md`: el formato antiguo sigue soportado por migración y su lector (`AppConfigV1`) no debe
+  cambiarse.
 - Cadenas localizadas: `Docs/Manual.md` (inglés) y `Docs/Manual_es.md` (español) son el manual de usuario —
   actualiza ambos si cambia el comportamiento de cara al usuario, siguiendo la convención bilingüe ya
   existente en este repo.
