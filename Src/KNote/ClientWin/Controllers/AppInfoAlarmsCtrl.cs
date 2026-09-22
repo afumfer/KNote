@@ -67,7 +67,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     #region Controller methods
 
     // Only KMessageId/RepositoryAlias/NotifiedAt actually come back from the state file
-    // (see AppInfoAlarmRowConfig) - the rest is looked up fresh from the owning repository so the
+    // (see AppInfoAlarmRow) - the rest is looked up fresh from the owning repository so the
     // list never shows a stale note title/comment/user. A message that no longer exists (note or
     // message deleted while the app was closed) quietly drops its row instead of showing a blank one.
     // Fire-and-forget from the synchronous OnInitialized(), same pattern as
@@ -91,7 +91,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         Store.SaveConfig();
     }
 
-    private static async Task<bool> TryHydrateRowAsync(IKntService service, AppInfoAlarmRowConfig row)
+    private static async Task<bool> TryHydrateRowAsync(IKntService service, AppInfoAlarmRow row)
     {
         var message = await service.Notes.GetMessageAsync(row.KMessageId);
         if (!message.IsValid || message.Entity.NoteId == null)
@@ -110,7 +110,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         return true;
     }
 
-    public void AddOrUpdateRow(AppInfoAlarmRowConfig row)
+    public void AddOrUpdateRow(AppInfoAlarmRow row)
     {
         Store.State.AppInfoAlarmsWindow.Rows.RemoveAll(r => r.KMessageId == row.KMessageId);
         Store.State.AppInfoAlarmsWindow.Rows.Add(row);
@@ -138,7 +138,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     // in the state file) - the live IKntService needed to actually reopen the note is resolved here, on
     // demand, instead of being cached on the row for the row's whole (persisted, cross-session)
     // lifetime, where it could go stale if the repository were removed/reconnected meanwhile.
-    public void RequestOpenNote(AppInfoAlarmRowConfig row)
+    public void RequestOpenNote(AppInfoAlarmRow row)
     {
         var serviceRef = Store.GetServiceRef(row.RepositoryAlias);
         if (serviceRef == null)
@@ -198,7 +198,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     }
 
     // Which user is the "active" one is per repository; resolve it once per repository involved.
-    private async Task<Dictionary<string, Guid?>> GetActiveUserIdsAsync(IEnumerable<AppInfoAlarmRowConfig> rows)
+    private async Task<Dictionary<string, Guid?>> GetActiveUserIdsAsync(IEnumerable<AppInfoAlarmRow> rows)
     {
         var activeUsers = new Dictionary<string, Guid?>();
         foreach (var alias in rows.Select(r => r.RepositoryAlias).Distinct())

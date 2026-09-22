@@ -13,7 +13,7 @@ public class AppInfoRowRefreshTests
 
     private static Guid? ActiveUserOf(string alias) => alias == Alias ? UserId : null;
 
-    private static AppInfoAlarmRowConfig NewRow(Guid? noteId = null) => new()
+    private static AppInfoAlarmRow NewRow(Guid? noteId = null) => new()
     {
         KMessageId = Guid.NewGuid(),
         RepositoryAlias = Alias,
@@ -22,7 +22,7 @@ public class AppInfoRowRefreshTests
         Comment = "old comment"
     };
 
-    private static KMessageDto NewMessage(AppInfoAlarmRowConfig row, EnumNotificationType type = EnumNotificationType.AppInfo, Guid? userId = null) => new()
+    private static KMessageDto NewMessage(AppInfoAlarmRow row, EnumNotificationType type = EnumNotificationType.AppInfo, Guid? userId = null) => new()
     {
         KMessageId = row.KMessageId,
         NotificationType = type,

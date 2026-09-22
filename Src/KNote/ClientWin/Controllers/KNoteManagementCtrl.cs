@@ -583,7 +583,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         foreach (var message in appInfoMessages)
         {
-            AppInfoAlarmsCtrl.AddOrUpdateRow(new AppInfoAlarmRowConfig
+            AppInfoAlarmsCtrl.AddOrUpdateRow(new AppInfoAlarmRow
             {
                 KMessageId = message.KMessageId,
                 NoteId = noteId,

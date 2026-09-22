@@ -106,5 +106,5 @@ public class AppInfoAlarmsWindowState
     public WindowBoundsState Bounds { get; set; } = new();
 
     // Rows shown in the "Application info" alarms panel; they stay until the user explicitly removes them.
-    public List<AppInfoAlarmRowConfig> Rows { get; set; } = new();
+    public List<AppInfoAlarmRow> Rows { get; set; } = new();
 }

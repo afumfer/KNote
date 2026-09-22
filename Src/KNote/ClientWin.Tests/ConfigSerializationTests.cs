@@ -24,7 +24,7 @@ public class ConfigSerializationTests
         state.AppInfoAlarmsWindow.Bounds.Y = 456;
         state.AppInfoAlarmsWindow.Bounds.Width = 700;
         state.AppInfoAlarmsWindow.Bounds.Height = 300;
-        state.AppInfoAlarmsWindow.Rows.Add(new AppInfoAlarmRowConfig
+        state.AppInfoAlarmsWindow.Rows.Add(new AppInfoAlarmRow
         {
             KMessageId = kMessageId,
             RepositoryAlias = "Personal repository",
@@ -54,6 +54,47 @@ public class ConfigSerializationTests
         Assert.IsNull(row.NoteTopic);
         Assert.IsNull(row.Comment);
         Assert.IsNull(row.UserFullName);
+    }
+
+    // AppInfoAlarmRow was renamed from AppInfoAlarmRowConfig, and XmlSerializer names each Rows item
+    // after the class name - so a KNoteState.config written by an older build still has
+    // <AppInfoAlarmRowConfig> elements under <Rows>. Deliberately not carried forward with an
+    // [XmlArrayItem] compatibility alias (see AppInfoAlarmRow's doc comment): those old rows are meant
+    // to be dropped silently rather than resurrected under the new name, and the rest of the file must
+    // still load normally around them.
+    [TestMethod]
+    public void XmlSerializer_Deserialize_IgnoresRowsWrittenUnderThePreRenameElementName()
+    {
+        var xml = """
+            <?xml version="1.0" encoding="utf-16"?>
+            <AppUserState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+              <AppInfoAlarmsWindow>
+                <Bounds>
+                  <X>123</X>
+                  <Y>456</Y>
+                  <Width>700</Width>
+                  <Height>300</Height>
+                </Bounds>
+                <Rows>
+                  <AppInfoAlarmRowConfig>
+                    <KMessageId>4b1a5e2a-1111-4444-8888-000000000001</KMessageId>
+                    <RepositoryAlias>Personal repository</RepositoryAlias>
+                    <NotifiedAt>2026-01-01T10:00:00</NotifiedAt>
+                  </AppInfoAlarmRowConfig>
+                </Rows>
+              </AppInfoAlarmsWindow>
+            </AppUserState>
+            """;
+
+        var serializer = new XmlSerializer(typeof(AppUserState));
+        using var stream = new MemoryStream(System.Text.Encoding.Unicode.GetBytes(xml));
+        var state = (AppUserState)serializer.Deserialize(stream)!;
+
+        // The rest of the document, outside the renamed element, still loads normally...
+        Assert.AreEqual(123, state.AppInfoAlarmsWindow.Bounds.X);
+        Assert.AreEqual(700, state.AppInfoAlarmsWindow.Bounds.Width);
+        // ...but the old row is gone rather than resurrected, per the agreed trade-off.
+        Assert.AreEqual(0, state.AppInfoAlarmsWindow.Rows.Count);
     }
 
     [TestMethod]

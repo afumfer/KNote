@@ -91,8 +91,8 @@ public class XmlConfigFileTests
         Assert.ThrowsExactly<InvalidOperationException>(() => XmlConfigFile.Load<AppConfigV1>(_file, out _));
     }
 
-    // The frozen sample of a real (anonymized) V1 file. The restructuring must keep loading it
-    // without losing any value.
+    // The frozen sample of a real (anonymized) V1 file. The restructuring must keep loading it without
+    // losing any value, except the AppInfoAlarmRow rename below (a deliberately accepted exception).
     [TestMethod]
     public void Load_V1Fixture_LoadsEveryValue()
     {
@@ -120,6 +120,9 @@ public class XmlConfigFileTests
         Assert.IsFalse(config.SmtpEnableSsl);
         Assert.AreEqual("test-smtp-password", config.SmtpPassword);
         Assert.AreEqual(2997, config.AppInfoAlarmsLocX);
-        Assert.AreEqual(2, config.AppInfoAlarmsRows.Count);
+        // The one accepted exception to "loses no value": AppInfoAlarmRow was renamed from
+        // AppInfoAlarmRowConfig, and the old element name is deliberately not kept alive (see its doc
+        // comment), so old rows come back empty rather than migrated.
+        Assert.AreEqual(0, config.AppInfoAlarmsRows.Count);
     }
 }

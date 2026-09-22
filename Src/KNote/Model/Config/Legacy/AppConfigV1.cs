@@ -66,5 +66,10 @@ public class AppConfigV1
     public int AppInfoAlarmsLocY { get; set; }
     public int AppInfoAlarmsWidth { get; set; }
     public int AppInfoAlarmsHeight { get; set; }
-    public List<AppInfoAlarmRowConfig> AppInfoAlarmsRows { get; set; } = new();
+    // AppInfoAlarmRow was renamed from AppInfoAlarmRowConfig after this V1 format was frozen, so real
+    // pre-restructure files on disk still have <AppInfoAlarmRowConfig> items here. Same accepted
+    // trade-off as AppUserState.AppInfoAlarmsWindow.Rows (see AppInfoAlarmRow's doc comment): those old
+    // items are dropped silently on the next V1-to-V2 migration rather than kept alive under the old
+    // element name - not worth pinning it just for this list, on either side of the rename.
+    public List<AppInfoAlarmRow> AppInfoAlarmsRows { get; set; } = new();
 }

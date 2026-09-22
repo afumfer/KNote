@@ -67,7 +67,9 @@ public class StoreConfigPersistenceTests
         Assert.AreEqual(42, reloaded.State.ManagementWindow.Bounds.X);
         Assert.AreEqual("new-password", reloaded.Settings.Notifications.Email.Password);
         Assert.AreEqual(2, reloaded.Settings.Repositories.Items.Count);
-        Assert.AreEqual(2, reloaded.State.AppInfoAlarmsWindow.Rows.Count);
+        // The one accepted exception: AppInfoAlarmRow was renamed from AppInfoAlarmRowConfig, and the
+        // old element name is deliberately not kept alive (see its doc comment).
+        Assert.AreEqual(0, reloaded.State.AppInfoAlarmsWindow.Rows.Count);
         Assert.AreEqual("COM7", reloaded.Settings.Connectivity.ServerCOM.PortName);
         Assert.AreEqual(0, reloaded.TakeConfigNotices().Count, "a normal load has nothing to report");
     }

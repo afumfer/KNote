@@ -18,7 +18,7 @@ public static class AppInfoRowRefresh
         Removed
     }
 
-    public sealed record RowChange(AppInfoAlarmRowConfig Row, ChangeKind Kind);
+    public sealed record RowChange(AppInfoAlarmRow Row, ChangeKind Kind);
 
     /// <summary>
     /// A note was saved with its full message list (NoteEditor, the only editor that can change what the rows show). A row is removed when its message no
@@ -26,7 +26,7 @@ public static class AppInfoRowRefresh
     /// active user; otherwise its Topic/Comment are refreshed.
     /// </summary>
     /// <param name="activeUserIdOf">Active user id for a repository alias (null when unknown).</param>
-    public static List<RowChange> ApplyNoteSaved(IEnumerable<AppInfoAlarmRowConfig> rows, NoteExtendedDto note, Func<string, Guid?> activeUserIdOf)
+    public static List<RowChange> ApplyNoteSaved(IEnumerable<AppInfoAlarmRow> rows, NoteExtendedDto note, Func<string, Guid?> activeUserIdOf)
     {
         var changes = new List<RowChange>();
 
@@ -58,7 +58,7 @@ public static class AppInfoRowRefresh
     /// A user was saved: refresh the User column of the rows addressed to them. A row only exists for
     /// messages addressed to its repository's active user, so that user is the row's recipient.
     /// </summary>
-    public static List<RowChange> ApplyUserSaved(IEnumerable<AppInfoAlarmRowConfig> rows, UserDto user, Func<string, Guid?> activeUserIdOf)
+    public static List<RowChange> ApplyUserSaved(IEnumerable<AppInfoAlarmRow> rows, UserDto user, Func<string, Guid?> activeUserIdOf)
     {
         var changes = new List<RowChange>();
 

@@ -143,7 +143,7 @@ public interface IViewServerCOM : IViewChat
 // IViewManageList<T> shapes.
 public interface IViewAppInfoAlarms : IViewEmbeddable
 {
-    void AddOrUpdateRow(AppInfoAlarmRowConfig row);
+    void AddOrUpdateRow(AppInfoAlarmRow row);
     void RemoveRow(Guid kMessageId);
     void HideView();
     void ActivateView();

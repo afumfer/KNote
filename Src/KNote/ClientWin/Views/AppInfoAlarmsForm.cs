@@ -92,7 +92,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         return panelForm;
     }
 
-    public void AddOrUpdateRow(AppInfoAlarmRowConfig row)
+    public void AddOrUpdateRow(AppInfoAlarmRow row)
     {
         var key = row.KMessageId.ToString();
 
@@ -195,7 +195,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
     // Looks up the row via the Ctrl's own canonical list (Store.State.AppInfoAlarmsWindow.Rows) rather
     // than a private Form-side index, the same convention NoteTypesSelectorForm uses against
     // _ctrl.ListEntities.
-    private AppInfoAlarmRowConfig GetSelectedRow()
+    private AppInfoAlarmRow GetSelectedRow()
     {
         if (listViewAlarms.SelectedItems.Count == 0)
             return null;
@@ -204,7 +204,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         return _ctrl.Store.State.AppInfoAlarmsWindow.Rows.FirstOrDefault(r => r.KMessageId == selectedId);
     }
 
-    private ListViewItem RowToListViewItem(AppInfoAlarmRowConfig row)
+    private ListViewItem RowToListViewItem(AppInfoAlarmRow row)
     {
         var item = new ListViewItem(row.NotifiedAt.ToString("dd/MM/yyyy HH:mm"));
         item.Name = row.KMessageId.ToString();
@@ -212,7 +212,7 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         return item;
     }
 
-    private void UpdateListViewItem(ListViewItem item, AppInfoAlarmRowConfig row, bool addSubItems = false)
+    private void UpdateListViewItem(ListViewItem item, AppInfoAlarmRow row, bool addSubItems = false)
     {
         item.Text = row.NotifiedAt.ToString("dd/MM/yyyy HH:mm");
         if (addSubItems)
