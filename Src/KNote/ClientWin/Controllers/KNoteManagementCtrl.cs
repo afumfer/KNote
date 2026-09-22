@@ -283,9 +283,11 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 // Show the Application info alarms panel on startup if the user left it with
                 // undismissed rows from a previous session, so they aren't left wondering where
                 // their pending reminders went - same intent as PostIts reopening themselves via
-                // MessagesManagementCtrl.VisibleWindows().
-                if (Store.State.AppInfoAlarmsWindow.Rows.Count > 0)
-                    AppInfoAlarmsCtrl.Activate();
+                // MessagesManagementCtrl.VisibleWindows(). Fire-and-forget: deciding this needs to
+                // hit the database (AppInfoAlarmRowMaintenance), and creating AppInfoAlarmsCtrl shows
+                // its window immediately (see its own doc comment) - so that decision must be made
+                // and the persisted rows sanitized *before* touching the property, not after.
+                _ = ShowAppInfoAlarmsIfAnyPendingAsync();
 
                 NotifyView.ShowView();
 
@@ -552,6 +554,14 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     public void ShowAppInfoAlarms()
     {
         AppInfoAlarmsCtrl.Activate();
+    }
+
+    // Startup-only: see the call site in OnInitialized(). Not used by ShowAppInfoAlarms() (the menu
+    // option) - opening the panel by hand always shows it, empty or not, same as before.
+    private async Task ShowAppInfoAlarmsIfAnyPendingAsync()
+    {
+        if (await AppInfoAlarmRowMaintenance.PruneAndHasAnyRowAsync(Store))
+            AppInfoAlarmsCtrl.Activate();
     }
 
     private async void _appInfoAlarmsCtrl_OpenNoteRequested(object sender, ControllerEventArgs<ServiceWithNoteId> e)
