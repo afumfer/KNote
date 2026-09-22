@@ -1465,7 +1465,11 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private void ApplyDescriptionLockUI(bool locked)
     {
-        kntEditView.ContentLocked = locked;
+        // In embedded mode (e.g. the note shown inside KNoteManagement, EditMode == false) the
+        // description control must stay read-only regardless of the note's own DescriptionBlocked
+        // flag - otherwise this method (re-run on every ModelToControls()/RefreshViewOnlyRequiredCtrl())
+        // would unlock it again as soon as an unlocked note is loaded.
+        kntEditView.ContentLocked = locked || !_ctrl.EditMode;
         toolDescription.Enabled = !locked;
         buttonInsertLink.Enabled = !locked;
         buttonInsertTemplate.Enabled = !locked;
