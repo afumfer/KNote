@@ -23,6 +23,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Func<NotesFilterDto, Task<Result<List<NoteInfoDto>>>>? GetFilterAsyncImpl { get; set; }
     public Func<Guid, Task<Result<List<NoteMinimalDto>>>>? GetByFolderMinimalAsyncImpl { get; set; }
     public Func<Guid, Task<Result<List<TraceNoteDto>>>>? GetTraceNotesFromAsyncImpl { get; set; }
+    public Func<Guid, Task<Result<KMessageDto>>>? GetMessageAsyncImpl { get; set; }
 
     public Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity) =>
         (SaveExtendedAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveExtendedAsync)} not configured for this test"))(entity);
@@ -69,7 +70,8 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId) => throw new NotSupportedException();
     public Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId) => throw new NotSupportedException();
     public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId) => throw new NotSupportedException();
-    public Task<Result<KMessageDto>> GetMessageAsync(Guid messageId) => throw new NotSupportedException();
+    public Task<Result<KMessageDto>> GetMessageAsync(Guid messageId) =>
+        (GetMessageAsyncImpl ?? throw new NotSupportedException($"{nameof(GetMessageAsync)} not configured for this test"))(messageId);
     public Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false) => throw new NotSupportedException();
     public Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId) => throw new NotSupportedException();
     public Task<Result<List<TraceNoteDto>>> GetTraceNotesFromAsync(Guid noteId) =>
