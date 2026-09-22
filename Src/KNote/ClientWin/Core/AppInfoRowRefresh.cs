@@ -21,9 +21,22 @@ public static class AppInfoRowRefresh
     public sealed record RowChange(AppInfoAlarmRow Row, ChangeKind Kind);
 
     /// <summary>
-    /// A note was saved with its full message list (NoteEditor, the only editor that can change what the rows show). A row is removed when its message no
-    /// longer exists, is no longer an AppInfo alarm, or is no longer addressed to the row repository's
-    /// active user; otherwise its Topic/Comment are refreshed.
+    /// The single definition of "this message still belongs in the panel", shared by every caller that
+    /// decides whether a row should exist or survive (AppInfoAlarmsCtrl.TryHydrateRowAsync at load time,
+    /// ApplyNoteSaved below when a note is re-saved) instead of each keeping its own, possibly
+    /// diverging, copy of these three checks.
+    /// </summary>
+    public static bool IsAddressedToActiveUser(KMessageDto message, Guid? activeUserId)
+        => message != null
+           && message.NotificationType == EnumNotificationType.AppInfo
+           && message.UserId != null
+           && message.UserId == activeUserId;
+
+    /// <summary>
+    /// A note was saved with its full message list (NoteEditor, the only editor that can change what
+    /// the rows show). A row is removed when its message no longer exists or is no longer addressed to
+    /// the row repository's active user (see IsAddressedToActiveUser); otherwise its Topic/Comment are
+    /// refreshed.
     /// </summary>
     /// <param name="activeUserIdOf">Active user id for a repository alias (null when unknown).</param>
     public static List<RowChange> ApplyNoteSaved(IEnumerable<AppInfoAlarmRow> rows, NoteExtendedDto note, Func<string, Guid?> activeUserIdOf)
@@ -34,10 +47,7 @@ public static class AppInfoRowRefresh
         {
             var message = note.Messages?.FirstOrDefault(m => m.KMessageId == row.KMessageId);
 
-            if (message == null
-                || message.NotificationType != EnumNotificationType.AppInfo
-                || message.UserId == null
-                || message.UserId != activeUserIdOf(row.RepositoryAlias))
+            if (!IsAddressedToActiveUser(message, activeUserIdOf(row.RepositoryAlias)))
             {
                 changes.Add(new RowChange(row, ChangeKind.Removed));
                 continue;

@@ -38,6 +38,55 @@ public class AppInfoRowRefreshTests
     };
 
     [TestMethod]
+    public void IsAddressedToActiveUser_AppInfoAddressedToActiveUser_ReturnsTrue()
+    {
+        var message = new KMessageDto { NotificationType = EnumNotificationType.AppInfo, UserId = UserId };
+
+        Assert.IsTrue(AppInfoRowRefresh.IsAddressedToActiveUser(message, UserId));
+    }
+
+    [TestMethod]
+    public void IsAddressedToActiveUser_NullMessage_ReturnsFalse()
+    {
+        Assert.IsFalse(AppInfoRowRefresh.IsAddressedToActiveUser(null, UserId));
+    }
+
+    [TestMethod]
+    [DataRow(EnumNotificationType.PostIt)]
+    [DataRow(EnumNotificationType.Email)]
+    [DataRow(EnumNotificationType.ExecuteKntScript)]
+    public void IsAddressedToActiveUser_NotAppInfo_ReturnsFalse(EnumNotificationType type)
+    {
+        var message = new KMessageDto { NotificationType = type, UserId = UserId };
+
+        Assert.IsFalse(AppInfoRowRefresh.IsAddressedToActiveUser(message, UserId));
+    }
+
+    [TestMethod]
+    public void IsAddressedToActiveUser_NoRecipient_ReturnsFalse()
+    {
+        var message = new KMessageDto { NotificationType = EnumNotificationType.AppInfo, UserId = null };
+
+        Assert.IsFalse(AppInfoRowRefresh.IsAddressedToActiveUser(message, UserId));
+    }
+
+    [TestMethod]
+    public void IsAddressedToActiveUser_AnotherUser_ReturnsFalse()
+    {
+        var message = new KMessageDto { NotificationType = EnumNotificationType.AppInfo, UserId = Guid.NewGuid() };
+
+        Assert.IsFalse(AppInfoRowRefresh.IsAddressedToActiveUser(message, UserId));
+    }
+
+    [TestMethod]
+    public void IsAddressedToActiveUser_UnknownActiveUser_ReturnsFalse()
+    {
+        var message = new KMessageDto { NotificationType = EnumNotificationType.AppInfo, UserId = UserId };
+
+        Assert.IsFalse(AppInfoRowRefresh.IsAddressedToActiveUser(message, activeUserId: null));
+    }
+
+    [TestMethod]
     public void ApplyUserSaved_FullNameChanged_UpdatesRowsOfThatUserOnly()
     {
         var mine = NewRow();

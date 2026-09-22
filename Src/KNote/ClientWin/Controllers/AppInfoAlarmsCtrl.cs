@@ -68,19 +68,24 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 
     // Only KMessageId/RepositoryAlias/NotifiedAt actually come back from the state file
     // (see AppInfoAlarmRow) - the rest is looked up fresh from the owning repository so the
-    // list never shows a stale note title/comment/user. A message that no longer exists (note or
-    // message deleted while the app was closed) quietly drops its row instead of showing a blank one.
+    // list never shows a stale note title/comment/user. A row whose message no longer exists, or no
+    // longer qualifies (see AppInfoRowRefresh.IsAddressedToActiveUser - note/message deleted, alarm type
+    // or recipient changed, all possible while the app was closed or from another client) quietly drops
+    // instead of showing a stale or blank one.
     // Fire-and-forget from the synchronous OnInitialized(), same pattern as
     // MessagesManagementCtrl.OnInitialized() kicking off VisibleWindows().
     private async void LoadPersistedRows()
     {
-        foreach (var saved in Store.State.AppInfoAlarmsWindow.Rows.ToList())
+        var rows = Store.State.AppInfoAlarmsWindow.Rows.ToList();
+        var activeUsers = await GetActiveUserIdsAsync(rows);
+
+        foreach (var saved in rows)
         {
             var serviceRef = Store.GetServiceRef(saved.RepositoryAlias);
             if (serviceRef == null)
                 continue;
 
-            if (!await TryHydrateRowAsync(serviceRef.Service, saved))
+            if (!await TryHydrateRowAsync(serviceRef.Service, saved, activeUsers.GetValueOrDefault(saved.RepositoryAlias)))
             {
                 Store.State.AppInfoAlarmsWindow.Rows.Remove(saved);
                 continue;
@@ -91,10 +96,10 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         Store.SaveConfig();
     }
 
-    private static async Task<bool> TryHydrateRowAsync(IKntService service, AppInfoAlarmRow row)
+    private static async Task<bool> TryHydrateRowAsync(IKntService service, AppInfoAlarmRow row, Guid? activeUserId)
     {
         var message = await service.Notes.GetMessageAsync(row.KMessageId);
-        if (!message.IsValid || message.Entity.NoteId == null)
+        if (!AppInfoRowRefresh.IsAddressedToActiveUser(message.IsValid ? message.Entity : null, activeUserId) || message.Entity.NoteId == null)
             return false;
 
         var note = await service.Notes.GetAsync(message.Entity.NoteId.Value);
