@@ -1,3 +1,4 @@
+using System.Globalization;
 using KNote.Model;
 
 namespace KNote.ClientWin.Core;
@@ -30,10 +31,19 @@ public class KntTextUtils
             return 0;
     }
 
+    // Accepts both "." and "," as the decimal separator, whatever the current culture: these values
+    // (trace note weights, task times, difficulty levels) never need a thousands separator, and the
+    // culture's default parsing silently read "1.5" typed under es-ES as 15 ("." being its thousands
+    // separator). Text with both separators (e.g. "1.500,25") is rejected instead of misread.
     public double? TextToDouble(string text)
     {
-        double output;
-        if (double.TryParse(text, out output))
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        var decimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+        var normalized = text.Trim().Replace(".", decimalSeparator).Replace(",", decimalSeparator);
+
+        if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.CurrentCulture, out var output))
             return output;
         else
             return null;

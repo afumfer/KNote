@@ -38,18 +38,54 @@ public class KntTextUtilsTests
     [TestMethod]
     public void TextToDouble_ValidNumber_ReturnsParsedValue()
     {
-        // TextToDouble uses double.TryParse with the current thread culture (not InvariantCulture),
-        // so the input must be formatted for CurrentCulture, e.g. "3,14" under es-ES. This is
-        // characterizing existing behavior, not asserting it is the desired one.
         var numberText = (3.14).ToString(CultureInfo.CurrentCulture);
 
         Assert.AreEqual(3.14, KntTextUtils.TextToDouble(numberText));
     }
 
+    // "." and "," are both accepted as the decimal separator, whatever the current culture - in
+    // particular "1.5" under es-ES, where "." is the thousands separator and used to be read as 15.
     [TestMethod]
-    public void TextToDouble_InvalidText_ReturnsNull()
+    [DataRow("es-ES", "1,5")]
+    [DataRow("es-ES", "1.5")]
+    [DataRow("en-US", "1.5")]
+    [DataRow("en-US", "1,5")]
+    [DataRow("es-ES", " 1.5 ")]
+    public void TextToDouble_EitherDecimalSeparator_ReturnsParsedValue(string culture, string text)
     {
-        Assert.IsNull(KntTextUtils.TextToDouble("not a number"));
+        WithCulture(culture, () => Assert.AreEqual(1.5, KntTextUtils.TextToDouble(text)));
+    }
+
+    [TestMethod]
+    public void TextToDouble_NegativeNumber_ReturnsParsedValue()
+    {
+        WithCulture("es-ES", () => Assert.AreEqual(-2.25, KntTextUtils.TextToDouble("-2.25")));
+    }
+
+    [TestMethod]
+    [DataRow("1.500,25")]
+    [DataRow("1,500.25")]
+    [DataRow("")]
+    [DataRow("   ")]
+    [DataRow(null)]
+    [DataRow("not a number")]
+    public void TextToDouble_InvalidText_ReturnsNull(string text)
+    {
+        WithCulture("es-ES", () => Assert.IsNull(KntTextUtils.TextToDouble(text)));
+    }
+
+    private static void WithCulture(string culture, Action action)
+    {
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo(culture);
+            action();
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     [TestMethod]
