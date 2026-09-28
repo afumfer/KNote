@@ -1568,6 +1568,7 @@
             listViewTraceNoteFrom.TabIndex = 1;
             listViewTraceNoteFrom.UseCompatibleStateImageBehavior = false;
             listViewTraceNoteFrom.Resize += listViewTraceNote_Resize;
+            listViewTraceNoteFrom.DoubleClick += listViewTraceNoteFrom_DoubleClick;
             //
             // panelTraceFromHeader
             //
@@ -1637,6 +1638,7 @@
             listViewTraceNoteTo.TabIndex = 1;
             listViewTraceNoteTo.UseCompatibleStateImageBehavior = false;
             listViewTraceNoteTo.Resize += listViewTraceNote_Resize;
+            listViewTraceNoteTo.DoubleClick += listViewTraceNoteTo_DoubleClick;
             //
             // panelTraceToHeader
             //

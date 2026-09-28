@@ -1225,6 +1225,26 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         await RemoveTraceNote(listViewTraceNoteTo, ownerIsFromSide: true);
     }
 
+    // Double-click opens the related note itself (not the relation editor - that's the "Edit" button).
+    // Not gated on _ctrl.EditMode, unlike the other lists: it navigates, it doesn't edit this note.
+    private async void listViewTraceNoteFrom_DoubleClick(object sender, EventArgs e)
+    {
+        await EditRelatedNote(listViewTraceNoteFrom, ownerIsFromSide: false);
+    }
+
+    private async void listViewTraceNoteTo_DoubleClick(object sender, EventArgs e)
+    {
+        await EditRelatedNote(listViewTraceNoteTo, ownerIsFromSide: true);
+    }
+
+    private async Task EditRelatedNote(ListView listView, bool ownerIsFromSide)
+    {
+        if (listView.SelectedItems.Count == 0)
+            return;
+        var traceNoteId = Guid.Parse(listView.SelectedItems[0].Name);
+        await _ctrl.EditRelatedNote(traceNoteId, ownerIsFromSide);
+    }
+
     private async Task EditTraceNote(ListView listView, bool ownerIsFromSide)
     {
         if (listView.SelectedItems.Count == 0)

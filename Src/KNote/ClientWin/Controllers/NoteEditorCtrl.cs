@@ -510,6 +510,28 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
             return null;
     }
 
+    // Opens the OTHER note of the relation (the one shown in the "Trace notes" row) in its own
+    // note editor window - same "edit existing note" path as KNoteManagementCtrl.EditNote.
+    public async Task<bool> EditRelatedNote(Guid traceNoteId, bool ownerIsFromSide)
+    {
+        var list = ownerIsFromSide ? Model.TraceNotesTo : Model.TraceNotesFrom;
+        var traceNote = list.SingleOrDefault(_ => _.TraceNoteId == traceNoteId);
+        if (traceNote == null)
+            return false;
+
+        var relatedNoteId = ownerIsFromSide ? traceNote.ToId : traceNote.FromId;
+
+        var noteEditorCtrl = new NoteEditorCtrl(Store);
+        if (!await noteEditorCtrl.LoadModelById(Service, relatedNoteId, false))
+        {
+            noteEditorCtrl.Finalize();
+            return false;
+        }
+
+        noteEditorCtrl.Run();
+        return true;
+    }
+
     public bool DeleteTraceNote(Guid traceNoteId, bool ownerIsFromSide)
     {
         bool res = false;
