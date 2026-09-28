@@ -27,6 +27,10 @@ public class TraceNoteEditorCtrl : CtrlEditorBase<IViewEditor<TraceNoteDto>, Tra
 
     public List<TraceNoteTypeDto> TraceNoteTypeOptions { get; private set; } = new();
 
+    // Optional dialog title; when empty the view keeps its default one. Used by
+    // KNoteManagementCtrl.TraceSelectedNotes, which reuses this dialog as a template for several notes.
+    public string Caption { get; set; } = "";
+
     #endregion
 
     #region Constructor

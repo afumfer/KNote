@@ -165,6 +165,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         ModelToControlsOnlyRequiredComponents();
     }
 
+    public Task RefreshTraceNotesDisplayAsync() => ModelToControlsTraceNotes();
+
     public async Task RefreshFolderAndRepositoryDisplayAsync()
     {
         Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";

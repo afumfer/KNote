@@ -26,6 +26,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         Store.Events.Subscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
         Store.Events.Subscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
         Store.Events.Subscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
+        Store.Events.Subscribe<TraceNotesChanged>(OnTraceNotesChangedElsewhere);
     }
 
     public override void Dispose()
@@ -33,6 +34,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
         Store.Events.Unsubscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
         Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
+        Store.Events.Unsubscribe<TraceNotesChanged>(OnTraceNotesChangedElsewhere);
         base.Dispose();
     }
 
@@ -64,6 +66,48 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         if (Service == null)
             return;
         await View.RefreshFolderAndRepositoryDisplayAsync();
+    }
+
+    // Only ADDS the relations this editor doesn't have yet (by TraceNoteId): the user's own pending,
+    // unsaved changes to the trace lists (added/edited/removed items) and to the rest of the note are
+    // kept as they are - TraceNotesChanged is only published for newly created relations.
+    private async void OnTraceNotesChangedElsewhere(TraceNotesChanged e)
+    {
+        if (Service == null || !e.NoteIds.Contains(Model.NoteId))
+            return;
+
+        try
+        {
+            var from = await Service.Notes.GetTraceNotesFromAsync(Model.NoteId);
+            var to = await Service.Notes.GetTraceNotesToAsync(Model.NoteId);
+
+            var added = AddMissingTraceNotes(Model.TraceNotesFrom, from)
+                | AddMissingTraceNotes(Model.TraceNotesTo, to);
+
+            if (added)
+                await View.RefreshTraceNotesDisplayAsync();
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo(ex.Message);
+        }
+    }
+
+    private static bool AddMissingTraceNotes(List<TraceNoteDto> list, Result<List<TraceNoteDto>> fetched)
+    {
+        if (!fetched.IsValid || fetched.Entity == null)
+            return false;
+
+        var added = false;
+        foreach (var traceNote in fetched.Entity)
+        {
+            if (list.Any(t => t.TraceNoteId == traceNote.TraceNoteId))
+                continue;
+            traceNote.SetIsDirty(false);  // already persisted: must not be saved again with the note
+            list.Add(traceNote);
+            added = true;
+        }
+        return added;
     }
 
     #endregion

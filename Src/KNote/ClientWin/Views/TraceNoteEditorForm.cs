@@ -70,6 +70,9 @@ public partial class TraceNoteEditorForm : KntEditorForm, IViewEditor<TraceNoteD
 
     protected override void ModelToControls()
     {
+        if (!string.IsNullOrEmpty(_ctrl.Caption))
+            Text = _ctrl.Caption;
+
         textRelatedNote.Text = _ctrl.RelatedNoteDisplay;
 
         comboTraceNoteType.DisplayMember = "Name";

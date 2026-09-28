@@ -31,4 +31,8 @@ internal class FakeNoteEditorView : IViewNoteEditorEmbeddable<NoteExtendedDto>
     public Func<Task>? RefreshFolderAndRepositoryDisplayAsyncImpl { get; set; }
     public Task RefreshFolderAndRepositoryDisplayAsync() =>
         (RefreshFolderAndRepositoryDisplayAsyncImpl ?? throw new NotSupportedException($"{nameof(RefreshFolderAndRepositoryDisplayAsync)} not configured for this test"))();
+
+    public Func<Task>? RefreshTraceNotesDisplayAsyncImpl { get; set; }
+    public Task RefreshTraceNotesDisplayAsync() =>
+        (RefreshTraceNotesDisplayAsyncImpl ?? throw new NotSupportedException($"{nameof(RefreshTraceNotesDisplayAsync)} not configured for this test"))();
 }

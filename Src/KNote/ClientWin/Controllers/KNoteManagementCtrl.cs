@@ -391,6 +391,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 _notesSelectorCtrl.Extensions.Add("Move selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendMoveSelectedNotes));
                 _notesSelectorCtrl.Extensions.Add("Add tag to selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendAddTagSelectedNotes));
                 _notesSelectorCtrl.Extensions.Add("Remove tag from selected notes ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendRemoveTagSelectedNotes));
+                _notesSelectorCtrl.Extensions.Add("Trace selected notes to ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendTraceSelectedNotesTo));
+                _notesSelectorCtrl.Extensions.Add("Trace selected notes from ...", new ExtensionsEventHandler<NoteMinimalDto>(ExtendTraceSelectedNotesFrom));
                 _notesSelectorCtrl.Extensions.Add("--2", new ExtensionsEventHandler<NoteMinimalDto>(ExtendNull));
                 _notesSelectorCtrl.Extensions.Add(NotesSelectorForm.ToggleTextFilterMenuText, new ExtensionsEventHandler<NoteMinimalDto>(ExtendToggleTextFilter));
             }
@@ -467,6 +469,16 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     private async void ExtendRemoveTagSelectedNotes(object sender, ControllerEventArgs<NoteMinimalDto> e)
     {
         await ChangeTags(EnumChangeTag.Remove);
+    }
+
+    private async void ExtendTraceSelectedNotesTo(object sender, ControllerEventArgs<NoteMinimalDto> e)
+    {
+        await TraceSelectedNotes(selectedAreFromSide: true);
+    }
+
+    private async void ExtendTraceSelectedNotesFrom(object sender, ControllerEventArgs<NoteMinimalDto> e)
+    {
+        await TraceSelectedNotes(selectedAreFromSide: false);
     }
 
     private void ExtendToggleTextFilter(object sender, ControllerEventArgs<NoteMinimalDto> e)
@@ -1280,6 +1292,79 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             await Task.Delay(1); // This delay is necessary
             if (progress != null)
                 progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Updating Note #{note.NoteNumber}", HeavyProcessCtrl = heavyProcessCtrl });
+
+            if (cancellationToken != null && cancellationToken.IsCancellationRequested)
+            {
+                throw new TaskCanceledException();
+            }
+        }
+    }
+
+    // "Trace selected notes to/from ..." (notes grid context menu). Reuses the same TraceNoteEditorCtrl
+    // dialog as the "Trace notes" tab's [+] button to pick the target note plus type/order/weight, and
+    // then creates that relation for every selected note. selectedAreFromSide = true: each selected
+    // note is FromId and the target note is ToId ("to"); false: the target note is FromId ("from").
+    public async Task TraceSelectedNotes(bool selectedAreFromSide)
+    {
+        var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal().ToList();
+        if (selectedNotes == null || selectedNotes.Count == 0)
+        {
+            View.ShowInfo("You have not selected notes for trace.");
+            return;
+        }
+
+        var direction = selectedAreFromSide ? "to" : "from";
+
+        var traceEditor = new TraceNoteEditorCtrl(Store);
+        traceEditor.AutoDBSave = false;  // the dialog only fills in the template, saved below per note
+        await traceEditor.NewModel(SelectedServiceRef.Service);
+        traceEditor.OwnerIsFromSide = selectedAreFromSide;
+        traceEditor.Model.SetIsNew(true);
+        traceEditor.Caption = $"Trace {selectedNotes.Count} selected note(s) {direction}";
+        await traceEditor.LoadTraceNoteTypeOptionsAsync();
+
+        var res = traceEditor.RunModal();
+        if (res.Entity != EControllerResult.Executed)
+            return;
+
+        var job = new TraceSelectedNotesJob(traceEditor.Model, selectedAreFromSide);
+        try
+        {
+            // --- Heavy process instance model
+            using var heavyProcessCtrl = new HeavyProcessCtrl(Store);
+            heavyProcessCtrl.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
+            heavyProcessCtrl.UpdateProcessName($"Tracing selected notes {direction} {traceEditor.RelatedNoteDisplay} .");
+            await heavyProcessCtrl.Exec2(TraceSelectedNotesAction, job, selectedNotes);
+        }
+        catch (TaskCanceledException)
+        {
+            //View.ShowInfo("The operation has been canceled.");
+        }
+
+        // The notes grid doesn't show relations; open note editors (the embedded one included) of any
+        // affected note pick up the new relations through this message.
+        if (job.Created > 0)
+            Store.Events.Publish(new TraceNotesChanged(selectedNotes.Select(n => n.NoteId).Append(job.TargetNoteId).ToList()));
+
+        View.ShowInfo(job.Summary());
+    }
+
+    public async Task TraceSelectedNotesAction(TraceSelectedNotesJob job, List<NoteMinimalDto> selectedNotes, CancellationTokenSource cancellationToken = null, IProgress<KNoteProgress> progress = null, HeavyProcessCtrl heavyProcessCtrl = null)
+    {
+        var index = 0;
+        var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
+
+        foreach (var note in selectedNotes)
+        {
+            await job.TraceNoteAsync(service, note);
+
+            index++;
+            var percentage = (double)index / selectedNotes.Count;
+            percentage = percentage * 100;
+            var percentageInt = (int)Math.Round(percentage, 0);
+            await Task.Delay(1); // This delay is necessary
+            if (progress != null)
+                progress.Report(new KNoteProgress { Progress = percentageInt, Info = $"Tracing Note #{note.NoteNumber}", HeavyProcessCtrl = heavyProcessCtrl });
 
             if (cancellationToken != null && cancellationToken.IsCancellationRequested)
             {

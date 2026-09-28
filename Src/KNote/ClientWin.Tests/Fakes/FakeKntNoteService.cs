@@ -23,6 +23,8 @@ internal class FakeKntNoteService : IKntNoteService
     public Func<NotesFilterDto, Task<Result<List<NoteInfoDto>>>>? GetFilterAsyncImpl { get; set; }
     public Func<Guid, Task<Result<List<NoteMinimalDto>>>>? GetByFolderMinimalAsyncImpl { get; set; }
     public Func<Guid, Task<Result<List<TraceNoteDto>>>>? GetTraceNotesFromAsyncImpl { get; set; }
+    public Func<Guid, Task<Result<List<TraceNoteDto>>>>? GetTraceNotesToAsyncImpl { get; set; }
+    public Func<TraceNoteDto, bool, Task<Result<TraceNoteDto>>>? SaveTraceNoteAsyncImpl { get; set; }
     public Func<Guid, Task<Result<KMessageDto>>>? GetMessageAsyncImpl { get; set; }
 
     public Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity) =>
@@ -76,8 +78,10 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId) => throw new NotSupportedException();
     public Task<Result<List<TraceNoteDto>>> GetTraceNotesFromAsync(Guid noteId) =>
         (GetTraceNotesFromAsyncImpl ?? throw new NotSupportedException($"{nameof(GetTraceNotesFromAsync)} not configured for this test"))(noteId);
-    public Task<Result<List<TraceNoteDto>>> GetTraceNotesToAsync(Guid noteId) => throw new NotSupportedException();
-    public Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity, bool forceNew = false) => throw new NotSupportedException();
+    public Task<Result<List<TraceNoteDto>>> GetTraceNotesToAsync(Guid noteId) =>
+        (GetTraceNotesToAsyncImpl ?? throw new NotSupportedException($"{nameof(GetTraceNotesToAsync)} not configured for this test"))(noteId);
+    public Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity, bool forceNew = false) =>
+        (SaveTraceNoteAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveTraceNoteAsync)} not configured for this test"))(entity, forceNew);
     public Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId) => throw new NotSupportedException();
     public Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId) => throw new NotSupportedException();
     public Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false) => throw new NotSupportedException();

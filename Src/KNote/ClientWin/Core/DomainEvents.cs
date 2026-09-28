@@ -62,3 +62,10 @@ public record ServiceRefRemoved(ServiceRef ServiceRef);
 /// to apply the change to the already-open list instead of waiting for a restart.
 /// </summary>
 public record NotesListViewOptionsChanged;
+
+/// <summary>
+/// Published by KNoteManagementCtrl.TraceSelectedNotes after it has created trace notes (relations)
+/// directly through the service, bypassing any open note editor: NoteEditorCtrl listens to it so an
+/// already-open editor of one of these notes shows the new relations without reopening the note.
+/// </summary>
+public record TraceNotesChanged(IReadOnlyCollection<Guid> NoteIds);

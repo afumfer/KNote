@@ -51,11 +51,20 @@ public interface IFolderAndRepositoryDisplay
     Task RefreshFolderAndRepositoryDisplayAsync();
 }
 
-// NoteEditorCtrl's own view contract: IViewEditorEmbeddable<T> plus the folder/repository display
-// capability. Kept as its own interface (rather than widening IViewEditorEmbeddable<T> itself) so
-// other, unrelated IViewEditorEmbeddable<T> implementers aren't forced to implement a member they
-// have no use for.
-public interface IViewNoteEditorEmbeddable<T> : IViewEditorEmbeddable<T>, IFolderAndRepositoryDisplay
+// Same idea as IFolderAndRepositoryDisplay, for the "Trace notes" tab: re-renders only the trace
+// notes lists (from the already updated Model), keeping any unsaved edits in the rest of the view -
+// used when relations of this note are created elsewhere, see NoteEditorCtrl's Store.Events
+// subscriptions.
+public interface ITraceNotesDisplay
+{
+    Task RefreshTraceNotesDisplayAsync();
+}
+
+// NoteEditorCtrl's own view contract: IViewEditorEmbeddable<T> plus the folder/repository and trace
+// notes display capabilities. Kept as its own interface (rather than widening IViewEditorEmbeddable<T>
+// itself) so other, unrelated IViewEditorEmbeddable<T> implementers aren't forced to implement
+// members they have no use for.
+public interface IViewNoteEditorEmbeddable<T> : IViewEditorEmbeddable<T>, IFolderAndRepositoryDisplay, ITraceNotesDisplay
 {
 }
 
