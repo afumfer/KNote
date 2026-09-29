@@ -261,6 +261,9 @@ static class Program
         KntWebView.KntEditView.WebView2ProcessFailed += (s, e) =>
             store.Logger?.LogWarning("WebView2 process failed. Kind: {kind}, reason: {reason}, exit code: {exitCode}, process: {description}.",
                 e.ProcessFailedKind, e.Reason, e.ExitCode, e.ProcessDescription);
+
+        KntWebView.KntEditView.WebView2ErrorOccurred += (s, ex) =>
+            store.Logger?.LogError(ex, "WebView2 error.");
     }
 
     #region Utils

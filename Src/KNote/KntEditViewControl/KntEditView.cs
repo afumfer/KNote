@@ -34,6 +34,13 @@ namespace KntWebView
         /// </summary>
         public static event EventHandler<CoreWebView2ProcessFailedEventArgs>? WebView2ProcessFailed;
 
+        /// <summary>
+        /// Raised when a WebView2 operation of any KntEditView (initialization, virtual host
+        /// mapping, ...) fails. The failure is contained here - the content area is just left empty -
+        /// instead of escaping to the caller, so the host only needs to log it.
+        /// </summary>
+        public static event EventHandler<Exception>? WebView2ErrorOccurred;
+
         #endregion
 
         #region Public properties
@@ -198,12 +205,19 @@ namespace KntWebView
 
         private async void KntEditView_Load(object sender, EventArgs e)
         {
-            await EnsureInitializedAsync();
+            try
+            {
+                await EnsureInitializedAsync();
+            }
+            catch (Exception ex)
+            {
+                WebView2ErrorOccurred?.Invoke(this, ex);
+            }
         }
 
         private void webView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
-            statusLabel.Text = webView.Source.ToString();
+            statusLabel.Text = webView.Source?.ToString() ?? "";
             NavigationEnd?.Invoke(this, new EventArgs());
         }
 
@@ -306,12 +320,24 @@ namespace KntWebView
             await EnsureInitializedAsync();
 
             FolderForVirtualHostNameMapping = folder;
-            
+
+            // Null when WebView2 could not be initialized (see InitializeAsync).
+            if (webView.CoreWebView2 == null)
+                return;
+
             if (Directory.Exists(FolderForVirtualHostNameMapping))
             {
-                webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
-                    "knote.resources", FolderForVirtualHostNameMapping,
-                    CoreWebView2HostResourceAccessKind.Allow);
+                try
+                {
+                    webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                        "knote.resources", FolderForVirtualHostNameMapping,
+                        CoreWebView2HostResourceAccessKind.Allow);
+                }
+                catch (Exception ex)
+                {
+                    // E.g. its browser process has just failed (see WebView2ProcessFailed).
+                    WebView2ErrorOccurred?.Invoke(this, ex);
+                }
             }
         }
         
@@ -339,12 +365,12 @@ namespace KntWebView
 
         public void GoBack()
         {
-            webView.CoreWebView2.GoBack();
+            webView.CoreWebView2?.GoBack();
         }
 
         public void GoForward()
         {
-            webView.CoreWebView2.GoForward();
+            webView.CoreWebView2?.GoForward();
         }
 
         #endregion
@@ -358,26 +384,40 @@ namespace KntWebView
         // different CoreWebView2Environment".
         private Task? _initializationTask;
 
+        // A completed initialization that didn't succeed is started again on a later call. Checked
+        // here rather than by clearing _initializationTask from InitializeAsync itself, which would
+        // be undone by the "??=" assignment if InitializeAsync ever completed synchronously.
         private Task EnsureInitializedAsync()
         {
-            _initializationTask ??= InitializeAsync();
+            if (_initializationTask == null || (_initializationTask.IsCompleted && !_isInitialized))
+                _initializationTask = InitializeAsync();
             return _initializationTask;
         }
 
+        // Never throws: a failure (WebView2 runtime being updated, browser process failing to
+        // start under heavy load, control disposed meanwhile, ...) is reported through
+        // WebView2ErrorOccurred and leaves CoreWebView2 null, which every caller already checks.
         private async Task InitializeAsync()
         {
             statusLabel.Text = "(Initializing ......)";
 
-            // WebView2's default UserDataFolder is derived from the hosting process's exe path.
-            // When launched via "dotnet exec" (e.g. VS Code's coreclr debugger), the host is
-            // dotnet.exe under Program Files, which is not writable, causing E_ACCESSDENIED.
-            // Pinning an explicit folder avoids that regardless of how it was launched. Prefer the
-            // host-configured WebView2UserDataFolder (set by ClientWin's Program.cs to a per-user
-            // AppData folder) so the cache doesn't pile up next to the application binaries; fall
-            // back to the historical location if the host never set it.
-            var userDataFolder = WebView2UserDataFolder ?? Path.Combine(Application.StartupPath, "WebView2Cache");
-            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
-            await webView.EnsureCoreWebView2Async(environment);
+            try
+            {
+                // WebView2's default UserDataFolder is derived from the hosting process's exe path.
+                // When launched via "dotnet exec" (e.g. VS Code's coreclr debugger), the host is
+                // dotnet.exe under Program Files, which is not writable, causing E_ACCESSDENIED.
+                // Pinning an explicit folder avoids that regardless of how it was launched. Prefer the
+                // host-configured WebView2UserDataFolder (set by ClientWin's Program.cs to a per-user
+                // AppData folder) so the cache doesn't pile up next to the application binaries; fall
+                // back to the historical location if the host never set it.
+                var userDataFolder = WebView2UserDataFolder ?? Path.Combine(Application.StartupPath, "WebView2Cache");
+                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+                await webView.EnsureCoreWebView2Async(environment);
+            }
+            catch (Exception ex)
+            {
+                WebView2ErrorOccurred?.Invoke(this, ex);
+            }
 
             if ((webView != null) && (webView.CoreWebView2 != null))
             {
@@ -393,8 +433,7 @@ namespace KntWebView
             }
             else
             {
-                _isInitialized = false;
-                _initializationTask = null; // allow a retry on a later call
+                _isInitialized = false; // allows a retry on a later call (see EnsureInitializedAsync)
             }
             statusLabel.Text = "";
         }
