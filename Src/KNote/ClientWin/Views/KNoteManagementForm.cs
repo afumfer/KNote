@@ -270,6 +270,14 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         {
             await _ctrl.ChangeTags(EnumChangeTag.Remove);
         }
+        else if (menuSel == menuTraceSelectedNotesTo)
+        {
+            await _ctrl.TraceSelectedNotes(selectedAreFromSide: true);
+        }
+        else if (menuSel == menuTraceSelectedNotesFrom)
+        {
+            await _ctrl.TraceSelectedNotes(selectedAreFromSide: false);
+        }
         else if (menuSel == menuExecuteCode)
         {
             await _ctrl.RunCodeSelectedNotes(false);

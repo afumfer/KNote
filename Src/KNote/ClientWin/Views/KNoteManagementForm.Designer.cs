@@ -60,6 +60,8 @@
             menuEditS2 = new ToolStripSeparator();
             menuAddTags = new ToolStripMenuItem();
             menuRemoveTags = new ToolStripMenuItem();
+            menuTraceSelectedNotesTo = new ToolStripMenuItem();
+            menuTraceSelectedNotesFrom = new ToolStripMenuItem();
             menuEditS3 = new ToolStripSeparator();
             menuMoreOptions = new ToolStripMenuItem();
             menuExecuteCode = new ToolStripMenuItem();
@@ -270,7 +272,7 @@
             // 
             // menuEdit
             // 
-            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuNewNote, menuNewNoteAsPostIt, menuEditNote, menuEditNoteAsPostIt, menuDeleteNote, menuEditS1, menuMoveSelectedNotes, menuEditS2, menuAddTags, menuRemoveTags, menuEditS3, menuMoreOptions });
+            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuNewNote, menuNewNoteAsPostIt, menuEditNote, menuEditNoteAsPostIt, menuDeleteNote, menuEditS1, menuMoveSelectedNotes, menuEditS2, menuAddTags, menuRemoveTags, menuTraceSelectedNotesTo, menuTraceSelectedNotesFrom, menuEditS3, menuMoreOptions });
             menuEdit.Name = "menuEdit";
             menuEdit.Size = new Size(39, 20);
             menuEdit.Text = "&Edit";
@@ -343,7 +345,21 @@
             menuRemoveTags.Size = new Size(261, 22);
             menuRemoveTags.Text = "Remove tags from selected notes ...";
             menuRemoveTags.Click += menu_Click;
-            // 
+            //
+            // menuTraceSelectedNotesTo
+            //
+            menuTraceSelectedNotesTo.Name = "menuTraceSelectedNotesTo";
+            menuTraceSelectedNotesTo.Size = new Size(261, 22);
+            menuTraceSelectedNotesTo.Text = "Trace selected notes to ...";
+            menuTraceSelectedNotesTo.Click += menu_Click;
+            //
+            // menuTraceSelectedNotesFrom
+            //
+            menuTraceSelectedNotesFrom.Name = "menuTraceSelectedNotesFrom";
+            menuTraceSelectedNotesFrom.Size = new Size(261, 22);
+            menuTraceSelectedNotesFrom.Text = "Trace selected notes from ...";
+            menuTraceSelectedNotesFrom.Click += menu_Click;
+            //
             // menuEditS3
             // 
             menuEditS3.Name = "menuEditS3";
@@ -975,6 +991,8 @@
         private ToolStripSeparator menuEditS2;
         private ToolStripMenuItem menuAddTags;
         private ToolStripMenuItem menuRemoveTags;
+        private ToolStripMenuItem menuTraceSelectedNotesTo;
+        private ToolStripMenuItem menuTraceSelectedNotesFrom;
         private ToolStripSeparator menuEditS3;
         private ToolStripMenuItem menuMoreOptions;
         private ToolStripMenuItem menuExecuteCode;
