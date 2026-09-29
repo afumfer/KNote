@@ -2,6 +2,7 @@
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.ClientWin.Controllers;
 
@@ -67,8 +68,13 @@ public class FoldersSelectorCtrl : CtrlSyncableSelectorBase<IViewSelector<Folder
         }
         catch (Exception ex)
         {
+            // Returning null (FoldersSelectorForm.LoadNodes skips it) only leaves this repository's
+            // node empty. Rethrowing aborted the whole tree load instead, and escaped from
+            // FoldersSelectorForm.RefreshView (async void) as an unhandled exception - e.g. at startup
+            // with a SQL Server repository not reachable yet.
+            Store.Logger?.LogError(ex, "Loading the folders of repository {alias} failed.", serviceRef.Alias);
             View.ShowInfo(ex.Message);
-            throw;
+            return null;
         }
     }
 

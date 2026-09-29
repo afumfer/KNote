@@ -979,7 +979,8 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 resRep = await notes.GetAllAsync(m => m.UserId == userId && m.AlarmActivated == true 
                     && m.AlarmDateTime <= DateTime.Now && m.NoteId != null && m.NotificationType == (EnumNotificationType)notificationType);
 
-            foreach (var m in resRep.Entity)
+            // Entity is null when the query failed; its error is returned in result's error messages below.
+            foreach (var m in resRep.Entity ?? new List<KMessage>())
             {
                 m.ApplyAlarmControl();
                 await UpdateMessageAsync(m.GetSimpleDto<KMessageDto>());

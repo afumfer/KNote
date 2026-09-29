@@ -310,6 +310,11 @@ public class Store
     // backup had to be used, secrets must be entered again...). Returned once, then cleared.
     private readonly List<string> _configNotices = new();
 
+    public void AddConfigNotice(string notice)
+    {
+        _configNotices.Add(notice);
+    }
+
     public IReadOnlyList<string> TakeConfigNotices()
     {
         var notices = _configNotices.ToList();
@@ -372,7 +377,7 @@ public class Store
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "SaveActiveNotes.");
+            Logger?.LogError(ex, "SaveActiveNotes.");
             return false;
         }
     }
@@ -423,7 +428,7 @@ public class Store
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "SaveAndCloseActiveNotes.");
+            Logger?.LogError(ex, "SaveAndCloseActiveNotes.");
             return false;
         }
     }
@@ -859,7 +864,10 @@ public class Store
     {
         string codeResult = string.Empty;
 
+        // No Assistant repository configured: there is nowhere to look for includes.
         var assistantServiceRef = GetAssistantServiceRef();
+        if (assistantServiceRef == null)
+            return codeResult;
 
         var traceNoteTypes = await assistantServiceRef.Service.TraceNoteTypes.GetAllAsync();
         var includeType = traceNoteTypes.Entity?.FirstOrDefault(t => t.Name == KntConst.IncludeCode);
@@ -867,6 +875,9 @@ public class Store
             return codeResult;
 
         var incomingTraces = await assistantServiceRef.Service.Notes.GetTraceNotesFromAsync(noteId);
+        if (incomingTraces.Entity == null)
+            return codeResult;
+
         var orderedIncludes = incomingTraces.Entity
             .Where(t => t.TraceNoteTypeId == includeType.TraceNoteTypeId)
             .OrderBy(t => t.Order);

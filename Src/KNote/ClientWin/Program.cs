@@ -90,8 +90,10 @@ static class Program
         }
         catch (Exception ex)
         {
+            // Not rethrown: that ended the process with no message at all for the user.
             appStore.Logger?.LogCritical(ex, "KNote has stopped because there was an exception.");
-            throw;
+            KntMessageBox.Show($"{KntConst.AppName} could not start and will be closed. The error has been logged.\r\n\r\n{ex.Message}",
+                KntConst.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {
@@ -200,16 +202,30 @@ static class Program
             if (store.Settings.General.LogFile == legacyLogFile)
                 store.Settings.General.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
 
+            // A repository that can't be opened right now (e.g. its SQL Server is stopped or not
+            // reachable yet: ServiceRef's constructor already connects, see KntRepositoryFactory) is
+            // skipped for this session only, instead of aborting the whole application. It stays in
+            // the configuration, so it is tried again on the next startup.
             foreach (var r in store.Settings.Repositories.Items)
             {
-                var serviceRef = new ServiceRef(r, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger);
+                var serviceRef = TryCreateServiceRef(store, r);
+                if (serviceRef == null)
+                    continue;
+
                 store.AddServiceRef(serviceRef);
-                await store.EnsureCurrentUserRegistered(serviceRef.Service);
+
+                try
+                {
+                    await store.EnsureCurrentUserRegistered(serviceRef.Service);
+                }
+                catch (Exception ex)
+                {
+                    store.Logger?.LogError(ex, "Checking the current user in repository {alias} failed.", r.Alias);
+                }
             }
 
-
             if (store.Settings.Repositories.Assistant?.ConnectionString != null)
-                store.SetAssistantServiceRef(new ServiceRef(store.Settings.Repositories.Assistant, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger));
+                store.SetAssistantServiceRef(TryCreateServiceRef(store, store.Settings.Repositories.Assistant));
             else
                 store.SetAssistantServiceRef(null);
         }
@@ -223,6 +239,23 @@ static class Program
         var firstService = store.GetFirstServiceRef();
         var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
         store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
+    }
+
+    // Returns null (logged, and reported to the user once the main window is shown, through the
+    // config notices) when the repository can't be opened.
+    static ServiceRef TryCreateServiceRef(Store store, RepositoryRef repositoryRef)
+    {
+        try
+        {
+            return new ServiceRef(repositoryRef, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger);
+        }
+        catch (Exception ex)
+        {
+            store.Logger?.LogError(ex, "Repository {alias} could not be opened.", repositoryRef.Alias);
+            store.AddConfigNotice($"The repository '{repositoryRef.Alias}' could not be opened, so it is not available in this session. "
+                + $"It will be tried again the next time {KntConst.AppName} starts.{Environment.NewLine}({ex.Message})");
+            return null;
+        }
     }
 
     // Last line of defense. Exceptions escaping an "async void" handler (alarm timers, PostIts

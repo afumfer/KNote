@@ -6,6 +6,7 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.ClientWin.Controllers;
 
@@ -536,10 +537,20 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     private async void _messagesManagementCtrl_ExecuteKntScript(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
-        var service = e.Entity.Service;
-        var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
+        try
+        {
+            var service = e.Entity.Service;
+            var note = (await (service.Notes.GetAsync(e.Entity.NoteId))).Entity;
+            // The note may have been deleted since the alarm was scheduled.
+            if (note == null)
+                return;
 
-        await Store.RunCode(note, caller: this);
+            await Store.RunCode(note, caller: this);
+        }
+        catch (Exception ex)
+        {
+            ReportAlarmError(ex, "script", e.Entity.NoteId);
+        }
     }
 
     #endregion
@@ -591,33 +602,44 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         var service = e.Entity.Service;
         var noteId = e.Entity.NoteId;
 
-        var note = (await service.Notes.GetAsync(noteId)).Entity;
-        var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
-
-        var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
-        var repositoryAlias = Store.GetServiceRef(service.IdServiceRef)?.Alias;
-
-        // Same note-level granularity caveat as Email alarms (see _messagesManagement_EMailAlarm):
-        // GetAlarmNotesIdAsync only reports the note, not which specific message fired.
-        var appInfoMessages = messages.Where(m => m.NotificationType == EnumNotificationType.AppInfo && m.UserId == currentUser.UserId).ToList();
-        if (appInfoMessages.Count == 0)
-            return;
-
-        foreach (var message in appInfoMessages)
+        try
         {
-            AppInfoAlarmsCtrl.AddOrUpdateRow(new AppInfoAlarmRow
-            {
-                KMessageId = message.KMessageId,
-                NoteId = noteId,
-                RepositoryAlias = repositoryAlias,
-                NoteTopic = note.Topic,
-                Comment = message.Comment,
-                UserFullName = currentUser.FullName,
-                NotifiedAt = DateTime.Now
-            });
-        }
+            var note = (await service.Notes.GetAsync(noteId)).Entity;
+            var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
 
-        AppInfoAlarmsCtrl.Activate();
+            var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+            var repositoryAlias = Store.GetServiceRef(service.IdServiceRef)?.Alias;
+
+            // Deleted note, a failed query, or the current user not registered in this repository.
+            if (note == null || messages == null || currentUser == null)
+                return;
+
+            // Same note-level granularity caveat as Email alarms (see _messagesManagement_EMailAlarm):
+            // GetAlarmNotesIdAsync only reports the note, not which specific message fired.
+            var appInfoMessages = messages.Where(m => m.NotificationType == EnumNotificationType.AppInfo && m.UserId == currentUser.UserId).ToList();
+            if (appInfoMessages.Count == 0)
+                return;
+
+            foreach (var message in appInfoMessages)
+            {
+                AppInfoAlarmsCtrl.AddOrUpdateRow(new AppInfoAlarmRow
+                {
+                    KMessageId = message.KMessageId,
+                    NoteId = noteId,
+                    RepositoryAlias = repositoryAlias,
+                    NoteTopic = note.Topic,
+                    Comment = message.Comment,
+                    UserFullName = currentUser.FullName,
+                    NotifiedAt = DateTime.Now
+                });
+            }
+
+            AppInfoAlarmsCtrl.Activate();
+        }
+        catch (Exception ex)
+        {
+            ReportAlarmError(ex, "Application info", noteId);
+        }
     }
 
     #endregion
@@ -629,17 +651,28 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         var service = e.Entity.Service;
         var noteId = e.Entity.NoteId;
 
-        var note = (await service.Notes.GetAsync(noteId)).Entity;
-        var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
+        try
+        {
+            var note = (await service.Notes.GetAsync(noteId)).Entity;
+            var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
 
-        var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
+            var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
 
-        // GetAlarmNotesIdAsync only reports which note had a due Email alarm, not which of its
-        // messages fired (the repository already consumed/rescheduled it as a side effect of the
-        // query) - so, like PostIt/ExecuteKntScript already do at note granularity, every Email
-        // message on this note still assigned to the current user is (re)sent here.
-        foreach (var message in messages.Where(m => m.NotificationType == EnumNotificationType.Email && m.UserId == currentUser.UserId))
-            await SendEmailAlarm(service, note, message);
+            // Deleted note, a failed query, or the current user not registered in this repository.
+            if (note == null || messages == null || currentUser == null)
+                return;
+
+            // GetAlarmNotesIdAsync only reports which note had a due Email alarm, not which of its
+            // messages fired (the repository already consumed/rescheduled it as a side effect of the
+            // query) - so, like PostIt/ExecuteKntScript already do at note granularity, every Email
+            // message on this note still assigned to the current user is (re)sent here.
+            foreach (var message in messages.Where(m => m.NotificationType == EnumNotificationType.Email && m.UserId == currentUser.UserId))
+                await SendEmailAlarm(service, note, message);
+        }
+        catch (Exception ex)
+        {
+            ReportAlarmError(ex, "Email", noteId);
+        }
     }
 
     private async Task SendEmailAlarm(IKntService service, NoteDto note, KMessageDto message)
@@ -668,17 +701,40 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     }
 
     private async void _messagesManagement_PostItAlarm(object sender, ControllerEventArgs<ServiceWithNoteId> e)
-    {                        
-        if (await Store.CheckNoteIsOpenOnDesktop(e.Entity.NoteId))
-            return;
-        await EditNotePostIt(e.Entity.Service, e.Entity.NoteId, true);
+    {
+        try
+        {
+            if (await Store.CheckNoteIsOpenOnDesktop(e.Entity.NoteId))
+                return;
+            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId, true);
+        }
+        catch (Exception ex)
+        {
+            ReportAlarmError(ex, "PostIt", e.Entity.NoteId);
+        }
     }
 
     private async void _messagesManagement_PostItVisible(object sender, ControllerEventArgs<ServiceWithNoteId> e)
     {
-        if (await Store.CheckPostItIsActive(e.Entity.NoteId))
-            return;
-        await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
+        try
+        {
+            if (await Store.CheckPostItIsActive(e.Entity.NoteId))
+                return;
+            await EditNotePostIt(e.Entity.Service, e.Entity.NoteId);
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "Reopening the PostIt of note {noteId} failed.", e.Entity.NoteId);
+            NotifyMessage($"A PostIt could not be reopened: {ex.Message}");
+        }
+    }
+
+    // Alarm handlers run unattended from MessagesManagementCtrl's timer (async void): a failure
+    // processing one note's alarm is logged and shown in the status bar, never allowed to escape.
+    private void ReportAlarmError(Exception ex, string alarmType, Guid noteId)
+    {
+        Store.Logger?.LogError(ex, "{alarmType} alarm of note {noteId} failed.", alarmType, noteId);
+        NotifyMessage($"The {alarmType} alarm of a note could not be processed: {ex.Message}");
     }
 
     #endregion
