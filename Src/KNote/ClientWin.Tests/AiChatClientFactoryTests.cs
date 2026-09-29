@@ -48,26 +48,6 @@ public class AiChatClientFactoryTests
         Assert.AreEqual("", result);
     }
 
-    [DataTestMethod]
-    [DataRow("gpt-4o-mini", false)]
-    [DataRow("gpt-4o", false)]
-    [DataRow("gpt-3.5-turbo", false)]
-    [DataRow("gpt-5.6-terra", true)]
-    [DataRow("gpt-5", true)]
-    [DataRow("gpt-5-mini", true)]
-    [DataRow("o1-mini", true)]
-    [DataRow("o3", true)]
-    [DataRow("o4-mini", true)]
-    [DataRow("", false)]
-    [DataRow(null, false)]
-    public void IsReasoningModel_ClassifiesKnownModelNames(string model, bool expectedIsReasoningModel)
-    {
-        // Regression test for the bug OpenAiProviderSmokeTests caught: gpt-4o-mini rejects
-        // reasoning_effort outright ("Unrecognized request argument"), while reasoning models
-        // reject function tools unless it's explicitly set to "none".
-        Assert.AreEqual(expectedIsReasoningModel, AiChatClientFactory.IsReasoningModel(model));
-    }
-
     [TestMethod]
     public void Create_NullProviderRef_ThrowsArgumentNullException()
     {
@@ -85,7 +65,7 @@ public class AiChatClientFactoryTests
     [TestMethod]
     public void Create_EachKnownProvider_ReturnsChatClientWithoutTouchingTheNetwork()
     {
-        // Client construction (OpenAI.Chat.ChatClient / AnthropicClient / OllamaApiClient, plus the
+        // Client construction (OpenAI.Responses.ResponsesClient / AnthropicClient / OllamaApiClient, plus the
         // .AsBuilder()/.UseFunctionInvocation() wrapping) is all lazy - no request is made until a
         // GetResponseAsync/GetStreamingResponseAsync call - so a placeholder key/host is enough to
         // catch build-breaking API changes from a NuGet bump without needing real credentials.

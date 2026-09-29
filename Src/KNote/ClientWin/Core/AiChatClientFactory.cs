@@ -21,10 +21,18 @@ public static class AiChatClientFactory
 
         IChatClient baseClient = providerRef.Provider switch
         {
-            EnumAiProvider.OpenAI => new OpenAI.Chat.ChatClient(
-                providerRef.Model,
+            // Responses API (/v1/responses), not Chat Completions: OpenAI's reasoning models reject
+            // function tools on /v1/chat/completions unless reasoning_effort is "none", and some of
+            // them (gpt-6-astra) don't accept "none" either - so tools can't work there at all.
+            // /v1/responses accepts tools with any reasoning effort, and non-reasoning models
+            // (gpt-4o, ...) work unchanged. OPENAI001: the SDK still flags this API as
+            // evaluation-only - re-run OpenAiProviderSmokeTests after bumping OpenAI or
+            // Microsoft.Extensions.AI.OpenAI.
+#pragma warning disable OPENAI001
+            EnumAiProvider.OpenAI => new OpenAI.Responses.ResponsesClient(
                 ResolveApiKey(providerRef, "OPENAI_API_KEY"))
-                .AsIChatClient(),
+                .AsIChatClient(providerRef.Model),
+#pragma warning restore OPENAI001
 
             EnumAiProvider.Anthropic => new AnthropicClient
             {
@@ -46,31 +54,19 @@ public static class AiChatClientFactory
                 if (providerRef.Provider == EnumAiProvider.Anthropic)
                     o.ModelId = providerRef.Model;
 
-                // OpenAI's reasoning models (o1/o3/o4/gpt-5.x) reject function tools on
-                // /v1/chat/completions unless reasoning_effort is explicitly "none" (HTTP 400
-                // invalid_request_error otherwise) - but older/non-reasoning models (gpt-4o,
-                // gpt-4o-mini, ...) reject the reasoning_effort argument outright as unrecognized
-                // (a different HTTP 400). Confirmed by ClientWin.Tests/OpenAiProviderSmokeTests -
-                // only set this for models that actually need it.
-                if (providerRef.Provider == EnumAiProvider.OpenAI && IsReasoningModel(providerRef.Model))
-                    o.Reasoning = new ReasoningOptions { Effort = ReasoningEffort.None };
+                // Unlike Chat Completions, the Responses API stores responses server-side by
+                // default (store=true) - keep them off OpenAI's servers, since tool results carry
+                // note contents. No reasoning_effort is sent: each model uses its own default.
+#pragma warning disable OPENAI001
+                if (providerRef.Provider == EnumAiProvider.OpenAI)
+                    o.RawRepresentationFactory = _ => new OpenAI.Responses.CreateResponseOptions { StoredOutputEnabled = false };
+#pragma warning restore OPENAI001
 
                 o.Tools = [.. tools.GetTools()];
             })
             .UseFunctionInvocation()
             .Build();
     }
-
-    // There's no API to ask "does this model support reasoning_effort", so this is a name-based
-    // heuristic - update it if OpenAI (or a compatible gateway/proxy exposing custom model
-    // aliases) ships a new reasoning-model family name.
-    // Internal so ClientWin.Tests can verify the heuristic directly for known model names.
-    internal static bool IsReasoningModel(string model) =>
-        !string.IsNullOrEmpty(model) &&
-        (model.StartsWith("o1", StringComparison.OrdinalIgnoreCase) ||
-         model.StartsWith("o3", StringComparison.OrdinalIgnoreCase) ||
-         model.StartsWith("o4", StringComparison.OrdinalIgnoreCase) ||
-         model.Contains("gpt-5", StringComparison.OrdinalIgnoreCase));
 
     // KNoteData.config (AiProviderRef.ApiKey) takes precedence; the environment variable is only
     // a fallback for local/manual testing when the config hasn't been filled in yet. Not used for

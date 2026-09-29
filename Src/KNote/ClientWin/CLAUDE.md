@@ -366,8 +366,8 @@ IA — no se ejecuta por defecto).
 Dos detalles de `ClientWin` motivados exclusivamente por esa suite de tests, a tener en cuenta si tocas
 código de IA:
 - `ClientWin/Properties/AssemblyInfo.cs` declara `[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]`
-  — `AiChatClientFactory.ResolveApiKey`/`IsReasoningModel` y `KNoteAIAssistantCtrl.SetChatClientForTesting`
-  son `internal` en vez de `private` únicamente para que los tests los ejerciten sin red real.
+  — `AiChatClientFactory.ResolveApiKey` y `KNoteAIAssistantCtrl.SetChatClientForTesting` son `internal`
+  en vez de `private` únicamente para que los tests los ejerciten sin red real.
 - `KNoteAiTools` recibe `IKntService` en el constructor (no `ServiceRef`) para las tools de solo lectura
   (`search_notes`/`get_note_details`) — así se pueden testear contra los fakes de servicio ya existentes
   (`Fakes/FakeKntService.cs`) sin base de datos real. `AiChatClientFactory.Create` sigue recibiendo

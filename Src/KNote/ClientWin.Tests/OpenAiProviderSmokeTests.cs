@@ -10,7 +10,9 @@ namespace KNote.ClientWin.Tests;
 /// (`dotnet test --filter "TestCategory=RequiresRealAiProvider"`) after bumping
 /// OpenAI/Microsoft.Extensions.AI(.OpenAI) to confirm the wiring in AiChatClientFactory still works
 /// end-to-end - this is exactly the kind of regression a NuGet bump can introduce silently (see the
-/// gpt-5.x "reasoning_effort" incompatibility with function tools fixed in AiChatClientFactory).
+/// reasoning models' "reasoning_effort" incompatibility with function tools on Chat Completions,
+/// avoided in AiChatClientFactory by using the Responses API). Run it with both a reasoning model
+/// (gpt-5.x/gpt-6) and a non-reasoning one (gpt-4o-mini) - AiProviderSmokeTests:OpenAI:Model.
 /// See ClientWin.Tests/CLAUDE.md for how to configure OPENAI_API_KEY.
 /// </summary>
 [TestClass]
@@ -63,7 +65,7 @@ public class OpenAiProviderSmokeTests
 
         // AiChatClientFactory.Create always attaches KNoteAiTools' tools (search_notes/get_note_details)
         // and enables function invocation, exactly like production - this is the request shape that
-        // triggered the "reasoning_effort" HTTP 400 with gpt-5.x models when it wasn't yet handled.
+        // triggered the "reasoning_effort" HTTP 400 with gpt-5.x/gpt-6 models on Chat Completions.
         var client = AiChatClientFactory.Create(providerRef, TestServiceRefFactory.CreateInMemorySqlite(), TestStoreFactory.CreateEmpty());
         var response = await client.GetResponseAsync([
             new ChatMessage(ChatRole.User, "Use the search_notes tool to search for the word \"test\", then summarize in one sentence what you found (even if nothing was found).")

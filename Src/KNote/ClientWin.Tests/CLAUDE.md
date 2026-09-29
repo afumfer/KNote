@@ -50,8 +50,7 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
 - `Fakes/FakeChatClient.cs` — fake de `IChatClient` (`Microsoft.Extensions.AI`), mismo patrón que el
   resto de `Fakes/` (`GetResponseImpl`/`GetStreamingResponseImpl` configurables).
 - `AiChatClientFactoryTests.cs` — `ResolveApiKey` (precedencia `AiProviderRef.ApiKey` > variable de
-  entorno), `IsReasoningModel` (heurística por nombre de modelo, ver más abajo), `Create` para los 3
-  proveedores (sin red real: la construcción del cliente es perezosa).
+  entorno), `Create` para los 3 proveedores (sin red real: la construcción del cliente es perezosa).
 - `KNoteAiToolsTests.cs` — `search_notes`/`get_note_details`/`create_task` contra
   `FakeKntService`/`FakeKntNoteService` (sin base de datos real). Como esos métodos son `private` en
   `KNoteAiTools` (solo pensados para llegar a través del `AITool` que construye `AIFunctionFactory.Create`
@@ -90,19 +89,26 @@ streaming, y un round-trip de function-calling contra `search_notes` (la tool qu
 `AiChatClientFactory.Create`).
 
 **Por qué existen — precedente real**: esta suite ya encontró y ayudó a corregir dos bugs reales de
-producción en `AiChatClientFactory` el mismo día en que se escribió:
-1. Los modelos de razonamiento de OpenAI (`o1`/`o3`/`o4`/familia `gpt-5.x`) rechazan function tools en
-   `/v1/chat/completions` salvo que `reasoning_effort` sea explícitamente `"none"` (HTTP 400
-   `invalid_request_error`).
+producción en `AiChatClientFactory` el mismo día en que se escribió, cuando OpenAI se llamaba por Chat
+Completions (`/v1/chat/completions`):
+1. Los modelos de razonamiento de OpenAI (`o1`/`o3`/`o4`/familias `gpt-5.x`, `gpt-6`...) rechazan
+   function tools en `/v1/chat/completions` salvo que `reasoning_effort` sea explícitamente `"none"`
+   (HTTP 400 `invalid_request_error`). Omitirlo no basta: estos modelos usan `medium` por defecto.
 2. Los modelos NO razonadores (`gpt-4o`, `gpt-4o-mini`, ...) rechazan el propio parámetro
    `reasoning_effort` como argumento no reconocido (un HTTP 400 *distinto*) — forzarlo siempre para
    `OpenAI`, como se hizo al arreglar (1), rompía estos modelos.
 
-La solución fue `AiChatClientFactory.IsReasoningModel(model)`: una heurística por nombre de modelo (no hay
-forma de preguntarle a la API "¿este modelo soporta `reasoning_effort`?"). Si OpenAI (o un gateway/proxy
-compatible que exponga alias de modelo propios, como usa este proyecto) lanza una nueva familia de
-modelos de razonamiento, esa heurística es el sitio a actualizar — y esta suite es la forma de confirmar
-que el cambio no rompe nada, con una llamada real.
+Se resolvió primero con una heurística por nombre de modelo que enviaba `"none"` solo a los modelos de
+razonamiento, pero `gpt-6-astra` rechaza también `"none"` (solo admite `low`/`medium`/`high`/`xhigh`), así
+que con tools no tiene ningún valor válido en Chat Completions. La solución definitiva fue pasar OpenAI a
+la **Responses API** (`/v1/responses`, `OpenAI.Responses.ResponsesClient`), que acepta tools con cualquier
+esfuerzo de razonamiento: ya no se envía `reasoning_effort` (cada modelo usa su valor por defecto) y no
+hace falta heurística. Se envía `store=false` (`StoredOutputEnabled = false`) para que OpenAI no guarde
+en su servidor las respuestas, que llevan contenido de las notas — igual que en Chat Completions.
+Verificado con llamadas reales (`gpt-6-astra`, `gpt-5.6-terra`, `gpt-4o-mini`): varios turnos con tools,
+con y sin streaming. Al actualizar `OpenAI`/`Microsoft.Extensions.AI.OpenAI`, pasa esta suite con un
+modelo de razonamiento y con uno que no lo sea (`AiProviderSmokeTests:OpenAI:Model`) — la API de
+Responses del SDK aún está marcada como experimental (`OPENAI001`) y puede cambiar.
 
 **No corren por defecto** (cuestan tokens/dinero y dependen de red):
 ```powershell
