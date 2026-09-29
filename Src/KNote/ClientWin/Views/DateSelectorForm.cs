@@ -2,7 +2,7 @@
 
 namespace KNote.ClientWin.Views;
 
-public partial class DateSelectorForm : Form
+public partial class DateSelectorForm : KntForm
 {
     #region Public properties 
 

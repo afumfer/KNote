@@ -3,7 +3,7 @@ using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NoteAttributeFilterSelectorForm : Form
+public partial class NoteAttributeFilterSelectorForm : KntForm
 {
     #region Properties
 

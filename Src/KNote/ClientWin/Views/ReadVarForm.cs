@@ -2,7 +2,7 @@
 
 namespace KNote.ClientWin.Views;
 
-public partial class ReadVarForm : Form
+public partial class ReadVarForm : KntForm
 {
     #region Private members
 
