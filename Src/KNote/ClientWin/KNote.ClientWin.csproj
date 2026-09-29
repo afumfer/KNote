@@ -15,11 +15,11 @@
     <None Remove="Temp\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Anthropic" Version="12.49.0" />
+    <PackageReference Include="Anthropic" Version="12.51.0" />
     <PackageReference Include="Markdig" Version="1.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.10.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.10.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.10.1" />
     <PackageReference Include="NLog" Version="6.2.1" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.2.1" />
     <PackageReference Include="OllamaSharp" Version="5.4.30" />
