@@ -29,13 +29,16 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         Store.Events.Subscribe<TraceNotesChanged>(OnTraceNotesChangedElsewhere);
     }
 
-    public override void Dispose()
+    // In OnFinalized, not Dispose: closing the editor goes through Finalize() only, so unsubscribing
+    // in Dispose left every closed editor listening to Store.Events for the rest of the session
+    // (Dispose also ends up here, through CtrlBase.Dispose -> Finalize).
+    protected override Result<EControllerResult> OnFinalized()
     {
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
         Store.Events.Unsubscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
         Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
         Store.Events.Unsubscribe<TraceNotesChanged>(OnTraceNotesChangedElsewhere);
-        base.Dispose();
+        return base.OnFinalized();
     }
 
     #endregion

@@ -65,4 +65,11 @@ public class DomainEventBus
         foreach (var handler in handlersSnapshot)
             ((Action<TMessage>)handler).Invoke(message);
     }
+
+    // Lets tests check that a controller releases its subscriptions when it is closed.
+    internal int SubscriberCount<TMessage>()
+    {
+        lock (_lock)
+            return _handlers.TryGetValue(typeof(TMessage), out var handlersForType) ? handlersForType.Count : 0;
+    }
 }

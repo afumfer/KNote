@@ -114,6 +114,20 @@ public class NoteEditorCtrlTraceNotesChangedTests
         Assert.IsNull(view.LastShownInfo);
     }
 
+    // Closing the editor window finalizes the controller without disposing it.
+    [TestMethod]
+    public async Task TraceNotesChanged_AfterFinalize_IsIgnored()
+    {
+        var (ctrl, view, service) = CreateCtrl();
+        var note = await LoadNoteAsync(ctrl, service);
+        ctrl.Finalize();
+
+        ctrl.Store.Events.Publish(new TraceNotesChanged(new[] { note.NoteId }));
+
+        Assert.AreEqual(0, ctrl.Model.TraceNotesTo.Count);
+        Assert.IsNull(view.LastShownInfo);
+    }
+
     [TestMethod]
     public async Task TraceNotesChanged_AfterDispose_IsIgnored()
     {

@@ -977,8 +977,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     }
 
     // A controller whose model could not be loaded (LoadModelById already told the user why) is
-    // discarded instead of being shown half-initialized. Dispose, not just Finalize, so its Store
-    // event subscriptions are released too.
+    // discarded instead of being shown half-initialized.
     public async Task<bool> EditNote(IKntService service, Guid noteId)
     {
         var noteEditorCtrl = new NoteEditorCtrl(Store);

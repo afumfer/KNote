@@ -78,6 +78,35 @@ public class NotePostItHandoffTests
         Assert.AreNotEqual(EControllerState.Finalized, ctrl.ControllerState);
     }
 
+    // Closing a note editor or a PostIt goes through Finalize() only (never Dispose()), so that is
+    // what must release their Store.Events subscriptions.
+    [TestMethod]
+    public void NoteEditorCtrl_Finalize_UnsubscribesFromStoreEvents()
+    {
+        var store = new Store(factoryViews: null!);
+        var ctrl = new NoteEditorCtrl(store);
+
+        ctrl.Finalize();
+
+        Assert.AreEqual(0, store.Events.SubscriberCount<EntityDeleted<NoteExtendedDto>>());
+        Assert.AreEqual(0, store.Events.SubscriberCount<EntitySaved<FolderDto>>());
+        Assert.AreEqual(0, store.Events.SubscriberCount<EntitySaved<KNote.Model.RepositoryRef>>());
+        Assert.AreEqual(0, store.Events.SubscriberCount<TraceNotesChanged>());
+    }
+
+    [TestMethod]
+    public void PostItEditorCtrl_Finalize_UnsubscribesFromStoreEvents()
+    {
+        var store = new Store(factoryViews: null!);
+        var ctrl = new PostItEditorCtrl(store);
+
+        ctrl.Finalize();
+
+        Assert.AreEqual(0, store.Events.SubscriberCount<EntityDeleted<NoteExtendedDto>>());
+        Assert.AreEqual(0, store.Events.SubscriberCount<EntitySaved<FolderDto>>());
+        Assert.AreEqual(0, store.Events.SubscriberCount<EntitySaved<KNote.Model.RepositoryRef>>());
+    }
+
     [TestMethod]
     public void PostItEditorCtrl_ClosesWhenItsNoteIsDeletedElsewhere()
     {

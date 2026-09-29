@@ -41,12 +41,13 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
         Store.Events.Subscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
     }
 
-    public override void Dispose()
+    // Same as NoteEditorCtrl.OnFinalized: closing a PostIt goes through Finalize() only.
+    protected override Result<EControllerResult> OnFinalized()
     {
         Store.Events.Unsubscribe<EntityDeleted<NoteExtendedDto>>(OnNoteDeletedElsewhere);
         Store.Events.Unsubscribe<EntitySaved<FolderDto>>(OnFolderSavedElsewhere);
         Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(OnRepositorySavedElsewhere);
-        base.Dispose();
+        return base.OnFinalized();
     }
 
     #endregion
