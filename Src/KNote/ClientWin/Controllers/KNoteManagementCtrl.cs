@@ -976,11 +976,19 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         await OnNoteEditorSaved(res.GetSimpleDto<NoteMinimalDto>());            
     }
 
+    // A controller whose model could not be loaded (LoadModelById already told the user why) is
+    // discarded instead of being shown half-initialized. Dispose, not just Finalize, so its Store
+    // event subscriptions are released too.
     public async Task<bool> EditNote(IKntService service, Guid noteId)
     {
         var noteEditorCtrl = new NoteEditorCtrl(Store);
         var res = await noteEditorCtrl.LoadModelById(service, noteId, false);
-        noteEditorCtrl.Run();            
+        if (!res)
+        {
+            noteEditorCtrl.Dispose();
+            return false;
+        }
+        noteEditorCtrl.Run();
         return res;
     }
 
@@ -1003,6 +1011,12 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     {            
         var postItEditorCtrl = new PostItEditorCtrl(Store);
         var res = await postItEditorCtrl.LoadModelById(service, noteId, false);
+        // Same as EditNote: without a loaded model (and WindowPostIt) the PostIt can't be shown.
+        if (!res)
+        {
+            postItEditorCtrl.Dispose();
+            return false;
+        }
         if(alwaysTop)
             postItEditorCtrl.ForceAlwaysTop = true;
         postItEditorCtrl.Run();

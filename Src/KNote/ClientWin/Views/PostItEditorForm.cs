@@ -372,9 +372,10 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         }
     }
 
+    // WindowPostIt is only null while PostItEditorCtrl.LoadModelById hasn't completed (or failed).
     private void ModelToControlsPostIt(bool updateSizeAndLocation = true, bool forceAlwaysTop = false)
     {
-        if (_ctrl.Model is null)
+        if (_ctrl.Model is null || _ctrl.WindowPostIt is null)
             return;
 
         kntEditView.StatusInfoBackcolor = _ctrl.WindowPostIt.NoteColor;
@@ -441,6 +442,9 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
     private void ControlsToModelPostIt()
     {
+        if (_ctrl.WindowPostIt is null)
+            return;
+
         // Top and Left are shifted to -32000 when the post - it in navigation mode is minimized.
         // So we need to prevent those incorrect values ​​from being saved.
         if (this.Top >= 0 && this.Left >= 0)

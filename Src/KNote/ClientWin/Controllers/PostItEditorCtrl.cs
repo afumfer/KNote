@@ -236,7 +236,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
     {
         View.RefreshModel();
 
-        if (!Model.IsDirty() && !WindowPostIt.IsDirty() )
+        if (!Model.IsDirty() && WindowPostIt?.IsDirty() != true)
             return true;
 
         var success = true;

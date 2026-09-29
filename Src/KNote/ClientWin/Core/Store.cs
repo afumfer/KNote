@@ -363,8 +363,12 @@ public class Store
         {
             foreach (var com in _controllerRegistry.All)
             {
-                if (com is PostItEditorCtrl)
-                    await ((PostItEditorCtrl)com).SaveModel();
+                // Only PostIts already shown: a PostItEditorCtrl registers itself in its constructor,
+                // so one still inside LoadModelById (opened by an alarm or at startup) is also listed
+                // here, and saving it would read its not yet filled view back into the model. Same
+                // purpose as the EditMode check below, which is only set once a NoteEditorCtrl runs.
+                if (com is PostItEditorCtrl postIt && postIt.ControllerState == EControllerState.Started)
+                    await postIt.SaveModel();
 
                 if (com is NoteEditorCtrl)
                 {
