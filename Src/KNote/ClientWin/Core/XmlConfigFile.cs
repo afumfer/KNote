@@ -13,6 +13,9 @@ public static class XmlConfigFile
     public const string BackupExtension = ".bak";
     private const string TempExtension = ".tmp";
 
+    private const int ReplaceAttempts = 3;
+    private const int ReplaceRetryDelayMs = 100;
+
     /// <param name="keepBackup">
     /// When false the file being replaced is not kept as "&lt;file&gt;.bak" - for the one case where that
     /// previous content must not linger on disk (a pre-migration file holding plain-text secrets).
@@ -26,10 +29,26 @@ public static class XmlConfigFile
             new XmlSerializer(typeof(T)).Serialize(writer, config);
         }
 
-        if (File.Exists(file))
-            File.Replace(tempFile, file, keepBackup ? file + BackupExtension : null);
-        else
-            File.Move(tempFile, file);
+        // Another process (antivirus, search indexer, backup/sync tools...) may briefly hold the file
+        // just written by the previous save - usual at startup, where several saves happen within
+        // milliseconds - making File.Replace/Move fail. A short retry is enough. File.Exists is
+        // evaluated again on each attempt: a failed File.Replace can leave the file already moved
+        // to its backup, in which case the retry just moves the temp file into place.
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                if (File.Exists(file))
+                    File.Replace(tempFile, file, keepBackup ? file + BackupExtension : null);
+                else
+                    File.Move(tempFile, file);
+                return;
+            }
+            catch (Exception ex) when ((ex is IOException or UnauthorizedAccessException) && attempt < ReplaceAttempts)
+            {
+                Thread.Sleep(ReplaceRetryDelayMs);
+            }
+        }
     }
 
     /// <summary>

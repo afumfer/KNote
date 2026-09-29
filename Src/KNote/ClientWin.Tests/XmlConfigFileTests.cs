@@ -62,6 +62,43 @@ public class XmlConfigFileTests
     }
 
     [TestMethod]
+    public void Save_ExistingFileBrieflyLocked_RetriesAndSaves()
+    {
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 1 }, _file);
+        var lockStream = new FileStream(_file, FileMode.Open, FileAccess.Read, FileShare.None);
+        var release = Task.Run(async () =>
+        {
+            await Task.Delay(50);
+            lockStream.Dispose();
+        });
+
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 2 }, _file);
+        release.Wait();
+
+        Assert.AreEqual(2, XmlConfigFile.Load<AppConfigV1>(_file, out _)!.RunCounter);
+    }
+
+    [TestMethod]
+    public void Save_ExistingFileLockedPersistently_ThrowsAndKeepsPreviousContent()
+    {
+        XmlConfigFile.Save(new AppConfigV1 { RunCounter = 1 }, _file);
+
+        using (new FileStream(_file, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            try
+            {
+                XmlConfigFile.Save(new AppConfigV1 { RunCounter = 2 }, _file);
+                Assert.Fail("Save should have failed while the file is locked.");
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+            }
+        }
+
+        Assert.AreEqual(1, XmlConfigFile.Load<AppConfigV1>(_file, out _)!.RunCounter);
+    }
+
+    [TestMethod]
     public void Load_CorruptFileWithBackup_RecoversFromBackup()
     {
         XmlConfigFile.Save(new AppConfigV1 { RunCounter = 1 }, _file);

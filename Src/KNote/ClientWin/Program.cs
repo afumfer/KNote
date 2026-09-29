@@ -150,7 +150,7 @@ static class Program
             store.Logger = null;
 
         // Create default repository and add link
-        if (!File.Exists(appFileConfig))
+        if (!ConfigFileExists(store, appFileConfig))
         {
             var pathData = Path.Combine(AppUserDataPath.Directory, "Data");
             if (!Directory.Exists(pathData))
@@ -230,15 +230,45 @@ static class Program
                 store.SetAssistantServiceRef(null);
         }
 
+        // No repository at all (the default one could not be created, or none of the configured ones
+        // could be opened): stop before SaveConfig, which would overwrite the configuration with an
+        // empty repository list. Main reports this to the user.
+        var firstService = store.GetFirstServiceRef();
+        if (firstService == null)
+            throw new InvalidOperationException("No repository could be opened. The details have been logged.");
+
         store.State.Session.LastDateTimeStart = DateTime.Now;
         store.State.Session.RunCounter += 1;
 
         store.SaveConfig(appFileConfig);
 
         // default folder
-        var firstService = store.GetFirstServiceRef();
         var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
         store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
+    }
+
+    // Only a real first run (neither the configuration nor its backup exist) may create the default
+    // repository and a brand new configuration. KNoteData.config can be missing for a moment while
+    // another KNote instance replaces it (File.Replace is not atomic for other processes), or be
+    // missing with its backup left behind: treating either case as a first run used to overwrite the
+    // user's configuration with an empty repository list.
+    static bool ConfigFileExists(Store store, string configFile)
+    {
+        if (File.Exists(configFile))
+            return true;
+
+        var backupFile = configFile + XmlConfigFile.BackupExtension;
+        if (!File.Exists(backupFile))
+            return false;
+
+        Thread.Sleep(500);
+        if (File.Exists(configFile))
+            return true;
+
+        File.Copy(backupFile, configFile);
+        store.Logger?.LogWarning("{configFile} was missing and has been restored from its backup.", configFile);
+        store.AddConfigNotice($"'{Path.GetFileName(configFile)}' was missing, so it has been restored from its last backup.");
+        return true;
     }
 
     // Returns null (logged, and reported to the user once the main window is shown, through the

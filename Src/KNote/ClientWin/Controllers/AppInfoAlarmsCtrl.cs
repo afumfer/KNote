@@ -74,26 +74,43 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     // instead of showing a stale or blank one.
     // Fire-and-forget from the synchronous OnInitialized(), same pattern as
     // MessagesManagementCtrl.OnInitialized() kicking off VisibleWindows().
+    // A row whose repository errors out is kept (not shown, not removed): an error right now is not
+    // evidence of an orphaned row - same rule as AppInfoAlarmRowMaintenance.
     private async void LoadPersistedRows()
     {
-        var rows = Store.State.AppInfoAlarmsWindow.Rows.ToList();
-        var activeUsers = await GetActiveUserIdsAsync(rows);
-
-        foreach (var saved in rows)
+        try
         {
-            var serviceRef = Store.GetServiceRef(saved.RepositoryAlias);
-            if (serviceRef == null)
-                continue;
+            var rows = Store.State.AppInfoAlarmsWindow.Rows.ToList();
+            var activeUsers = await GetActiveUserIdsAsync(rows);
 
-            if (!await TryHydrateRowAsync(serviceRef.Service, saved, activeUsers.GetValueOrDefault(saved.RepositoryAlias)))
+            foreach (var saved in rows)
             {
-                Store.State.AppInfoAlarmsWindow.Rows.Remove(saved);
-                continue;
-            }
+                var serviceRef = Store.GetServiceRef(saved.RepositoryAlias);
+                if (serviceRef == null)
+                    continue;
 
-            View.AddOrUpdateRow(saved);
+                try
+                {
+                    if (!await TryHydrateRowAsync(serviceRef.Service, saved, activeUsers.GetValueOrDefault(saved.RepositoryAlias)))
+                    {
+                        Store.State.AppInfoAlarmsWindow.Rows.Remove(saved);
+                        continue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Store.Logger?.LogError(ex, "LoadPersistedRows, repository {alias}: {message}", saved.RepositoryAlias, ex.Message);
+                    continue;
+                }
+
+                View.AddOrUpdateRow(saved);
+            }
+            Store.SaveConfig();
         }
-        Store.SaveConfig();
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "LoadPersistedRows: {message}", ex.Message);
+        }
     }
 
     private static async Task<bool> TryHydrateRowAsync(IKntService service, AppInfoAlarmRow row, Guid? activeUserId)
