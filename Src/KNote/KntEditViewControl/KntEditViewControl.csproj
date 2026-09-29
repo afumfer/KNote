@@ -9,7 +9,7 @@
     <FileVersion>0.0.10.28</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="10.0.101" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="10.0.110" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HtmlEditorControl\HTMLEditorControl.csproj" />
