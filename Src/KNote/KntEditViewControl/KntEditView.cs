@@ -27,6 +27,13 @@ namespace KntWebView
         /// </summary>
         public static string? WebView2UserDataFolder { get; set; }
 
+        /// <summary>
+        /// Raised when a WebView2 process (browser, renderer, GPU, ...) of any KntEditView fails.
+        /// Static for the same reason as WebView2UserDataFolder: the host application subscribes
+        /// once at startup (e.g. to log it) instead of having to reach every KntEditView instance.
+        /// </summary>
+        public static event EventHandler<CoreWebView2ProcessFailedEventArgs>? WebView2ProcessFailed;
+
         #endregion
 
         #region Public properties
@@ -198,6 +205,11 @@ namespace KntWebView
         {
             statusLabel.Text = webView.Source.ToString();
             NavigationEnd?.Invoke(this, new EventArgs());
+        }
+
+        private void CoreWebView2_ProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)
+        {
+            WebView2ProcessFailed?.Invoke(this, e);
         }
 
         private void webView2_CoreWebView2InitializationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
@@ -373,6 +385,7 @@ namespace KntWebView
                 webView.CoreWebView2InitializationCompleted += webView2_CoreWebView2InitializationCompleted;
                 webView.NavigationStarting += EnsureHttps;
                 webView.NavigationCompleted += webView2_NavigationCompleted;
+                webView.CoreWebView2.ProcessFailed += CoreWebView2_ProcessFailed;
 
                 // Left at its default (true): callers (NoteEditorForm/PostItEditorForm) no longer
                 // wire WinForms DragDrop on WebViewControl, so the browser handles OS drops itself

@@ -6,6 +6,7 @@ using NLog;
 using KNote.ClientWin.Views;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Controllers;
+using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Service.Core;
 using NLog.Extensions.Logging;
@@ -34,6 +35,7 @@ static class Program
 
         ApplicationConfiguration.Initialize();
         Store appStore = new Store(new FactoryViewsWinForms());
+        RegisterGlobalExceptionHandlers(appStore);
         SplashForm splashForm = new SplashForm(appStore);
         Exception loadException = null;
 
@@ -221,6 +223,44 @@ static class Program
         var firstService = store.GetFirstServiceRef();
         var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
         store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
+    }
+
+    // Last line of defense. Exceptions escaping an "async void" handler (alarm timers, PostIts
+    // reopened at startup, WebView2 initialization, ...) or a fire-and-forget task used to end up in
+    // WinForms' default "unhandled exception" dialog without leaving any trace in the log. They are
+    // now logged, and UI thread ones are reported to the user while the app keeps running (same as
+    // the default dialog's "Continue"). Store.Logger is only created inside LoadAppStore, so anything
+    // failing before that point is still shown but not logged.
+    static void RegisterGlobalExceptionHandlers(Store store)
+    {
+        // Must be called before the first window is created.
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
+        Application.ThreadException += (s, e) =>
+        {
+            store.Logger?.LogError(e.Exception, "Unhandled exception in the UI thread.");
+            KntMessageBox.Show(
+                $"An unexpected error has occurred and has been logged. {KntConst.AppName} will keep running.\r\n\r\n{e.Exception.Message}",
+                KntConst.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        };
+
+        // Non-UI thread: the process is terminated by the runtime right after this handler, so the
+        // only thing left to do is make sure the exception reaches the log file.
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+            store.Logger?.LogCritical(e.ExceptionObject as Exception, "Unhandled exception in a non-UI thread. KNote will be terminated.");
+            LogManager.Flush();
+        };
+
+        TaskScheduler.UnobservedTaskException += (s, e) =>
+        {
+            store.Logger?.LogWarning(e.Exception, "Unobserved task exception.");
+            e.SetObserved();
+        };
+
+        KntWebView.KntEditView.WebView2ProcessFailed += (s, e) =>
+            store.Logger?.LogWarning("WebView2 process failed. Kind: {kind}, reason: {reason}, exit code: {exitCode}, process: {description}.",
+                e.ProcessFailedKind, e.Reason, e.ExitCode, e.ProcessDescription);
     }
 
     #region Utils
