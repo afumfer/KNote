@@ -152,22 +152,24 @@ namespace KNote.ClientWin.Views
             // buttonNavigate
             //
             buttonNavigate.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonNavigate.Location = new Point(769, 4);
+            buttonNavigate.Location = new Point(753, 4);
             buttonNavigate.Name = "buttonNavigate";
-            buttonNavigate.Size = new Size(82, 26);
+            buttonNavigate.Size = new Size(98, 26);
             buttonNavigate.TabIndex = 4;
             buttonNavigate.Text = "Navigate";
+            buttonNavigate.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonNavigate.UseVisualStyleBackColor = true;
             buttonNavigate.Click += buttonNavigate_Click;
             //
             // buttonMarkDown
             //
             buttonMarkDown.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonMarkDown.Location = new Point(682, 4);
+            buttonMarkDown.Location = new Point(650, 4);
             buttonMarkDown.Name = "buttonMarkDown";
-            buttonMarkDown.Size = new Size(82, 26);
+            buttonMarkDown.Size = new Size(98, 26);
             buttonMarkDown.TabIndex = 3;
             buttonMarkDown.Text = "Markdown";
+            buttonMarkDown.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonMarkDown.UseVisualStyleBackColor = true;
             buttonMarkDown.Click += buttonMarkDown_Click;
             //
@@ -185,7 +187,7 @@ namespace KNote.ClientWin.Views
             radioGetStream.AutoSize = true;
             radioGetStream.Checked = true;
             radioGetStream.Font = new Font("Segoe UI", 8.25F);
-            radioGetStream.Location = new Point(455, 9);
+            radioGetStream.Location = new Point(423, 9);
             radioGetStream.Name = "radioGetStream";
             radioGetStream.Size = new Size(81, 17);
             radioGetStream.TabIndex = 1;
@@ -197,7 +199,7 @@ namespace KNote.ClientWin.Views
             //
             radioGetCompletion.AutoSize = true;
             radioGetCompletion.Font = new Font("Segoe UI", 8.25F);
-            radioGetCompletion.Location = new Point(557, 9);
+            radioGetCompletion.Location = new Point(525, 9);
             radioGetCompletion.Name = "radioGetCompletion";
             radioGetCompletion.Size = new Size(106, 17);
             radioGetCompletion.TabIndex = 2;
@@ -263,11 +265,12 @@ namespace KNote.ClientWin.Views
             // buttonRestart
             //
             buttonRestart.Font = new Font("Segoe UI", 8.25F);
-            buttonRestart.Location = new Point(246, 4);
+            buttonRestart.Location = new Point(224, 4);
             buttonRestart.Name = "buttonRestart";
-            buttonRestart.Size = new Size(56, 26);
+            buttonRestart.Size = new Size(78, 26);
             buttonRestart.TabIndex = 2;
             buttonRestart.Text = "&Restart";
+            buttonRestart.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonRestart.UseVisualStyleBackColor = true;
             buttonRestart.Click += buttonRestart_Click;
             //
@@ -318,11 +321,12 @@ namespace KNote.ClientWin.Views
             // buttonSend
             //
             buttonSend.Font = new Font("Segoe UI", 8.25F);
-            buttonSend.Location = new Point(184, 4);
+            buttonSend.Location = new Point(140, 4);
             buttonSend.Name = "buttonSend";
-            buttonSend.Size = new Size(56, 26);
+            buttonSend.Size = new Size(78, 26);
             buttonSend.TabIndex = 1;
             buttonSend.Text = "&Send";
+            buttonSend.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
             //

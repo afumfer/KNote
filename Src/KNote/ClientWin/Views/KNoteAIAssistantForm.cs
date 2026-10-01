@@ -3,6 +3,7 @@ using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.ClientWin.Utils;
+using KntIcons;
 
 namespace KNote.ClientWin.Views;
 
@@ -22,6 +23,11 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     public KNoteAIAssistantForm(KNoteAIAssistantCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonSend.SetKntIcon(KntIcon.Send);
+        buttonRestart.SetKntIcon(KntIcon.Restart);
+        buttonMarkDown.SetKntIcon(KntIcon.Markdown);
+        buttonNavigate.SetKntIcon(KntIcon.Navigate);
 
         _ctrl = ctrl;
 

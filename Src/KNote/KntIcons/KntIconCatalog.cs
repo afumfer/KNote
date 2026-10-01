@@ -70,6 +70,10 @@ internal static class KntIconCatalog
         [KntIcon.Run] = new(0xE990, 0xF605, Success),                 // play
         [KntIcon.Stop] = new(0xF729, 0xF72A, Danger),                 // stop
 
+        // AI assistant
+        [KntIcon.Send] = new(0xEA8E, 0xF699, Neutral),                // send
+        [KntIcon.Restart] = new(0xE0B3, 0xF13F, Neutral),             // arrow_counterclockwise
+
         // Web view
         [KntIcon.Back] = new(0xF184, 0xF15B, Neutral),                // arrow_left
         [KntIcon.Forward] = new(0xE0EB, 0xF181, Neutral),             // arrow_right

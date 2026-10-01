@@ -50,6 +50,10 @@ public enum KntIcon
     Run,
     Stop,
 
+    // AI assistant
+    Send,
+    Restart,
+
     // Web view
     Back,
     Forward,
