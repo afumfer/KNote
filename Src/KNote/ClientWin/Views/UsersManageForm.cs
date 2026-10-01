@@ -55,10 +55,10 @@ public partial class UsersManageForm : KntForm, IViewManageList<UserDto>
         // Only the primary column (see PrimaryColumnIndex) is ever resized dynamically - every other
         // column needs a real, fixed pixel width here: a "-2" (native auto-size) width on a column
         // nothing else manages is what used to leave "Roles" collapsed to ~0px.
-        listViewUsers.Columns.Add("User name", 130, HorizontalAlignment.Left);
-        listViewUsers.Columns.Add("Full name", 180, HorizontalAlignment.Left);
-        listViewUsers.Columns.Add("Email", 180, HorizontalAlignment.Left);
-        listViewUsers.Columns.Add("Roles", 200, HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("User name", LogicalToDeviceUnits(130), HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("Full name", LogicalToDeviceUnits(180), HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("Email", LogicalToDeviceUnits(180), HorizontalAlignment.Left);
+        listViewUsers.Columns.Add("Roles", LogicalToDeviceUnits(200), HorizontalAlignment.Left);
 
         if (_ctrl.ListEntities != null)
         {

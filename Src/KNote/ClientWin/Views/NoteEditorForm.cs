@@ -1045,8 +1045,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         // Width of -2 indicates auto-size.
-        listViewAttributes.Columns.Add("Order", 0, HorizontalAlignment.Left);
-        listViewAttributes.Columns.Add("Name", 250, HorizontalAlignment.Left);
+        listViewAttributes.Columns.Add("Order", LogicalToDeviceUnits(0), HorizontalAlignment.Left);
+        listViewAttributes.Columns.Add("Name", LogicalToDeviceUnits(250), HorizontalAlignment.Left);
         listViewAttributes.Columns.Add("Value", -2, HorizontalAlignment.Left);
         // Always ascending by Order (column 0) - see the comment above; no user-driven sort to respect.
         ListViewSortHelper.ApplyDefaultSort(listViewAttributes);
@@ -1066,9 +1066,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
                 listViewResources.Items.Add(ResourceDtoToListViewItem(res));
         }
 
-        listViewResources.Columns.Add("Order", 70, HorizontalAlignment.Left);
-        listViewResources.Columns.Add("Name", 200, HorizontalAlignment.Left);
-        listViewResources.Columns.Add("File type", 100, HorizontalAlignment.Left);
+        listViewResources.Columns.Add("Order", LogicalToDeviceUnits(70), HorizontalAlignment.Left);
+        listViewResources.Columns.Add("Name", LogicalToDeviceUnits(200), HorizontalAlignment.Left);
+        listViewResources.Columns.Add("File type", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
         ListViewSortHelper.ApplyInitialOrder(listViewResources, _resourcesSorter);
         listViewResources_Resize(listViewResources, EventArgs.Empty);
     }
@@ -1084,17 +1084,17 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         // Width of -2 indicates auto-size.
-        listViewTasks.Columns.Add("Priority", 50, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Topic/Tags", 250, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Resolved", 60, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Start", 120, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("End", 120, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Est. time", 50, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Spend time", 50, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Dif.", 50, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Ex start", 120, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("Ex end", 120, HorizontalAlignment.Left);
-        listViewTasks.Columns.Add("User", 250, HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Priority", LogicalToDeviceUnits(50), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Topic/Tags", LogicalToDeviceUnits(250), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Resolved", LogicalToDeviceUnits(60), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Start", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("End", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Est. time", LogicalToDeviceUnits(50), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Spend time", LogicalToDeviceUnits(50), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Dif.", LogicalToDeviceUnits(50), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Ex start", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("Ex end", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
+        listViewTasks.Columns.Add("User", LogicalToDeviceUnits(250), HorizontalAlignment.Left);
         ListViewSortHelper.ApplyInitialOrder(listViewTasks, _tasksSorter);
         listView_Resize(listViewTasks, EventArgs.Empty);
     }
@@ -1110,12 +1110,12 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         // Width of -2 indicates auto-size.
-        listViewAlarms.Columns.Add("Date time", 130, HorizontalAlignment.Left);
-        listViewAlarms.Columns.Add("User", 130, HorizontalAlignment.Left);
-        listViewAlarms.Columns.Add("Activated", 80, HorizontalAlignment.Left);
-        listViewAlarms.Columns.Add("Alarm periodicity", 120, HorizontalAlignment.Left);
-        listViewAlarms.Columns.Add("Min", 50, HorizontalAlignment.Left);
-        listViewAlarms.Columns.Add("Notification type", 120, HorizontalAlignment.Left);
+        listViewAlarms.Columns.Add("Date time", LogicalToDeviceUnits(130), HorizontalAlignment.Left);
+        listViewAlarms.Columns.Add("User", LogicalToDeviceUnits(130), HorizontalAlignment.Left);
+        listViewAlarms.Columns.Add("Activated", LogicalToDeviceUnits(80), HorizontalAlignment.Left);
+        listViewAlarms.Columns.Add("Alarm periodicity", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
+        listViewAlarms.Columns.Add("Min", LogicalToDeviceUnits(50), HorizontalAlignment.Left);
+        listViewAlarms.Columns.Add("Notification type", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
         listViewAlarms.Columns.Add("Comment", -2, HorizontalAlignment.Left);
         ListViewSortHelper.ApplyInitialOrder(listViewAlarms, _alarmsSorter);
         listView_Resize(listViewAlarms, EventArgs.Empty);
@@ -1146,19 +1146,19 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             if (!traceNote.IsDeleted())
                 listViewTraceNoteTo.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.ToId, traceNoteTypeNames));
 
-        listViewTraceNoteFrom.Columns.Add("Number", 60, HorizontalAlignment.Left);
-        listViewTraceNoteFrom.Columns.Add("Topic", 300, HorizontalAlignment.Left);
-        listViewTraceNoteFrom.Columns.Add("Tags", 150, HorizontalAlignment.Left);
-        listViewTraceNoteFrom.Columns.Add("Type", 110, HorizontalAlignment.Left);
-        listViewTraceNoteFrom.Columns.Add("Order", 55, HorizontalAlignment.Left);
-        listViewTraceNoteFrom.Columns.Add("Weight", 55, HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Number", LogicalToDeviceUnits(60), HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Topic", LogicalToDeviceUnits(300), HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Tags", LogicalToDeviceUnits(150), HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Type", LogicalToDeviceUnits(110), HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Order", LogicalToDeviceUnits(55), HorizontalAlignment.Left);
+        listViewTraceNoteFrom.Columns.Add("Weight", LogicalToDeviceUnits(55), HorizontalAlignment.Left);
 
-        listViewTraceNoteTo.Columns.Add("Number", 60, HorizontalAlignment.Left);
-        listViewTraceNoteTo.Columns.Add("Topic", 300, HorizontalAlignment.Left);
-        listViewTraceNoteTo.Columns.Add("Tags", 150, HorizontalAlignment.Left);
-        listViewTraceNoteTo.Columns.Add("Type", 110, HorizontalAlignment.Left);
-        listViewTraceNoteTo.Columns.Add("Order", 55, HorizontalAlignment.Left);
-        listViewTraceNoteTo.Columns.Add("Weight", 55, HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Number", LogicalToDeviceUnits(60), HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Topic", LogicalToDeviceUnits(300), HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Tags", LogicalToDeviceUnits(150), HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Type", LogicalToDeviceUnits(110), HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Order", LogicalToDeviceUnits(55), HorizontalAlignment.Left);
+        listViewTraceNoteTo.Columns.Add("Weight", LogicalToDeviceUnits(55), HorizontalAlignment.Left);
 
         ListViewSortHelper.ApplyInitialOrder(listViewTraceNoteFrom, _traceNoteFromSorter);
         ListViewSortHelper.ApplyInitialOrder(listViewTraceNoteTo, _traceNoteToSorter);
@@ -1772,7 +1772,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var formReadVar = new ReadVarForm(listVars);
 
         formReadVar.Text = "Search for text in the note description";
-        formReadVar.Size = new Size(500, 150);
+        formReadVar.Size = formReadVar.LogicalToDeviceUnits(new Size(500, 150));
 
         var result = formReadVar.ShowDialog();
 

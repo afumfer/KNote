@@ -418,12 +418,12 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[0].Visible = false;
         
         dataGridNotes.Columns[1].DataPropertyName = "NoteNumber";
-        dataGridNotes.Columns[1].Width = 80; // room for the sort glyph next to right-aligned numbers
+        dataGridNotes.Columns[1].Width = LogicalToDeviceUnits(80); // room for the sort glyph next to right-aligned numbers
         dataGridNotes.Columns[1].HeaderText = "Number";        
         dataGridNotes.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
         dataGridNotes.Columns[2].DataPropertyName = "Topic";
-        dataGridNotes.Columns[2].MinimumWidth = 380;
+        dataGridNotes.Columns[2].MinimumWidth = LogicalToDeviceUnits(380);
 
         // Not AutoSizeMode.Fill: that would forbid the user from widening Topic. Instead FitTopicColumn
         // stretches it over any free space on the right whenever the grid is resized.
@@ -431,27 +431,27 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.Columns[2].HeaderText = "Topic";        
 
         dataGridNotes.Columns[3].DataPropertyName = "Priority";
-        dataGridNotes.Columns[3].Width = 70;
+        dataGridNotes.Columns[3].Width = LogicalToDeviceUnits(70);
         dataGridNotes.Columns[3].HeaderText = "Priority";
         dataGridNotes.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
         dataGridNotes.Columns[4].DataPropertyName = "Tags";
-        dataGridNotes.Columns[4].Width = 140;
+        dataGridNotes.Columns[4].Width = LogicalToDeviceUnits(140);
         dataGridNotes.Columns[4].HeaderText = "Tags";
 
         dataGridNotes.Columns[5].DataPropertyName = "InternalTags";
-        dataGridNotes.Columns[5].Width = 150;
+        dataGridNotes.Columns[5].Width = LogicalToDeviceUnits(150);
         dataGridNotes.Columns[5].HeaderText = "Status";
 
         dataGridNotes.Columns[6].DataPropertyName = "ModificationDateTime";
-        dataGridNotes.Columns[6].Width = 160;
+        dataGridNotes.Columns[6].Width = LogicalToDeviceUnits(160);
         dataGridNotes.Columns[6].HeaderText = "Modification date";
         dataGridNotes.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         // Widths of the two date columns are fitted to their content once data is loaded
         // (FitDateColumns); a fixed pixel width doesn't follow the font/DPI and wastes space.
 
         dataGridNotes.Columns[7].DataPropertyName = "CreationDateTime";
-        dataGridNotes.Columns[7].Width = 150;
+        dataGridNotes.Columns[7].Width = LogicalToDeviceUnits(150);
         dataGridNotes.Columns[7].HeaderText = "Creation date";
         dataGridNotes.Columns[7].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 

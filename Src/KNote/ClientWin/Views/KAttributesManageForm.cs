@@ -146,11 +146,11 @@ public partial class KAttributesManageForm : KntForm, IViewManageList<KAttribute
         // column needs a real, fixed pixel width here: a "-2" (native auto-size) width on a column
         // nothing else manages is what used to leave "Required" collapsed and the other columns
         // shrunk, with empty space left over on the right.
-        listViewAttributes.Columns.Add("Note type", 150, HorizontalAlignment.Left);
-        listViewAttributes.Columns.Add("Order", 50, HorizontalAlignment.Left);
-        listViewAttributes.Columns.Add("Name", 150, HorizontalAlignment.Left);
-        listViewAttributes.Columns.Add("Data type", 100, HorizontalAlignment.Left);
-        listViewAttributes.Columns.Add("Required", 70, HorizontalAlignment.Left);
+        listViewAttributes.Columns.Add("Note type", LogicalToDeviceUnits(150), HorizontalAlignment.Left);
+        listViewAttributes.Columns.Add("Order", LogicalToDeviceUnits(50), HorizontalAlignment.Left);
+        listViewAttributes.Columns.Add("Name", LogicalToDeviceUnits(150), HorizontalAlignment.Left);
+        listViewAttributes.Columns.Add("Data type", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
+        listViewAttributes.Columns.Add("Required", LogicalToDeviceUnits(70), HorizontalAlignment.Left);
 
         if (_ctrl.ListEntities != null)
         {

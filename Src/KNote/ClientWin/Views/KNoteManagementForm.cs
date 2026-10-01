@@ -148,7 +148,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
         var formReadVar = new ReadVarForm(listVars);
         formReadVar.Text = caption;
-        formReadVar.Size = new Size(500, 150);
+        formReadVar.Size = formReadVar.LogicalToDeviceUnits(new Size(500, 150));
 
         return formReadVar.ShowDialog() == DialogResult.OK ? listVars[0].VarNewValueText : null;
     }

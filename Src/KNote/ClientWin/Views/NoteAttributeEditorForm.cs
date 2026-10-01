@@ -88,12 +88,12 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
 
     private void ModelToControlText(bool widthShort = false)
     {
-        textValue.Location = new Point(10, 32);
+        textValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
         textValue.Multiline = false;
         if(widthShort)
-            textValue.Size = new Size(200, 23);
+            textValue.Size = LogicalToDeviceUnits(new Size(200, 23));
         else
-            textValue.Size = new Size(478, 23);
+            textValue.Size = LogicalToDeviceUnits(new Size(478, 23));
         textValue.Text = _ctrl.Model.Value?.ToString();
         textValue.Visible = true;
         textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
@@ -103,9 +103,9 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
 
     private void ModelToControlTextArea()
     {
-        textValue.Location = new Point(10, 32);
+        textValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
         textValue.Multiline = true;
-        textValue.Size = new Size(478, 140);
+        textValue.Size = LogicalToDeviceUnits(new Size(478, 140));
         textValue.Text = _ctrl.Model.Value;
         textValue.Visible = true;
         textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -116,7 +116,7 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
     private void ModelToControlCheck()
     {
         labelAttribute.Text = "Check option:";
-        checkValue.Location = new Point(10, 32);
+        checkValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
         checkValue.Checked = bool.Parse(_ctrl.Model.Value);
         checkValue.Text = _ctrl.Model.Name;
         checkValue.Visible = true;
@@ -128,7 +128,7 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
     private void ModelToControlDateTime()
     {
         ModelToControlText(true);
-        buttonSelDate.Location = new Point(216, 32);
+        buttonSelDate.Location = new Point(LogicalToDeviceUnits(216), LogicalToDeviceUnits(32));
         buttonSelDate.Visible = true;
     }
 
@@ -142,8 +142,8 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
                 comboValue.Items.Add(atr.Value);
         }
         comboValue.SelectedItem = _ctrl.Model.Value;
-        comboValue.Location = new Point(10, 32);
-        comboValue.Size = new Size(478, 23);
+        comboValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
+        comboValue.Size = LogicalToDeviceUnits(new Size(478, 23));
         comboValue.Visible = true;
         comboValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
             | System.Windows.Forms.AnchorStyles.Left)
@@ -153,7 +153,7 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
     private async void ModelToControlListView()
     {
         PersonalizeListView(listViewValue);
-        listViewValue.Columns.Add("Name", 450, HorizontalAlignment.Left);
+        listViewValue.Columns.Add("Name", LogicalToDeviceUnits(450), HorizontalAlignment.Left);
         var res = await _ctrl.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_ctrl.Model.KAttributeId);
         if (res.IsValid)
         {                
@@ -168,8 +168,8 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
             }
                 
         }            
-        listViewValue.Location = new Point(10, 32);
-        listViewValue.Size = new Size(478, 140);
+        listViewValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
+        listViewValue.Size = LogicalToDeviceUnits(new Size(478, 140));
         listViewValue.Visible = true;
         listViewValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)

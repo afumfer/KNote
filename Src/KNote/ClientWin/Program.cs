@@ -29,10 +29,7 @@ static class Program
             return;
         }
 #endif
-        Application.SetHighDpiMode(HighDpiMode.SystemAware);
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-
+        // Visual styles, text rendering and high DPI mode (SystemAware) come from the csproj.
         ApplicationConfiguration.Initialize();
         Store appStore = new Store(new FactoryViewsWinForms());
         RegisterGlobalExceptionHandlers(appStore);

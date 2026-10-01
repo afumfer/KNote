@@ -55,7 +55,7 @@ public partial class TraceNoteTypesManageForm : KntForm, IViewManageList<TraceNo
     {
         listViewTraceNoteTypes.Clear();
 
-        listViewTraceNoteTypes.Columns.Add("Name", 200, HorizontalAlignment.Left);
+        listViewTraceNoteTypes.Columns.Add("Name", LogicalToDeviceUnits(200), HorizontalAlignment.Left);
         listViewTraceNoteTypes.Columns.Add("Description", -2, HorizontalAlignment.Left);
 
         if (_ctrl.ListEntities != null)

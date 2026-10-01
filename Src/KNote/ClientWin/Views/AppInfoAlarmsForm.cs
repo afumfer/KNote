@@ -236,11 +236,11 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         ListViewStyle.ApplyStandard(listView);
         listView.MultiSelect = false;
 
-        listView.Columns.Add("Notified", 130, HorizontalAlignment.Left);
-        listView.Columns.Add("Note", 200, HorizontalAlignment.Left);
-        listView.Columns.Add("Repository", 100, HorizontalAlignment.Left);
-        listView.Columns.Add("User", 120, HorizontalAlignment.Left);
-        listView.Columns.Add("Comment", 250, HorizontalAlignment.Left);
+        listView.Columns.Add("Notified", LogicalToDeviceUnits(130), HorizontalAlignment.Left);
+        listView.Columns.Add("Note", LogicalToDeviceUnits(200), HorizontalAlignment.Left);
+        listView.Columns.Add("Repository", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
+        listView.Columns.Add("User", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
+        listView.Columns.Add("Comment", LogicalToDeviceUnits(250), HorizontalAlignment.Left);
     }
 
     #endregion

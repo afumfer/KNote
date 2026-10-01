@@ -55,7 +55,7 @@ public partial class NoteTypesManageForm : KntForm, IViewManageList<NoteTypeDto>
     {
         listViewNoteTypes.Clear();
 
-        listViewNoteTypes.Columns.Add("Name", 200, HorizontalAlignment.Left);
+        listViewNoteTypes.Columns.Add("Name", LogicalToDeviceUnits(200), HorizontalAlignment.Left);
         listViewNoteTypes.Columns.Add("Description", -2, HorizontalAlignment.Left);
 
         if (_ctrl.ListEntities != null)

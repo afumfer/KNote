@@ -45,8 +45,8 @@ public partial class NoteTypesSelectorForm : KntForm, IViewEmbeddable
                 listViewNoteTypes.Items.Add(NoteTypeDtoToListViewItem(type));
             }
             
-            listViewNoteTypes.Columns.Add("Name", 120, HorizontalAlignment.Left);
-            listViewNoteTypes.Columns.Add("Description", 240, HorizontalAlignment.Left);
+            listViewNoteTypes.Columns.Add("Name", LogicalToDeviceUnits(120), HorizontalAlignment.Left);
+            listViewNoteTypes.Columns.Add("Description", LogicalToDeviceUnits(240), HorizontalAlignment.Left);
         }
     }
 

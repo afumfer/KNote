@@ -46,9 +46,9 @@ public partial class UsersSelectorForm : KntForm, IViewEmbeddable
                     item.Selected = true;
             }
 
-            listViewUsers.Columns.Add("User name", 100, HorizontalAlignment.Left);
-            listViewUsers.Columns.Add("Full name", 160, HorizontalAlignment.Left);
-            listViewUsers.Columns.Add("Email", 160, HorizontalAlignment.Left);
+            listViewUsers.Columns.Add("User name", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
+            listViewUsers.Columns.Add("Full name", LogicalToDeviceUnits(160), HorizontalAlignment.Left);
+            listViewUsers.Columns.Add("Email", LogicalToDeviceUnits(160), HorizontalAlignment.Left);
         }
     }
 

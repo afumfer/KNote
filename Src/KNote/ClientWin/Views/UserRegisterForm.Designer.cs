@@ -45,10 +45,10 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             //
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonCancel.Location = new Point(378, 391);
-            buttonCancel.Margin = new Padding(4, 5, 4, 5);
+            buttonCancel.Location = new Point(265, 235);
+            buttonCancel.Margin = new Padding(3);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new Size(91, 38);
+            buttonCancel.Size = new Size(64, 23);
             buttonCancel.TabIndex = 10;
             buttonCancel.Text = "&Cancel";
             buttonCancel.UseVisualStyleBackColor = true;
@@ -57,10 +57,10 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             //
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonAccept.Location = new Point(279, 391);
-            buttonAccept.Margin = new Padding(4, 5, 4, 5);
+            buttonAccept.Location = new Point(195, 235);
+            buttonAccept.Margin = new Padding(3);
             buttonAccept.Name = "buttonAccept";
-            buttonAccept.Size = new Size(91, 38);
+            buttonAccept.Size = new Size(64, 23);
             buttonAccept.TabIndex = 9;
             buttonAccept.Text = "&Accept";
             buttonAccept.UseVisualStyleBackColor = true;
@@ -69,95 +69,95 @@ namespace KNote.ClientWin.Views
             // labelInfo
             //
             labelInfo.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            labelInfo.Location = new Point(14, 12);
-            labelInfo.Margin = new Padding(4, 0, 4, 0);
+            labelInfo.Location = new Point(10, 7);
+            labelInfo.Margin = new Padding(3, 0, 3, 0);
             labelInfo.Name = "labelInfo";
-            labelInfo.Size = new Size(455, 75);
+            labelInfo.Size = new Size(318, 45);
             labelInfo.TabIndex = 0;
             //
             // labelUserName
             //
             labelUserName.AutoSize = true;
-            labelUserName.Location = new Point(14, 100);
-            labelUserName.Margin = new Padding(4, 0, 4, 0);
+            labelUserName.Location = new Point(10, 60);
+            labelUserName.Margin = new Padding(3, 0, 3, 0);
             labelUserName.Name = "labelUserName";
-            labelUserName.Size = new Size(96, 25);
+            labelUserName.Size = new Size(67, 15);
             labelUserName.TabIndex = 1;
             labelUserName.Text = "User name:";
             //
             // textUserName
             //
             textUserName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textUserName.Location = new Point(14, 128);
-            textUserName.Margin = new Padding(4, 5, 4, 5);
+            textUserName.Location = new Point(10, 77);
+            textUserName.Margin = new Padding(3);
             textUserName.Name = "textUserName";
             textUserName.ReadOnly = true;
-            textUserName.Size = new Size(455, 31);
+            textUserName.Size = new Size(318, 19);
             textUserName.TabIndex = 2;
             //
             // labelFullName
             //
             labelFullName.AutoSize = true;
-            labelFullName.Location = new Point(14, 172);
-            labelFullName.Margin = new Padding(4, 0, 4, 0);
+            labelFullName.Location = new Point(10, 103);
+            labelFullName.Margin = new Padding(3, 0, 3, 0);
             labelFullName.Name = "labelFullName";
-            labelFullName.Size = new Size(89, 25);
+            labelFullName.Size = new Size(62, 15);
             labelFullName.TabIndex = 3;
             labelFullName.Text = "Full name:";
             //
             // textFullName
             //
             textFullName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textFullName.Location = new Point(14, 200);
-            textFullName.Margin = new Padding(4, 5, 4, 5);
+            textFullName.Location = new Point(10, 120);
+            textFullName.Margin = new Padding(3);
             textFullName.Name = "textFullName";
-            textFullName.Size = new Size(455, 31);
+            textFullName.Size = new Size(318, 19);
             textFullName.TabIndex = 4;
             //
             // labelEMail
             //
             labelEMail.AutoSize = true;
-            labelEMail.Location = new Point(14, 244);
-            labelEMail.Margin = new Padding(4, 0, 4, 0);
+            labelEMail.Location = new Point(10, 146);
+            labelEMail.Margin = new Padding(3, 0, 3, 0);
             labelEMail.Name = "labelEMail";
-            labelEMail.Size = new Size(58, 25);
+            labelEMail.Size = new Size(41, 15);
             labelEMail.TabIndex = 5;
             labelEMail.Text = "Email:";
             //
             // textEMail
             //
             textEMail.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textEMail.Location = new Point(14, 272);
-            textEMail.Margin = new Padding(4, 5, 4, 5);
+            textEMail.Location = new Point(10, 163);
+            textEMail.Margin = new Padding(3);
             textEMail.Name = "textEMail";
-            textEMail.Size = new Size(455, 31);
+            textEMail.Size = new Size(318, 19);
             textEMail.TabIndex = 6;
             //
             // labelPassword
             //
             labelPassword.AutoSize = true;
-            labelPassword.Location = new Point(14, 316);
-            labelPassword.Margin = new Padding(4, 0, 4, 0);
+            labelPassword.Location = new Point(10, 190);
+            labelPassword.Margin = new Padding(3, 0, 3, 0);
             labelPassword.Name = "labelPassword";
-            labelPassword.Size = new Size(91, 25);
+            labelPassword.Size = new Size(64, 15);
             labelPassword.TabIndex = 7;
             labelPassword.Text = "Password:";
             //
             // textPassword
             //
             textPassword.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textPassword.Location = new Point(14, 344);
-            textPassword.Margin = new Padding(4, 5, 4, 5);
+            textPassword.Location = new Point(10, 206);
+            textPassword.Margin = new Padding(3);
             textPassword.Name = "textPassword";
-            textPassword.Size = new Size(455, 31);
+            textPassword.Size = new Size(318, 19);
             textPassword.TabIndex = 8;
             textPassword.UseSystemPasswordChar = true;
             //
             // UserRegisterForm
             //
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(483, 443);
+            ClientSize = new Size(338, 266);
             Controls.Add(buttonCancel);
             Controls.Add(buttonAccept);
             Controls.Add(labelInfo);
@@ -170,7 +170,7 @@ namespace KNote.ClientWin.Views
             Controls.Add(labelPassword);
             Controls.Add(textPassword);
             KeyPreview = true;
-            Margin = new Padding(4, 5, 4, 5);
+            Margin = new Padding(3);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "UserRegisterForm";

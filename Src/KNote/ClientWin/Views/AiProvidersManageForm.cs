@@ -55,8 +55,8 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
     {
         listViewProviders.Clear();
 
-        listViewProviders.Columns.Add("Alias", 160, HorizontalAlignment.Left);
-        listViewProviders.Columns.Add("Provider", 100, HorizontalAlignment.Left);
+        listViewProviders.Columns.Add("Alias", LogicalToDeviceUnits(160), HorizontalAlignment.Left);
+        listViewProviders.Columns.Add("Provider", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
         listViewProviders.Columns.Add("Model", -2, HorizontalAlignment.Left);
 
         if (_ctrl.ListEntities != null)

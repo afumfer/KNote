@@ -54,9 +54,9 @@
             panelForm.Controls.Add(panelBottom);
             panelForm.Dock = DockStyle.Fill;
             panelForm.Location = new Point(0, 0);
-            panelForm.Margin = new Padding(3, 4, 3, 4);
+            panelForm.Margin = new Padding(3);
             panelForm.Name = "panelForm";
-            panelForm.Size = new Size(760, 615);
+            panelForm.Size = new Size(665, 461);
             panelForm.TabIndex = 0;
             //
             // panelTextFilter
@@ -65,30 +65,30 @@
             panelTextFilter.Controls.Add(buttonUndoFilter);
             panelTextFilter.Dock = DockStyle.Top;
             panelTextFilter.Location = new Point(0, 0);
-            panelTextFilter.Margin = new Padding(3, 4, 3, 4);
+            panelTextFilter.Margin = new Padding(3);
             panelTextFilter.Name = "panelTextFilter";
-            panelTextFilter.Size = new Size(760, 40);
+            panelTextFilter.Size = new Size(665, 30);
             panelTextFilter.TabIndex = 0;
             panelTextFilter.Visible = false;
             //
             // textFilter
             //
             textFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textFilter.Location = new Point(8, 8);
-            textFilter.Margin = new Padding(3, 4, 3, 4);
+            textFilter.Location = new Point(7, 6);
+            textFilter.Margin = new Padding(3);
             textFilter.Name = "textFilter";
             textFilter.PlaceholderText = "Filter by #number, Topic or Tags... (Enter to apply)";
-            textFilter.Size = new Size(702, 27);
+            textFilter.Size = new Size(614, 20);
             textFilter.TabIndex = 0;
             textFilter.KeyDown += textFilter_KeyDown;
             //
             // buttonUndoFilter
             //
             buttonUndoFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonUndoFilter.Location = new Point(718, 8);
-            buttonUndoFilter.Margin = new Padding(3, 4, 3, 4);
+            buttonUndoFilter.Location = new Point(628, 6);
+            buttonUndoFilter.Margin = new Padding(3);
             buttonUndoFilter.Name = "buttonUndoFilter";
-            buttonUndoFilter.Size = new Size(32, 30);
+            buttonUndoFilter.Size = new Size(28, 22);
             buttonUndoFilter.TabIndex = 1;
             buttonUndoFilter.UseVisualStyleBackColor = true;
             buttonUndoFilter.Click += buttonUndoFilter_Click;
@@ -98,9 +98,9 @@
             panelDataGridNotes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panelDataGridNotes.Controls.Add(dataGridNotes);
             panelDataGridNotes.Location = new Point(1, 1);
-            panelDataGridNotes.Margin = new Padding(3, 4, 3, 4);
+            panelDataGridNotes.Margin = new Padding(3);
             panelDataGridNotes.Name = "panelDataGridNotes";
-            panelDataGridNotes.Size = new Size(759, 557);
+            panelDataGridNotes.Size = new Size(664, 418);
             panelDataGridNotes.TabIndex = 1;
             // 
             // dataGridNotes
@@ -115,13 +115,13 @@
             dataGridNotes.EditMode = DataGridViewEditMode.EditOnF2;
             dataGridNotes.GridColor = SystemColors.ControlDark;
             dataGridNotes.Location = new Point(0, 0);
-            dataGridNotes.Margin = new Padding(3, 4, 3, 4);
+            dataGridNotes.Margin = new Padding(3);
             dataGridNotes.Name = "dataGridNotes";
             dataGridNotes.ReadOnly = true;
             dataGridNotes.RowHeadersVisible = false;
-            dataGridNotes.RowHeadersWidth = 25;
+            dataGridNotes.RowHeadersWidth = 22;
             dataGridNotes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridNotes.Size = new Size(758, 555);
+            dataGridNotes.Size = new Size(663, 416);
             dataGridNotes.TabIndex = 0;
             dataGridNotes.Text = "dataGridView1";
             dataGridNotes.ColumnHeaderMouseClick += dataGridNotes_ColumnHeaderMouseClick;
@@ -134,27 +134,27 @@
             // 
             contextMenu.ImageScalingSize = new Size(20, 20);
             contextMenu.Name = "contextMenu";
-            contextMenu.Size = new Size(61, 4);
+            contextMenu.Size = new Size(53, 3);
             // 
             // panelBottom
             // 
             panelBottom.Controls.Add(buttonCancel);
             panelBottom.Controls.Add(buttonAccept);
             panelBottom.Dock = DockStyle.Bottom;
-            panelBottom.Location = new Point(0, 556);
-            panelBottom.Margin = new Padding(3, 4, 3, 4);
+            panelBottom.Location = new Point(0, 417);
+            panelBottom.Margin = new Padding(3);
             panelBottom.Name = "panelBottom";
-            panelBottom.Size = new Size(760, 59);
+            panelBottom.Size = new Size(665, 44);
             panelBottom.TabIndex = 2;
             // 
             // buttonCancel
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(660, 13);
-            buttonCancel.Margin = new Padding(3, 4, 3, 4);
+            buttonCancel.Location = new Point(578, 10);
+            buttonCancel.Margin = new Padding(3);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new Size(90, 34);
+            buttonCancel.Size = new Size(79, 26);
             buttonCancel.TabIndex = 2;
             buttonCancel.Text = "&Cancel";
             buttonCancel.UseVisualStyleBackColor = true;
@@ -164,10 +164,10 @@
             // 
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonAccept.DialogResult = DialogResult.OK;
-            buttonAccept.Location = new Point(564, 13);
-            buttonAccept.Margin = new Padding(3, 4, 3, 4);
+            buttonAccept.Location = new Point(494, 10);
+            buttonAccept.Margin = new Padding(3);
             buttonAccept.Name = "buttonAccept";
-            buttonAccept.Size = new Size(90, 34);
+            buttonAccept.Size = new Size(79, 26);
             buttonAccept.TabIndex = 1;
             buttonAccept.Text = "&Accept";
             buttonAccept.UseVisualStyleBackColor = true;
@@ -175,12 +175,12 @@
             // 
             // NotesSelectorForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(760, 615);
+            ClientSize = new Size(665, 461);
             Controls.Add(panelForm);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(3, 4, 3, 4);
+            Margin = new Padding(3);
             Name = "NotesSelectorForm";
             Text = "Notes selector";
             panelForm.ResumeLayout(false);
