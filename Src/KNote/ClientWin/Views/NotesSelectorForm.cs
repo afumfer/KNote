@@ -294,15 +294,19 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
     {
         _skipSelectionChanged = true;
 
+        // Columns first: the sort key below reads them, and configuring binds an empty list (it would
+        // replace the data if it ran afterwards).
+        CoonfigureGridStd();
+
         var entities = GetFilteredEntities();
 
+        // Always a List<NoteMinimalDto>, never a lazy LINQ query: from an *empty* IEnumerable the
+        // BindingSource can't tell the item type, and the grid then replaces all its configured columns
+        // with a single "Current" one (FitDateColumns etc. would no longer find them).
         if (_sortOrder == SortOrder.Descending)
-            _source.DataSource = entities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
+            _source.DataSource = entities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o)).ToList();
         else if (_sortOrder == SortOrder.Ascending)
-            _source.DataSource = entities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o));
-
-        // DataSource has changed, so we need to refresh the grid definition
-        CoonfigureGridStd();
+            _source.DataSource = entities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o)).ToList();
 
         dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
