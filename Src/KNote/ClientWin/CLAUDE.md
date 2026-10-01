@@ -354,6 +354,16 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
 - **Modo embebido**: si el nuevo caso de uso necesita mostrarse tanto en ventana flotante como embebido en
   un panel, hereda de `CtrlViewEmbeddableBase`/`CtrlNoteEditorEmbeddableBase` e implementa
   `IViewEmbeddable` en el `Form` (`PanelView()`, `ConfigureEmbededMode()`, `ConfigureWindowMode()`).
+- **Escalado (DPI)**: la app es `SystemAware` (`ApplicationHighDpiMode` en el csproj): se maqueta una vez a
+  la escala del sistema y Windows reescala la ventana si se mueve a un monitor con otra escala. Se probó
+  `PerMonitorV2` y descuadra las vistas embebidas (`TopLevel = false`) al pasar a un monitor de menor escala;
+  no lo actives sin rehacer antes esas vistas. El diseñador de VS trabaja siempre a 100 %
+  (`ForceDesignerDPIUnaware`), así que todos los formularios tienen `AutoScaleDimensions = 7x15`. Cualquier
+  tamaño en píxeles que se asigne **en código** después de `InitializeComponent()` (anchos de columna,
+  posiciones, tamaños de ventana) ya no lo escala WinForms: pásalo por `LogicalToDeviceUnits(...)`.
+- **Iconos**: salen de `KntIcons` (`KntIcon` + `SetKntIcon(...)`/`KntIconProvider`), asignados en código
+  tras `InitializeComponent()`, nunca como imágenes en el diseñador. Ver `KntIcons/CLAUDE.md`. Excepción: el
+  icono de la aplicación (`Resources/Icons/stickyyellow_32_icon.ico`) y el del PostIt se mantienen como están.
 
 ## Tests (`ClientWin.Tests`)
 

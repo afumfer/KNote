@@ -15,7 +15,8 @@ No hay un único `.sln` en la raíz; hay varios `.slnx` ("VS solution XML"), cad
 distinta del código:
 
 - `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `Repository*`, `ClientWin`, `Client`,
-  `KntScript`, `MessageBroker*`, `HtmlEditorControl`, `KntEditViewControl`. Úsalo para la mayoría del trabajo.
+  `KntScript`, `MessageBroker*`, `HtmlEditorControl`, `KntEditViewControl`, `KntIcons`. Úsalo para la mayoría del
+  trabajo.
 - `KNoteTest.slnx` — solo `Model` + `Tests`, para ejecutar la suite de tests de integración de forma aislada.
 
 Existen además otros `.slnx` específicos de subproyectos (por ejemplo el de `KntRedmineApi`, documentado en
@@ -81,15 +82,16 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   ├─ MessageBroker
   │    └─ MessageBroker.RabbitMQ
   ├─ Service                          (→ Repository, Repository.Dapper, Repository.EntityFramework, MessageBroker*)
-  │    └─ ClientWin                   (→ también HtmlEditorControl, KntEditViewControl, KntScript)
+  │    └─ ClientWin                   (→ también HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
 
 Server → Client, Model, Service
 KntEditViewControl → HtmlEditorControl
 ```
 
-`KntScript` y `HtmlEditorControl` no tienen referencias a otros proyectos (son hojas usadas solo por
-`ClientWin`).
+`KntScript`, `HtmlEditorControl` y `KntIcons` no tienen referencias a otros proyectos (son hojas usadas solo
+por `ClientWin`). `KntIcons` dibuja los iconos de la UI WinForms a partir de una fuente vectorial para que se
+vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`.
 
 ### Patrón Repository (ORM intercambiable)
 

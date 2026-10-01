@@ -13,4 +13,5 @@
   <Project Path="MessageBroker.RabbitMQ/KNote.MessageBroker.RabbitMQ.csproj" />
   <Project Path="HtmlEditorControl/HTMLEditorControl.csproj" />
   <Project Path="KntEditViewControl/KntEditViewControl.csproj" />
+  <Project Path="KntIcons/KntIcons.csproj" />
 </Solution>
