@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HtmlEditorControl\HTMLEditorControl.csproj" />
+    <ProjectReference Include="..\KntIcons\KntIcons.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">

@@ -86,12 +86,13 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
 
 Server → Client, Model, Service
-KntEditViewControl → HtmlEditorControl
+KntEditViewControl → HtmlEditorControl, KntIcons
+HtmlEditorControl → KntIcons
 ```
 
-`KntScript`, `HtmlEditorControl` y `KntIcons` no tienen referencias a otros proyectos (son hojas usadas solo
-por `ClientWin`). `KntIcons` dibuja los iconos de la UI WinForms a partir de una fuente vectorial para que se
-vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`.
+`KntScript` y `KntIcons` no tienen referencias a otros proyectos (son hojas). `KntIcons` dibuja los iconos de
+la UI WinForms (`ClientWin`, `HtmlEditorControl`, `KntEditViewControl`) a partir de una fuente vectorial para
+que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`.
 
 ### Patrón Repository (ORM intercambiable)
 

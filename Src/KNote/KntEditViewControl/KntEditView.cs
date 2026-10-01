@@ -2,6 +2,7 @@
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using MSDN.Html.Editor;
+using KntIcons;
 
 namespace KntWebView
 {
@@ -13,6 +14,10 @@ namespace KntWebView
         {
             InitializeComponent();
             InitializeEditorsComponent();
+
+            btnBack.SetKntIcon(KntIcon.Back);
+            btnForward.SetKntIcon(KntIcon.Forward);
+            btnNavigate.SetKntIcon(KntIcon.Refresh);
         }
 
         #endregion

@@ -186,7 +186,6 @@
             // toolstripTextCut
             // 
             this.toolstripTextCut.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripTextCut.Image = global::MSDN.Html.Editor.Properties.Resources.ToolBarCut;
             resources.ApplyResources(this.toolstripTextCut, "toolstripTextCut");
             this.toolstripTextCut.Name = "toolstripTextCut";
             this.toolstripTextCut.Tag = "TextCut";
@@ -195,7 +194,6 @@
             // toolstripTextCopy
             // 
             this.toolstripTextCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripTextCopy.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarCopy;
             resources.ApplyResources(this.toolstripTextCopy, "toolstripTextCopy");
             this.toolstripTextCopy.Name = "toolstripTextCopy";
             this.toolstripTextCopy.Tag = "TextCopy";
@@ -204,7 +202,6 @@
             // toolstripTextPaste
             // 
             this.toolstripTextPaste.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripTextPaste.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarPaste;
             resources.ApplyResources(this.toolstripTextPaste, "toolstripTextPaste");
             this.toolstripTextPaste.Name = "toolstripTextPaste";
             this.toolstripTextPaste.Tag = "TextPaste";
@@ -218,7 +215,6 @@
             // toolstripEditUndo
             // 
             this.toolstripEditUndo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripEditUndo.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarUndo;
             resources.ApplyResources(this.toolstripEditUndo, "toolstripEditUndo");
             this.toolstripEditUndo.Name = "toolstripEditUndo";
             this.toolstripEditUndo.Tag = "EditUndo";
@@ -227,7 +223,6 @@
             // toolstripEditRedo
             // 
             this.toolstripEditRedo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripEditRedo.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarRedo;
             resources.ApplyResources(this.toolstripEditRedo, "toolstripEditRedo");
             this.toolstripEditRedo.Name = "toolstripEditRedo";
             this.toolstripEditRedo.Tag = "EditRedo";
@@ -241,7 +236,6 @@
             // toolstripFormatBold
             // 
             this.toolstripFormatBold.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFormatBold.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarBold;
             resources.ApplyResources(this.toolstripFormatBold, "toolstripFormatBold");
             this.toolstripFormatBold.Name = "toolstripFormatBold";
             this.toolstripFormatBold.Tag = "FormatBold";
@@ -250,7 +244,6 @@
             // toolstripFormatUnderline
             // 
             this.toolstripFormatUnderline.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFormatUnderline.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarUnderline;
             resources.ApplyResources(this.toolstripFormatUnderline, "toolstripFormatUnderline");
             this.toolstripFormatUnderline.Name = "toolstripFormatUnderline";
             this.toolstripFormatUnderline.Tag = "FormatUnderline";
@@ -259,7 +252,6 @@
             // toolstripFormatItalic
             // 
             this.toolstripFormatItalic.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFormatItalic.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarItalic;
             resources.ApplyResources(this.toolstripFormatItalic, "toolstripFormatItalic");
             this.toolstripFormatItalic.Name = "toolstripFormatItalic";
             this.toolstripFormatItalic.Tag = "FormatItalic";
@@ -268,7 +260,6 @@
             // toolstripFontDialog
             // 
             this.toolstripFontDialog.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFontDialog.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontStyle;
             resources.ApplyResources(this.toolstripFontDialog, "toolstripFontDialog");
             this.toolstripFontDialog.Name = "toolstripFontDialog";
             this.toolstripFontDialog.Tag = "FontDialog";
@@ -277,7 +268,6 @@
             // toolstripFontNormal
             // 
             this.toolstripFontNormal.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFontNormal.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontNormal;
             resources.ApplyResources(this.toolstripFontNormal, "toolstripFontNormal");
             this.toolstripFontNormal.Name = "toolstripFontNormal";
             this.toolstripFontNormal.Tag = "FontNormal";
@@ -286,7 +276,6 @@
             // toolstripColorDialog
             // 
             this.toolstripColorDialog.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripColorDialog.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontColor;
             resources.ApplyResources(this.toolstripColorDialog, "toolstripColorDialog");
             this.toolstripColorDialog.Name = "toolstripColorDialog";
             this.toolstripColorDialog.Tag = "ColorDialog";
@@ -295,7 +284,6 @@
             // toolstripFontIncrease
             // 
             this.toolstripFontIncrease.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFontIncrease.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontUp;
             resources.ApplyResources(this.toolstripFontIncrease, "toolstripFontIncrease");
             this.toolstripFontIncrease.Name = "toolstripFontIncrease";
             this.toolstripFontIncrease.Tag = "FontIncrease";
@@ -304,7 +292,6 @@
             // toolstripFontDecrease
             // 
             this.toolstripFontDecrease.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFontDecrease.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontDown;
             resources.ApplyResources(this.toolstripFontDecrease, "toolstripFontDecrease");
             this.toolstripFontDecrease.Name = "toolstripFontDecrease";
             this.toolstripFontDecrease.Tag = "FontDecrease";
@@ -318,7 +305,6 @@
             // toolstripJustifyLeft
             // 
             this.toolstripJustifyLeft.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripJustifyLeft.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarJustifyLeft;
             resources.ApplyResources(this.toolstripJustifyLeft, "toolstripJustifyLeft");
             this.toolstripJustifyLeft.Name = "toolstripJustifyLeft";
             this.toolstripJustifyLeft.Tag = "JustifyLeft";
@@ -327,7 +313,6 @@
             // toolstripJustifyCenter
             // 
             this.toolstripJustifyCenter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripJustifyCenter.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarJustifyCenter;
             resources.ApplyResources(this.toolstripJustifyCenter, "toolstripJustifyCenter");
             this.toolstripJustifyCenter.Name = "toolstripJustifyCenter";
             this.toolstripJustifyCenter.Tag = "JustifyCenter";
@@ -336,7 +321,6 @@
             // toolstripJustifyRight
             // 
             this.toolstripJustifyRight.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripJustifyRight.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarJustifyRight;
             resources.ApplyResources(this.toolstripJustifyRight, "toolstripJustifyRight");
             this.toolstripJustifyRight.Name = "toolstripJustifyRight";
             this.toolstripJustifyRight.Tag = "JustifyRight";
@@ -345,7 +329,6 @@
             // toolstripFontIndent
             // 
             this.toolstripFontIndent.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFontIndent.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTabInsert;
             resources.ApplyResources(this.toolstripFontIndent, "toolstripFontIndent");
             this.toolstripFontIndent.Name = "toolstripFontIndent";
             this.toolstripFontIndent.Tag = "FontIndent";
@@ -354,7 +337,6 @@
             // toolstripFontOutdent
             // 
             this.toolstripFontOutdent.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFontOutdent.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTabRemove;
             resources.ApplyResources(this.toolstripFontOutdent, "toolstripFontOutdent");
             this.toolstripFontOutdent.Name = "toolstripFontOutdent";
             this.toolstripFontOutdent.Tag = "FontOutdent";
@@ -368,7 +350,6 @@
             // toolstripListOrdered
             // 
             this.toolstripListOrdered.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripListOrdered.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarListOrdered;
             resources.ApplyResources(this.toolstripListOrdered, "toolstripListOrdered");
             this.toolstripListOrdered.Name = "toolstripListOrdered";
             this.toolstripListOrdered.Tag = "ListOrdered";
@@ -377,7 +358,6 @@
             // toolstripListUnordered
             // 
             this.toolstripListUnordered.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripListUnordered.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarListUnordered;
             resources.ApplyResources(this.toolstripListUnordered, "toolstripListUnordered");
             this.toolstripListUnordered.Name = "toolstripListUnordered";
             this.toolstripListUnordered.Tag = "ListUnordered";
@@ -391,7 +371,6 @@
             // toolstripInsertLine
             // 
             this.toolstripInsertLine.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripInsertLine.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarLine;
             resources.ApplyResources(this.toolstripInsertLine, "toolstripInsertLine");
             this.toolstripInsertLine.Name = "toolstripInsertLine";
             this.toolstripInsertLine.Tag = "InsertLine";
@@ -400,7 +379,6 @@
             // toolstripInsertTable
             // 
             this.toolstripInsertTable.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripInsertTable.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTable;
             resources.ApplyResources(this.toolstripInsertTable, "toolstripInsertTable");
             this.toolstripInsertTable.Name = "toolstripInsertTable";
             this.toolstripInsertTable.Tag = "InsertTable";
@@ -409,7 +387,6 @@
             // toolstripInsertImage
             // 
             this.toolstripInsertImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripInsertImage.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarImage;
             resources.ApplyResources(this.toolstripInsertImage, "toolstripInsertImage");
             this.toolstripInsertImage.Name = "toolstripInsertImage";
             this.toolstripInsertImage.Tag = "InsertImage";
@@ -418,7 +395,6 @@
             // toolstripInsertLink
             // 
             this.toolstripInsertLink.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripInsertLink.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarWebLink;
             resources.ApplyResources(this.toolstripInsertLink, "toolstripInsertLink");
             this.toolstripInsertLink.Name = "toolstripInsertLink";
             this.toolstripInsertLink.Tag = "InsertLink";
@@ -432,7 +408,6 @@
             // toolstripFindReplace
             // 
             this.toolstripFindReplace.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripFindReplace.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFind;
             resources.ApplyResources(this.toolstripFindReplace, "toolstripFindReplace");
             this.toolstripFindReplace.Name = "toolstripFindReplace";
             this.toolstripFindReplace.Tag = "FindReplace";
@@ -441,7 +416,6 @@
             // toolstripDocumentPrint
             // 
             this.toolstripDocumentPrint.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolstripDocumentPrint.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarPrint;
             resources.ApplyResources(this.toolstripDocumentPrint, "toolstripDocumentPrint");
             this.toolstripDocumentPrint.Name = "toolstripDocumentPrint";
             this.toolstripDocumentPrint.Tag = "DocumentPrint";
@@ -475,7 +449,6 @@
             // 
             // contextTableModify
             // 
-            this.contextTableModify.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTable;
             resources.ApplyResources(this.contextTableModify, "contextTableModify");
             this.contextTableModify.Name = "contextTableModify";
             this.contextTableModify.Tag = "TableModify";
@@ -515,7 +488,6 @@
             // 
             // contextEditUndo
             // 
-            this.contextEditUndo.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarUndo;
             resources.ApplyResources(this.contextEditUndo, "contextEditUndo");
             this.contextEditUndo.Name = "contextEditUndo";
             this.contextEditUndo.Tag = "EditUndo";
@@ -523,7 +495,6 @@
             // 
             // contextEditRedo
             // 
-            this.contextEditRedo.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarRedo;
             resources.ApplyResources(this.contextEditRedo, "contextEditRedo");
             this.contextEditRedo.Name = "contextEditRedo";
             this.contextEditRedo.Tag = "EditRedo";
@@ -536,7 +507,6 @@
             // 
             // contextEditCut
             // 
-            this.contextEditCut.Image = global::MSDN.Html.Editor.Properties.Resources.ToolBarCut;
             resources.ApplyResources(this.contextEditCut, "contextEditCut");
             this.contextEditCut.Name = "contextEditCut";
             this.contextEditCut.Tag = "TextCut";
@@ -544,7 +514,6 @@
             // 
             // contextEditCopy
             // 
-            this.contextEditCopy.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarCopy;
             resources.ApplyResources(this.contextEditCopy, "contextEditCopy");
             this.contextEditCopy.Name = "contextEditCopy";
             this.contextEditCopy.Tag = "TextCopy";
@@ -552,7 +521,6 @@
             // 
             // contextEditPaste
             // 
-            this.contextEditPaste.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarPaste;
             resources.ApplyResources(this.contextEditPaste, "contextEditPaste");
             this.contextEditPaste.Name = "contextEditPaste";
             this.contextEditPaste.Tag = "TextPaste";
@@ -565,7 +533,6 @@
             // 
             // contextEditFindReplace
             // 
-            this.contextEditFindReplace.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFind;
             resources.ApplyResources(this.contextEditFindReplace, "contextEditFindReplace");
             this.contextEditFindReplace.Name = "contextEditFindReplace";
             this.contextEditFindReplace.Tag = "FindReplace";
@@ -592,7 +559,6 @@
             // 
             // contextEditDelete
             // 
-            this.contextEditDelete.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarDelete;
             resources.ApplyResources(this.contextEditDelete, "contextEditDelete");
             this.contextEditDelete.Name = "contextEditDelete";
             this.contextEditDelete.Tag = "TextDelete";
@@ -615,7 +581,6 @@
             // 
             // contextDocumentOpen
             // 
-            this.contextDocumentOpen.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFileOpen;
             resources.ApplyResources(this.contextDocumentOpen, "contextDocumentOpen");
             this.contextDocumentOpen.Name = "contextDocumentOpen";
             this.contextDocumentOpen.Tag = "OpenFile";
@@ -623,7 +588,6 @@
             // 
             // contextDocumentSave
             // 
-            this.contextDocumentSave.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFileSave;
             resources.ApplyResources(this.contextDocumentSave, "contextDocumentSave");
             this.contextDocumentSave.Name = "contextDocumentSave";
             this.contextDocumentSave.Tag = "SaveFile";
@@ -636,7 +600,6 @@
             // 
             // contextDocumentPrint
             // 
-            this.contextDocumentPrint.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarPrint;
             resources.ApplyResources(this.contextDocumentPrint, "contextDocumentPrint");
             this.contextDocumentPrint.Name = "contextDocumentPrint";
             this.contextDocumentPrint.Tag = "DocumentPrint";
@@ -706,7 +669,6 @@
             // 
             // contextFormatFontDialog
             // 
-            this.contextFormatFontDialog.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontStyle;
             resources.ApplyResources(this.contextFormatFontDialog, "contextFormatFontDialog");
             this.contextFormatFontDialog.Name = "contextFormatFontDialog";
             this.contextFormatFontDialog.Tag = "FontDialog";
@@ -714,7 +676,6 @@
             // 
             // contextFormatColorDialog
             // 
-            this.contextFormatColorDialog.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontColor;
             resources.ApplyResources(this.contextFormatColorDialog, "contextFormatColorDialog");
             this.contextFormatColorDialog.Name = "contextFormatColorDialog";
             this.contextFormatColorDialog.Tag = "ColorDialog";
@@ -734,7 +695,6 @@
             // 
             // contextFormatBold
             // 
-            this.contextFormatBold.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarBold;
             resources.ApplyResources(this.contextFormatBold, "contextFormatBold");
             this.contextFormatBold.Name = "contextFormatBold";
             this.contextFormatBold.Tag = "FormatBold";
@@ -742,7 +702,6 @@
             // 
             // contextFormatItalic
             // 
-            this.contextFormatItalic.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarItalic;
             resources.ApplyResources(this.contextFormatItalic, "contextFormatItalic");
             this.contextFormatItalic.Name = "contextFormatItalic";
             this.contextFormatItalic.Tag = "FormatItalic";
@@ -750,7 +709,6 @@
             // 
             // contextFormatUnderline
             // 
-            this.contextFormatUnderline.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarUnderline;
             resources.ApplyResources(this.contextFormatUnderline, "contextFormatUnderline");
             this.contextFormatUnderline.Name = "contextFormatUnderline";
             this.contextFormatUnderline.Tag = "FormatUnderline";
@@ -784,7 +742,6 @@
             // 
             // contextFormatIncrease
             // 
-            this.contextFormatIncrease.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontUp;
             resources.ApplyResources(this.contextFormatIncrease, "contextFormatIncrease");
             this.contextFormatIncrease.Name = "contextFormatIncrease";
             this.contextFormatIncrease.Tag = "FontIncrease";
@@ -792,7 +749,6 @@
             // 
             // contextFormatDecrease
             // 
-            this.contextFormatDecrease.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontDown;
             resources.ApplyResources(this.contextFormatDecrease, "contextFormatDecrease");
             this.contextFormatDecrease.Name = "contextFormatDecrease";
             this.contextFormatDecrease.Tag = "FontDecrease";
@@ -800,7 +756,6 @@
             // 
             // contextFormatIndent
             // 
-            this.contextFormatIndent.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTabInsert;
             resources.ApplyResources(this.contextFormatIndent, "contextFormatIndent");
             this.contextFormatIndent.Name = "contextFormatIndent";
             this.contextFormatIndent.Tag = "FontIndent";
@@ -808,7 +763,6 @@
             // 
             // contextFormatOutdent
             // 
-            this.contextFormatOutdent.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTabRemove;
             resources.ApplyResources(this.contextFormatOutdent, "contextFormatOutdent");
             this.contextFormatOutdent.Name = "contextFormatOutdent";
             this.contextFormatOutdent.Tag = "FontOutdent";
@@ -821,7 +775,6 @@
             // 
             // contextFormatListOrdered
             // 
-            this.contextFormatListOrdered.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarListOrdered;
             resources.ApplyResources(this.contextFormatListOrdered, "contextFormatListOrdered");
             this.contextFormatListOrdered.Name = "contextFormatListOrdered";
             this.contextFormatListOrdered.Tag = "ListOrdered";
@@ -829,7 +782,6 @@
             // 
             // contextFormatListUnordered
             // 
-            this.contextFormatListUnordered.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarListUnordered;
             resources.ApplyResources(this.contextFormatListUnordered, "contextFormatListUnordered");
             this.contextFormatListUnordered.Name = "contextFormatListUnordered";
             this.contextFormatListUnordered.Tag = "ListUnordered";
@@ -846,7 +798,6 @@
             // 
             // contextJustifyLeft
             // 
-            this.contextJustifyLeft.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarJustifyLeft;
             resources.ApplyResources(this.contextJustifyLeft, "contextJustifyLeft");
             this.contextJustifyLeft.Name = "contextJustifyLeft";
             this.contextJustifyLeft.Tag = "JustifyLeft";
@@ -854,7 +805,6 @@
             // 
             // contextJustifyCenter
             // 
-            this.contextJustifyCenter.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarJustifyCenter;
             resources.ApplyResources(this.contextJustifyCenter, "contextJustifyCenter");
             this.contextJustifyCenter.Name = "contextJustifyCenter";
             this.contextJustifyCenter.Tag = "JustifyCenter";
@@ -862,7 +812,6 @@
             // 
             // contextJustifyRight
             // 
-            this.contextJustifyRight.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarJustifyRight;
             resources.ApplyResources(this.contextJustifyRight, "contextJustifyRight");
             this.contextJustifyRight.Name = "contextJustifyRight";
             this.contextJustifyRight.Tag = "JustifyRight";
@@ -883,7 +832,6 @@
             // 
             // contextFormattingNormal
             // 
-            this.contextFormattingNormal.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarFontNormal;
             resources.ApplyResources(this.contextFormattingNormal, "contextFormattingNormal");
             this.contextFormattingNormal.Name = "contextFormattingNormal";
             this.contextFormattingNormal.Tag = "FormattedNormal";
@@ -950,7 +898,6 @@
             // 
             // contextInsertLine
             // 
-            this.contextInsertLine.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarLine;
             resources.ApplyResources(this.contextInsertLine, "contextInsertLine");
             this.contextInsertLine.Name = "contextInsertLine";
             this.contextInsertLine.Tag = "InsertLine";
@@ -958,7 +905,6 @@
             // 
             // contextInsertLink
             // 
-            this.contextInsertLink.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarWebLink;
             resources.ApplyResources(this.contextInsertLink, "contextInsertLink");
             this.contextInsertLink.Name = "contextInsertLink";
             this.contextInsertLink.Tag = "InsertLink";
@@ -966,7 +912,6 @@
             // 
             // contextInsertImage
             // 
-            this.contextInsertImage.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarImage;
             resources.ApplyResources(this.contextInsertImage, "contextInsertImage");
             this.contextInsertImage.Name = "contextInsertImage";
             this.contextInsertImage.Tag = "InsertImage";
@@ -988,7 +933,6 @@
             // 
             // contextInsertTable
             // 
-            this.contextInsertTable.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarTable;
             resources.ApplyResources(this.contextInsertTable, "contextInsertTable");
             this.contextInsertTable.Name = "contextInsertTable";
             this.contextInsertTable.Tag = "InsertTable";

@@ -123,4 +123,7 @@
       <HintPath>Lib\Microsoft.mshtml.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KntIcons\KntIcons.csproj" />
+  </ItemGroup>
 </Project>

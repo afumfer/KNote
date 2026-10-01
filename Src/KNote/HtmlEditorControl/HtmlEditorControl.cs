@@ -13,6 +13,7 @@ using System.Net;
 using System.Text;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using KntIcons;
 
 using mshtmlDocument = mshtml.HTMLDocument;
 using mshtmlBody = mshtml.HTMLBody;
@@ -295,6 +296,7 @@ namespace MSDN.Html.Editor
 		{
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
+            SetIcons();
 
 			// define the default values
 			// browser constants and commands
@@ -340,6 +342,49 @@ namespace MSDN.Html.Editor
             this.ScrollBars = _scrollBars;
 
         } //HtmlEditorControl
+
+
+        /// <summary>
+        /// Toolbar and context menu icons, drawn by KntIcons at the current DPI
+        /// </summary>
+        private void SetIcons()
+        {
+            var icons = new (ToolStripItem Item, KntIcon Icon)[]
+            {
+                (toolstripTextCut, KntIcon.Cut), (contextEditCut, KntIcon.Cut),
+                (toolstripTextCopy, KntIcon.Copy), (contextEditCopy, KntIcon.Copy),
+                (toolstripTextPaste, KntIcon.PasteFromClipboard), (contextEditPaste, KntIcon.PasteFromClipboard),
+                (contextEditDelete, KntIcon.Delete),
+                (toolstripEditUndo, KntIcon.Undo), (contextEditUndo, KntIcon.Undo),
+                (toolstripEditRedo, KntIcon.Redo), (contextEditRedo, KntIcon.Redo),
+                (toolstripFindReplace, KntIcon.Search), (contextEditFindReplace, KntIcon.Search),
+                (toolstripFormatBold, KntIcon.Bold), (contextFormatBold, KntIcon.Bold),
+                (toolstripFormatItalic, KntIcon.Italic), (contextFormatItalic, KntIcon.Italic),
+                (toolstripFormatUnderline, KntIcon.Underline), (contextFormatUnderline, KntIcon.Underline),
+                (toolstripFontDialog, KntIcon.Font), (contextFormatFontDialog, KntIcon.Font),
+                (toolstripFontNormal, KntIcon.ClearFormatting), (contextFormattingNormal, KntIcon.ClearFormatting),
+                (toolstripColorDialog, KntIcon.FontColor), (contextFormatColorDialog, KntIcon.FontColor),
+                (toolstripFontIncrease, KntIcon.FontIncrease), (contextFormatIncrease, KntIcon.FontIncrease),
+                (toolstripFontDecrease, KntIcon.FontDecrease), (contextFormatDecrease, KntIcon.FontDecrease),
+                (toolstripJustifyLeft, KntIcon.AlignLeft), (contextJustifyLeft, KntIcon.AlignLeft),
+                (toolstripJustifyCenter, KntIcon.AlignCenter), (contextJustifyCenter, KntIcon.AlignCenter),
+                (toolstripJustifyRight, KntIcon.AlignRight), (contextJustifyRight, KntIcon.AlignRight),
+                (toolstripFontIndent, KntIcon.IndentIncrease), (contextFormatIndent, KntIcon.IndentIncrease),
+                (toolstripFontOutdent, KntIcon.IndentDecrease), (contextFormatOutdent, KntIcon.IndentDecrease),
+                (toolstripListOrdered, KntIcon.NumberedList), (contextFormatListOrdered, KntIcon.NumberedList),
+                (toolstripListUnordered, KntIcon.BulletedList), (contextFormatListUnordered, KntIcon.BulletedList),
+                (toolstripInsertLine, KntIcon.HorizontalLine), (contextInsertLine, KntIcon.HorizontalLine),
+                (toolstripInsertTable, KntIcon.Table), (contextInsertTable, KntIcon.Table), (contextTableModify, KntIcon.Table),
+                (toolstripInsertImage, KntIcon.Image), (contextInsertImage, KntIcon.Image),
+                (toolstripInsertLink, KntIcon.Link), (contextInsertLink, KntIcon.Link),
+                (toolstripDocumentPrint, KntIcon.Print), (contextDocumentPrint, KntIcon.Print),
+                (contextDocumentOpen, KntIcon.FolderOpen),
+                (contextDocumentSave, KntIcon.Save),
+            };
+            foreach (var (item, icon) in icons)
+                item.SetKntIcon(icon);
+
+        } //SetIcons
 
 
         /// <summary>

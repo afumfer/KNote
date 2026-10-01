@@ -1,7 +1,7 @@
 # CLAUDE.md
 
-Guía para trabajar en `KntIcons`, la librería de iconos de las apps WinForms de KNote (`ClientWin` y, más
-adelante, `HtmlEditorControl`/`KntEditViewControl`). Proyecto hoja: no referencia a ningún otro proyecto.
+Guía para trabajar en `KntIcons`, la librería de iconos de la UI WinForms de KNote (`ClientWin`,
+`HtmlEditorControl` y `KntEditViewControl`). Proyecto hoja: no referencia a ningún otro proyecto.
 
 ## Qué resuelve
 

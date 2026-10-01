@@ -60,7 +60,6 @@
             // 
             // btnForward
             // 
-            btnForward.Image = (Image)resources.GetObject("btnForward.Image");
             btnForward.Location = new Point(26, 2);
             btnForward.Name = "btnForward";
             btnForward.Size = new Size(25, 25);
@@ -70,7 +69,6 @@
             // 
             // btnBack
             // 
-            btnBack.Image = (Image)resources.GetObject("btnBack.Image");
             btnBack.Location = new Point(1, 2);
             btnBack.Name = "btnBack";
             btnBack.Size = new Size(25, 25);
@@ -80,7 +78,6 @@
             // 
             // btnNavigate
             // 
-            btnNavigate.Image = (Image)resources.GetObject("btnNavigate.Image");
             btnNavigate.Location = new Point(51, 2);
             btnNavigate.Name = "btnNavigate";
             btnNavigate.Size = new Size(25, 25);
