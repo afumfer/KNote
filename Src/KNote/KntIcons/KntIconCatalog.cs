@@ -18,6 +18,7 @@ internal static class KntIconCatalog
     // Monochrome icons; color only carries meaning, and only for a few of them.
     private static readonly Color Neutral = Color.FromArgb(0x42, 0x42, 0x42);
     private static readonly Color Folder = Color.FromArgb(0xC2, 0x82, 0x00);
+    private static readonly Color PostIt = Color.FromArgb(0xD8, 0xA8, 0x00);
     private static readonly Color Repository = Color.FromArgb(0x0F, 0x6C, 0xBD);
     private static readonly Color Alarm = Color.FromArgb(0xCA, 0x50, 0x10);
     private static readonly Color Success = Color.FromArgb(0x10, 0x7C, 0x10);
@@ -49,6 +50,8 @@ internal static class KntIconCatalog
         [KntIcon.Repository] = new(0xF0D7, 0xE466, Repository),       // database
 
         // Note editor
+        [KntIcon.PostIt] = new(0xF663, 0xF56B, PostIt),               // note
+        [KntIcon.Navigate] = new(0xE6B1, 0xF45A, Neutral),            // globe
         [KntIcon.BasicData] = new(0xEEED, 0xE557, Neutral),           // document_text
         [KntIcon.Attributes] = new(0xF01AD, 0xECE2, Neutral),         // text_bullet_list_square
         [KntIcon.Resources] = new(0xF1A8, 0xF1A9, Neutral),           // attach

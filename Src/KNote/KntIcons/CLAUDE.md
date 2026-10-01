@@ -13,7 +13,7 @@ al tamaño exacto en píxeles del DPI de la app, así que se ve nítido a cualqu
   incrustada como recurso (`Fonts/FluentSystemIcons-Regular.ttf`). Origen:
   https://github.com/microsoft/fluentui-system-icons, carpeta `fonts/`.
 - **Estilo**: monocromo gris oscuro; el color solo aporta significado y solo en unos pocos iconos
-  (carpetas, repositorio, alarma, ejecutar, parar, borrar). Los colores viven en `KntIconCatalog`.
+  (carpetas, repositorio, PostIt, alarma, ejecutar, parar, borrar). Los colores viven en `KntIconCatalog`.
 - **DPI**: `ClientWin` es `SystemAware` (ver su `CLAUDE.md`), así que cada icono se dibuja una sola vez a la
   escala del sistema; Windows reescala la ventana entera si se mueve a un monitor con otra escala.
 

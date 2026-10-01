@@ -4,6 +4,7 @@ using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
 using KntScript;
+using KntIcons;
 using System;
 using System.Data;
 using System.Diagnostics;
@@ -104,6 +105,36 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             dropTarget.DragEnter += Content_DragEnter;
             dropTarget.DragDrop += Content_DragDrop;
         }
+
+        SetIcons();
+    }
+
+    private void SetIcons()
+    {
+        buttonSave.SetKntIcon(KntIcon.Save);
+        buttonDelete.SetKntIcon(KntIcon.Delete);
+        buttonUndo.SetKntIcon(KntIcon.Undo);
+        buttonPostIt.SetKntIcon(KntIcon.PostIt);
+        buttonCheck.SetKntIcon(KntIcon.Check);
+        buttonPrint.SetKntIcon(KntIcon.Print);
+        buttonTools.SetKntIcon(KntIcon.Tools);
+        buttonExecuteKntScript.SetKntIcon(KntIcon.Run);
+
+        toolDescriptionHtml.SetKntIcon(KntIcon.Html);
+        toolDescriptionMarkdown.SetKntIcon(KntIcon.Markdown);
+        toolDescriptionUploadResource.SetKntIcon(KntIcon.UploadResource);
+        toolDescriptionUploadResourceFromClipboard.SetKntIcon(KntIcon.PasteFromClipboard);
+
+        // Content view/edit mode switches: same icons as the matching description toolbar menus.
+        buttonEditMarkdown.SetKntIcon(KntIcon.Markdown);
+        buttonNavigate.SetKntIcon(KntIcon.Navigate);
+        buttonViewHtml.SetKntIcon(KntIcon.Html);
+
+        // Same order as the tabs' ImageIndex (Designer): basic data, attributes, resources, activities,
+        // alarms, code, trace notes.
+        imageListTabNoteData.SetKntIcons(KntIconProvider.DefaultSize, DeviceDpi,
+            KntIcon.BasicData, KntIcon.Attributes, KntIcon.Resources, KntIcon.Activities,
+            KntIcon.Alarm, KntIcon.Script, KntIcon.TraceNotes);
     }
 
     private static void AlignButtonsRight(Control header, int rightMargin, int spacing, params Control[] buttonsLeftToRight)

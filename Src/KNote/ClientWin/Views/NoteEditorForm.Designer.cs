@@ -221,9 +221,7 @@
             // 
             // buttonSave
             // 
-            buttonSave.Image = (Image)resources.GetObject("buttonSave.Image");
             buttonSave.ImageScaling = ToolStripItemImageScaling.None;
-            buttonSave.ImageTransparentColor = Color.Magenta;
             buttonSave.Name = "buttonSave";
             buttonSave.Size = new Size(57, 22);
             buttonSave.Text = "Save  ";
@@ -231,9 +229,7 @@
             // 
             // buttonDelete
             // 
-            buttonDelete.Image = (Image)resources.GetObject("buttonDelete.Image");
             buttonDelete.ImageScaling = ToolStripItemImageScaling.None;
-            buttonDelete.ImageTransparentColor = Color.Magenta;
             buttonDelete.Name = "buttonDelete";
             buttonDelete.Size = new Size(66, 22);
             buttonDelete.Text = "Delete  ";
@@ -243,9 +239,7 @@
             // 
             buttonUndo.DisplayStyle = ToolStripItemDisplayStyle.Image;
             buttonUndo.Enabled = false;
-            buttonUndo.Image = (Image)resources.GetObject("buttonUndo.Image");
             buttonUndo.ImageScaling = ToolStripItemImageScaling.None;
-            buttonUndo.ImageTransparentColor = Color.Magenta;
             buttonUndo.Name = "buttonUndo";
             buttonUndo.Size = new Size(23, 22);
             buttonUndo.Text = "Undo  ";
@@ -260,9 +254,7 @@
             // 
             // buttonPostIt
             // 
-            buttonPostIt.Image = (Image)resources.GetObject("buttonPostIt.Image");
             buttonPostIt.ImageScaling = ToolStripItemImageScaling.None;
-            buttonPostIt.ImageTransparentColor = Color.Magenta;
             buttonPostIt.Name = "buttonPostIt";
             buttonPostIt.Size = new Size(104, 22);
             buttonPostIt.Text = "View as Post-It";
@@ -276,9 +268,7 @@
             // buttonCheck
             // 
             buttonCheck.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonCheck.Image = (Image)resources.GetObject("buttonCheck.Image");
             buttonCheck.ImageScaling = ToolStripItemImageScaling.None;
-            buttonCheck.ImageTransparentColor = Color.Magenta;
             buttonCheck.Name = "buttonCheck";
             buttonCheck.Size = new Size(23, 22);
             buttonCheck.Text = "Check";
@@ -290,9 +280,7 @@
             // 
             // buttonPrint
             // 
-            buttonPrint.Image = (Image)resources.GetObject("buttonPrint.Image");
             buttonPrint.ImageScaling = ToolStripItemImageScaling.None;
-            buttonPrint.ImageTransparentColor = Color.Magenta;
             buttonPrint.Name = "buttonPrint";
             buttonPrint.Size = new Size(58, 22);
             buttonPrint.Text = "Print  ";
@@ -307,9 +295,7 @@
             // 
             buttonTools.DisplayStyle = ToolStripItemDisplayStyle.Image;
             buttonTools.DropDownItems.AddRange(new ToolStripItem[] { buttonTextSearch, buttonTextSearchNext, buttonAddTaskSelectedText, buttonInsertTemplate, toolStripToolS1, buttonKNoteAssistant, buttonExecuteKntScript, buttonExecuteKntScriptInNewTask, buttonExecuteKntScriptStdOutConsole, buttonInsertCode, toolStripSeparator1, buttonLockFormat });
-            buttonTools.Image = (Image)resources.GetObject("buttonTools.Image");
             buttonTools.ImageScaling = ToolStripItemImageScaling.None;
-            buttonTools.ImageTransparentColor = Color.Magenta;
             buttonTools.Name = "buttonTools";
             buttonTools.Size = new Size(29, 22);
             buttonTools.Text = "toolStripDropDownTools";
@@ -407,20 +393,6 @@
             // 
             // imageListTabNoteData
             // 
-            imageListTabNoteData.ColorDepth = ColorDepth.Depth8Bit;
-            imageListTabNoteData.ImageStream = (ImageListStreamer)resources.GetObject("imageListTabNoteData.ImageStream");
-            imageListTabNoteData.TransparentColor = Color.Transparent;
-            imageListTabNoteData.Images.SetKeyName(0, "alarm_16.png");
-            imageListTabNoteData.Images.SetKeyName(1, "fileTestLight_16.png");
-            imageListTabNoteData.Images.SetKeyName(2, "bookmarkLight_24.png");
-            imageListTabNoteData.Images.SetKeyName(3, "books_16.png");
-            imageListTabNoteData.Images.SetKeyName(4, "code_16.png");
-            imageListTabNoteData.Images.SetKeyName(5, "libraryBooks_16.png");
-            imageListTabNoteData.Images.SetKeyName(6, "tasks_16.png");
-            imageListTabNoteData.Images.SetKeyName(7, "checkbox_16.png");
-            imageListTabNoteData.Images.SetKeyName(8, "codgs_16.png");
-            imageListTabNoteData.Images.SetKeyName(9, "code_16.png");
-            imageListTabNoteData.Images.SetKeyName(10, "upload_16.png");
             // 
             // panelForm
             // 
@@ -457,7 +429,7 @@
             tabBasicData.Controls.Add(panelDescription);
             tabBasicData.Controls.Add(panelContentHeader);
             tabBasicData.Controls.Add(panelHeaderData);
-            tabBasicData.ImageIndex = 1;
+            tabBasicData.ImageIndex = 0;
             tabBasicData.Location = new Point(4, 30);
             tabBasicData.Margin = new Padding(4, 3, 4, 3);
             tabBasicData.Name = "tabBasicData";
@@ -505,10 +477,8 @@
             // 
             toolDescriptionHtml.DisplayStyle = ToolStripItemDisplayStyle.Image;
             toolDescriptionHtml.DropDownItems.AddRange(new ToolStripItem[] { toolDescriptionHtmlTitle1, toolDescriptionHtmlTitle2, toolDescriptionHtmlTitle3, toolDescriptionHtmlTitle4, toolDescriptionHtmlS3, toolDescriptionHtmlEdit });
-            toolDescriptionHtml.Image = (Image)resources.GetObject("toolDescriptionHtml.Image");
             toolDescriptionHtml.ImageAlign = ContentAlignment.MiddleLeft;
             toolDescriptionHtml.ImageScaling = ToolStripItemImageScaling.None;
-            toolDescriptionHtml.ImageTransparentColor = Color.Magenta;
             toolDescriptionHtml.Name = "toolDescriptionHtml";
             toolDescriptionHtml.Size = new Size(26, 20);
             toolDescriptionHtml.Text = "H";
@@ -557,10 +527,8 @@
             // 
             toolDescriptionMarkdown.DisplayStyle = ToolStripItemDisplayStyle.Image;
             toolDescriptionMarkdown.DropDownItems.AddRange(new ToolStripItem[] { toolDescriptionMarkdownH1, toolDescriptionMarkdownH2, toolDescriptionMarkdownH3, toolDescriptionMarkdownH4, toolDescriptionMarkdownS1, toolDescriptionMarkdownBold, toolDescriptionMarkdownStrikethrough, toolDescriptionMarkdownItalic, toolDescriptionMarkdownS2, toolDescriptionMarkdownList, toolDescriptionMarkdownListOrdered, toolDescriptionMarkdownLine, toolDescriptionMarkdownLink, toolDescriptionMarkdownImage, toolDescriptionMarkdownTable, toolDescriptionMarkdownCode });
-            toolDescriptionMarkdown.Image = (Image)resources.GetObject("toolDescriptionMarkdown.Image");
             toolDescriptionMarkdown.ImageAlign = ContentAlignment.MiddleLeft;
             toolDescriptionMarkdown.ImageScaling = ToolStripItemImageScaling.None;
-            toolDescriptionMarkdown.ImageTransparentColor = Color.Magenta;
             toolDescriptionMarkdown.Name = "toolDescriptionMarkdown";
             toolDescriptionMarkdown.Size = new Size(26, 20);
             toolDescriptionMarkdown.Text = "Markdown";
@@ -681,9 +649,7 @@
             // toolDescriptionUploadResource
             // 
             toolDescriptionUploadResource.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolDescriptionUploadResource.Image = (Image)resources.GetObject("toolDescriptionUploadResource.Image");
             toolDescriptionUploadResource.ImageScaling = ToolStripItemImageScaling.None;
-            toolDescriptionUploadResource.ImageTransparentColor = Color.Magenta;
             toolDescriptionUploadResource.Name = "toolDescriptionUploadResource";
             toolDescriptionUploadResource.Size = new Size(26, 20);
             toolDescriptionUploadResource.Text = "Upload resource";
@@ -692,9 +658,7 @@
             // toolDescriptionUploadResourceFromClipboard
             // 
             toolDescriptionUploadResourceFromClipboard.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolDescriptionUploadResourceFromClipboard.Image = (Image)resources.GetObject("toolDescriptionUploadResourceFromClipboard.Image");
             toolDescriptionUploadResourceFromClipboard.ImageScaling = ToolStripItemImageScaling.None;
-            toolDescriptionUploadResourceFromClipboard.ImageTransparentColor = Color.Magenta;
             toolDescriptionUploadResourceFromClipboard.Name = "toolDescriptionUploadResourceFromClipboard";
             toolDescriptionUploadResourceFromClipboard.Size = new Size(26, 20);
             toolDescriptionUploadResourceFromClipboard.Text = "Add imge from clipboard";
@@ -748,6 +712,7 @@
             buttonNavigate.Size = new Size(96, 26);
             buttonNavigate.TabIndex = 6;
             buttonNavigate.Text = "Navigate";
+            buttonNavigate.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonNavigate.UseVisualStyleBackColor = true;
             buttonNavigate.Click += buttonNavigate_Click;
             // 
@@ -755,14 +720,13 @@
             // 
             buttonEditMarkdown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonEditMarkdown.Font = new Font("Segoe UI", 8.25F);
-            buttonEditMarkdown.ImageAlign = ContentAlignment.MiddleLeft;
-            buttonEditMarkdown.ImageList = imageListTabNoteData;
             buttonEditMarkdown.Location = new Point(474, 2);
             buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
             buttonEditMarkdown.Name = "buttonEditMarkdown";
             buttonEditMarkdown.Size = new Size(96, 26);
             buttonEditMarkdown.TabIndex = 5;
             buttonEditMarkdown.Text = "Markdown";
+            buttonEditMarkdown.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonEditMarkdown.UseVisualStyleBackColor = true;
             buttonEditMarkdown.Click += buttonEditMarkdown_Click;
             // 
@@ -776,6 +740,7 @@
             buttonViewHtml.Size = new Size(96, 26);
             buttonViewHtml.TabIndex = 7;
             buttonViewHtml.Text = "Html editor";
+            buttonViewHtml.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonViewHtml.UseVisualStyleBackColor = true;
             buttonViewHtml.Click += buttonEditHtml_Click;
             // 
@@ -959,7 +924,7 @@
             tabAttributes.Controls.Add(label15);
             tabAttributes.Controls.Add(buttonAttributeEdit);
             tabAttributes.Controls.Add(label10);
-            tabAttributes.ImageIndex = 5;
+            tabAttributes.ImageIndex = 1;
             tabAttributes.Location = new Point(4, 30);
             tabAttributes.Margin = new Padding(4, 3, 4, 3);
             tabAttributes.Name = "tabAttributes";
@@ -1060,7 +1025,7 @@
             // tabResources
             // 
             tabResources.Controls.Add(splitResourcesViewer);
-            tabResources.ImageIndex = 3;
+            tabResources.ImageIndex = 2;
             tabResources.Location = new Point(4, 30);
             tabResources.Margin = new Padding(4, 3, 4, 3);
             tabResources.Name = "tabResources";
@@ -1259,7 +1224,7 @@
             // tabActivities
             // 
             tabActivities.Controls.Add(splitTasksViewer);
-            tabActivities.ImageIndex = 6;
+            tabActivities.ImageIndex = 3;
             tabActivities.Location = new Point(4, 30);
             tabActivities.Margin = new Padding(4, 3, 4, 3);
             tabActivities.Name = "tabActivities";
@@ -1395,7 +1360,7 @@
             tabAlarms.Controls.Add(buttonDeleteAlarm);
             tabAlarms.Controls.Add(buttonAddAlarm);
             tabAlarms.Controls.Add(label4);
-            tabAlarms.ImageIndex = 0;
+            tabAlarms.ImageIndex = 4;
             tabAlarms.Location = new Point(4, 30);
             tabAlarms.Margin = new Padding(4, 3, 4, 3);
             tabAlarms.Name = "tabAlarms";
@@ -1472,7 +1437,7 @@
             tabCode.Controls.Add(labelCodeType);
             tabCode.Controls.Add(textScriptCode);
             tabCode.Controls.Add(labelScriptCode);
-            tabCode.ImageIndex = 8;
+            tabCode.ImageIndex = 5;
             tabCode.Location = new Point(4, 30);
             tabCode.Margin = new Padding(4, 3, 4, 3);
             tabCode.Name = "tabCode";
@@ -1529,7 +1494,7 @@
             // tabTraceNotes
             //
             tabTraceNotes.Controls.Add(splitContainerTraceNotes);
-            tabTraceNotes.ImageIndex = 2;
+            tabTraceNotes.ImageIndex = 6;
             tabTraceNotes.Location = new Point(4, 30);
             tabTraceNotes.Margin = new Padding(4, 3, 4, 3);
             tabTraceNotes.Name = "tabTraceNotes";

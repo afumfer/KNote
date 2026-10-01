@@ -30,6 +30,8 @@ public enum KntIcon
     Repository,
 
     // Note editor
+    PostIt,
+    Navigate,
     BasicData,
     Attributes,
     Resources,

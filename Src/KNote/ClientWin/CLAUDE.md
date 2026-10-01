@@ -363,7 +363,7 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   posiciones, tamaños de ventana) ya no lo escala WinForms: pásalo por `LogicalToDeviceUnits(...)`.
 - **Iconos**: salen de `KntIcons` (`KntIcon` + `SetKntIcon(...)`/`KntIconProvider`), asignados en código
   tras `InitializeComponent()`, nunca como imágenes en el diseñador. Ver `KntIcons/CLAUDE.md`. Excepción: el
-  icono de la aplicación (`Resources/Icons/stickyyellow_32_icon.ico`) y el del PostIt se mantienen como están.
+  icono de la aplicación (`Resources/Icons/stickyyellow_32_icon.ico`) se mantiene como está.
 
 ## Tests (`ClientWin.Tests`)
 
