@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using NavigateActionOption = MSDN.Html.Editor.NavigateActionOption;
 using System.Runtime.Versioning;
+using KntIcons;
 
 #endregion
 
@@ -31,6 +32,7 @@ namespace MSDN.Html.Editor
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			this.Icon = KntIconProvider.CreateIcon(KntIcon.Link, this.DeviceDpi);
 
 			// define the text for the targets
 			this.listTargets.Items.AddRange(Enum.GetNames(typeof(NavigateActionOption)));

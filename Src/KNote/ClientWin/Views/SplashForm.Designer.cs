@@ -74,7 +74,6 @@
             // 
             // iconoANotas
             // 
-            iconoANotas.ErrorImage = (Image)resources.GetObject("iconoANotas.ErrorImage");
             iconoANotas.ImeMode = ImeMode.NoControl;
             iconoANotas.Location = new Point(26, 35);
             iconoANotas.Margin = new Padding(4, 3, 4, 3);

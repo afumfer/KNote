@@ -6,6 +6,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Runtime.Versioning;
+using KntIcons;
 
 #endregion
 
@@ -37,6 +38,7 @@ namespace MSDN.Html.Editor
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			this.Icon = KntIconProvider.CreateIcon(KntIcon.Html, this.DeviceDpi);
 
 			// ensure content is empty
 			this.htmlText.Text = string.Empty;

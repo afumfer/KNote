@@ -12,6 +12,7 @@ using MeasurementOption = MSDN.Html.Editor.MeasurementOption;
 using HorizontalAlignOption = MSDN.Html.Editor.HorizontalAlignOption;
 using VerticalAlignOption = MSDN.Html.Editor.VerticalAlignOption;
 using System.Runtime.Versioning;
+using KntIcons;
 
 #endregion
 
@@ -47,6 +48,7 @@ namespace MSDN.Html.Editor
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			this.Icon = KntIconProvider.CreateIcon(KntIcon.Table, this.DeviceDpi);
 
 			// define the dropdown list value
 			this.listCaptionAlignment.Items.AddRange(Enum.GetNames(typeof(HorizontalAlignOption)));

@@ -126,7 +126,6 @@ namespace MSDN.Html.Editor
             this.Controls.Add(this.bCancel);
             this.Controls.Add(this.bInsert);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "EnterImageForm";

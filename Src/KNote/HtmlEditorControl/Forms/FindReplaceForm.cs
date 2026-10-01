@@ -5,6 +5,7 @@ using System.Drawing;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Runtime.Versioning;
+using KntIcons;
 
 #endregion
 
@@ -49,6 +50,7 @@ namespace MSDN.Html.Editor
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			this.Icon = KntIconProvider.CreateIcon(KntIcon.Search, this.DeviceDpi);
 
 			// Define the initial state of the form assuming a Find command to be displayed first
 			DefineFindWindow(findNotReplace);

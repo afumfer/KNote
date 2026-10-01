@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using ImageAlignOption = MSDN.Html.Editor.ImageAlignOption;
 using System.Runtime.Versioning;
+using KntIcons;
 
 #endregion
 
@@ -31,6 +32,7 @@ namespace MSDN.Html.Editor
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			this.Icon = KntIconProvider.CreateIcon(KntIcon.Image, this.DeviceDpi);
 
 			// define the text for the alignment
 			this.listAlign.Items.AddRange(Enum.GetNames(typeof(ImageAlignOption)));

@@ -58,6 +58,23 @@ buena.
 - [ ] Las notificaciones tipo "toast" (`Store.Events`, mensaje `ControllerNotification`) se muestran
       correctamente.
 
+## Escalado (DPI) e iconos
+
+Probar al menos a 100 % y a 200 %, y, si hay dos monitores con escalas distintas, arrancando en cada uno.
+
+- [ ] Ninguna ventana se ve descuadrada al arrancar (barra de estado de `KNoteManagementForm`, tabs del
+      editor de notas embebido, altura de filas del selector de notas).
+- [ ] Los iconos (barras de herramientas, tabs, árbol de carpetas, botones de listas, PostIt, editor HTML,
+      botones de navegación) se ven nítidos y proporcionados al texto, sin bitmaps estirados ni diminutos.
+- [ ] El icono de la aplicación se ve nítido en la barra de título, la barra de tareas, Alt+Tab, la bandeja
+      del sistema, el splash y "Acerca de".
+- [ ] Una ventana guardada en una posición que ya no cae en ninguna pantalla (otro monitor o escala) se
+      abre visible: `KNoteManagementForm`, `AppInfoAlarmsForm` y los PostIt.
+- [ ] Los botones `...`/`X` junto a una caja de texto tienen su mismo alto (p. ej. fechas de
+      `TaskEditorForm`, carpeta de `NotesFilterParamForm`, quitar filtro del selector de notas).
+- [ ] En un PostIt, el icono del menú toma los colores de la barra de título (y el de la caja de la URL en
+      modo navegación) y el asa de redimensionar sigue funcionando.
+
 ## Otros
 
 - [ ] Opciones de la aplicación (`OptionsEditorCtrl`) se guardan y se recargan correctamente al

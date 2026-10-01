@@ -68,33 +68,6 @@
     </Compile>
     <EmbeddedResource Include="Resources\HtmlEditor.bmp" />
     <Content Include="Resources\HtmlEditor.ico" />
-    <Content Include="Resources\ToolbarBold.bmp" />
-    <Content Include="Resources\ToolbarCopy.bmp" />
-    <Content Include="Resources\ToolBarCut.bmp" />
-    <Content Include="Resources\ToolbarDelete.bmp" />
-    <Content Include="Resources\ToolbarFind.bmp" />
-    <Content Include="Resources\ToolbarFontColor.bmp" />
-    <Content Include="Resources\ToolbarFontDown.bmp" />
-    <Content Include="Resources\ToolbarFontNormal.bmp" />
-    <Content Include="Resources\ToolbarFontStyle.bmp" />
-    <Content Include="Resources\ToolbarFontUp.bmp" />
-    <Content Include="Resources\ToolbarImage.bmp" />
-    <Content Include="Resources\ToolbarItalic.bmp" />
-    <Content Include="Resources\ToolbarJustifyCenter.bmp" />
-    <Content Include="Resources\ToolbarJustifyLeft.bmp" />
-    <Content Include="Resources\ToolbarJustifyRight.bmp" />
-    <Content Include="Resources\ToolbarLine.bmp" />
-    <Content Include="Resources\ToolbarListOrdered.bmp" />
-    <Content Include="Resources\ToolbarListUnordered.bmp" />
-    <Content Include="Resources\ToolbarPaste.bmp" />
-    <Content Include="Resources\ToolbarProperties.bmp" />
-    <Content Include="Resources\ToolbarRedo.bmp" />
-    <Content Include="Resources\ToolbarTabInsert.bmp" />
-    <Content Include="Resources\ToolbarTable.bmp" />
-    <Content Include="Resources\ToolbarTabRemove.bmp" />
-    <Content Include="Resources\ToolbarUnderline.bmp" />
-    <Content Include="Resources\ToolbarUndo.bmp" />
-    <Content Include="Resources\ToolbarWebLink.bmp" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
