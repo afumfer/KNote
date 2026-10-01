@@ -51,7 +51,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(737, 387);
             Controls.Add(textOut);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "InOutDeviceForm";
             ShowInTaskbar = false;
             Text = "KntScript out console";

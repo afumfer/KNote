@@ -84,11 +84,19 @@ public class KntForm : Form
         return KntMessageBox.Show(info, caption, buttons, icon);
     }
 
+    // Window (title bar, taskbar, Alt+Tab) icon: the app icon unless a view means something else
+    // (e.g. AppInfoAlarmsForm). Set on Load rather than per form in the Designer, so there is a single copy of
+    // the app icon instead of one serialized in every .resx.
+    protected virtual Icon WindowIcon => AppIcon.Icon;
+
     // A modal form is a normal (non-topmost) window, so a PostIt marked "always visible" would cover
     // it and the app would look frozen (same problem KntMessageBox solves for message boxes).
     // Checked here, right before the dialog is shown, so no ShowDialog call site has to change.
     protected override void OnLoad(EventArgs e)
     {
+        if (!DesignMode)
+            Icon = WindowIcon;
+
         if (!DesignMode && Modal && TopMostWindows.AnyVisible())
         {
             TopMost = true;

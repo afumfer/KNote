@@ -27,7 +27,6 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
 
         _ctrl = ctrl;
         this.Text = $"{KntConst.AppName} - Application info alarms";
-        SetWindowIcon();
         _sorter = ListViewSortHelper.Attach(listViewAlarms);
 
         // Applied here, before the window is ever shown, rather than in Load: this form starts
@@ -47,10 +46,9 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         }
     }
 
-    private void SetWindowIcon()
-    {
-        this.Icon = KntIconProvider.CreateIcon(KntIcon.Alarm, DeviceDpi);
-    }
+    private Icon _windowIcon;
+
+    protected override Icon WindowIcon => _windowIcon ??= KntIconProvider.CreateIcon(KntIcon.Alarm, DeviceDpi);
 
     #endregion
 

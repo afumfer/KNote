@@ -118,7 +118,6 @@
             Controls.Add(listMessages);
             Controls.Add(textMessage);
             Controls.Add(buttonSend);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KntChatForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Simple chat";

@@ -211,7 +211,6 @@ namespace KNote.ClientWin.Views
             this.ClientSize = new System.Drawing.Size(437, 388);
             this.Controls.Add(this.panelForm);
             this.Controls.Add(this.panelBottom);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "NotesSearchParamForm";

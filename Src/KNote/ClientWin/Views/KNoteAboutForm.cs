@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -17,6 +18,7 @@ public partial class KNoteAboutForm : KntForm, IViewBase
     public KNoteAboutForm(KNoteManagementCtrl ctrl)
     {
         InitializeComponent();
+        AppIcon.ShowIn(iconoANotas);
         Text = KntConst.AppName;
         labelAppName.Text = KntConst.AppName;
 

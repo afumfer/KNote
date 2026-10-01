@@ -50,7 +50,6 @@
             notifyKNote.BalloonTipText = "KeyNotex notify";
             notifyKNote.BalloonTipTitle = "KeyNotex";
             notifyKNote.ContextMenuStrip = contextKNoteMenu;
-            notifyKNote.Icon = (Icon)resources.GetObject("notifyKNote.Icon");
             notifyKNote.Text = "KNote";
             notifyKNote.Visible = true;
             notifyKNote.DoubleClick += notifyKNote_DoubleClick;
@@ -136,7 +135,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(33, 33);
             FormBorderStyle = FormBorderStyle.None;
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4, 3, 4, 3);
             Name = "NotifyForm";
             ShowInTaskbar = false;

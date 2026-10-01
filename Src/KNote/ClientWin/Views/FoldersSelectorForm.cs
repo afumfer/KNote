@@ -13,6 +13,8 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
 
     private readonly FoldersSelectorCtrl _ctrl;
 
+    private Icon _windowIcon;
+
     #endregion
 
     #region Constructor
@@ -253,6 +255,8 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
     #endregion
 
     #region Private methods
+
+    protected override Icon WindowIcon => _windowIcon ??= KntIconProvider.CreateIcon(KntIcon.FolderOpen, DeviceDpi);
 
     private void LoadNodes(TreeNode node, ServiceRef service, List<FolderDto> folders)
     {

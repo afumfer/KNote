@@ -17,6 +17,7 @@ public partial class InOutDeviceForm : Form, IInOutDevice
     public InOutDeviceForm()
     {
         InitializeComponent();
+        Icon = AppIcon.Icon;
     }
 
     #endregion 

@@ -86,7 +86,6 @@
             ClientSize = new Size(586, 375);
             Controls.Add(panelControls);
             Controls.Add(panelButtons);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "ReadVarForm";

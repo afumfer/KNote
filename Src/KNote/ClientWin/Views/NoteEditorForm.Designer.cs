@@ -1654,7 +1654,6 @@
             ClientSize = new Size(809, 625);
             Controls.Add(panelForm);
             Controls.Add(toolBarNoteEditor);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Margin = new Padding(4, 3, 4, 3);
             Name = "NoteEditorForm";

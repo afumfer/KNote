@@ -367,8 +367,11 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   `X`) se iguala a ella con `Utils/ControlLayout.AlignToTextBox(...)` tras `InitializeComponent()`: el alto
   real de una `TextBox` de una línea lo decide su fuente en tiempo de ejecución, no el Designer.
 - **Iconos**: salen de `KntIcons` (`KntIcon` + `SetKntIcon(...)`/`KntIconProvider`), asignados en código
-  tras `InitializeComponent()`, nunca como imágenes en el diseñador. Ver `KntIcons/CLAUDE.md`. Excepción: el
-  icono de la aplicación (`Resources/Icons/stickyyellow_32_icon.ico`) se mantiene como está.
+  tras `InitializeComponent()`, nunca como imágenes en el diseñador. Ver `KntIcons/CLAUDE.md`. El icono de la
+  aplicación es `Resources/Icons/KNote.ico` (el diseño de siempre, con fotogramas de 16 a 256 px), expuesto por
+  `Utils/AppIcon`: `KntForm` lo aplica como icono de ventana en `OnLoad` (`WindowIcon`, que una vista sobrescribe
+  si su ventana significa otra cosa, p. ej. `AppInfoAlarmsForm`), así que **no** se asigna `Icon` en el
+  diseñador (dejaría una copia del `.ico` en cada `.resx`).
 
 ## Tests (`ClientWin.Tests`)
 

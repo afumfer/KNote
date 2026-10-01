@@ -478,7 +478,6 @@ namespace KNote.ClientWin.Views
             Controls.Add(statusInfo);
             Controls.Add(buttonStop);
             Controls.Add(buttonStart);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4, 3, 4, 3);
             MinimumSize = new Size(600, 500);
             Name = "KntServerCOMForm";

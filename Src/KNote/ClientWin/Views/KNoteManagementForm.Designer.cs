@@ -918,7 +918,6 @@
             Controls.Add(toolBarManagement);
             Controls.Add(statusBarManagement);
             Controls.Add(menuManagement);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Margin = new Padding(4, 3, 4, 3);
             Name = "KNoteManagementForm";

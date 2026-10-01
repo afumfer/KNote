@@ -81,7 +81,6 @@
             Controls.Add(progressProcess);
             Controls.Add(buttonCancel);
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "HeavyProcessForm";

@@ -176,7 +176,6 @@ namespace KNote.ClientWin.Views
             Controls.Add(buttonCancel);
             Controls.Add(buttonAccept);
             Controls.Add(panelForm);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             MaximizeBox = false;
             MinimizeBox = false;

@@ -29,85 +29,83 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplashForm));
-            this.labelVersion = new System.Windows.Forms.Label();
-            this.labelMessage = new System.Windows.Forms.Label();
-            this.labelANotas = new System.Windows.Forms.Label();
-            this.iconoANotas = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.iconoANotas)).BeginInit();
-            this.SuspendLayout();
+            labelVersion = new Label();
+            labelMessage = new Label();
+            labelANotas = new Label();
+            iconoANotas = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)iconoANotas).BeginInit();
+            SuspendLayout();
             // 
             // labelVersion
             // 
-            this.labelVersion.ForeColor = System.Drawing.Color.White;
-            this.labelVersion.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelVersion.Location = new System.Drawing.Point(121, 84);
-            this.labelVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelVersion.Name = "labelVersion";
-            this.labelVersion.Size = new System.Drawing.Size(188, 17);
-            this.labelVersion.TabIndex = 14;
-            this.labelVersion.Text = "Versión: ";
-            this.labelVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            labelVersion.ForeColor = Color.White;
+            labelVersion.ImeMode = ImeMode.NoControl;
+            labelVersion.Location = new Point(123, 77);
+            labelVersion.Margin = new Padding(4, 0, 4, 0);
+            labelVersion.Name = "labelVersion";
+            labelVersion.Size = new Size(188, 17);
+            labelVersion.TabIndex = 14;
+            labelVersion.Text = "Versión: ";
+            labelVersion.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // labelMessage
             // 
-            this.labelMessage.ForeColor = System.Drawing.Color.White;
-            this.labelMessage.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelMessage.Location = new System.Drawing.Point(13, 180);
-            this.labelMessage.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelMessage.Name = "labelMessage";
-            this.labelMessage.Size = new System.Drawing.Size(326, 23);
-            this.labelMessage.TabIndex = 13;
-            this.labelMessage.Text = "Starting ...";
-            this.labelMessage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            labelMessage.ForeColor = Color.White;
+            labelMessage.ImeMode = ImeMode.NoControl;
+            labelMessage.Location = new Point(13, 180);
+            labelMessage.Margin = new Padding(4, 0, 4, 0);
+            labelMessage.Name = "labelMessage";
+            labelMessage.Size = new Size(326, 23);
+            labelMessage.TabIndex = 13;
+            labelMessage.Text = "Starting ...";
+            labelMessage.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // labelANotas
             // 
-            this.labelANotas.Font = new System.Drawing.Font("Courier New", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelANotas.ForeColor = System.Drawing.Color.White;
-            this.labelANotas.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.labelANotas.Location = new System.Drawing.Point(119, 46);
-            this.labelANotas.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelANotas.Name = "labelANotas";
-            this.labelANotas.Size = new System.Drawing.Size(190, 28);
-            this.labelANotas.TabIndex = 12;
-            this.labelANotas.Text = "KNote";
+            labelANotas.Font = new Font("Courier New", 18F, FontStyle.Bold);
+            labelANotas.ForeColor = Color.White;
+            labelANotas.ImeMode = ImeMode.NoControl;
+            labelANotas.Location = new Point(121, 35);
+            labelANotas.Margin = new Padding(4, 0, 4, 0);
+            labelANotas.Name = "labelANotas";
+            labelANotas.Size = new Size(190, 28);
+            labelANotas.TabIndex = 12;
+            labelANotas.Text = "KNote";
             // 
             // iconoANotas
             // 
-            this.iconoANotas.ErrorImage = ((System.Drawing.Image)(resources.GetObject("iconoANotas.ErrorImage")));
-            this.iconoANotas.Image = ((System.Drawing.Image)(resources.GetObject("iconoANotas.Image")));
-            this.iconoANotas.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.iconoANotas.Location = new System.Drawing.Point(35, 46);
-            this.iconoANotas.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.iconoANotas.Name = "iconoANotas";
-            this.iconoANotas.Size = new System.Drawing.Size(76, 80);
-            this.iconoANotas.TabIndex = 11;
-            this.iconoANotas.TabStop = false;
+            iconoANotas.ErrorImage = (Image)resources.GetObject("iconoANotas.ErrorImage");
+            iconoANotas.ImeMode = ImeMode.NoControl;
+            iconoANotas.Location = new Point(26, 35);
+            iconoANotas.Margin = new Padding(4, 3, 4, 3);
+            iconoANotas.Name = "iconoANotas";
+            iconoANotas.Size = new Size(76, 80);
+            iconoANotas.TabIndex = 11;
+            iconoANotas.TabStop = false;
             // 
             // SplashForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(348, 213);
-            this.ControlBox = false;
-            this.Controls.Add(this.labelVersion);
-            this.Controls.Add(this.labelMessage);
-            this.Controls.Add(this.labelANotas);
-            this.Controls.Add(this.iconoANotas);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "SplashForm";
-            this.Opacity = 0.7D;
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Load += new System.EventHandler(this.SplashForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.iconoANotas)).EndInit();
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.DimGray;
+            ClientSize = new Size(344, 209);
+            ControlBox = false;
+            Controls.Add(labelVersion);
+            Controls.Add(labelMessage);
+            Controls.Add(labelANotas);
+            Controls.Add(iconoANotas);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Margin = new Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "SplashForm";
+            Opacity = 0.7D;
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            Load += SplashForm_Load;
+            ((System.ComponentModel.ISupportInitialize)iconoANotas).EndInit();
+            ResumeLayout(false);
 
         }
 

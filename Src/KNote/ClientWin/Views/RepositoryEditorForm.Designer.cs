@@ -466,7 +466,6 @@ namespace KNote.ClientWin.Views
             Controls.Add(buttonCancel);
             Controls.Add(buttonAccept);
             Controls.Add(tabControlMain);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Margin = new Padding(3);
             MaximizeBox = false;

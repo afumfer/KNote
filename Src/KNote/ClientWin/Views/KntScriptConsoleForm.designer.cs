@@ -291,7 +291,6 @@
             Controls.Add(panel1);
             Controls.Add(statusStripKntConsole);
             Controls.Add(toolStripConsole);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Margin = new Padding(4, 3, 4, 3);
             Name = "KntScriptConsoleForm";

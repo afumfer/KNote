@@ -596,7 +596,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(693, 534);
             Controls.Add(tabControlLab);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KntLabForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "KNote Lab";

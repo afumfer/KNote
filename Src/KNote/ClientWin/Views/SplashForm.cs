@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Service.Core;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -17,6 +18,8 @@ public partial class SplashForm : Form
     public SplashForm(Store appContext)
     {
         InitializeComponent();
+        Icon = AppIcon.Icon;
+        AppIcon.ShowIn(iconoANotas);
         this.labelANotas.Text = KntConst.AppName;
 
         appContext.Events.Subscribe<ServiceRefAdded>(AppContext_AddedServiceRef);

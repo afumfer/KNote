@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -17,6 +18,7 @@ public partial class NotifyForm : KntForm, IViewBase
     public NotifyForm(KNoteManagementCtrl ctrl)
     {
         InitializeComponent();
+        notifyKNote.Icon = AppIcon.Icon;
         notifyKNote.Text = KntConst.AppName;
         menuShowKNoteManagement.Text = $"Show {KntConst.AppName} management ...";
 

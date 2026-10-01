@@ -114,7 +114,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(460, 468);
             Controls.Add(panelForm);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "FoldersSelectorForm";
             Text = "Folders selector";
             panelForm.ResumeLayout(false);

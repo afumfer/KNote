@@ -179,7 +179,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(665, 461);
             Controls.Add(panelForm);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(3);
             Name = "NotesSelectorForm";
             Text = "Notes selector";

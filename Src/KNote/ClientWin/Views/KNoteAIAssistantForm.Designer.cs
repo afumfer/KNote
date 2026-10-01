@@ -333,7 +333,6 @@ namespace KNote.ClientWin.Views
             ClientSize = new Size(858, 623);
             Controls.Add(splitChat);
             Controls.Add(statusStripChat);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KNoteAIAssistantForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "KNote AI Assistant";

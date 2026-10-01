@@ -69,9 +69,8 @@ namespace KNote.ClientWin.Views
             // iconoANotas
             // 
             iconoANotas.ErrorImage = (Image)resources.GetObject("iconoANotas.ErrorImage");
-            iconoANotas.Image = (Image)resources.GetObject("iconoANotas.Image");
             iconoANotas.ImeMode = ImeMode.NoControl;
-            iconoANotas.Location = new Point(30, 17);
+            iconoANotas.Location = new Point(20, 13);
             iconoANotas.Margin = new Padding(4, 3, 4, 3);
             iconoANotas.Name = "iconoANotas";
             iconoANotas.Size = new Size(74, 79);
