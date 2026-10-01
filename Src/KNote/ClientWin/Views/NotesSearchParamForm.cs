@@ -2,6 +2,7 @@ using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KntIcons;
 
 namespace KNote.ClientWin.Views;
 
@@ -20,6 +21,8 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        buttonSearch.SetKntIcon(KntIcon.Search);
     }
 
     #endregion

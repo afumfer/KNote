@@ -23,7 +23,7 @@ public static class KntIconProvider
     private static readonly PrivateFontCollection Fonts = new();
     private static readonly Lazy<FontFamily> IconFontFamily = new(LoadFontFamily);
     private static readonly Lazy<int> LazySystemDpi = new(ReadSystemDpi);
-    private static readonly Dictionary<(KntIcon Icon, int LogicalSize, int PixelSize), Bitmap> Cache = new();
+    private static readonly Dictionary<(KntIcon Icon, int LogicalSize, int PixelSize, int Argb), Bitmap> Cache = new();
 
     /// <summary>
     /// DPI the process renders at (the app is SystemAware): fallback for callers with no control at hand.
@@ -35,39 +35,27 @@ public static class KntIconProvider
 
     /// <summary>
     /// Returns the icon drawn in a square of <paramref name="logicalSize"/> logical pixels scaled to
-    /// <paramref name="dpi"/>. The same arguments always return the same (shared) bitmap.
+    /// <paramref name="dpi"/>, in its catalog color unless <paramref name="color"/> overrides it (e.g. a light
+    /// icon over a dark background). The same arguments always return the same (shared) bitmap.
     /// </summary>
-    public static Bitmap GetBitmap(KntIcon icon, int logicalSize, int dpi)
+    public static Bitmap GetBitmap(KntIcon icon, int logicalSize, int dpi, Color? color = null)
     {
+        var glyph = KntIconCatalog.Get(icon);
+        if (color is Color overrideColor)
+            glyph = glyph with { Color = overrideColor };
+
         int pixelSize = ToDevicePixels(logicalSize, dpi);
-        var key = (icon, logicalSize, pixelSize);
+        var key = (icon, logicalSize, pixelSize, glyph.Color.ToArgb());
 
         lock (Cache)
         {
             if (!Cache.TryGetValue(key, out var bitmap))
             {
-                bitmap = Render(KntIconCatalog.Get(icon), logicalSize, pixelSize);
+                bitmap = Render(glyph, logicalSize, pixelSize);
                 Cache.Add(key, bitmap);
             }
             return bitmap;
         }
-    }
-
-    /// <summary>
-    /// Creates a 32-bit <see cref="ImageList"/> with <paramref name="icons"/> in that order (index i is
-    /// icons[i], and each image's key is its <see cref="KntIcon"/> name). The caller owns the list.
-    /// </summary>
-    public static ImageList CreateImageList(int logicalSize, int dpi, params KntIcon[] icons)
-    {
-        int pixelSize = ToDevicePixels(logicalSize, dpi);
-        var imageList = new ImageList
-        {
-            ColorDepth = ColorDepth.Depth32Bit,
-            ImageSize = new Size(pixelSize, pixelSize)
-        };
-        foreach (var icon in icons)
-            imageList.Images.Add(icon.ToString(), GetBitmap(icon, logicalSize, dpi));
-        return imageList;
     }
 
     private static Bitmap Render(KntIconGlyph glyph, int logicalSize, int pixelSize)

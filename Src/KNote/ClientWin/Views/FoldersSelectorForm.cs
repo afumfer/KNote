@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KntIcons;
 
 namespace KNote.ClientWin.Views;
 
@@ -21,6 +22,10 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
         InitializeComponent();
 
         _ctrl = ctrl;
+
+        // Same order as the image indexes the tree nodes use: 0 selected folder, 1 folder, 2 repository.
+        imageListFolders.SetKntIcons(KntIconProvider.DefaultSize, DeviceDpi,
+            KntIcon.FolderOpen, KntIcon.Folder, KntIcon.Repository);
     }
 
     #endregion 

@@ -53,9 +53,23 @@ public class KntIconProviderTests
     }
 
     [TestMethod]
-    public void CreateImageList_KeepsOrderAndDeviceSize()
+    public void GetBitmap_ColorOverride_DrawsInThatColor()
     {
-        using var imageList = KntIconProvider.CreateImageList(16, 192, KntIcon.FolderOpen, KntIcon.Folder, KntIcon.Repository);
+        var light = KntIconProvider.GetBitmap(KntIcon.FolderOpen, 16, 96, Color.White);
+        var catalog = KntIconProvider.GetBitmap(KntIcon.FolderOpen, 16, 96);
+
+        var opaque = OpaquePixels(light).ToList();
+        Assert.AreNotSame(catalog, light);
+        Assert.IsTrue(opaque.Count > 0);
+        Assert.IsTrue(opaque.All(c => c.R == 255 && c.G == 255 && c.B == 255));
+    }
+
+    [TestMethod]
+    public void SetKntIcons_ImageList_KeepsOrderAndDeviceSize()
+    {
+        using var imageList = new ImageList { ColorDepth = ColorDepth.Depth8Bit };
+
+        imageList.SetKntIcons(16, 192, KntIcon.FolderOpen, KntIcon.Folder, KntIcon.Repository);
 
         Assert.AreEqual(ColorDepth.Depth32Bit, imageList.ColorDepth);
         Assert.AreEqual(new Size(32, 32), imageList.ImageSize);
@@ -85,5 +99,16 @@ public class KntIconProviderTests
                 if (bitmap.GetPixel(x, y).A > 0)
                     return true;
         return false;
+    }
+
+    private static IEnumerable<Color> OpaquePixels(Bitmap bitmap)
+    {
+        for (int y = 0; y < bitmap.Height; y++)
+            for (int x = 0; x < bitmap.Width; x++)
+            {
+                var pixel = bitmap.GetPixel(x, y);
+                if (pixel.A == 255)
+                    yield return pixel;
+            }
     }
 }

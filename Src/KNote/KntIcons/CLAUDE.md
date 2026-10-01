@@ -23,12 +23,14 @@ al tamaño exacto en píxeles del DPI de la app, así que se ve nítido a cualqu
   por su glifo.
 - `KntIconCatalog` (interno) — `KntIcon` → glifo de 16 px y de 20 px (diseños distintos de la fuente) +
   color. El comentario de cada entrada es el nombre Fluent del icono.
-- `KntIconProvider` — `GetBitmap(icon, logicalSize, dpi)` (caché: los bitmaps son **compartidos, nunca los
-  liberes**) y `CreateImageList(logicalSize, dpi, params KntIcon[])` (32 bits, índice = orden de los
-  argumentos, clave = nombre del `KntIcon`; la `ImageList` sí es del llamador).
+- `KntIconProvider` — `GetBitmap(icon, logicalSize, dpi, color?)` (caché: los bitmaps son **compartidos,
+  nunca los liberes**). `color` sustituye al del catálogo solo donde hace falta, p. ej. un icono claro sobre
+  un fondo oscuro.
 - `KntIconExtensions` — `SetKntIcon(...)` para `ToolStripItem`, `ButtonBase` y `PictureBox`, tomando el DPI
   del control. En `ToolStripItem` fija `ImageScaling = None`: el bitmap ya tiene su tamaño final y dejar que
-  el ToolStrip lo estire a `ImageScalingSize` lo volvería a emborronar.
+  el ToolStrip lo estire a `ImageScalingSize` lo volvería a emborronar. `ImageList.SetKntIcons(logicalSize,
+  dpi, params KntIcon[])` rellena una `ImageList` creada en el diseñador (así la sigue liberando su
+  formulario): 32 bits, índice = orden de los argumentos, clave = nombre del `KntIcon`.
 
 ## Uso desde una vista
 
@@ -37,7 +39,7 @@ fijos serializados en los `.resx`.
 
 ```csharp
 buttonSave.SetKntIcon(KntIcon.Save);
-treeViewFolders.ImageList = KntIconProvider.CreateImageList(KntIconProvider.DefaultSize, DeviceDpi,
+imageListFolders.SetKntIcons(KntIconProvider.DefaultSize, DeviceDpi,
     KntIcon.FolderOpen, KntIcon.Folder, KntIcon.Repository);
 ```
 

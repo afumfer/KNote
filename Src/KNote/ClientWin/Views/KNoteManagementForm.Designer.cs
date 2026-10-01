@@ -634,9 +634,7 @@
             // 
             // toolNewNote
             // 
-            toolNewNote.Image = (Image)resources.GetObject("toolNewNote.Image");
             toolNewNote.ImageAlign = ContentAlignment.MiddleLeft;
-            toolNewNote.ImageTransparentColor = Color.Magenta;
             toolNewNote.Name = "toolNewNote";
             toolNewNote.Size = new Size(57, 22);
             toolNewNote.Text = "New  ";
@@ -645,8 +643,6 @@
             // 
             // toolEditNote
             // 
-            toolEditNote.Image = (Image)resources.GetObject("toolEditNote.Image");
-            toolEditNote.ImageTransparentColor = Color.Magenta;
             toolEditNote.Name = "toolEditNote";
             toolEditNote.Size = new Size(53, 22);
             toolEditNote.Text = "Edit  ";
@@ -655,8 +651,6 @@
             // 
             // toolDeleteNote
             // 
-            toolDeleteNote.Image = (Image)resources.GetObject("toolDeleteNote.Image");
-            toolDeleteNote.ImageTransparentColor = Color.Magenta;
             toolDeleteNote.Name = "toolDeleteNote";
             toolDeleteNote.Size = new Size(66, 22);
             toolDeleteNote.Text = "Delete  ";
@@ -670,8 +664,6 @@
             // 
             // toolPrintReports
             // 
-            toolPrintReports.Image = (Image)resources.GetObject("toolPrintReports.Image");
-            toolPrintReports.ImageTransparentColor = Color.Magenta;
             toolPrintReports.Name = "toolPrintReports";
             toolPrintReports.Size = new Size(58, 22);
             toolPrintReports.Text = "Print  ";
@@ -684,8 +676,6 @@
             // 
             // toolConfiguration
             // 
-            toolConfiguration.Image = (Image)resources.GetObject("toolConfiguration.Image");
-            toolConfiguration.ImageTransparentColor = Color.Magenta;
             toolConfiguration.Name = "toolConfiguration";
             toolConfiguration.Size = new Size(107, 22);
             toolConfiguration.Text = "Configuration  ";
@@ -763,12 +753,10 @@
             // 
             // pictureBoxFolder
             // 
-            pictureBoxFolder.Image = (Image)resources.GetObject("pictureBoxFolder.Image");
             pictureBoxFolder.Location = new Point(8, 5);
             pictureBoxFolder.Margin = new Padding(4, 3, 4, 3);
             pictureBoxFolder.Name = "pictureBoxFolder";
             pictureBoxFolder.Size = new Size(42, 39);
-            pictureBoxFolder.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBoxFolder.TabIndex = 0;
             pictureBoxFolder.TabStop = false;
             // 
@@ -882,11 +870,6 @@
             //
             // imageTabExplorer
             // 
-            imageTabExplorer.ColorDepth = ColorDepth.Depth8Bit;
-            imageTabExplorer.ImageStream = (ImageListStreamer)resources.GetObject("imageTabExplorer.ImageStream");
-            imageTabExplorer.TransparentColor = Color.Transparent;
-            imageTabExplorer.Images.SetKeyName(0, "folderOpene_16.png");
-            imageTabExplorer.Images.SetKeyName(1, "search_16.png");
             // 
             // splitContainer2
             // 

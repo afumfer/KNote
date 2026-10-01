@@ -4,6 +4,7 @@ using KNote.Model.Core;
 using KNote.Model.Dto;
 using System.Data;
 using KNote.ClientWin.Utils;
+using KntIcons;
 
 namespace KNote.ClientWin.Views;
 
@@ -55,31 +56,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         dataGridNotes.DataBindingComplete += dataGridNotes_DataBindingComplete;
         _ctrl.Store.Events.Subscribe<NotesListViewOptionsChanged>(OnNotesListViewOptionsChanged);
 
-        SetUndoFilterButtonIcon();
-    }
-
-    // Resources\Icons\undo_16.png embedded as a resource (KNote.ClientWin.KNote.ClientWin.csproj) rather
-    // than wired through the Designer's .resx machinery, since this button is built by hand here,
-    // not via the Forms Designer. Falls back to "X" if the resource can't be found/loaded, so a
-    // packaging mistake degrades gracefully instead of leaving the button unlabeled.
-    private void SetUndoFilterButtonIcon()
-    {
-        try
-        {
-            using var iconStream = System.Reflection.Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("KNote.ClientWin.Resources.Icons.undo_16.png");
-            if (iconStream != null)
-            {
-                buttonUndoFilter.Image = Image.FromStream(iconStream);
-                buttonUndoFilter.Text = "";
-                return;
-            }
-        }
-        catch (Exception)
-        {
-            // fall through to the text fallback below
-        }
-        buttonUndoFilter.Text = "X";
+        buttonUndoFilter.SetKntIcon(KntIcon.FilterClear);
     }
 
     #endregion 

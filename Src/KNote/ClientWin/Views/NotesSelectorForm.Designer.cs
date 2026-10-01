@@ -85,7 +85,7 @@
             // buttonUndoFilter
             //
             buttonUndoFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonUndoFilter.Location = new Point(628, 6);
+            buttonUndoFilter.Location = new Point(628, 4);
             buttonUndoFilter.Margin = new Padding(3);
             buttonUndoFilter.Name = "buttonUndoFilter";
             buttonUndoFilter.Size = new Size(28, 22);

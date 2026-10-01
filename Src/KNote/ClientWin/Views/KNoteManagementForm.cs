@@ -2,6 +2,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KntScript;
+using KntIcons;
 using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
@@ -44,11 +45,27 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 #if DEBUG
         menuKNoteLab.Visible = true;
 #endif
+
+        SetIcons();
     }
 
-    #endregion 
+    private void SetIcons()
+    {
+        toolNewNote.SetKntIcon(KntIcon.NewNote);
+        toolEditNote.SetKntIcon(KntIcon.Edit);
+        toolDeleteNote.SetKntIcon(KntIcon.Delete);
+        toolPrintReports.SetKntIcon(KntIcon.Print);
+        toolConfiguration.SetKntIcon(KntIcon.Settings);
 
-    #region IViewBase interface 
+        // Over the dark folder header: a light icon, as large as the folder caption next to it.
+        pictureBoxFolder.SetKntIcon(KntIcon.FolderOpen, 32, Color.WhiteSmoke);
+
+        imageTabExplorer.SetKntIcons(KntIconProvider.DefaultSize, DeviceDpi, KntIcon.FolderOpen, KntIcon.Search);
+    }
+
+    #endregion
+
+    #region IViewBase interface
 
     public override void ShowView()
     {

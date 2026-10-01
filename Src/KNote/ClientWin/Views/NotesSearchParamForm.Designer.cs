@@ -133,7 +133,6 @@ namespace KNote.ClientWin.Views
             // buttonSearch
             // 
             this.buttonSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSearch.Image = ((System.Drawing.Image)(resources.GetObject("buttonSearch.Image")));
             this.buttonSearch.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.buttonSearch.Location = new System.Drawing.Point(301, 9);
             this.buttonSearch.Name = "buttonSearch";
