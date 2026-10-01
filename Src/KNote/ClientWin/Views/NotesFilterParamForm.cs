@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KntIcons;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
@@ -32,6 +33,12 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
     public NotesFilterParamForm(NotesFilterParamCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonFolderClear.AlignToTextBox(textFolder);
+        buttonFolderSelect.AlignToTextBox(textFolder);
+
+        buttonAddAttribute.SetKntIcon(KntIcon.Add);
+        buttonRemoveAttribute.SetKntIcon(KntIcon.Remove);
 
         _ctrl = ctrl;
 

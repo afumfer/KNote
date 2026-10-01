@@ -209,7 +209,6 @@ namespace KNote.ClientWin.Views
             this.buttonEditTabValue.Name = "buttonEditTabValue";
             this.buttonEditTabValue.Size = new System.Drawing.Size(27, 26);
             this.buttonEditTabValue.TabIndex = 3;
-            this.buttonEditTabValue.Text = "...";
             this.buttonEditTabValue.UseVisualStyleBackColor = true;
             this.buttonEditTabValue.Click += new System.EventHandler(this.buttonEditTabValue_Click);
             //
@@ -221,7 +220,6 @@ namespace KNote.ClientWin.Views
             this.buttonDeleteTabValue.Name = "buttonDeleteTabValue";
             this.buttonDeleteTabValue.Size = new System.Drawing.Size(27, 26);
             this.buttonDeleteTabValue.TabIndex = 2;
-            this.buttonDeleteTabValue.Text = "-";
             this.buttonDeleteTabValue.UseVisualStyleBackColor = true;
             this.buttonDeleteTabValue.Click += new System.EventHandler(this.buttonDeleteTabValue_Click);
             //
@@ -233,7 +231,6 @@ namespace KNote.ClientWin.Views
             this.buttonAddTabValue.Name = "buttonAddTabValue";
             this.buttonAddTabValue.Size = new System.Drawing.Size(27, 26);
             this.buttonAddTabValue.TabIndex = 1;
-            this.buttonAddTabValue.Text = "+";
             this.buttonAddTabValue.UseVisualStyleBackColor = true;
             this.buttonAddTabValue.Click += new System.EventHandler(this.buttonAddTabValue_Click);
             //

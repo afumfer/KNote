@@ -361,6 +361,11 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   (`ForceDesignerDPIUnaware`), así que todos los formularios tienen `AutoScaleDimensions = 7x15`. Cualquier
   tamaño en píxeles que se asigne **en código** después de `InitializeComponent()` (anchos de columna,
   posiciones, tamaños de ventana) ya no lo escala WinForms: pásalo por `LogicalToDeviceUnits(...)`.
+  Al restaurar la posición guardada de una ventana, pásala por `Utils/WindowPlacement.EnsureVisible(...)`:
+  si el usuario cambió de monitor o de escala, puede caer fuera de todas las pantallas actuales (incluso en
+  el hueco entre dos monitores). Un botón pegado a la derecha de la caja de texto sobre la que actúa (`...`,
+  `X`) se iguala a ella con `Utils/ControlLayout.AlignToTextBox(...)` tras `InitializeComponent()`: el alto
+  real de una `TextBox` de una línea lo decide su fuente en tiempo de ejecución, no el Designer.
 - **Iconos**: salen de `KntIcons` (`KntIcon` + `SetKntIcon(...)`/`KntIconProvider`), asignados en código
   tras `InitializeComponent()`, nunca como imágenes en el diseñador. Ver `KntIcons/CLAUDE.md`. Excepción: el
   icono de la aplicación (`Resources/Icons/stickyyellow_32_icon.ico`) se mantiene como está.

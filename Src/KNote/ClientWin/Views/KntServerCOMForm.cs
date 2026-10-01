@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Utils;
+using KntIcons;
 using KNote.Model;
 using System.IO.Ports;
 
@@ -306,34 +307,17 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
 
     #region Button icons
 
-    // Same technique as AppInfoAlarmsForm/NotesSelectorForm: PNGs embedded as resources (see
-    // KNote.ClientWin.csproj) instead of going through the Designer's .resx. A missing icon just
-    // leaves the button text-only.
     private void SetButtonIcons()
     {
-        SetButtonIcon(buttonStart, "play_16.png");
-        SetButtonIcon(buttonStop, "stop_16.png");
+        SetButtonIcon(buttonStart, KntIcon.Run);
+        SetButtonIcon(buttonStop, KntIcon.Stop);
     }
 
-    private static void SetButtonIcon(Button button, string resourceName)
+    private static void SetButtonIcon(Button button, KntIcon icon)
     {
-        try
-        {
-            using var stream = System.Reflection.Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream($"KNote.ClientWin.Resources.Icons.{resourceName}");
-            if (stream == null)
-                return;
-
-            // A Bitmap needs its stream for its whole life: copy it into a Bitmap that owns its data.
-            using var loaded = new Bitmap(stream);
-            button.Image = new Bitmap(loaded);
-            button.ImageAlign = ContentAlignment.MiddleLeft;
-            button.TextImageRelation = TextImageRelation.ImageBeforeText;
-        }
-        catch (Exception)
-        {
-            // Keep the text-only button.
-        }
+        button.SetKntIcon(icon);
+        button.ImageAlign = ContentAlignment.MiddleLeft;
+        button.TextImageRelation = TextImageRelation.ImageBeforeText;
     }
 
     #endregion

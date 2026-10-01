@@ -148,12 +148,10 @@ namespace KNote.ClientWin.Views
             // 
             picResize.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             picResize.Cursor = Cursors.SizeNWSE;
-            picResize.Image = (Image)resources.GetObject("picResize.Image");
-            picResize.Location = new Point(465, 6);
+            picResize.Location = new Point(461, 3);
             picResize.Margin = new Padding(3);
             picResize.Name = "picResize";
-            picResize.Size = new Size(12, 12);
-            picResize.SizeMode = PictureBoxSizeMode.StretchImage;
+            picResize.Size = new Size(16, 16);
             picResize.TabIndex = 5;
             picResize.TabStop = false;
             picResize.MouseDown += picResize_MouseDown;
@@ -177,7 +175,7 @@ namespace KNote.ClientWin.Views
             labelCaption.Location = new Point(1, 1);
             labelCaption.Margin = new Padding(3, 0, 3, 0);
             labelCaption.Name = "labelCaption";
-            labelCaption.Padding = new Padding(20, 2, 0, 0);
+            labelCaption.Padding = new Padding(25, 2, 0, 0);
             labelCaption.Size = new Size(476, 20);
             labelCaption.TabIndex = 1;
             labelCaption.DoubleClick += labelCaption_DoubleClick;
@@ -187,12 +185,10 @@ namespace KNote.ClientWin.Views
             // picMenu
             // 
             picMenu.Cursor = Cursors.Hand;
-            picMenu.Image = (Image)resources.GetObject("picMenu.Image");
             picMenu.Location = new Point(5, 5);
             picMenu.Margin = new Padding(3);
             picMenu.Name = "picMenu";
             picMenu.Size = new Size(16, 16);
-            picMenu.SizeMode = PictureBoxSizeMode.StretchImage;
             picMenu.TabIndex = 4;
             picMenu.TabStop = false;
             picMenu.MouseUp += picMenu_MouseUp;

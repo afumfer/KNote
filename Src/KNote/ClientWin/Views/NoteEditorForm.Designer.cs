@@ -1008,7 +1008,6 @@
             buttonAttributeEdit.Name = "buttonAttributeEdit";
             buttonAttributeEdit.Size = new Size(27, 26);
             buttonAttributeEdit.TabIndex = 4;
-            buttonAttributeEdit.Text = "...";
             buttonAttributeEdit.UseVisualStyleBackColor = true;
             buttonAttributeEdit.Click += buttonAttributeEdit_Click;
             // 
@@ -1102,7 +1101,6 @@
             buttonResourceAdd.Name = "buttonResourceAdd";
             buttonResourceAdd.Size = new Size(27, 26);
             buttonResourceAdd.TabIndex = 10;
-            buttonResourceAdd.Text = "+";
             toolTipHelps.SetToolTip(buttonResourceAdd, "Add resource");
             buttonResourceAdd.UseVisualStyleBackColor = true;
             buttonResourceAdd.Click += buttonResourceAdd_Click;
@@ -1116,7 +1114,6 @@
             buttonResourceDelete.Name = "buttonResourceDelete";
             buttonResourceDelete.Size = new Size(27, 26);
             buttonResourceDelete.TabIndex = 11;
-            buttonResourceDelete.Text = "-";
             buttonResourceDelete.UseVisualStyleBackColor = true;
             buttonResourceDelete.Click += buttonResourceDelete_Click;
             // 
@@ -1129,7 +1126,6 @@
             buttonResourceEdit.Name = "buttonResourceEdit";
             buttonResourceEdit.Size = new Size(27, 26);
             buttonResourceEdit.TabIndex = 12;
-            buttonResourceEdit.Text = "...";
             buttonResourceEdit.UseVisualStyleBackColor = true;
             buttonResourceEdit.Click += buttonResourceEdit_Click;
             // 
@@ -1296,7 +1292,6 @@
             buttonTaskAdd.Name = "buttonTaskAdd";
             buttonTaskAdd.Size = new Size(29, 26);
             buttonTaskAdd.TabIndex = 15;
-            buttonTaskAdd.Text = "+";
             buttonTaskAdd.UseVisualStyleBackColor = true;
             buttonTaskAdd.Click += buttonTaskAdd_Click;
             // 
@@ -1309,7 +1304,6 @@
             buttonTaskDelete.Name = "buttonTaskDelete";
             buttonTaskDelete.Size = new Size(29, 26);
             buttonTaskDelete.TabIndex = 16;
-            buttonTaskDelete.Text = "-";
             buttonTaskDelete.UseVisualStyleBackColor = true;
             buttonTaskDelete.Click += buttonTaskDelete_Click;
             // 
@@ -1322,7 +1316,6 @@
             buttonTaskEdit.Name = "buttonTaskEdit";
             buttonTaskEdit.Size = new Size(29, 26);
             buttonTaskEdit.TabIndex = 17;
-            buttonTaskEdit.Text = "...";
             buttonTaskEdit.UseVisualStyleBackColor = true;
             buttonTaskEdit.Click += buttonTaskEdit_Click;
             // 
@@ -1391,7 +1384,6 @@
             buttonEditAlarm.Name = "buttonEditAlarm";
             buttonEditAlarm.Size = new Size(27, 26);
             buttonEditAlarm.TabIndex = 3;
-            buttonEditAlarm.Text = "...";
             buttonEditAlarm.UseVisualStyleBackColor = true;
             buttonEditAlarm.Click += buttonEditAlarm_Click;
             // 
@@ -1404,7 +1396,6 @@
             buttonDeleteAlarm.Name = "buttonDeleteAlarm";
             buttonDeleteAlarm.Size = new Size(27, 26);
             buttonDeleteAlarm.TabIndex = 2;
-            buttonDeleteAlarm.Text = "-";
             buttonDeleteAlarm.UseVisualStyleBackColor = true;
             buttonDeleteAlarm.Click += buttonDeleteAlarm_Click;
             // 
@@ -1417,7 +1408,6 @@
             buttonAddAlarm.Name = "buttonAddAlarm";
             buttonAddAlarm.Size = new Size(27, 26);
             buttonAddAlarm.TabIndex = 1;
-            buttonAddAlarm.Text = "+";
             buttonAddAlarm.UseVisualStyleBackColor = true;
             buttonAddAlarm.Click += buttonAddAlarm_Click;
             // 
@@ -1565,7 +1555,6 @@
             buttonTraceFromAdd.Name = "buttonTraceFromAdd";
             buttonTraceFromAdd.Size = new Size(27, 26);
             buttonTraceFromAdd.TabIndex = 10;
-            buttonTraceFromAdd.Text = "+";
             buttonTraceFromAdd.UseVisualStyleBackColor = true;
             buttonTraceFromAdd.Click += buttonTraceFromAdd_Click;
             //
@@ -1577,7 +1566,6 @@
             buttonTraceFromRemove.Name = "buttonTraceFromRemove";
             buttonTraceFromRemove.Size = new Size(27, 26);
             buttonTraceFromRemove.TabIndex = 11;
-            buttonTraceFromRemove.Text = "-";
             buttonTraceFromRemove.UseVisualStyleBackColor = true;
             buttonTraceFromRemove.Click += buttonTraceFromRemove_Click;
             //
@@ -1589,7 +1577,6 @@
             buttonTraceFromEdit.Name = "buttonTraceFromEdit";
             buttonTraceFromEdit.Size = new Size(27, 26);
             buttonTraceFromEdit.TabIndex = 12;
-            buttonTraceFromEdit.Text = "...";
             buttonTraceFromEdit.UseVisualStyleBackColor = true;
             buttonTraceFromEdit.Click += buttonTraceFromEdit_Click;
             //
@@ -1635,7 +1622,6 @@
             buttonTraceToAdd.Name = "buttonTraceToAdd";
             buttonTraceToAdd.Size = new Size(27, 26);
             buttonTraceToAdd.TabIndex = 13;
-            buttonTraceToAdd.Text = "+";
             buttonTraceToAdd.UseVisualStyleBackColor = true;
             buttonTraceToAdd.Click += buttonTraceToAdd_Click;
             //
@@ -1647,7 +1633,6 @@
             buttonTraceToRemove.Name = "buttonTraceToRemove";
             buttonTraceToRemove.Size = new Size(27, 26);
             buttonTraceToRemove.TabIndex = 14;
-            buttonTraceToRemove.Text = "-";
             buttonTraceToRemove.UseVisualStyleBackColor = true;
             buttonTraceToRemove.Click += buttonTraceToRemove_Click;
             //
@@ -1659,7 +1644,6 @@
             buttonTraceToEdit.Name = "buttonTraceToEdit";
             buttonTraceToEdit.Size = new Size(27, 26);
             buttonTraceToEdit.TabIndex = 15;
-            buttonTraceToEdit.Text = "...";
             buttonTraceToEdit.UseVisualStyleBackColor = true;
             buttonTraceToEdit.Click += buttonTraceToEdit_Click;
             //

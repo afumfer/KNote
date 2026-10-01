@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Core;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -41,6 +42,8 @@ public partial class FolderEditorForm : KntEditorForm, IViewEditor<FolderDto>
     {
 
         InitializeComponent();
+
+        buttonFolderSearch.AlignToTextBox(textParentFolder);
 
         _ctrl = ctrl;
 

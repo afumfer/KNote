@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KntIcons;
 using KNote.Model;
 
 namespace KNote.ClientWin.Views;
@@ -34,40 +35,21 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         // CenterScreen/CenterParent after the fact (e.g. from its own Load handler) is unreliable -
         // unlike Manual/WindowsDefaultLocation forms (such as KNoteManagementForm), whose Location can
         // be safely restored in Load because nothing else is competing to (re)position them.
+        // The saved position can be off every current screen (monitor or Windows scale changed since it
+        // was saved), and may legitimately be negative (a monitor left of / above the primary one).
         var bounds = _ctrl.Store.State.AppInfoAlarmsWindow.Bounds;
         if (bounds.Width > 0)
             Size = new Size(bounds.Width, bounds.Height);
-        if (bounds.X > 0 || bounds.Y > 0)
+        if (bounds.X != 0 || bounds.Y != 0)
         {
             StartPosition = FormStartPosition.Manual;
-            Location = new Point(bounds.X, bounds.Y);
+            Bounds = WindowPlacement.EnsureVisible(new Rectangle(new Point(bounds.X, bounds.Y), Size));
         }
     }
 
-    // Resources\Icons\alarm_24.png embedded as a resource (KNote.ClientWin.csproj) rather than wired
-    // through the Designer's .resx machinery, same technique already used by
-    // NotesSelectorForm.SetUndoFilterButtonIcon. Falls back to the default form icon if the resource
-    // can't be found/loaded.
     private void SetWindowIcon()
     {
-        try
-        {
-            using var iconStream = System.Reflection.Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("KNote.ClientWin.Resources.Icons.alarm_24.png");
-            if (iconStream == null)
-                return;
-
-            using var bitmap = new Bitmap(iconStream);
-            // Icon.FromHandle wraps a native HICON it doesn't own, so Clone() (a managed copy) is
-            // kept and the native handle is deliberately left unreleased - a one-time, single-icon
-            // leak for the process's lifetime, not worth a DestroyIcon P/Invoke here.
-            using var icon = Icon.FromHandle(bitmap.GetHicon());
-            this.Icon = (Icon)icon.Clone();
-        }
-        catch (Exception)
-        {
-            // Keep the default form icon.
-        }
+        this.Icon = KntIconProvider.CreateIcon(KntIcon.Alarm, DeviceDpi);
     }
 
     #endregion

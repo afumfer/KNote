@@ -581,21 +581,13 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
     private void SetViewPositionAndSize()
     {
+        // 0 means "never saved" (keep the default); any other value, negative included (a monitor left of /
+        // above the primary one), is restored - moved back on screen if it no longer falls on one.
         var bounds = _ctrl.Store.State.ManagementWindow.Bounds;
+        var location = new Point(bounds.X != 0 ? bounds.X : Left, bounds.Y != 0 ? bounds.Y : Top);
+        var size = new Size(bounds.Width > 0 ? bounds.Width : Width, bounds.Height > 0 ? bounds.Height : Height);
 
-        if (bounds.X > SystemInformation.VirtualScreen.Width - 100)
-            bounds.X = 100;
-        if (bounds.Y > SystemInformation.VirtualScreen.Height - 100)
-            bounds.Y = 100;
-
-        if (bounds.Y > 0)
-            Top = bounds.Y;
-        if (bounds.X > 0)
-            Left = bounds.X;
-        if (bounds.Width > 0)
-            Width = bounds.Width;
-        if (bounds.Height > 0)
-            Height = bounds.Height;
+        Bounds = WindowPlacement.EnsureVisible(new Rectangle(location, size));
     }
 
     #endregion

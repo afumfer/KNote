@@ -58,6 +58,53 @@ public static class KntIconProvider
         }
     }
 
+    /// <summary>
+    /// Creates a window icon for <paramref name="icon"/> with frames for the small (title bar) and large
+    /// (Alt+Tab, taskbar) icon sizes at <paramref name="dpi"/>. Unlike the bitmaps, the caller owns it.
+    /// </summary>
+    public static Icon CreateIcon(KntIcon icon, int dpi)
+    {
+        var frames = new[] { 16, 24, 32, 48 }
+            .Select(logicalSize => GetBitmap(icon, logicalSize, dpi))
+            .ToList();
+
+        // ICO container with PNG-compressed frames (supported by Windows since Vista).
+        using var stream = new MemoryStream();
+        using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8, leaveOpen: true))
+        {
+            var pngs = frames.Select(frame =>
+            {
+                using var png = new MemoryStream();
+                frame.Save(png, ImageFormat.Png);
+                return png.ToArray();
+            }).ToList();
+
+            writer.Write((short)0);             // reserved
+            writer.Write((short)1);             // type: icon
+            writer.Write((short)frames.Count);
+
+            int offset = 6 + 16 * frames.Count;
+            for (int i = 0; i < frames.Count; i++)
+            {
+                int size = frames[i].Width;
+                writer.Write((byte)(size >= 256 ? 0 : size));   // width (0 means 256)
+                writer.Write((byte)(size >= 256 ? 0 : size));   // height
+                writer.Write((byte)0);                          // palette colors
+                writer.Write((byte)0);                          // reserved
+                writer.Write((short)1);                         // color planes
+                writer.Write((short)32);                        // bits per pixel
+                writer.Write(pngs[i].Length);
+                writer.Write(offset);
+                offset += pngs[i].Length;
+            }
+            foreach (var png in pngs)
+                writer.Write(png);
+        }
+
+        stream.Position = 0;
+        return new Icon(stream);
+    }
+
     private static Bitmap Render(KntIconGlyph glyph, int logicalSize, int pixelSize)
     {
         // Each design size is drawn on its own pixel grid; use the 16 px one wherever it fits.

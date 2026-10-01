@@ -2,6 +2,8 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
+using KntIcons;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace KNote.ClientWin.Views;
@@ -20,6 +22,9 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     private Guid _selectedFolderId;
 
     private readonly string _url;
+
+    // picMenu sits on the caption (true) or floats over the navigation URL bar (false).
+    private bool _menuOverCaption;
 
     #endregion
 
@@ -400,14 +405,16 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
         if (updateSizeAndLocation)
         {
-            // Avoid positions outside the view zone
-            if (_ctrl.WindowPostIt.PosX > SystemInformation.VirtualScreen.Width - 50)
-                _ctrl.WindowPostIt.PosX = SystemInformation.VirtualScreen.Width - _ctrl.WindowPostIt.Width;
-            if (_ctrl.WindowPostIt.PosY > SystemInformation.VirtualScreen.Height - 50)
-                _ctrl.WindowPostIt.PosY = SystemInformation.VirtualScreen.Height - _ctrl.WindowPostIt.Height;
+            // The saved position can be off every current screen (monitor or Windows scale changed).
+            var window = _ctrl.WindowPostIt;
+            var bounds = WindowPlacement.EnsureVisible(new Rectangle(window.PosX, window.PosY, window.Width, window.Height));
+            window.PosX = bounds.X;
+            window.PosY = bounds.Y;
+            window.Width = bounds.Width;
+            window.Height = bounds.Height;
 
-            this.Location = new System.Drawing.Point(_ctrl.WindowPostIt.PosX, _ctrl.WindowPostIt.PosY);
-            this.Size = new System.Drawing.Size(_ctrl.WindowPostIt.Width, _ctrl.WindowPostIt.Height);
+            this.Location = bounds.Location;
+            this.Size = bounds.Size;
 
             if (forceAlwaysTop)
                 _ctrl.WindowPostIt.AlwaysOnTop = true;
@@ -418,6 +425,10 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         labelCaption.ForeColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextTitleColor);
         BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
         labelStatus.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
+
+        // Both icons follow the Post-It's own text colors, so they stay visible on any note color.
+        SetMenuIcon();
+        picResize.SetKntIcon(KntIcon.ResizeGrip, 16, ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor));
     }
 
     protected override void ControlsToModel()
@@ -566,7 +577,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
                 // Size picMenu to match the URL textbox's own height (which now matches the
                 // back/forward/reload buttons) and float it as an overlay on top of the textbox's
                 // right edge, instead of shrinking the textbox to make room for it. It's then
-                // shrunk by ~25% around that same center point, so it doesn't fill the whole row.
+                // shrunk by ~10% around that same center point, so it doesn't fill the whole row.
                 var urlTextBox = kntEditView.UrlTextBox;
 
                 // kntEditView is nested inside panelContent, so its bounds aren't directly
@@ -580,14 +591,17 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
                 int centerX = kntEditViewRight - 2 - fullSize / 2;
                 int centerY = kntEditViewTop + urlTextBox.Top + fullSize / 2;
 
-                int picMenuSize = (int)(fullSize * 0.75);
+                int picMenuSize = (int)(fullSize * 0.9);
                 picMenu.Size = new Size(picMenuSize, picMenuSize);
                 picMenu.Top = centerY - picMenuSize / 2;
                 picMenu.Left = centerX - picMenuSize / 2;
-                picMenu.BackColor = Color.WhiteSmoke;
+                // Same background as the URL textbox it overlays.
+                picMenu.BackColor = urlTextBox.BackColor;
                 picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
                     | System.Windows.Forms.AnchorStyles.Right));
                 picMenu.BringToFront();
+                _menuOverCaption = false;
+                SetMenuIcon();
             }
             else
             {
@@ -624,7 +638,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         // Sized/positioned from labelCaption's own (AutoScale-tracked) height instead of a
         // hardcoded pixel value, so it stays correctly proportioned at any Windows scale factor -
         // mirrors the same approach already used for picMenu in navigation mode.
-        int iconSize = (int)(labelCaption.Height * 0.7);
+        int iconSize = (int)(labelCaption.Height * 0.9);
         Point captionOrigin = panelForm.PointToClient(labelCaption.PointToScreen(Point.Empty));
 
         picMenu.Size = new Size(iconSize, iconSize);
@@ -633,6 +647,25 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
             | System.Windows.Forms.AnchorStyles.Left));
         picMenu.BringToFront();
+        _menuOverCaption = true;
+        SetMenuIcon();
+    }
+
+    // picMenu's size follows the caption / URL bar height (see above), so its icon is drawn for that size.
+    // Over the caption it takes the caption's colors (picMenu is a sibling of the caption, not its child,
+    // so it doesn't inherit them), so it stands out on any Post-It title color.
+    private void SetMenuIcon()
+    {
+        int logicalSize = (int)Math.Round(picMenu.Height * 96.0 / DeviceDpi);
+        if (logicalSize <= 0)
+            return;
+        Color? color = null;
+        if (_menuOverCaption)
+        {
+            picMenu.BackColor = labelCaption.BackColor;
+            color = labelCaption.ForeColor;
+        }
+        picMenu.SetKntIcon(KntIcon.PostIt, logicalSize, color);
     }
 
     private void KntEditView_NavigationStart(object sender, EventArgs e)

@@ -72,7 +72,6 @@ namespace KNote.ClientWin.Views
             this.buttonEdit.Name = "buttonEdit";
             this.buttonEdit.Size = new System.Drawing.Size(27, 26);
             this.buttonEdit.TabIndex = 2;
-            this.buttonEdit.Text = "...";
             this.buttonEdit.UseVisualStyleBackColor = true;
             this.buttonEdit.Click += new System.EventHandler(this.buttonEdit_Click);
             //
@@ -84,7 +83,6 @@ namespace KNote.ClientWin.Views
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(27, 26);
             this.buttonDelete.TabIndex = 1;
-            this.buttonDelete.Text = "-";
             this.buttonDelete.UseVisualStyleBackColor = true;
             this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             //
@@ -96,7 +94,6 @@ namespace KNote.ClientWin.Views
             this.buttonAdd.Name = "buttonAdd";
             this.buttonAdd.Size = new System.Drawing.Size(27, 26);
             this.buttonAdd.TabIndex = 0;
-            this.buttonAdd.Text = "+";
             this.buttonAdd.UseVisualStyleBackColor = true;
             this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
             //

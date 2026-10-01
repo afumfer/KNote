@@ -77,8 +77,6 @@
             // buttonNew
             // 
             buttonNew.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonNew.Image = (Image)resources.GetObject("buttonNew.Image");
-            buttonNew.ImageTransparentColor = Color.Magenta;
             buttonNew.Name = "buttonNew";
             buttonNew.Size = new Size(23, 22);
             buttonNew.Text = "New";
@@ -87,8 +85,6 @@
             // buttonOpen
             // 
             buttonOpen.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonOpen.Image = (Image)resources.GetObject("buttonOpen.Image");
-            buttonOpen.ImageTransparentColor = Color.Magenta;
             buttonOpen.Name = "buttonOpen";
             buttonOpen.Size = new Size(23, 22);
             buttonOpen.Text = "Open";
@@ -97,8 +93,6 @@
             // buttonSave
             // 
             buttonSave.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonSave.Image = (Image)resources.GetObject("buttonSave.Image");
-            buttonSave.ImageTransparentColor = Color.Magenta;
             buttonSave.Name = "buttonSave";
             buttonSave.Size = new Size(23, 22);
             buttonSave.Text = "Save";
@@ -112,8 +106,6 @@
             // buttonRun
             //
             buttonRun.DropDownItems.AddRange(new ToolStripItem[] { buttonRunKntScript, buttonRunCSCode, buttonRunCSCodeStdOut, buttonRunPyCode, buttonRunPyCodeStdOut, buttonRunJsCode, buttonRunJsCodeStdOut, buttonRunNaturalLanguage });
-            buttonRun.Image = (Image)resources.GetObject("buttonRun.Image");
-            buttonRun.ImageTransparentColor = Color.Magenta;
             buttonRun.Name = "buttonRun";
             buttonRun.Size = new Size(57, 22);
             buttonRun.Text = "Run";

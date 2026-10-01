@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KntIcons;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -31,6 +32,10 @@ public partial class AttributeEditorForm : KntEditorForm, IViewEditor<KAttribute
     public AttributeEditorForm(AttributeEditorCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonAddTabValue.SetKntIcon(KntIcon.Add);
+        buttonDeleteTabValue.SetKntIcon(KntIcon.Remove);
+        buttonEditTabValue.SetKntIcon(KntIcon.Edit);
         PersonalizeControls();
 
         _ctrl = ctrl;

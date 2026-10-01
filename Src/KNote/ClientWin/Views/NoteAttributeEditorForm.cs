@@ -129,6 +129,7 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
     {
         ModelToControlText(true);
         buttonSelDate.Location = new Point(LogicalToDeviceUnits(216), LogicalToDeviceUnits(32));
+        buttonSelDate.AlignToTextBox(textValue);
         buttonSelDate.Visible = true;
     }
 

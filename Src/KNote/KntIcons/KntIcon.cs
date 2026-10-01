@@ -31,6 +31,7 @@ public enum KntIcon
 
     // Note editor
     PostIt,
+    ResizeGrip,
     Navigate,
     BasicData,
     Attributes,

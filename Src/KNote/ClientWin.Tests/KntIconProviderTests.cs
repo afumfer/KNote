@@ -65,6 +65,20 @@ public class KntIconProviderTests
     }
 
     [TestMethod]
+    [DataRow(96, 16, 32)]
+    [DataRow(192, 32, 64)]
+    public void CreateIcon_HasFramesForSmallAndLargeIconSizes(int dpi, int smallPixels, int largePixels)
+    {
+        using var icon = KntIconProvider.CreateIcon(KntIcon.Alarm, dpi);
+        using var small = new Icon(icon, smallPixels, smallPixels);
+        using var large = new Icon(icon, largePixels, largePixels);
+
+        Assert.AreEqual(smallPixels, small.Width);
+        Assert.AreEqual(largePixels, large.Width);
+        Assert.AreNotEqual(IntPtr.Zero, large.Handle);
+    }
+
+    [TestMethod]
     public void SetKntIcons_ImageList_KeepsOrderAndDeviceSize()
     {
         using var imageList = new ImageList { ColorDepth = ColorDepth.Depth8Bit };

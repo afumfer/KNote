@@ -2,6 +2,7 @@
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -18,6 +19,9 @@ public partial class MessageEditorForm : KntEditorForm, IViewEditor<KMessageDto>
     public MessageEditorForm(MessageEditorCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonSelectDate.AlignToTextBox(textAlarmDateTime);
+        buttonSelectUser.AlignToTextBox(textUserFullName);
         PersonalizeControls();
 
         _ctrl = ctrl;

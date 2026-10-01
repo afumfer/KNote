@@ -129,7 +129,6 @@ namespace KNote.ClientWin.Views
             this.buttonRemoveAttribute.Name = "buttonRemoveAttribute";
             this.buttonRemoveAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonRemoveAttribute.TabIndex = 21;
-            this.buttonRemoveAttribute.Text = "-";
             this.buttonRemoveAttribute.UseVisualStyleBackColor = true;
             this.buttonRemoveAttribute.Click += new System.EventHandler(this.buttonRemoveAttribute_Click);
             //
@@ -140,7 +139,6 @@ namespace KNote.ClientWin.Views
             this.buttonAddAttribute.Name = "buttonAddAttribute";
             this.buttonAddAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonAddAttribute.TabIndex = 20;
-            this.buttonAddAttribute.Text = "+";
             this.buttonAddAttribute.UseVisualStyleBackColor = true;
             this.buttonAddAttribute.Click += new System.EventHandler(this.buttonAddAttribute_Click);
             //

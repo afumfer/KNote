@@ -57,6 +57,7 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
         _ctrl.Store.Events.Subscribe<NotesListViewOptionsChanged>(OnNotesListViewOptionsChanged);
 
         buttonUndoFilter.SetKntIcon(KntIcon.FilterClear);
+        buttonUndoFilter.AlignToTextBox(textFilter);
     }
 
     #endregion 

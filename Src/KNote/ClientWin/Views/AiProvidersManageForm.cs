@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KntIcons;
 using KNote.Model;
 
 namespace KNote.ClientWin.Views;
@@ -30,6 +31,10 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
     public AiProvidersManageForm(AiProvidersManageCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonAdd.SetKntIcon(KntIcon.Add);
+        buttonDelete.SetKntIcon(KntIcon.Remove);
+        buttonEdit.SetKntIcon(KntIcon.Edit);
 
         _ctrl = ctrl;
 

@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -17,6 +18,10 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
     public RepositoryEditorForm(RepositoryEditorCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonSelectDirectory.AlignToTextBox(textSqLiteDirectory);
+        buttonSelectFile.AlignToTextBox(textSqLiteDataBase);
+        buttonSelectDirectoryResources.AlignToTextBox(textResourcesContainerRoot);
 
         _ctrl = ctrl;
 

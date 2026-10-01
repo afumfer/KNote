@@ -107,6 +107,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         SetIcons();
+
+        buttonFolderSearch.AlignToTextBox(textFolderNumber);
+        buttonDeleteType.AlignToTextBox(textNoteType);
+        buttonNoteType.AlignToTextBox(textNoteType);
     }
 
     private void SetIcons()
@@ -129,6 +133,20 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         buttonEditMarkdown.SetKntIcon(KntIcon.Markdown);
         buttonNavigate.SetKntIcon(KntIcon.Navigate);
         buttonViewHtml.SetKntIcon(KntIcon.Html);
+
+        // Add / remove / edit buttons of the tabs' lists.
+        buttonAttributeEdit.SetKntIcon(KntIcon.Edit);
+        foreach (var (add, remove, edit) in new[] {
+            (buttonResourceAdd, buttonResourceDelete, buttonResourceEdit),
+            (buttonTaskAdd, buttonTaskDelete, buttonTaskEdit),
+            (buttonAddAlarm, buttonDeleteAlarm, buttonEditAlarm),
+            (buttonTraceFromAdd, buttonTraceFromRemove, buttonTraceFromEdit),
+            (buttonTraceToAdd, buttonTraceToRemove, buttonTraceToEdit) })
+        {
+            add.SetKntIcon(KntIcon.Add);
+            remove.SetKntIcon(KntIcon.Remove);
+            edit.SetKntIcon(KntIcon.Edit);
+        }
 
         // Same order as the tabs' ImageIndex (Designer): basic data, attributes, resources, activities,
         // alarms, code, trace notes.

@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -17,6 +18,11 @@ public partial class TaskEditorForm : KntEditorForm, IViewEditor<NoteTaskDto>
     public TaskEditorForm(TaskEditorCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonSelDateStart.AlignToTextBox(textStartDate);
+        buttonSelDateEnd.AlignToTextBox(textEndDate);
+        buttonSelDateExS.AlignToTextBox(textExStartDate);
+        buttonSelDateExE.AlignToTextBox(textExEndDate);
 
         _ctrl = ctrl;
     }

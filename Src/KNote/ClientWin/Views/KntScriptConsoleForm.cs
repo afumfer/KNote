@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KntScript;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Utils;
+using KntIcons;
 
 namespace KNote.ClientWin.Views;
 
@@ -26,6 +27,11 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
     {
         InitializeComponent();
         PersonalizeTabStop();
+
+        buttonNew.SetKntIcon(KntIcon.NewDocument);
+        buttonOpen.SetKntIcon(KntIcon.FolderOpen);
+        buttonSave.SetKntIcon(KntIcon.Save);
+        buttonRun.SetKntIcon(KntIcon.Run);
 
         _ctrl = ctrl;
         _ctrl.ScriptExited += Ctrl_ScriptExited;

@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KntIcons;
 using KNote.Model;
 using KNote.Model.Dto;
 
@@ -31,6 +32,10 @@ public partial class TraceNoteTypesManageForm : KntForm, IViewManageList<TraceNo
     public TraceNoteTypesManageForm(TraceNoteTypesManageCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonAdd.SetKntIcon(KntIcon.Add);
+        buttonDelete.SetKntIcon(KntIcon.Remove);
+        buttonEdit.SetKntIcon(KntIcon.Edit);
 
         _ctrl = ctrl;
 

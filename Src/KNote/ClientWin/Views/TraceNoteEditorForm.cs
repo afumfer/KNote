@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model.Dto;
+using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
 
@@ -22,6 +23,8 @@ public partial class TraceNoteEditorForm : KntEditorForm, IViewEditor<TraceNoteD
     public TraceNoteEditorForm(TraceNoteEditorCtrl ctrl)
     {
         InitializeComponent();
+
+        buttonSelectRelatedNote.AlignToTextBox(textRelatedNote);
 
         _ctrl = ctrl;
     }

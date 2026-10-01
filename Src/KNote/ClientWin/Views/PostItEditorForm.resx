@@ -127,40 +127,12 @@
     <value>True</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="picResize.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        R0lGODlhDgAOAIcAAAAAAP//////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        /yH/C05FVFNDQVBFMi4wAwEBAAAh+QQBAAABACwAAAAADgAOAAAIMQADCBxIsKDBggAOIkyoUCCAhw0D
-        PISocCJFgxYvEsyo0SFHhgM/ahR5kWRJkxELBgQAOw==
-</value>
-  </data>
   <metadata name="labelCaption.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <metadata name="picMenu.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="picMenu.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAAMVJREFUWEft
-        ljEKAjEQRbOLYqN8ke219iheRDyIN/AoXkCYysbSQ1j92kLZEEHj6AqbxGYGXpOZzLxiCHEULCi4UHAr
-        zIGCkaPgrCRLsW4F4sOSbE3ABEzABEzABEzABEwgl8CeggkFdQdVLoGZ+zWUyykYht4VBc0X/Lc8vpyC
-        h8BYyT2z/KfAKecOdAmQgmmJHdAE2uFNqSWMBV6Hh6Kr0qAvmsD78FC0Uxr0JRY4UoB4to/wIq0o2CSk
-        Dr0HFMz9tn+IO6gQWBePtlCwAAAAAElFTkSuQmCC
-</value>
-  </data>
   <metadata name="menuPostIt.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>

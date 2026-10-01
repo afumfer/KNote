@@ -51,6 +51,7 @@ internal static class KntIconCatalog
 
         // Note editor
         [KntIcon.PostIt] = new(0xF663, 0xF56B, PostIt),               // note
+        [KntIcon.ResizeGrip] = new(0xE2A4, 0xE2A5, Neutral),          // caret_down_right
         [KntIcon.Navigate] = new(0xE6B1, 0xF45A, Neutral),            // globe
         [KntIcon.BasicData] = new(0xEEED, 0xE557, Neutral),           // document_text
         [KntIcon.Attributes] = new(0xF01AD, 0xECE2, Neutral),         // text_bullet_list_square
