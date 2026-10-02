@@ -46,6 +46,8 @@
             menuEditFolder = new ToolStripMenuItem();
             menuDeleteFolder = new ToolStripMenuItem();
             menuFileS1 = new ToolStripSeparator();
+            menuPrintNotesList = new ToolStripMenuItem();
+            menuFileS3 = new ToolStripSeparator();
             menuHide = new ToolStripMenuItem();
             menuFilesS2 = new ToolStripSeparator();
             menuExit = new ToolStripMenuItem();
@@ -77,8 +79,6 @@
             menuViewS2 = new ToolStripSeparator();
             menuListFilterVisible = new ToolStripMenuItem();
             menuTools = new ToolStripMenuItem();
-            menuReports = new ToolStripMenuItem();
-            menuToolsS1 = new ToolStripSeparator();
             menuKntScriptConsole = new ToolStripMenuItem();
             menuChat = new ToolStripMenuItem();
             menuAIAssistant = new ToolStripMenuItem();
@@ -102,7 +102,7 @@
             toolEditNote = new ToolStripButton();
             toolDeleteNote = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
-            toolPrintReports = new ToolStripButton();
+            toolPrintNotesList = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
             toolConfiguration = new ToolStripButton();
             panelSupManagement = new Panel();
@@ -151,7 +151,7 @@
             // 
             // menuFile
             // 
-            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuHide, menuFilesS2, menuExit });
+            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuPrintNotesList, menuFileS3, menuHide, menuFilesS2, menuExit });
             menuFile.Name = "menuFile";
             menuFile.Size = new Size(37, 20);
             menuFile.Text = "&File";
@@ -249,6 +249,18 @@
             // 
             menuFileS1.Name = "menuFileS1";
             menuFileS1.Size = new Size(200, 6);
+            // 
+            // menuPrintNotesList
+            // 
+            menuPrintNotesList.Name = "menuPrintNotesList";
+            menuPrintNotesList.Size = new Size(203, 22);
+            menuPrintNotesList.Text = "&Print notes list ...";
+            menuPrintNotesList.Click += menu_Click;
+            // 
+            // menuFileS3
+            // 
+            menuFileS3.Name = "menuFileS3";
+            menuFileS3.Size = new Size(200, 6);
             // 
             // menuHide
             // 
@@ -474,22 +486,10 @@
             //
             // menuTools
             // 
-            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuReports, menuToolsS1, menuKntScriptConsole, menuChat, menuAIAssistant, menuAppInfoAlarms, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuOptions });
+            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuKntScriptConsole, menuChat, menuAIAssistant, menuAppInfoAlarms, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuOptions });
             menuTools.Name = "menuTools";
             menuTools.Size = new Size(46, 20);
             menuTools.Text = "&Tools";
-            // 
-            // menuReports
-            // 
-            menuReports.Name = "menuReports";
-            menuReports.Size = new Size(185, 22);
-            menuReports.Text = "&Reports ...";
-            menuReports.Click += menu_Click;
-            // 
-            // menuToolsS1
-            // 
-            menuToolsS1.Name = "menuToolsS1";
-            menuToolsS1.Size = new Size(182, 6);
             // 
             // menuKntScriptConsole
             // 
@@ -625,7 +625,7 @@
             // 
             // toolBarManagement
             // 
-            toolBarManagement.Items.AddRange(new ToolStripItem[] { toolNewNote, toolEditNote, toolDeleteNote, toolStripSeparator1, toolPrintReports, toolStripSeparator2, toolConfiguration });
+            toolBarManagement.Items.AddRange(new ToolStripItem[] { toolNewNote, toolEditNote, toolDeleteNote, toolStripSeparator1, toolPrintNotesList, toolStripSeparator2, toolConfiguration });
             toolBarManagement.Location = new Point(0, 24);
             toolBarManagement.Name = "toolBarManagement";
             toolBarManagement.Size = new Size(1014, 25);
@@ -662,12 +662,13 @@
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(6, 25);
             // 
-            // toolPrintReports
+            // toolPrintNotesList
             // 
-            toolPrintReports.Name = "toolPrintReports";
-            toolPrintReports.Size = new Size(58, 22);
-            toolPrintReports.Text = "Print  ";
-            toolPrintReports.ToolTipText = "Print reports";
+            toolPrintNotesList.Name = "toolPrintNotesList";
+            toolPrintNotesList.Size = new Size(58, 22);
+            toolPrintNotesList.Text = "Print  ";
+            toolPrintNotesList.ToolTipText = "Print notes list";
+            toolPrintNotesList.Click += buttonToolBar_Click;
             // 
             // toolStripSeparator2
             // 
@@ -961,6 +962,8 @@
         private ToolStripMenuItem menuEditFolder;
         private ToolStripMenuItem menuDeleteFolder;
         private ToolStripSeparator menuFileS1;
+        private ToolStripMenuItem menuPrintNotesList;
+        private ToolStripSeparator menuFileS3;
         private ToolStripMenuItem menuHide;
         private ToolStripSeparator menuFilesS2;
         private ToolStripMenuItem menuExit;
@@ -982,8 +985,6 @@
         private ToolStripMenuItem menuFoldersExplorer;
         private ToolStripMenuItem menuSearchPanel;
         private ToolStripMenuItem menuTools;
-        private ToolStripMenuItem menuReports;
-        private ToolStripSeparator menuToolsS1;
         private ToolStripSeparator menuToolsS2;
         private ToolStripMenuItem menuKntScriptConsole;
         private ToolStripMenuItem menuKNoteLab;
@@ -1002,7 +1003,7 @@
         private ToolStripButton toolDeleteNote;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripSeparator toolStripSeparator2;
-        private ToolStripButton toolPrintReports;
+        private ToolStripButton toolPrintNotesList;
         private ToolStripButton toolConfiguration;
         private Panel panelSupManagement;
         private Label labelFolderDetail;

@@ -117,7 +117,7 @@ namespace KNote.ClientWin.Views
             //
             webView.AllowExternalDrop = false;
             webView.CreationProperties = null;
-            webView.DefaultBackgroundColor = Color.FromArgb(228, 231, 235);
+            webView.DefaultBackgroundColor = Color.White;
             webView.Dock = DockStyle.Fill;
             webView.Location = new Point(0, 29);
             webView.Name = "webView";

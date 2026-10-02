@@ -198,6 +198,14 @@ table.knt-grid .knt-nowrap {
     overflow-wrap: normal;
 }
 
+table.knt-grid .knt-topic {
+    font-weight: 600;
+}
+
+table.knt-grid .knt-muted {
+    color: var(--muted);
+}
+
 .knt-chip {
     display: inline-block;
     margin: 0 3pt 1.5pt 0;

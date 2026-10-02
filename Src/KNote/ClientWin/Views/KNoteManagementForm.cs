@@ -37,11 +37,6 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
         Shown += (s, e) => ViewShown?.Invoke(this, e);
 
-        // TODO: options ... for next version
-        menuReports.Visible = false;
-        menuToolsS1.Visible = false;
-        toolPrintReports.Visible = false;
-        toolStripSeparator2.Visible = false;
 #if DEBUG
         menuKNoteLab.Visible = true;
 #endif
@@ -54,7 +49,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         toolNewNote.SetKntIcon(KntIcon.NewNote);
         toolEditNote.SetKntIcon(KntIcon.Edit);
         toolDeleteNote.SetKntIcon(KntIcon.Delete);
-        toolPrintReports.SetKntIcon(KntIcon.Print);
+        toolPrintNotesList.SetKntIcon(KntIcon.Print);
         toolConfiguration.SetKntIcon(KntIcon.Settings);
 
         // Over the dark folder header: a light icon, as large as the folder caption next to it.
@@ -267,6 +262,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         {
             _ctrl.HideKNoteManagement();
         }
+        else if (menuSel == menuPrintNotesList)
+        {
+            await _ctrl.PrintNotesList();
+        }
         else if (menuSel == menuAbout)
         {
             _ctrl.About();
@@ -406,6 +405,8 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
             await _ctrl.AddNote();
         else if (menuSel == toolDeleteNote)
             await _ctrl.DeleteNote();
+        else if (menuSel == toolPrintNotesList)
+            await _ctrl.PrintNotesList();
         else if (menuSel == toolConfiguration)
             await _ctrl.ManagementRepository();
     }

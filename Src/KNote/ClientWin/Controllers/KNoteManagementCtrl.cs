@@ -1531,6 +1531,39 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             View.ShowInfo($"The stdout console mode is not supported for the script type of the following note(s) - they were skipped: {string.Join(", ", unsupportedNotes)}.");
     }
 
+    // Prints the notes list as the user is seeing it (columns, order, text filter), headed by the folder
+    // path or the search/filter summary, through the report preview (print or save as PDF).
+    public async Task PrintNotesList()
+    {
+        try
+        {
+            var snapshot = NotesSelectorCtrl.GetDisplayedNotes();
+            if (snapshot.Rows.Count == 0)
+            {
+                View.ShowInfo("There are no notes in the list to print.");
+                return;
+            }
+
+            ReportDocument report;
+            using (new WaitCursor())
+            {
+                var context = await GetNotesListContextAsync(snapshot.TextFilter);
+                report = NotesListReport.Build(snapshot, context, DateTime.Now);
+            }
+
+            var reportPreviewCtrl = new ReportPreviewCtrl(Store);
+            reportPreviewCtrl.LoadReport(report);
+            var result = reportPreviewCtrl.Run();
+            if (!result.IsValid)
+                View.ShowInfo($"The notes list could not be printed: {result.ErrorMessage}");
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "PrintNotesList: {message}", ex.Message);
+            View.ShowInfo($"The notes list could not be printed: {ex.Message}");
+        }
+    }
+
     // Where the notes currently listed come from (folder, quick search or structured filter), with every
     // name resolved - used to identify the list in its printed report and in its exported file name.
     // textFilter is the in-memory filter the notes list view applies on top (NotesListSnapshot.TextFilter).

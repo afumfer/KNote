@@ -14,6 +14,9 @@ namespace KNote.ClientWin.Views;
 // part of the content (note descriptions) is user written. Printing uses the browser's own print dialog,
 // which has its own paged preview, printer selection and "Save as PDF"; "Save as PDF ..." here saves
 // directly in the report's orientation.
+// webView.DefaultBackgroundColor must stay white (set in the Designer): the print engine paints the page
+// margins with it, not with the document's background - grey there gave PDFs grey borders. The grey around
+// the sheet in the preview comes from the report's own stylesheet (@media screen).
 public partial class ReportPreviewForm : KntForm, IViewBase
 {
     #region Private fields
@@ -78,6 +81,7 @@ public partial class ReportPreviewForm : KntForm, IViewBase
         }
         catch (Exception ex)
         {
+            await LeaveWebView2CallbackAsync();
             _ctrl.ReportError("The report preview could not be initialized", ex);
         }
     }
@@ -187,9 +191,10 @@ public partial class ReportPreviewForm : KntForm, IViewBase
         if (dialog.ShowDialog(this) != DialogResult.OK)
             return;
 
+        var saved = false;
+        Exception error = null;
         try
         {
-            bool saved;
             using (new WaitCursor())
             {
                 var settings = webView.CoreWebView2.Environment.CreatePrintSettings();
@@ -203,23 +208,40 @@ public partial class ReportPreviewForm : KntForm, IViewBase
 
                 saved = await webView.CoreWebView2.PrintToPdfAsync(dialog.FileName, settings);
             }
-
-            if (!saved)
-            {
-                ShowInfo($"The PDF file could not be saved:\r\n{dialog.FileName}", "KNote - Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            _ctrl.PdfSaved(dialog.FileName);
-            if (ShowInfo($"Report saved as PDF:\r\n{dialog.FileName}\r\n\r\nDo you want to open it now?", "KNote - Report",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                OpenExternal(dialog.FileName);
         }
         catch (Exception ex)
         {
-            _ctrl.ReportError("The PDF file could not be saved", ex);
+            error = ex;
         }
+
+        await LeaveWebView2CallbackAsync();
+
+        if (error != null)
+        {
+            _ctrl.ReportError("The PDF file could not be saved", error);
+            return;
+        }
+
+        if (!saved)
+        {
+            ShowInfo($"The PDF file could not be saved:\r\n{dialog.FileName}", "KNote - Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        _ctrl.PdfSaved(dialog.FileName);
+        if (ShowInfo($"Report saved as PDF:\r\n{dialog.FileName}\r\n\r\nDo you want to open it now?", "KNote - Report",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            OpenExternal(dialog.FileName);
     }
+
+    // An awaited WebView2 call (PrintToPdfAsync, EnsureCoreWebView2Async...) resumes INSIDE WebView2's own
+    // completion callback: the continuation runs inline on the UI thread. A modal dialog shown there runs
+    // a nested message loop within that callback, which WebView2 does not support - clicking the dialog
+    // killed the process (fail-fast in EmbeddedBrowserWebView.dll, no .NET exception). Task.Yield posts the
+    // rest of the caller to the message queue (WinForms SynchronizationContext), so it runs once the
+    // callback has returned. Call it before any modal UI that follows an awaited WebView2 call.
+    private static async Task LeaveWebView2CallbackAsync()
+        => await Task.Yield();
 
     private void ChangeZoom(int direction)
     {
