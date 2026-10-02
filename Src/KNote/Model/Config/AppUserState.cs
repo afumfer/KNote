@@ -20,6 +20,8 @@ public class AppUserState
     public ManagementWindowState ManagementWindow { get; set; } = new();
 
     public AppInfoAlarmsWindowState AppInfoAlarmsWindow { get; set; } = new();
+
+    public ReportsState Reports { get; set; } = new();
 }
 
 [Serializable]
@@ -107,4 +109,12 @@ public class AppInfoAlarmsWindowState
 
     // Rows shown in the "Application info" alarms panel; they stay until the user explicitly removes them.
     public List<AppInfoAlarmRow> Rows { get; set; } = new();
+}
+
+[Serializable]
+public class ReportsState
+{
+    // Folder the user last saved a report to (PDF from the report preview, CSV export of the notes list),
+    // proposed again by the next save dialog. Empty means "never saved yet" (the Documents folder is used).
+    public string LastExportFolder { get; set; }
 }

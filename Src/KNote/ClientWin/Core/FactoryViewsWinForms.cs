@@ -51,5 +51,6 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<KntServerCOMCtrl, IViewServerCOM>(c => new KntServerCOMForm(c));
         Registry.Register<KntLabCtrl, IViewBase>(c => new KntLabForm(c));
         Registry.Register<HeavyProcessCtrl, IViewHeavyProcess>(c => new HeavyProcessForm(c));
+        Registry.Register<ReportPreviewCtrl, IViewBase>(c => new ReportPreviewForm(c));
     }
 }

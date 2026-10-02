@@ -1,0 +1,309 @@
+/* Common stylesheet of KNote's printable reports (see ClientWin/Core/Reports/ReportHtml.cs, which also
+   writes the @page rule: size/orientation, running header and page numbers). */
+
+:root {
+    --accent: #0F6CBD;
+    --accent-soft: #EAF2FB;
+    --ink: #1B1F24;
+    --muted: #5B6470;
+    --rule: #D9DEE5;
+    --zebra: #F6F8FB;
+    --chip: #EEF1F5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+body {
+    margin: 0;
+    color: var(--ink);
+    background: #FFFFFF;
+    font-family: "Segoe UI", "Segoe UI Variable", Arial, sans-serif;
+    font-size: 9pt;
+    line-height: 1.35;
+}
+
+@page {
+    margin: 13mm 11mm 14mm 11mm;
+
+    @top-right {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 7.5pt;
+        color: #5B6470;
+        vertical-align: bottom;
+        padding-bottom: 2mm;
+    }
+
+    @bottom-left {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 7.5pt;
+        color: #5B6470;
+        vertical-align: top;
+        padding-top: 2mm;
+    }
+
+    @bottom-right {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 7.5pt;
+        color: #5B6470;
+        vertical-align: top;
+        padding-top: 2mm;
+    }
+}
+
+/* On screen (the preview window) the report looks like a sheet of paper; the print engine ignores this. */
+@media screen {
+    html {
+        background: #E4E7EB;
+    }
+
+    body {
+        margin: 18px auto;
+        padding: 13mm 11mm 14mm 11mm;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .18), 0 6px 18px rgba(0, 0, 0, .08);
+    }
+
+    body.knt-portrait {
+        width: 210mm;
+        min-height: 297mm;
+    }
+
+    body.knt-landscape {
+        width: 297mm;
+        min-height: 210mm;
+    }
+}
+
+/* ---- Header band ---------------------------------------------------------------------------------- */
+
+.knt-header {
+    border-top: 4px solid var(--accent);
+    padding: 7pt 0 8pt 0;
+    margin-bottom: 10pt;
+    border-bottom: 1px solid var(--rule);
+}
+
+.knt-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8pt;
+    font-size: 7.5pt;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.knt-app {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.knt-kind {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.knt-header h1 {
+    margin: 3pt 0 0 0;
+    font-size: 15pt;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.knt-subheading {
+    margin: 2pt 0 0 0;
+    color: var(--muted);
+    font-size: 9pt;
+    overflow-wrap: anywhere;
+}
+
+.knt-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4pt 22pt;
+    margin: 7pt 0 0 0;
+}
+
+.knt-meta div {
+    display: flex;
+    flex-direction: column;
+}
+
+.knt-meta dt {
+    color: var(--muted);
+    font-size: 6.8pt;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.knt-meta dd {
+    margin: 0;
+    font-size: 9pt;
+    font-weight: 600;
+}
+
+/* ---- Tables --------------------------------------------------------------------------------------- */
+
+table.knt-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+table.knt-grid thead {
+    display: table-header-group; /* repeated at the top of every printed page */
+}
+
+table.knt-grid th {
+    padding: 4pt 5pt;
+    text-align: left;
+    vertical-align: bottom;
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: .03em;
+    color: var(--ink);
+    background: var(--accent-soft);
+    border-bottom: 1.5px solid var(--accent);
+}
+
+table.knt-grid td {
+    padding: 3.5pt 5pt;
+    vertical-align: top;
+    border-bottom: .5pt solid var(--rule);
+    overflow-wrap: anywhere;
+}
+
+table.knt-grid tbody tr:nth-child(even) td {
+    background: var(--zebra);
+}
+
+table.knt-grid tr {
+    break-inside: avoid;
+}
+
+table.knt-grid .knt-num,
+table.knt-grid .knt-right {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+table.knt-grid .knt-nowrap {
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.knt-chip {
+    display: inline-block;
+    margin: 0 3pt 1.5pt 0;
+    padding: 0 5pt;
+    border-radius: 7pt;
+    background: var(--chip);
+    font-size: 7.5pt;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.knt-badge {
+    display: inline-block;
+    padding: 0 6pt;
+    border-radius: 3pt;
+    font-size: 7.5pt;
+    font-weight: 600;
+    line-height: 1.6;
+    color: #FFFFFF;
+    background: var(--accent);
+}
+
+.knt-badge.knt-warning {
+    background: #C25B00;
+}
+
+.knt-badge.knt-success {
+    background: #107C10;
+}
+
+.knt-empty {
+    color: var(--muted);
+    font-style: italic;
+}
+
+.knt-summary {
+    margin-top: 8pt;
+    color: var(--muted);
+    font-size: 8pt;
+    text-align: right;
+}
+
+/* ---- Sections (detail reports) -------------------------------------------------------------------- */
+
+.knt-section {
+    margin-top: 14pt;
+}
+
+.knt-section > h2 {
+    margin: 0 0 6pt 0;
+    padding-bottom: 3pt;
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 1px solid var(--rule);
+    break-after: avoid;
+}
+
+.knt-fields {
+    display: grid;
+    grid-template-columns: max-content 1fr max-content 1fr;
+    gap: 3pt 12pt;
+    margin: 0;
+}
+
+.knt-fields dt {
+    color: var(--muted);
+    font-size: 8pt;
+}
+
+.knt-fields dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.knt-content {
+    font-size: 9.5pt;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.knt-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.knt-content table {
+    border-collapse: collapse;
+    max-width: 100%;
+}
+
+.knt-content th,
+.knt-content td {
+    border: .5pt solid var(--rule);
+    padding: 2pt 4pt;
+}
+
+.knt-content pre,
+.knt-content code {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 8.5pt;
+}
+
+.knt-content pre {
+    padding: 5pt 7pt;
+    background: var(--zebra);
+    border: .5pt solid var(--rule);
+    white-space: pre-wrap;
+}

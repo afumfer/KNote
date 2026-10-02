@@ -54,6 +54,12 @@ public enum KntIcon
     Send,
     Restart,
 
+    // Report preview
+    SavePdf,
+    ZoomIn,
+    ZoomOut,
+    Close,
+
     // Web view
     Back,
     Forward,

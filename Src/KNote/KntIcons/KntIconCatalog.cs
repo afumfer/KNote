@@ -74,6 +74,12 @@ internal static class KntIconCatalog
         [KntIcon.Send] = new(0xEA8E, 0xF699, Neutral),                // send
         [KntIcon.Restart] = new(0xE0B3, 0xF13F, Neutral),             // arrow_counterclockwise
 
+        // Report preview
+        [KntIcon.SavePdf] = new(0xF3AB, 0xF3AC, Neutral),             // document_pdf
+        [KntIcon.ZoomIn] = new(0xEE8E, 0xF8C4, Neutral),              // zoom_in
+        [KntIcon.ZoomOut] = new(0xEE8F, 0xF8C6, Neutral),             // zoom_out
+        [KntIcon.Close] = new(0xF368, 0xF369, Neutral),               // dismiss
+
         // Web view
         [KntIcon.Back] = new(0xF184, 0xF15B, Neutral),                // arrow_left
         [KntIcon.Forward] = new(0xE0EB, 0xF181, Neutral),             // arrow_right

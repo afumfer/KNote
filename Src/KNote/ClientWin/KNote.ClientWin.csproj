@@ -66,4 +66,8 @@
     <None Remove="Resources\Icons\KNote.ico" />
     <EmbeddedResource Include="Resources\Icons\KNote.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\KNoteReport.css" />
+    <EmbeddedResource Include="Resources\KNoteReport.css" LogicalName="KNote.ClientWin.Resources.KNoteReport.css" />
+  </ItemGroup>
 </Project>
