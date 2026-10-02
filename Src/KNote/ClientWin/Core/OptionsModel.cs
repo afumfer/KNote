@@ -66,6 +66,21 @@ public class OptionsModel : SmartModelDtoBase
         }
     }
 
+    // Applied on the next start (see AppTheme).
+    private AppColorMode _colorMode;
+    public AppColorMode ColorMode
+    {
+        get { return _colorMode; }
+        set
+        {
+            if (_colorMode != value)
+            {
+                _colorMode = value;
+                OnPropertyChanged("ColorMode");
+            }
+        }
+    }
+
     private string _chatHubUrl;
     public string ChatHubUrl
     {
@@ -204,6 +219,7 @@ public class OptionsModel : SmartModelDtoBase
             AlarmSeconds = settings.General.AlarmSeconds,
             AutoSaveActivated = settings.General.AutoSaveActivated,
             AutoSaveSeconds = settings.General.AutoSaveSeconds,
+            ColorMode = settings.General.ColorMode,
             ChatHubUrl = settings.Connectivity.ChatHub.Url,
             ChatHubAutoConnectDisabled = state.Session.ChatHubAutoConnectDisabled,
             SmtpHost = email.Host,
@@ -226,6 +242,7 @@ public class OptionsModel : SmartModelDtoBase
         settings.General.AlarmSeconds = AlarmSeconds;
         settings.General.AutoSaveActivated = AutoSaveActivated;
         settings.General.AutoSaveSeconds = AutoSaveSeconds;
+        settings.General.ColorMode = ColorMode;
         settings.Connectivity.ChatHub.Url = ChatHubUrl;
         state.Session.ChatHubAutoConnectDisabled = ChatHubAutoConnectDisabled;
         email.Host = SmtpHost;

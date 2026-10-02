@@ -75,6 +75,10 @@ public class Store
 
     public ILogger Logger { get; set; }
 
+    // Set before finalizing the app to have Program.Main start it again once it has closed (e.g. to apply
+    // a new color mode, see AppTheme).
+    public bool RestartRequested { get; set; }
+
     private string _kNoteWebViewStyle = null;    
     public string KNoteWebViewStyle
     {

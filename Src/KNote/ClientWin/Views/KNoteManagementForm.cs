@@ -335,7 +335,13 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         }
         else if (menuSel == menuOptions)
         {
-            _ctrl.Options();
+            SaveViewSizeAndPosition();
+            await _ctrl.Options();
+        }
+        else if (menuSel == menuDarkMode)
+        {
+            SaveViewSizeAndPosition();
+            await _ctrl.ToggleDarkMode();
         }
         else if (menuSel == menuFoldersExplorer)
         {
@@ -419,6 +425,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
     {
         // Kept in sync with the notes grid's own context menu entry (same toggle, two entry points).
         menuListFilterVisible.Checked = _ctrl.NotesSelectorCtrl.EnableTextFilter;
+        menuDarkMode.Checked = _ctrl.IsDarkModeConfigured;
     }
 
     private async void buttonToolBar_Click(object sender, EventArgs e)
@@ -573,6 +580,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
         splitContainer2.Panel1.Controls.Add(_ctrl.NotesSelectorCtrl.View.PanelView());
         splitContainer2.Panel2.Controls.Add(_ctrl.NoteEditorCtrl.View.PanelView());
+
+        // The embedded views' panels arrive after this form's Load (where KntForm adjusts its controls for
+        // dark mode), and their own forms are never loaded: adjust them here.
+        AppTheme.AdjustControlsForDarkMode(this);
     }
 
     private void SetSearchModePanel(bool quickSearch)

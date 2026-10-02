@@ -374,6 +374,24 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   `Utils/AppIcon`: `KntForm` lo aplica como icono de ventana en `OnLoad` (`WindowIcon`, que una vista sobrescribe
   si su ventana significa otra cosa, p. ej. `AppInfoAlarmsForm`), así que **no** se asigna `Icon` en el
   diseñador (dejaría una copia del `.ico` en cada `.resx`).
+- **Modo oscuro** (`Utils/AppTheme`, ajuste `General.ColorMode`: `Light`/`Dark`/`System`): lo pinta el propio
+  WinForms (`Application.SetColorMode`), pero solo en las ventanas creadas después de fijarlo; cambiarlo con
+  ventanas abiertas las deja a medio pintar. Por eso se aplica una vez al arrancar (`Program.Main`, tras
+  cargar la configuración) y cambiarlo pide reiniciar (`Store.RestartRequested`). Lo que WinForms no resuelve
+  se adapta en un único punto: iconos (`KntIcons`), listas sin cuadrícula (`ListViewStyle`), la rejilla de
+  notas (`DataGridViewStyle`, con cabeceras planas y su propio glifo de ordenación) y el visor Markdown
+  (`KNoteWebViewStyle.css` con `prefers-color-scheme`, que `KntEditView` fija según el modo de la app).
+  Dos valores por defecto del diseñador se pintan en oscuro como marcos blancos gruesos: el borde `Fixed3D`
+  (TextBox, ListBox, ListView, TreeView...) y `TabPage.UseVisualStyleBackColor = true`. `KntForm.OnLoad`
+  los corrige en todos sus controles (`AppTheme.AdjustControlsForDarkMode`); los que se añaden después del
+  `Load` (p. ej. los paneles embebidos vía `PanelView()` en `KNoteManagementForm.LinkComponents`, cuyas
+  vistas nunca se cargan) necesitan llamarlo otra vez tras añadirlos. Al pasar un TextBox de una línea a
+  `FixedSingle` lo encoge 1 px por arriba y por abajo (si no, el texto queda 1 px alto), y los botones
+  igualados con `AlignToTextBox` lo siguen. Un `TabControl` cuyo contenido llega al borde con su propia
+  scrollbar (el árbol de carpetas) usa `Utils/FlushTabControl`: en oscuro el margen interior entre páginas
+  y marco se ve como un hueco junto a la scrollbar.
+  En las vistas, usa `SystemColors.*` en vez de colores fijos (`Color.White`...): los fijos no cambian en
+  oscuro. Los informes y su previsualización se quedan siempre en claro (son para imprimir).
 
 ## Informes imprimibles y exportación (`Core/Reports`)
 

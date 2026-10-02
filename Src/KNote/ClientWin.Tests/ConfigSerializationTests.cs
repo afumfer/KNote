@@ -129,6 +129,18 @@ public class ConfigSerializationTests
     }
 
     [TestMethod]
+    [DataRow(AppColorMode.Light)]
+    [DataRow(AppColorMode.Dark)]
+    [DataRow(AppColorMode.System)]
+    public void XmlSerializer_RoundTrip_PreservesColorMode(AppColorMode colorMode)
+    {
+        var settings = new AppUserSettings();
+        settings.General.ColorMode = colorMode;
+
+        Assert.AreEqual(colorMode, RoundTrip(settings).General.ColorMode);
+    }
+
+    [TestMethod]
     public void XmlSerializer_SettingsWithoutServerCOMSection_LoadsDefaults()
     {
         // A settings file saved before the ServerCOM section existed.
@@ -137,6 +149,7 @@ public class ConfigSerializationTests
         var settings = (AppUserSettings)new XmlSerializer(typeof(AppUserSettings)).Deserialize(new StringReader(oldSettings))!;
 
         Assert.AreEqual(45, settings.General.AlarmSeconds);
+        Assert.AreEqual(AppColorMode.Light, settings.General.ColorMode);
         var com = settings.Connectivity.ServerCOM;
         Assert.AreEqual("COM1", com.PortName);
         Assert.AreEqual(115200, com.BaudRate);

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
+using KNote.ClientWin.Utils;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -1722,10 +1723,11 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         return context;
     }
 
-    public void Options()
+    public async Task Options()
     {
         var optionsEditorCtrl = new OptionsEditorCtrl(Store);
-        
+        var colorMode = Store.Settings.General.ColorMode;
+
         optionsEditorCtrl.LoadModel(
             SelectedServiceRef?.Service,
             OptionsModel.From(Store.Settings, Store.State),
@@ -1735,7 +1737,37 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         {
             // TODO: refresh context management
             // ... for next major version
+
+            if (Store.Settings.General.ColorMode != colorMode)
+                await OfferRestartToApplyColorMode();
         }
+    }
+
+    // What View > Dark mode shows as checked: the configured mode, which only takes effect on the next start.
+    public bool IsDarkModeConfigured => Store.Settings.General.ColorMode switch
+    {
+        AppColorMode.Dark => true,
+        AppColorMode.System => AppTheme.IsDark,
+        _ => false
+    };
+
+    public async Task ToggleDarkMode()
+    {
+        Store.Settings.General.ColorMode = IsDarkModeConfigured ? AppColorMode.Light : AppColorMode.Dark;
+        Store.SaveConfig();
+        await OfferRestartToApplyColorMode();
+    }
+
+    // The color mode can't change while the app is running (see AppTheme): offer to restart it now.
+    private async Task OfferRestartToApplyColorMode()
+    {
+        var answer = View.ShowInfo($"The new color mode will be applied the next time {KntConst.AppName} starts.\r\n\r\nRestart {KntConst.AppName} now?",
+            KntConst.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        if (answer != DialogResult.Yes)
+            return;
+
+        Store.RestartRequested = true;
+        await FinalizeAppForce();
     }
     
     public void About()

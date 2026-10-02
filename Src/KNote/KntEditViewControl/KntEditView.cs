@@ -435,6 +435,12 @@ namespace KntWebView
                 // Left at its default (true): callers (NoteEditorForm/PostItEditorForm) no longer
                 // wire WinForms DragDrop on WebViewControl, so the browser handles OS drops itself
                 // as it normally would.
+
+                // The pages' "prefers-color-scheme" follows the app's color mode, not Windows' (its
+                // default): the host's style sheet (KNoteWebViewStyle.css in ClientWin) has a dark variant.
+                webView.CoreWebView2.Profile.PreferredColorScheme = Application.IsDarkModeEnabled
+                    ? CoreWebView2PreferredColorScheme.Dark
+                    : CoreWebView2PreferredColorScheme.Light;
             }
             else
             {
@@ -445,6 +451,11 @@ namespace KntWebView
 
         private void InitializeEditorsComponent()
         {
+            // Shown until the first page is painted: dark in dark mode, so there is no white flash. Same
+            // color as the dark variant of the host's style sheet.
+            if (Application.IsDarkModeEnabled)
+                webView.DefaultBackgroundColor = Color.FromArgb(0x1F, 0x1F, 0x1F);
+
             webView.Dock = DockStyle.Fill;
             textContent.Dock = DockStyle.Fill;
             htmlContent.Dock = DockStyle.Fill;

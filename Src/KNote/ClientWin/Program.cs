@@ -15,14 +15,26 @@ namespace KNote.ClientWin;
 
 static class Program
 {
+    // Command line argument of the instance started by a restart (see Store.RestartRequested).
+    private const string RestartArgument = "--restart";
+
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>        
     [STAThread]
-    static void Main()
+    static void Main(string[] args)
     {
 #if RELEASE
-        Process[] instancias = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
+        var currentProcess = Process.GetCurrentProcess();
+        // Started by a restart: the previous instance may still be closing, and would otherwise make this
+        // one quit below as a second instance.
+        if (args.Contains(RestartArgument))
+        {
+            foreach (var previous in Process.GetProcessesByName(currentProcess.ProcessName).Where(p => p.Id != currentProcess.Id))
+                previous.WaitForExit(15000);
+        }
+
+        Process[] instancias = Process.GetProcessesByName(currentProcess.ProcessName);
         if (instancias.Length > 1)
         {
             BringToFront();
@@ -69,6 +81,10 @@ static class Program
             if (loadException != null)
                 ExceptionDispatchInfo.Capture(loadException).Throw();
 
+            // Light/dark mode: only the windows created from here on follow it (see AppTheme). The splash
+            // and, on first run, the user registration dialog have already been shown in the default mode.
+            AppTheme.Apply(appStore.Settings.General.ColorMode);
+
             // knoteManagement.Run() can end up displaying a note whose content uses WebView2 (e.g. it
             // now reactivates the last active folder, see Store.ChangeActiveFolderWithServiceRef): if
             // its first note uses the WebView2 content mode, CoreWebView2Environment.CreateAsync needs
@@ -84,6 +100,9 @@ static class Program
             Application.Run((Form)knoteManagement.View);
 
             appStore.Logger?.LogInformation("KNote finalized");
+
+            if (appStore.RestartRequested)
+                Process.Start(Environment.ProcessPath, RestartArgument);
         }
         catch (Exception ex)
         {

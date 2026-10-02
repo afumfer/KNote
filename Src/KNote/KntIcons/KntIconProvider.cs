@@ -38,9 +38,13 @@ public static class KntIconProvider
     /// <paramref name="dpi"/>, in its catalog color unless <paramref name="color"/> overrides it (e.g. a light
     /// icon over a dark background). The same arguments always return the same (shared) bitmap.
     /// </summary>
+    /// <remarks>
+    /// The catalog color follows the app's color mode (Application.IsDarkModeEnabled): in dark mode it is the
+    /// lighter tone of the same color (see <see cref="GetColor"/>). The mode is fixed for the whole process.
+    /// </remarks>
     public static Bitmap GetBitmap(KntIcon icon, int logicalSize, int dpi, Color? color = null)
     {
-        var glyph = KntIconCatalog.Get(icon);
+        var glyph = KntIconCatalog.Get(icon, Application.IsDarkModeEnabled);
         if (color is Color overrideColor)
             glyph = glyph with { Color = overrideColor };
 
@@ -57,6 +61,12 @@ public static class KntIconProvider
             return bitmap;
         }
     }
+
+    /// <summary>
+    /// Catalog color of <paramref name="icon"/> over a light or a dark background.
+    /// </summary>
+    public static Color GetColor(KntIcon icon, bool darkBackground) =>
+        KntIconCatalog.Get(icon, darkBackground).Color;
 
     /// <summary>
     /// Creates a window icon for <paramref name="icon"/> with frames for the small (title bar) and large

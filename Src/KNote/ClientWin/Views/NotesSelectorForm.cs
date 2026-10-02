@@ -52,6 +52,7 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
 
         _ctrl = ctrl;
 
+        DataGridViewStyle.ApplyDarkIfNeeded(dataGridNotes);
         dataGridNotes.SizeChanged += (s, e) => FitTopicColumn();
         dataGridNotes.ColumnWidthChanged += dataGridNotes_ColumnWidthChanged;
         dataGridNotes.DataBindingComplete += dataGridNotes_DataBindingComplete;

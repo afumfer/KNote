@@ -24,6 +24,19 @@ internal static class KntIconCatalog
     private static readonly Color Success = Color.FromArgb(0x10, 0x7C, 0x10);
     private static readonly Color Danger = Color.FromArgb(0xC5, 0x0F, 0x1F);
 
+    // The same palette for dark backgrounds (dark mode): lighter tones of each color, so they keep their
+    // contrast (and meaning) instead of fading into the background.
+    private static readonly Dictionary<Color, Color> DarkBackgroundColors = new()
+    {
+        [Neutral] = Color.FromArgb(0xD6, 0xD6, 0xD6),
+        [Folder] = Color.FromArgb(0xE8, 0xA9, 0x3A),
+        [PostIt] = Color.FromArgb(0xF2, 0xC9, 0x4C),
+        [Repository] = Color.FromArgb(0x47, 0x9E, 0xF5),
+        [Alarm] = Color.FromArgb(0xF0, 0x88, 0x4E),
+        [Success] = Color.FromArgb(0x54, 0xB0, 0x54),
+        [Danger] = Color.FromArgb(0xE3, 0x7D, 0x80),
+    };
+
     private static readonly Dictionary<KntIcon, KntIconGlyph> Glyphs = new()
     {
         // General
@@ -109,8 +122,11 @@ internal static class KntIconCatalog
         [KntIcon.Link] = new(0xF4E3, 0xF4E4, Neutral),                // link
     };
 
-    public static KntIconGlyph Get(KntIcon icon) =>
-        Glyphs.TryGetValue(icon, out var glyph)
-            ? glyph
-            : throw new ArgumentOutOfRangeException(nameof(icon), icon, "Icon not mapped in KntIconCatalog.");
+    public static KntIconGlyph Get(KntIcon icon, bool darkBackground = false)
+    {
+        if (!Glyphs.TryGetValue(icon, out var glyph))
+            throw new ArgumentOutOfRangeException(nameof(icon), icon, "Icon not mapped in KntIconCatalog.");
+
+        return darkBackground ? glyph with { Color = DarkBackgroundColors[glyph.Color] } : glyph;
+    }
 }

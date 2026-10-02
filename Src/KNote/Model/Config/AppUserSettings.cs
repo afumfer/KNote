@@ -42,6 +42,17 @@ public class GeneralConfig
     public bool AutoSaveActivated { get; set; }
 
     public int AutoSaveSeconds { get; set; }
+
+    // Color mode of the desktop app (ClientWin). Applied once, at startup: changing it takes a restart.
+    public AppColorMode ColorMode { get; set; } = AppColorMode.Light;
+}
+
+public enum AppColorMode
+{
+    Light,
+    Dark,
+    // Follows the Windows "app mode" setting (light or dark) at startup.
+    System
 }
 
 [Serializable]

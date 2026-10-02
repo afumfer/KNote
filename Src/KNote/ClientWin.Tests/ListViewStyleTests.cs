@@ -22,6 +22,18 @@ public class ListViewStyleTests
     }
 
     [TestMethod]
+    public void ApplyStandard_InDarkMode_DropsTheGridLinesAndKeepsTheRestOfTheLook()
+    {
+        using var listView = new ListView();
+
+        ListViewStyle.ApplyStandard(listView, checkBoxes: false, darkMode: true);
+
+        Assert.IsFalse(listView.GridLines);
+        Assert.AreEqual(View.Details, listView.View);
+        Assert.IsTrue(listView.FullRowSelect);
+    }
+
+    [TestMethod]
     public void ApplyStandard_WithCheckBoxes_EnablesThemAndKeepsTheRestOfTheLook()
     {
         using var listView = new ListView();

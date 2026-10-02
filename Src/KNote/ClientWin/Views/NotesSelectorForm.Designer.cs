@@ -74,7 +74,7 @@
             // textFilter
             //
             textFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textFilter.Location = new Point(7, 6);
+            textFilter.Location = new Point(7, 4);
             textFilter.Margin = new Padding(3);
             textFilter.Name = "textFilter";
             textFilter.PlaceholderText = "Filter by #number, Topic or Tags... (Enter to apply)";
@@ -85,7 +85,7 @@
             // buttonUndoFilter
             //
             buttonUndoFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonUndoFilter.Location = new Point(628, 6);
+            buttonUndoFilter.Location = new Point(628, 4);
             buttonUndoFilter.Margin = new Padding(3);
             buttonUndoFilter.Name = "buttonUndoFilter";
             buttonUndoFilter.Size = new Size(28, 22);

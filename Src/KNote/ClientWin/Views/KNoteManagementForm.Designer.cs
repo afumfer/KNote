@@ -81,6 +81,8 @@
             menuCompactViewNotesList = new ToolStripMenuItem();
             menuViewS2 = new ToolStripSeparator();
             menuListFilterVisible = new ToolStripMenuItem();
+            menuViewS3 = new ToolStripSeparator();
+            menuDarkMode = new ToolStripMenuItem();
             menuTools = new ToolStripMenuItem();
             menuKntScriptConsole = new ToolStripMenuItem();
             menuChat = new ToolStripMenuItem();
@@ -115,7 +117,7 @@
             labelFolder = new Label();
             pictureBoxFolder = new PictureBox();
             splitContainer1 = new SplitContainer();
-            tabExplorers = new TabControl();
+            tabExplorers = new KNote.ClientWin.Utils.FlushTabControl();
             tabTreeFolders = new TabPage();
             tabSearch = new TabPage();
             imageTabExplorer = new ImageList(components);
@@ -418,7 +420,7 @@
             // 
             // menuView
             // 
-            menuView.DropDownItems.AddRange(new ToolStripItem[] { menuFoldersExplorer, menuSearchPanel, menuViewS1, menuVerticalPanelForNotes, menuHeaderPanelVisible, menuToolbarVisible, menuMainVisible, menuCompactViewNotesList, menuViewS2, menuListFilterVisible });
+            menuView.DropDownItems.AddRange(new ToolStripItem[] { menuFoldersExplorer, menuSearchPanel, menuViewS1, menuVerticalPanelForNotes, menuHeaderPanelVisible, menuToolbarVisible, menuMainVisible, menuCompactViewNotesList, menuViewS2, menuListFilterVisible, menuViewS3, menuDarkMode });
             menuView.Name = "menuView";
             menuView.Size = new Size(44, 20);
             menuView.Text = "&View";
@@ -507,6 +509,18 @@
             menuListFilterVisible.Size = new Size(237, 22);
             menuListFilterVisible.Text = "Show list filter";
             menuListFilterVisible.Click += menu_Click;
+            // 
+            // menuViewS3
+            // 
+            menuViewS3.Name = "menuViewS3";
+            menuViewS3.Size = new Size(234, 6);
+            // 
+            // menuDarkMode
+            // 
+            menuDarkMode.Name = "menuDarkMode";
+            menuDarkMode.Size = new Size(237, 22);
+            menuDarkMode.Text = "Dark mode";
+            menuDarkMode.Click += menu_Click;
             //
             // menuTools
             // 
@@ -829,7 +843,7 @@
             tabTreeFolders.Location = new Point(4, 30);
             tabTreeFolders.Margin = new Padding(4, 3, 4, 3);
             tabTreeFolders.Name = "tabTreeFolders";
-            tabTreeFolders.Padding = new Padding(4, 3, 4, 3);
+            tabTreeFolders.Padding = new Padding(0);
             tabTreeFolders.Size = new Size(278, 526);
             tabTreeFolders.TabIndex = 0;
             tabTreeFolders.Text = "Tree folders  ";
@@ -1038,7 +1052,7 @@
         private PictureBox pictureBoxFolder;
         private SplitContainer splitContainer1;
         private SplitContainer splitContainer2;
-        private TabControl tabExplorers;
+        private KNote.ClientWin.Utils.FlushTabControl tabExplorers;
         private TabPage tabTreeFolders;
         private TabPage tabSearch;
         private Panel panelSearchToggle;
@@ -1057,6 +1071,8 @@
         private ToolStripMenuItem menuListFilterVisible;
         private ToolStripSeparator menuViewS1;
         private ToolStripSeparator menuViewS2;
+        private ToolStripSeparator menuViewS3;
+        private ToolStripMenuItem menuDarkMode;
         private ToolStripMenuItem menuToolbarVisible;
         private ToolStripMenuItem menuChat;
         private ToolStripMenuItem menuAIAssistant;

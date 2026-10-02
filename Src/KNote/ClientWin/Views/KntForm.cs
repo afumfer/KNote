@@ -95,7 +95,10 @@ public class KntForm : Form
     protected override void OnLoad(EventArgs e)
     {
         if (!DesignMode)
+        {
             Icon = WindowIcon;
+            AppTheme.AdjustControlsForDarkMode(this);
+        }
 
         if (!DesignMode && Modal && TopMostWindows.AnyVisible())
         {

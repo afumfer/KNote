@@ -65,9 +65,9 @@ public partial class NotifyForm : KntForm, IViewBase
         _ctrl.ShowAppInfoAlarms();
     }
 
-    private void menuKNoteOptions_Click(object sender, EventArgs e)
+    private async void menuKNoteOptions_Click(object sender, EventArgs e)
     {
-        _ctrl.Options();
+        await _ctrl.Options();
     }
 
     private void menuHelp_Click(object sender, EventArgs e)

@@ -1,7 +1,9 @@
 /* ==========================================================================
    vscode-markdown-light.css
    Hoja de estilo que reproduce el aspecto del "Markdown Preview" de
-   Visual Studio Code en su tema claro (Light+), fondo blanco fijo.
+   Visual Studio Code en su tema claro (Light+) y, en modo oscuro
+   (prefers-color-scheme: dark, que KNote fija según su propio modo de
+   color), en su tema oscuro (Dark+).
 
    No requiere ningún contenedor ni clase envoltorio: se aplica directamente
    sobre las etiquetas HTML resultantes de convertir un .md
@@ -29,6 +31,26 @@
   --md-table-header-bg: rgba(0, 0, 0, 0.04);
   --md-table-row-alt: rgba(0, 0, 0, 0.02);
   --md-hr: rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- Modo oscuro ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --md-fg: #cccccc;
+    --md-bg: #1f1f1f;
+    --md-link: #4daafc;
+    --md-border: #3c3c3c;
+    --md-code-bg: rgba(110, 118, 129, 0.4);
+    --md-code-block-bg: #2a2a2a;
+    --md-blockquote-fg: #9d9d9d;
+    --md-blockquote-border: rgba(0, 122, 204, 0.6);
+    --md-table-border: #474747;
+    --md-table-header-bg: rgba(255, 255, 255, 0.06);
+    --md-table-row-alt: rgba(255, 255, 255, 0.03);
+    --md-hr: rgba(255, 255, 255, 0.18);
+  }
 }
 
 html {

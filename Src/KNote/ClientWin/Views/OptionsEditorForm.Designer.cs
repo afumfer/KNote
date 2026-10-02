@@ -62,6 +62,8 @@ namespace KNote.ClientWin.Views
             this.label1 = new System.Windows.Forms.Label();
             this.textChatHubUrl = new System.Windows.Forms.TextBox();
             this.buttonTestChatHubUrl = new System.Windows.Forms.Button();
+            this.labelColorMode = new System.Windows.Forms.Label();
+            this.comboColorMode = new System.Windows.Forms.ComboBox();
             this.panelForm.SuspendLayout();
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
@@ -109,6 +111,8 @@ namespace KNote.ClientWin.Views
             // 
             // tabGlobalOptions
             // 
+            this.tabGlobalOptions.Controls.Add(this.comboColorMode);
+            this.tabGlobalOptions.Controls.Add(this.labelColorMode);
             this.tabGlobalOptions.Controls.Add(this.textChatHubUrl);
             this.tabGlobalOptions.Controls.Add(this.buttonTestChatHubUrl);
             this.tabGlobalOptions.Controls.Add(this.label1);
@@ -366,6 +370,24 @@ namespace KNote.ClientWin.Views
             this.buttonTestChatHubUrl.UseVisualStyleBackColor = true;
             this.buttonTestChatHubUrl.Click += new System.EventHandler(this.buttonTestChatHubUrl_Click);
             //
+            // labelColorMode
+            //
+            this.labelColorMode.AutoSize = true;
+            this.labelColorMode.Location = new System.Drawing.Point(13, 128);
+            this.labelColorMode.Name = "labelColorMode";
+            this.labelColorMode.Size = new System.Drawing.Size(71, 15);
+            this.labelColorMode.TabIndex = 10;
+            this.labelColorMode.Text = "Color mode:";
+            this.labelColorMode.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // comboColorMode
+            //
+            this.comboColorMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboColorMode.Location = new System.Drawing.Point(95, 124);
+            this.comboColorMode.Name = "comboColorMode";
+            this.comboColorMode.Size = new System.Drawing.Size(180, 23);
+            this.comboColorMode.TabIndex = 11;
+            //
             // OptionsEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -408,6 +430,8 @@ namespace KNote.ClientWin.Views
         private TextBox textChatHubUrl;
         private Label label1;
         private Button buttonTestChatHubUrl;
+        private Label labelColorMode;
+        private ComboBox comboColorMode;
         private System.Windows.Forms.TabPage tabEmailOptions;
         private Label labelSmtpHost;
         private TextBox textSmtpHost;

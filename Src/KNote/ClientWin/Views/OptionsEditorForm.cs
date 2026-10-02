@@ -10,6 +10,14 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
 
     private readonly OptionsEditorCtrl _ctrl;
 
+    // Items of comboColorMode, in the same order.
+    private static readonly (AppColorMode Mode, string Text)[] ColorModes =
+    {
+        (AppColorMode.Light, "Light"),
+        (AppColorMode.Dark, "Dark"),
+        (AppColorMode.System, "Use the Windows setting")
+    };
+
     #endregion
 
     #region Constructor 
@@ -18,6 +26,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
     {
         InitializeComponent();
         this.Text = $"{KntConst.AppName} options";
+        comboColorMode.Items.AddRange(ColorModes.Select(c => (object)c.Text).ToArray());
 
         _ctrl = ctrl;
     }
@@ -129,6 +138,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         checkAutoSaveActivated.Checked = _ctrl.Model.AutoSaveActivated;
         textAutosaveSeconds.Text = _ctrl.Model.AutoSaveSeconds.ToString();
         textChatHubUrl.Text = _ctrl.Model.ChatHubUrl;
+        comboColorMode.SelectedIndex = Math.Max(0, Array.FindIndex(ColorModes, c => c.Mode == _ctrl.Model.ColorMode));
         textSmtpHost.Text = _ctrl.Model.SmtpHost;
         textSmtpPort.Text = _ctrl.Model.SmtpPort.ToString();
         checkSmtpEnableSsl.Checked = _ctrl.Model.SmtpEnableSsl;
@@ -148,6 +158,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         _ctrl.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
         _ctrl.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
         _ctrl.Model.ChatHubUrl = textChatHubUrl.Text;
+        _ctrl.Model.ColorMode = ColorModes[comboColorMode.SelectedIndex].Mode;
         _ctrl.Model.SmtpHost = textSmtpHost.Text;
         _ctrl.Model.SmtpPort = _ctrl.Store.KntTextUtils.TextToInt(textSmtpPort.Text);
         _ctrl.Model.SmtpEnableSsl = checkSmtpEnableSsl.Checked;

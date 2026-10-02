@@ -13,6 +13,7 @@ public class OptionsModelTests
         settings.General.AlarmSeconds = 35;
         settings.General.AutoSaveActivated = true;
         settings.General.AutoSaveSeconds = 60;
+        settings.General.ColorMode = AppColorMode.Dark;
         settings.Connectivity.ChatHub.Url = "http://chat.example.com/hub";
         settings.Notifications.Email.Host = "smtp.example.com";
         settings.Notifications.Email.Port = 465;
@@ -37,6 +38,7 @@ public class OptionsModelTests
         Assert.AreEqual(35, model.AlarmSeconds);
         Assert.IsTrue(model.AutoSaveActivated);
         Assert.AreEqual(60, model.AutoSaveSeconds);
+        Assert.AreEqual(AppColorMode.Dark, model.ColorMode);
         Assert.AreEqual("http://chat.example.com/hub", model.ChatHubUrl);
         Assert.IsTrue(model.ChatHubAutoConnectDisabled);
         Assert.AreEqual("smtp.example.com", model.SmtpHost);
@@ -58,6 +60,7 @@ public class OptionsModelTests
         model.AlarmSeconds = 40;
         model.AutoSaveActivated = false;
         model.AutoSaveSeconds = 90;
+        model.ColorMode = AppColorMode.System;
         model.ChatHubUrl = "http://other/hub";
         model.ChatHubAutoConnectDisabled = false;
         model.SmtpHost = "smtp.other.com";
@@ -75,6 +78,7 @@ public class OptionsModelTests
         Assert.AreEqual(40, settings.General.AlarmSeconds);
         Assert.IsFalse(settings.General.AutoSaveActivated);
         Assert.AreEqual(90, settings.General.AutoSaveSeconds);
+        Assert.AreEqual(AppColorMode.System, settings.General.ColorMode);
         Assert.AreEqual("http://other/hub", settings.Connectivity.ChatHub.Url);
         Assert.IsFalse(state.Session.ChatHubAutoConnectDisabled);
         var email = settings.Notifications.Email;

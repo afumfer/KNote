@@ -65,6 +65,28 @@ public class KntIconProviderTests
     }
 
     [TestMethod]
+    [DynamicData(nameof(AllIcons))]
+    public void GetColor_DarkBackground_KeepsEnoughContrastOverTheDarkModeBackground(KntIcon icon)
+    {
+        // WCAG minimum for graphical objects (3:1), over the darkest background of dark mode.
+        var background = Color.FromArgb(0x1F, 0x1F, 0x1F);
+
+        var ratio = ContrastRatio(KntIconProvider.GetColor(icon, darkBackground: true), background);
+
+        Assert.IsTrue(ratio >= 3, $"{icon}: contrast {ratio:0.00} over the dark background");
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(AllIcons))]
+    public void GetColor_DarkBackground_IsLighterThanTheLightModeColor(KntIcon icon)
+    {
+        var light = KntIconProvider.GetColor(icon, darkBackground: false);
+        var dark = KntIconProvider.GetColor(icon, darkBackground: true);
+
+        Assert.IsTrue(RelativeLuminance(dark) > RelativeLuminance(light), $"{icon}: dark mode color is not lighter");
+    }
+
+    [TestMethod]
     [DataRow(96, 16, 32)]
     [DataRow(192, 32, 64)]
     public void CreateIcon_HasFramesForSmallAndLargeIconSizes(int dpi, int smallPixels, int largePixels)
@@ -104,6 +126,22 @@ public class KntIconProviderTests
         int expectedPixels = KntIconProvider.ToDevicePixels(KntIconProvider.DefaultSize, toolStrip.DeviceDpi);
         Assert.AreEqual(new Size(expectedPixels, expectedPixels), button.Image!.Size);
         Assert.AreEqual(ToolStripItemImageScaling.None, button.ImageScaling);
+    }
+
+    private static double ContrastRatio(Color a, Color b)
+    {
+        double la = RelativeLuminance(a), lb = RelativeLuminance(b);
+        return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
+    }
+
+    private static double RelativeLuminance(Color color)
+    {
+        static double Channel(byte value)
+        {
+            double c = value / 255.0;
+            return c <= 0.03928 ? c / 12.92 : Math.Pow((c + 0.055) / 1.055, 2.4);
+        }
+        return 0.2126 * Channel(color.R) + 0.7152 * Channel(color.G) + 0.0722 * Channel(color.B);
     }
 
     private static bool HasVisiblePixels(Bitmap bitmap)
