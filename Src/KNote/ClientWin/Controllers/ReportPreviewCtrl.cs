@@ -1,5 +1,6 @@
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
+using KNote.Model;
 using Microsoft.Extensions.Logging;
 
 namespace KNote.ClientWin.Controllers;
@@ -43,6 +44,14 @@ public class ReportPreviewCtrl : CtrlViewBase<IViewBase>
 
     protected override IViewBase CreateView()
         => Store.FactoryViews.Registry.Resolve<ReportPreviewCtrl, IViewBase>(this);
+
+    // Opens a new preview window with the report: the usual entry point of the print use cases.
+    public static Result<EControllerResult> Show(Store store, ReportDocument report, string resourcesRootPath = null)
+    {
+        var reportPreviewCtrl = new ReportPreviewCtrl(store);
+        reportPreviewCtrl.LoadReport(report, resourcesRootPath);
+        return reportPreviewCtrl.Run();
+    }
 
     public void LoadReport(ReportDocument report, string resourcesRootPath = null)
     {

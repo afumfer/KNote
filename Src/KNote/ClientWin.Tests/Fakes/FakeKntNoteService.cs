@@ -18,6 +18,8 @@ internal class FakeKntNoteService : IKntNoteService
     public Func<NoteTaskDto, bool, Task<Result<NoteTaskDto>>>? SaveNoteTaskAsyncImpl { get; set; }
     public Func<NotesSearchDto, Task<Result<List<NoteMinimalDto>>>>? GetSearchMinimalAsyncImpl { get; set; }
     public Func<Task<Result<List<NoteMinimalDto>>>>? GetAllMinimalAsyncImpl { get; set; }
+    public Func<string, string>? UtilMarkdownToHtmlImpl { get; set; }
+    public Func<ResourceDto, string>? UtilGetResourceFilePathImpl { get; set; }
     public Func<Guid, Task<Result<NoteDto>>>? GetByIdAsyncImpl { get; set; }
     public Func<int, Task<Result<NoteDto>>>? GetByNumberAsyncImpl { get; set; }
     public Func<NoteInfoDto, Task<Result<NoteExtendedDto>>>? NewExtendedAsyncImpl { get; set; }
@@ -95,11 +97,13 @@ internal class FakeKntNoteService : IKntNoteService
     public string UtilGetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages) => throw new NotSupportedException();
     public (string, string) UtilGetResourceUrls(ResourceDto resource) => throw new NotSupportedException();
     public bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true) => throw new NotSupportedException();
-    public string UtilGetResourceFilePath(ResourceDto resource) => throw new NotSupportedException();
+    public string UtilGetResourceFilePath(ResourceDto resource) =>
+        (UtilGetResourceFilePathImpl ?? throw new NotSupportedException($"{nameof(UtilGetResourceFilePath)} not configured for this test"))(resource);
     public string UtilGetResourceFileUrl(string container, string fileName) => throw new NotSupportedException();
     public string UtilGetDefaultNewResourceContainer() => throw new NotSupportedException();
     public string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false) => throw new NotSupportedException();
     public string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false) => throw new NotSupportedException();
     public string UtilHtmlToMarkdown(string html) => throw new NotSupportedException();
-    public string UtilMarkdownToHtml(string markdown) => throw new NotSupportedException();
+    public string UtilMarkdownToHtml(string markdown) =>
+        (UtilMarkdownToHtmlImpl ?? throw new NotSupportedException($"{nameof(UtilMarkdownToHtml)} not configured for this test"))(markdown);
 }

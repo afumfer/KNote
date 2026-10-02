@@ -12,11 +12,13 @@ namespace KNote.ClientWin.Tests.Fakes;
 internal class FakeKntFolderService : IKntFolderService
 {
     public Func<Guid, string, Task<Result>>? UpdateOrderNotesAsyncImpl { get; set; }
+    public Func<Guid, Task<Result<FolderDto>>>? GetByIdAsyncImpl { get; set; }
 
     public Task<Result<List<FolderInfoDto>>> GetAllAsync() => throw new NotSupportedException();
     public Task<Result<List<FolderDto>>> GetTreeAsync() => throw new NotSupportedException();
     public Task<Result<FolderDto>> GetHomeAsync() => throw new NotSupportedException();
-    public Task<Result<FolderDto>> GetAsync(Guid folderId) => throw new NotSupportedException();
+    public Task<Result<FolderDto>> GetAsync(Guid folderId) =>
+        (GetByIdAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAsync)}(Guid) not configured for this test"))(folderId);
     public Task<Result<FolderDto>> GetAsync(int folderNumber) => throw new NotSupportedException();
     public Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo) => throw new NotSupportedException();
     public Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes) =>

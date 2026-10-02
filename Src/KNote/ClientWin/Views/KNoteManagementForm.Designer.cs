@@ -48,6 +48,7 @@
             menuFileS1 = new ToolStripSeparator();
             menuPrintNotesList = new ToolStripMenuItem();
             menuExportNotesListCsv = new ToolStripMenuItem();
+            menuPrintSelectedNote = new ToolStripMenuItem();
             menuFileS3 = new ToolStripSeparator();
             menuHide = new ToolStripMenuItem();
             menuFilesS2 = new ToolStripSeparator();
@@ -152,7 +153,7 @@
             // 
             // menuFile
             // 
-            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuPrintNotesList, menuExportNotesListCsv, menuFileS3, menuHide, menuFilesS2, menuExit });
+            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuPrintNotesList, menuExportNotesListCsv, menuPrintSelectedNote, menuFileS3, menuHide, menuFilesS2, menuExit });
             menuFile.Name = "menuFile";
             menuFile.Size = new Size(37, 20);
             menuFile.Text = "&File";
@@ -264,6 +265,13 @@
             menuExportNotesListCsv.Size = new Size(203, 22);
             menuExportNotesListCsv.Text = "E&xport notes list to CSV ...";
             menuExportNotesListCsv.Click += menu_Click;
+            // 
+            // menuPrintSelectedNote
+            // 
+            menuPrintSelectedNote.Name = "menuPrintSelectedNote";
+            menuPrintSelectedNote.Size = new Size(203, 22);
+            menuPrintSelectedNote.Text = "Print &selected note details ...";
+            menuPrintSelectedNote.Click += menu_Click;
             // 
             // menuFileS3
             // 
@@ -972,6 +980,7 @@
         private ToolStripSeparator menuFileS1;
         private ToolStripMenuItem menuPrintNotesList;
         private ToolStripMenuItem menuExportNotesListCsv;
+        private ToolStripMenuItem menuPrintSelectedNote;
         private ToolStripSeparator menuFileS3;
         private ToolStripMenuItem menuHide;
         private ToolStripSeparator menuFilesS2;

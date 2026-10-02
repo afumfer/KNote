@@ -1,9 +1,11 @@
 ﻿using KNote.ClientWin.Core;
+using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Text.Json;
@@ -773,6 +775,32 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
     public void CleanView()
     {
         View.CleanView();
+    }
+
+    // Prints everything about the note as the user is seeing it in the editor, including changes not
+    // saved yet (flagged in the report), through the report preview (print or save as PDF).
+    public async Task PrintNote()
+    {
+        try
+        {
+            View.RefreshModel();
+
+            ReportDocument report;
+            using (new WaitCursor())
+            {
+                var data = await NoteDetailReportData.CreateAsync(Store, ServiceRef, Model, unsavedChanges: Model.IsDirty());
+                report = NoteDetailReport.Build(data, DateTime.Now);
+            }
+
+            var result = ReportPreviewCtrl.Show(Store, report, ServiceRef?.RepositoryRef?.ResourcesContainerRootPath);
+            if (!result.IsValid)
+                View.ShowInfo($"The note could not be printed: {result.ErrorMessage}");
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "PrintNote: {message}", ex.Message);
+            View.ShowInfo($"The note could not be printed: {ex.Message}");
+        }
     }
 
     public async Task RunCode(bool runInNewTask = true)

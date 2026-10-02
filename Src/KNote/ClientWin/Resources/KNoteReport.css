@@ -202,8 +202,12 @@ table.knt-grid .knt-topic {
     font-weight: 600;
 }
 
-table.knt-grid .knt-muted {
+.knt-muted {
     color: var(--muted);
+}
+
+.knt-small {
+    font-size: 8pt;
 }
 
 .knt-chip {
@@ -264,6 +268,101 @@ table.knt-grid .knt-muted {
     break-after: avoid;
 }
 
+.knt-section > h2 .knt-count {
+    display: inline-block;
+    margin-left: 6pt;
+    padding: 0 5pt;
+    border-radius: 7pt;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 7.5pt;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.knt-section h3 {
+    margin: 9pt 0 4pt 0;
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    break-after: avoid;
+}
+
+.knt-notice {
+    margin: 0 0 4pt 0;
+    padding: 5pt 7pt;
+    border-left: 3px solid #C25B00;
+    background: #FFF4E5;
+    font-size: 8.5pt;
+}
+
+.knt-task-head {
+    margin-bottom: 2pt;
+}
+
+.knt-task-head .knt-badge {
+    margin-right: 4pt;
+}
+
+/* Resources: cards with an image thumbnail, or the file kind for anything else. */
+.knt-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8pt;
+}
+
+.knt-card {
+    border: .5pt solid var(--rule);
+    border-radius: 4pt;
+    padding: 6pt;
+    break-inside: avoid;
+}
+
+.knt-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90pt;
+    margin-bottom: 5pt;
+    border-radius: 3pt;
+    background: var(--zebra);
+    overflow: hidden;
+}
+
+.knt-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.knt-thumb.knt-file span {
+    padding: 4pt 8pt;
+    border-radius: 3pt;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: .06em;
+}
+
+.knt-card-title {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.knt-card-meta {
+    color: var(--muted);
+    font-size: 7.5pt;
+}
+
+.knt-card-text {
+    margin-top: 3pt;
+    font-size: 8pt;
+    overflow-wrap: anywhere;
+}
+
 .knt-fields {
     display: grid;
     grid-template-columns: max-content 1fr max-content 1fr;
@@ -285,6 +384,28 @@ table.knt-grid .knt-muted {
     font-size: 9.5pt;
     line-height: 1.45;
     overflow-wrap: anywhere;
+}
+
+/* Headings written in a note's description stay below the report's own section headings. */
+.knt-content h1 { font-size: 13pt; }
+.knt-content h2 { font-size: 12pt; }
+.knt-content h3 { font-size: 10.5pt; }
+.knt-content h4,
+.knt-content h5,
+.knt-content h6 { font-size: 9.5pt; }
+
+.knt-content h1,
+.knt-content h2,
+.knt-content h3,
+.knt-content h4,
+.knt-content h5,
+.knt-content h6 {
+    margin: 8pt 0 4pt 0;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--ink);
+    break-after: avoid;
 }
 
 .knt-content img {

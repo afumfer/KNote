@@ -73,10 +73,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             comboScriptType.Items.Add(scriptType.Text);
 
         // TODO: options for new versión
-        buttonPrint.Visible = false;
         buttonCheck.Visible = false;
         toolStripS3.Visible = false;
-        toolStripS4.Visible = false;
 
         // Anchor=Right is not reliable here: its reference gap gets captured at a point
         // in the layout lifecycle that ends up inconsistent with the DPI-driven
@@ -319,6 +317,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         else if (menuSel == buttonPostIt)
         {
             await PostItEdit();
+        }
+        else if (menuSel == buttonPrint)
+        {
+            await _ctrl.PrintNote();
         }
         else if (menuSel == buttonExecuteKntScript)
         {
@@ -1182,18 +1184,13 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         if (_ctrl.Service == null)
             return;
 
-        // Fetched once and reused for every row - avoids re-fetching the (small, catalog-like)
-        // TraceNoteTypes list once per trace note.
-        var traceNoteTypeNames = (await _ctrl.Service.Repository.TraceNoteTypes.GetAllAsync()).Entity?
-            .ToDictionary(t => t.TraceNoteTypeId, t => t.Name) ?? new Dictionary<Guid, string>();
+        var traceNoteTypeNames = await TraceNoteRows.GetTypeNamesAsync(_ctrl.Service);
 
-        foreach (var traceNote in _ctrl.Model.TraceNotesFrom)
-            if (!traceNote.IsDeleted())
-                listViewTraceNoteFrom.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.FromId, traceNoteTypeNames));
+        foreach (var row in await TraceNoteRows.ResolveAllAsync(_ctrl.Service, _ctrl.Model.TraceNotesFrom, fromSide: true, traceNoteTypeNames))
+            listViewTraceNoteFrom.Items.Add(TraceNoteRowToListViewItem(row));
 
-        foreach (var traceNote in _ctrl.Model.TraceNotesTo)
-            if (!traceNote.IsDeleted())
-                listViewTraceNoteTo.Items.Add(await TraceNoteDtoToListViewItemAsync(traceNote, traceNote.ToId, traceNoteTypeNames));
+        foreach (var row in await TraceNoteRows.ResolveAllAsync(_ctrl.Service, _ctrl.Model.TraceNotesTo, fromSide: false, traceNoteTypeNames))
+            listViewTraceNoteTo.Items.Add(TraceNoteRowToListViewItem(row));
 
         listViewTraceNoteFrom.Columns.Add("Number", LogicalToDeviceUnits(60), HorizontalAlignment.Left);
         listViewTraceNoteFrom.Columns.Add("Topic", LogicalToDeviceUnits(300), HorizontalAlignment.Left);
@@ -1217,20 +1214,16 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     }
 
     // Each row shows the OTHER note in the relation (Number/Topic/Tags), not the TraceNoteDto's own
-    // fields - resolved with one lookup per row (trace lists are small, per-note; not worth a batch
-    // endpoint yet) - plus Order/Weight/Type, which DO belong to the TraceNoteDto itself (Type only
-    // shown when TraceNoteTypeId actually has a value - untyped relations are a valid, common case).
-    private async Task<ListViewItem> TraceNoteDtoToListViewItemAsync(TraceNoteDto traceNote, Guid relatedNoteId, Dictionary<Guid, string> traceNoteTypeNames)
+    // fields, plus Order/Weight/Type, which DO belong to the TraceNoteDto itself - see TraceNoteRows.
+    private static ListViewItem TraceNoteRowToListViewItem(TraceNoteRow row)
     {
-        var relatedNote = (await _ctrl.Service.Notes.GetAsync(relatedNoteId)).Entity;
-
-        var itemList = new ListViewItem(relatedNote != null ? "#" + relatedNote.NoteNumber : "?");
-        itemList.Name = traceNote.TraceNoteId.ToString();
-        itemList.SubItems.Add(relatedNote?.Topic);
-        itemList.SubItems.Add(relatedNote?.Tags);
-        itemList.SubItems.Add(traceNote.TraceNoteTypeId.HasValue && traceNoteTypeNames.TryGetValue(traceNote.TraceNoteTypeId.Value, out var typeName) ? typeName : "");
-        itemList.SubItems.Add(traceNote.Order.ToString());
-        itemList.SubItems.Add(traceNote.Weight.ToString());
+        var itemList = new ListViewItem(row.Number);
+        itemList.Name = row.TraceNoteId.ToString();
+        itemList.SubItems.Add(row.Topic);
+        itemList.SubItems.Add(row.Tags);
+        itemList.SubItems.Add(row.Type);
+        itemList.SubItems.Add(row.Order.ToString());
+        itemList.SubItems.Add(row.Weight.ToString());
         return itemList;
     }
 

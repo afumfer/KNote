@@ -285,6 +285,8 @@
             buttonPrint.Size = new Size(58, 22);
             buttonPrint.Text = "Print  ";
             buttonPrint.TextAlign = ContentAlignment.MiddleLeft;
+            buttonPrint.ToolTipText = "Print note details";
+            buttonPrint.Click += buttonToolBar_Click;
             // 
             // toolStripS4
             // 

@@ -1551,9 +1551,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 report = NotesListReport.Build(snapshot, context, DateTime.Now);
             }
 
-            var reportPreviewCtrl = new ReportPreviewCtrl(Store);
-            reportPreviewCtrl.LoadReport(report);
-            var result = reportPreviewCtrl.Run();
+            var result = ReportPreviewCtrl.Show(Store, report);
             if (!result.IsValid)
                 View.ShowInfo($"The notes list could not be printed: {result.ErrorMessage}");
         }
@@ -1561,6 +1559,44 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         {
             Store.Logger?.LogError(ex, "PrintNotesList: {message}", ex.Message);
             View.ShowInfo($"The notes list could not be printed: {ex.Message}");
+        }
+    }
+
+    // Prints everything about the note selected in the notes list, as saved in the repository (the panel
+    // below the list is a read-only view of it).
+    public async Task PrintSelectedNote()
+    {
+        if (SelectedNoteInfo == null)
+        {
+            View.ShowInfo("There is no note selected to print.");
+            return;
+        }
+
+        try
+        {
+            var serviceRef = SelectedServiceRef;
+            ReportDocument report;
+            using (new WaitCursor())
+            {
+                var response = await serviceRef.Service.Notes.GetExtendedAsync(SelectedNoteInfo.NoteId);
+                if (!response.IsValid)
+                {
+                    View.ShowInfo(response.ErrorMessage);
+                    return;
+                }
+
+                var data = await NoteDetailReportData.CreateAsync(Store, serviceRef, response.Entity, unsavedChanges: false);
+                report = NoteDetailReport.Build(data, DateTime.Now);
+            }
+
+            var result = ReportPreviewCtrl.Show(Store, report, serviceRef.RepositoryRef?.ResourcesContainerRootPath);
+            if (!result.IsValid)
+                View.ShowInfo($"The note could not be printed: {result.ErrorMessage}");
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "PrintSelectedNote: {message}", ex.Message);
+            View.ShowInfo($"The note could not be printed: {ex.Message}");
         }
     }
 
