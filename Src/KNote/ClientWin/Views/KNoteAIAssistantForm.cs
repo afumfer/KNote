@@ -38,7 +38,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         panelResultHeader.Resize += (s, e) => AlignControlsRight(panelResultHeader, 8, 8,
             radioGetStream, radioGetCompletion, buttonMarkDown, buttonNavigate);
         panelPromptHeader.Resize += (s, e) => AlignControlsRight(panelPromptHeader, 6, 6,
-            comboProviders, buttonManageProviders, buttonSend, buttonRestart, panelSeparator, buttonCatalogPrompts, buttonViewSystem);
+            buttonSend, buttonRestart, panelSeparator, comboProviders, buttonManageProviders, buttonCatalogPrompts, buttonViewSystem);
     }
 
     private static void AlignControlsRight(Control header, int rightMargin, int spacing, params Control[] controlsLeftToRight)
