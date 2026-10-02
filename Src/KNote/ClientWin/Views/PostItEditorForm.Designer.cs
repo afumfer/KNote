@@ -92,10 +92,10 @@ namespace KNote.ClientWin.Views
             //
             panelContent.Controls.Add(kntEditView);
             panelContent.Dock = DockStyle.Fill;
-            panelContent.Location = new Point(0, 20);
+            panelContent.Location = new Point(0, 30);
             panelContent.Name = "panelContent";
             panelContent.Padding = new Padding(3, 2, 3, 2);
-            panelContent.Size = new Size(479, 301);
+            panelContent.Size = new Size(479, 290);
             panelContent.TabIndex = 1;
             //
             // kntEditView
@@ -104,7 +104,7 @@ namespace KNote.ClientWin.Views
             kntEditView.Dock = DockStyle.Fill;
             kntEditView.Location = new Point(3, 2);
             kntEditView.Name = "kntEditView";
-            kntEditView.Size = new Size(473, 296);
+            kntEditView.Size = new Size(473, 286);
             kntEditView.TabIndex = 0;
             //
             // panelFooter
@@ -135,7 +135,7 @@ namespace KNote.ClientWin.Views
             // 
             progressStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             progressStatus.ForeColor = SystemColors.Window;
-            progressStatus.Location = new Point(415, 6);
+            progressStatus.Location = new Point(411, 6);
             progressStatus.Margin = new Padding(3);
             progressStatus.Name = "progressStatus";
             progressStatus.Size = new Size(42, 10);
@@ -148,10 +148,10 @@ namespace KNote.ClientWin.Views
             // 
             picResize.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             picResize.Cursor = Cursors.SizeNWSE;
-            picResize.Location = new Point(461, 3);
+            picResize.Location = new Point(459, 0);
             picResize.Margin = new Padding(3);
             picResize.Name = "picResize";
-            picResize.Size = new Size(16, 16);
+            picResize.Size = new Size(20, 20);
             picResize.TabIndex = 5;
             picResize.TabStop = false;
             picResize.MouseDown += picResize_MouseDown;
@@ -164,20 +164,21 @@ namespace KNote.ClientWin.Views
             panelCaptionHeader.Location = new Point(0, 0);
             panelCaptionHeader.Name = "panelCaptionHeader";
             panelCaptionHeader.Padding = new Padding(1);
-            panelCaptionHeader.Size = new Size(479, 22);
+            panelCaptionHeader.Size = new Size(479, 30);
             panelCaptionHeader.TabIndex = 0;
             //
             // labelCaption
             //
             labelCaption.BackColor = Color.PaleGoldenrod;
             labelCaption.Dock = DockStyle.Fill;
-            labelCaption.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            labelCaption.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
             labelCaption.Location = new Point(1, 1);
             labelCaption.Margin = new Padding(3, 0, 3, 0);
             labelCaption.Name = "labelCaption";
-            labelCaption.Padding = new Padding(25, 2, 0, 0);
-            labelCaption.Size = new Size(476, 20);
+            labelCaption.Padding = new Padding(34, 0, 4, 0);
+            labelCaption.Size = new Size(477, 28);
             labelCaption.TabIndex = 1;
+            labelCaption.TextAlign = ContentAlignment.MiddleLeft;
             labelCaption.DoubleClick += labelCaption_DoubleClick;
             labelCaption.MouseDown += labelCaption_MouseDown;
             labelCaption.MouseMove += labelCaption_MouseMove;

@@ -428,7 +428,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
         // Both icons follow the Post-It's own text colors, so they stay visible on any note color.
         SetMenuIcon();
-        picResize.SetKntIcon(KntIcon.ResizeGrip, 16, ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor));
+        picResize.SetKntIcon(KntIcon.ResizeGrip, 20,ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor));
     }
 
     protected override void ControlsToModel()
@@ -637,8 +637,9 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     {
         // Sized/positioned from labelCaption's own (AutoScale-tracked) height instead of a
         // hardcoded pixel value, so it stays correctly proportioned at any Windows scale factor -
-        // mirrors the same approach already used for picMenu in navigation mode.
-        int iconSize = (int)(labelCaption.Height * 0.9);
+        // mirrors the same approach already used for picMenu in navigation mode. Nearly the full
+        // caption height: the Fluent glyph already carries its own inner margin.
+        int iconSize = labelCaption.Height - LogicalToDeviceUnits(2);
         Point captionOrigin = panelForm.PointToClient(labelCaption.PointToScreen(Point.Empty));
 
         picMenu.Size = new Size(iconSize, iconSize);
