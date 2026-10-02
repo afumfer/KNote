@@ -55,7 +55,7 @@ public class NoteDetailReportData
             FolderPath = note.FolderId == Guid.Empty ? "" : await store.GetKNoteFolerPath(serviceRef, note.FolderId)
         };
 
-        RenderDescription(data, store, service, repositoryRef);
+        (data.DescriptionHtml, data.DescriptionUrl) = RenderDescription(store, service, repositoryRef, note);
 
         foreach (var resource in note.Resources.Where(r => !r.IsDeleted()).OrderBy(r => r.Order))
             data.Resources.Add(new NoteDetailResource(resource.Order, resource.NameOut, resource.FileType, resource.Description,
@@ -71,22 +71,24 @@ public class NoteDetailReportData
         return data;
     }
 
-    // Same rules as the note editor's view of the description (NoteEditorForm.ModelToControls): html is
-    // shown as is, "navigation" is either a web page link or markdown, anything else is markdown.
-    private static void RenderDescription(NoteDetailReportData data, Store store, IKntService service, RepositoryRef repositoryRef)
+    // A note's description as printable HTML, with the same rules as the note editor's view of it
+    // (NoteEditorForm.ModelToControls): html is shown as is, "navigation" is either a web page (only its
+    // URL is returned, not rendered) or markdown, anything else is markdown. Both null when it is empty.
+    // Resource references point to KntConst.VirtualHostNameToFolderMapping (see ReportPreviewCtrl).
+    public static (string Html, string Url) RenderDescription(Store store, IKntService service, RepositoryRef repositoryRef, NoteInfoDto note)
     {
-        var description = data.Note.Description;
+        var description = note?.Description;
         if (string.IsNullOrWhiteSpace(description))
-            return;
+            return (null, null);
 
-        var contentType = data.Note.GetContentTypeExt().ForDescription;
+        var contentType = note.GetContentTypeExt().ForDescription;
+        var url = contentType == "navigation" ? store.KntTextUtils.ExtractUrlFromText(description) : null;
 
         if (contentType == "html")
-            data.DescriptionHtml = MapResources(repositoryRef, description);
-        else if (contentType == "navigation" && !string.IsNullOrEmpty(store.KntTextUtils.ExtractUrlFromText(description)))
-            data.DescriptionUrl = store.KntTextUtils.ExtractUrlFromText(description);
-        else
-            data.DescriptionHtml = MarkdownToHtml(service, repositoryRef, description);
+            return (MapResources(repositoryRef, description), null);
+        if (!string.IsNullOrEmpty(url))
+            return (null, url);
+        return (MarkdownToHtml(service, repositoryRef, description), null);
     }
 
     private static string MarkdownToHtml(IKntService service, RepositoryRef repositoryRef, string markdown)

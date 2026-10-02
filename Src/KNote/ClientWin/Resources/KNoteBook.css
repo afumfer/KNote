@@ -1,0 +1,333 @@
+/* Stylesheet of KNote's "book" reports (see ClientWin/Core/Reports/NotesBook.cs; ReportHtml.cs writes the
+   @page size, running title and page number). Sober, serif typography: cover, contents, one chapter per
+   note. */
+
+:root {
+    --ink: #1D1D1F;
+    --muted: #6B6B70;
+    --rule: #C9C9CE;
+    --soft: #F4F4F6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+body {
+    margin: 0;
+    color: var(--ink);
+    background: #FFFFFF;
+    font-family: Cambria, Georgia, "Times New Roman", serif;
+    font-size: 10.5pt;
+    line-height: 1.5;
+}
+
+@page {
+    margin: 24mm 22mm 24mm 22mm;
+
+    @top-center {
+        font-family: Cambria, Georgia, serif;
+        font-size: 8pt;
+        font-variant: small-caps;
+        letter-spacing: .08em;
+        color: #6B6B70;
+        vertical-align: bottom;
+        padding-bottom: 4mm;
+    }
+
+    @bottom-center {
+        font-family: Cambria, Georgia, serif;
+        font-size: 9pt;
+        color: #6B6B70;
+        vertical-align: top;
+        padding-top: 4mm;
+    }
+}
+
+/* ---- Cover ---------------------------------------------------------------------------------------- */
+
+.knt-cover {
+    page: front;
+    break-after: page;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 245mm;
+    padding: 40mm 6mm 0 6mm;
+    text-align: center;
+}
+
+.knt-cover-label {
+    font-size: 9pt;
+    font-variant: small-caps;
+    letter-spacing: .3em;
+    color: var(--muted);
+}
+
+.knt-cover h1 {
+    margin: 10mm 0 0 0;
+    font-size: 30pt;
+    font-weight: normal;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.knt-cover-rule {
+    width: 30mm;
+    margin: 9mm auto;
+    border: 0;
+    border-top: 1px solid var(--ink);
+}
+
+.knt-cover-subtitle {
+    font-size: 12pt;
+    font-style: italic;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.knt-cover-meta {
+    font-size: 9pt;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+/* ---- Contents ------------------------------------------------------------------------------------- */
+
+.knt-contents {
+    page: front;
+    break-after: page;
+}
+
+.knt-contents h2,
+.knt-chapter-label {
+    font-size: 9pt;
+    font-weight: normal;
+    font-variant: small-caps;
+    letter-spacing: .3em;
+    color: var(--muted);
+}
+
+.knt-contents h2 {
+    margin: 18mm 0 10mm 0;
+    font-size: 16pt;
+    letter-spacing: .15em;
+    color: var(--ink);
+}
+
+.knt-toc-entry {
+    display: flex;
+    align-items: baseline;
+    margin: 0 0 2.6mm 0;
+    color: inherit;
+    text-decoration: none;
+    break-inside: avoid;
+}
+
+.knt-toc-number {
+    flex: 0 0 9mm;
+    color: var(--muted);
+    font-variant-numeric: oldstyle-nums;
+}
+
+.knt-toc-title {
+    flex: 0 1 auto;
+    overflow-wrap: anywhere;
+}
+
+.knt-toc-leader {
+    flex: 1 1 8mm;
+    min-width: 8mm;
+    margin: 0 2mm;
+    border-bottom: 1px dotted var(--rule);
+    transform: translateY(-.25em);
+}
+
+/* Fixed width so filling in the numbers (second pass) never changes the layout of the first one. */
+.knt-pageref {
+    display: inline-block;
+    flex: 0 0 10mm;
+    width: 10mm;
+    text-align: right;
+    font-variant-numeric: oldstyle-nums;
+}
+
+/* ---- Chapters ------------------------------------------------------------------------------------- */
+
+.knt-chapter {
+    break-before: page;
+}
+
+.knt-chapter-opening {
+    padding-top: 22mm;
+    margin-bottom: 12mm;
+}
+
+.knt-chapter-label {
+    margin: 0;
+}
+
+.knt-chapter h1 {
+    margin: 3mm 0 0 0;
+    font-size: 22pt;
+    font-weight: normal;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.knt-chapter-rule {
+    width: 18mm;
+    margin: 7mm 0 0 0;
+    border: 0;
+    border-top: 1px solid var(--ink);
+}
+
+.knt-chapter-empty {
+    color: var(--muted);
+    font-style: italic;
+}
+
+/* ---- Chapter text (a note's description) -------------------------------------------------------- */
+
+.knt-text {
+    text-align: justify;
+    hyphens: auto;
+    overflow-wrap: break-word;
+}
+
+.knt-text p {
+    margin: 0 0 .7em 0;
+    orphans: 3;
+    widows: 3;
+}
+
+.knt-text h1,
+.knt-text h2,
+.knt-text h3,
+.knt-text h4,
+.knt-text h5,
+.knt-text h6 {
+    margin: 1.3em 0 .5em 0;
+    font-weight: bold;
+    line-height: 1.25;
+    text-align: left;
+    break-after: avoid;
+}
+
+.knt-text h1 { font-size: 15pt; }
+.knt-text h2 { font-size: 13pt; }
+.knt-text h3 { font-size: 11.5pt; }
+.knt-text h4,
+.knt-text h5,
+.knt-text h6 { font-size: 10.5pt; font-style: italic; }
+
+.knt-text a {
+    color: inherit;
+}
+
+.knt-text img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 4mm auto;
+    break-inside: avoid;
+}
+
+.knt-text ul,
+.knt-text ol {
+    margin: 0 0 .7em 0;
+    padding-left: 7mm;
+}
+
+.knt-text blockquote {
+    margin: 0 0 .7em 0;
+    padding: 0 0 0 5mm;
+    border-left: 1px solid var(--rule);
+    font-style: italic;
+    color: var(--muted);
+}
+
+.knt-text table {
+    border-collapse: collapse;
+    max-width: 100%;
+    margin: 0 0 .9em 0;
+    font-size: 9.5pt;
+    text-align: left;
+}
+
+.knt-text th,
+.knt-text td {
+    padding: 1.5mm 3mm;
+    border-bottom: .5pt solid var(--rule);
+    vertical-align: top;
+}
+
+.knt-text th {
+    border-bottom: 1px solid var(--ink);
+    font-weight: bold;
+}
+
+.knt-text tr {
+    break-inside: avoid;
+}
+
+.knt-text pre,
+.knt-text code {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 8.5pt;
+}
+
+.knt-text pre {
+    margin: 0 0 .9em 0;
+    padding: 3mm 4mm;
+    background: var(--soft);
+    white-space: pre-wrap;
+    text-align: left;
+    break-inside: avoid;
+}
+
+.knt-text hr {
+    width: 18mm;
+    margin: 6mm auto;
+    border: 0;
+    border-top: 1px solid var(--rule);
+}
+
+/* On screen (the preview window) every part of the book (cover, contents, each chapter) is shown as a
+   sheet of paper; the print engine ignores this and paginates with the @page rules. */
+@media screen {
+    html,
+    body {
+        background: #E4E7EB;
+    }
+
+    body {
+        padding: 18px 0;
+    }
+
+    .knt-cover,
+    .knt-contents,
+    .knt-chapter {
+        width: 210mm;
+        margin: 0 auto 18px auto;
+        padding: 24mm 22mm;
+        background: #FFFFFF;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .18), 0 6px 18px rgba(0, 0, 0, .08);
+    }
+
+    .knt-cover {
+        height: 297mm;
+        padding-top: 64mm;
+        padding-bottom: 24mm;
+    }
+
+    .knt-contents,
+    .knt-chapter {
+        min-height: 120mm;
+    }
+}

@@ -638,7 +638,10 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
                 col.DefaultCellStyle.Alignment == DataGridViewContentAlignment.MiddleRight, col.Width));
 
         foreach (DataGridViewRow row in dataGridNotes.Rows)
+        {
             snapshot.Rows.Add(columns.Select(c => row.Cells[c.Index].FormattedValue?.ToString() ?? "").ToArray());
+            snapshot.NoteIds.Add((Guid)row.Cells["NoteId"].Value);
+        }
 
         return snapshot;
     }

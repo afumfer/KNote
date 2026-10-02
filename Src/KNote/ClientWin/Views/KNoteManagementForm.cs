@@ -281,6 +281,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         {
             await _ctrl.PrintNotesList();
         }
+        else if (menuSel == menuPrintNotesBook)
+        {
+            await _ctrl.PrintNotesBook();
+        }
         else if (menuSel == menuExportNotesListCsv)
         {
             await _ctrl.ExportNotesListToCsv();

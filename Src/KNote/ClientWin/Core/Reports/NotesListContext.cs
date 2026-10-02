@@ -65,7 +65,7 @@ public class NotesListContext
     }
 
     // Base of the proposed file name (without extension, not yet sanitized - see ReportFileName).
-    public string FileNameBase(DateTime date)
+    public string FileNameBase(DateTime date, string prefix = "Notes")
     {
         var what = Source switch
         {
@@ -77,7 +77,7 @@ public class NotesListContext
         if (!string.IsNullOrWhiteSpace(TextFilter))
             what += $" ({TextFilter.Trim()})";
 
-        return $"Notes - {what} - {date:yyyy-MM-dd}";
+        return $"{prefix} - {what} - {date:yyyy-MM-dd}";
     }
 
     private string SearchScope

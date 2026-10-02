@@ -6,6 +6,16 @@ public enum ReportOrientation
     Landscape
 }
 
+public enum ReportLayout
+{
+    // Header band + data (Resources/KNoteReport.css).
+    Report,
+
+    // Book: the body brings its own cover, contents and chapters; serif typography, running title and
+    // centered page numbers (Resources/KNoteBook.css).
+    Book
+}
+
 // A label/value pair shown in the report's header band (repository, notes count, generation date...).
 public record ReportMetaItem(string Label, string Value);
 
@@ -27,6 +37,16 @@ public class ReportDocument
     public List<ReportMetaItem> Meta { get; set; } = new();
 
     public ReportOrientation Orientation { get; set; } = ReportOrientation.Portrait;
+
+    public ReportLayout Layout { get; set; } = ReportLayout.Report;
+
+    // Language of the content (html lang), used by the browser for hyphenation. Report texts are English.
+    public string Language { get; set; } = "en";
+
+    // The body has page references (ReportHtml.PageReference) to fill with the real page numbers, which
+    // only exist once the report is paginated: the preview prints it once to find them (see
+    // PdfNamedDestinations) before showing it.
+    public bool ResolvePageReferences { get; set; }
 
     public string BodyHtml { get; set; } = "";
 

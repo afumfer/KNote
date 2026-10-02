@@ -60,6 +60,15 @@ public class ReportPreviewCtrl : CtrlViewBase<IViewBase>
         ResourcesRootPath = resourcesRootPath;
     }
 
+    // Second pass of a report with page references (ReportDocument.ResolvePageReferences): the view has
+    // printed it once and read where each target landed (see PdfNamedDestinations).
+    public void ApplyPageNumbers(IReadOnlyDictionary<string, int> pages)
+    {
+        Html = ReportHtml.FillPageReferences(Html, pages);
+        if (pages == null || pages.Count == 0)
+            Store.Logger?.LogWarning("Report preview - page numbers could not be resolved for \"{title}\".", Report?.Title);
+    }
+
     public void PdfSaved(string pdfPath)
     {
         LastExportFolder = Path.GetDirectoryName(pdfPath);

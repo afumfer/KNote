@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
@@ -1559,6 +1560,39 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         {
             Store.Logger?.LogError(ex, "PrintNotesList: {message}", ex.Message);
             View.ShowInfo($"The notes list could not be printed: {ex.Message}");
+        }
+    }
+
+    // Prints the listed notes as a book: one chapter per note (Topic and Description) in the order they are
+    // listed, after a cover and a table of contents, through the report preview (print or save as PDF).
+    public async Task PrintNotesBook()
+    {
+        try
+        {
+            var snapshot = NotesSelectorCtrl.GetDisplayedNotes();
+            if (snapshot.NoteIds.Count == 0)
+            {
+                View.ShowInfo("There are no notes in the list to print.");
+                return;
+            }
+
+            var serviceRef = SelectedServiceRef;
+            ReportDocument report;
+            using (new WaitCursor())
+            {
+                var context = await GetNotesListContextAsync(snapshot.TextFilter);
+                var chapters = await NotesBook.LoadChaptersAsync(Store, serviceRef, snapshot.NoteIds);
+                report = NotesBook.Build(context, chapters, DateTime.Now, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+            }
+
+            var result = ReportPreviewCtrl.Show(Store, report, serviceRef.RepositoryRef?.ResourcesContainerRootPath);
+            if (!result.IsValid)
+                View.ShowInfo($"The notes book could not be printed: {result.ErrorMessage}");
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "PrintNotesBook: {message}", ex.Message);
+            View.ShowInfo($"The notes book could not be printed: {ex.Message}");
         }
     }
 

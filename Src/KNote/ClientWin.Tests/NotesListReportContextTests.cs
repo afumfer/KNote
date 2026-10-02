@@ -149,6 +149,7 @@ public class NotesSelectorFormSnapshotTests
         Assert.AreEqual(3, snapshot.LoadedCount);
         CollectionAssert.AreEqual(new[] { "10", "20", "30" }, snapshot.Rows.Select(r => r[0]).ToArray());
         CollectionAssert.AreEqual(new[] { "Alpha", "Beta", "Gamma" }, snapshot.Rows.Select(r => r[1]).ToArray());
+        CollectionAssert.AreEqual(new[] { Notes[1].NoteId, Notes[2].NoteId, Notes[0].NoteId }, snapshot.NoteIds, "The note of each row, in the same order");
         // The grid's own formatting (DateTime's TypeConverter, which e.g. drops zero seconds), not ToString().
         var displayedDate = TypeDescriptor.GetConverter(typeof(DateTime)).ConvertToString(null, CultureInfo.CurrentCulture, new DateTime(2026, 2, 1, 9, 30, 0));
         Assert.AreEqual(displayedDate, snapshot.Rows[0][5]);

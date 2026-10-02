@@ -47,6 +47,7 @@
             menuDeleteFolder = new ToolStripMenuItem();
             menuFileS1 = new ToolStripSeparator();
             menuPrintNotesList = new ToolStripMenuItem();
+            menuPrintNotesBook = new ToolStripMenuItem();
             menuExportNotesListCsv = new ToolStripMenuItem();
             menuPrintSelectedNote = new ToolStripMenuItem();
             menuFileS3 = new ToolStripSeparator();
@@ -153,7 +154,7 @@
             // 
             // menuFile
             // 
-            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuPrintNotesList, menuExportNotesListCsv, menuPrintSelectedNote, menuFileS3, menuHide, menuFilesS2, menuExit });
+            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuPrintNotesList, menuPrintNotesBook, menuPrintSelectedNote, menuExportNotesListCsv, menuFileS3, menuHide, menuFilesS2, menuExit });
             menuFile.Name = "menuFile";
             menuFile.Size = new Size(37, 20);
             menuFile.Text = "&File";
@@ -258,6 +259,13 @@
             menuPrintNotesList.Size = new Size(203, 22);
             menuPrintNotesList.Text = "&Print notes list ...";
             menuPrintNotesList.Click += menu_Click;
+            // 
+            // menuPrintNotesBook
+            // 
+            menuPrintNotesBook.Name = "menuPrintNotesBook";
+            menuPrintNotesBook.Size = new Size(203, 22);
+            menuPrintNotesBook.Text = "Print notes list as &book ...";
+            menuPrintNotesBook.Click += menu_Click;
             // 
             // menuExportNotesListCsv
             // 
@@ -979,6 +987,7 @@
         private ToolStripMenuItem menuDeleteFolder;
         private ToolStripSeparator menuFileS1;
         private ToolStripMenuItem menuPrintNotesList;
+        private ToolStripMenuItem menuPrintNotesBook;
         private ToolStripMenuItem menuExportNotesListCsv;
         private ToolStripMenuItem menuPrintSelectedNote;
         private ToolStripSeparator menuFileS3;

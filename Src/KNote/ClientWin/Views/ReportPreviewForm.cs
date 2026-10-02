@@ -14,6 +14,9 @@ namespace KNote.ClientWin.Views;
 // part of the content (note descriptions) is user written. Printing uses the browser's own print dialog,
 // which has its own paged preview, printer selection and "Save as PDF"; "Save as PDF ..." here saves
 // directly in the report's orientation.
+// A report with page references (e.g. the contents of a book, ReportDocument.ResolvePageReferences) is
+// paginated in two passes before it is shown: printed once to an in-memory PDF to read where each target
+// landed (PdfNamedDestinations), then reloaded with those page numbers filled in.
 // webView.DefaultBackgroundColor must stay white (set in the Designer): the print engine paints the page
 // margins with it, not with the document's background - grey there gave PDFs grey borders. The grey around
 // the sheet in the preview comes from the report's own stylesheet (@media screen).
@@ -21,7 +24,10 @@ public partial class ReportPreviewForm : KntForm, IViewBase
 {
     #region Private fields
 
-    private const string ReportUrl = "https://knote.report/report.html";
+    // Served from memory; each load gets its own "?v=N" so a reload after filling in the page numbers is
+    // a real navigation.
+    private const string ReportHost = "https://knote.report/";
+    private const string ReportUrl = ReportHost + "report.html";
 
     // A4 in inches (WebView2 print settings unit), portrait; Orientation rotates it.
     private const double A4WidthInches = 8.27;
@@ -31,6 +37,7 @@ public partial class ReportPreviewForm : KntForm, IViewBase
 
     private readonly ReportPreviewCtrl _ctrl;
     private bool _webViewReady;
+    private int _loadCount;
 
     #endregion
 
@@ -75,7 +82,11 @@ public partial class ReportPreviewForm : KntForm, IViewBase
         try
         {
             await InitializeWebViewAsync();
-            webView.Source = new Uri(ReportUrl);
+
+            if (_ctrl.Report?.ResolvePageReferences == true)
+                await ResolvePageReferencesAsync();
+
+            await LoadReportAsync();
             _webViewReady = true;
             EnableReportActions(true);
         }
@@ -109,7 +120,7 @@ public partial class ReportPreviewForm : KntForm, IViewBase
 
     private void CoreWebView2_WebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e)
     {
-        if (!string.Equals(e.Request.Uri, ReportUrl, StringComparison.OrdinalIgnoreCase))
+        if (!IsReportUri(e.Request.Uri))
             return;
 
         var content = new MemoryStream(Encoding.UTF8.GetBytes(_ctrl.Html ?? ""));
@@ -120,7 +131,7 @@ public partial class ReportPreviewForm : KntForm, IViewBase
     // instead of navigating the preview away from the report.
     private void CoreWebView2_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
     {
-        if (string.Equals(e.Uri, ReportUrl, StringComparison.OrdinalIgnoreCase))
+        if (IsReportUri(e.Uri))
             return;
 
         e.Cancel = true;
@@ -152,7 +163,7 @@ public partial class ReportPreviewForm : KntForm, IViewBase
         core.Settings.AreDevToolsEnabled = false;
 #endif
 
-        core.AddWebResourceRequestedFilter(ReportUrl, CoreWebView2WebResourceContext.Document);
+        core.AddWebResourceRequestedFilter(ReportHost + "*", CoreWebView2WebResourceContext.Document);
         core.WebResourceRequested += CoreWebView2_WebResourceRequested;
         core.NavigationStarting += CoreWebView2_NavigationStarting;
         core.NewWindowRequested += CoreWebView2_NewWindowRequested;
@@ -161,6 +172,59 @@ public partial class ReportPreviewForm : KntForm, IViewBase
         if (!string.IsNullOrEmpty(_ctrl.ResourcesRootPath) && Directory.Exists(_ctrl.ResourcesRootPath))
             core.SetVirtualHostNameToFolderMapping(new Uri(KntConst.VirtualHostNameToFolderMapping).Host,
                 _ctrl.ResourcesRootPath, CoreWebView2HostResourceAccessKind.Allow);
+    }
+
+    // Same URL plus "?v=N" (fragments "#..." of the contents' links included).
+    private static bool IsReportUri(string uri)
+        => uri != null && uri.StartsWith(ReportUrl, StringComparison.OrdinalIgnoreCase);
+
+    private Task LoadReportAsync()
+    {
+        var loaded = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void OnCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            webView.CoreWebView2.NavigationCompleted -= OnCompleted;
+            loaded.TrySetResult(e.IsSuccess);
+        }
+
+        webView.CoreWebView2.NavigationCompleted += OnCompleted;
+        webView.CoreWebView2.Navigate($"{ReportUrl}?v={++_loadCount}");
+        return loaded.Task;
+    }
+
+    private async Task ResolvePageReferencesAsync()
+    {
+        var status = statusLabel.Text;
+        statusLabel.Text = "Paginating ...";
+        UseWaitCursor = true;
+        try
+        {
+            await LoadReportAsync();
+            using var pdf = await webView.CoreWebView2.PrintToPdfStreamAsync(CreatePrintSettings());
+            await LeaveWebView2CallbackAsync();
+            using var bytes = new MemoryStream();
+            await pdf.CopyToAsync(bytes);
+            _ctrl.ApplyPageNumbers(PdfNamedDestinations.Parse(bytes.ToArray()));
+        }
+        finally
+        {
+            UseWaitCursor = false;
+            statusLabel.Text = status;
+        }
+    }
+
+    // The same settings for the pagination pass and "Save as PDF", so both paginate alike.
+    private CoreWebView2PrintSettings CreatePrintSettings()
+    {
+        var settings = webView.CoreWebView2.Environment.CreatePrintSettings();
+        settings.Orientation = _ctrl.Report.Orientation == ReportOrientation.Landscape
+            ? CoreWebView2PrintOrientation.Landscape
+            : CoreWebView2PrintOrientation.Portrait;
+        settings.PageWidth = A4WidthInches;
+        settings.PageHeight = A4HeightInches;
+        settings.ShouldPrintBackgrounds = true;
+        settings.ShouldPrintHeaderAndFooter = false;
+        return settings;
     }
 
     private void Print()
@@ -196,18 +260,7 @@ public partial class ReportPreviewForm : KntForm, IViewBase
         try
         {
             using (new WaitCursor())
-            {
-                var settings = webView.CoreWebView2.Environment.CreatePrintSettings();
-                settings.Orientation = _ctrl.Report.Orientation == ReportOrientation.Landscape
-                    ? CoreWebView2PrintOrientation.Landscape
-                    : CoreWebView2PrintOrientation.Portrait;
-                settings.PageWidth = A4WidthInches;
-                settings.PageHeight = A4HeightInches;
-                settings.ShouldPrintBackgrounds = true;
-                settings.ShouldPrintHeaderAndFooter = false;
-
-                saved = await webView.CoreWebView2.PrintToPdfAsync(dialog.FileName, settings);
-            }
+                saved = await webView.CoreWebView2.PrintToPdfAsync(dialog.FileName, CreatePrintSettings());
         }
         catch (Exception ex)
         {

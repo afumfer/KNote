@@ -16,6 +16,10 @@ public class NotesListSnapshot
     // One entry per row, one cell per column of Columns (same order).
     public List<string[]> Rows { get; } = new();
 
+    // The note of each row (same order as Rows), for the use cases that need more than the cell texts
+    // (e.g. the notes book, which prints each note's description).
+    public List<Guid> NoteIds { get; } = new();
+
     // Text of the in-memory filter applied over the loaded list (NotesSelectorCtrl.EnableTextFilter), or
     // empty when none is applied.
     public string TextFilter { get; set; } = "";
