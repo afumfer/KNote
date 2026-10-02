@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -137,7 +138,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         var isFilter = selectedNotesInServiceRef?.NotesFilter != null;
         var description = isFilter
-            ? BuildFilterDescription(selectedNotesInServiceRef.NotesFilter)
+            ? await BuildFilterDescription(selectedNotesInServiceRef.ServiceRef, selectedNotesInServiceRef.NotesFilter)
             : selectedNotesInServiceRef?.NotesSearch?.TextSearch;
 
         NotifyMessage($"Loading notes filter: {description}");
@@ -158,23 +159,51 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         View.DeactivateWaitState();
     }
 
-    private static string BuildFilterDescription(NotesFilterDto notesFilter)
+    private async Task<string> BuildFilterDescription(ServiceRef serviceRef, NotesFilterDto notesFilter)
     {
-        var parts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(notesFilter.Topic))
-            parts.Add($"Topic={notesFilter.Topic}");
-        if (!string.IsNullOrWhiteSpace(notesFilter.Description))
-            parts.Add($"Description={notesFilter.Description}");
-        if (!string.IsNullOrWhiteSpace(notesFilter.Tags))
-            parts.Add($"Tags={notesFilter.Tags}");
-        if (notesFilter.NoteTypeId != null)
-            parts.Add("NoteType");
-        if (notesFilter.FolderId != null)
-            parts.Add("Folder");
-        if (notesFilter.AttributesFilter?.Count > 0)
-            parts.Add($"Attributes={notesFilter.AttributesFilter.Count}");
+        var criteria = await DescribeFilterCriteriaAsync(serviceRef, notesFilter);
+        return criteria.Count > 0 ? string.Join(", ", criteria.Select(c => $"{c.Label}={c.Value}")) : "(no criteria)";
+    }
 
-        return parts.Count > 0 ? string.Join(", ", parts) : "(no criteria)";
+    // The criteria actually set in a structured filter, with names instead of ids (note type, folder path).
+    // A name that can't be resolved (e.g. deleted meanwhile) shows as "?" rather than failing the caller.
+    private async Task<List<ReportMetaItem>> DescribeFilterCriteriaAsync(ServiceRef serviceRef, NotesFilterDto notesFilter)
+    {
+        var criteria = new List<ReportMetaItem>();
+
+        if (!string.IsNullOrWhiteSpace(notesFilter.Topic))
+            criteria.Add(new ReportMetaItem("Topic", notesFilter.Topic.Trim()));
+        if (!string.IsNullOrWhiteSpace(notesFilter.Description))
+            criteria.Add(new ReportMetaItem("Description", notesFilter.Description.Trim()));
+        if (!string.IsNullOrWhiteSpace(notesFilter.Tags))
+            criteria.Add(new ReportMetaItem("Tags", notesFilter.Tags.Trim()));
+
+        if (notesFilter.NoteTypeId != null)
+        {
+            string noteType = null;
+            try
+            {
+                noteType = serviceRef == null ? null : (await serviceRef.Service.NoteTypes.GetAsync(notesFilter.NoteTypeId.Value)).Entity?.Name;
+            }
+            catch (Exception ex)
+            {
+                Store.Logger?.LogError(ex, "DescribeFilterCriteriaAsync, note type: {message}", ex.Message);
+            }
+            criteria.Add(new ReportMetaItem("Note type", noteType ?? "?"));
+        }
+
+        if (notesFilter.FolderId != null)
+        {
+            var folderPath = await Store.GetKNoteFolerPath(serviceRef, notesFilter.FolderId.Value);
+            if (string.IsNullOrEmpty(folderPath))
+                folderPath = "?";
+            criteria.Add(new ReportMetaItem("Folder", notesFilter.IncludeChildFolders ? $"{folderPath} (and subfolders)" : folderPath));
+        }
+
+        foreach (var atr in notesFilter.AttributesFilter ?? new List<AtrFilterDto>())
+            criteria.Add(new ReportMetaItem(string.IsNullOrWhiteSpace(atr.AtrName) ? "Attribute" : atr.AtrName, atr.Value ?? ""));
+
+        return criteria;
     }
 
     // The renamed folder may be an ancestor of the active folder (the displayed path includes every
@@ -1500,6 +1529,43 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         if (unsupportedNotes.Count > 0)
             View.ShowInfo($"The stdout console mode is not supported for the script type of the following note(s) - they were skipped: {string.Join(", ", unsupportedNotes)}.");
+    }
+
+    // Where the notes currently listed come from (folder, quick search or structured filter), with every
+    // name resolved - used to identify the list in its printed report and in its exported file name.
+    // textFilter is the in-memory filter the notes list view applies on top (NotesListSnapshot.TextFilter).
+    public async Task<NotesListContext> GetNotesListContextAsync(string textFilter)
+    {
+        var serviceRef = SelectedServiceRef;
+        var context = new NotesListContext
+        {
+            RepositoryAlias = serviceRef?.RepositoryRef?.Alias,
+            RepositoryProvider = serviceRef?.RepositoryRef?.Provider,
+            TextFilter = textFilter
+        };
+
+        if (SelectMode == EnumSelectMode.Folders)
+        {
+            context.Source = NotesListSource.Folder;
+            context.FolderNumber = SelectedFolderInfo?.FolderNumber;
+            if (SelectedFolderInfo != null)
+                context.FolderPath = await Store.GetKNoteFolerPath(serviceRef, SelectedFolderInfo.FolderId);
+        }
+        else if (SelectedNotesInServiceRef?.NotesFilter != null)
+        {
+            context.Source = NotesListSource.Filter;
+            context.FilterCriteria = await DescribeFilterCriteriaAsync(serviceRef, SelectedNotesInServiceRef.NotesFilter);
+        }
+        else
+        {
+            var notesSearch = SelectedNotesInServiceRef?.NotesSearch;
+            context.Source = NotesListSource.Search;
+            context.SearchText = notesSearch?.TextSearch?.Trim();
+            context.SearchInDescription = notesSearch?.SearchInDescription ?? false;
+            context.SearchInNoteTasks = notesSearch?.SearchInNoteTasks ?? false;
+        }
+
+        return context;
     }
 
     public void Options()

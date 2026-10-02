@@ -1,4 +1,6 @@
 ﻿using KNote.Model;
+using KNote.Model.Dto;
+using KNote.ClientWin.Core.Reports;
 
 namespace KNote.ClientWin.Core;
 
@@ -82,6 +84,20 @@ public interface IViewSelector<TItem> : IViewEmbeddable
     void AddItem(TItem item);
     object SelectItem(TItem item);
     List<TItem> GetSelectedListItem();
+}
+
+// Small, standalone capability (same idea as IFolderAndRepositoryDisplay): the notes list exactly as the
+// user is seeing it - visible columns, sort order and in-memory text filter only live in the view - for
+// the print and CSV export use cases of the management window.
+public interface INotesListSnapshotProvider
+{
+    NotesListSnapshot GetDisplayedNotes();
+}
+
+// NotesSelectorCtrl's own view contract: IViewSelector<NoteMinimalDto> plus the snapshot capability. Kept
+// as its own interface so other IViewSelector<T> implementers (FoldersSelectorForm) aren't affected.
+public interface IViewNotesSelector : IViewSelector<NoteMinimalDto>, INotesListSnapshotProvider
+{
 }
 
 /// <summary>

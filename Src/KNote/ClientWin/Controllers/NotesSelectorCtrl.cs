@@ -1,11 +1,12 @@
 ﻿using KNote.ClientWin.Core;
+using KNote.ClientWin.Core.Reports;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
-public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewSelector<NoteMinimalDto>, NoteMinimalDto>
+public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, NoteMinimalDto>
 {
     #region Properties
 
@@ -61,9 +62,9 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewSelector<NoteMini
 
     #region ISelectorView implementation
 
-    protected override IViewSelector<NoteMinimalDto> CreateView()
+    protected override IViewNotesSelector CreateView()
     {
-        return Store.FactoryViews.Registry.Resolve<NotesSelectorCtrl, IViewSelector<NoteMinimalDto>>(this);
+        return Store.FactoryViews.Registry.Resolve<NotesSelectorCtrl, IViewNotesSelector>(this);
     }
 
     #endregion 
@@ -311,6 +312,11 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewSelector<NoteMini
     public List<NoteMinimalDto> GetSelectedListNotesMinimal()
     {
         return View.GetSelectedListItem();
+    }
+
+    public NotesListSnapshot GetDisplayedNotes()
+    {
+        return View.GetDisplayedNotes();
     }
 
     public void CleanView()

@@ -1,5 +1,6 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Core.Reports;
 using KNote.Model.Core;
 using KNote.Model.Dto;
 using System.Data;
@@ -8,7 +9,7 @@ using KntIcons;
 
 namespace KNote.ClientWin.Views;
 
-public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
+public partial class NotesSelectorForm : KntForm, IViewNotesSelector
 {
     #region Private fields 
 
@@ -611,6 +612,35 @@ public partial class NotesSelectorForm : KntForm, IViewSelector<NoteMinimalDto>
             listNoteInfo.Add(DataGridViewRowToNoteInfo((DataGridViewRow)dg));
             
         return listNoteInfo;
+    }
+
+    // Read straight from the grid, so it is what the user sees: visible columns in display order, rows
+    // in their current (sorted, text-filtered) order and each cell's formatted text (e.g. dates in the
+    // grid's own format).
+    public NotesListSnapshot GetDisplayedNotes()
+    {
+        var snapshot = new NotesListSnapshot
+        {
+            TextFilter = _textFilter?.Trim() ?? "",
+            LoadedCount = _ctrl.ListEntities?.Count ?? 0
+        };
+
+        if (dataGridNotes.Columns.Count <= 1)
+            return snapshot; // grid not configured yet: nothing loaded
+
+        var columns = dataGridNotes.Columns.Cast<DataGridViewColumn>()
+            .Where(c => c.Visible)
+            .OrderBy(c => c.DisplayIndex)
+            .ToList();
+
+        foreach (var col in columns)
+            snapshot.Columns.Add(new NotesListColumn(col.Name, col.HeaderText,
+                col.DefaultCellStyle.Alignment == DataGridViewContentAlignment.MiddleRight, col.Width));
+
+        foreach (DataGridViewRow row in dataGridNotes.Rows)
+            snapshot.Rows.Add(columns.Select(c => row.Cells[c.Index].FormattedValue?.ToString() ?? "").ToArray());
+
+        return snapshot;
     }
 
     private void GridSelectFirstElement(bool skipSelectionChanged = true)
