@@ -35,6 +35,7 @@ ClientWin/
 │     FactoryViewsWinForms.cs – implementación WinForms de la factory
 │     Store.cs              – estado global, mediador entre controladores, acceso a Service
 │     KNoteScriptLibrary.cs – funciones expuestas al motor de scripting KntScript
+│     Reports/              – informes imprimibles y exportación CSV (ver "Informes imprimibles")
 ├── Views/                  – Forms de WinForms (uno o varios `IView*` implementados por Form)
 ├── Utils/, Resources/, AutoKntScripts/, Properties/, Log/
 ```
@@ -139,7 +140,8 @@ public interface IViewSelector<TItem> : IViewEmbeddable { ... }
 ```
 
 Más interfaces específicas de un caso de uso concreto: `IViewKNoteManagement`, `IViewPostIt<T>`,
-`IViewChat`, `IViewServerCOM`, `IViewHeavyProcess`.
+`IViewChat`, `IViewServerCOM`, `IViewHeavyProcess`, `IViewNotesSelector` (`IViewSelector<NoteMinimalDto>` +
+`INotesListSnapshotProvider`, ver "Informes imprimibles").
 
 `IFactoryViews` (`Core/IFactoryViews.cs`) históricamente declaraba **una sobrecarga de `View(...)` por cada
 Ctrl concreto** (resolución por el tipo estático del controlador), más un par de vistas auxiliares de
@@ -372,6 +374,58 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   `Utils/AppIcon`: `KntForm` lo aplica como icono de ventana en `OnLoad` (`WindowIcon`, que una vista sobrescribe
   si su ventana significa otra cosa, p. ej. `AppInfoAlarmsForm`), así que **no** se asigna `Icon` en el
   diseñador (dejaría una copia del `.ico` en cada `.resx`).
+
+## Informes imprimibles y exportación (`Core/Reports`)
+
+Los informes son **HTML + CSS** que se muestran en una ventana de previsualización con WebView2, desde la que
+se imprimen (diálogo de impresión de Chromium, con su propia vista previa y "Guardar como PDF") o se guardan
+como PDF (`PrintToPdfAsync`). No hay `PrintDocument`/GDI+ ni librerías de PDF.
+
+- **Modelo y renderizado (lógica pura, testeada en `ClientWin.Tests`)**: un generador construye un
+  `ReportDocument` (título, cabecera, metadatos, cuerpo HTML, `Orientation`, `Layout` `Report`/`Book`,
+  `ResolvePageReferences`) y `ReportHtml.Render` lo convierte en la página completa: hoja de estilo
+  incrustada (`Resources/KNoteReport.css` o `KNoteBook.css`, `EmbeddedResource` con `LogicalName` en el
+  csproj), `@page` (A4, orientación, cabecera de página y numeración con cajas de margen) y, en los
+  informes, la banda de cabecera. Generadores existentes: `NotesListReport` (lista, horizontal),
+  `NoteDetailReport` + `NoteDetailReportData` (detalle de nota, vertical), `NotesBook` (lista como libro),
+  y `NotesListCsv` (exportación CSV, sin previsualización). `ReportFileName` propone nombres de fichero y la
+  carpeta inicial de los diálogos (`AppUserState.Reports.LastExportFolder`, compartida por PDF y CSV).
+- **Datos de la lista de notas "tal como se ve"**: el orden, las columnas visibles (vista compacta,
+  `HiddenColumns`) y el filtro de texto en memoria **solo existen en la vista**, así que
+  `NotesSelectorForm` los entrega como `NotesListSnapshot` (`INotesListSnapshotProvider`, combinada en
+  `IViewNotesSelector`; textos de celda tal como los formatea el grid y `NoteIds` en orden). El origen de la
+  lista (carpeta, búsqueda o filtro, con nombres resueltos) es `NotesListContext`, construido por
+  `KNoteManagementCtrl.GetNotesListContextAsync`. Las descripciones se convierten a HTML con
+  `NoteDetailReportData.RenderDescription` (mismas reglas que el editor; los recursos se apuntan al host
+  virtual `KntConst.VirtualHostNameToFolderMapping`). Las trazas se resuelven con `Core/TraceNoteRows`
+  (compartido con `NoteEditorForm`).
+- **Previsualización**: `ReportPreviewCtrl.Show(Store, report, resourcesRootPath)` abre `ReportPreviewForm`.
+  **Un informe nuevo no necesita vista ni Ctrl nuevos**: generador puro en `Core/Reports` (con tests) +
+  llamada a `ReportPreviewCtrl.Show` desde el Ctrl del caso de uso. Todo texto del usuario va por
+  `ReportHtml.Encode`; el que acaba en una caja de margen (`content: "..."`), por `ReportHtml.CssString`
+  (escapa también `<`/`>`: va dentro de `<style>`).
+
+Particularidades de WebView2/Chromium que motivan el diseño de `ReportPreviewForm` (no las deshagas):
+
+- **Nada modal tras un `await` de WebView2.** La continuación de `await PrintToPdfAsync(...)`,
+  `EnsureCoreWebView2Async(...)`, etc. se ejecuta **en línea dentro de la devolución de llamada de
+  WebView2**; un `MessageBox` ahí abre un bucle de mensajes anidado que WebView2 no admite y el proceso
+  muere sin excepción .NET (fail-fast `0x80000003` en `EmbeddedBrowserWebView.dll`). Antes de cualquier
+  diálogo, `await LeaveWebView2CallbackAsync()` (un `Task.Yield()` que encola el resto en el contexto de
+  WinForms).
+- **`DefaultBackgroundColor` blanco**: el motor de impresión pinta los márgenes de página del PDF con ese
+  color, no con el fondo del documento (con gris salían bordes grises). El gris de "escritorio" de la
+  previsualización lo pone el CSS (`@media screen`).
+- **HTML servido desde memoria** (`WebResourceRequested` sobre `https://knote.report/`), no
+  `NavigateToString` (límite de 2 MB). Scripts de página desactivados (las descripciones las escribe el
+  usuario); los enlaces solo se abren fuera si son http/https/mailto.
+- **Números de página de un índice**: Chromium soporta cajas de margen (`@top-right`, `counter(page)`,
+  `counter(pages)`) y páginas con nombre (`page: front`), pero **no** `target-counter()`. Por eso un
+  informe con `ResolvePageReferences` se pagina en dos pasadas: se imprime a un PDF en memoria
+  (`PrintToPdfStreamAsync`), `PdfNamedDestinations` lee de él en qué página quedó cada destino de enlace
+  interno (`<a href="#id">` → elemento con ese `id`) y `ReportHtml.FillPageReferences` rellena los
+  marcadores `ReportHtml.PageReference(id)` antes de mostrar la versión final. Los marcadores tienen ancho
+  fijo para que rellenarlos no cambie la paginación.
 
 ## Tests (`ClientWin.Tests`)
 

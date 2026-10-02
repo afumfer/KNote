@@ -75,6 +75,33 @@ Probar al menos a 100 % y a 200 %, y, si hay dos monitores con escalas distintas
 - [ ] En un PostIt, el icono del menú toma los colores de la barra de título (y el de la caja de la URL en
       modo navegación) y el asa de redimensionar sigue funcionando.
 
+## Impresión y exportación
+
+Los informes se muestran en la previsualización (`ReportPreviewCtrl`/`ReportPreviewForm`, WebView2).
+
+- [ ] File → "Print notes list ..." (y el botón Print de la barra de `KNoteManagementForm`) imprime la
+      lista tal como se ve: mismas columnas visibles (también en vista compacta), mismo orden de filas
+      tras ordenar por otra columna y respetando el filtro de texto de la lista; en horizontal y con todas
+      las columnas dentro de la página. Probar con una carpeta, una búsqueda rápida y un filtro
+      estructurado: la cabecera muestra la ruta de la carpeta o el resumen de la búsqueda/filtro (con
+      nombres de tipo de nota, carpeta y atributos, no identificadores).
+- [ ] File → "Print notes list as book ..." genera portada, índice y un capítulo por nota en el orden de
+      la lista; los números de página del índice coinciden con las páginas reales en el PDF guardado
+      (probar con notas largas, con imágenes y tablas, y con un título que ocupe dos líneas en el índice).
+- [ ] File → "Print selected note details ..." imprime la nota seleccionada (o avisa si no hay ninguna):
+      propiedades, descripción con sus imágenes, atributos, recursos con miniatura de las imágenes,
+      tareas y notas trazadas; nunca el script de la nota ni de sus atributos, ni sus alarmas.
+- [ ] El botón Print del editor de notas (ventana flotante) imprime la nota tal como se ve; tras
+      modificarla sin guardar, el informe muestra el aviso "Unsaved changes".
+- [ ] En la previsualización: **Print ...** abre el diálogo de impresión, **Save as PDF ...** guarda el
+      PDF (márgenes blancos, orientación del informe) y al contestar "Sí" a abrirlo se abre sin que la app
+      se cierre; el zoom funciona y los enlaces de una descripción se abren en el navegador.
+- [ ] File → "Export notes list to CSV ..." propone un nombre según la carpeta/búsqueda/filtro y guarda
+      el mismo contenido que la lista impresa; abierto en Excel con doble clic, las columnas se separan
+      solas, los acentos se ven bien y un topic como "- Accesos rápidos" no sale como `#¿NOMBRE?`.
+- [ ] Con la lista vacía, imprimir/exportar avisan en vez de abrir la previsualización o el diálogo.
+- [ ] Los diálogos de guardar (PDF y CSV) empiezan en la última carpeta usada, también tras reiniciar.
+
 ## Otros
 
 - [ ] Opciones de la aplicación (`OptionsEditorCtrl`) se guardan y se recargan correctamente al
