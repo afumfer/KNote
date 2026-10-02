@@ -1564,6 +1564,57 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         }
     }
 
+    // Exports the notes list as the user is seeing it to a CSV file (same content as PrintNotesList), named
+    // after the folder or search/filter it comes from.
+    public async Task ExportNotesListToCsv()
+    {
+        try
+        {
+            var snapshot = NotesSelectorCtrl.GetDisplayedNotes();
+            if (snapshot.Rows.Count == 0)
+            {
+                View.ShowInfo("There are no notes in the list to export.");
+                return;
+            }
+
+            var context = await GetNotesListContextAsync(snapshot.TextFilter);
+            var fileName = ReportFileName.Sanitize(context.FileNameBase(DateTime.Now)) + ".csv";
+
+            var path = View.PromptForSaveFile("Export notes list to CSV", "CSV file (*.csv)|*.csv",
+                ReportFileName.InitialFolder(Store.State.Reports.LastExportFolder), fileName);
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            using (new WaitCursor())
+                await File.WriteAllTextAsync(path, NotesListCsv.Build(snapshot), NotesListCsv.FileEncoding);
+
+            Store.State.Reports.LastExportFolder = Path.GetDirectoryName(path);
+            NotifyMessage($"Notes list exported to CSV: {path}");
+
+            if (View.ShowInfo($"Notes list exported to CSV ({snapshot.Rows.Count} notes):\r\n{path}\r\n\r\nDo you want to open it now?", "KNote",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                OpenFile(path);
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "ExportNotesListToCsv: {message}", ex.Message);
+            View.ShowInfo($"The notes list could not be exported: {ex.Message}");
+        }
+    }
+
+    private void OpenFile(string path)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogError(ex, "OpenFile {path}: {message}", path, ex.Message);
+            View.ShowInfo($"The file could not be opened: {ex.Message}");
+        }
+    }
+
     // Where the notes currently listed come from (folder, quick search or structured filter), with every
     // name resolved - used to identify the list in its printed report and in its exported file name.
     // textFilter is the in-memory filter the notes list view applies on top (NotesListSnapshot.TextFilter).

@@ -24,13 +24,7 @@ public class ReportPreviewCtrl : CtrlViewBase<IViewBase>
 
     public string LastExportFolder
     {
-        get
-        {
-            var folder = Store.State.Reports.LastExportFolder;
-            return !string.IsNullOrEmpty(folder) && Directory.Exists(folder)
-                ? folder
-                : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        }
+        get { return ReportFileName.InitialFolder(Store.State.Reports.LastExportFolder); }
         set { Store.State.Reports.LastExportFolder = value; }
     }
 

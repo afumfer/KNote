@@ -165,6 +165,21 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         return formReadVar.ShowDialog() == DialogResult.OK ? listVars[0].VarNewValueText : null;
     }
 
+    public string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName)
+    {
+        using var dialog = new SaveFileDialog
+        {
+            Title = title,
+            Filter = filter,
+            AddExtension = true,
+            OverwritePrompt = true,
+            InitialDirectory = initialDirectory,
+            FileName = fileName
+        };
+
+        return dialog.ShowDialog(this) == DialogResult.OK ? dialog.FileName : null;
+    }
+
     #endregion
 
     #region Form events handlers
@@ -265,6 +280,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         else if (menuSel == menuPrintNotesList)
         {
             await _ctrl.PrintNotesList();
+        }
+        else if (menuSel == menuExportNotesListCsv)
+        {
+            await _ctrl.ExportNotesListToCsv();
         }
         else if (menuSel == menuAbout)
         {

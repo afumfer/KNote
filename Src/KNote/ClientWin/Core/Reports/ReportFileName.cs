@@ -9,6 +9,13 @@ public static class ReportFileName
 {
     public const int MaxLength = 100;
 
+    // Folder the save dialogs start in: the one last saved to (AppUserState.Reports.LastExportFolder) while
+    // it still exists, the user's Documents folder otherwise.
+    public static string InitialFolder(string lastExportFolder)
+        => !string.IsNullOrEmpty(lastExportFolder) && Directory.Exists(lastExportFolder)
+            ? lastExportFolder
+            : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
     public static string Sanitize(string text, string fallback = "KNote report")
     {
         if (string.IsNullOrWhiteSpace(text))

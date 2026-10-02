@@ -130,6 +130,10 @@ public interface IViewKNoteManagement : IViewBase
     // Returns the value the user typed, or null if the dialog was canceled.
     string PromptForValue(string label, string caption);
 
+    // Save file dialog, used by KNoteManagementCtrl.ExportNotesListToCsv. filter uses the WinForms
+    // "Description|*.ext" syntax. Returns the chosen path, or null if the dialog was canceled.
+    string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName);
+
     // Raised once this view is actually visible under a running message loop. The app bootstrap
     // (Program.cs) needs this to defer KNoteManagementCtrl.Run() until Application.Run's loop is
     // truly pumping (some notes need it, e.g. WebView2 content), without knowing this view is a
