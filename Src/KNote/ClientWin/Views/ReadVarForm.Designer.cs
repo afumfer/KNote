@@ -70,7 +70,7 @@
             // 
             // panelControls
             // 
-            panelControls.BackColor = Color.White;
+            panelControls.BackColor = SystemColors.Window;
             panelControls.Dock = DockStyle.Fill;
             panelControls.Location = new Point(0, 0);
             panelControls.Name = "panelControls";

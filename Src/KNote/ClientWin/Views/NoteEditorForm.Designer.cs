@@ -695,7 +695,7 @@
             labelExpandContent.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelExpandContent.AutoSize = true;
             labelExpandContent.Font = new Font("Segoe UI", 10F);
-            labelExpandContent.ForeColor = SystemColors.ControlDarkDark;
+            labelExpandContent.ForeColor = SystemColors.GrayText;
             labelExpandContent.Location = new Point(766, 8);
             labelExpandContent.Name = "labelExpandContent";
             labelExpandContent.Size = new Size(21, 19);

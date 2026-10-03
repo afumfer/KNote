@@ -173,8 +173,7 @@ namespace KNote.ClientWin.Views
             // panelLine
             //
             panelLine.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            panelLine.BackColor = Color.DarkGray;
-            panelLine.ForeColor = Color.Gray;
+            panelLine.BackColor = SystemColors.ControlDark;
             panelLine.Location = new Point(11, 42);
             panelLine.Name = "panelLine";
             panelLine.Size = new Size(561, 2);

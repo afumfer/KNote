@@ -16,11 +16,15 @@ public static class AppTheme
     // True when the app is running in dark mode (chosen, or followed from Windows with AppColorMode.System).
     public static bool IsDark => Application.IsDarkModeEnabled;
 
-    // Fixes what WinForms' dark mode paints as thick white frames, all of them designer defaults: a TabPage
-    // with UseVisualStyleBackColor (the light visual style background around its content) and the Fixed3D
-    // border (the default of TextBox, ListBox, ListView, TreeView...), which becomes the thin gray
-    // FixedSingle one. Called by KntForm on load, so it only reaches the controls that exist by then. Safe to
-    // call again on the same controls: what it has already changed no longer matches.
+    // Links over a dark background: a LinkLabel's default blue (#0000FF) is barely readable there. Same
+    // color as the links of the Markdown viewer's dark style sheet (KNoteWebViewStyle.css).
+    internal static readonly Color DarkLinkColor = Color.FromArgb(0x4D, 0xAA, 0xFC);
+
+    // Fixes what WinForms' dark mode leaves light, all of them designer defaults: a TabPage with
+    // UseVisualStyleBackColor (the light visual style background around its content), the Fixed3D border
+    // (the default of TextBox, ListBox, ListView, TreeView...), which becomes the thin gray FixedSingle one,
+    // and the LinkLabel's dark blue. Called by KntForm on load, so it only reaches the controls that exist by
+    // then. Safe to call again on the same controls: what it has already changed no longer matches.
     public static void AdjustControlsForDarkMode(Control root)
     {
         if (IsDark)
@@ -33,6 +37,13 @@ public static class AppTheme
         {
             if (control is TabPage tabPage)
                 tabPage.UseVisualStyleBackColor = false;
+
+            if (control is LinkLabel linkLabel)
+            {
+                linkLabel.LinkColor = DarkLinkColor;
+                linkLabel.ActiveLinkColor = DarkLinkColor;
+                linkLabel.VisitedLinkColor = DarkLinkColor;
+            }
 
             switch (control)
             {

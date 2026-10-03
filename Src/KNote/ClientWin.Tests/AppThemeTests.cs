@@ -85,6 +85,20 @@ public class AppThemeTests
     }
 
     [TestMethod]
+    public void AdjustControls_LinkLabel_GetsTheDarkModeLinkColor()
+    {
+        using var form = new Form();
+        var link = new LinkLabel();
+        form.Controls.Add(link);
+
+        AppTheme.AdjustControls(form);
+
+        Assert.AreEqual(AppTheme.DarkLinkColor, link.LinkColor);
+        Assert.AreEqual(AppTheme.DarkLinkColor, link.ActiveLinkColor);
+        Assert.AreEqual(AppTheme.DarkLinkColor, link.VisitedLinkColor);
+    }
+
+    [TestMethod]
     public void AdjustControls_LeavesBorderlessControlsWithoutBorder()
     {
         using var form = new Form();

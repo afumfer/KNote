@@ -156,7 +156,7 @@
             // statusLabel
             // 
             statusLabel.BackColor = SystemColors.Control;
-            statusLabel.ForeColor = SystemColors.ControlDarkDark;
+            statusLabel.ForeColor = SystemColors.GrayText;
             statusLabel.Name = "statusLabel";
             statusLabel.Size = new Size(0, 17);
             // 

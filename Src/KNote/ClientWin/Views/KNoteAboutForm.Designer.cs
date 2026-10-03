@@ -44,7 +44,6 @@ namespace KNote.ClientWin.Views
             // labelVersion
             // 
             labelVersion.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelVersion.ForeColor = Color.Black;
             labelVersion.ImeMode = ImeMode.NoControl;
             labelVersion.Location = new Point(115, 45);
             labelVersion.Margin = new Padding(4, 0, 4, 0);
@@ -57,7 +56,6 @@ namespace KNote.ClientWin.Views
             // labelAppName
             // 
             labelAppName.Font = new Font("Courier New", 18F, FontStyle.Bold);
-            labelAppName.ForeColor = Color.Black;
             labelAppName.ImeMode = ImeMode.NoControl;
             labelAppName.Location = new Point(112, 17);
             labelAppName.Margin = new Padding(4, 0, 4, 0);
@@ -90,7 +88,6 @@ namespace KNote.ClientWin.Views
             // labelInfo
             // 
             labelInfo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            labelInfo.ForeColor = Color.Black;
             labelInfo.ImeMode = ImeMode.NoControl;
             labelInfo.Location = new Point(116, 103);
             labelInfo.Margin = new Padding(4, 0, 4, 0);
@@ -101,7 +98,6 @@ namespace KNote.ClientWin.Views
             // 
             // labelRepository
             // 
-            labelRepository.ForeColor = Color.Black;
             labelRepository.ImeMode = ImeMode.NoControl;
             labelRepository.Location = new Point(116, 62);
             labelRepository.Margin = new Padding(4, 0, 4, 0);
