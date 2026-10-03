@@ -953,7 +953,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         webViewResource.ShowNavigationTools = false;
 
         textDescriptionResource.ReadOnly = true;
-        textDescriptionResource.BackColor = Color.White;
+        textDescriptionResource.BackColor = SystemColors.Window;
 
         kntEditViewTask.ShowStatusInfo = false;
         kntEditViewTask.EnableUrlBox = false;
@@ -1424,7 +1424,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             TextBox t = (TextBox)c;
             t.ReadOnly = true;
-            t.BackColor = Color.White;
+            // Read-only, but with the normal (not the grayed read-only) background: White in light mode,
+            // dark in dark mode. A fixed Color.White left light text over a white box in dark mode.
+            t.BackColor = SystemColors.Window;
             return;
         }
         else if (c is Button)
