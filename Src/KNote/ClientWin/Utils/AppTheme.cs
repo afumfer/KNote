@@ -11,7 +11,12 @@ namespace KNote.ClientWin.Utils;
 public static class AppTheme
 {
     public static void Apply(AppColorMode mode)
-        => Application.SetColorMode(ToSystemColorMode(mode));
+    {
+        Application.SetColorMode(ToSystemColorMode(mode));
+
+        // Menus and toolbars (those with the default ManagerRenderMode) use it in any color mode.
+        ToolStripManager.Renderer = new KntToolStripRenderer();
+    }
 
     // True when the app is running in dark mode (chosen, or followed from Windows with AppColorMode.System).
     public static bool IsDark => Application.IsDarkModeEnabled;

@@ -373,7 +373,9 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   aplicación es `Resources/Icons/KNote.ico` (el diseño de siempre, con fotogramas de 16 a 256 px), expuesto por
   `Utils/AppIcon`: `KntForm` lo aplica como icono de ventana en `OnLoad` (`WindowIcon`, que una vista sobrescribe
   si su ventana significa otra cosa, p. ej. `AppInfoAlarmsForm`), así que **no** se asigna `Icon` en el
-  diseñador (dejaría una copia del `.ico` en cada `.resx`).
+  diseñador (dejaría una copia del `.ico` en cada `.resx`). La marca de check de los menús tampoco es la de
+  WinForms (que copia su bitmap sin escalar y sale recortada a escalados altos): la dibuja
+  `Utils/KntToolStripRenderer` con `KntIcon.Check`, fijado como `ToolStripManager.Renderer` en `AppTheme.Apply`.
 - **Modo oscuro** (`Utils/AppTheme`, ajuste `General.ColorMode`: `Light`/`Dark`/`System`): lo pinta el propio
   WinForms (`Application.SetColorMode`), pero solo en las ventanas creadas después de fijarlo; cambiarlo con
   ventanas abiertas las deja a medio pintar. Por eso se aplica una vez al arrancar (`Program.Main`, tras
