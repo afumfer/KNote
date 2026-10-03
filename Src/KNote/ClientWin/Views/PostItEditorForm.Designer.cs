@@ -176,6 +176,7 @@ namespace KNote.ClientWin.Views
             labelCaption.Margin = new Padding(3, 0, 3, 0);
             labelCaption.Name = "labelCaption";
             labelCaption.Padding = new Padding(34, 0, 4, 0);
+            labelCaption.SingleLine = true;
             labelCaption.Size = new Size(477, 28);
             labelCaption.TabIndex = 1;
             labelCaption.TextAlign = ContentAlignment.MiddleLeft;
