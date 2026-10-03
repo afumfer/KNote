@@ -5,8 +5,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.0.10</Version>
-    <AssemblyVersion>0.0.10.30</AssemblyVersion>
-    <FileVersion>0.0.10.30</FileVersion>
+    <AssemblyVersion>0.0.10.31</AssemblyVersion>
+    <FileVersion>0.0.10.31</FileVersion>
     <ApplicationIcon>Resources\Icons\KNote.ico</ApplicationIcon>
     <!-- Read by ApplicationConfiguration.Initialize(). PerMonitorV2 breaks the embedded (TopLevel = false)
          views when moving to a monitor with a lower scale; with SystemAware Windows rescales the window. -->
