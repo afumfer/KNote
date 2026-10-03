@@ -55,7 +55,17 @@ public partial class ReportPreviewForm : KntForm, IViewBase
         buttonZoomIn.SetKntIcon(KntIcon.ZoomIn);
         buttonClose.SetKntIcon(KntIcon.Close);
 
+        SizeZoomLabel();
         EnableReportActions(false);
+    }
+
+    // labelZoom has a fixed size (so the toolbar doesn't jump as the zoom changes), but the designer's
+    // size isn't scaled with DPI and clips the text at 200%: size it from the widest text it can show.
+    private void SizeZoomLabel()
+    {
+        var textSize = TextRenderer.MeasureText("000 %", labelZoom.Font);
+        labelZoom.Size = new Size(textSize.Width + toolBarReport.LogicalToDeviceUnits(8),
+            textSize.Height + toolBarReport.LogicalToDeviceUnits(4));
     }
 
     #endregion
