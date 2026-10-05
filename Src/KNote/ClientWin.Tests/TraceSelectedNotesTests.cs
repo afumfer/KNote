@@ -28,6 +28,40 @@ public class TraceSelectedNotesTests
 
     private static NoteMinimalDto Note(Guid? noteId = null) => new() { NoteId = noteId ?? Guid.NewGuid(), NoteNumber = 7 };
 
+    [TestMethod]
+    public async Task TraceNoteAsync_RefusedForLackOfRole_StopsTheBatch()
+    {
+        // The rest of the notes would be refused the same way (same role in the same repository): the
+        // whole batch stops at the first refusal instead of collecting one error per note.
+        var job = CreateJob(selectedAreFromSide: true);
+        var service = new FakeKntService();
+        service.NotesFake.GetTraceNotesToAsyncImpl = _ => Task.FromResult(new Result<List<TraceNoteDto>>(new List<TraceNoteDto>()));
+        service.NotesFake.SaveTraceNoteAsyncImpl = (_, _) =>
+        {
+            var refused = new Result<TraceNoteDto> { NotAuthorized = true };
+            refused.AddErrorMessage("The user 'jdoe' needs the role 'Staff'.");
+            return Task.FromResult(refused);
+        };
+
+        var ex = await Assert.ThrowsExactlyAsync<KntNotAuthorizedException>(() => job.TraceNoteAsync(service, Note()));
+
+        StringAssert.Contains(ex.Message, "needs the role 'Staff'");
+        Assert.AreEqual(0, job.Created);
+    }
+
+    [TestMethod]
+    public void ThrowIfNotAuthorized_OnlyThrowsForARefusalForLackOfRole()
+    {
+        var failed = new Result();
+        failed.AddErrorMessage("Some other error");
+        KntNotAuthorizedException.ThrowIfNotAuthorized(failed);
+        KntNotAuthorizedException.ThrowIfNotAuthorized(new Result());
+
+        var refused = new Result { NotAuthorized = true };
+        refused.AddErrorMessage("Not authorized.");
+        Assert.ThrowsExactly<KntNotAuthorizedException>(() => KntNotAuthorizedException.ThrowIfNotAuthorized(refused));
+    }
+
     private static Task<Result<List<TraceNoteDto>>> Existing(params TraceNoteDto[] traceNotes) =>
         Task.FromResult(new Result<List<TraceNoteDto>>(traceNotes.ToList()));
 

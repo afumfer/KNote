@@ -67,6 +67,52 @@ public class KntSecurityContextTests
     }
 
     [TestMethod]
+    public void IsAuthorized_WithoutRequirement_IsAlwaysTrue()
+    {
+        Assert.IsTrue(new KntSecurityContext().IsAuthorized((KntAuthorizeAttribute)null));
+    }
+
+    [TestMethod]
+    public void IsAuthorized_RepositoryRequirement_UsesTheRoleInThatRepository()
+    {
+        var security = new KntSecurityContext();
+        var personal = new FakeKntService();
+        var shared = new FakeKntService();
+        security.SetRepositoryRole(personal, EnumRoles.Admin);
+        security.SetRepositoryRole(shared, EnumRoles.Guest);
+        var staff = new KntAuthorizeAttribute(EnumRoles.Staff);
+
+        Assert.IsTrue(security.IsAuthorized(staff, personal));
+        Assert.IsFalse(security.IsAuthorized(staff, shared));
+        Assert.IsFalse(security.IsAuthorized(staff, new FakeKntService()), "No role in an unknown repository.");
+        Assert.IsTrue(security.IsAuthorized(staff), "No repository: the application role.");
+    }
+
+    [TestMethod]
+    public void IsAuthorized_ApplicationRequirement_UsesTheApplicationRole()
+    {
+        var security = new KntSecurityContext();
+        var shared = new FakeKntService();
+        security.SetRepositoryRole(shared, EnumRoles.Guest);
+        security.SetRepositoryRole(new FakeKntService(), EnumRoles.ProjectManager);
+
+        Assert.IsTrue(security.IsAuthorized(new KntAuthorizeAttribute(EnumRoles.ProjectManager, AuthorizationScope.Application), shared));
+        Assert.IsFalse(security.IsAuthorized(new KntAuthorizeAttribute(EnumRoles.Admin, AuthorizationScope.Application)));
+    }
+
+    [TestMethod]
+    public void IsAuthorized_ByType_ReadsTheTypesAttribute()
+    {
+        var security = new KntSecurityContext();
+        var service = new FakeKntService();
+        security.SetRepositoryRole(service, EnumRoles.Guest);
+
+        Assert.IsTrue(security.IsAuthorized(typeof(KNote.Service.ServicesCommands.KntNotesGetExtendedAsyncCommand), service));
+        Assert.IsFalse(security.IsAuthorized(typeof(KNote.Service.ServicesCommands.KntNotesSaveExtendedAsyncCommand), service));
+        Assert.IsTrue(security.IsAuthorized(typeof(string)), "A type without [KntAuthorize] requires nothing.");
+    }
+
+    [TestMethod]
     public void RemoveRepository_ForgetsItsRole()
     {
         var security = new KntSecurityContext();

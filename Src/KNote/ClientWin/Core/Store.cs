@@ -41,6 +41,11 @@ public class Store
     // How AppUserName signed in, and its role in each linked repository (see AuthenticateRepositoryAsync).
     public KntSecurityContext Security { get; } = new();
 
+    // How a refused use case is reported to the user (see CtrlBase.CheckAccess), without creating the
+    // refused controller's view. Program sets it to a message box; null (only logged) until then, so a
+    // Store built elsewhere (tests) never blocks on a dialog nobody can close.
+    public Action<string> AccessDeniedNotifier { get; set; }
+
     public string ComputerName { get; set; }
 
     public Version AppVersion { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
@@ -383,10 +388,11 @@ public class Store
                 if (com is PostItEditorCtrl postIt && postIt.ControllerState == EControllerState.Started)
                     await postIt.SaveModel();
 
+                // A note open in consult mode can't be saved: skipped without a word (see NoteEditorCtrl).
                 if (com is NoteEditorCtrl)
                 {
                     var comNote = (NoteEditorCtrl)com;
-                    if (comNote.EditMode)
+                    if (comNote.EditMode && !comNote.ConsultMode)
                         await comNote.SaveModel();
                 }
             }
@@ -422,7 +428,7 @@ public class Store
                     var comNote = (NoteEditorCtrl)com;
                     if (comNote.ServiceRef.IdServiceRef == serviceId)
                     {
-                        if (comNote.EditMode)
+                        if (comNote.EditMode && !comNote.ConsultMode)
                         {
                             await comNote.SaveModel();                                
                             stackNotes.Push(comNote);
@@ -479,21 +485,6 @@ public class Store
             return null;
     }
 
-    /// <summary>
-    /// Checks whether the current Windows user (AppUserName) has the Admin role in the given
-    /// repository's Users table. Used to gate the repository administration tabs (Users, Note types,
-    /// Attributes) in RepositoryEditorCtrl/RepositoryEditorForm.
-    /// </summary>
-    public async Task<bool> IsCurrentUserAdminAsync(IKntService service)
-    {
-        var userDto = (await service.Users.GetByUserNameAsync(this.AppUserName)).Entity;
-        if (userDto?.RoleDefinition == null)
-            return false;
-
-        return userDto.RoleDefinition
-            .Split(',', StringSplitOptions.TrimEntries)
-            .Contains(nameof(EnumRoles.Admin));
-    }
 
     /// <summary>
     /// Decides whether the session's user (AppUserName) can use a repository before it is linked, and
@@ -557,6 +548,39 @@ public class Store
     /// the repository management screen). A user that has lost every role there keeps the repository
     /// linked, without a role (every command is then refused).
     /// </summary>
+    public void NotifyAccessDenied(string message)
+    {
+        Logger?.LogInformation("Access denied: {message}", message);
+        AccessDeniedNotifier?.Invoke(message);
+    }
+
+    /// <summary>
+    /// Running code (KntScript, C#, Python, JavaScript, a natural language request, a shell command) needs
+    /// the ProjectManager role, application-wide: a script may touch any repository, and what it does
+    /// there is still authorized by the Service layer with the user's role in each one. Every way of
+    /// running code goes through the Run*/ExecuteCommand methods below, which check this first (or calls
+    /// CheckCanRunScripts itself, see there).
+    /// </summary>
+    public static readonly KntAuthorizeAttribute RunScriptsRequirement = new(EnumRoles.ProjectManager, AuthorizationScope.Application);
+
+    public bool CanRunScripts => Security.IsAuthorized(RunScriptsRequirement);
+
+    // False (and the user told, unless silent) when the user can't run code. Also called by the few use cases
+    // that run a KntScript engine of their own: the KNote assistants of the catalog (KNoteAIAssistantCtrl,
+    // NoteEditorCtrl), whose script is code like any other.
+    public bool CheckCanRunScripts(bool silent = false)
+    {
+        if (CanRunScripts)
+            return true;
+
+        var message = $"Running scripts requires the role '{KntConst.Roles[RunScriptsRequirement.MinimumRole]}'.";
+        if (silent)
+            Logger?.LogInformation("Access denied: {message}", message);
+        else
+            NotifyAccessDenied(message);
+        return false;
+    }
+
     public async Task RefreshRepositoryRoleAsync(IKntService service)
     {
         service.ResetCurrentUser();
@@ -681,6 +705,9 @@ public class Store
 
     public async Task RunCode(NoteDto note, bool runInNewTask = true, CtrlBase caller = null)
     {
+        if (!CheckCanRunScripts())
+            return;
+
         var ct = note.GetContentTypeExt();
         if (ct == null || string.IsNullOrEmpty(ct.ForScript))
             return;
@@ -781,7 +808,7 @@ public class Store
     // that, instead of leaving it sitting there for the user to close by hand.
     public void RunKntSCode(string code)
     {
-        if (string.IsNullOrEmpty(code))
+        if (string.IsNullOrEmpty(code) || !CheckCanRunScripts())
             return;
 
         var inOutDevice = new InOutDeviceForm();
@@ -797,7 +824,7 @@ public class Store
     // cs/py/js/knt, none of which carry state between executions either.
     public async Task RunNaturalLanguageCode(string prompt)
     {
-        if (string.IsNullOrEmpty(prompt))
+        if (string.IsNullOrEmpty(prompt) || !CheckCanRunScripts())
             return;
 
         var assistantCtrl = new KNoteAIAssistantCtrl(this);
@@ -842,6 +869,9 @@ public class Store
     // note's script type doesn't support it instead of silently doing nothing.
     public async Task<bool> RunCodeInStdOutConsole(NoteDto note, CtrlBase caller = null)
     {
+        if (!CheckCanRunScripts())
+            return false;
+
         var ct = note.GetContentTypeExt();
         if (ct == null || !SupportsStdOutConsole(ct.ForScript))
             return false;
@@ -878,6 +908,9 @@ public class Store
     // runCommandTemplate gets the generated file name via {0} (e.g. "dotnet run {0}", "python {0}").
     private (string, string) RunScriptCode(string code, string fileExtension, string runCommandTemplate, bool redirectStandardOut)
     {
+        if (!CheckCanRunScripts())
+            return ("", "Not authorized to run scripts.");
+
         string tempDir = Path.GetTempPath();
         string nameFile = $"kntTmpCodeFile_{Guid.NewGuid().ToString()}.{fileExtension}";
         string tempFullFileName = Path.Combine(tempDir, nameFile);
@@ -893,6 +926,9 @@ public class Store
 
     public (string, string) ExecuteCommand(string command, string dir, bool redirectStandardOut = true)
     {
+        if (!CheckCanRunScripts())
+            return ("", "Not authorized to run commands.");
+
         try
         {
             var process = new Process

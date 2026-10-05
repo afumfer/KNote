@@ -2,6 +2,7 @@
 
 using KNote.Model;
 using KNote.ClientWin.Utils;
+using KNote.Service.Core;
 
 namespace KNote.ClientWin.Core;
 
@@ -67,13 +68,75 @@ abstract public class CtrlBase : IDisposable
         return new Result<EControllerResult>(EControllerResult.Executed);
     } 
 
+    #region Authorization
+
+    /// <summary>
+    /// The role this use case requires, declared with [KntAuthorize] on the controller class - the KNote
+    /// counterpart of ASP.NET Core's [Authorize] on a controller. Null (no attribute) means no requirement:
+    /// that is how a controller included in another one (a selector, a tab of the repository editor...)
+    /// leaves the decision to the controller that includes it. A controller whose requirement depends on
+    /// its state overrides this (see RepositoryEditorCtrl and its EditorMode). The finer-grained operations
+    /// of a use case (saving, deleting...) are authorized by the Service layer, on each command.
+    /// </summary>
+    protected virtual KntAuthorizeAttribute RequiredAuthorization
+        => GetType().GetCustomAttribute<KntAuthorizeAttribute>(inherit: false);
+
+    /// <summary>
+    /// The repository a Repository-scoped requirement is checked against: the user's role is per
+    /// repository. Editors return the service they work on (see CtrlEditorBase).
+    /// </summary>
+    protected virtual IKntService AuthorizationResource => null;
+
+    /// <summary>
+    /// False when CheckPreconditions refused to start this controller: its view must not be shown.
+    /// </summary>
+    public bool PreconditionsMet { get; private set; } = true;
+
+    /// <summary>
+    /// Whether the user meets this use case's requirement, without telling the user anything (e.g. to
+    /// skip a use case started automatically, such as a panel reopened at startup).
+    /// </summary>
+    public bool IsAuthorized()
+        => Store.Security.IsAuthorized(RequiredAuthorization, AuthorizationResource);
+
+    /// <summary>
+    /// Checks this use case's requirement before it starts: if the user doesn't meet it, tells the user
+    /// (Store.NotifyAccessDenied) and finalizes the controller. Run() calls it; a controller that doesn't
+    /// start through Run() calls it first thing in its own entry point.
+    /// </summary>
+    public bool CheckAccess()
+    {
+        if (IsAuthorized())
+            return true;
+
+        PreconditionsMet = false;
+        Store.NotifyAccessDenied(AccessDeniedMessage(RequiredAuthorization));
+        Finalize();
+        return false;
+    }
+
+    private string AccessDeniedMessage(KntAuthorizeAttribute requirement)
+    {
+        var roleName = KntConst.Roles[requirement.MinimumRole];
+        var useCase = string.IsNullOrEmpty(ControllerName) ? "This option" : $"'{ControllerName}'";
+        var repositoryAlias = AuthorizationResource?.RepositoryRef?.Alias;
+
+        return requirement.Scope == AuthorizationScope.Repository && repositoryAlias != null
+            ? $"{useCase} requires the role '{roleName}' in the repository '{repositoryAlias}'."
+            : $"{useCase} requires the role '{roleName}'.";
+    }
+
+    #endregion
+
     protected virtual Result<EControllerResult> CheckPreconditions()
     {
-        // TODO: In the future, generic rules will be implemented for all controllers.
-        //       These rules can be overwritten or supplemented in derived classes.
-        //       For now, the base class preconditions always return success.
-                
-        return new Result<EControllerResult>(EControllerResult.Executed); 
+        var result = new Result<EControllerResult>(EControllerResult.Executed);
+        if (!CheckAccess())
+        {
+            result = new Result<EControllerResult>(EControllerResult.Error);
+            result.AddErrorMessage("Access denied.");
+        }
+        return result;
     }
 
     protected virtual Result<EControllerResult> OnFinalized() 
@@ -97,8 +160,10 @@ abstract public class CtrlBase : IDisposable
             }
         }
         else
-        {                
-            OnStateControllerChanged(EControllerState.Error);
+        {
+            // Refused by CheckAccess: already finalized.
+            if (PreconditionsMet)
+                OnStateControllerChanged(EControllerState.Error);
             return result;
         }
 

@@ -17,7 +17,7 @@ public class StoreRunJsCodeTests
     {
         try
         {
-            var (result, error) = TestStoreFactory.CreateEmpty().ExecuteCommand("node --version", Path.GetTempPath());
+            var (result, error) = TestStoreFactory.CreateEmpty().GrantAdmin().ExecuteCommand("node --version", Path.GetTempPath());
             return string.IsNullOrEmpty(error);
         }
         catch
@@ -35,7 +35,7 @@ public class StoreRunJsCodeTests
             return;
         }
 
-        var store = TestStoreFactory.CreateEmpty();
+        var store = TestStoreFactory.CreateEmpty().GrantAdmin();
 
         var (result, error) = store.RunJsCode("console.log('KNote-js-ok')", redirectStandardOut: true);
 

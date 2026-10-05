@@ -109,6 +109,12 @@ public class MessagesManagementCtrl : CtrlBase
         }
     }
 
+    // The repositories where the user's role allows a use case (a controller or a Service command type,
+    // see KntSecurityContext.IsAuthorized). This runs on a timer, so the rest are skipped without a word:
+    // e.g. a Guest gets neither PostIts reopened nor alarms processed in that repository.
+    public List<ServiceRef> RepositoriesAuthorizedFor(Type useCase)
+        => Store.GetAllServiceRef().Where(s => Store.Security.IsAuthorized(useCase, s.Service)).ToList();
+
     // Every repository is processed on its own: one that fails (e.g. a SQL Server not reachable
     // yet at startup) is logged and skipped, without preventing the rest from being processed.
     private async void VisibleWindows()
@@ -117,7 +123,7 @@ public class MessagesManagementCtrl : CtrlBase
             execAutoSave = false;
         try
         {
-            foreach (var serviceRef in Store.GetAllServiceRef())
+            foreach (var serviceRef in RepositoriesAuthorizedFor(typeof(PostItEditorCtrl)))
             {
                 try
                 {
@@ -145,7 +151,8 @@ public class MessagesManagementCtrl : CtrlBase
             execAutoSave = false;
         try
         {
-            foreach (var serviceRef in Store.GetAllServiceRef())
+            // Checking the alarms also updates them (KntNotesGetAlarmNotesIdAsyncCommand's role).
+            foreach (var serviceRef in RepositoriesAuthorizedFor(typeof(KNote.Service.ServicesCommands.KntNotesGetAlarmNotesIdAsyncCommand)))
             {
                 try
                 {

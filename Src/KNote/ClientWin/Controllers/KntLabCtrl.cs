@@ -1,7 +1,9 @@
 ﻿using KNote.ClientWin.Core;
+using KNote.Model;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Admin, AuthorizationScope.Application)]
 public class KntLabCtrl : CtrlBase
 {
     #region  Constructor
@@ -28,6 +30,10 @@ public class KntLabCtrl : CtrlBase
 
     public void ShowLabView()
     {
+        // Refused by Run() (CheckPreconditions): already finalized, nothing to show.
+        if (!PreconditionsMet)
+            return;
+
         LabView.ShowView();
     }
 

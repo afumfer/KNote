@@ -22,7 +22,7 @@ public class InteractiveScriptSessionTests
     {
         try
         {
-            var (result, error) = TestStoreFactory.CreateEmpty().ExecuteCommand($"{command} --version", Path.GetTempPath());
+            var (result, error) = TestStoreFactory.CreateEmpty().GrantAdmin().ExecuteCommand($"{command} --version", Path.GetTempPath());
             return string.IsNullOrEmpty(error);
         }
         catch

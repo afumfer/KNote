@@ -1,3 +1,4 @@
+using System.Reflection;
 using KNote.Model;
 using KNote.Service.Core;
 
@@ -53,6 +54,30 @@ public class KntSecurityContext
         var role = GetRepositoryRole(service);
         return role == null ? "no role" : KntConst.Roles[role.Value];
     }
+
+    /// <summary>
+    /// Whether the user meets a [KntAuthorize] requirement: no requirement is always met; an Application
+    /// one is checked against ApplicationRole; a Repository one against the user's role in that repository
+    /// (against ApplicationRole when there is no repository yet, e.g. a note editor before loading a note).
+    /// </summary>
+    public bool IsAuthorized(KntAuthorizeAttribute requirement, IKntService repository = null)
+    {
+        if (requirement == null)
+            return true;
+
+        var role = requirement.Scope == AuthorizationScope.Repository && repository != null
+            ? GetRepositoryRole(repository)
+            : ApplicationRole;
+
+        return role >= requirement.MinimumRole;
+    }
+
+    /// <summary>
+    /// Whether the user meets the requirement a type declares with [KntAuthorize]: a controller (its use
+    /// case) or a Service command (e.g. to know beforehand whether saving a note will be allowed).
+    /// </summary>
+    public bool IsAuthorized(Type type, IKntService repository = null)
+        => IsAuthorized(type.GetCustomAttribute<KntAuthorizeAttribute>(inherit: false), repository);
 
     /// <summary>
     /// What the use cases that don't belong to one repository (Options, AI providers, creating a

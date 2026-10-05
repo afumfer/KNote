@@ -229,7 +229,11 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         try
         {
             var noteEditor = new NoteEditorCtrl(_ctrl.Store);
-            await noteEditor.NewModel(_ctrl.Store.GetActiveOrDefaultService());
+            if (!await noteEditor.NewModel(_ctrl.Store.GetActiveOrDefaultService()))
+            {
+                noteEditor.Finalize();
+                return;
+            }
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
             noteEditor.Model.Description = _ctrl.ChatTextMessages.ToString();
             noteEditor.Model.Tags = "[AIAssistant]";

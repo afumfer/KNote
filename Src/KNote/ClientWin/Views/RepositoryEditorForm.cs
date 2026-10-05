@@ -178,15 +178,13 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         }
 
         // Users/Note types/Trace note types/Attributes administration only makes sense for an
-        // already-linked repository (Management mode) and only for a repository user with the Admin role.
-        tabPageUsers.Enabled = _ctrl.CurrentUserIsAdmin;
-        tabPageNoteTypes.Enabled = _ctrl.CurrentUserIsAdmin;
-        tabPageTraceNoteTypes.Enabled = _ctrl.CurrentUserIsAdmin;
-        tabPageAttributes.Enabled = _ctrl.CurrentUserIsAdmin;
+        // already-linked repository (Management mode).
+        tabPageUsers.Enabled = _ctrl.AdministrationAvailable;
+        tabPageNoteTypes.Enabled = _ctrl.AdministrationAvailable;
+        tabPageTraceNoteTypes.Enabled = _ctrl.AdministrationAvailable;
+        tabPageAttributes.Enabled = _ctrl.AdministrationAvailable;
 
-        var adminTabsHint = _ctrl.EditorMode != EnumRepositoryEditorMode.Management
-            ? "Available once the repository is linked."
-            : (_ctrl.CurrentUserIsAdmin ? "" : "Requires the Admin role in this repository.");
+        var adminTabsHint = _ctrl.AdministrationAvailable ? "" : "Available once the repository is linked.";
 
         // The tab's content gets disabled along with the tab (see above), so a ToolTip on the
         // TabPage itself is what explains why - it still works when hovering the tab header, since

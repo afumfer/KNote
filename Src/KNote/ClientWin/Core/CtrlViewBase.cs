@@ -38,6 +38,16 @@ abstract public class CtrlViewBase<TView> : CtrlBase
 
     protected abstract TView CreateView();
 
+    // Tells the user why a Service result failed: a refusal for lack of role through Store.NotifyAccessDenied,
+    // like a refused controller (no view needed), anything else through this controller's view.
+    protected void ShowResultError(ResultBase result)
+    {
+        if (result.NotAuthorized)
+            Store.NotifyAccessDenied(result.ErrorMessage);
+        else
+            View.ShowInfo(result.ErrorMessage);
+    }
+
     public override Result<EControllerResult> Run()
     {
         Result<EControllerResult> result;
@@ -45,7 +55,9 @@ abstract public class CtrlViewBase<TView> : CtrlBase
         try
         {
             result = base.Run();
-            View.ShowView();
+            // Refused by CheckPreconditions: the view isn't even created.
+            if (PreconditionsMet)
+                View.ShowView();
         }
         catch (Exception ex)
         {
@@ -63,6 +75,9 @@ abstract public class CtrlViewBase<TView> : CtrlBase
         try
         {
             result = base.Run();
+            if (!PreconditionsMet)
+                return result;
+
             var resultView = View.ShowModalView();
             result = resultView;
         }
@@ -307,6 +322,9 @@ abstract public class CtrlEditorBase<TView, TEntity> : CtrlViewBase<TView>
     }
 
     public bool AutoDBSave { get; set; } = true;
+
+    // An editor's use case is authorized against the repository of the entity it edits.
+    protected override IKntService AuthorizationResource => Service;
 
     #endregion
 

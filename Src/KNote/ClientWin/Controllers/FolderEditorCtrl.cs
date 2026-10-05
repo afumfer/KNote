@@ -5,6 +5,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.ProjectManager)]
 public class FolderEditorCtrl : CtrlNoteEditorBase<IViewEditor<FolderDto>, FolderDto>
 {
     #region Constructor 

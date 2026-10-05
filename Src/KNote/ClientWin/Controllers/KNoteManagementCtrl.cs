@@ -357,7 +357,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 NotifyView.ShowView();
 
                 // TODO: Experimental ---------------------------------
-                if (!string.IsNullOrEmpty(Store.Settings.Connectivity.ChatHub.Url))
+                // Started automatically: skipped without a word for a user who can't use the chat.
+                if (!string.IsNullOrEmpty(Store.Settings.Connectivity.ChatHub.Url) && Store.Security.IsAuthorized(typeof(KntChatCtrl)))
                 {
                     if (!Store.State.Session.ChatHubAutoConnectDisabled)
                     {
@@ -609,6 +610,13 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             if (note == null)
                 return;
 
+            // Fired by an alarm: skipped (and logged) without a word for a user who can't run scripts.
+            if (!Store.CanRunScripts)
+            {
+                Store.Logger?.LogInformation("Script alarm of note {noteId} skipped: the user can't run scripts.", e.Entity.NoteId);
+                return;
+            }
+
             await Store.RunCode(note, caller: this);
         }
         catch (Exception ex)
@@ -624,15 +632,18 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     // Kept alive for the whole session once first needed (either the user opens it from the menu, or
     // an AppInfo alarm fires) so it keeps accumulating rows in the background - see AppInfoAlarmsCtrl.
     private AppInfoAlarmsCtrl _appInfoAlarmsCtrl;
+    // Null when the user may not use it (Run() refused it, and told the user): it is tried again next time.
     public AppInfoAlarmsCtrl AppInfoAlarmsCtrl
     {
         get
         {
             if (_appInfoAlarmsCtrl == null)
             {
-                _appInfoAlarmsCtrl = new AppInfoAlarmsCtrl(Store);
-                _appInfoAlarmsCtrl.OpenNoteRequested += _appInfoAlarmsCtrl_OpenNoteRequested;
-                _appInfoAlarmsCtrl.Run();
+                var appInfoAlarmsCtrl = new AppInfoAlarmsCtrl(Store);
+                appInfoAlarmsCtrl.OpenNoteRequested += _appInfoAlarmsCtrl_OpenNoteRequested;
+                appInfoAlarmsCtrl.Run();
+                if (appInfoAlarmsCtrl.PreconditionsMet)
+                    _appInfoAlarmsCtrl = appInfoAlarmsCtrl;
             }
             return _appInfoAlarmsCtrl;
         }
@@ -640,15 +651,19 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     public void ShowAppInfoAlarms()
     {
-        AppInfoAlarmsCtrl.Activate();
+        AppInfoAlarmsCtrl?.Activate();
     }
 
     // Startup-only: see the call site in OnInitialized(). Not used by ShowAppInfoAlarms() (the menu
     // option) - opening the panel by hand always shows it, empty or not, same as before.
     private async Task ShowAppInfoAlarmsIfAnyPendingAsync()
     {
+        // Started automatically: skipped without a word for a user who can't use the panel.
+        if (!Store.Security.IsAuthorized(typeof(AppInfoAlarmsCtrl)))
+            return;
+
         if (await AppInfoAlarmRowMaintenance.PruneAndHasAnyRowAsync(Store))
-            AppInfoAlarmsCtrl.Activate();
+            AppInfoAlarmsCtrl?.Activate();
     }
 
     private async void _appInfoAlarmsCtrl_OpenNoteRequested(object sender, ControllerEventArgs<ServiceWithNoteId> e)
@@ -686,7 +701,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
             foreach (var message in appInfoMessages)
             {
-                AppInfoAlarmsCtrl.AddOrUpdateRow(new AppInfoAlarmRow
+                AppInfoAlarmsCtrl?.AddOrUpdateRow(new AppInfoAlarmRow
                 {
                     KMessageId = message.KMessageId,
                     NoteId = noteId,
@@ -698,7 +713,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 });
             }
 
-            AppInfoAlarmsCtrl.Activate();
+            AppInfoAlarmsCtrl?.Activate();
         }
         catch (Exception ex)
         {
@@ -1032,12 +1047,23 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             EndDate = DateTime.Now
         };
 
-        var resNoteForSaveTask = (await service.Notes.GetExtendedAsync(SelectedNoteInfo.NoteId)).Entity;
-        resNoteForSaveTask.Tasks.Add(task);
+        var resNoteForSaveTask = await service.Notes.GetExtendedAsync(SelectedNoteInfo.NoteId);
+        if (!resNoteForSaveTask.IsValid)
+        {
+            View.ShowInfo(resNoteForSaveTask.ErrorMessage);
+            return;
+        }
+        resNoteForSaveTask.Entity.Tasks.Add(task);
 
-        var res = (await service.Notes.SaveExtendedAsync(resNoteForSaveTask)).Entity;
-        
-        await OnNoteEditorSaved(res.GetSimpleDto<NoteMinimalDto>());            
+        // Refused (e.g. a Guest in this repository) or failed: the reason is in the result.
+        var res = await service.Notes.SaveExtendedAsync(resNoteForSaveTask.Entity);
+        if (!res.IsValid)
+        {
+            View.ShowInfo(res.ErrorMessage);
+            return;
+        }
+
+        await OnNoteEditorSaved(res.Entity.GetSimpleDto<NoteMinimalDto>());
     }
 
     // A controller whose model could not be loaded (LoadModelById already told the user why) is
@@ -1099,8 +1125,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     public async Task AddNote(IKntService service)
     {
         var noteEditorCtrl = new NoteEditorCtrl(Store);
-        await noteEditorCtrl.NewModel(service);
-        noteEditorCtrl.Run();
+        if (await noteEditorCtrl.NewModel(service))
+            noteEditorCtrl.Run();
+        else
+            noteEditorCtrl.Finalize();
     }
 
     public async Task AddNotePostIt()
@@ -1320,6 +1348,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             HeavyProcessCtrl.UpdateProcessName($"Moving notes to folder '{folderName}'.");
             await HeavyProcessCtrl.Exec2(MoveSelectedNotesAction, selectedNotes, folderId);            
         }
+        catch (KntNotAuthorizedException ex)
+        {
+            View.ShowInfo(ex.Message);
+        }
         catch (TaskCanceledException)
         {
             //View.ShowInfo("The operation has been canceled.");
@@ -1341,7 +1373,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         var service = new ServiceRef(SelectedServiceRef.RepositoryRef, SelectedServiceRef.UserIdentityName).Service;
         foreach (var n in selectedNotes)
         {
-            await service.Notes.UtilPatchFolderAsync(n.NoteId, newFolderId);
+            KntNotAuthorizedException.ThrowIfNotAuthorized(await service.Notes.UtilPatchFolderAsync(n.NoteId, newFolderId));
 
             index++;
             var percentage = (double)index / selectedNotes.Count;
@@ -1396,6 +1428,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 heavyProcessCtrl.UpdateProcessName($"Updating tags. {labelInput} {tag} .");
                 await heavyProcessCtrl.Exec3(ChangeTagsAction, action, selectedNotes, tag);
             }
+            catch (KntNotAuthorizedException ex)
+            {
+                View.ShowInfo(ex.Message);
+            }
             catch (TaskCanceledException)
             {
                 //View.ShowInfo("The operation has been canceled.");
@@ -1419,10 +1455,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         foreach (var note in selectedNotes)
         {
-            if (action == EnumChangeTag.Add)
-                await service.Notes.UtilPatchChangeTagsAsync(note.NoteId, "", tag);
-            else
-                await service.Notes.UtilPatchChangeTagsAsync(note.NoteId, tag, "");
+            var res = action == EnumChangeTag.Add
+                ? await service.Notes.UtilPatchChangeTagsAsync(note.NoteId, "", tag)
+                : await service.Notes.UtilPatchChangeTagsAsync(note.NoteId, tag, "");
+            KntNotAuthorizedException.ThrowIfNotAuthorized(res);
 
             index++;
             var percentage = (double)index / selectedNotes.Count;
@@ -1474,6 +1510,11 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             heavyProcessCtrl.ReportProgress = new Progress<KNoteProgress>(ReportProgressChangeTags);
             heavyProcessCtrl.UpdateProcessName($"Tracing selected notes {direction} {traceEditor.RelatedNoteDisplay} .");
             await heavyProcessCtrl.Exec2(TraceSelectedNotesAction, job, selectedNotes);
+        }
+        catch (KntNotAuthorizedException ex)
+        {
+            View.ShowInfo(ex.Message);
+            return;
         }
         catch (TaskCanceledException)
         {
@@ -1585,14 +1626,14 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 return;
             }
 
-            ReportDocument report;
-            using (new WaitCursor())
+            var result = await ReportPreviewCtrl.ShowAsync(Store, SelectedServiceRef?.Service, async () =>
             {
-                var context = await GetNotesListContextAsync(snapshot.TextFilter);
-                report = NotesListReport.Build(snapshot, context, DateTime.Now);
-            }
-
-            var result = ReportPreviewCtrl.Show(Store, report);
+                using (new WaitCursor())
+                {
+                    var context = await GetNotesListContextAsync(snapshot.TextFilter);
+                    return NotesListReport.Build(snapshot, context, DateTime.Now);
+                }
+            });
             if (!result.IsValid)
                 View.ShowInfo($"The notes list could not be printed: {result.ErrorMessage}");
         }
@@ -1617,15 +1658,15 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             }
 
             var serviceRef = SelectedServiceRef;
-            ReportDocument report;
-            using (new WaitCursor())
+            var result = await ReportPreviewCtrl.ShowAsync(Store, serviceRef?.Service, async () =>
             {
-                var context = await GetNotesListContextAsync(snapshot.TextFilter);
-                var chapters = await NotesBook.LoadChaptersAsync(Store, serviceRef, snapshot.NoteIds);
-                report = NotesBook.Build(context, chapters, DateTime.Now, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
-            }
-
-            var result = ReportPreviewCtrl.Show(Store, report, serviceRef.RepositoryRef?.ResourcesContainerRootPath);
+                using (new WaitCursor())
+                {
+                    var context = await GetNotesListContextAsync(snapshot.TextFilter);
+                    var chapters = await NotesBook.LoadChaptersAsync(Store, serviceRef, snapshot.NoteIds);
+                    return NotesBook.Build(context, chapters, DateTime.Now, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+                }
+            }, serviceRef?.RepositoryRef?.ResourcesContainerRootPath);
             if (!result.IsValid)
                 View.ShowInfo($"The notes book could not be printed: {result.ErrorMessage}");
         }
@@ -1649,21 +1690,19 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         try
         {
             var serviceRef = SelectedServiceRef;
-            ReportDocument report;
-            using (new WaitCursor())
+            var noteId = SelectedNoteInfo.NoteId;
+            var result = await ReportPreviewCtrl.ShowAsync(Store, serviceRef.Service, async () =>
             {
-                var response = await serviceRef.Service.Notes.GetExtendedAsync(SelectedNoteInfo.NoteId);
-                if (!response.IsValid)
+                using (new WaitCursor())
                 {
-                    View.ShowInfo(response.ErrorMessage);
-                    return;
+                    var response = await serviceRef.Service.Notes.GetExtendedAsync(noteId);
+                    if (!response.IsValid)
+                        throw new InvalidOperationException(response.ErrorMessage);
+
+                    var data = await NoteDetailReportData.CreateAsync(Store, serviceRef, response.Entity, unsavedChanges: false);
+                    return NoteDetailReport.Build(data, DateTime.Now);
                 }
-
-                var data = await NoteDetailReportData.CreateAsync(Store, serviceRef, response.Entity, unsavedChanges: false);
-                report = NoteDetailReport.Build(data, DateTime.Now);
-            }
-
-            var result = ReportPreviewCtrl.Show(Store, report, serviceRef.RepositoryRef?.ResourcesContainerRootPath);
+            }, serviceRef.RepositoryRef?.ResourcesContainerRootPath);
             if (!result.IsValid)
                 View.ShowInfo($"The note could not be printed: {result.ErrorMessage}");
         }
@@ -1674,55 +1713,16 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         }
     }
 
-    // Exports the notes list as the user is seeing it to a CSV file (same content as PrintNotesList), named
-    // after the folder or search/filter it comes from.
+    // Exports the notes list as the user is seeing it to a CSV file (see NotesListCsvExportCtrl).
     public async Task ExportNotesListToCsv()
     {
-        try
+        var exportCtrl = new NotesListCsvExportCtrl(Store)
         {
-            var snapshot = NotesSelectorCtrl.GetDisplayedNotes();
-            if (snapshot.Rows.Count == 0)
-            {
-                View.ShowInfo("There are no notes in the list to export.");
-                return;
-            }
-
-            var context = await GetNotesListContextAsync(snapshot.TextFilter);
-            var fileName = ReportFileName.Sanitize(context.FileNameBase(DateTime.Now)) + ".csv";
-
-            var path = View.PromptForSaveFile("Export notes list to CSV", "CSV file (*.csv)|*.csv",
-                ReportFileName.InitialFolder(Store.State.Reports.LastExportFolder), fileName);
-            if (string.IsNullOrEmpty(path))
-                return;
-
-            using (new WaitCursor())
-                await File.WriteAllTextAsync(path, NotesListCsv.Build(snapshot), NotesListCsv.FileEncoding);
-
-            Store.State.Reports.LastExportFolder = Path.GetDirectoryName(path);
-            NotifyMessage($"Notes list exported to CSV: {path}");
-
-            if (View.ShowInfo($"Notes list exported to CSV ({snapshot.Rows.Count} notes):\r\n{path}\r\n\r\nDo you want to open it now?", "KNote",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                OpenFile(path);
-        }
-        catch (Exception ex)
-        {
-            Store.Logger?.LogError(ex, "ExportNotesListToCsv: {message}", ex.Message);
-            View.ShowInfo($"The notes list could not be exported: {ex.Message}");
-        }
-    }
-
-    private void OpenFile(string path)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            Store.Logger?.LogError(ex, "OpenFile {path}: {message}", path, ex.Message);
-            View.ShowInfo($"The file could not be opened: {ex.Message}");
-        }
+            Service = SelectedServiceRef?.Service,
+            Snapshot = NotesSelectorCtrl.GetDisplayedNotes(),
+            GetContextAsync = GetNotesListContextAsync
+        };
+        await exportCtrl.ExportAsync();
     }
 
     // Where the notes currently listed come from (folder, quick search or structured filter), with every
@@ -1969,8 +1969,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     {
         var postItEditorCtrl = new PostItEditorCtrl(Store);
         postItEditorCtrl.FolderWithServiceRef = folderWithServiceRef;
-        await postItEditorCtrl.NewModel(folderWithServiceRef.ServiceRef.Service);
-        postItEditorCtrl.Run();
+        if (await postItEditorCtrl.NewModel(folderWithServiceRef.ServiceRef.Service))
+            postItEditorCtrl.Run();
+        else
+            postItEditorCtrl.Finalize();
     }
 
     private void RunKntChatCtrl(bool visibleView = true)

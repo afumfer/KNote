@@ -1,3 +1,4 @@
+using KNote.ClientWin.Tests.Helpers;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
@@ -16,7 +17,7 @@ public class KntServerCOMCtrlTests
     {
         // No AI providers configured, so the inner assistant is not started (no dialog, no network).
         // SaveSettings() is deliberately not called by these tests: it writes the real KNoteData.config.
-        return new KntServerCOMCtrl(new Store(new TestFactoryViews())) { PortName = MissingPort };
+        return new KntServerCOMCtrl(new Store(new TestFactoryViews()).GrantAdmin()) { PortName = MissingPort };
     }
 
     [TestMethod]

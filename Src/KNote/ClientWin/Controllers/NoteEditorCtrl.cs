@@ -12,11 +12,22 @@ using System.Text.Json;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Guest)]
 public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbeddable<NoteExtendedDto>, NoteExtendedDto>
 {
     #region Properties
        
     public bool EditMode { get; set; }
+
+    // Consult mode: the user may read this note but not change it, i.e. lacks the role that saving a note
+    // takes in its repository (the one KntNotesSaveExtendedAsyncCommand declares; a Guest). The Service
+    // layer would refuse the save anyway: this only lets the editor say so up front, skip the autosave and
+    // explain itself instead of showing a refusal when a change is about to be saved.
+    public bool ConsultMode
+        => Service != null && !Store.Security.IsAuthorized(typeof(KNote.Service.ServicesCommands.KntNotesSaveExtendedAsyncCommand), Service);
+
+    public string ConsultModeMessage
+        => $"You can read this note but not change it: your role in the repository '{Service?.RepositoryRef?.Alias}' is '{Store.Security.GetRepositoryRoleName(Service)}'.";
 
     #endregion
 
@@ -165,7 +176,13 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         {
             Service = service;
                 
+            // Refused for a user who can't create notes in this repository (a Guest): said before any editor opens.
             var response = await Service.Notes.NewExtendedAsync();
+            if (!response.IsValid)
+            {
+                ShowResultError(response);
+                return false;
+            }
             Model = response.Entity;
 
             // Evaluate whether to put the following default values in the service layer 
@@ -202,12 +219,30 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         return false;
     }
 
+    protected override Result<EControllerResult> OnInitialized()
+    {
+        var result = base.OnInitialized();
+
+        // Opened in its own window (not the read-only one embedded in KNoteManagement) by a user who can't
+        // change it: said up front, before the user starts typing.
+        if (result.IsValid && !EmbededMode && ConsultMode)
+            View.ShowInfo(ConsultModeMessage);
+
+        return result;
+    }
+
     protected override async Task<bool> SaveModelCore()
     {
         View.RefreshModel();
 
         if (!Model.IsDirty())
             return true;
+
+        if (ConsultMode)
+        {
+            View.ShowInfo($"{ConsultModeMessage} The changes can't be saved.");
+            return false;
+        }
 
         var isNew = (Model.NoteId == Guid.Empty);
                         
@@ -785,14 +820,14 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         {
             View.RefreshModel();
 
-            ReportDocument report;
-            using (new WaitCursor())
+            var result = await ReportPreviewCtrl.ShowAsync(Store, Service, async () =>
             {
-                var data = await NoteDetailReportData.CreateAsync(Store, ServiceRef, Model, unsavedChanges: Model.IsDirty());
-                report = NoteDetailReport.Build(data, DateTime.Now);
-            }
-
-            var result = ReportPreviewCtrl.Show(Store, report, ServiceRef?.RepositoryRef?.ResourcesContainerRootPath);
+                using (new WaitCursor())
+                {
+                    var data = await NoteDetailReportData.CreateAsync(Store, ServiceRef, Model, unsavedChanges: Model.IsDirty());
+                    return NoteDetailReport.Build(data, DateTime.Now);
+                }
+            }, ServiceRef?.RepositoryRef?.ResourcesContainerRootPath);
             if (!result.IsValid)
                 View.ShowInfo($"The note could not be printed: {result.ErrorMessage}");
         }
@@ -831,6 +866,10 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
     public async Task ExecKNoteAssistant()
     {
+        // A KNote assistant is a KntScript script: running it takes the role any script does.
+        if (!Store.CheckCanRunScripts())
+            return;
+
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
         var catalogItem = await Store.GetCatalogItem(assistantServiceRef, KntConst.AssistantTag, "Select KNote assistant");
         if (catalogItem == null)                    

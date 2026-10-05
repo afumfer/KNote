@@ -6,6 +6,7 @@ using System.Text;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Admin, AuthorizationScope.Application)]
 public class KntServerCOMCtrl : CtrlBase, IDisposable
 {
     #region Private fields
@@ -810,6 +811,10 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public void ShowServerCOMView(bool autoCloseCtrlOnViewExit)
     {
+        // Refused by Run() (CheckPreconditions): already finalized, nothing to show.
+        if (!PreconditionsMet)
+            return;
+
         AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;
         ServerCOMView.ShowView();
     }
@@ -817,6 +822,8 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
     // For use in KntScript
     public void ShowServerCOMView()
     {
+        if (!PreconditionsMet)
+            return;
 
         if (ControllerState == EControllerState.Started)
         {
@@ -830,6 +837,9 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
 
     public void VisibleView(bool visible)
     {
+        if (!PreconditionsMet)
+            return;
+
         ServerCOMView.VisibleView(visible);
     }
 

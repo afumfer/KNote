@@ -44,6 +44,8 @@ static class Program
         // Visual styles, text rendering and high DPI mode (SystemAware) come from the csproj.
         ApplicationConfiguration.Initialize();
         Store appStore = new Store(new FactoryViewsWinForms());
+        appStore.AccessDeniedNotifier = message =>
+            KntMessageBox.Show(message, KntConst.AppName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         RegisterGlobalExceptionHandlers(appStore);
         SplashForm splashForm = new SplashForm(appStore);
         Exception loadException = null;

@@ -6,6 +6,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Staff)]
 public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, NoteDto>
 {
     #region Private fields
@@ -141,7 +142,13 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
         {
             Service = service;
 
+            // Refused for a user who can't create notes in this repository (a Guest): said before any PostIt opens.
             var response = await Service.Notes.NewAsync();
+            if (!response.IsValid)
+            {
+                ShowResultError(response);
+                return false;
+            }
             Model = response.Entity;
 
             // Evaluate whether to put the following default values in the service layer 

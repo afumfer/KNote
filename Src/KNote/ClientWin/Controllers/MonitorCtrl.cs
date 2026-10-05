@@ -4,6 +4,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Admin, AuthorizationScope.Application)]
 public class MonitorCtrl : CtrlViewBase<IViewBase>
 {
     #region Constructor 
