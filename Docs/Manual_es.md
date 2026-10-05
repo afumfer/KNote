@@ -19,8 +19,8 @@ La aplicación de escritorio de Windows guarda su configuración en la carpeta `
 
 | Fichero | Qué contiene | Cuándo cambia |
 |---|---|---|
-| `KNoteData.config` | Lo que tú configuras: repositorios, proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat hub y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
-| `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último repositorio y carpeta activos, posición y tamaño de las ventanas, disposición de las listas, paneles visibles y las filas del panel de alarmas. | Mientras usas la aplicación. |
+| `KNoteData.config` | Lo que tú configuras: cómo entras, repositorios, proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat hub y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
+| `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), último repositorio y carpeta activos, posición y tamaño de las ventanas, disposición de las listas, paneles visibles y las filas del panel de alarmas. | Mientras usas la aplicación. |
 
 Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borrar `KNoteData.config` hace que KaNote arranque como si fuera la primera vez: tus bases de datos no se borran, pero se pierde la lista de repositorios y de proveedores de IA.
 
@@ -31,6 +31,41 @@ Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borr
 **Actualización desde una versión anterior.** Las versiones anteriores guardaban todo en un único `KNoteData.config`. La primera vez que arranca esta versión, convierte ese fichero automáticamente en los dos anteriores, conservando todos tus valores (las contraseñas y API keys se conservan, ahora cifradas). Se guarda una copia del fichero antiguo, **sin** contraseñas ni API keys, como `KNoteData.config.v1.bak`.
 
 **Volver a una versión anterior.** Las versiones anteriores no pueden leer los ficheros nuevos y fallarán al arrancar. Para volver: cierra KaNote, guarda en otro sitio una copia del `KNoteData.config` actual, renombra `KNoteData.config.v1.bak` a `KNoteData.config`, borra `KNoteState.config`, arranca la versión anterior y vuelve a introducir tus contraseñas y API keys.
+
+### Acceso, usuarios y roles (aplicación de escritorio)
+
+**Cómo entras.** Por defecto la aplicación de escritorio te identifica con tu **cuenta de Windows**, sin pedirte nada (como la seguridad integrada de SQL Server). En **Options → Sign in** puedes elegir en su lugar **With a KNote user name and password**; el cambio se aplica la próxima vez que arranque KaNote (te ofrece reiniciar). A partir de entonces, KaNote pide un usuario y una contraseña al arrancar, proponiendo el último usuario usado. La ventana de acceso tiene también un enlace **Use my Windows account instead**, que entra con la cuenta de Windows y vuelve a dejar la opción como estaba.
+
+**Cada repositorio tiene sus propios usuarios.** Al arrancar KaNote, y siempre que vinculas o creas un repositorio, se comprueba tu usuario en ese repositorio:
+
+| Situación | Qué pasa |
+|---|---|
+| Estás registrado en él | El repositorio se vincula. Con un usuario de KNote, la contraseña también tiene que coincidir. |
+| No estás registrado en él | La ventana **Register user** te pide el nombre completo y el correo (y una contraseña). Si entras con un usuario de KNote, la contraseña es la del acceso, para que las mismas credenciales abran todos tus repositorios. |
+| Contraseña incorrecta, usuario deshabilitado o registro cancelado | El repositorio no está disponible en esta sesión. Se mantiene en tu configuración y se vuelve a intentar en el siguiente arranque; KaNote te dice el motivo al abrirse la ventana principal. |
+
+Si ninguno de tus repositorios te acepta, KaNote te deja reintentar (volviendo a pedir el usuario, si entras con uno de KNote) o cerrar.
+
+**Roles.** Tu rol es por repositorio, así que puedes ser Admin de tu repositorio personal y Guest en uno compartido. Los roles son jerárquicos: cada uno puede hacer todo lo de los anteriores, y algo más.
+
+| Rol | Qué añade |
+|---|---|
+| **Guest** | Navegar por carpetas y notas, buscar y filtrar, abrir notas para leerlas, vincular y desvincular repositorios, ayuda y "acerca de". |
+| **Staff** | Crear, editar y borrar notas (y sus tareas, recursos, alarmas y notas trazadas), post-its, mover notas y cambiar etiquetas, imprimir y exportar a CSV, alarmas de información de la aplicación, opciones, proveedores de IA, chat y asistente de IA. |
+| **Project manager** | Crear, editar y borrar carpetas, consola de KntScript y ejecutar el código de las notas, asistentes de KNote del catálogo. |
+| **Admin** | Administrar el repositorio (usuarios, tipos de nota, atributos, tipos de traza), crear repositorios, servidor de puerto COM y herramientas del laboratorio. |
+
+Las opciones que no pertenecen a un repositorio (opciones, IA, chat, scripts, crear un repositorio...) usan tu rol más alto entre tus repositorios.
+
+**Quién recibe qué rol.** El primer usuario que se registra en un repositorio donde `adminKNote` sigue siendo el único Admin pasa a ser Admin también: quien crea un repositorio nuevo lo administra. A partir de ahí, los usuarios nuevos se registran como **Guest** hasta que un Admin les sube el rol en **Repository → Users**.
+
+**Dónde se ve.** La barra de estado de la ventana de gestión muestra tu usuario, tu rol en el repositorio activo (cambia al pasar a una carpeta de otro repositorio) y tu rol de aplicación, p. ej. `jdoe · Personal repository: Admin · Application: Admin`. Su tooltip muestra cómo has entrado y tu rol en cada repositorio vinculado.
+
+**Cuando una opción no es para tu rol.** Todos los menús siguen disponibles; elegir uno que tu rol no permite solo te indica qué rol hace falta. Una nota abierta por un Guest se abre para leerla: KaNote lo avisa y los cambios no se pueden guardar. Los procesos automáticos (reabrir post-its, alarmas, alarmas de script) se saltan los repositorios donde tu rol no los permite.
+
+**Actualización desde una versión anterior.** La primera vez que se abre una base de datos con esta versión se actualiza automáticamente: el rol *Public* pasa a llamarse **Guest** (así que los usuarios registrados como *Public* solo pueden leer hasta que un Admin los sube a Staff), la errata *ProjecManager* pasa a **ProjectManager** y el usuario de ejemplo `owner` se borra si nunca se usó. Las versiones anteriores no conocen los nombres nuevos de los roles; guarda una copia de una base de datos compartida antes de abrirla con esta versión.
+
+Estos permisos los aplica la aplicación. Quien se conecte a la base de datos directamente, con su cadena de conexión, no queda limitado por ellos: protege también las bases de datos compartidas con los permisos de la propia base de datos.
 
 ### Impresión y exportación (aplicación de escritorio)
 

@@ -188,8 +188,9 @@ interfaz), que es lo que permite sustituir WinForms por otro framework sin tocar
 
 **Al añadir un caso de uso nuevo hay que tocar, en este orden**: interfaz `IView*` (si no hay una genérica
 que sirva) → registro en `ViewFactoryRegistry` (vía el constructor de `FactoryViewsWinForms`) → clase
-`Ctrl` en `Controllers/` heredando de la base adecuada, resolviendo su vista contra el registro → `Form`
-en `Views/` implementando la interfaz.
+`Ctrl` en `Controllers/` heredando de la base adecuada, resolviendo su vista contra el registro, con su
+`[KntAuthorize]` si es un caso de uso de nivel superior (ver "Autenticación y autorización") → `Form` en
+`Views/` implementando la interfaz.
 
 ## `Store` (`Core/Store.cs`)
 
@@ -254,6 +255,9 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
   app), persistidos en dos ficheros (ver "Configuración persistida" más abajo), `Logger` (NLog), helpers de
   scripting (`RunKntSCode`,
   `RunCSCode`, `ExecuteCommand`) para el motor KntScript.
+- `Security` (`KntSecurityContext`): cómo ha entrado el usuario de la sesión (`AppUserName`) y su rol en
+  cada repositorio vinculado; `AuthenticateRepositoryAsync`, `NotifyAccessDenied`/`AccessDeniedNotifier` y
+  `CanRunScripts` (ver "Autenticación y autorización").
 - Constructor: `Store(IFactoryViews factoryViews)` — la factory se inyecta aquí, no vía DI.
 
 ## Configuración persistida (`Settings` / `State`)
@@ -262,7 +266,7 @@ La configuración vive en `%LocalAppData%\KNote` (`AppUserDataPath`), en **dos f
 carga/guarda con `LoadConfig`/`SaveConfig` delegando en `Core/AppConfigStorage.cs`:
 
 - `KNoteData.config` ← `Store.Settings` (`AppUserSettings`, en `Model/Config`): lo que **configura el usuario**
-  (`General`, `Repositories`, `Ai`, `Notifications/Email`, `Connectivity` con `ChatHub`/`MessageBroker`/
+  (`General`, `Security`, `Repositories`, `Ai`, `Notifications/Email`, `Connectivity` con `ChatHub`/`MessageBroker`/
   `ServerCOM`). Solo se reescribe cuando los ajustes cambian de verdad (`AppConfigStorage` compara con lo
   último leído/escrito), así que llamar a `SaveConfig()` por un cambio de estado no lo toca.
 - `KNoteState.config` ← `Store.State` (`AppUserState`): lo que **la app recuerda sola** (`Session`,
@@ -397,6 +401,60 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   En las vistas, usa `SystemColors.*` en vez de colores fijos (`Color.White`...): los fijos no cambian en
   oscuro. Los informes y su previsualización se quedan siempre en claro (son para imprimir).
 
+## Autenticación y autorización
+
+Dos niveles, al estilo de ASP.NET Core (`[Authorize]` en controladoras y acciones), sin guardas escritas a
+mano en los métodos:
+
+- **Casos de uso → controladoras.** La clase del `Ctrl` de nivel superior declara su rol mínimo con
+  `[KntAuthorize(rol, ámbito)]` (`Model/KntAuthorization.cs`). `CtrlBase.CheckPreconditions()` (lo llama
+  `Run()`/`RunModal()`) lo comprueba con `CheckAccess()`: si el usuario no llega, avisa con
+  `Store.NotifyAccessDenied` (el `MessageBox` lo conecta `Program` en `Store.AccessDeniedNotifier`; es `null`
+  fuera de la app, p. ej. en tests), finaliza la controladora y deja `PreconditionsMet = false`, así que
+  `CtrlViewBase` **ni crea la vista**. `RequiredAuthorization` es virtual (`RepositoryEditorCtrl` lo decide
+  por `EditorMode`) y `AuthorizationResource` dice contra qué repositorio se mira el rol (en
+  `CtrlEditorBase`, su `Service`; sin repositorio se usa el rol de aplicación). `IsAuthorized()` hace la
+  misma comprobación sin avisar, para lo que arranca solo. Un caso de uso que no arranca por `Run()`
+  (`NotesListCsvExportCtrl.ExportAsync`, `ReportPreviewCtrl.ShowAsync`) llama a `CheckAccess()` al empezar,
+  antes de pedir nada al usuario o de construir el informe. Los `Ctrl` que heredan de `CtrlBase` y muestran
+  su vista aparte (`KntChatCtrl`, `KNoteAIAssistantCtrl`, `KntServerCOMCtrl`, `KntLabCtrl`) no la muestran si
+  `!PreconditionsMet`.
+- **Sin atributo = sin requisito**: así se marcan los `Ctrl` *incluidos* en otro caso de uso (selectores,
+  pestañas del editor de repositorio, editores de tareas/recursos/mensajes de una nota...) — decide el que
+  los incluye. `KNoteManagementCtrl` (el hub) tampoco lleva atributo: cada caso de uso que lanza decide.
+- **Operaciones → comandos del Service.** Lo más fino (guardar, borrar, mover...) lo autoriza la capa
+  Service en cada comando (ver el `CLAUDE.md` raíz). Un resultado denegado llega con `Result.NotAuthorized`:
+  `CtrlViewBase.ShowResultError(result)` lo avisa igual que una controladora denegada (sin crear la vista) y
+  `KntNotAuthorizedException.ThrowIfNotAuthorized(result)` corta un lote (`HeavyProcessCtrl`) en la primera
+  denegación.
+- **Roles** (`EnumRoles`, jerárquicos: `Guest < Staff < ProjectManager < Admin`; `KntRoles` lee
+  `User.RoleDefinition`). Son **por repositorio**; el rol de aplicación es el más alto entre los
+  repositorios vinculados (Guest como mínimo). Viven en `Store.Security` (`Core/KntSecurityContext.cs`):
+  modo de acceso de la sesión, contraseña en memoria (nunca persistida), rol por repositorio (clave
+  `IKntService.IdServiceRef`) e `IsAuthorized(requisito | tipo, service)` — el tipo puede ser un `Ctrl` o un
+  comando del Service (así `NoteEditorCtrl.ConsultMode` usa el rol de `KntNotesSaveExtendedAsyncCommand` sin
+  repetirlo).
+- **Acceso** (`Program.SignInAsync`/`LinkRepositoriesAsync`): con `Settings.Security.AuthenticationMode =
+  Credentials`, `LoginCtrl` pide usuario y contraseña (que solo inician la sesión); cada repositorio pasa por
+  `Store.AuthenticateRepositoryAsync(service)` antes de vincularse — registrado (y, con credenciales, con la
+  misma contraseña), registro ofrecido si no existe (`UserRegisterCtrl`, rol decidido por
+  `Users.RegisterAsync`), o no vinculado en esta sesión. Tras gestionar un repositorio,
+  `Store.RefreshRepositoryRoleAsync`.
+- **Excepciones conscientes**, cada una en un único punto: ejecutar código exige ProjectManager de
+  aplicación (`Store.CanRunScripts`/`CheckCanRunScripts`, en todos los `Run*`/`ExecuteCommand` de `Store` y en
+  los KNote assistants del catálogo, que crean su propio motor KntScript); lo que arranca solo se salta en
+  silencio (`MessagesManagementCtrl.RepositoriesAuthorizedFor`, panel AppInfo y chat al arrancar, alarmas de
+  script); `NoteEditorCtrl.ConsultMode` (abrir para leer, sin autoguardado).
+- **Las vistas no saben nada de seguridad**: todos los menús siguen habilitados y el aviso sale al usarlos.
+  La barra de estado solo pinta los textos que prepara `KNoteManagementCtrl` (`SessionUserInfo`/
+  `SessionUserDetail`).
+- **Caso de uso nuevo**: decide si es de nivel superior (atributo) o incluido (sin atributo) y añádelo a la
+  matriz de `ClientWin.Tests/ControllerAuthorizationMatrixTests` (falla hasta que lo hagas). Un comando nuevo
+  del Service, igual con `Tests/ServiceTests/CommandAuthorizationMatrixTests`.
+
+Esta autorización la aplica la aplicación: quien tenga la cadena de conexión de una BD no queda limitado por
+ella.
+
 ## Informes imprimibles y exportación (`Core/Reports`)
 
 Los informes son **HTML + CSS** que se muestran en una ventana de previsualización con WebView2, desde la que
@@ -421,9 +479,12 @@ como PDF (`PrintToPdfAsync`). No hay `PrintDocument`/GDI+ ni librerías de PDF.
   `NoteDetailReportData.RenderDescription` (mismas reglas que el editor; los recursos se apuntan al host
   virtual `KntConst.VirtualHostNameToFolderMapping`). Las trazas se resuelven con `Core/TraceNoteRows`
   (compartido con `NoteEditorForm`).
-- **Previsualización**: `ReportPreviewCtrl.Show(Store, report, resourcesRootPath)` abre `ReportPreviewForm`.
-  **Un informe nuevo no necesita vista ni Ctrl nuevos**: generador puro en `Core/Reports` (con tests) +
-  llamada a `ReportPreviewCtrl.Show` desde el Ctrl del caso de uso. Todo texto del usuario va por
+- **Previsualización**: `ReportPreviewCtrl.ShowAsync(Store, service, buildReport, resourcesRootPath)` abre
+  `ReportPreviewForm`: comprueba primero el rol (Staff en el repositorio `service`) y solo después llama a
+  `buildReport`. **Un informe nuevo no necesita vista ni Ctrl nuevos**: generador puro en `Core/Reports`
+  (con tests) + llamada a `ReportPreviewCtrl.ShowAsync` desde el Ctrl del caso de uso. La exportación CSV
+  es su propio caso de uso, `NotesListCsvExportCtrl` (sin ventana: `IViewFileExport`/`FileExportForm` solo
+  aportan el diálogo de guardar). Todo texto del usuario va por
   `ReportHtml.Encode`; el que acaba en una caja de margen (`content: "..."`), por `ReportHtml.CssString`
   (escapa también `<`/`>`: va dentro de `<style>`).
 

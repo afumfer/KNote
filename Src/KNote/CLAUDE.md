@@ -126,6 +126,19 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   "lenguaje minimalista de automatización" mencionado en el README, invocado desde la consola de scripts de
   ClientWin (`KntScriptConsoleCtrl`). Si vas a cambiar qué puede hacer una acción de script sobre una
   nota/carpeta, esta es la capa a tocar — no `Service/Services` directamente.
+- **Autorización por comando.** Cada comando declara su rol mínimo con `[KntAuthorize(rol)]` o
+  `[KntAllowAnonymous]` (`Model/KntAuthorization.cs`; roles jerárquicos `EnumRoles` `Guest < Staff <
+  ProjectManager < Admin`, leídos de `User.RoleDefinition` con `KntRoles`). `KntServiceBase.ExecuteCommand`
+  lo comprueba (`KntCommandServiceBase.ValidateAuthorizationAsync`) contra el rol de `UserIdentityName` en ese
+  repositorio (`IKntService.GetCurrentUserAsync`/`GetCurrentUserRoleAsync`, leído del repositorio y cacheado;
+  `ResetCurrentUser` lo olvida), **solo si `IKntService.EnforceAuthorization` está activo**: lo activa
+  `ServiceRef` (ClientWin); `Server` lo deja apagado y sigue con sus `[Authorize]`, igual que los tests de
+  servicio que no van de seguridad. Un comando sin atributo se deniega; uno denegado devuelve un `Result` con
+  `NotAuthorized = true`. Un comando nuevo necesita su atributo y su fila en
+  `Tests/ServiceTests/CommandAuthorizationMatrixTests`. El registro de usuarios (`Users.RegisterAsync`)
+  decide el rol del usuario nuevo (Admin mientras haya como mucho un Admin, Guest después); `CreateAsync` es
+  el alta que hace un Admin, con el rol que elija. ClientWin añade encima la autorización de sus casos de
+  uso (ver "Autenticación y autorización" en `ClientWin/CLAUDE.md`).
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 
