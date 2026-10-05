@@ -63,7 +63,7 @@ static class Program
             //
             // A single message loop for the whole session: its main form is the splash first, then the
             // management window, so the splash stays on screen until that window is complete (it starts
-            // transparent and appears once its panels are built, see KNoteManagementForm_Shown) instead
+            // hidden (cloaked) and appears once its panels are built, see KNoteManagementForm_Shown) instead
             // of leaving a gap between both windows.
             var appContext = new ApplicationContext(splashForm);
 

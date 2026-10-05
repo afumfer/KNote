@@ -4,6 +4,7 @@ using KNote.Model;
 using KntScript;
 using KntIcons;
 using KNote.ClientWin.Utils;
+using System.Runtime.InteropServices;
 
 namespace KNote.ClientWin.Views;
 
@@ -191,14 +192,14 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         SetViewPositionAndSize();
         ApplyStartupPanelVisibility();
 
-        // Transparent until Shown has built its panels (see KNoteManagementForm_Shown).
-        Opacity = 0;
+        // Hidden from the screen until Shown has built its panels (see KNoteManagementForm_Shown).
+        SetCloaked(true);
     }
 
     // ViewShown runs KNoteManagementCtrl.Run() (Program.cs), which creates the embedded views and docks
     // them here (ShowView/LinkComponents) synchronously. It has to wait for Shown (a running message loop,
     // see IViewKNoteManagement.ViewShown), but meanwhile the window would show its empty panels being
-    // filled in: it stays transparent until then, and appears once fully painted.
+    // filled in: it stays cloaked until then, and appears once fully painted.
     private void KNoteManagementForm_Shown(object sender, EventArgs e)
     {
         try
@@ -207,10 +208,29 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         }
         finally
         {
-            Update();
-            Opacity = 1;
+            RedrawWindow(Handle, IntPtr.Zero, IntPtr.Zero, RDW_UPDATENOW | RDW_ALLCHILDREN);
+            SetCloaked(false);
         }
     }
+
+    // A cloaked window is shown, laid out and painted as usual, but DWM keeps it off the screen; uncloaked,
+    // it appears with what is already painted. Unlike Opacity (a layered window), nothing is repainted when
+    // it appears, which flashed the window's empty background for a moment.
+    private void SetCloaked(bool cloaked)
+    {
+        int value = cloaked ? 1 : 0;
+        DwmSetWindowAttribute(Handle, DWMWA_CLOAK, ref value, sizeof(int));
+    }
+
+    private const int DWMWA_CLOAK = 13;
+    private const uint RDW_ALLCHILDREN = 0x0080;
+    private const uint RDW_UPDATENOW = 0x0100;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+    [DllImport("user32.dll")]
+    private static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
 
     private async void KNoteManagementForm_FormClosing(object sender, FormClosingEventArgs e)
     {
