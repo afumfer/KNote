@@ -208,13 +208,24 @@ static class Program
             };
 
             var initialServiceRef = new ServiceRef(r0, store.AppUserName, false, store.Logger);
-            var resCreateDB = await initialServiceRef.Service.CreateDataBase(store.AppUserName);
+            var resCreateDB = await initialServiceRef.Service.CreateDataBase();
 
             if (resCreateDB)
             {                    
                 store.AddServiceRef(initialServiceRef);
                 store.SetAssistantServiceRef(null);
                 store.Settings.Repositories.Items.Add(r0);
+
+                // The new database only has its seeded users: the current user registers here and, as
+                // the first one after adminKNote, becomes its Admin (see KntUsersRegisterAsyncCommand).
+                try
+                {
+                    await store.EnsureCurrentUserRegistered(initialServiceRef.Service);
+                }
+                catch (Exception ex)
+                {
+                    store.Logger?.LogError(ex, "Registering the current user in repository {alias} failed.", r0.Alias);
+                }
             }
 
             // Default values

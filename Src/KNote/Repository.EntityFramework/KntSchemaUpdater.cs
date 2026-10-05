@@ -307,15 +307,21 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_KAttributes_Name_NoteTypeId"" ON ""KAttri
 DROP TABLE IF EXISTS ""KEvents"";
 ";
 
-    // Revision 4 - renames two roles stored in Users.RoleDefinition (a comma-separated list of
-    // EnumRoles names, e.g. "Staff, Admin"), following the same rename of EnumRoles:
-    //  - Public -> Guest (a clearer name for the lowest, read-only role).
-    //  - ProjecManager -> ProjectManager (typo fix).
-    //
-    // Plain REPLACE on the whole list is safe: no other role name contains "Public" or "ProjecManager"
-    // as a substring, and "ProjectManager" doesn't contain "ProjecManager" either, so running this step
-    // again over already-renamed rows is a no-op. The WHERE clause only avoids rewriting untouched rows.
-    // Same SQL for both providers (REPLACE/LIKE exist in SQL Server and Sqlite alike).
+    // Revision 4:
+    //  - Renames two roles stored in Users.RoleDefinition (a comma-separated list of EnumRoles names,
+    //    e.g. "Staff, Admin"), following the same rename of EnumRoles: Public -> Guest (a clearer name
+    //    for the lowest, read-only role) and ProjecManager -> ProjectManager (typo fix).
+    //    Plain REPLACE on the whole list is safe: no other role name contains "Public" or
+    //    "ProjecManager" as a substring, and "ProjectManager" doesn't contain "ProjecManager" either, so
+    //    running this step again over already-renamed rows is a no-op. The WHERE clause only avoids
+    //    rewriting untouched rows.
+    //  - Deletes the "owner" user that ModelBuilderExtensions.Seed() no longer creates: as a second
+    //    Admin it would make every newly registered user a Guest (see KntUsersRegisterAsyncCommand).
+    //    ClientWin used to rename it to the current Windows user right after creating a database, so it
+    //    only survives in databases created by Server. It's matched by its seeded UserName and EMail
+    //    (a renamed one no longer matches) and only deleted if nothing references it, so a seeded
+    //    account somebody actually used is kept.
+    // Same SQL for both providers (REPLACE/LIKE/NOT EXISTS exist in SQL Server and Sqlite alike).
     private static void UpdateSchemaV4(KntDbContext ctx, RepositoryRef repositoryRef)
     {
         ctx.Database.ExecuteSqlRaw(UpdateSchemaV4Sql);
@@ -325,5 +331,11 @@ DROP TABLE IF EXISTS ""KEvents"";
 UPDATE Users
 SET RoleDefinition = REPLACE(REPLACE(RoleDefinition, 'ProjecManager', 'ProjectManager'), 'Public', 'Guest')
 WHERE RoleDefinition LIKE '%Public%' OR RoleDefinition LIKE '%ProjecManager%';
+
+DELETE FROM Users
+WHERE UserName = 'owner' AND EMail = 'owner@mydomain.com'
+    AND NOT EXISTS (SELECT 1 FROM Windows WHERE Windows.UserId = Users.UserId)
+    AND NOT EXISTS (SELECT 1 FROM NoteTasks WHERE NoteTasks.UserId = Users.UserId)
+    AND NOT EXISTS (SELECT 1 FROM KMessages WHERE KMessages.UserId = Users.UserId);
 ";
 }

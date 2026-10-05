@@ -139,7 +139,9 @@ public class UsersController : ControllerBase
         {
             _logger.LogTrace("User {user} register at {dateTime}.", user.UserName, DateTime.Now);
 
-            var kresService = await _service.Users.CreateAsync(user);
+            // The new user's role is decided by the service (KntUsersRegisterAsyncCommand), not by the
+            // RoleDefinition this anonymous endpoint receives.
+            var kresService = await _service.Users.RegisterAsync(user);
 
             if (kresService.IsValid)
             {

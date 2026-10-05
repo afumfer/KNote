@@ -175,12 +175,15 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             {
                 // Create repository and add link                    
                 var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
-                if (await newService.Service.CreateDataBase(SystemInformation.UserName))
+                if (await newService.Service.CreateDataBase())
                 {
                     Store.AddServiceRef(newService);
                     Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
+                    // Same as for a linked repository: as the first user registered in this new
+                    // database the current user becomes its Admin (see KntUsersRegisterAsyncCommand).
+                    await Store.EnsureCurrentUserRegistered(newService.Service);
                     OnAddedEntity(Model);
                 }
                 else

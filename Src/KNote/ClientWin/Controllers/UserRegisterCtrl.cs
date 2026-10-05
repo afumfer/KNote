@@ -1,5 +1,4 @@
 using KNote.ClientWin.Core;
-using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
@@ -32,10 +31,11 @@ public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, Use
     {
         Service = service;
 
+        // No RoleDefinition: Users.RegisterAsync decides the new user's role (see
+        // KntUsersRegisterAsyncCommand) and writes it back into Model.
         Model = new UserRegisterDto
         {
-            UserName = Store.AppUserName,
-            RoleDefinition = nameof(EnumRoles.Guest)
+            UserName = Store.AppUserName
         };
 
         return Task.FromResult(true);
@@ -58,7 +58,7 @@ public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, Use
 
         try
         {
-            var result = await Service.Users.CreateAsync(Model);
+            var result = await Service.Users.RegisterAsync(Model);
             if (result.IsValid)
             {
                 Model.SetIsDirty(false);

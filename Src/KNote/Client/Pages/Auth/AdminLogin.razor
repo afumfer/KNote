@@ -34,9 +34,8 @@
                new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
 
         if(resDialog != null)
-        {            
-            resDialog.RoleDefinition = "Guest";
-
+        {
+            // The new user's role is decided by the server (see KntUsersRegisterAsyncCommand).
             var result = await store.Users.RegisterAsync(resDialog);
             if (!result.success)                
                 await dialogService.Alert(result.error, "Error", new AlertOptions() { OkButtonText = "OK" });

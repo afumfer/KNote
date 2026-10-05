@@ -37,7 +37,7 @@ internal class FakeKntService : IKntService
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();
-    public Task<bool> CreateDataBase(string newOwner = null) => throw new NotSupportedException();
+    public Task<bool> CreateDataBase() => throw new NotSupportedException();
     public string GetSystemVariable(string scope, string variable) => throw new NotSupportedException();
     public void SaveSystemVariable(string scope, string key, string value) => throw new NotSupportedException();
     public void PublishNoteInMessageBroker(NoteExtendedDto noteInfo) => throw new NotSupportedException();

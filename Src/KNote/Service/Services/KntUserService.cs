@@ -71,5 +71,11 @@ public class KntUserService : KntServiceBase, IKntUserService
 
     }
 
+    public async Task<Result<UserDto>> RegisterAsync(UserRegisterDto userRegisterInfo)
+    {
+        var command = new KntUsersRegisterAsyncCommand(Service, userRegisterInfo);
+        return await ExecuteCommand(command);
+    }
+
     #endregion
 }

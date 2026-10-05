@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
@@ -238,6 +239,45 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
         }
     }
 
+}
+
+/// <summary>
+/// Self-registration of a new user (ClientWin's "Register user" dialog, Server's api/users/register):
+/// same as KntUsersCreateAsyncCommand, except that the role is decided here and never taken from the
+/// caller - the RoleDefinition of the given UserRegisterDto is overwritten with it. A user created by
+/// an Admin from the users management screen goes through KntUsersCreateAsyncCommand instead, keeping
+/// the roles that Admin chose.
+/// </summary>
+public class KntUsersRegisterAsyncCommand : KntUsersCreateAsyncCommand
+{
+    public KntUsersRegisterAsyncCommand(IKntService service, UserRegisterDto user) : base(service, user)
+    {
+
+    }
+
+    public override async Task<Result<UserDto>> Execute()
+    {
+        var resUsers = await Repository.Users.GetAllAsync();
+        if (!resUsers.IsValid)
+        {
+            var resService = new Result<UserDto>();
+            resService.AddListErrorMessage(resUsers.ListErrorMessage);
+            return resService;
+        }
+
+        var adminCount = resUsers.Entity.Count(u => KntRoles.IsInRole(u.RoleDefinition, EnumRoles.Admin));
+        Param.RoleDefinition = RoleForNewUser(adminCount).ToString();
+
+        return await base.Execute();
+    }
+
+    /// <summary>
+    /// While a repository still has a single Admin (typically the seeded adminKNote, or none at all),
+    /// whoever registers next becomes an Admin too, so the first real user of a new database can manage
+    /// it. From the second real Admin on, new users start as Guests until an Admin raises their role.
+    /// </summary>
+    public static EnumRoles RoleForNewUser(int adminCount)
+        => adminCount <= 1 ? EnumRoles.Admin : EnumRoles.Guest;
 }
 
 /// <summary>

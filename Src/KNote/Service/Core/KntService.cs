@@ -144,33 +144,21 @@ public class KntService : IKntService, IDisposable
         return await _repository.TestDbConnection();
     }
 
-    public async Task<bool> CreateDataBase(string newOwner = null)
+    // The database itself is created (EnsureCreated plus seed) when the repository is built, see
+    // KntRepositoryFactory.Create; this only confirms it can be read. Its first users come from the
+    // registration flow (Users.RegisterAsync), not from here. Reads through the repository directly,
+    // not a service command: nobody is registered in a brand-new database yet.
+    public async Task<bool> CreateDataBase()
     {
         try
         {
-            var res = await SystemValues.GetAllAsync();
-            if (!res.IsValid)
-                return false;
-
-            if (!string.IsNullOrEmpty(newOwner))
-            {
-                var resGetU = await Users.GetByUserNameAsync("owner");
-                if (resGetU.IsValid)
-                {
-                    resGetU.Entity.UserName = newOwner;
-                    var resUpdateU = await Users.SaveAsync(resGetU.Entity);
-                    if (!resUpdateU.IsValid)
-                        return false;
-                }
-                else
-                    return false;
-            }
+            var res = await _repository.SystemValues.GetAllAsync();
+            return res.IsValid;
         }
         catch (Exception)
         {
             return false;
         }
-        return true;
     }
 
 

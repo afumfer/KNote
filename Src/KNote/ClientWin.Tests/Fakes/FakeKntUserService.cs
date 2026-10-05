@@ -13,6 +13,7 @@ internal class FakeKntUserService : IKntUserService
 {
     public Func<string, Task<Result<UserDto>>>? GetByUserNameAsyncImpl { get; set; }
     public Func<UserRegisterDto, Task<Result<UserDto>>>? CreateAsyncImpl { get; set; }
+    public Func<UserRegisterDto, Task<Result<UserDto>>>? RegisterAsyncImpl { get; set; }
     public Func<PageIdentifier, Task<Result<List<UserDto>>>>? GetAllAsyncImpl { get; set; }
     public Func<Guid, Task<Result<UserDto>>>? GetAsyncImpl { get; set; }
     public Func<UserDto, Task<Result<UserDto>>>? SaveAsyncImpl { get; set; }
@@ -24,6 +25,9 @@ internal class FakeKntUserService : IKntUserService
 
     public Task<Result<UserDto>> CreateAsync(UserRegisterDto userRegisterInfoDto) =>
         (CreateAsyncImpl ?? throw new NotSupportedException($"{nameof(CreateAsync)} not configured for this test"))(userRegisterInfoDto);
+
+    public Task<Result<UserDto>> RegisterAsync(UserRegisterDto userRegisterInfoDto) =>
+        (RegisterAsyncImpl ?? throw new NotSupportedException($"{nameof(RegisterAsync)} not configured for this test"))(userRegisterInfoDto);
 
     public Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier pagination = null) =>
         (GetAllAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAllAsync)} not configured for this test"))(pagination);
