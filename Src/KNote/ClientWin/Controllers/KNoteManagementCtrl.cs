@@ -59,19 +59,22 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     // Who is using the application and with which role in the active repository: roles are per
     // repository, so this changes with the selected folder or filter. Shown in the status bar.
+    // Along with the application role (the one of the options that don't belong to a repository), so both
+    // security contexts the user is in are in sight.
     public string SessionUserInfo
     {
         get
         {
+            var applicationRole = $"Application: {Store.Security.ApplicationRoleName}";
             var serviceRef = SelectedServiceRef;
             if (serviceRef == null)
-                return Store.AppUserName;
+                return $"{Store.AppUserName} · {applicationRole}";
 
-            return $"{Store.AppUserName} · {Store.Security.GetRepositoryRoleName(serviceRef.Service)} ({serviceRef.Alias})";
+            return $"{Store.AppUserName} · {serviceRef.Alias}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)} · {applicationRole}";
         }
     }
 
-    // How the user signed in and its role in every linked repository (status bar tooltip).
+    // How the user signed in, its application role and its role in every linked repository (status bar tooltip).
     public string SessionUserDetail
     {
         get
@@ -81,7 +84,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 Store.Security.AuthenticationMode == AppAuthenticationMode.Windows
                     ? $"Signed in with the Windows account '{Store.AppUserName}'."
                     : $"Signed in as the {KntConst.AppName} user '{Store.AppUserName}'.",
-                "Roles:"
+                $"Application role: {Store.Security.ApplicationRoleName} (your highest role among your repositories, for options, AI, chat, scripts, creating repositories...).",
+                "Role in each repository (for its notes and folders):"
             };
             foreach (var serviceRef in Store.GetAllServiceRef())
                 lines.Add($"   {serviceRef.Alias}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)}");

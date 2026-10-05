@@ -86,4 +86,7 @@ public class KntSecurityContext
     /// </summary>
     public EnumRoles ApplicationRole
         => _repositoryRoles.Count == 0 ? EnumRoles.Guest : _repositoryRoles.Values.Max();
+
+    // ApplicationRole as shown to the user ("Project manager"...).
+    public string ApplicationRoleName => KntConst.Roles[ApplicationRole];
 }

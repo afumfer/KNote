@@ -67,6 +67,17 @@ public class KntSecurityContextTests
     }
 
     [TestMethod]
+    public void ApplicationRoleName_ShowsTheApplicationRoleAsTheUserReadsIt()
+    {
+        var security = new KntSecurityContext();
+        Assert.AreEqual("Guest", security.ApplicationRoleName);
+
+        security.SetRepositoryRole(new FakeKntService(), EnumRoles.Guest);
+        security.SetRepositoryRole(new FakeKntService(), EnumRoles.ProjectManager);
+        Assert.AreEqual("Project manager", security.ApplicationRoleName);
+    }
+
+    [TestMethod]
     public void IsAuthorized_WithoutRequirement_IsAlwaysTrue()
     {
         Assert.IsTrue(new KntSecurityContext().IsAuthorized((KntAuthorizeAttribute)null));
