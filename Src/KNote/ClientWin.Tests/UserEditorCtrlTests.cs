@@ -36,7 +36,7 @@ public class UserEditorCtrlTests
         await ctrl.NewModel(service);
 
         Assert.AreEqual(Guid.Empty, ctrl.Model.UserId);
-        Assert.AreEqual("Public", ctrl.Model.RoleDefinition);
+        Assert.AreEqual("Guest", ctrl.Model.RoleDefinition);
     }
 
     [TestMethod]

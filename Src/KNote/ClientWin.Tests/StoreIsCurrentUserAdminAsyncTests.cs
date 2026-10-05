@@ -45,7 +45,7 @@ public class StoreIsCurrentUserAdminAsyncTests
     {
         var (store, service) = CreateStore();
         service.UsersFake.GetByUserNameAsyncImpl = _ =>
-            Task.FromResult(new Result<UserDto>(new UserDto { RoleDefinition = "Public" }));
+            Task.FromResult(new Result<UserDto>(new UserDto { RoleDefinition = "Guest" }));
 
         Assert.IsFalse(await store.IsCurrentUserAdminAsync(service));
     }

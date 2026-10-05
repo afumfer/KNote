@@ -34,7 +34,7 @@ public class UserRegisterCtrlTests
         await ctrl.NewModel(service);
 
         Assert.AreEqual(store.AppUserName, ctrl.Model.UserName);
-        Assert.AreEqual("Public", ctrl.Model.RoleDefinition);
+        Assert.AreEqual("Guest", ctrl.Model.RoleDefinition);
     }
 
     [TestMethod]

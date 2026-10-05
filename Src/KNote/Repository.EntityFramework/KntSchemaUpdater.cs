@@ -25,12 +25,13 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 3;
+    public const int CurrentSchemaRevision = 4;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
         (2, AddTraceNotes),
-        (3, UpdateSchemaV3)
+        (3, UpdateSchemaV3),
+        (4, UpdateSchemaV4)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -304,5 +305,25 @@ DROP INDEX IF EXISTS ""IX_KAttributes_Name"";
 CREATE UNIQUE INDEX IF NOT EXISTS ""IX_KAttributes_Name_NoteTypeId"" ON ""KAttributes"" (""Name"", ""NoteTypeId"");
 
 DROP TABLE IF EXISTS ""KEvents"";
+";
+
+    // Revision 4 - renames two roles stored in Users.RoleDefinition (a comma-separated list of
+    // EnumRoles names, e.g. "Staff, Admin"), following the same rename of EnumRoles:
+    //  - Public -> Guest (a clearer name for the lowest, read-only role).
+    //  - ProjecManager -> ProjectManager (typo fix).
+    //
+    // Plain REPLACE on the whole list is safe: no other role name contains "Public" or "ProjecManager"
+    // as a substring, and "ProjectManager" doesn't contain "ProjecManager" either, so running this step
+    // again over already-renamed rows is a no-op. The WHERE clause only avoids rewriting untouched rows.
+    // Same SQL for both providers (REPLACE/LIKE exist in SQL Server and Sqlite alike).
+    private static void UpdateSchemaV4(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        ctx.Database.ExecuteSqlRaw(UpdateSchemaV4Sql);
+    }
+
+    private const string UpdateSchemaV4Sql = @"
+UPDATE Users
+SET RoleDefinition = REPLACE(REPLACE(RoleDefinition, 'ProjecManager', 'ProjectManager'), 'Public', 'Guest')
+WHERE RoleDefinition LIKE '%Public%' OR RoleDefinition LIKE '%ProjecManager%';
 ";
 }

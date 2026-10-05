@@ -99,7 +99,7 @@ public class FoldersController : ControllerBase
 
     [HttpPost]
     [HttpPut]
-    [Authorize(Roles = "Admin, ProjecManager")]
+    [Authorize(Roles = "Admin, ProjectManager")]
     public async Task<IActionResult> Post([FromBody]FolderDto folder)
     {
         try
@@ -122,7 +122,7 @@ public class FoldersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin, ProjecManager")]
+    [Authorize(Roles = "Admin, ProjectManager")]
     public async Task<IActionResult> Delete(Guid id)
     {
         try

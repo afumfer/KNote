@@ -161,7 +161,7 @@ public static class ModelBuilderExtensions
                 UserName = "user1",
                 FullName = "user1 KNote",
                 EMail = "user1@mydomain.com",
-                RoleDefinition = "Public",
+                RoleDefinition = nameof(EnumRoles.Guest),
                 PasswordSalt = passwordSaltDemo,
                 PasswordHash = passwordHashDemo
             }

@@ -461,7 +461,7 @@ public class KntRedmineManager
                          EMail = $"{fullName}@{fullName}.org", 
                          FullName = fullName,
                          Password = GetRandomString(10), 
-                         RoleDefinition = "Public",
+                         RoleDefinition = "Guest",
                          UserName = name 
                     });
                 if (resNewUser.IsValid)

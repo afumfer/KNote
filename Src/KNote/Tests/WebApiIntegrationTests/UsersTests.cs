@@ -44,7 +44,7 @@ public class UsersTests : WebApiTestBase
         string userName = "__TEST_REGISTERUSER_###__";
         string userEmail = "TESTREGISTER@TESTREGISTER.ORG";
         string userFullName = "__TEST_REGISTERUSER_FULLNAME_###__";
-        string userRoles = "Public";
+        string userRoles = "Guest";
         string userPass = "pass12345abcd!!";
         Guid userId = Guid.Empty;        
         UserRegisterDto user = new() { UserId = userId, UserName = userName, EMail = userEmail, FullName = userFullName, RoleDefinition = userRoles, Password = userPass };        
@@ -81,7 +81,7 @@ public class UsersTests : WebApiTestBase
         string userEmail = "TESTDUPEMAIL@TESTDUPEMAIL.ORG";
         string userFullName = "__TEST_DUPEMAIL_FULLNAME_###__";
         string userPass = "pass12345abcd!!";
-        UserRegisterDto user1 = new() { UserId = Guid.Empty, UserName = userName1, EMail = userEmail, FullName = userFullName, RoleDefinition = "Public", Password = userPass };
+        UserRegisterDto user1 = new() { UserId = Guid.Empty, UserName = userName1, EMail = userEmail, FullName = userFullName, RoleDefinition = "Guest", Password = userPass };
 
         var httpRes1 = await HttpClient.PostAsJsonAsync($"{UrlBase}api/users/register", user1);
         var res1 = await httpRes1.Content.ReadFromJsonAsync<UserTokenDto>();
@@ -96,7 +96,7 @@ public class UsersTests : WebApiTestBase
             // DB unique index on Users.EMail would only produce a raw, cryptic DbUpdateException -
             // KntUsersCreateAsyncCommand now checks this upfront and must surface a clear message.
             string userName2 = "__TEST_DUPEMAIL_2_###__";
-            UserRegisterDto user2 = new() { UserId = Guid.Empty, UserName = userName2, EMail = userEmail, FullName = userFullName, RoleDefinition = "Public", Password = userPass };
+            UserRegisterDto user2 = new() { UserId = Guid.Empty, UserName = userName2, EMail = userEmail, FullName = userFullName, RoleDefinition = "Guest", Password = userPass };
 
             var httpRes2 = await HttpClient.PostAsJsonAsync($"{UrlBase}api/users/register", user2);
             var res2 = await httpRes2.Content.ReadFromJsonAsync<UserTokenDto>();
@@ -119,7 +119,7 @@ public class UsersTests : WebApiTestBase
         string userName = "__TEST_CREATEUSER_###__";
         string userEmail = "TESTCREATE@TESTCREATE.ORG";
         string userFullName = "__TEST_CREATEUSER_FULLNAME_###__";
-        string userRoles = "Public";        
+        string userRoles = "Guest";        
         Guid userId = Guid.Empty;
         UserDto user = new() { UserId = userId, UserName = userName, EMail = userEmail, FullName = userFullName, RoleDefinition = userRoles };
         

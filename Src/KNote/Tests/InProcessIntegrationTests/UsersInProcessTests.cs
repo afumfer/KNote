@@ -65,7 +65,7 @@ public class UsersInProcessTests
             UserName = userName,
             EMail = userEmail,
             FullName = "__TEST_REGISTERUSER_FULLNAME_###__",
-            RoleDefinition = "Public",
+            RoleDefinition = "Guest",
             Password = "pass12345abcd!!"
         };
 
@@ -100,7 +100,7 @@ public class UsersInProcessTests
             UserName = $"{prefix}{Guid.NewGuid():N}"[..24],
             EMail = userEmail,
             FullName = "__TEST_DUPEMAIL_FULLNAME_###__",
-            RoleDefinition = "Public",
+            RoleDefinition = "Guest",
             Password = "pass12345abcd!!"
         };
 
@@ -131,7 +131,7 @@ public class UsersInProcessTests
         string userName = $"itest-crud-{Guid.NewGuid():N}"[..24];
         string userEmail = $"{Guid.NewGuid():N}@knote.tests";
         Guid userId = Guid.Empty;
-        UserDto user = new() { UserId = userId, UserName = userName, EMail = userEmail, FullName = "__TEST_CREATEUSER_FULLNAME_###__", RoleDefinition = "Public" };
+        UserDto user = new() { UserId = userId, UserName = userName, EMail = userEmail, FullName = "__TEST_CREATEUSER_FULLNAME_###__", RoleDefinition = "Guest" };
 
         var httpRes = await _httpClient.PostAsJsonAsync("api/users", user);
         var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();

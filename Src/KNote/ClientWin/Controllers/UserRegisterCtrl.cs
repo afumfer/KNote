@@ -1,4 +1,5 @@
 using KNote.ClientWin.Core;
+using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
@@ -34,7 +35,7 @@ public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, Use
         Model = new UserRegisterDto
         {
             UserName = Store.AppUserName,
-            RoleDefinition = "Public"
+            RoleDefinition = nameof(EnumRoles.Guest)
         };
 
         return Task.FromResult(true);

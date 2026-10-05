@@ -63,9 +63,9 @@ public partial class UserEditorForm : KntEditorForm, IViewEditor<UserDto>
         textFullName.Text = _ctrl.Model.FullName;
 
         var roles = (_ctrl.Model.RoleDefinition ?? "").Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        checkPublic.Checked = roles.Contains(nameof(EnumRoles.Public));
+        checkGuest.Checked = roles.Contains(nameof(EnumRoles.Guest));
         checkStaff.Checked = roles.Contains(nameof(EnumRoles.Staff));
-        checkProjectManager.Checked = roles.Contains(nameof(EnumRoles.ProjecManager));
+        checkProjectManager.Checked = roles.Contains(nameof(EnumRoles.ProjectManager));
         checkAdmin.Checked = roles.Contains(nameof(EnumRoles.Admin));
 
         textPassword.Text = "";
@@ -83,9 +83,9 @@ public partial class UserEditorForm : KntEditorForm, IViewEditor<UserDto>
         _ctrl.Model.FullName = textFullName.Text;
 
         var roles = new List<string>();
-        if (checkPublic.Checked) roles.Add(nameof(EnumRoles.Public));
+        if (checkGuest.Checked) roles.Add(nameof(EnumRoles.Guest));
         if (checkStaff.Checked) roles.Add(nameof(EnumRoles.Staff));
-        if (checkProjectManager.Checked) roles.Add(nameof(EnumRoles.ProjecManager));
+        if (checkProjectManager.Checked) roles.Add(nameof(EnumRoles.ProjectManager));
         if (checkAdmin.Checked) roles.Add(nameof(EnumRoles.Admin));
         _ctrl.Model.RoleDefinition = string.Join(",", roles);
 

@@ -47,9 +47,9 @@ public static class KntConst
 
         Roles = new Dictionary<EnumRoles, string>
         {
-            { EnumRoles.Public, "Public user"},
+            { EnumRoles.Guest, "Guest"},
             { EnumRoles.Staff, "Staff"},
-            { EnumRoles.ProjecManager, "Project manager"},
+            { EnumRoles.ProjectManager, "Project manager"},
             { EnumRoles.Admin, "Admin"}
         };
 
@@ -120,12 +120,14 @@ public enum EnumKAttributeDataType
     TagsValue
 }
 
+// Hierarchical: each role includes every permission of the roles below it, so the numeric values define
+// the order (compare them with >=, see KntRoles). Persisted by name (User.RoleDefinition), never by value.
 public enum EnumRoles
 {
-    Public,
-    Staff,
-    ProjecManager,
-    Admin
+    Guest = 1,
+    Staff = 2,
+    ProjectManager = 3,
+    Admin = 4
 }
 
 public enum EnumStatus

@@ -36,7 +36,7 @@ namespace KNote.ClientWin.Views
             this.checkAdmin = new System.Windows.Forms.CheckBox();
             this.checkProjectManager = new System.Windows.Forms.CheckBox();
             this.checkStaff = new System.Windows.Forms.CheckBox();
-            this.checkPublic = new System.Windows.Forms.CheckBox();
+            this.checkGuest = new System.Windows.Forms.CheckBox();
             this.labelRoles = new System.Windows.Forms.Label();
             this.textFullName = new System.Windows.Forms.TextBox();
             this.labelFullName = new System.Windows.Forms.Label();
@@ -59,7 +59,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.checkAdmin);
             this.panelForm.Controls.Add(this.checkProjectManager);
             this.panelForm.Controls.Add(this.checkStaff);
-            this.panelForm.Controls.Add(this.checkPublic);
+            this.panelForm.Controls.Add(this.checkGuest);
             this.panelForm.Controls.Add(this.labelRoles);
             this.panelForm.Controls.Add(this.textFullName);
             this.panelForm.Controls.Add(this.labelFullName);
@@ -129,15 +129,15 @@ namespace KNote.ClientWin.Views
             this.checkStaff.Text = "Staff";
             this.checkStaff.UseVisualStyleBackColor = true;
             //
-            // checkPublic
+            // checkGuest
             //
-            this.checkPublic.AutoSize = true;
-            this.checkPublic.Location = new System.Drawing.Point(20, 185);
-            this.checkPublic.Name = "checkPublic";
-            this.checkPublic.Size = new System.Drawing.Size(93, 19);
-            this.checkPublic.TabIndex = 7;
-            this.checkPublic.Text = "Public user";
-            this.checkPublic.UseVisualStyleBackColor = true;
+            this.checkGuest.AutoSize = true;
+            this.checkGuest.Location = new System.Drawing.Point(20, 185);
+            this.checkGuest.Name = "checkGuest";
+            this.checkGuest.Size = new System.Drawing.Size(93, 19);
+            this.checkGuest.TabIndex = 7;
+            this.checkGuest.Text = "Guest";
+            this.checkGuest.UseVisualStyleBackColor = true;
             //
             // labelRoles
             //
@@ -255,7 +255,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelFullName;
         private System.Windows.Forms.TextBox textFullName;
         private System.Windows.Forms.Label labelRoles;
-        private System.Windows.Forms.CheckBox checkPublic;
+        private System.Windows.Forms.CheckBox checkGuest;
         private System.Windows.Forms.CheckBox checkStaff;
         private System.Windows.Forms.CheckBox checkProjectManager;
         private System.Windows.Forms.CheckBox checkAdmin;

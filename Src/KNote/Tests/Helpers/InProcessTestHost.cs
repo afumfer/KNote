@@ -33,7 +33,7 @@ public static class InProcessTestHost
             FullName = "In-Process Test User",
             // Admin covers every role check across the controllers this suite exercises
             // (Folders/KAttributes/NoteTypes/Users require "Admin"; Notes accepts
-            // "Admin, Staff, ProjecManager").
+            // "Admin, Staff, ProjectManager").
             RoleDefinition = "Admin",
             Password = "InProcess-Test-Password-1!"
         };
