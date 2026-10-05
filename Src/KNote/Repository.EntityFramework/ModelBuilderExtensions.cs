@@ -23,16 +23,6 @@ public static class ModelBuilderExtensions
             .WithOne(_ => _.KAttribute)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // -------------------------------
-        //modelBuilder.Entity<TraceNote>()
-        //    .WithOne(_ => _.To)
-        //    .HasMany(_ => _.From)                
-        //    .WillCascadeOnDelete(false);
-
-        //modelBuilder.Entity<TraceNote>()
-        //   .HasRequired(_ => _.From)
-        //   .WithMany(_ => _.To)
-        //   .WillCascadeOnDelete(false);               
         modelBuilder.Entity<Note>()
             .HasMany(_ => _.To)
             .WithOne(_ => _.From)
@@ -43,17 +33,6 @@ public static class ModelBuilderExtensions
             .WithOne(_ => _.To)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // ---------------------------
-        //modelBuilder.Entity<Window>()
-        //   .HasRequired(_ => _.User)
-        //   .WithMany(_ => _.Windows)
-        //   .WillCascadeOnDelete(false);
-
-        //modelBuilder.Entity<Window>()
-        //   .HasRequired(_ => _.Note)
-        //   .WithMany(_ => _.Windows)
-        //   .WillCascadeOnDelete(false);
-
         modelBuilder.Entity<Window>()
             .HasOne(_ => _.User)
             .WithMany(_ => _.Windows)
@@ -63,17 +42,6 @@ public static class ModelBuilderExtensions
             .HasOne(_ => _.Note)
             .WithMany(_ => _.Windows)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // --------------------
-        //modelBuilder.Entity<NoteTask>()
-        //   .HasRequired(_ => _.Note)
-        //   .WithMany(_ => _.Tasks)
-        //   .WillCascadeOnDelete(false);
-
-        //modelBuilder.Entity<NoteTask>()
-        //   .HasRequired(_ => _.User)
-        //   .WithMany(_ => _.Tasks)
-        //   .WillCascadeOnDelete(false);
 
         modelBuilder.Entity<Note>()
            .HasMany(_ => _.NoteTasks)
@@ -127,24 +95,17 @@ public static class ModelBuilderExtensions
             new SystemValue { SystemValueId = Guid.NewGuid(), Scope = "SYSTEM", Key = "DB_VERSION", Value = KntSchemaUpdater.CurrentSchemaRevision.ToString() }
         );
 
-        var idUser0 = Guid.NewGuid();
+        // Only one Admin is seeded on purpose: the self-registration policy (KntUsersRegisterAsyncCommand)
+        // makes the first user who registers in a new database an Admin as long as adminKNote is still the
+        // only one. The "owner" user that used to be seeded here (and renamed to the current Windows user
+        // by CreateDataBase) is gone; KntSchemaUpdater's revision 4 step removes it from older databases.
         var idUser1 = Guid.NewGuid();
         var idUser2 = Guid.NewGuid();
 
         var passwordSaltDemo = Convert.FromBase64String("rS2A7TGIHC1wXYhvUIZYSAOa/AME+q77z2LMOfEAjw6oERZ3G0+LgrGA5ff+CbpjpwIrpMoyNmoVgTLlKl/KJ+BHMsd8ovMemsiEgS+FLGkPSzb/8kkOTcEgYDfDv9s1WTgAtduT5vgVWWz9XrsqbH6C4yE+I8rhBOc+i/Y3+B8=");
         var passwordHashDemo = Convert.FromBase64String("+OJpwQUcwmvI9gnmyqJO7L1TGzX6CpyniZgFC1zFnTmeRfbTJJ6vZBVm3eo84YclL5mlhaqh7iGPHF2fEDZZxw==");
 
-        modelBuilder.Entity<User>().HasData(                
-            new User
-            {
-                UserId = idUser0,
-                UserName = "owner",
-                FullName = "Owner KNote",
-                EMail = "owner@mydomain.com",
-                RoleDefinition = "Admin",
-                PasswordSalt = passwordSaltDemo,
-                PasswordHash = passwordHashDemo
-            },
+        modelBuilder.Entity<User>().HasData(
             new User
             {
                 UserId = idUser1,
@@ -161,16 +122,11 @@ public static class ModelBuilderExtensions
                 UserName = "user1",
                 FullName = "user1 KNote",
                 EMail = "user1@mydomain.com",
-                RoleDefinition = "Public",
+                RoleDefinition = nameof(EnumRoles.Guest),
                 PasswordSalt = passwordSaltDemo,
                 PasswordHash = passwordHashDemo
             }
         );
-
-        // TODO: Add NoteTypes
-        //Documentation
-        //Work order
-        //Reminder
 
         var idFolder1 = Guid.NewGuid();
         var idFolder2 = Guid.NewGuid();

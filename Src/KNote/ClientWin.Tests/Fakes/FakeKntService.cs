@@ -23,8 +23,17 @@ internal class FakeKntService : IKntService
 
     public ILogger Logger { get; set; }
     public Guid IdServiceRef { get; } = Guid.NewGuid();
-    public RepositoryRef RepositoryRef => throw new NotSupportedException();
+    public RepositoryRef RepositoryRef { get; set; } = new RepositoryRef { Alias = "Fake repository" };
     public string UserIdentityName { get; set; }
+    public bool EnforceAuthorization { get; set; }
+
+    // What GetCurrentUserAsync returns (null: the user isn't registered in this repository); the role
+    // comes from it, as in KntService. An Admin by default, so tests unrelated to authorization run as before.
+    public UserDto CurrentUser { get; set; } = new UserDto { UserId = Guid.NewGuid(), UserName = "admin", RoleDefinition = "Admin" };
+    public Task<UserDto> GetCurrentUserAsync() => Task.FromResult(CurrentUser);
+    public Task<EnumRoles?> GetCurrentUserRoleAsync() =>
+        Task.FromResult(CurrentUser == null || CurrentUser.Disabled ? null : KntRoles.Highest(CurrentUser.RoleDefinition));
+    public void ResetCurrentUser() { }
 
     public IKntRepository Repository => throw new NotSupportedException();
     public IKntUserService Users => UsersFake;
@@ -37,7 +46,7 @@ internal class FakeKntService : IKntService
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();
-    public Task<bool> CreateDataBase(string newOwner = null) => throw new NotSupportedException();
+    public Task<bool> CreateDataBase() => throw new NotSupportedException();
     public string GetSystemVariable(string scope, string variable) => throw new NotSupportedException();
     public void SaveSystemVariable(string scope, string key, string value) => throw new NotSupportedException();
     public void PublishNoteInMessageBroker(NoteExtendedDto noteInfo) => throw new NotSupportedException();

@@ -100,6 +100,7 @@
             statusLabel2 = new ToolStripStatusLabel();
             statusLabelMenuHint = new ToolStripStatusLabel();
             progressBar = new ToolStripProgressBar();
+            statusLabelUser = new ToolStripStatusLabel();
             toolBarManagement = new ToolStrip();
             toolNewNote = new ToolStripButton();
             toolEditNote = new ToolStripButton();
@@ -614,10 +615,11 @@
             // 
             // statusBarManagement
             // 
-            statusBarManagement.Items.AddRange(new ToolStripItem[] { statusLabel2, statusLabelMenuHint, progressBar });
+            statusBarManagement.Items.AddRange(new ToolStripItem[] { statusLabel2, statusLabelMenuHint, progressBar, statusLabelUser });
             statusBarManagement.Location = new Point(0, 668);
             statusBarManagement.Name = "statusBarManagement";
             statusBarManagement.Padding = new Padding(1, 0, 16, 0);
+            statusBarManagement.ShowItemToolTips = true;
             statusBarManagement.Size = new Size(1014, 22);
             statusBarManagement.TabIndex = 3;
             statusBarManagement.Text = "statusStrip1";
@@ -626,6 +628,7 @@
             // 
             statusLabel2.Name = "statusLabel2";
             statusLabel2.Size = new Size(19, 17);
+            statusLabel2.Spring = true;
             statusLabel2.Text = "....";
             statusLabel2.TextAlign = ContentAlignment.MiddleLeft;
             //
@@ -643,6 +646,14 @@
             progressBar.Name = "progressBar";
             progressBar.Size = new Size(100, 16);
             progressBar.Visible = false;
+            //
+            // statusLabelUser
+            //
+            statusLabelUser.BorderSides = ToolStripStatusLabelBorderSides.Left;
+            statusLabelUser.Name = "statusLabelUser";
+            statusLabelUser.Size = new Size(16, 17);
+            statusLabelUser.TextAlign = ContentAlignment.MiddleRight;
+            statusLabelUser.TextImageRelation = TextImageRelation.ImageBeforeText;
             // 
             // toolBarManagement
             // 
@@ -1060,6 +1071,7 @@
         private ToolStripMenuItem menuAppInfoAlarms;
         private ToolStripMenuItem menuAIProviders;
         private ToolStripProgressBar progressBar;
+        private ToolStripStatusLabel statusLabelUser;
         private ToolStripMenuItem menuCOMPortServer;
         private Label labelReResources;
         private Label labelRepAliasCon;

@@ -6,6 +6,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.ProjectManager, AuthorizationScope.Application)]
 public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
 {
     #region Private fields

@@ -31,10 +31,11 @@ public static class InProcessTestHost
             UserName = $"itest-{Guid.NewGuid():N}"[..24],
             EMail = $"{Guid.NewGuid():N}@knote.tests",
             FullName = "In-Process Test User",
-            // Admin covers every role check across the controllers this suite exercises
-            // (Folders/KAttributes/NoteTypes/Users require "Admin"; Notes accepts
-            // "Admin, Staff, ProjecManager").
-            RoleDefinition = "Admin",
+            // No RoleDefinition: api/users/register ignores it (KntUsersRegisterAsyncCommand). Being the
+            // first user registered in this host's brand-new database, where adminKNote is the only
+            // Admin, this user becomes an Admin - which covers every role check across the controllers
+            // this suite exercises (Folders/KAttributes/NoteTypes/Users require "Admin"; Notes accepts
+            // "Admin, Staff, ProjectManager").
             Password = "InProcess-Test-Password-1!"
         };
 

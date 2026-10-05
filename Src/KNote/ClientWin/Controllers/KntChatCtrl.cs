@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Staff, AuthorizationScope.Application)]
 public class KntChatCtrl : CtrlBase, IDisposable
 {
     #region Private fields
@@ -251,6 +252,10 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     public void ShowChatView(bool autoCloseCtrlOnViewExit)
     {
+        // Refused by Run() (CheckPreconditions): already finalized, nothing to show.
+        if (!PreconditionsMet)
+            return;
+
         AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;        
         ChatView.ShowView();
     }
@@ -258,7 +263,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
     // For use in KntScript
     public void ShowChatView()
     {
-        
+        if (!PreconditionsMet)
+            return;
+
         if (ControllerState == EControllerState.Started)
         {
             ChatView.ShowView();
@@ -271,6 +278,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     public void VisibleView (bool visible)
     {
+        if (!PreconditionsMet)
+            return;
+
         ChatView.VisibleView(visible);
     }
 

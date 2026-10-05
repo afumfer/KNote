@@ -11,11 +11,20 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     public EnumRepositoryEditorMode EditorMode { get; set; }
 
     /// <summary>
-    /// Whether the current Windows user (Store.AppUserName) has the Admin role in the repository being
-    /// managed. Only meaningful in EnumRepositoryEditorMode.Management (a repository must already be
-    /// linked to have a Users table to check against); gates the Users/Note types/Attributes tabs.
+    /// Whether the repository administration tabs (Users, Note types, Trace note types, Attributes) apply:
+    /// only to an already linked repository, i.e. in EnumRepositoryEditorMode.Management - which in turn
+    /// requires the Admin role in that repository (see RequiredAuthorization).
     /// </summary>
-    public bool CurrentUserIsAdmin { get; private set; }
+    public bool AdministrationAvailable => EditorMode == EnumRepositoryEditorMode.Management;
+
+    // Each mode is a different use case: linking a repository is open to anybody who signed in; creating
+    // one takes an Admin somewhere (the application role); managing one takes an Admin in that repository.
+    protected override KntAuthorizeAttribute RequiredAuthorization => EditorMode switch
+    {
+        EnumRepositoryEditorMode.Create => new KntAuthorizeAttribute(EnumRoles.Admin, AuthorizationScope.Application),
+        EnumRepositoryEditorMode.Management => new KntAuthorizeAttribute(EnumRoles.Admin),
+        _ => null
+    };
 
     #endregion
 
@@ -84,10 +93,8 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             Model.ResourcesContainerRootUrl = repositoryForEdit.ResourcesContainerRootUrl;
             Model.SetIsDirty(false);
 
-            CurrentUserIsAdmin = EditorMode == EnumRepositoryEditorMode.Management
-                && await Store.IsCurrentUserAdminAsync(service);
-
-            if (CurrentUserIsAdmin)
+            // Not loaded for a user who will be refused the management screen anyway (see RunModal).
+            if (AdministrationAvailable && IsAuthorized())
             {
                 await NoteTypesManageCtrl.LoadEntitiesAsync(service);
                 await KAttributesManageCtrl.LoadEntitiesAsync(service);
@@ -111,10 +118,6 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
         Service = service;
 
         Model = new RepositoryRef();
-
-        // AddLink/Create modes: the repository isn't linked yet, so there's no Users table to check
-        // the current user's role against - the admin tabs stay disabled regardless.
-        CurrentUserIsAdmin = false;
 
         return Task.FromResult(true);
     }
@@ -154,14 +157,22 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             else if (EditorMode == EnumRepositoryEditorMode.AddLink)
             {                    
                 // Add link repository
-                var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);                    
+                var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
                 if (await newService.Service.TestDbConnection())
                 {
+                    // Only linked if the session's user may use it (registered, or registering now; with
+                    // the session's password, when signed in with a KNote user).
+                    var authentication = await Store.AuthenticateRepositoryAsync(newService.Service);
+                    if (!authentication.IsValid)
+                    {
+                        View.ShowInfo(authentication.ErrorMessage);
+                        return false;
+                    }
+
                     Store.AddServiceRef(newService);
                     Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
-                    await Store.EnsureCurrentUserRegistered(newService.Service);
                     OnAddedEntity(Model);
                 }
                 else
@@ -175,8 +186,17 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             {
                 // Create repository and add link                    
                 var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
-                if (await newService.Service.CreateDataBase(SystemInformation.UserName))
+                if (await newService.Service.CreateDataBase())
                 {
+                    // Same as for a linked repository. Being the first user registered in this new
+                    // database, the current user becomes its Admin (see KntUsersRegisterAsyncCommand).
+                    var authentication = await Store.AuthenticateRepositoryAsync(newService.Service);
+                    if (!authentication.IsValid)
+                    {
+                        View.ShowInfo($"The repository has been created, but it has not been linked.{Environment.NewLine}{authentication.ErrorMessage}");
+                        return false;
+                    }
+
                     Store.AddServiceRef(newService);
                     Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);

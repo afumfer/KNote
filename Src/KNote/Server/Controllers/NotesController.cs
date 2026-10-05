@@ -66,7 +66,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpPost("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]        
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]        
     public async Task <IActionResult> Filter([FromBody] NotesFilterDto notesFilter)
     {
         try
@@ -178,7 +178,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> New()
     {
         try
@@ -204,7 +204,7 @@ public class NotesController : ControllerBase
 
     [HttpPost]
     [HttpPut]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> Post([FromBody]NoteDto note)
     {            
         try
@@ -251,7 +251,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> Delete(Guid id)
     {
         try
@@ -275,7 +275,7 @@ public class NotesController : ControllerBase
 
     [HttpPost("[action]")]
     [HttpPut("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> Resources([FromBody]ResourceInfoDto entity)
     {
         try
@@ -300,7 +300,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("{id}/[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> Resources(Guid id)
     {
         try
@@ -323,7 +323,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpDelete("resources/{id}")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> DeleteResources(Guid id)
     {
         try
@@ -348,7 +348,7 @@ public class NotesController : ControllerBase
     // TODO: ###  deprecated... 
     [HttpPost("[action]")]
     [HttpPut("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> SaveFile(ResourceDto resource)
     {
         Result<ResourceDto> resApi = new Result<ResourceDto>();
@@ -374,7 +374,7 @@ public class NotesController : ControllerBase
 
     [HttpPost("[action]")]
     [HttpPut("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> Tasks([FromBody]NoteTaskDto entity)
     {            
         try
@@ -399,7 +399,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("{id}/[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> Tasks(Guid id)
     {
         try
@@ -424,7 +424,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpGet("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> GetStartedTasksByDateTimeRage([FromQuery] string start, [FromQuery] string end)
     {
         try
@@ -452,7 +452,7 @@ public class NotesController : ControllerBase
     }
 
     [HttpDelete("tasks/{id}")]
-    [Authorize(Roles = "Admin, Staff, ProjecManager")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> DeleteTask(Guid id)
     {
         try

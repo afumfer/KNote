@@ -116,6 +116,14 @@ public interface IViewManageList<TEntity> : IViewEmbeddable
 
 #region Specific views
 
+// A use case that writes a file chosen by the user (e.g. NotesListCsvExportCtrl) and has no window of its own.
+public interface IViewFileExport : IViewBase
+{
+    // Save file dialog. filter uses the WinForms "Description|*.ext" syntax. Returns the chosen path, or
+    // null if the dialog was canceled.
+    string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName);
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();
@@ -129,10 +137,6 @@ public interface IViewKNoteManagement : IViewBase
     // controller doesn't have to reference a concrete WinForms Form to ask the user for the tag text.
     // Returns the value the user typed, or null if the dialog was canceled.
     string PromptForValue(string label, string caption);
-
-    // Save file dialog, used by KNoteManagementCtrl.ExportNotesListToCsv. filter uses the WinForms
-    // "Description|*.ext" syntax. Returns the chosen path, or null if the dialog was canceled.
-    string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName);
 
     // Raised once this view is actually visible under a running message loop. The app bootstrap
     // (Program.cs) needs this to defer KNoteManagementCtrl.Run() until Application.Run's loop is

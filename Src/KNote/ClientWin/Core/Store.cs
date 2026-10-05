@@ -34,7 +34,17 @@ public class Store
 
     public AppUserState State { get; protected set; }
 
+    // The user of this session: the Windows account, or the KNote user name typed in the sign-in dialog
+    // (see Security.AuthenticationMode). Every ServiceRef is created with it.
     public string AppUserName { get; set; }
+
+    // How AppUserName signed in, and its role in each linked repository (see AuthenticateRepositoryAsync).
+    public KntSecurityContext Security { get; } = new();
+
+    // How a refused use case is reported to the user (see CtrlBase.CheckAccess), without creating the
+    // refused controller's view. Program sets it to a message box; null (only logged) until then, so a
+    // Store built elsewhere (tests) never blocks on a dialog nobody can close.
+    public Action<string> AccessDeniedNotifier { get; set; }
 
     public string ComputerName { get; set; }
 
@@ -192,6 +202,7 @@ public class Store
         serviceRef.Service.CommandExecuted -= ServiceRef_CommandExecuted;
 
         _serviceRefRegistry.Remove(serviceRef);
+        Security.RemoveRepository(serviceRef.Service);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
         Settings.Repositories.Items.Remove(serviceRef.RepositoryRef);
         Events.Publish(new ServiceRefRemoved(serviceRef));
@@ -316,7 +327,10 @@ public class Store
 
     public void AddConfigNotice(string notice)
     {
-        _configNotices.Add(notice);
+        // Linking the repositories can be retried at startup (see Program.LinkRepositoriesAsync): the same
+        // notice is only worth telling once.
+        if (!_configNotices.Contains(notice))
+            _configNotices.Add(notice);
     }
 
     public IReadOnlyList<string> TakeConfigNotices()
@@ -374,10 +388,11 @@ public class Store
                 if (com is PostItEditorCtrl postIt && postIt.ControllerState == EControllerState.Started)
                     await postIt.SaveModel();
 
+                // A note open in consult mode can't be saved: skipped without a word (see NoteEditorCtrl).
                 if (com is NoteEditorCtrl)
                 {
                     var comNote = (NoteEditorCtrl)com;
-                    if (comNote.EditMode)
+                    if (comNote.EditMode && !comNote.ConsultMode)
                         await comNote.SaveModel();
                 }
             }
@@ -413,7 +428,7 @@ public class Store
                     var comNote = (NoteEditorCtrl)com;
                     if (comNote.ServiceRef.IdServiceRef == serviceId)
                     {
-                        if (comNote.EditMode)
+                        if (comNote.EditMode && !comNote.ConsultMode)
                         {
                             await comNote.SaveModel();                                
                             stackNotes.Push(comNote);
@@ -470,37 +485,110 @@ public class Store
             return null;
     }
 
-    /// <summary>
-    /// Checks whether the current Windows user (AppUserName) has the Admin role in the given
-    /// repository's Users table. Used to gate the repository administration tabs (Users, Note types,
-    /// Attributes) in RepositoryEditorCtrl/RepositoryEditorForm.
-    /// </summary>
-    public async Task<bool> IsCurrentUserAdminAsync(IKntService service)
-    {
-        var userDto = (await service.Users.GetByUserNameAsync(this.AppUserName)).Entity;
-        if (userDto?.RoleDefinition == null)
-            return false;
 
-        return userDto.RoleDefinition
-            .Split(',', StringSplitOptions.TrimEntries)
-            .Contains(nameof(EnumRoles.Admin));
+    /// <summary>
+    /// Decides whether the session's user (AppUserName) can use a repository before it is linked, and
+    /// records its role there in Security. Signed in with the Windows account, being registered is enough;
+    /// signed in with a KNote user name, the session's password must match too. A user not registered yet
+    /// is offered the registration dialog (its role then comes from KntUsersRegisterAsyncCommand). An
+    /// invalid result (wrong password, registration cancelled, disabled user...) explains why, and means
+    /// the repository must not be linked in this session.
+    /// </summary>
+    public async Task<Result> AuthenticateRepositoryAsync(IKntService service)
+    {
+        var result = new Result();
+        var alias = service.RepositoryRef?.Alias;
+
+        var user = await service.GetCurrentUserAsync();
+        if (user == null)
+        {
+            var userRegisterCtrl = new UserRegisterCtrl(this);
+            await userRegisterCtrl.NewModel(service);
+            if (userRegisterCtrl.RunModal().Entity != EControllerResult.Executed)
+            {
+                result.AddErrorMessage($"The user '{AppUserName}' is not registered in the repository '{alias}', so it is not available in this session.");
+                return result;
+            }
+        }
+        else if (Security.AuthenticationMode == AppAuthenticationMode.Credentials && !await PasswordIsValidAsync(service))
+        {
+            result.AddErrorMessage($"The password of the user '{AppUserName}' is not valid in the repository '{alias}', so it is not available in this session.");
+            return result;
+        }
+
+        var role = await service.GetCurrentUserRoleAsync();
+        if (role == null)
+        {
+            result.AddErrorMessage($"The user '{AppUserName}' is disabled or has no role in the repository '{alias}', so it is not available in this session.");
+            return result;
+        }
+
+        Security.SetRepositoryRole(service, role.Value);
+        return result;
+    }
+
+    private async Task<bool> PasswordIsValidAsync(IKntService service)
+    {
+        try
+        {
+            var res = await service.Users.AuthenticateAsync(new UserCredentialsDto { UserName = AppUserName, Password = Security.Password });
+            return res.IsValid;
+        }
+        catch (Exception ex)
+        {
+            // A user created from the users management screen may have no password at all yet: checking
+            // it throws instead of just failing.
+            Logger?.LogWarning(ex, "Authenticating {user} in repository {alias} failed.", AppUserName, service.RepositoryRef?.Alias);
+            return false;
+        }
     }
 
     /// <summary>
-    /// Checks whether the current Windows user (AppUserName) is registered in the Users table of
-    /// the given repository, and if not, shows a modal registration dialog for it. Cancelling the
-    /// dialog is not blocking: the app keeps running against that repository without the user
-    /// registered (existing guards elsewhere, e.g. PostItEditorCtrl, already handle that case).
+    /// Reads again the session user's role in a linked repository (e.g. after its users were edited from
+    /// the repository management screen). A user that has lost every role there keeps the repository
+    /// linked, without a role (every command is then refused).
     /// </summary>
-    public async Task<bool> EnsureCurrentUserRegistered(IKntService service)
+    public void NotifyAccessDenied(string message)
     {
-        if (await GetUserId(service) != null)
+        Logger?.LogInformation("Access denied: {message}", message);
+        AccessDeniedNotifier?.Invoke(message);
+    }
+
+    /// <summary>
+    /// Running code (KntScript, C#, Python, JavaScript, a natural language request, a shell command) needs
+    /// the ProjectManager role, application-wide: a script may touch any repository, and what it does
+    /// there is still authorized by the Service layer with the user's role in each one. Every way of
+    /// running code goes through the Run*/ExecuteCommand methods below, which check this first (or calls
+    /// CheckCanRunScripts itself, see there).
+    /// </summary>
+    public static readonly KntAuthorizeAttribute RunScriptsRequirement = new(EnumRoles.ProjectManager, AuthorizationScope.Application);
+
+    public bool CanRunScripts => Security.IsAuthorized(RunScriptsRequirement);
+
+    // False (and the user told, unless silent) when the user can't run code. Also called by the few use cases
+    // that run a KntScript engine of their own: the KNote assistants of the catalog (KNoteAIAssistantCtrl,
+    // NoteEditorCtrl), whose script is code like any other.
+    public bool CheckCanRunScripts(bool silent = false)
+    {
+        if (CanRunScripts)
             return true;
 
-        var userRegisterCtrl = new UserRegisterCtrl(this);
-        await userRegisterCtrl.NewModel(service);
-        var result = userRegisterCtrl.RunModal();
-        return result.Entity == EControllerResult.Executed;
+        var message = $"Running scripts requires the role '{KntConst.Roles[RunScriptsRequirement.MinimumRole]}'.";
+        if (silent)
+            Logger?.LogInformation("Access denied: {message}", message);
+        else
+            NotifyAccessDenied(message);
+        return false;
+    }
+
+    public async Task RefreshRepositoryRoleAsync(IKntService service)
+    {
+        service.ResetCurrentUser();
+        var role = await service.GetCurrentUserRoleAsync();
+        if (role == null)
+            Security.RemoveRepository(service);
+        else
+            Security.SetRepositoryRole(service, role.Value);
     }
 
     #endregion
@@ -617,6 +705,9 @@ public class Store
 
     public async Task RunCode(NoteDto note, bool runInNewTask = true, CtrlBase caller = null)
     {
+        if (!CheckCanRunScripts())
+            return;
+
         var ct = note.GetContentTypeExt();
         if (ct == null || string.IsNullOrEmpty(ct.ForScript))
             return;
@@ -717,7 +808,7 @@ public class Store
     // that, instead of leaving it sitting there for the user to close by hand.
     public void RunKntSCode(string code)
     {
-        if (string.IsNullOrEmpty(code))
+        if (string.IsNullOrEmpty(code) || !CheckCanRunScripts())
             return;
 
         var inOutDevice = new InOutDeviceForm();
@@ -733,7 +824,7 @@ public class Store
     // cs/py/js/knt, none of which carry state between executions either.
     public async Task RunNaturalLanguageCode(string prompt)
     {
-        if (string.IsNullOrEmpty(prompt))
+        if (string.IsNullOrEmpty(prompt) || !CheckCanRunScripts())
             return;
 
         var assistantCtrl = new KNoteAIAssistantCtrl(this);
@@ -778,6 +869,9 @@ public class Store
     // note's script type doesn't support it instead of silently doing nothing.
     public async Task<bool> RunCodeInStdOutConsole(NoteDto note, CtrlBase caller = null)
     {
+        if (!CheckCanRunScripts())
+            return false;
+
         var ct = note.GetContentTypeExt();
         if (ct == null || !SupportsStdOutConsole(ct.ForScript))
             return false;
@@ -814,6 +908,9 @@ public class Store
     // runCommandTemplate gets the generated file name via {0} (e.g. "dotnet run {0}", "python {0}").
     private (string, string) RunScriptCode(string code, string fileExtension, string runCommandTemplate, bool redirectStandardOut)
     {
+        if (!CheckCanRunScripts())
+            return ("", "Not authorized to run scripts.");
+
         string tempDir = Path.GetTempPath();
         string nameFile = $"kntTmpCodeFile_{Guid.NewGuid().ToString()}.{fileExtension}";
         string tempFullFileName = Path.Combine(tempDir, nameFile);
@@ -829,6 +926,9 @@ public class Store
 
     public (string, string) ExecuteCommand(string command, string dir, bool redirectStandardOut = true)
     {
+        if (!CheckCanRunScripts())
+            return ("", "Not authorized to run commands.");
+
         try
         {
             var process = new Process

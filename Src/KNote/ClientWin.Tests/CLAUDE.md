@@ -28,6 +28,23 @@ lo pida (`LoadModelById(service, id)`, `NewModel(service)`, ...) — nunca un `I
 Al añadir un miembro nuevo a un fake existente, sigue el mismo patrón (delegado opcional + throw por
 defecto) en vez de sustituir el `throw new NotSupportedException()` por una implementación fija.
 
+## Tests y autorización (roles)
+
+Un `Store` recién creado no tiene ningún rol (`Store.Security` vacío: rol de aplicación Guest y ninguno en
+ningún repositorio), así que una controladora con `[KntAuthorize]`, la ejecución de scripts
+(`Store.CanRunScripts`) o el modo consulta de `NoteEditorCtrl` se comportan como para un Guest. En los tests
+que **no** van de seguridad, entra como Admin con `TestStoreFactory.GrantAdmin(store, servicios...)` (Admin
+en esos `IKntService`; sin argumentos, en uno ficticio, suficiente para el rol de aplicación). En los que sí,
+fija el rol justo con `store.Security.SetRepositoryRole(service, rol)`.
+
+`Store.AccessDeniedNotifier` es `null` fuera de la app (lo conecta `Program`), así que una denegación nunca
+abre un `MessageBox` que bloquee la ejecución de los tests; para comprobar el aviso, captúralo:
+`store.AccessDeniedNotifier = notified.Add`.
+
+Las matrices de roles se comprueban por reflexión: `ControllerAuthorizationMatrixTests` (controladoras de
+`ClientWin`) y, en `Tests/`, `CommandAuthorizationMatrixTests` (comandos del Service). Un caso de uso o un
+comando nuevo las hace fallar hasta que se decide su rol en ellas.
+
 ## Tests de configuración (`AppConfigStorage`, migración, secretos)
 
 - `Fixtures/KNoteData.v1.config` es un `KNoteData.config` del formato antiguo con **datos sintéticos** (nunca

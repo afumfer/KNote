@@ -110,7 +110,7 @@ public abstract class KntServiceBase
 
     private async Task<(TResult Result, CommandOutcome Outcome)> ExecuteCommandCore<TResult>(KntCommandServiceBase<TResult> command) where TResult : ResultBase, new()
     {
-        var validAuthorization = command.ValidateAuthorization();
+        var validAuthorization = await command.ValidateAuthorizationAsync();
         if (validAuthorization.IsValid)
         {
             Service.Logger?.LogTrace("Service validated authorization for {command}", command.GetType());
@@ -123,7 +123,8 @@ public abstract class KntServiceBase
             var result = new TResult();
             result.AddErrorMessage("Not authorized. ");
             result.AddListErrorMessage(validAuthorization.ListErrorMessage);
-            Service.Logger?.LogTrace("Service authorization is not valid for {command}", command.GetType());
+            result.NotAuthorized = true;
+            Service.Logger?.LogInformation("Service authorization is not valid for {command}: {errorMessage}", command.GetType(), validAuthorization.ErrorMessage);
             return (result, CommandOutcome.NotAuthorized);
         }
     }

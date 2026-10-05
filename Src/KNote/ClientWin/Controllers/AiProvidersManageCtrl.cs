@@ -12,6 +12,7 @@ namespace KNote.ClientWin.Controllers;
 /// straight from the Tools menu, and ListEntities is Store.Settings.Ai.Providers itself (no
 /// service call needed to load it).
 /// </summary>
+[KntAuthorize(EnumRoles.Staff, AuthorizationScope.Application)]
 public class AiProvidersManageCtrl : CtrlManageListBase<IViewManageList<AiProviderRef>, AiProviderRef>
 {
     #region Constructor

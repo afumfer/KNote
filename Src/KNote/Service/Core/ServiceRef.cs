@@ -47,6 +47,7 @@ public class ServiceRef
             {
                 _service = new KntService(Repository, ActivateMessageBroker);
                 _service.UserIdentityName = UserIdentityName;
+                _service.EnforceAuthorization = EnforceAuthorization;
             }
             return _service;
         }
@@ -56,15 +57,21 @@ public class ServiceRef
 
     public bool ActivateMessageBroker { get; init; }
 
+    // ServiceRef is ClientWin's way into the Service layer (Server builds KntService through DI instead),
+    // so by default every command is checked against the role of UserIdentityName in this repository.
+    public bool EnforceAuthorization { get; }
+
     #endregion
 
     #region Constructor
 
-    public ServiceRef(RepositoryRef repositoryRef, string userIdentityName, bool activateMessageBroker = false, ILogger logger = null)
+    public ServiceRef(RepositoryRef repositoryRef, string userIdentityName, bool activateMessageBroker = false, ILogger logger = null,
+        bool enforceAuthorization = true)
     {
         RepositoryRef = repositoryRef;
         UserIdentityName = userIdentityName;
         ActivateMessageBroker = activateMessageBroker;
+        EnforceAuthorization = enforceAuthorization;
         Service.Logger = logger;
     }
 

@@ -48,14 +48,15 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 
     protected override void ModelToControls()
     {
-        var alias = _ctrl.ServiceRef?.RepositoryRef?.Alias ?? "this repository";
-        labelInfo.Text = $"The Windows user '{_ctrl.Model.UserName}' is not registered in '{alias}'. " +
+        var alias = _ctrl.RepositoryAlias ?? "this repository";
+        labelInfo.Text = $"The user '{_ctrl.Model.UserName}' is not registered in '{alias}'. " +
             "Please provide the following details to register it.";
 
         textUserName.Text = _ctrl.Model.UserName;
         textFullName.Text = _ctrl.Model.FullName;
         textEMail.Text = _ctrl.Model.EMail;
         textPassword.Text = _ctrl.Model.Password;
+        textPassword.ReadOnly = _ctrl.PasswordFromSignIn;
     }
 
     protected override void ControlsToModel()

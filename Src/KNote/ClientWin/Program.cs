@@ -44,14 +44,16 @@ static class Program
         // Visual styles, text rendering and high DPI mode (SystemAware) come from the csproj.
         ApplicationConfiguration.Initialize();
         Store appStore = new Store(new FactoryViewsWinForms());
+        appStore.AccessDeniedNotifier = message =>
+            KntMessageBox.Show(message, KntConst.AppName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         RegisterGlobalExceptionHandlers(appStore);
         SplashForm splashForm = new SplashForm(appStore);
         Exception loadException = null;
 
         try
         {
-            // LoadAppStore does real async I/O (repository access) and can show a modal dialog
-            // (Store.EnsureCurrentUserRegistered). It must finish before KNoteManagementCtrl is
+            // LoadAppStore does real async I/O (repository access) and can show modal dialogs (sign-in,
+            // Store.AuthenticateRepositoryAsync's registration). It must finish before KNoteManagementCtrl is
             // created. Kicking it off from SplashForm.Shown, under a real Application.Run(splashForm)
             // message loop, lets every "await" marshal its continuation back onto this UI thread the
             // normal WinForms way. A manual Application.DoEvents() polling loop here instead (run
@@ -71,7 +73,11 @@ static class Program
             {
                 try
                 {
-                    await LoadAppStore(appStore);
+                    if (!await LoadAppStore(appStore))
+                    {
+                        splashForm.Close();
+                        return;
+                    }
 
                     // Light/dark mode: only the windows created from here on follow it (see AppTheme). The
                     // splash and, on first run, the user registration dialog have already been shown in the
@@ -136,7 +142,8 @@ static class Program
         }
     }
 
-    static async Task LoadAppStore(Store store)
+    // False: the user chose to close the application while signing in (no error to report).
+    static async Task<bool> LoadAppStore(Store store)
     {
         var pathApp = Application.StartupPath;
 
@@ -207,15 +214,17 @@ static class Program
                 ResourcesContainerRootUrl = @"file:///" + pathResourcesCache.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             };
 
+            // Linked below, with the rest of the configured repositories (there are none yet): the new
+            // database only has its seeded users, so the user registers there and, as the first one after
+            // adminKNote, becomes its Admin (see KntUsersRegisterAsyncCommand). A first run always signs in
+            // with the Windows account (SecurityConfig's default).
             var initialServiceRef = new ServiceRef(r0, store.AppUserName, false, store.Logger);
-            var resCreateDB = await initialServiceRef.Service.CreateDataBase(store.AppUserName);
+            var resCreateDB = await initialServiceRef.Service.CreateDataBase();
 
             if (resCreateDB)
-            {                    
-                store.AddServiceRef(initialServiceRef);
-                store.SetAssistantServiceRef(null);
                 store.Settings.Repositories.Items.Add(r0);
-            }
+            store.SetAssistantServiceRef(null);
+            store.Security.StartSession(AppAuthenticationMode.Windows);
 
             // Default values
             store.Settings.General.AutoSaveActivated = true;
@@ -237,33 +246,21 @@ static class Program
             if (store.Settings.General.LogFile == legacyLogFile)
                 store.Settings.General.LogFile = Path.Combine(AppUserDataPath.Directory, "KNoteWinApp.log");
 
-            // A repository that can't be opened right now (e.g. its SQL Server is stopped or not
-            // reachable yet: ServiceRef's constructor already connects, see KntRepositoryFactory) is
-            // skipped for this session only, instead of aborting the whole application. It stays in
-            // the configuration, so it is tried again on the next startup.
-            foreach (var r in store.Settings.Repositories.Items)
-            {
-                var serviceRef = TryCreateServiceRef(store, r);
-                if (serviceRef == null)
-                    continue;
+            if (!await SignInAsync(store))
+                return false;
 
-                store.AddServiceRef(serviceRef);
-
-                try
-                {
-                    await store.EnsureCurrentUserRegistered(serviceRef.Service);
-                }
-                catch (Exception ex)
-                {
-                    store.Logger?.LogError(ex, "Checking the current user in repository {alias} failed.", r.Alias);
-                }
-            }
-
+            // The Assistant repository is only read, as a catalog of templates, prompts and code
+            // snippets (Store.GetCatalogItem/GetIncludeCode): the user isn't registered there, so it
+            // runs without per-user authorization. Editing those notes goes through the repository's
+            // own link, if it is also linked, which is authorized as usual.
             if (store.Settings.Repositories.Assistant?.ConnectionString != null)
-                store.SetAssistantServiceRef(TryCreateServiceRef(store, store.Settings.Repositories.Assistant));
+                store.SetAssistantServiceRef(TryCreateServiceRef(store, store.Settings.Repositories.Assistant, enforceAuthorization: false));
             else
                 store.SetAssistantServiceRef(null);
         }
+
+        if (!await LinkRepositoriesAsync(store))
+            return false;
 
         // No repository at all (the default one could not be created, or none of the configured ones
         // could be opened): stop before SaveConfig, which would overwrite the configuration with an
@@ -280,6 +277,88 @@ static class Program
         // default folder
         var folder = (await firstService.Service.Folders.GetHomeAsync()).Entity;
         store.DefaultFolderWithServiceRef = new FolderWithServiceRef { ServiceRef = firstService, FolderInfo = folder };
+
+        return true;
+    }
+
+    // Starts the session's identity (Store.AppUserName, Store.Security): the Windows account, or, when the
+    // application is set to sign in with a KNote user name and password, whatever the user types in the
+    // sign-in dialog (which can also switch back to the Windows account). False: the user closed the
+    // dialog, so the application must close.
+    static async Task<bool> SignInAsync(Store store)
+    {
+        if (store.Settings.Security.AuthenticationMode != AppAuthenticationMode.Credentials)
+        {
+            store.AppUserName = SystemInformation.UserName;
+            store.Security.StartSession(AppAuthenticationMode.Windows);
+            return true;
+        }
+
+        var loginCtrl = new LoginCtrl(store);
+        await loginCtrl.NewModel();
+        return loginCtrl.RunModal().Entity == EControllerResult.Executed;
+    }
+
+    // Links every configured repository the session's user may use (see Store.AuthenticateRepositoryAsync).
+    // A repository that can't be opened right now (e.g. its SQL Server is stopped or not reachable yet:
+    // ServiceRef's constructor already connects, see KntRepositoryFactory) or that refuses the user (not
+    // registered, wrong password, disabled) is skipped for this session only, instead of aborting the
+    // whole application: it stays in the configuration and is tried again on the next startup. When every
+    // repository could be opened but none accepted the user, the user can try again (signing in again,
+    // with credentials) or close the application (false).
+    static async Task<bool> LinkRepositoriesAsync(Store store)
+    {
+        while (true)
+        {
+            var refusals = new List<string>();
+            var anyOpened = false;
+
+            foreach (var r in store.Settings.Repositories.Items)
+            {
+                var serviceRef = TryCreateServiceRef(store, r);
+                if (serviceRef == null)
+                    continue;
+                anyOpened = true;
+
+                Result authentication;
+                try
+                {
+                    authentication = await store.AuthenticateRepositoryAsync(serviceRef.Service);
+                }
+                catch (Exception ex)
+                {
+                    store.Logger?.LogError(ex, "Checking the current user in repository {alias} failed.", r.Alias);
+                    authentication = new Result();
+                    authentication.AddErrorMessage($"The user '{store.AppUserName}' could not be checked in the repository '{r.Alias}', so it is not available in this session.{Environment.NewLine}({ex.Message})");
+                }
+
+                if (authentication.IsValid)
+                    store.AddServiceRef(serviceRef);
+                else
+                {
+                    store.Logger?.LogWarning("Repository {alias} not linked: {reason}", r.Alias, authentication.ErrorMessage);
+                    refusals.Add(authentication.ErrorMessage);
+                }
+            }
+
+            // Linked something, or nothing could even be opened (reported by the caller): the refusals
+            // are shown once the main window is up, through the config notices.
+            if (store.GetFirstServiceRef() != null || !anyOpened)
+            {
+                foreach (var refusal in refusals)
+                    store.AddConfigNotice(refusal);
+                return true;
+            }
+
+            var answer = KntMessageBox.Show($"{string.Join(Environment.NewLine + Environment.NewLine, refusals)}"
+                + $"{Environment.NewLine}{Environment.NewLine}{KntConst.AppName} needs at least one repository. Do you want to try again?",
+                KntConst.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (answer != DialogResult.Yes)
+                return false;
+
+            if (store.Security.AuthenticationMode == AppAuthenticationMode.Credentials && !await SignInAsync(store))
+                return false;
+        }
     }
 
     // Only a real first run (neither the configuration nor its backup exist) may create the default
@@ -308,11 +387,12 @@ static class Program
 
     // Returns null (logged, and reported to the user once the main window is shown, through the
     // config notices) when the repository can't be opened.
-    static ServiceRef TryCreateServiceRef(Store store, RepositoryRef repositoryRef)
+    static ServiceRef TryCreateServiceRef(Store store, RepositoryRef repositoryRef, bool enforceAuthorization = true)
     {
         try
         {
-            return new ServiceRef(repositoryRef, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger);
+            return new ServiceRef(repositoryRef, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger,
+                enforceAuthorization);
         }
         catch (Exception ex)
         {

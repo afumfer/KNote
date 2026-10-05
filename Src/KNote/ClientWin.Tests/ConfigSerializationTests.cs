@@ -141,6 +141,37 @@ public class ConfigSerializationTests
     }
 
     [TestMethod]
+    [DataRow(AppAuthenticationMode.Windows)]
+    [DataRow(AppAuthenticationMode.Credentials)]
+    public void XmlSerializer_RoundTrip_PreservesAuthenticationMode(AppAuthenticationMode authenticationMode)
+    {
+        var settings = new AppUserSettings();
+        settings.Security.AuthenticationMode = authenticationMode;
+
+        Assert.AreEqual(authenticationMode, RoundTrip(settings).Security.AuthenticationMode);
+    }
+
+    [TestMethod]
+    public void XmlSerializer_SettingsWithoutSecuritySection_SignInWithTheWindowsAccount()
+    {
+        // A settings file saved before the Security section existed.
+        const string oldSettings = "<?xml version=\"1.0\"?><AppUserSettings schemaVersion=\"2\"><General><AlarmSeconds>45</AlarmSeconds></General></AppUserSettings>";
+
+        var settings = (AppUserSettings)new XmlSerializer(typeof(AppUserSettings)).Deserialize(new StringReader(oldSettings))!;
+
+        Assert.AreEqual(AppAuthenticationMode.Windows, settings.Security.AuthenticationMode);
+    }
+
+    [TestMethod]
+    public void XmlSerializer_RoundTrip_PreservesLastUserName()
+    {
+        var state = new AppUserState();
+        state.Session.LastUserName = "jdoe";
+
+        Assert.AreEqual("jdoe", RoundTrip(state).Session.LastUserName);
+    }
+
+    [TestMethod]
     public void XmlSerializer_SettingsWithoutServerCOMSection_LoadsDefaults()
     {
         // A settings file saved before the ServerCOM section existed.

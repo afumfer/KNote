@@ -18,6 +18,7 @@ namespace KNote.ClientWin.Controllers;
 // RepositoryAlias), and double-click/"Remove from list" act immediately instead of closing the
 // controller with a selection. See CtrlViewEmbeddableBase's own doc comment for this same call on
 // NotesSearchParamCtrl/NotesFilterParamCtrl.
+[KntAuthorize(EnumRoles.Staff, AuthorizationScope.Application)]
 public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 {
     #region Constructor

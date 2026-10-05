@@ -33,7 +33,7 @@ public class ConstraintViolationParityTests
             UserName = $"parity-1-{Guid.NewGuid():N}"[..24],
             EMail = duplicateEmail,
             FullName = "Parity User 1",
-            RoleDefinition = "Public"
+            RoleDefinition = "Guest"
         };
         var firstRes = await repo.Users.AddAsync(firstUser);
         Assert.IsTrue(firstRes.IsValid, firstRes.ErrorMessage);
@@ -44,7 +44,7 @@ public class ConstraintViolationParityTests
             UserName = $"parity-2-{Guid.NewGuid():N}"[..24],
             EMail = duplicateEmail,
             FullName = "Parity User 2",
-            RoleDefinition = "Public"
+            RoleDefinition = "Guest"
         };
 
         var ex = await Assert.ThrowsExactlyAsync<KntRepositoryException>(() => repo.Users.AddAsync(secondUser));

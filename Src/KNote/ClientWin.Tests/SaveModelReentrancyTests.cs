@@ -1,3 +1,4 @@
+using KNote.ClientWin.Tests.Helpers;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
@@ -28,9 +29,9 @@ public class SaveModelReentrancyTests
         var view = new FakeNoteEditorView();
         factoryViews.Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(c => view);
 
-        var store = new Store(factoryViews);
-        var ctrl = new NoteEditorCtrl(store);
         var service = new FakeKntService();
+        var store = new Store(factoryViews).GrantAdmin(service);
+        var ctrl = new NoteEditorCtrl(store);
 
         return (ctrl, view, service);
     }

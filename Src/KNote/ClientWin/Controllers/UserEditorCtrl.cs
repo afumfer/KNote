@@ -67,7 +67,7 @@ public class UserEditorCtrl : CtrlEditorBase<IViewEditor<UserDto>, UserDto>
     {
         Service = service;
 
-        Model = new UserDto { RoleDefinition = nameof(EnumRoles.Public) };
+        Model = new UserDto { RoleDefinition = nameof(EnumRoles.Guest) };
         NewUserPassword = null;
 
         return Task.FromResult(true);

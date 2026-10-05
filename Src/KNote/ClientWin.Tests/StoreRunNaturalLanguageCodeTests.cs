@@ -1,3 +1,4 @@
+using KNote.ClientWin.Tests.Helpers;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
@@ -22,7 +23,7 @@ public class StoreRunNaturalLanguageCodeTests
     [TestMethod]
     public async Task RunNaturalLanguageCode_NoProvidersConfigured_ReturnsWithoutShowingAssistantView()
     {
-        var store = new Store(new TestFactoryViews());
+        var store = new Store(new TestFactoryViews()).GrantAdmin();
         var fakeView = new FakeAIAssistantView();
         store.FactoryViews.Registry.Register<KNoteAIAssistantCtrl, IViewBase>(_ => fakeView);
 
@@ -35,7 +36,7 @@ public class StoreRunNaturalLanguageCodeTests
     [TestMethod]
     public async Task RunNaturalLanguageCode_EmptyPrompt_DoesNothing()
     {
-        var store = new Store(new TestFactoryViews());
+        var store = new Store(new TestFactoryViews()).GrantAdmin();
         var fakeView = new FakeAIAssistantView();
         store.FactoryViews.Registry.Register<KNoteAIAssistantCtrl, IViewBase>(_ => fakeView);
 

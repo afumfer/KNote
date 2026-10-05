@@ -37,9 +37,9 @@ public class UsersInProcessTests
 
         Assert.IsTrue(httpRes.IsSuccessStatusCode);
         Assert.IsNotNull(res?.Entity);
-        // KntDbContext seeds 3 users (owner, adminKNote, user1), plus the Admin user this test
-        // class registered for itself.
-        Assert.AreEqual(4, res!.Entity!.Count);
+        // KntDbContext seeds 2 users (adminKNote, user1), plus the Admin user this test class
+        // registered for itself.
+        Assert.AreEqual(3, res!.Entity!.Count);
     }
 
     [TestMethod]
@@ -65,7 +65,7 @@ public class UsersInProcessTests
             UserName = userName,
             EMail = userEmail,
             FullName = "__TEST_REGISTERUSER_FULLNAME_###__",
-            RoleDefinition = "Public",
+            RoleDefinition = "Guest",
             Password = "pass12345abcd!!"
         };
 
@@ -91,6 +91,37 @@ public class UsersInProcessTests
     }
 
     [TestMethod]
+    public async Task Execute_Register_IgnoresTheRequestedRole()
+    {
+        // This class' own user (see InProcessTestHost) already is the second Admin next to adminKNote,
+        // so whoever registers now is a Guest (KntUsersRegisterAsyncCommand) - asking for Admin or not.
+        UserRegisterDto user = new()
+        {
+            UserId = Guid.Empty,
+            UserName = $"itest-role-{Guid.NewGuid():N}"[..24],
+            EMail = $"{Guid.NewGuid():N}@knote.tests",
+            FullName = "__TEST_REGISTERROLE_FULLNAME_###__",
+            RoleDefinition = "Admin",
+            Password = "pass12345abcd!!"
+        };
+
+        var httpRes = await _httpClient.PostAsJsonAsync("api/users/register", user);
+        var res = await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();
+        Assert.IsTrue(res?.success, res?.error);
+        var userId = Guid.Parse(res!.uid);
+
+        try
+        {
+            var resGet = await _httpClient.GetFromJsonAsync<Result<UserDto>>($"api/users/{userId}");
+            Assert.AreEqual("Guest", resGet?.Entity?.RoleDefinition);
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/users/{userId}");
+        }
+    }
+
+    [TestMethod]
     public async Task Execute_Register_DuplicateEmail_ReturnsFriendlyError()
     {
         string userEmail = $"{Guid.NewGuid():N}@knote.tests";
@@ -100,7 +131,7 @@ public class UsersInProcessTests
             UserName = $"{prefix}{Guid.NewGuid():N}"[..24],
             EMail = userEmail,
             FullName = "__TEST_DUPEMAIL_FULLNAME_###__",
-            RoleDefinition = "Public",
+            RoleDefinition = "Guest",
             Password = "pass12345abcd!!"
         };
 
@@ -131,7 +162,7 @@ public class UsersInProcessTests
         string userName = $"itest-crud-{Guid.NewGuid():N}"[..24];
         string userEmail = $"{Guid.NewGuid():N}@knote.tests";
         Guid userId = Guid.Empty;
-        UserDto user = new() { UserId = userId, UserName = userName, EMail = userEmail, FullName = "__TEST_CREATEUSER_FULLNAME_###__", RoleDefinition = "Public" };
+        UserDto user = new() { UserId = userId, UserName = userName, EMail = userEmail, FullName = "__TEST_CREATEUSER_FULLNAME_###__", RoleDefinition = "Guest" };
 
         var httpRes = await _httpClient.PostAsJsonAsync("api/users", user);
         var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();

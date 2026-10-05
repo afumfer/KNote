@@ -1,6 +1,7 @@
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
 using KNote.Model;
+using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
 
 namespace KNote.ClientWin.Controllers;
@@ -8,11 +9,17 @@ namespace KNote.ClientWin.Controllers;
 // Shows a printable report (ReportDocument) in a preview window from which the user prints it or saves
 // it as PDF. The report itself is built by whoever launches this use case (notes list, note details...);
 // printing and PDF generation are done by the view's browser engine (WebView2).
+[KntAuthorize(EnumRoles.Staff)]
 public class ReportPreviewCtrl : CtrlViewBase<IViewBase>
 {
     #region Properties
 
     public ReportDocument Report { get; private set; }
+
+    // The repository the report comes from: printing it is authorized against the user's role there.
+    public IKntService Service { get; set; }
+
+    protected override IKntService AuthorizationResource => Service;
 
     public string Html { get; private set; }
 
@@ -45,10 +52,28 @@ public class ReportPreviewCtrl : CtrlViewBase<IViewBase>
     protected override IViewBase CreateView()
         => Store.FactoryViews.Registry.Resolve<ReportPreviewCtrl, IViewBase>(this);
 
-    // Opens a new preview window with the report: the usual entry point of the print use cases.
-    public static Result<EControllerResult> Show(Store store, ReportDocument report, string resourcesRootPath = null)
+    // Opens a new preview window with the report built by buildReport: the entry point of every print use
+    // case. Printing what a repository holds requires the Staff role there (see the class attribute), so
+    // that is checked first, before building a report that can take a while (e.g. a notes book). Refused,
+    // the user is told and the result is Canceled (no error left to report by the caller).
+    public static async Task<Result<EControllerResult>> ShowAsync(Store store, IKntService service,
+        Func<Task<ReportDocument>> buildReport, string resourcesRootPath = null)
     {
-        var reportPreviewCtrl = new ReportPreviewCtrl(store);
+        var reportPreviewCtrl = new ReportPreviewCtrl(store) { Service = service };
+        if (!reportPreviewCtrl.CheckAccess())
+            return new Result<EControllerResult>(EControllerResult.Canceled);
+
+        ReportDocument report;
+        try
+        {
+            report = await buildReport();
+        }
+        catch
+        {
+            reportPreviewCtrl.Finalize();
+            throw;
+        }
+
         reportPreviewCtrl.LoadReport(report, resourcesRootPath);
         return reportPreviewCtrl.Run();
     }

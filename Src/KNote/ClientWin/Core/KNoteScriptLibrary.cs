@@ -420,7 +420,12 @@ public class KNoteScriptLibrary: Library
     {
         ServiceRef serviceRef = GetServiceRef(repositoryAlias);
 
-        NoteDto note = (await serviceRef.Service.Notes.NewAsync()).Entity;
+        // Refused (e.g. a Guest in that repository) or failed: nothing to save.
+        var resNew = await serviceRef.Service.Notes.NewAsync();
+        if (!resNew.IsValid)
+            return false;
+
+        NoteDto note = resNew.Entity;
         note.Topic = subjet;
         note.Description = message;
         if (folderNumber == null)

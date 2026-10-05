@@ -16,4 +16,5 @@ public interface IKntUserService
     Task<Result<UserDto>> SetPasswordAsync(Guid userId, string newPassword);
     Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials);
     Task<Result<UserDto>> CreateAsync(UserRegisterDto userRegisterInfoDto);
+    Task<Result<UserDto>> RegisterAsync(UserRegisterDto userRegisterInfoDto);
 }

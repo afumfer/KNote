@@ -77,12 +77,13 @@ public class TraceSelectedNotesJob
             };
 
             var res = await service.Notes.SaveTraceNoteAsync(traceNote, true);
+            KntNotAuthorizedException.ThrowIfNotAuthorized(res);
             if (res.IsValid)
                 Created++;
             else
                 AddError(note, res.ErrorMessage);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not KntNotAuthorizedException)
         {
             AddError(note, ex.Message);
         }

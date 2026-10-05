@@ -102,6 +102,32 @@ Los informes se muestran en la previsualización (`ReportPreviewCtrl`/`ReportPre
 - [ ] Con la lista vacía, imprimir/exportar avisan en vez de abrir la previsualización o el diálogo.
 - [ ] Los diálogos de guardar (PDF y CSV) empiezan en la última carpeta usada, también tras reiniciar.
 
+## Acceso, usuarios y roles
+
+Probar con una BD de pruebas (o una copia): el primer arranque de esta versión la actualiza (revisión 4).
+
+- [ ] Primer arranque (sin `%LocalAppData%\KNote`): aparece "Register user"; tras registrarse, el usuario es
+      Admin del repositorio personal (Repository → Users) y la barra de estado lo muestra.
+- [ ] Options → Sign in: cambiar a "With a KNote user name and password" ofrece reiniciar; al arrancar aparece
+      el login con el último usuario propuesto; "Use my Windows account" entra con Windows y deja la opción en
+      Windows.
+- [ ] Con credenciales: un repositorio donde la contraseña no coincide no se vincula y se avisa al abrir la
+      ventana principal; en uno donde el usuario no existe se ofrece el registro con la contraseña ya puesta;
+      si ningún repositorio acepta al usuario, se ofrece reintentar o cerrar.
+- [ ] Vincular y crear un repositorio pasan por la misma comprobación (registro aceptado y cancelado).
+- [ ] La barra de estado muestra usuario, rol del repositorio activo y rol de aplicación; el del repositorio
+      cambia al pasar a otro repositorio y el tooltip lista el rol en todos; tras cambiarse uno mismo el rol
+      en Repository → Users se actualizan ambos.
+- [ ] Como **Guest** en un repositorio: abrir una nota avisa de que es de solo lectura y guardar lo explica;
+      Nueva nota, Nuevo post-it, Imprimir, Exportar CSV, Nueva carpeta, Mover notas, Cambiar tags y Trazar
+      notas dan el aviso de rol sin abrir nada (los lotes, un solo aviso); no se reabren sus post-its ni se
+      procesan sus alarmas.
+- [ ] Como **Staff**: notas, post-its, impresión y CSV permitidos; carpetas, consola KntScript, ejecutar código
+      de notas y KNote assistants dan el aviso.
+- [ ] Sin ser **Admin** en ningún repositorio: Crear repositorio, Gestionar repositorio, COM Port Server y Lab
+      dan el aviso.
+- [ ] Ningún menú aparece deshabilitado por el rol: el aviso sale al usarlo.
+
 ## Otros
 
 - [ ] Opciones de la aplicación (`OptionsEditorCtrl`) se guardan y se recargan correctamente al

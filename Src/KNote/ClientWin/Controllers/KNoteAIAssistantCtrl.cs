@@ -14,6 +14,7 @@ namespace KNote.ClientWin.Controllers;
 // Built on Microsoft.Extensions.AI's IChatClient abstraction (provider-agnostic: OpenAI, Anthropic,
 // Ollama - see AiChatClientFactory). Replaces the retired KntChatGPTCtrl (OpenAI-only, built
 // directly on the OpenAI.Chat SDK).
+[KntAuthorize(EnumRoles.Staff, AuthorizationScope.Application)]
 public class KNoteAIAssistantCtrl : CtrlBase
 {
     #region Private fields
@@ -156,6 +157,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public void ShowAIAssistantView(bool autoCloseCtrlOnViewExit, bool autoSaveChatMessagesOnViewExit)
     {
+        // Refused by Run() (CheckPreconditions): already finalized, nothing to show.
+        if (!PreconditionsMet)
+            return;
+
         AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;
         AutoSaveChatMessagesOnViewExit = autoSaveChatMessagesOnViewExit;
         AIAssistantView.ShowView();
@@ -164,6 +169,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // For use in KntScript
     public void ShowAIAssistantView()
     {
+        if (!PreconditionsMet)
+            return;
+
         if(ControllerState == EControllerState.Started)
         {
             AIAssistantView.ShowView();
@@ -382,6 +390,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public async Task ExecChatAssistant()
     {
+        // A KNote assistant is a KntScript script: running it takes the role any script does.
+        if (!Store.CheckCanRunScripts())
+            return;
+
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
         var catalogItem = await Store.GetCatalogItem(assistantServiceRef, KntConst.AssistantTag, "Select KNote assistant");
         if (catalogItem == null)

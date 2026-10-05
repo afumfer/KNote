@@ -1,3 +1,4 @@
+using KNote.ClientWin.Tests.Helpers;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
@@ -18,7 +19,7 @@ public class KntChatCtrlTests
         var view = new FakeChatView();
         factoryViews.Registry.Register<KntChatCtrl, IViewChat>(c => view);
 
-        var store = new Store(factoryViews) { AppUserName = "jdoe" };
+        var store = new Store(factoryViews) { AppUserName = "jdoe" }.GrantAdmin();
         store.Settings.Connectivity.ChatHub.Url = chatHubUrl;
 
         return (new KntChatCtrl(store), view);

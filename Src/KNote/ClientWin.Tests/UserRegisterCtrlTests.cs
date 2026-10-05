@@ -27,18 +27,54 @@ public class UserRegisterCtrlTests
     }
 
     [TestMethod]
-    public async Task NewModel_PrefillsUserNameFromStoreAppUserName_AndSetsPublicRole()
+    public async Task NewModel_PrefillsUserNameFromStoreAppUserName_WithoutChoosingARole()
     {
         var (ctrl, _, service, store) = CreateCtrl();
 
         await ctrl.NewModel(service);
 
         Assert.AreEqual(store.AppUserName, ctrl.Model.UserName);
-        Assert.AreEqual("Public", ctrl.Model.RoleDefinition);
+        // The role is decided by Users.RegisterAsync (KntUsersRegisterAsyncCommand), never by the dialog.
+        Assert.IsNull(ctrl.Model.RoleDefinition);
     }
 
     [TestMethod]
-    public async Task SaveModel_ValidData_CallsCreateAsync_ReturnsTrue_FiresAddedEntity()
+    public async Task NewModel_WithTheWindowsAccount_LeavesThePasswordToTheUser()
+    {
+        var (ctrl, _, service, store) = CreateCtrl();
+        store.Security.StartSession(AppAuthenticationMode.Windows);
+
+        await ctrl.NewModel(service);
+
+        Assert.IsNull(ctrl.Model.Password);
+        Assert.IsFalse(ctrl.PasswordFromSignIn);
+    }
+
+    [TestMethod]
+    public async Task NewModel_SignedInWithAKNoteUser_UsesTheSignInPassword()
+    {
+        var (ctrl, _, service, store) = CreateCtrl();
+        store.Security.StartSession(AppAuthenticationMode.Credentials, "secret");
+
+        await ctrl.NewModel(service);
+
+        Assert.AreEqual("secret", ctrl.Model.Password);
+        Assert.IsTrue(ctrl.PasswordFromSignIn);
+    }
+
+    [TestMethod]
+    public async Task RepositoryAlias_ComesFromTheService_AsTheRepositoryIsNotLinkedYet()
+    {
+        var (ctrl, _, service, _) = CreateCtrl();
+        service.RepositoryRef = new RepositoryRef { Alias = "Shared repository" };
+
+        await ctrl.NewModel(service);
+
+        Assert.AreEqual("Shared repository", ctrl.RepositoryAlias);
+    }
+
+    [TestMethod]
+    public async Task SaveModel_ValidData_CallsRegisterAsync_ReturnsTrue_FiresAddedEntity()
     {
         var (ctrl, view, service, store) = CreateCtrl();
         await ctrl.NewModel(service);
@@ -46,7 +82,7 @@ public class UserRegisterCtrlTests
         ctrl.Model.EMail = "john@doe.com";
         ctrl.Model.Password = "secret";
 
-        service.UsersFake.CreateAsyncImpl = u => Task.FromResult(new Result<UserDto>(u));
+        service.UsersFake.RegisterAsyncImpl = u => Task.FromResult(new Result<UserDto>(u));
         UserRegisterDto addedEntity = null;
         ctrl.AddedEntity += (s, e) => addedEntity = e.Entity;
 
@@ -66,13 +102,13 @@ public class UserRegisterCtrlTests
         ctrl.Model.Password = "secret";
         // FullName intentionally left empty.
 
-        var createCalled = false;
-        service.UsersFake.CreateAsyncImpl = u => { createCalled = true; return Task.FromResult(new Result<UserDto>(u)); };
+        var registerCalled = false;
+        service.UsersFake.RegisterAsyncImpl = u => { registerCalled = true; return Task.FromResult(new Result<UserDto>(u)); };
 
         var saved = await ctrl.SaveModel();
 
         Assert.IsFalse(saved);
-        Assert.IsFalse(createCalled);
+        Assert.IsFalse(registerCalled);
         Assert.IsFalse(string.IsNullOrEmpty(view.LastShownInfo));
     }
 
@@ -87,7 +123,7 @@ public class UserRegisterCtrlTests
 
         var invalidResult = new Result<UserDto>();
         invalidResult.AddErrorMessage("Username \"jdoe\" is already taken");
-        service.UsersFake.CreateAsyncImpl = _ => Task.FromResult(invalidResult);
+        service.UsersFake.RegisterAsyncImpl = _ => Task.FromResult(invalidResult);
 
         var saved = await ctrl.SaveModel();
 
@@ -105,13 +141,13 @@ public class UserRegisterCtrlTests
         // Password intentionally left empty. UserDto.Validate doesn't cover it (Password is declared
         // on UserRegisterDto), so SaveModel checks it explicitly before calling the service.
 
-        var createCalled = false;
-        service.UsersFake.CreateAsyncImpl = u => { createCalled = true; return Task.FromResult(new Result<UserDto>(u)); };
+        var registerCalled = false;
+        service.UsersFake.RegisterAsyncImpl = u => { registerCalled = true; return Task.FromResult(new Result<UserDto>(u)); };
 
         var saved = await ctrl.SaveModel();
 
         Assert.IsFalse(saved);
-        Assert.IsFalse(createCalled);
+        Assert.IsFalse(registerCalled);
         Assert.IsFalse(string.IsNullOrEmpty(view.LastShownInfo));
     }
 
@@ -126,8 +162,8 @@ public class UserRegisterCtrlTests
 
         // KntServiceBase.ExecuteCommand wraps every exception thrown by a command (e.g. duplicate
         // username) into a generic KntServiceException with the real cause as InnerException.
-        service.UsersFake.CreateAsyncImpl = _ => throw new Exception(
-            "KNote service error. (KntUsersCreateAsyncCommand). ",
+        service.UsersFake.RegisterAsyncImpl = _ => throw new Exception(
+            "KNote service error. (KntUsersRegisterAsyncCommand). ",
             new Exception("Username \"jdoe\" is already taken"));
 
         var saved = await ctrl.SaveModel();
@@ -149,8 +185,8 @@ public class UserRegisterCtrlTests
         // KntRepositoryException ("KNote repository error. (...)"), and that is wrapped again by
         // KntServiceBase.ExecuteCommand into a KntServiceException ("KNote service error. (...)").
         // SaveModel must unwrap both layers to reach the real cause, not stop at the first one.
-        service.UsersFake.CreateAsyncImpl = _ => throw new Exception(
-            "KNote service error. (KntUsersCreateAsyncCommand). ",
+        service.UsersFake.RegisterAsyncImpl = _ => throw new Exception(
+            "KNote service error. (KntUsersRegisterAsyncCommand). ",
             new Exception(
                 "KNote repository error. (KNote.Repository.Dapper.KntUserRepository)",
                 new Exception("UNIQUE constraint failed: Users.UserName")));

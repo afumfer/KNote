@@ -31,6 +31,10 @@ public class SessionState
 
     public int RunCounter { get; set; }
 
+    // User name entered the last time the user signed in with a KNote user and password (see
+    // SecurityConfig.AuthenticationMode), proposed again in the sign-in dialog. Never the password.
+    public string LastUserName { get; set; }
+
     // Repository/folder the user had active when the application was last closed, so KNoteManagementCtrl
     // can reactivate it on the next startup instead of showing no selection.
     public string LastActiveRepositoryAlias { get; set; }

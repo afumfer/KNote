@@ -18,7 +18,7 @@ public class StoreRunPyCodeTests
     {
         try
         {
-            var (result, error) = TestStoreFactory.CreateEmpty().ExecuteCommand("python --version", Path.GetTempPath());
+            var (result, error) = TestStoreFactory.CreateEmpty().GrantAdmin().ExecuteCommand("python --version", Path.GetTempPath());
             return string.IsNullOrEmpty(error);
         }
         catch
@@ -36,7 +36,7 @@ public class StoreRunPyCodeTests
             return;
         }
 
-        var store = TestStoreFactory.CreateEmpty();
+        var store = TestStoreFactory.CreateEmpty().GrantAdmin();
 
         var (result, error) = store.RunPyCode("print('KNote-py-ok')", redirectStandardOut: true);
 

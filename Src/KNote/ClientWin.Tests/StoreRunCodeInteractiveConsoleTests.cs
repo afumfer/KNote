@@ -32,7 +32,7 @@ public class StoreRunCodeInteractiveConsoleTests
     // touching a real database (it short-circuits before ever calling GetTraceNotesFromAsync).
     private static Store CreateStoreWithEmptyGlobalIncludes()
     {
-        var store = TestStoreFactory.CreateEmpty();
+        var store = TestStoreFactory.CreateEmpty().GrantAdmin();
         var fakeService = new FakeKntService();
         fakeService.TraceNoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<TraceNoteTypeDto>>(new List<TraceNoteTypeDto>()));
         store.SetAssistantServiceRef(TestServiceRefFactory.CreateWithFakeService(fakeService));

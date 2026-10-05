@@ -1,4 +1,5 @@
 using KNote.ClientWin.Core;
+using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
@@ -6,6 +7,17 @@ namespace KNote.ClientWin.Controllers;
 
 public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, UserRegisterDto>
 {
+    #region Properties
+
+    // Signed in with a KNote user name and password, the new user gets the password typed in the sign-in
+    // dialog: the same credentials must open every repository of the session.
+    public bool PasswordFromSignIn { get; private set; }
+
+    // Where the user is being registered. Taken from the service, as the repository isn't linked yet.
+    public string RepositoryAlias => Service?.RepositoryRef?.Alias;
+
+    #endregion
+
     #region Constructor
 
     public UserRegisterCtrl(Store store) : base(store)
@@ -31,10 +43,13 @@ public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, Use
     {
         Service = service;
 
+        // No RoleDefinition: Users.RegisterAsync decides the new user's role (see
+        // KntUsersRegisterAsyncCommand) and writes it back into Model.
+        PasswordFromSignIn = Store.Security.AuthenticationMode == AppAuthenticationMode.Credentials;
         Model = new UserRegisterDto
         {
             UserName = Store.AppUserName,
-            RoleDefinition = "Public"
+            Password = PasswordFromSignIn ? Store.Security.Password : null
         };
 
         return Task.FromResult(true);
@@ -57,7 +72,7 @@ public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, Use
 
         try
         {
-            var result = await Service.Users.CreateAsync(Model);
+            var result = await Service.Users.RegisterAsync(Model);
             if (result.IsValid)
             {
                 Model.SetIsDirty(false);

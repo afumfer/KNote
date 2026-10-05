@@ -10,7 +10,7 @@
         </div>
         <div class="col-sm-3 mt-2 mb-2">
             <span class="float-right">
-                <AuthorizeView Roles="Admin, ProjecManager, Staff">
+                <AuthorizeView Roles="Admin, ProjectManager, Staff">
                     <Authorized>
                         <RadzenButton Click="@(() => OnNoteView.InvokeAsync(Note))" Icon="launch"
                                       ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"

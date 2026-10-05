@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
@@ -7,6 +8,7 @@ using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntUsersGetAllAsyncCommand : KntCommandServiceBase<PageIdentifier, Result<List<UserDto>>>
 {
     public KntUsersGetAllAsyncCommand(IKntService service, PageIdentifier pageIdentifier) : base(service, pageIdentifier)
@@ -20,6 +22,7 @@ public class KntUsersGetAllAsyncCommand : KntCommandServiceBase<PageIdentifier, 
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntUsersGetAsyncCommand : KntCommandServiceBase<Guid, Result<UserDto>>
 {
     public KntUsersGetAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -33,6 +36,7 @@ public class KntUsersGetAsyncCommand : KntCommandServiceBase<Guid, Result<UserDt
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntUsersGetByUserNameAsyncCommand : KntCommandServiceBase<string, Result<UserDto>>
 {
     public KntUsersGetByUserNameAsyncCommand(IKntService service, string userName) : base(service, userName)
@@ -47,6 +51,7 @@ public class KntUsersGetByUserNameAsyncCommand : KntCommandServiceBase<string, R
 }
 
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntUsersSaveAsyncCommand : KntCommandSaveServiceBase<UserDto, Result<UserDto>>
 {
     public KntUsersSaveAsyncCommand(IKntService service, UserDto entity) : base(service, entity)
@@ -56,18 +61,24 @@ public class KntUsersSaveAsyncCommand : KntCommandSaveServiceBase<UserDto, Resul
 
     public override async Task<Result<UserDto>> Execute()
     {
+        Result<UserDto> result;
         if (Param.UserId == Guid.Empty)
         {
             Param.UserId = Guid.NewGuid();
-            return await Repository.Users.AddAsync(Param);
+            result = await Repository.Users.AddAsync(Param);
         }
         else
         {
-            return await Repository.Users.UpdateAsync(Param);
+            result = await Repository.Users.UpdateAsync(Param);
         }
+
+        // The saved user may be the current one (its roles, or whether it is disabled).
+        Service.ResetCurrentUser();
+        return result;
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntUsersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<UserDto>>
 {
     public KntUsersDeleteAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -117,11 +128,15 @@ public class KntUsersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<Use
         else
             result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 
+        // The deleted user may be the current one.
+        Service.ResetCurrentUser();
+
         return result;
     }
 }
 
 
+[KntAllowAnonymous]
 public class KntUsersAuthenticateAsyncCommand : KntCommandServiceBase<UserCredentialsDto, Result<UserDto>>
 {
     public KntUsersAuthenticateAsyncCommand(IKntService service, UserCredentialsDto userCredentials) : base(service, userCredentials)
@@ -182,6 +197,7 @@ public class KntUsersAuthenticateAsyncCommand : KntCommandServiceBase<UserCreden
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegisterDto, Result<UserDto>>
 {
     public KntUsersCreateAsyncCommand(IKntService service, UserRegisterDto user) : base(service, user)
@@ -216,6 +232,9 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
             resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
             if (!resRep.IsValid)
                 resService.AddListErrorMessage(resRep.ListErrorMessage);
+
+            // The new user may be the current one, until now not registered (no role).
+            Service.ResetCurrentUser();
         }
         return resService;
     }
@@ -241,11 +260,52 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
 }
 
 /// <summary>
+/// Self-registration of a new user (ClientWin's "Register user" dialog, Server's api/users/register):
+/// same as KntUsersCreateAsyncCommand, except that the role is decided here and never taken from the
+/// caller - the RoleDefinition of the given UserRegisterDto is overwritten with it. A user created by
+/// an Admin from the users management screen goes through KntUsersCreateAsyncCommand instead, keeping
+/// the roles that Admin chose.
+/// </summary>
+[KntAllowAnonymous]
+public class KntUsersRegisterAsyncCommand : KntUsersCreateAsyncCommand
+{
+    public KntUsersRegisterAsyncCommand(IKntService service, UserRegisterDto user) : base(service, user)
+    {
+
+    }
+
+    public override async Task<Result<UserDto>> Execute()
+    {
+        var resUsers = await Repository.Users.GetAllAsync();
+        if (!resUsers.IsValid)
+        {
+            var resService = new Result<UserDto>();
+            resService.AddListErrorMessage(resUsers.ListErrorMessage);
+            return resService;
+        }
+
+        var adminCount = resUsers.Entity.Count(u => KntRoles.IsInRole(u.RoleDefinition, EnumRoles.Admin));
+        Param.RoleDefinition = RoleForNewUser(adminCount).ToString();
+
+        return await base.Execute();
+    }
+
+    /// <summary>
+    /// While a repository still has a single Admin (typically the seeded adminKNote, or none at all),
+    /// whoever registers next becomes an Admin too, so the first real user of a new database can manage
+    /// it. From the second real Admin on, new users start as Guests until an Admin raises their role.
+    /// </summary>
+    public static EnumRoles RoleForNewUser(int adminCount)
+        => adminCount <= 1 ? EnumRoles.Admin : EnumRoles.Guest;
+}
+
+/// <summary>
 /// Sets/resets an existing user's password - the counterpart missing for the "New user" flow
 /// (KntUsersCreateAsyncCommand), which is the only place that has ever hashed a password: SaveAsync/
 /// KntUsersSaveAsyncCommand's plain UserDto has no Password field, so a user created via the Admin
 /// panel had no way to log in until either this command or the create flow set one explicitly.
 /// </summary>
+[KntAuthorize(EnumRoles.Admin)]
 public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<(Guid UserId, string NewPassword), Result<UserDto>>
 {
     public KntUsersSetPasswordAsyncCommand(IKntService service, Guid userId, string newPassword)

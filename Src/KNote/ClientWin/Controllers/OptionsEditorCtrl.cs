@@ -4,6 +4,7 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Staff, AuthorizationScope.Application)]
 public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<OptionsModel>, OptionsModel>
 {
     #region Constructor 

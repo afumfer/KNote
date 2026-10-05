@@ -58,6 +58,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         toolDeleteNote.SetKntIcon(KntIcon.Delete);
         toolPrintNotesList.SetKntIcon(KntIcon.Print);
         toolConfiguration.SetKntIcon(KntIcon.Settings);
+        statusLabelUser.SetKntIcon(KntIcon.User);
 
         // Over the dark folder header: a light icon, as large as the folder caption next to it.
         pictureBoxFolder.SetKntIcon(KntIcon.FolderOpen, 32, Color.WhiteSmoke);
@@ -123,6 +124,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         labelRepAliasCon.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Alias} ({_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Provider})";
         labelReResources.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainerRootPath}\\{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainer}";
 
+        // The user and its role in the active repository, which changes along with it.
+        statusLabelUser.Text = _ctrl.SessionUserInfo;
+        statusLabelUser.ToolTipText = _ctrl.SessionUserDetail;
+
         return DialogResult.OK;
     }
 
@@ -166,21 +171,6 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         formReadVar.Size = formReadVar.LogicalToDeviceUnits(new Size(500, 150));
 
         return formReadVar.ShowDialog() == DialogResult.OK ? listVars[0].VarNewValueText : null;
-    }
-
-    public string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName)
-    {
-        using var dialog = new SaveFileDialog
-        {
-            Title = title,
-            Filter = filter,
-            AddExtension = true,
-            OverwritePrompt = true,
-            InitialDirectory = initialDirectory,
-            FileName = fileName
-        };
-
-        return dialog.ShowDialog(this) == DialogResult.OK ? dialog.FileName : null;
     }
 
     #endregion

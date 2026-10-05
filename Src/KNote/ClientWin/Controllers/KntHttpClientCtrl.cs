@@ -4,6 +4,7 @@ using System.Text;
 
 namespace KNote.ClientWin.Controllers;
 
+[KntAuthorize(EnumRoles.Admin, AuthorizationScope.Application)]
 public class KntHttpClientCtrl : CtrlBase
 {
     #region Private fields 

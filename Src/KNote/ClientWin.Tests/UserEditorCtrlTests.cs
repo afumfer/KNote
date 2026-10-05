@@ -29,14 +29,14 @@ public class UserEditorCtrlTests
     }
 
     [TestMethod]
-    public async Task NewModel_CreatesEmptyModel_WithPublicRole()
+    public async Task NewModel_CreatesEmptyModel_WithGuestRole()
     {
         var (ctrl, _, service) = CreateCtrl();
 
         await ctrl.NewModel(service);
 
         Assert.AreEqual(Guid.Empty, ctrl.Model.UserId);
-        Assert.AreEqual("Public", ctrl.Model.RoleDefinition);
+        Assert.AreEqual("Guest", ctrl.Model.RoleDefinition);
     }
 
     [TestMethod]

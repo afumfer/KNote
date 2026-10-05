@@ -62,6 +62,10 @@ internal static class KntIconCatalog
         [KntIcon.FolderOpen] = new(0xF42D, 0xF42E, Folder),           // folder_open
         [KntIcon.Repository] = new(0xF0D7, 0xE466, Repository),       // database
 
+        // Users and security
+        [KntIcon.User] = new(0xF5BC, 0xF5BD, Neutral),                // person
+        [KntIcon.SignIn] = new(0xF0B55, 0xE928, Repository),          // person_circle
+
         // Note editor
         [KntIcon.PostIt] = new(0xF663, 0xF56B, PostIt),               // note
         [KntIcon.ResizeGrip] = new(0xE2A4, 0xE2A5, Neutral),          // caret_down_right
