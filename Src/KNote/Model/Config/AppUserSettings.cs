@@ -19,6 +19,8 @@ public class AppUserSettings
 
     public GeneralConfig General { get; set; } = new();
 
+    public SecurityConfig Security { get; set; } = new();
+
     public RepositoriesConfig Repositories { get; set; } = new();
 
     public AiConfig Ai { get; set; } = new();
@@ -53,6 +55,22 @@ public enum AppColorMode
     Dark,
     // Follows the Windows "app mode" setting (light or dark) at startup.
     System
+}
+
+[Serializable]
+public class SecurityConfig
+{
+    // How the desktop app (ClientWin) identifies its user. Applied once, at startup: changing it takes a
+    // restart. Windows by default, also on the first run.
+    public AppAuthenticationMode AuthenticationMode { get; set; } = AppAuthenticationMode.Windows;
+}
+
+public enum AppAuthenticationMode
+{
+    // The Windows account running the application, trusted as is (like SQL Server's integrated security).
+    Windows,
+    // A KNote user name and password, asked for at startup and checked against every repository's Users.
+    Credentials
 }
 
 [Serializable]

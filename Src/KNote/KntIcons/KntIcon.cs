@@ -29,6 +29,10 @@ public enum KntIcon
     FolderOpen,
     Repository,
 
+    // Users and security
+    User,
+    SignIn,
+
     // Note editor
     PostIt,
     ResizeGrip,

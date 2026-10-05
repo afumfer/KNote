@@ -27,16 +27,23 @@ public interface IKntService : IDisposable
     bool EnforceAuthorization { get; set; }
 
     /// <summary>
-    /// The highest role of UserIdentityName in this repository's Users table, or null when that user
-    /// isn't registered there or is disabled. Read once and cached; ResetCurrentUserRole forgets it.
+    /// UserIdentityName's row in this repository's Users table (disabled or not), or null when that user
+    /// isn't registered there. Read once and cached; ResetCurrentUser forgets it. Reads the repository
+    /// directly, so it works before the user is registered or authorized for anything.
+    /// </summary>
+    Task<UserDto> GetCurrentUserAsync();
+
+    /// <summary>
+    /// The highest role of UserIdentityName in this repository, or null when that user isn't registered
+    /// there or is disabled (see GetCurrentUserAsync).
     /// </summary>
     Task<EnumRoles?> GetCurrentUserRoleAsync();
 
     /// <summary>
-    /// Forgets the cached role, so the next GetCurrentUserRoleAsync reads it again. Called by the
-    /// commands that change users (their roles or whether they are disabled).
+    /// Forgets the cached current user, so the next GetCurrentUserAsync/GetCurrentUserRoleAsync reads it
+    /// again. Called by the commands that change users (their roles or whether they are disabled).
     /// </summary>
-    void ResetCurrentUserRole();
+    void ResetCurrentUser();
 
     IKntRepository Repository { get; }
 

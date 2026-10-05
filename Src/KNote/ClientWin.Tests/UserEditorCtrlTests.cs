@@ -29,7 +29,7 @@ public class UserEditorCtrlTests
     }
 
     [TestMethod]
-    public async Task NewModel_CreatesEmptyModel_WithPublicRole()
+    public async Task NewModel_CreatesEmptyModel_WithGuestRole()
     {
         var (ctrl, _, service) = CreateCtrl();
 

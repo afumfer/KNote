@@ -64,6 +64,8 @@ namespace KNote.ClientWin.Views
             this.buttonTestChatHubUrl = new System.Windows.Forms.Button();
             this.labelColorMode = new System.Windows.Forms.Label();
             this.comboColorMode = new System.Windows.Forms.ComboBox();
+            this.labelAuthenticationMode = new System.Windows.Forms.Label();
+            this.comboAuthenticationMode = new System.Windows.Forms.ComboBox();
             this.panelForm.SuspendLayout();
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
@@ -111,6 +113,8 @@ namespace KNote.ClientWin.Views
             // 
             // tabGlobalOptions
             // 
+            this.tabGlobalOptions.Controls.Add(this.comboAuthenticationMode);
+            this.tabGlobalOptions.Controls.Add(this.labelAuthenticationMode);
             this.tabGlobalOptions.Controls.Add(this.comboColorMode);
             this.tabGlobalOptions.Controls.Add(this.labelColorMode);
             this.tabGlobalOptions.Controls.Add(this.textChatHubUrl);
@@ -388,6 +392,24 @@ namespace KNote.ClientWin.Views
             this.comboColorMode.Size = new System.Drawing.Size(180, 23);
             this.comboColorMode.TabIndex = 11;
             //
+            // labelAuthenticationMode
+            //
+            this.labelAuthenticationMode.AutoSize = true;
+            this.labelAuthenticationMode.Location = new System.Drawing.Point(13, 167);
+            this.labelAuthenticationMode.Name = "labelAuthenticationMode";
+            this.labelAuthenticationMode.Size = new System.Drawing.Size(51, 15);
+            this.labelAuthenticationMode.TabIndex = 12;
+            this.labelAuthenticationMode.Text = "Sign in:";
+            this.labelAuthenticationMode.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // comboAuthenticationMode
+            //
+            this.comboAuthenticationMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboAuthenticationMode.Location = new System.Drawing.Point(95, 163);
+            this.comboAuthenticationMode.Name = "comboAuthenticationMode";
+            this.comboAuthenticationMode.Size = new System.Drawing.Size(295, 23);
+            this.comboAuthenticationMode.TabIndex = 13;
+            //
             // OptionsEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -432,6 +454,8 @@ namespace KNote.ClientWin.Views
         private Button buttonTestChatHubUrl;
         private Label labelColorMode;
         private ComboBox comboColorMode;
+        private Label labelAuthenticationMode;
+        private ComboBox comboAuthenticationMode;
         private System.Windows.Forms.TabPage tabEmailOptions;
         private Label labelSmtpHost;
         private TextBox textSmtpHost;

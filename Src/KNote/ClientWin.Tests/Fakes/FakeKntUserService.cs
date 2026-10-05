@@ -19,6 +19,7 @@ internal class FakeKntUserService : IKntUserService
     public Func<UserDto, Task<Result<UserDto>>>? SaveAsyncImpl { get; set; }
     public Func<Guid, Task<Result<UserDto>>>? DeleteAsyncImpl { get; set; }
     public Func<Guid, string, Task<Result<UserDto>>>? SetPasswordAsyncImpl { get; set; }
+    public Func<UserCredentialsDto, Task<Result<UserDto>>>? AuthenticateAsyncImpl { get; set; }
 
     public Task<Result<UserDto>> GetByUserNameAsync(string userName) =>
         (GetByUserNameAsyncImpl ?? throw new NotSupportedException($"{nameof(GetByUserNameAsync)} not configured for this test"))(userName);
@@ -44,5 +45,6 @@ internal class FakeKntUserService : IKntUserService
     public Task<Result<UserDto>> SetPasswordAsync(Guid userId, string newPassword) =>
         (SetPasswordAsyncImpl ?? throw new NotSupportedException($"{nameof(SetPasswordAsync)} not configured for this test"))(userId, newPassword);
 
-    public Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials) => throw new NotSupportedException();
+    public Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials) =>
+        (AuthenticateAsyncImpl ?? throw new NotSupportedException($"{nameof(AuthenticateAsync)} not configured for this test"))(userCredentials);
 }

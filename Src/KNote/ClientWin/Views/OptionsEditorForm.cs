@@ -18,6 +18,13 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         (AppColorMode.System, "Use the Windows setting")
     };
 
+    // Items of comboAuthenticationMode, in the same order.
+    private static readonly (AppAuthenticationMode Mode, string Text)[] AuthenticationModes =
+    {
+        (AppAuthenticationMode.Windows, "With my Windows account"),
+        (AppAuthenticationMode.Credentials, "With a KNote user name and password")
+    };
+
     #endregion
 
     #region Constructor 
@@ -27,6 +34,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         InitializeComponent();
         this.Text = $"{KntConst.AppName} options";
         comboColorMode.Items.AddRange(ColorModes.Select(c => (object)c.Text).ToArray());
+        comboAuthenticationMode.Items.AddRange(AuthenticationModes.Select(a => (object)a.Text).ToArray());
 
         _ctrl = ctrl;
     }
@@ -139,6 +147,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         textAutosaveSeconds.Text = _ctrl.Model.AutoSaveSeconds.ToString();
         textChatHubUrl.Text = _ctrl.Model.ChatHubUrl;
         comboColorMode.SelectedIndex = Math.Max(0, Array.FindIndex(ColorModes, c => c.Mode == _ctrl.Model.ColorMode));
+        comboAuthenticationMode.SelectedIndex = Math.Max(0, Array.FindIndex(AuthenticationModes, a => a.Mode == _ctrl.Model.AuthenticationMode));
         textSmtpHost.Text = _ctrl.Model.SmtpHost;
         textSmtpPort.Text = _ctrl.Model.SmtpPort.ToString();
         checkSmtpEnableSsl.Checked = _ctrl.Model.SmtpEnableSsl;
@@ -159,6 +168,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         _ctrl.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
         _ctrl.Model.ChatHubUrl = textChatHubUrl.Text;
         _ctrl.Model.ColorMode = ColorModes[comboColorMode.SelectedIndex].Mode;
+        _ctrl.Model.AuthenticationMode = AuthenticationModes[comboAuthenticationMode.SelectedIndex].Mode;
         _ctrl.Model.SmtpHost = textSmtpHost.Text;
         _ctrl.Model.SmtpPort = _ctrl.Store.KntTextUtils.TextToInt(textSmtpPort.Text);
         _ctrl.Model.SmtpEnableSsl = checkSmtpEnableSsl.Checked;

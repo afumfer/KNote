@@ -39,6 +39,41 @@ public class UserRegisterCtrlTests
     }
 
     [TestMethod]
+    public async Task NewModel_WithTheWindowsAccount_LeavesThePasswordToTheUser()
+    {
+        var (ctrl, _, service, store) = CreateCtrl();
+        store.Security.StartSession(AppAuthenticationMode.Windows);
+
+        await ctrl.NewModel(service);
+
+        Assert.IsNull(ctrl.Model.Password);
+        Assert.IsFalse(ctrl.PasswordFromSignIn);
+    }
+
+    [TestMethod]
+    public async Task NewModel_SignedInWithAKNoteUser_UsesTheSignInPassword()
+    {
+        var (ctrl, _, service, store) = CreateCtrl();
+        store.Security.StartSession(AppAuthenticationMode.Credentials, "secret");
+
+        await ctrl.NewModel(service);
+
+        Assert.AreEqual("secret", ctrl.Model.Password);
+        Assert.IsTrue(ctrl.PasswordFromSignIn);
+    }
+
+    [TestMethod]
+    public async Task RepositoryAlias_ComesFromTheService_AsTheRepositoryIsNotLinkedYet()
+    {
+        var (ctrl, _, service, _) = CreateCtrl();
+        service.RepositoryRef = new RepositoryRef { Alias = "Shared repository" };
+
+        await ctrl.NewModel(service);
+
+        Assert.AreEqual("Shared repository", ctrl.RepositoryAlias);
+    }
+
+    [TestMethod]
     public async Task SaveModel_ValidData_CallsRegisterAsync_ReturnsTrue_FiresAddedEntity()
     {
         var (ctrl, view, service, store) = CreateCtrl();

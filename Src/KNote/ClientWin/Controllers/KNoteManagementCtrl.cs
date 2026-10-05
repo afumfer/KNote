@@ -57,6 +57,39 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         }
     }
 
+    // Who is using the application and with which role in the active repository: roles are per
+    // repository, so this changes with the selected folder or filter. Shown in the status bar.
+    public string SessionUserInfo
+    {
+        get
+        {
+            var serviceRef = SelectedServiceRef;
+            if (serviceRef == null)
+                return Store.AppUserName;
+
+            return $"{Store.AppUserName} · {Store.Security.GetRepositoryRoleName(serviceRef.Service)} ({serviceRef.Alias})";
+        }
+    }
+
+    // How the user signed in and its role in every linked repository (status bar tooltip).
+    public string SessionUserDetail
+    {
+        get
+        {
+            var lines = new List<string>
+            {
+                Store.Security.AuthenticationMode == AppAuthenticationMode.Windows
+                    ? $"Signed in with the Windows account '{Store.AppUserName}'."
+                    : $"Signed in as the {KntConst.AppName} user '{Store.AppUserName}'.",
+                "Roles:"
+            };
+            foreach (var serviceRef in Store.GetAllServiceRef())
+                lines.Add($"   {serviceRef.Alias}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)}");
+
+            return string.Join(Environment.NewLine, lines);
+        }
+    }
+
     public EnumSelectMode SelectMode { get; set; } = EnumSelectMode.Folders;
 
     public FolderWithServiceRef DefaultFolderWithServiceRef
@@ -1187,8 +1220,14 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         }                        
         var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
         repositoryEditorCtrl.EditorMode = EnumRepositoryEditorMode.Management;
-        await repositoryEditorCtrl.LoadModelById(SelectedServiceRef.Service, SelectedServiceRef.IdServiceRef, false);
+        var serviceRef = SelectedServiceRef;
+        await repositoryEditorCtrl.LoadModelById(serviceRef.Service, serviceRef.IdServiceRef, false);
         var res = repositoryEditorCtrl.RunModal();
+
+        // The users of the repository may have been edited there, the current one included.
+        await Store.RefreshRepositoryRoleAsync(serviceRef.Service);
+        View.ShowInfo(null);
+
         if (res.Entity == EControllerResult.Executed)
         {
             // Do action 
@@ -1727,6 +1766,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     {
         var optionsEditorCtrl = new OptionsEditorCtrl(Store);
         var colorMode = Store.Settings.General.ColorMode;
+        var authenticationMode = Store.Settings.Security.AuthenticationMode;
 
         optionsEditorCtrl.LoadModel(
             SelectedServiceRef?.Service,
@@ -1738,8 +1778,15 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             // TODO: refresh context management
             // ... for next major version
 
+            // Both are applied once, at startup.
+            var changesOnRestart = new List<string>();
             if (Store.Settings.General.ColorMode != colorMode)
-                await OfferRestartToApplyColorMode();
+                changesOnRestart.Add("color mode");
+            if (Store.Settings.Security.AuthenticationMode != authenticationMode)
+                changesOnRestart.Add("way of signing in");
+
+            if (changesOnRestart.Count > 0)
+                await OfferRestartToApply(string.Join(" and ", changesOnRestart));
         }
     }
 
@@ -1755,13 +1802,14 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     {
         Store.Settings.General.ColorMode = IsDarkModeConfigured ? AppColorMode.Light : AppColorMode.Dark;
         Store.SaveConfig();
-        await OfferRestartToApplyColorMode();
+        await OfferRestartToApply("color mode");
     }
 
-    // The color mode can't change while the app is running (see AppTheme): offer to restart it now.
-    private async Task OfferRestartToApplyColorMode()
+    // Settings that can't change while the app is running (the color mode, see AppTheme; the way of signing
+    // in, see Store.Security): offer to restart it now.
+    private async Task OfferRestartToApply(string changedSettings)
     {
-        var answer = View.ShowInfo($"The new color mode will be applied the next time {KntConst.AppName} starts.\r\n\r\nRestart {KntConst.AppName} now?",
+        var answer = View.ShowInfo($"The new {changedSettings} will be applied the next time {KntConst.AppName} starts.\r\n\r\nRestart {KntConst.AppName} now?",
             KntConst.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         if (answer != DialogResult.Yes)
             return;

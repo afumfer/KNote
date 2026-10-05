@@ -81,6 +81,21 @@ public class OptionsModel : SmartModelDtoBase
         }
     }
 
+    // Applied on the next start (see Store.Security).
+    private AppAuthenticationMode _authenticationMode;
+    public AppAuthenticationMode AuthenticationMode
+    {
+        get { return _authenticationMode; }
+        set
+        {
+            if (_authenticationMode != value)
+            {
+                _authenticationMode = value;
+                OnPropertyChanged("AuthenticationMode");
+            }
+        }
+    }
+
     private string _chatHubUrl;
     public string ChatHubUrl
     {
@@ -220,6 +235,7 @@ public class OptionsModel : SmartModelDtoBase
             AutoSaveActivated = settings.General.AutoSaveActivated,
             AutoSaveSeconds = settings.General.AutoSaveSeconds,
             ColorMode = settings.General.ColorMode,
+            AuthenticationMode = settings.Security.AuthenticationMode,
             ChatHubUrl = settings.Connectivity.ChatHub.Url,
             ChatHubAutoConnectDisabled = state.Session.ChatHubAutoConnectDisabled,
             SmtpHost = email.Host,
@@ -243,6 +259,7 @@ public class OptionsModel : SmartModelDtoBase
         settings.General.AutoSaveActivated = AutoSaveActivated;
         settings.General.AutoSaveSeconds = AutoSaveSeconds;
         settings.General.ColorMode = ColorMode;
+        settings.Security.AuthenticationMode = AuthenticationMode;
         settings.Connectivity.ChatHub.Url = ChatHubUrl;
         state.Session.ChatHubAutoConnectDisabled = ChatHubAutoConnectDisabled;
         email.Host = SmtpHost;

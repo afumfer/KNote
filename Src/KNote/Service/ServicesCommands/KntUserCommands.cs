@@ -73,7 +73,7 @@ public class KntUsersSaveAsyncCommand : KntCommandSaveServiceBase<UserDto, Resul
         }
 
         // The saved user may be the current one (its roles, or whether it is disabled).
-        Service.ResetCurrentUserRole();
+        Service.ResetCurrentUser();
         return result;
     }
 }
@@ -129,7 +129,7 @@ public class KntUsersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<Use
             result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 
         // The deleted user may be the current one.
-        Service.ResetCurrentUserRole();
+        Service.ResetCurrentUser();
 
         return result;
     }
@@ -234,7 +234,7 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
                 resService.AddListErrorMessage(resRep.ListErrorMessage);
 
             // The new user may be the current one, until now not registered (no role).
-            Service.ResetCurrentUserRole();
+            Service.ResetCurrentUser();
         }
         return resService;
     }

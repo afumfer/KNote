@@ -34,7 +34,12 @@ public class Store
 
     public AppUserState State { get; protected set; }
 
+    // The user of this session: the Windows account, or the KNote user name typed in the sign-in dialog
+    // (see Security.AuthenticationMode). Every ServiceRef is created with it.
     public string AppUserName { get; set; }
+
+    // How AppUserName signed in, and its role in each linked repository (see AuthenticateRepositoryAsync).
+    public KntSecurityContext Security { get; } = new();
 
     public string ComputerName { get; set; }
 
@@ -192,6 +197,7 @@ public class Store
         serviceRef.Service.CommandExecuted -= ServiceRef_CommandExecuted;
 
         _serviceRefRegistry.Remove(serviceRef);
+        Security.RemoveRepository(serviceRef.Service);
         Logger?.LogInformation("Removed ServiceRef {component}", serviceRef.ToString());
         Settings.Repositories.Items.Remove(serviceRef.RepositoryRef);
         Events.Publish(new ServiceRefRemoved(serviceRef));
@@ -316,7 +322,10 @@ public class Store
 
     public void AddConfigNotice(string notice)
     {
-        _configNotices.Add(notice);
+        // Linking the repositories can be retried at startup (see Program.LinkRepositoriesAsync): the same
+        // notice is only worth telling once.
+        if (!_configNotices.Contains(notice))
+            _configNotices.Add(notice);
     }
 
     public IReadOnlyList<string> TakeConfigNotices()
@@ -487,20 +496,75 @@ public class Store
     }
 
     /// <summary>
-    /// Checks whether the current Windows user (AppUserName) is registered in the Users table of
-    /// the given repository, and if not, shows a modal registration dialog for it. Cancelling the
-    /// dialog is not blocking: the app keeps running against that repository without the user
-    /// registered (existing guards elsewhere, e.g. PostItEditorCtrl, already handle that case).
+    /// Decides whether the session's user (AppUserName) can use a repository before it is linked, and
+    /// records its role there in Security. Signed in with the Windows account, being registered is enough;
+    /// signed in with a KNote user name, the session's password must match too. A user not registered yet
+    /// is offered the registration dialog (its role then comes from KntUsersRegisterAsyncCommand). An
+    /// invalid result (wrong password, registration cancelled, disabled user...) explains why, and means
+    /// the repository must not be linked in this session.
     /// </summary>
-    public async Task<bool> EnsureCurrentUserRegistered(IKntService service)
+    public async Task<Result> AuthenticateRepositoryAsync(IKntService service)
     {
-        if (await GetUserId(service) != null)
-            return true;
+        var result = new Result();
+        var alias = service.RepositoryRef?.Alias;
 
-        var userRegisterCtrl = new UserRegisterCtrl(this);
-        await userRegisterCtrl.NewModel(service);
-        var result = userRegisterCtrl.RunModal();
-        return result.Entity == EControllerResult.Executed;
+        var user = await service.GetCurrentUserAsync();
+        if (user == null)
+        {
+            var userRegisterCtrl = new UserRegisterCtrl(this);
+            await userRegisterCtrl.NewModel(service);
+            if (userRegisterCtrl.RunModal().Entity != EControllerResult.Executed)
+            {
+                result.AddErrorMessage($"The user '{AppUserName}' is not registered in the repository '{alias}', so it is not available in this session.");
+                return result;
+            }
+        }
+        else if (Security.AuthenticationMode == AppAuthenticationMode.Credentials && !await PasswordIsValidAsync(service))
+        {
+            result.AddErrorMessage($"The password of the user '{AppUserName}' is not valid in the repository '{alias}', so it is not available in this session.");
+            return result;
+        }
+
+        var role = await service.GetCurrentUserRoleAsync();
+        if (role == null)
+        {
+            result.AddErrorMessage($"The user '{AppUserName}' is disabled or has no role in the repository '{alias}', so it is not available in this session.");
+            return result;
+        }
+
+        Security.SetRepositoryRole(service, role.Value);
+        return result;
+    }
+
+    private async Task<bool> PasswordIsValidAsync(IKntService service)
+    {
+        try
+        {
+            var res = await service.Users.AuthenticateAsync(new UserCredentialsDto { UserName = AppUserName, Password = Security.Password });
+            return res.IsValid;
+        }
+        catch (Exception ex)
+        {
+            // A user created from the users management screen may have no password at all yet: checking
+            // it throws instead of just failing.
+            Logger?.LogWarning(ex, "Authenticating {user} in repository {alias} failed.", AppUserName, service.RepositoryRef?.Alias);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Reads again the session user's role in a linked repository (e.g. after its users were edited from
+    /// the repository management screen). A user that has lost every role there keeps the repository
+    /// linked, without a role (every command is then refused).
+    /// </summary>
+    public async Task RefreshRepositoryRoleAsync(IKntService service)
+    {
+        service.ResetCurrentUser();
+        var role = await service.GetCurrentUserRoleAsync();
+        if (role == null)
+            Security.RemoveRepository(service);
+        else
+            Security.SetRepositoryRole(service, role.Value);
     }
 
     #endregion

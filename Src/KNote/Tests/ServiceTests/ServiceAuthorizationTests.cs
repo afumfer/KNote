@@ -151,6 +151,23 @@ public class ServiceAuthorizationTests
     }
 
     [TestMethod]
+    public async Task GetCurrentUser_TellsADisabledUserApartFromAnUnregisteredOne()
+    {
+        using var db = new RepositoryTestDatabase();
+        var disabled = EnforcedService(db, "Dapper", "disabled");
+        await AddUserAsync(disabled, "disabled", "Admin", disabled: true);
+        var unregistered = EnforcedService(db, "Dapper", "nobody");
+
+        var disabledUser = await disabled.GetCurrentUserAsync();
+        Assert.IsNotNull(disabledUser);
+        Assert.IsTrue(disabledUser.Disabled);
+        Assert.IsNull(await disabled.GetCurrentUserRoleAsync());
+
+        Assert.IsNull(await unregistered.GetCurrentUserAsync());
+        Assert.IsNull(await unregistered.GetCurrentUserRoleAsync());
+    }
+
+    [TestMethod]
     public async Task AnonymousCommands_RunForUnregisteredUsers()
     {
         using var db = new RepositoryTestDatabase();
@@ -205,7 +222,7 @@ public class ServiceAuthorizationTests
         await service.Repository.Users.UpdateAsync(user);
 
         Assert.AreEqual(EnumRoles.Guest, await service.GetCurrentUserRoleAsync());
-        service.ResetCurrentUserRole();
+        service.ResetCurrentUser();
         Assert.AreEqual(EnumRoles.Admin, await service.GetCurrentUserRoleAsync());
     }
 

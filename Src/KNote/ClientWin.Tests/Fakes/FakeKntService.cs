@@ -23,14 +23,17 @@ internal class FakeKntService : IKntService
 
     public ILogger Logger { get; set; }
     public Guid IdServiceRef { get; } = Guid.NewGuid();
-    public RepositoryRef RepositoryRef => throw new NotSupportedException();
+    public RepositoryRef RepositoryRef { get; set; } = new RepositoryRef { Alias = "Fake repository" };
     public string UserIdentityName { get; set; }
     public bool EnforceAuthorization { get; set; }
 
-    // What GetCurrentUserRoleAsync returns (null: the user isn't registered in this repository).
-    public EnumRoles? CurrentUserRole { get; set; } = EnumRoles.Admin;
-    public Task<EnumRoles?> GetCurrentUserRoleAsync() => Task.FromResult(CurrentUserRole);
-    public void ResetCurrentUserRole() { }
+    // What GetCurrentUserAsync returns (null: the user isn't registered in this repository); the role
+    // comes from it, as in KntService. An Admin by default, so tests unrelated to authorization run as before.
+    public UserDto CurrentUser { get; set; } = new UserDto { UserId = Guid.NewGuid(), UserName = "admin", RoleDefinition = "Admin" };
+    public Task<UserDto> GetCurrentUserAsync() => Task.FromResult(CurrentUser);
+    public Task<EnumRoles?> GetCurrentUserRoleAsync() =>
+        Task.FromResult(CurrentUser == null || CurrentUser.Disabled ? null : KntRoles.Highest(CurrentUser.RoleDefinition));
+    public void ResetCurrentUser() { }
 
     public IKntRepository Repository => throw new NotSupportedException();
     public IKntUserService Users => UsersFake;

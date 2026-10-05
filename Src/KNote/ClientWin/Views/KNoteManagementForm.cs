@@ -58,6 +58,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         toolDeleteNote.SetKntIcon(KntIcon.Delete);
         toolPrintNotesList.SetKntIcon(KntIcon.Print);
         toolConfiguration.SetKntIcon(KntIcon.Settings);
+        statusLabelUser.SetKntIcon(KntIcon.User);
 
         // Over the dark folder header: a light icon, as large as the folder caption next to it.
         pictureBoxFolder.SetKntIcon(KntIcon.FolderOpen, 32, Color.WhiteSmoke);
@@ -122,6 +123,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         labelFolderDetail.Text = msg2;
         labelRepAliasCon.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Alias} ({_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Provider})";
         labelReResources.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainerRootPath}\\{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainer}";
+
+        // The user and its role in the active repository, which changes along with it.
+        statusLabelUser.Text = _ctrl.SessionUserInfo;
+        statusLabelUser.ToolTipText = _ctrl.SessionUserDetail;
 
         return DialogResult.OK;
     }

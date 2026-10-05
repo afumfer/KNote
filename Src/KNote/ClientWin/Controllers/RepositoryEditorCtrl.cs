@@ -154,14 +154,22 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             else if (EditorMode == EnumRepositoryEditorMode.AddLink)
             {                    
                 // Add link repository
-                var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);                    
+                var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
                 if (await newService.Service.TestDbConnection())
                 {
+                    // Only linked if the session's user may use it (registered, or registering now; with
+                    // the session's password, when signed in with a KNote user).
+                    var authentication = await Store.AuthenticateRepositoryAsync(newService.Service);
+                    if (!authentication.IsValid)
+                    {
+                        View.ShowInfo(authentication.ErrorMessage);
+                        return false;
+                    }
+
                     Store.AddServiceRef(newService);
                     Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
-                    await Store.EnsureCurrentUserRegistered(newService.Service);
                     OnAddedEntity(Model);
                 }
                 else
@@ -177,13 +185,19 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
                 if (await newService.Service.CreateDataBase())
                 {
+                    // Same as for a linked repository. Being the first user registered in this new
+                    // database, the current user becomes its Admin (see KntUsersRegisterAsyncCommand).
+                    var authentication = await Store.AuthenticateRepositoryAsync(newService.Service);
+                    if (!authentication.IsValid)
+                    {
+                        View.ShowInfo($"The repository has been created, but it has not been linked.{Environment.NewLine}{authentication.ErrorMessage}");
+                        return false;
+                    }
+
                     Store.AddServiceRef(newService);
                     Store.AddServiceRefInSettings(newService);
                     Model.SetIsDirty(false);
                     Store.SaveConfig();
-                    // Same as for a linked repository: as the first user registered in this new
-                    // database the current user becomes its Admin (see KntUsersRegisterAsyncCommand).
-                    await Store.EnsureCurrentUserRegistered(newService.Service);
                     OnAddedEntity(Model);
                 }
                 else

@@ -1,22 +1,26 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
-using KNote.Model.Dto;
+using KNote.Model;
+using KntIcons;
 
 namespace KNote.ClientWin.Views;
 
-public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
+public partial class LoginForm : KntForm, IViewEditor<LoginModel>
 {
     #region Fields
 
-    private readonly UserRegisterCtrl _ctrl;
+    private readonly LoginCtrl _ctrl;
 
     #endregion
 
     #region Constructor
 
-    public UserRegisterForm(UserRegisterCtrl ctrl)
+    public LoginForm(LoginCtrl ctrl)
     {
         InitializeComponent();
+        this.Text = $"{KntConst.AppName} - Sign in";
+        // A dark band like the management window's header, with a light icon over it.
+        pictureBoxSignIn.SetKntIcon(KntIcon.SignIn, 56, Color.WhiteSmoke);
 
         _ctrl = ctrl;
     }
@@ -29,14 +33,18 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
     {
         var res = await _ctrl.SaveModel();
         if (res)
-        {
             this.DialogResult = DialogResult.OK;
-        }
     }
 
     private void buttonCancel_Click(object sender, EventArgs e)
     {
         this.DialogResult = DialogResult.Cancel;
+    }
+
+    private void linkWindowsAccount_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        _ctrl.UseWindowsAccount();
+        this.DialogResult = DialogResult.OK;
     }
 
     protected override void OnUserClosing(FormClosingEventArgs e)
@@ -48,21 +56,17 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 
     protected override void ModelToControls()
     {
-        var alias = _ctrl.RepositoryAlias ?? "this repository";
-        labelInfo.Text = $"The user '{_ctrl.Model.UserName}' is not registered in '{alias}'. " +
-            "Please provide the following details to register it.";
-
         textUserName.Text = _ctrl.Model.UserName;
-        textFullName.Text = _ctrl.Model.FullName;
-        textEMail.Text = _ctrl.Model.EMail;
         textPassword.Text = _ctrl.Model.Password;
-        textPassword.ReadOnly = _ctrl.PasswordFromSignIn;
+        linkWindowsAccount.Text = $"Use my Windows account ({_ctrl.WindowsUserName}) instead";
+
+        // The user name is usually remembered from the last time: start on the password then.
+        ActiveControl = string.IsNullOrEmpty(textUserName.Text) ? textUserName : textPassword;
     }
 
     protected override void ControlsToModel()
     {
-        _ctrl.Model.FullName = textFullName.Text;
-        _ctrl.Model.EMail = textEMail.Text;
+        _ctrl.Model.UserName = textUserName.Text;
         _ctrl.Model.Password = textPassword.Text;
     }
 
