@@ -32,7 +32,14 @@ public abstract class ResultBase
     {
         get { return (_listErrorMessage.Count == 0); }
     }
-    
+
+    /// <summary>
+    /// True when the operation wasn't run because the current user lacks the role it requires (see
+    /// KntServiceBase.ExecuteCommand). IsValid is false as well, with the reason in ErrorMessage; this
+    /// flag only tells that case apart, e.g. to stop a batch of operations at the first refusal.
+    /// </summary>
+    public bool NotAuthorized { get; set; }
+
     #endregion
 
     #region Constructor

@@ -18,6 +18,26 @@ public interface IKntService : IDisposable
     Task<bool> CreateDataBase();
     string UserIdentityName { get; set; }
 
+    /// <summary>
+    /// When true, every command checks the role of UserIdentityName in this repository against the
+    /// role its class declares with [KntAuthorize] (see KntCommandServiceBase.ValidateAuthorizationAsync).
+    /// Off by default: ServiceRef (ClientWin) turns it on. Server leaves it off and keeps relying on its
+    /// controllers' [Authorize], as do tests that exercise the service without a user.
+    /// </summary>
+    bool EnforceAuthorization { get; set; }
+
+    /// <summary>
+    /// The highest role of UserIdentityName in this repository's Users table, or null when that user
+    /// isn't registered there or is disabled. Read once and cached; ResetCurrentUserRole forgets it.
+    /// </summary>
+    Task<EnumRoles?> GetCurrentUserRoleAsync();
+
+    /// <summary>
+    /// Forgets the cached role, so the next GetCurrentUserRoleAsync reads it again. Called by the
+    /// commands that change users (their roles or whether they are disabled).
+    /// </summary>
+    void ResetCurrentUserRole();
+
     IKntRepository Repository { get; }
 
     IKntUserService Users { get; }

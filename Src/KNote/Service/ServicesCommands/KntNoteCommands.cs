@@ -8,6 +8,7 @@ using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetAllAsyncCommand : KntCommandServiceBase<Result<List<NoteInfoDto>>>
 {
     public KntNotesGetAllAsyncCommand(IKntService service) : base(service)
@@ -21,6 +22,7 @@ public class KntNotesGetAllAsyncCommand : KntCommandServiceBase<Result<List<Note
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetMinimalAllAsyncCommand : KntCommandServiceBase<Result<List<NoteMinimalDto>>>
 {
     public KntNotesGetMinimalAllAsyncCommand(IKntService service) : base(service)
@@ -34,6 +36,7 @@ public class KntNotesGetMinimalAllAsyncCommand : KntCommandServiceBase<Result<Li
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesHomeAllAsyncCommand : KntCommandServiceBase<Result<List<NoteInfoDto>>>
 {
     public KntNotesHomeAllAsyncCommand(IKntService service) : base(service)
@@ -47,6 +50,7 @@ public class KntNotesHomeAllAsyncCommand : KntCommandServiceBase<Result<List<Not
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetAsyncCommand : KntCommandServiceBase<Guid, Result<NoteDto>>
 {
     public KntNotesGetAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -60,6 +64,7 @@ public class KntNotesGetAsyncCommand : KntCommandServiceBase<Guid, Result<NoteDt
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetByNumberAsyncCommand : KntCommandServiceBase<int, Result<NoteDto>>
 {
     public KntNotesGetByNumberAsyncCommand(IKntService service, int id) : base(service, id)
@@ -73,6 +78,7 @@ public class KntNotesGetByNumberAsyncCommand : KntCommandServiceBase<int, Result
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetExtendedAsyncCommand : KntCommandServiceBase<Guid, Result<NoteExtendedDto>>
 {
     public KntNotesGetExtendedAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -111,6 +117,7 @@ public class KntNotesGetExtendedAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetByFolderAsyncCommand : KntCommandServiceBase<Guid, Result<List<NoteInfoDto>>>
 {
     public KntNotesGetByFolderAsyncCommand(IKntService service, Guid folderId) : base(service, folderId)
@@ -124,6 +131,7 @@ public class KntNotesGetByFolderAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetMinimalByFolderAsyncCommand : KntCommandServiceBase<Guid, Result<List<NoteMinimalDto>>>
 {
     public KntNotesGetMinimalByFolderAsyncCommand(IKntService service, Guid folderId) : base(service, folderId)
@@ -138,6 +146,7 @@ public class KntNotesGetMinimalByFolderAsyncCommand : KntCommandServiceBase<Guid
 }
 
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetFilterAsyncCommand : KntCommandServiceBase<NotesFilterDto, Result<List<NoteInfoDto>>>
 {
     public KntNotesGetFilterAsyncCommand(IKntService service, NotesFilterDto notesFilter) : base(service, notesFilter)
@@ -151,6 +160,7 @@ public class KntNotesGetFilterAsyncCommand : KntCommandServiceBase<NotesFilterDt
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetMinimalFilterAsyncCommand : KntCommandServiceBase<NotesFilterDto, Result<List<NoteMinimalDto>>>
 {
     public KntNotesGetMinimalFilterAsyncCommand(IKntService service, NotesFilterDto notesFilter) : base(service, notesFilter)
@@ -164,6 +174,7 @@ public class KntNotesGetMinimalFilterAsyncCommand : KntCommandServiceBase<NotesF
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetSearchAsyncCommand : KntCommandServiceBase<NotesSearchDto, Result<List<NoteInfoDto>>>
 {
     public KntNotesGetSearchAsyncCommand(IKntService service, NotesSearchDto notesSearch) : base(service, notesSearch)
@@ -177,6 +188,7 @@ public class KntNotesGetSearchAsyncCommand : KntCommandServiceBase<NotesSearchDt
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetMinimalSearchAsyncCommand : KntCommandServiceBase<NotesSearchDto, Result<List<NoteMinimalDto>>>
 {
     public KntNotesGetMinimalSearchAsyncCommand(IKntService service, NotesSearchDto notesSearch) : base(service, notesSearch)
@@ -190,6 +202,7 @@ public class KntNotesGetMinimalSearchAsyncCommand : KntCommandServiceBase<NotesS
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesNewAsyncCommand : KntCommandServiceBase<NoteInfoDto, Result<NoteDto>>
 {
     public KntNotesNewAsyncCommand(IKntService service, NoteInfoDto entityInfo) : base(service, entityInfo)
@@ -203,6 +216,7 @@ public class KntNotesNewAsyncCommand : KntCommandServiceBase<NoteInfoDto, Result
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesNewExtendedAsyncCommand : KntCommandServiceBase<NoteInfoDto, Result<NoteExtendedDto>>
 {
     public KntNotesNewExtendedAsyncCommand(IKntService service, NoteInfoDto entityInfo) : base(service, entityInfo)
@@ -221,6 +235,7 @@ public class KntNotesNewExtendedAsyncCommand : KntCommandServiceBase<NoteInfoDto
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Result<NoteDto>>
 {
     private readonly bool UpdateStatus;
@@ -261,6 +276,7 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteExtendedDto, Result<NoteExtendedDto>>
 {    
     public KntNotesSaveExtendedAsyncCommand(IKntService service, NoteExtendedDto entity) : base(service, entity)
@@ -410,6 +426,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<NoteDto>>
 {
     public KntNotesDeleteAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -440,6 +457,7 @@ public class KntNotesDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<Not
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesDeleteExtendedAsyncCommand : KntCommandServiceBase<Guid, Result<NoteExtendedDto>>
 {
     public KntNotesDeleteExtendedAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -499,6 +517,7 @@ public class KntNotesDeleteExtendedAsyncCommand : KntCommandServiceBase<Guid, Re
 }
 
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetResourcesAsyncCommand : KntCommandServiceBase<Guid, Result<List<ResourceDto>>>
 {
     public KntNotesGetResourcesAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -516,6 +535,7 @@ public class KntNotesGetResourcesAsyncCommand : KntCommandServiceBase<Guid, Resu
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetResourcesInfoAsyncCommand : KntCommandServiceBase<Guid, Result<List<ResourceInfoDto>>>
 {
     public KntNotesGetResourcesInfoAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -538,6 +558,7 @@ public class KntNotesGetResourcesInfoAsyncCommand : KntCommandServiceBase<Guid, 
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetResourceAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceDto>>
 {
     public KntNotesGetResourceAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -554,6 +575,7 @@ public class KntNotesGetResourceAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<ResourceDto, Result<ResourceDto>>
 {
     private readonly bool forceNew;
@@ -626,6 +648,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveResourceInfoAsyncCommand : KntCommandSaveServiceBase<ResourceInfoDto, Result<ResourceInfoDto>>
 {
     private readonly bool forceNew;
@@ -652,6 +675,7 @@ public class KntNotesSaveResourceInfoAsyncCommand : KntCommandSaveServiceBase<Re
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesDeleteResourceAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceDto>>
 {    
     public KntNotesDeleteResourceAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -695,6 +719,7 @@ public class KntNotesDeleteResourceAsyncCommand : KntCommandServiceBase<Guid, Re
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesDeleteResourceInfoAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceInfoDto>>
 {
     public KntNotesDeleteResourceInfoAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -713,6 +738,7 @@ public class KntNotesDeleteResourceInfoAsyncCommand : KntCommandServiceBase<Guid
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetNoteTasksAsyncCommand : KntCommandServiceBase<Guid, Result<List<NoteTaskDto>>>
 {
     public KntNotesGetNoteTasksAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -726,6 +752,7 @@ public class KntNotesGetNoteTasksAsyncCommand : KntCommandServiceBase<Guid, Resu
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetStartedTasksByDateTimeRageAsyncCommand : KntCommandServiceBase< Result<List<NoteTaskDto>>>
 {
     private readonly DateTime startDateTime;
@@ -743,6 +770,7 @@ public class KntNotesGetStartedTasksByDateTimeRageAsyncCommand : KntCommandServi
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand : KntCommandServiceBase<Result<List<NoteTaskDto>>>
 {
     private readonly DateTime startDateTime;
@@ -760,6 +788,7 @@ public class KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand : KntCommandSer
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetNoteTaskAsyncCommand : KntCommandServiceBase<Guid, Result<NoteTaskDto>>
 {
     public KntNotesGetNoteTaskAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -773,6 +802,7 @@ public class KntNotesGetNoteTaskAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveNoteTaskAsyncCommand : KntCommandSaveServiceBase<NoteTaskDto, Result<NoteTaskDto>>
 {
     private readonly bool forceNew;
@@ -806,6 +836,7 @@ public class KntNotesSaveNoteTaskAsyncCommand : KntCommandSaveServiceBase<NoteTa
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesDeleteNoteTaskAsyncCommand : KntCommandServiceBase<Guid, Result<NoteTaskDto>>
 {    
     public KntNotesDeleteNoteTaskAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -835,6 +866,7 @@ public class KntNotesDeleteNoteTaskAsyncCommand : KntCommandServiceBase<Guid, Re
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetMessagesAsyncCommand : KntCommandServiceBase<Guid, Result<List<KMessageDto>>>
 {
     public KntNotesGetMessagesAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -848,6 +880,7 @@ public class KntNotesGetMessagesAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetMessageAsyncCommand : KntCommandServiceBase<Guid, Result<KMessageDto>>
 {
     public KntNotesGetMessageAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -861,6 +894,7 @@ public class KntNotesGetMessageAsyncCommand : KntCommandServiceBase<Guid, Result
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveMessageAsyncCommand : KntCommandSaveServiceBase<KMessageDto, Result<KMessageDto>>
 {
     private readonly bool forceNew;
@@ -899,6 +933,7 @@ public class KntNotesSaveMessageAsyncCommand : KntCommandSaveServiceBase<KMessag
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesDeleteMessageAsyncCommand : KntCommandServiceBase<Guid, Result<KMessageDto>>
 {
     public KntNotesDeleteMessageAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -929,6 +964,7 @@ public class KntNotesDeleteMessageAsyncCommand : KntCommandServiceBase<Guid, Res
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetTraceNotesFromAsyncCommand : KntCommandServiceBase<Guid, Result<List<TraceNoteDto>>>
 {
     public KntNotesGetTraceNotesFromAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -943,6 +979,7 @@ public class KntNotesGetTraceNotesFromAsyncCommand : KntCommandServiceBase<Guid,
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetTraceNotesToAsyncCommand : KntCommandServiceBase<Guid, Result<List<TraceNoteDto>>>
 {
     public KntNotesGetTraceNotesToAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -957,6 +994,7 @@ public class KntNotesGetTraceNotesToAsyncCommand : KntCommandServiceBase<Guid, R
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveTraceNoteAsyncCommand : KntCommandSaveServiceBase<TraceNoteDto, Result<TraceNoteDto>>
 {
     private readonly bool forceNew;
@@ -990,6 +1028,7 @@ public class KntNotesSaveTraceNoteAsyncCommand : KntCommandSaveServiceBase<Trace
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesDeleteTraceNoteAsyncCommand : KntCommandServiceBase<Guid, Result<TraceNoteDto>>
 {
     public KntNotesDeleteTraceNoteAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -1019,6 +1058,7 @@ public class KntNotesDeleteTraceNoteAsyncCommand : KntCommandServiceBase<Guid, R
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetWindowAsyncCommand : KntCommandServiceBase<Result<WindowDto>>
 {
     private readonly Guid noteId;
@@ -1035,6 +1075,7 @@ public class KntNotesGetWindowAsyncCommand : KntCommandServiceBase<Result<Window
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveWindowAsyncCommand : KntCommandSaveServiceBase<WindowDto, Result<WindowDto>>
 {
     private readonly bool forceNew;
@@ -1068,6 +1109,7 @@ public class KntNotesSaveWindowAsyncCommand : KntCommandSaveServiceBase<WindowDt
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetVisibleNotesIdAsyncCommand : KntCommandServiceBase<Result<List<Guid>>>
 {
     private readonly string userName;
@@ -1089,6 +1131,7 @@ public class KntNotesGetVisibleNotesIdAsyncCommand : KntCommandServiceBase<Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesGetAlarmNotesIdAsyncCommand : KntCommandServiceBase<Result<List<Guid>>>
 {
     private readonly string userName;
@@ -1112,6 +1155,7 @@ public class KntNotesGetAlarmNotesIdAsyncCommand : KntCommandServiceBase<Result<
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool>>
 {
     private readonly Guid noteId;
@@ -1129,6 +1173,7 @@ public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntNotesPatchChangeTagsAsyncCommand : KntCommandServiceBase<Result<bool>>
 {
     private readonly Guid noteId;

@@ -7,6 +7,7 @@ using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntSystemValueGetAllAsyncCommand : KntCommandServiceBase<Result<List<SystemValueDto>>>
 {
     public KntSystemValueGetAllAsyncCommand(IKntService service) : base(service)
@@ -20,6 +21,7 @@ public class KntSystemValueGetAllAsyncCommand : KntCommandServiceBase<Result<Lis
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntSystemValueGetByScopeKeyAsyncCommand : KntCommandServiceBase<KeyValuePair<string, string>, Result<SystemValueDto>>
 {
     public KntSystemValueGetByScopeKeyAsyncCommand(IKntService service, KeyValuePair<string, string> scopeKey) : base(service, scopeKey)
@@ -32,6 +34,7 @@ public class KntSystemValueGetByScopeKeyAsyncCommand : KntCommandServiceBase<Key
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntSystemValueGetAsyncCommand : KntCommandServiceBase<Guid, Result<SystemValueDto>>
 {
     public KntSystemValueGetAsyncCommand(IKntService service,Guid id) : base(service, id)
@@ -44,6 +47,7 @@ public class KntSystemValueGetAsyncCommand : KntCommandServiceBase<Guid, Result<
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntSystemValueSaveAsyncCommand : KntCommandSaveServiceBase<SystemValueDto, Result<SystemValueDto>>
 {
     public KntSystemValueSaveAsyncCommand(IKntService service, SystemValueDto entity) : base(service, entity)
@@ -65,6 +69,7 @@ public class KntSystemValueSaveAsyncCommand : KntCommandSaveServiceBase<SystemVa
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntSystemValueDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<SystemValueDto>>
 {
     public KntSystemValueDeleteAsyncCommand(IKntService service, Guid id) : base(service, id)

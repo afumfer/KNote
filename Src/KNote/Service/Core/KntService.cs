@@ -138,7 +138,53 @@ public class KntService : IKntService, IDisposable
     }
 
     public string UserIdentityName { get; set; }
-    
+
+    public bool EnforceAuthorization { get; set; }
+
+    // Cache of GetCurrentUserRoleAsync, tied to the UserIdentityName it was read for. Guarded by a lock
+    // because ClientWin can run commands of the same service from more than one thread (alarm timers,
+    // heavy processes); a concurrent first read just reads the role twice.
+    private readonly object _currentUserRoleLock = new();
+    private bool _currentUserRoleLoaded;
+    private string _currentUserRoleUserName;
+    private EnumRoles? _currentUserRole;
+
+    public async Task<EnumRoles?> GetCurrentUserRoleAsync()
+    {
+        var userName = UserIdentityName;
+
+        lock (_currentUserRoleLock)
+        {
+            if (_currentUserRoleLoaded && _currentUserRoleUserName == userName)
+                return _currentUserRole;
+        }
+
+        // Straight to the repository, not through a command: this is what commands use to authorize
+        // themselves, and it must also work before the user is registered.
+        EnumRoles? role = null;
+        if (!string.IsNullOrEmpty(userName))
+        {
+            var res = await _repository.Users.GetByUserNameAsync(userName);
+            if (res.IsValid && res.Entity != null && !res.Entity.Disabled)
+                role = KntRoles.Highest(res.Entity.RoleDefinition);
+        }
+
+        lock (_currentUserRoleLock)
+        {
+            _currentUserRole = role;
+            _currentUserRoleUserName = userName;
+            _currentUserRoleLoaded = true;
+        }
+
+        return role;
+    }
+
+    public void ResetCurrentUserRole()
+    {
+        lock (_currentUserRoleLock)
+            _currentUserRoleLoaded = false;
+    }
+
     public async Task<bool> TestDbConnection()
     {
         return await _repository.TestDbConnection();

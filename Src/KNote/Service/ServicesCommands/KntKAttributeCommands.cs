@@ -8,6 +8,7 @@ using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntKAttributesGetAllAsyncCommand : KntCommandServiceBase<Result<List<KAttributeInfoDto>>>
 {
     public KntKAttributesGetAllAsyncCommand(IKntService service) : base(service)
@@ -21,6 +22,7 @@ public class KntKAttributesGetAllAsyncCommand : KntCommandServiceBase<Result<Lis
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntKAttributesGetAllByTypeAsyncCommand : KntCommandServiceBase<Guid?, Result<List<KAttributeInfoDto>>>
 {
     public KntKAttributesGetAllByTypeAsyncCommand(IKntService service, Guid? typeId) : base(service, typeId)
@@ -34,6 +36,7 @@ public class KntKAttributesGetAllByTypeAsyncCommand : KntCommandServiceBase<Guid
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntKAttributesGetAsyncCommand : KntCommandServiceBase<Guid, Result<KAttributeDto>>
 {
     public KntKAttributesGetAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -47,6 +50,7 @@ public class KntKAttributesGetAsyncCommand : KntCommandServiceBase<Guid, Result<
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntKAttributesSaveAsyncCommand : KntCommandSaveServiceBase<KAttributeDto, Result<KAttributeDto>>
 {
     public KntKAttributesSaveAsyncCommand(IKntService service, KAttributeDto entity) : base(service, entity)
@@ -86,6 +90,7 @@ public class KntKAttributesSaveAsyncCommand : KntCommandSaveServiceBase<KAttribu
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntKAttributesDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<KAttributeInfoDto>>
 {
     public KntKAttributesDeleteAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -127,6 +132,7 @@ public class KntKAttributesDeleteAsyncCommand : KntCommandServiceBase<Guid, Resu
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntKAttributesTabulatedValuesAsyncCommand : KntCommandServiceBase<Guid, Result<List<KAttributeTabulatedValueDto>>>
 {
     public KntKAttributesTabulatedValuesAsyncCommand(IKntService service, Guid attributeId) : base(service, attributeId)

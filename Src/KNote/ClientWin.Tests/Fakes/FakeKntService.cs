@@ -25,6 +25,12 @@ internal class FakeKntService : IKntService
     public Guid IdServiceRef { get; } = Guid.NewGuid();
     public RepositoryRef RepositoryRef => throw new NotSupportedException();
     public string UserIdentityName { get; set; }
+    public bool EnforceAuthorization { get; set; }
+
+    // What GetCurrentUserRoleAsync returns (null: the user isn't registered in this repository).
+    public EnumRoles? CurrentUserRole { get; set; } = EnumRoles.Admin;
+    public Task<EnumRoles?> GetCurrentUserRoleAsync() => Task.FromResult(CurrentUserRole);
+    public void ResetCurrentUserRole() { }
 
     public IKntRepository Repository => throw new NotSupportedException();
     public IKntUserService Users => UsersFake;

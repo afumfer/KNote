@@ -39,7 +39,9 @@ public static class Program
             if (appConfig == null)
                 return null;
 
-            var serviceRef = new ServiceRef(appConfig.RepositoryRef, SystemInformation.UserName);
+            // Per-user authorization is ClientWin's (see IKntService.EnforceAuthorization): this import tool
+            // keeps working as before, creating the notes and users it brings over from Redmine.
+            var serviceRef = new ServiceRef(appConfig.RepositoryRef, SystemInformation.UserName, enforceAuthorization: false);
 
             IPluginCommand plugin = new KntRedminePluginCommand
             {

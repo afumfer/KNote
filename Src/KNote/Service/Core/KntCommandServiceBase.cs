@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Reflection;
+using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Repository;
 
@@ -55,9 +56,37 @@ public abstract class KntCommandServiceBase<TResult>
         _service = service;
     }
 
-    public virtual Result ValidateAuthorization()
-    {        
-        return new Result();
+    /// <summary>
+    /// Checked by KntServiceBase.ExecuteCommand before Execute(). With Service.EnforceAuthorization on,
+    /// the command runs only if its class is marked [KntAllowAnonymous], or declares [KntAuthorize] and
+    /// the current user's role in this repository (Service.GetCurrentUserRoleAsync) is at least that one.
+    /// A command declaring neither is refused: forgetting the attribute must not leave it open.
+    /// </summary>
+    public virtual async Task<Result> ValidateAuthorizationAsync()
+    {
+        var result = new Result();
+        if (!Service.EnforceAuthorization)
+            return result;
+
+        var commandType = GetType();
+        if (commandType.GetCustomAttribute<KntAllowAnonymousAttribute>(inherit: false) != null)
+            return result;
+
+        var authorize = commandType.GetCustomAttribute<KntAuthorizeAttribute>(inherit: false);
+        if (authorize == null)
+        {
+            result.AddErrorMessage($"The operation {commandType.Name} does not declare the role it requires.");
+            return result;
+        }
+
+        var repositoryAlias = Service.RepositoryRef?.Alias;
+        var role = await Service.GetCurrentUserRoleAsync();
+        if (role == null)
+            result.AddErrorMessage($"The user '{UserIdentityName}' is not registered in the repository '{repositoryAlias}'.");
+        else if (role < authorize.MinimumRole)
+            result.AddErrorMessage($"The user '{UserIdentityName}' needs the role '{authorize.MinimumRole}' in the repository '{repositoryAlias}' for this operation (current role: '{role}').");
+
+        return result;
     }
 
     public virtual Result ValidateParam()

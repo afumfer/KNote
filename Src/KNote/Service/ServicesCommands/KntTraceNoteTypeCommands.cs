@@ -7,6 +7,7 @@ using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntTraceNoteTypeGetAllAsyncCommand : KntCommandServiceBase<Result<List<TraceNoteTypeDto>>>
 {
     public KntTraceNoteTypeGetAllAsyncCommand(IKntService service) : base(service)
@@ -20,6 +21,7 @@ public class KntTraceNoteTypeGetAllAsyncCommand : KntCommandServiceBase<Result<L
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntTraceNoteTypeGetAsyncCommand : KntCommandServiceBase<Guid, Result<TraceNoteTypeDto>>
 {
     public KntTraceNoteTypeGetAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -33,6 +35,7 @@ public class KntTraceNoteTypeGetAsyncCommand : KntCommandServiceBase<Guid, Resul
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntTraceNoteTypeSaveAsyncCommand : KntCommandSaveServiceBase<TraceNoteTypeDto, Result<TraceNoteTypeDto>>
 {
     public KntTraceNoteTypeSaveAsyncCommand(IKntService service, TraceNoteTypeDto entity) : base(service, entity)
@@ -54,6 +57,7 @@ public class KntTraceNoteTypeSaveAsyncCommand : KntCommandSaveServiceBase<TraceN
     }
 }
 
+[KntAuthorize(EnumRoles.Admin)]
 public class KntTraceNoteTypeDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<TraceNoteTypeDto>>
 {
     public KntTraceNoteTypeDeleteAsyncCommand(IKntService service, Guid id) : base(service, id)

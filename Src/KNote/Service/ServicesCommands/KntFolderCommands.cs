@@ -7,6 +7,7 @@ using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntFoldersGetAllAsyncCommand : KntCommandServiceBase<Result<List<FolderInfoDto>>>
 {
     public KntFoldersGetAllAsyncCommand(IKntService service) : base(service)
@@ -20,6 +21,7 @@ public class KntFoldersGetAllAsyncCommand : KntCommandServiceBase<Result<List<Fo
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntFoldersGetAsyncCommand : KntCommandServiceBase<Guid, Result<FolderDto>>
 {
     public KntFoldersGetAsyncCommand(IKntService service, Guid id) : base(service, id)
@@ -33,6 +35,7 @@ public class KntFoldersGetAsyncCommand : KntCommandServiceBase<Guid, Result<Fold
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntFoldersGetByNumAsyncCommand : KntCommandServiceBase<int, Result<FolderDto>>
 {
     public KntFoldersGetByNumAsyncCommand(IKntService service, int id) : base(service, id)
@@ -46,6 +49,7 @@ public class KntFoldersGetByNumAsyncCommand : KntCommandServiceBase<int, Result<
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntFoldersGetTreeAsyncCommand : KntCommandServiceBase<Result<List<FolderDto>>>
 {
     public KntFoldersGetTreeAsyncCommand(IKntService service) : base(service)
@@ -59,6 +63,7 @@ public class KntFoldersGetTreeAsyncCommand : KntCommandServiceBase<Result<List<F
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
 public class KntFoldersGetHomeAsyncCommand : KntCommandServiceBase<Result<FolderDto>>
 {
     public KntFoldersGetHomeAsyncCommand(IKntService service) : base(service)
@@ -72,6 +77,7 @@ public class KntFoldersGetHomeAsyncCommand : KntCommandServiceBase<Result<Folder
     }
 }
 
+[KntAuthorize(EnumRoles.ProjectManager)]
 public class KntFoldersSaveAsyncCommand : KntCommandSaveServiceBase<FolderDto, Result<FolderDto>>
 {
     public KntFoldersSaveAsyncCommand(IKntService service, FolderDto entity) : base(service, entity)
@@ -95,6 +101,7 @@ public class KntFoldersSaveAsyncCommand : KntCommandSaveServiceBase<FolderDto, R
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
 public class KntFoldersUpdateOrderNotesAsyncCommand : KntCommandServiceBase<(Guid FolderId, string OrderNotes), Result>
 {
     public KntFoldersUpdateOrderNotesAsyncCommand(IKntService service, Guid folderId, string orderNotes)
@@ -109,6 +116,7 @@ public class KntFoldersUpdateOrderNotesAsyncCommand : KntCommandServiceBase<(Gui
     }
 }
 
+[KntAuthorize(EnumRoles.ProjectManager)]
 public class KntFoldersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<FolderDto>>
 {
     public KntFoldersDeleteAsyncCommand(IKntService service, Guid id) : base(service, id)

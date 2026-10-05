@@ -270,8 +270,12 @@ static class Program
                 }
             }
 
+            // The Assistant repository is only read, as a catalog of templates, prompts and code
+            // snippets (Store.GetCatalogItem/GetIncludeCode): the user isn't registered there, so it
+            // runs without per-user authorization. Editing those notes goes through the repository's
+            // own link, if it is also linked, which is authorized as usual.
             if (store.Settings.Repositories.Assistant?.ConnectionString != null)
-                store.SetAssistantServiceRef(TryCreateServiceRef(store, store.Settings.Repositories.Assistant));
+                store.SetAssistantServiceRef(TryCreateServiceRef(store, store.Settings.Repositories.Assistant, enforceAuthorization: false));
             else
                 store.SetAssistantServiceRef(null);
         }
@@ -319,11 +323,12 @@ static class Program
 
     // Returns null (logged, and reported to the user once the main window is shown, through the
     // config notices) when the repository can't be opened.
-    static ServiceRef TryCreateServiceRef(Store store, RepositoryRef repositoryRef)
+    static ServiceRef TryCreateServiceRef(Store store, RepositoryRef repositoryRef, bool enforceAuthorization = true)
     {
         try
         {
-            return new ServiceRef(repositoryRef, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger);
+            return new ServiceRef(repositoryRef, store.AppUserName, store.Settings.Connectivity.MessageBroker.Activated, store.Logger,
+                enforceAuthorization);
         }
         catch (Exception ex)
         {
