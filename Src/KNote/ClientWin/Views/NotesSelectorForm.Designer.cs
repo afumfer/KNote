@@ -132,7 +132,6 @@
             // 
             // contextMenu
             // 
-            contextMenu.ImageScalingSize = new Size(20, 20);
             contextMenu.Name = "contextMenu";
             contextMenu.Size = new Size(53, 3);
             // 

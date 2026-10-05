@@ -169,7 +169,8 @@ public partial class KntServerCOMForm : KntForm, IViewServerCOM
     {
         if (_ctrl.AutoCloseCtrlOnViewExit)
             _ctrl.Finalize();
-        else
+        // Not at Windows shutdown: cancelling would make Windows warn that the app is blocking it.
+        else if (e.CloseReason != CloseReason.WindowsShutDown)
         {
             Hide();
             e.Cancel = true;

@@ -35,7 +35,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
         _ctrl.Store.Events.Subscribe<ControllerNotification>(Store_ComponentNotification);
 
-        Shown += (s, e) => ViewShown?.Invoke(this, e);
+        Shown += KNoteManagementForm_Shown;
 
 #if DEBUG
         menuKNoteLab.Visible = true;
@@ -194,6 +194,26 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
     {
         SetViewPositionAndSize();
         ApplyStartupPanelVisibility();
+
+        // Transparent until Shown has built its panels (see KNoteManagementForm_Shown).
+        Opacity = 0;
+    }
+
+    // ViewShown runs KNoteManagementCtrl.Run() (Program.cs), which creates the embedded views and docks
+    // them here (ShowView/LinkComponents) synchronously. It has to wait for Shown (a running message loop,
+    // see IViewKNoteManagement.ViewShown), but meanwhile the window would show its empty panels being
+    // filled in: it stays transparent until then, and appears once fully painted.
+    private void KNoteManagementForm_Shown(object sender, EventArgs e)
+    {
+        try
+        {
+            ViewShown?.Invoke(this, e);
+        }
+        finally
+        {
+            Update();
+            Opacity = 1;
+        }
     }
 
     private async void KNoteManagementForm_FormClosing(object sender, FormClosingEventArgs e)

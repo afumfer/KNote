@@ -105,10 +105,14 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
     // This panel is meant to stay alive for the whole session (like the tray icon) so it keeps
     // accumulating rows in the background - closing the window (X button) only hides it. It is
     // only really closed when KNoteManagementCtrl.Finalize() cascades into it at app shutdown.
+    // At Windows shutdown it isn't cancelled: that would make Windows warn that the app is blocking it.
     protected override void OnUserClosing(FormClosingEventArgs e)
     {
-        e.Cancel = true;
         SaveWindowBounds();
+        if (e.CloseReason == CloseReason.WindowsShutDown)
+            return;
+
+        e.Cancel = true;
         this.Hide();
     }
 

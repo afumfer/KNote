@@ -60,44 +60,63 @@ static class Program
             // own loop, plus SplashForm's own DoEvents() call in AppContext_AddedServiceRef), which is
             // exactly what caused a cross-thread control access as soon as repository loading had more
             // than one "await" in a row (e.g. right after cancelling the registration dialog).
+            //
+            // A single message loop for the whole session: its main form is the splash first, then the
+            // management window, so the splash stays on screen until that window is complete (it starts
+            // transparent and appears once its panels are built, see KNoteManagementForm_Shown) instead
+            // of leaving a gap between both windows.
+            var appContext = new ApplicationContext(splashForm);
+
             splashForm.Shown += async (s, e) =>
             {
                 try
                 {
                     await LoadAppStore(appStore);
+
+                    // Light/dark mode: only the windows created from here on follow it (see AppTheme). The
+                    // splash and, on first run, the user registration dialog have already been shown in the
+                    // default mode.
+                    AppTheme.Apply(appStore.Settings.General.ColorMode);
+
+                    // knoteManagement.Run() can end up displaying a note whose content uses WebView2 (e.g.
+                    // it reactivates the last active folder, see Store.ChangeActiveFolderWithServiceRef):
+                    // if its first note uses the WebView2 content mode, CoreWebView2Environment.CreateAsync
+                    // needs this message loop pumping and the window shown. Run before that, WebView2's
+                    // own marshaling can complete off the UI thread, so every await further up the call
+                    // chain (up to NoteEditorForm.ModelToControls) then resumes off-thread too and throws
+                    // a cross-thread InvalidOperationException. Hence the deferral to
+                    // IViewKNoteManagement.ViewShown.
+                    var knoteManagement = new KNoteManagementCtrl(appStore);
+                    knoteManagement.View.ViewShown += (_, _) =>
+                    {
+                        try
+                        {
+                            knoteManagement.Run();
+                        }
+                        finally
+                        {
+                            // Posted: processed once the management window has become visible, right
+                            // after this handler returns.
+                            splashForm.BeginInvoke(new MethodInvoker(splashForm.Close));
+                        }
+                    };
+
+                    var managementForm = (Form)knoteManagement.View;
+                    managementForm.Show();
+                    // From here on, closing the splash no longer ends the message loop: closing this does.
+                    appContext.MainForm = managementForm;
                 }
                 catch (Exception ex)
                 {
                     loadException = ex;
-                }
-                finally
-                {
                     splashForm.Close();
                 }
             };
 
-            Application.Run(splashForm);
+            Application.Run(appContext);
 
             if (loadException != null)
                 ExceptionDispatchInfo.Capture(loadException).Throw();
-
-            // Light/dark mode: only the windows created from here on follow it (see AppTheme). The splash
-            // and, on first run, the user registration dialog have already been shown in the default mode.
-            AppTheme.Apply(appStore.Settings.General.ColorMode);
-
-            // knoteManagement.Run() can end up displaying a note whose content uses WebView2 (e.g. it
-            // now reactivates the last active folder, see Store.ChangeActiveFolderWithServiceRef): if
-            // its first note uses the WebView2 content mode, CoreWebView2Environment.CreateAsync needs
-            // a real message loop already pumping on this thread. Called here, before Application.Run
-            // below starts one, WebView2's own marshaling can complete off the UI thread, so every
-            // await further up the call chain (up to NoteEditorForm.ModelToControls) then resumes
-            // off-thread too and throws a cross-thread InvalidOperationException. Deferring to
-            // IViewKNoteManagement.ViewShown, raised once that loop is running, is the same fix already
-            // applied to LoadAppStore/SplashForm above, for the same reason.
-            var knoteManagement = new KNoteManagementCtrl(appStore);
-            knoteManagement.View.ViewShown += (s, e) => knoteManagement.Run();
-
-            Application.Run((Form)knoteManagement.View);
 
             appStore.Logger?.LogInformation("KNote finalized");
 

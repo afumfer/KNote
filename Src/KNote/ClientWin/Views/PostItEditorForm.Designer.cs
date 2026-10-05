@@ -197,7 +197,6 @@ namespace KNote.ClientWin.Views
             // 
             // menuPostIt
             // 
-            menuPostIt.ImageScalingSize = new Size(24, 24);
             menuPostIt.Items.AddRange(new ToolStripItem[] { menuHide, menuAlwaysFront, menuSaveNow, menuDelete, menuS1, menuExtendedEdition, menuPostItProperties, menuWindowsFormView, menuS2, menuAlarmWithin, menuMoreActions });
             menuPostIt.Name = "menuPostIt";
             menuPostIt.Size = new Size(225, 182);
