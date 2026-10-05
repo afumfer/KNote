@@ -114,17 +114,13 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         else
             msg1 = "(Filtered notes)";
 
-        msg2 = $"{_ctrl.FolderPath?.ToString()}  [{_ctrl.SelectedFolderInfo?.FolderNumber.ToString()}]";
+        msg2 = $"{_ctrl.FolderPath?.ToString()}  [{_ctrl.SelectedFolderInfo?.FolderNumber.ToString()}]  ·  Notes: {_ctrl.CountNotes?.ToString()}";
 
-        if (menuHeaderPanelVisible.Checked)
-        {
-            labelFolder.Text = msg1;
-            labelFolderDetail.Text = msg2;
-            labelRepAliasCon.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Alias} ({_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Provider})";
-            labelReResources.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainerRootPath}\\{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainer}";
-        }
-
-        statusLabel1.Text = $"Notes: {_ctrl.CountNotes?.ToString()}";
+        // Updated even while the header panel is hidden, so it is current as soon as it is shown again.
+        labelFolder.Text = msg1;
+        labelFolderDetail.Text = msg2;
+        labelRepAliasCon.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Alias} ({_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Provider})";
+        labelReResources.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainerRootPath}\\{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainer}";
 
         return DialogResult.OK;
     }

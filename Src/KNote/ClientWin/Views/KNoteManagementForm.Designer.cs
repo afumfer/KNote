@@ -97,8 +97,6 @@
             menuHelpDoc = new ToolStripMenuItem();
             menuAbout = new ToolStripMenuItem();
             statusBarManagement = new StatusStrip();
-            statusLabel1 = new ToolStripStatusLabel();
-            statusS1 = new ToolStripStatusLabel();
             statusLabel2 = new ToolStripStatusLabel();
             statusLabelMenuHint = new ToolStripStatusLabel();
             progressBar = new ToolStripProgressBar();
@@ -616,28 +614,13 @@
             // 
             // statusBarManagement
             // 
-            statusBarManagement.Items.AddRange(new ToolStripItem[] { statusLabel1, statusS1, statusLabel2, statusLabelMenuHint, progressBar });
+            statusBarManagement.Items.AddRange(new ToolStripItem[] { statusLabel2, statusLabelMenuHint, progressBar });
             statusBarManagement.Location = new Point(0, 668);
             statusBarManagement.Name = "statusBarManagement";
             statusBarManagement.Padding = new Padding(1, 0, 16, 0);
             statusBarManagement.Size = new Size(1014, 22);
             statusBarManagement.TabIndex = 3;
             statusBarManagement.Text = "statusStrip1";
-            // 
-            // statusLabel1
-            // 
-            statusLabel1.AutoSize = false;
-            statusLabel1.BorderStyle = Border3DStyle.RaisedOuter;
-            statusLabel1.Name = "statusLabel1";
-            statusLabel1.Size = new Size(200, 17);
-            statusLabel1.Text = "....";
-            statusLabel1.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // statusS1
-            // 
-            statusS1.Name = "statusS1";
-            statusS1.Size = new Size(10, 17);
-            statusS1.Text = "|";
             // 
             // statusLabel2
             // 
@@ -1034,8 +1017,6 @@
         private ToolStripMenuItem menuHelpDoc;
         private ToolStripMenuItem menuAbout;
         private StatusStrip statusBarManagement;
-        private ToolStripStatusLabel statusLabel1;
-        private ToolStripStatusLabel statusS1;
         private ToolStripStatusLabel statusLabel2;
         private ToolStripStatusLabel statusLabelMenuHint;
         private ToolStrip toolBarManagement;
