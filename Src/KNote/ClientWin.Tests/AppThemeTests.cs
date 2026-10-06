@@ -99,6 +99,20 @@ public class AppThemeTests
     }
 
     [TestMethod]
+    public void AdjustControls_DropDownListCombo_BecomesFlatAndEditableComboKeepsItsStyle()
+    {
+        using var form = new Form();
+        var list = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        var editable = new ComboBox();
+        form.Controls.AddRange(new Control[] { list, editable });
+
+        AppTheme.AdjustControls(form);
+
+        Assert.AreEqual(FlatStyle.Flat, list.FlatStyle);
+        Assert.AreEqual(FlatStyle.Standard, editable.FlatStyle);
+    }
+
+    [TestMethod]
     public void AdjustControls_LeavesBorderlessControlsWithoutBorder()
     {
         using var form = new Form();

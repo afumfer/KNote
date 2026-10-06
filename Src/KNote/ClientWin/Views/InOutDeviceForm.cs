@@ -18,6 +18,10 @@ public partial class InOutDeviceForm : Form, IInOutDevice
     {
         InitializeComponent();
         Icon = AppIcon.Icon;
+
+        // Not a KntForm (it's also embedded in KntScriptConsoleForm, after that form's own adjustment): the
+        // output box's Fixed3D border would show as a thick white frame in dark mode.
+        AppTheme.AdjustControlsForDarkMode(this);
     }
 
     #endregion 

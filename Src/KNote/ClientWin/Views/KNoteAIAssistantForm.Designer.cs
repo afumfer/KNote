@@ -335,6 +335,7 @@ namespace KNote.ClientWin.Views
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(858, 623);
+            MinimumSize = new Size(820, 480);
             Controls.Add(splitChat);
             Controls.Add(statusStripChat);
             Name = "KNoteAIAssistantForm";

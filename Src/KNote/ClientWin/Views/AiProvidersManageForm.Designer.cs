@@ -102,6 +102,7 @@ namespace KNote.ClientWin.Views
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(700, 450);
+            this.MinimumSize = new System.Drawing.Size(460, 320);
             this.Controls.Add(this.panelForm);
             this.Name = "AiProvidersManageForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

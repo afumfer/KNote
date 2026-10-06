@@ -154,7 +154,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         SelectMode = EnumSelectMode.Folders;
 
-        NotifyMessage($"Loading notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
+        NotifyMessage($"Loading notes list for folder {FolderCaption(folderWithServideRef.FolderInfo)}");
 
         FolderPath = FoldersSelectorCtrl.Path;
 
@@ -164,10 +164,15 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         CountNotes = NotesSelectorCtrl.ListEntities?.Count;
 
         View.ShowInfo(null);
-        NotifyMessage($"Loaded notes list for folder {folderWithServideRef.FolderInfo?.FolderNumber}");
+        NotifyMessage($"Loaded notes list for folder {FolderCaption(folderWithServideRef.FolderInfo)}");
 
         View.DeactivateWaitState();
     }
+
+    // Name and number, as the status bar shows a folder or a note: "'Name' (#12)".
+    private static string FolderCaption(FolderInfoDto folder) => $"'{folder?.Name}' (#{folder?.FolderNumber})";
+
+    private static string NoteCaption(NoteMinimalDto note) => $"'{note.Topic}' (#{note.NoteNumber})";
 
     private async Task RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef selectedNotesInServiceRef)
     {
@@ -483,12 +488,12 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         if (e.Entity == null || SelectedServiceRef == null)
             return;
 
-        NotifyMessage($"Loading note details for note {e.Entity.NoteNumber}");
+        NotifyMessage($"Loading note details for note {NoteCaption(e.Entity)}");
 
-        _selectedNoteInfo = e.Entity;            
+        _selectedNoteInfo = e.Entity;
         await NoteEditorCtrl.LoadModelById(SelectedServiceRef.Service, _selectedNoteInfo.NoteId);
 
-        NotifyMessage($"Loaded note details for note {e.Entity.NoteNumber}");
+        NotifyMessage($"Loaded note details for note {NoteCaption(e.Entity)}");
     }
 
     private async void ExtendAddNote(object sender, ControllerEventArgs<NoteMinimalDto> e)

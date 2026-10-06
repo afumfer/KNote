@@ -32,7 +32,7 @@ namespace KNote.ClientWin.Views
             this.components = new System.ComponentModel.Container();
             this.panelForm = new System.Windows.Forms.Panel();
             this.listViewAlarms = new System.Windows.Forms.ListView();
-            this.contextMenuAlarms = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.contextMenuAlarms = new KNote.ClientWin.Utils.KntContextMenuStrip(this.components);
             this.menuRemoveFromList = new System.Windows.Forms.ToolStripMenuItem();
             this.panelForm.SuspendLayout();
             this.contextMenuAlarms.SuspendLayout();
@@ -99,7 +99,7 @@ namespace KNote.ClientWin.Views
 
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.ListView listViewAlarms;
-        private System.Windows.Forms.ContextMenuStrip contextMenuAlarms;
+        private KNote.ClientWin.Utils.KntContextMenuStrip contextMenuAlarms;
         private System.Windows.Forms.ToolStripMenuItem menuRemoveFromList;
     }
 }

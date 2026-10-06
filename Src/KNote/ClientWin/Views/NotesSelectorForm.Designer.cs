@@ -36,7 +36,7 @@
             buttonUndoFilter = new Button();
             panelDataGridNotes = new Panel();
             dataGridNotes = new DataGridView();
-            contextMenu = new ContextMenuStrip(components);
+            contextMenu = new KNote.ClientWin.Utils.KntContextMenuStrip(components);
             panelBottom = new Panel();
             buttonCancel = new Button();
             buttonAccept = new Button();
@@ -202,6 +202,6 @@
         private System.Windows.Forms.Button buttonAccept;
         private System.Windows.Forms.Panel panelDataGridNotes;
         private System.Windows.Forms.DataGridView dataGridNotes;
-        private System.Windows.Forms.ContextMenuStrip contextMenu;
+        private KNote.ClientWin.Utils.KntContextMenuStrip contextMenu;
     }
 }

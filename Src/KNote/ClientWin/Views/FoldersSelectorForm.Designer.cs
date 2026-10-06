@@ -31,7 +31,7 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FoldersSelectorForm));
             imageListFolders = new ImageList(components);
-            contextMenu = new ContextMenuStrip(components);
+            contextMenu = new KNote.ClientWin.Utils.KntContextMenuStrip(components);
             panelForm = new Panel();
             treeViewFolders = new TreeView();
             panelBottom = new Panel();
@@ -123,7 +123,7 @@
 
         #endregion
         private System.Windows.Forms.ImageList imageListFolders;
-        private System.Windows.Forms.ContextMenuStrip contextMenu;
+        private KNote.ClientWin.Utils.KntContextMenuStrip contextMenu;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;

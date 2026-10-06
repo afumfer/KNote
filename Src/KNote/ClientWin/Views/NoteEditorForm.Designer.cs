@@ -214,7 +214,6 @@
             toolBarNoteEditor.Location = new Point(0, 0);
             toolBarNoteEditor.Name = "toolBarNoteEditor";
             toolBarNoteEditor.Padding = new Padding(0, 0, 2, 0);
-            toolBarNoteEditor.RenderMode = ToolStripRenderMode.Professional;
             toolBarNoteEditor.Size = new Size(809, 25);
             toolBarNoteEditor.TabIndex = 6;
             toolBarNoteEditor.Text = "Toolbar KeyNotes";

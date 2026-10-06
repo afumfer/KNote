@@ -28,7 +28,7 @@ public static class AppTheme
     // Fixes what WinForms' dark mode leaves light, all of them designer defaults: a TabPage with
     // UseVisualStyleBackColor (the light visual style background around its content), the Fixed3D border
     // (the default of TextBox, ListBox, ListView, TreeView...), which becomes the thin gray FixedSingle one,
-    // and the LinkLabel's dark blue. Called by KntForm on load, so it only reaches the controls that exist by
+    // the face of a DropDownList combo and the LinkLabel's dark blue. Called by KntForm on load, so it only reaches the controls that exist by
     // then. Safe to call again on the same controls: what it has already changed no longer matches.
     public static void AdjustControlsForDarkMode(Control root)
     {
@@ -86,6 +86,11 @@ public static class AppTheme
                     break;
                 case PictureBox pictureBox when pictureBox.BorderStyle == BorderStyle.Fixed3D:
                     pictureBox.BorderStyle = BorderStyle.FixedSingle;
+                    break;
+                // The themed (Standard) DropDownList combo keeps its light face (selected text and arrow);
+                // only its drop-down list goes dark. The Flat one paints itself with its own dark colors.
+                case ComboBox combo when combo.DropDownStyle == ComboBoxStyle.DropDownList && combo.FlatStyle == FlatStyle.Standard:
+                    combo.FlatStyle = FlatStyle.Flat;
                     break;
             }
 

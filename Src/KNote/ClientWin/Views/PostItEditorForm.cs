@@ -26,6 +26,10 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     // picMenu sits on the caption (true) or floats over the navigation URL bar (false).
     private bool _menuOverCaption;
 
+    // picMenu floats over the URL box (navigation mode in a window), and must follow it (see
+    // PositionNavigationModePicMenu).
+    private bool _menuOverUrlBox;
+
     #endregion
 
     #region Constructor
@@ -40,6 +44,14 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         // guarantees they stay visible on top of it.
         picMenu.BringToFront();
         picResize.BringToFront();
+
+        // In navigation mode picMenu is placed from the URL box's bounds, first while this form is still being
+        // built: the URL box keeps moving and growing afterwards (kntEditView finishes its own scaling later,
+        // e.g. at 200%), so picMenu is placed again whenever it does.
+        kntEditView.UrlBox.SizeChanged += (s, e) => RepositionNavigationModePicMenu();
+        kntEditView.UrlBox.LocationChanged += (s, e) => RepositionNavigationModePicMenu();
+        kntEditView.SizeChanged += (s, e) => RepositionNavigationModePicMenu();
+        kntEditView.LocationChanged += (s, e) => RepositionNavigationModePicMenu();
 
         _ctrl = ctrl;
 
@@ -426,7 +438,8 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
         labelStatus.BackColor = ColorTranslator.FromHtml(_ctrl.WindowPostIt.NoteColor);
 
-        // Both icons follow the Post-It's own text colors, so they stay visible on any note color.
+        // The caption icon is a yellow picked for the title color, the resize grip follows the note's text
+        // color: both stay visible on any Post-It colors.
         SetMenuIcon();
         picResize.SetKntIcon(KntIcon.ResizeGrip, 20,ColorTranslator.FromHtml(_ctrl.WindowPostIt.TextNoteColor));
     }
@@ -574,34 +587,8 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
                 panelContent.Padding = new Padding(4, 2, 4, 4);
                 panelForm.PerformLayout(); // force kntEditView's Dock=Fill bounds to resolve now
 
-                // Size picMenu to match the URL textbox's own height (which now matches the
-                // back/forward/reload buttons) and float it as an overlay on top of the textbox's
-                // right edge, instead of shrinking the textbox to make room for it. It's then
-                // shrunk by ~10% around that same center point, so it doesn't fill the whole row.
-                var urlTextBox = kntEditView.UrlTextBox;
-
-                // kntEditView is nested inside panelContent, so its bounds aren't directly
-                // relative to panelForm (picMenu's own parent) - convert via screen coordinates
-                // instead of assuming a fixed nesting depth.
-                Point kntEditViewOrigin = panelForm.PointToClient(kntEditView.PointToScreen(Point.Empty));
-                int kntEditViewTop = kntEditViewOrigin.Y;
-                int kntEditViewRight = kntEditViewOrigin.X + kntEditView.Width;
-
-                int fullSize = urlTextBox.Height;
-                int centerX = kntEditViewRight - 2 - fullSize / 2;
-                int centerY = kntEditViewTop + urlTextBox.Top + fullSize / 2;
-
-                int picMenuSize = (int)(fullSize * 0.9);
-                picMenu.Size = new Size(picMenuSize, picMenuSize);
-                picMenu.Top = centerY - picMenuSize / 2;
-                picMenu.Left = centerX - picMenuSize / 2;
-                // Same background as the URL textbox it overlays.
-                picMenu.BackColor = urlTextBox.BackColor;
-                picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
-                    | System.Windows.Forms.AnchorStyles.Right));
-                picMenu.BringToFront();
-                _menuOverCaption = false;
-                SetMenuIcon();
+                _menuOverUrlBox = true;
+                PositionNavigationModePicMenu();
             }
             else
             {
@@ -633,8 +620,44 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         kntEditView.NavigationEnd += KntEditView_NavigationEnd;
     }
 
+    private void RepositionNavigationModePicMenu()
+    {
+        if (_menuOverUrlBox)
+            PositionNavigationModePicMenu();
+    }
+
+    // Sizes picMenu to the URL box's height (as tall as the back/forward/reload buttons beside it) and floats it
+    // as an overlay on top of the box's right edge, inside its border, instead of shrinking the box to make room
+    // for it. It's then shrunk by ~20% around that same center point, so it doesn't fill the whole box.
+    private void PositionNavigationModePicMenu()
+    {
+        var urlBox = kntEditView.UrlBox;
+
+        // The URL box is nested inside kntEditView (itself inside panelContent), so its bounds aren't directly
+        // relative to panelForm (picMenu's own parent) - convert via screen coordinates instead of assuming a
+        // fixed nesting depth.
+        Rectangle urlBoxBounds = panelForm.RectangleToClient(urlBox.RectangleToScreen(urlBox.ClientRectangle));
+
+        int fullSize = urlBoxBounds.Height;
+        int picMenuSize = (int)(fullSize * 0.8);
+        int centerX = urlBoxBounds.Right - 2 - fullSize / 2;
+
+        picMenu.Size = new Size(picMenuSize, picMenuSize);
+        // Centered on the box: rounded from its exact middle, so an odd leftover pixel doesn't always go below.
+        picMenu.Top = urlBoxBounds.Top + (int)Math.Round((fullSize - picMenuSize) / 2.0);
+        picMenu.Left = centerX - picMenuSize / 2;
+        // Same background as the URL box it overlays.
+        picMenu.BackColor = urlBox.BackColor;
+        picMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Top
+            | System.Windows.Forms.AnchorStyles.Right));
+        picMenu.BringToFront();
+        _menuOverCaption = false;
+        SetMenuIcon();
+    }
+
     private void PositionCaptionModePicMenu()
     {
+        _menuOverUrlBox = false;
         // Sized/positioned from labelCaption's own (AutoScale-tracked) height instead of a
         // hardcoded pixel value, so it stays correctly proportioned at any Windows scale factor -
         // mirrors the same approach already used for picMenu in navigation mode. Nearly the full
@@ -653,8 +676,8 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     }
 
     // picMenu's size follows the caption / URL bar height (see above), so its icon is drawn for that size.
-    // Over the caption it takes the caption's colors (picMenu is a sibling of the caption, not its child,
-    // so it doesn't inherit them), so it stands out on any Post-It title color.
+    // Over the caption it takes the caption's background (picMenu is a sibling of the caption, not its child,
+    // so it doesn't inherit it) and a yellow that stands out on any Post-It title color.
     private void SetMenuIcon()
     {
         int logicalSize = (int)Math.Round(picMenu.Height * 96.0 / DeviceDpi);
@@ -664,7 +687,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         if (_menuOverCaption)
         {
             picMenu.BackColor = labelCaption.BackColor;
-            color = labelCaption.ForeColor;
+            color = PostItCaptionIcon.GetColor(labelCaption.BackColor);
         }
         picMenu.SetKntIcon(KntIcon.PostIt, logicalSize, color);
     }
