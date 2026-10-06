@@ -80,7 +80,12 @@ namespace KntWebView
         {
             get { return textUrl.Enabled; }
 
-            set { textUrl.Enabled = value; }
+            set
+            {
+                textUrl.Enabled = value;
+                // The box around the text (panelUrl) follows the text box's own enabled/disabled background.
+                panelUrl.BackColor = value ? SystemColors.Window : SystemColors.Control;
+            }
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -200,6 +205,14 @@ namespace KntWebView
             get { return textUrl; }
         }
 
+        // The URL box as it is seen: the bordered box (as tall as the navigation buttons) that holds the URL
+        // text box. What lays something out over the URL bar measures this one, not UrlTextBox.
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Control UrlBox
+        {
+            get { return panelUrl; }
+        }
+
         #endregion
         
         public event EventHandler NavigationStart;
@@ -249,10 +262,34 @@ namespace KntWebView
             }
         }
 
-        private async void textUrl_KeyUp(object sender, KeyEventArgs e)
+        // A single-line TextBox can't be made taller with its text centered: the URL box is panelUrl, as tall
+        // as the navigation buttons beside it, with a borderless textUrl centered vertically inside it.
+        private void panelUrl_Layout(object sender, LayoutEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
-                await Navigate();
+            int margin = panelUrl.LogicalToDeviceUnits(3);
+            textUrl.SetBounds(margin, (panelUrl.ClientSize.Height - textUrl.Height) / 2,
+                Math.Max(0, panelUrl.ClientSize.Width - 2 * margin), textUrl.Height);
+        }
+
+        // Same 1px border as a text box, in a system color, so it fits the light and dark modes alike.
+        private void panelUrl_Paint(object sender, PaintEventArgs e)
+        {
+            ControlPaint.DrawBorder(e.Graphics, panelUrl.ClientRectangle, SystemColors.ControlDark, ButtonBorderStyle.Solid);
+        }
+
+        // A click on the box around the text works like a click on the text box itself.
+        private void panelUrl_Click(object sender, EventArgs e)
+        {
+            textUrl.Focus();
+        }
+
+        private async void textUrl_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter)
+                return;
+            // A single-line text box beeps on Enter.
+            e.SuppressKeyPress = true;
+            await Navigate();
         }
 
         private async void btnNavigate_Click(object sender, EventArgs e)

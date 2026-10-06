@@ -33,6 +33,7 @@
             btnForward = new Button();
             btnBack = new Button();
             btnNavigate = new Button();
+            panelUrl = new Panel();
             textUrl = new TextBox();
             panelWebView = new Panel();
             htmlContent = new MSDN.Html.Editor.HtmlEditorControl();
@@ -41,6 +42,7 @@
             statusBar = new StatusStrip();
             statusLabel = new ToolStripStatusLabel();
             panelToolBox.SuspendLayout();
+            panelUrl.SuspendLayout();
             panelWebView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             statusBar.SuspendLayout();
@@ -51,7 +53,7 @@
             panelToolBox.Controls.Add(btnForward);
             panelToolBox.Controls.Add(btnBack);
             panelToolBox.Controls.Add(btnNavigate);
-            panelToolBox.Controls.Add(textUrl);
+            panelToolBox.Controls.Add(panelUrl);
             panelToolBox.Dock = DockStyle.Top;
             panelToolBox.Location = new Point(0, 0);
             panelToolBox.Name = "panelToolBox";
@@ -86,17 +88,28 @@
             btnNavigate.Click += btnNavigate_Click;
             btnNavigate.MouseDown += btnNavigate_MouseDown;
             // 
+            // panelUrl
+            // 
+            panelUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panelUrl.BackColor = SystemColors.Window;
+            panelUrl.Controls.Add(textUrl);
+            panelUrl.Cursor = Cursors.IBeam;
+            panelUrl.Location = new Point(77, 2);
+            panelUrl.Name = "panelUrl";
+            panelUrl.Size = new Size(269, 25);
+            panelUrl.TabIndex = 6;
+            panelUrl.Click += panelUrl_Click;
+            panelUrl.Paint += panelUrl_Paint;
+            panelUrl.Layout += panelUrl_Layout;
+            // 
             // textUrl
             // 
-            textUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textUrl.Location = new Point(77, 3);
-            textUrl.Multiline = true;
+            textUrl.BorderStyle = BorderStyle.None;
+            textUrl.Location = new Point(3, 5);
             textUrl.Name = "textUrl";
-            textUrl.Padding = new Padding(0, 4, 0, 0);
-            textUrl.Size = new Size(269, 25);
-            textUrl.TabIndex = 6;
-            textUrl.WordWrap = false;
-            textUrl.KeyUp += textUrl_KeyUp;
+            textUrl.Size = new Size(263, 16);
+            textUrl.TabIndex = 0;
+            textUrl.KeyDown += textUrl_KeyDown;
             // 
             // panelWebView
             // 
@@ -171,7 +184,8 @@
             Size = new Size(348, 507);
             Load += KntEditView_Load;
             panelToolBox.ResumeLayout(false);
-            panelToolBox.PerformLayout();
+            panelUrl.ResumeLayout(false);
+            panelUrl.PerformLayout();
             panelWebView.ResumeLayout(false);
             panelWebView.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)webView).EndInit();
@@ -186,6 +200,7 @@
         private Button btnForward;
         private Button btnBack;
         private Button btnNavigate;
+        private Panel panelUrl;
         private TextBox textUrl;
         private Panel panelWebView;
         private Panel panelStatus;
