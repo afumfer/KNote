@@ -44,7 +44,11 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
     private void KntScriptForm_Load(object sender, EventArgs e)
     {
         _ctrl.KntScriptInOutDevice.SetEmbeddedMode();
-        splitContainer1.Panel2.Controls.Add((Control)_ctrl.KntScriptInOutDevice);
+        var outputView = (Control)_ctrl.KntScriptInOutDevice;
+        splitContainer1.Panel2.Controls.Add(outputView);
+        // Docked controls are laid out from the back of the z-order: brought to the front, the output (Fill)
+        // gets what panelInput (Bottom) leaves, instead of running under it and losing its bottom border.
+        outputView.BringToFront();
 
         if (_ctrl.AutoRunMode)
             ApplyAutoRunMode();

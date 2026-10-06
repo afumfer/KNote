@@ -374,7 +374,10 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   real de una `TextBox` de una línea lo decide su fuente en tiempo de ejecución, no el Designer. Los menús
   contextuales son `Utils/KntContextMenuStrip`, no `ContextMenuStrip`: el de WinForms calcula su margen de
   imagen/check y sus rellenos a 96 PPP y solo los reescala en `PerMonitorV2`, así que a 200 % la barra
-  lateral queda más estrecha que la casilla del check. Al añadir uno en el diseñador, cambia su tipo.
+  lateral queda más estrecha que la casilla del check. Al añadir uno en el diseñador, cambia su tipo. Las
+  barras de herramientas se dejan con su `Padding` y `RenderMode` por defecto (`ManagerRenderMode`, que usa
+  `KntToolStripRenderer`), para que todas tengan el mismo alto: un `Padding` vertical extra no las hace más
+  altas, aplasta sus botones y su grip.
 - **Iconos**: salen de `KntIcons` (`KntIcon` + `SetKntIcon(...)`/`KntIconProvider`), asignados en código
   tras `InitializeComponent()`, nunca como imágenes en el diseñador. Ver `KntIcons/CLAUDE.md`. El icono de la
   aplicación es `Resources/Icons/KNote.ico` (el diseño de siempre, con fotogramas de 16 a 256 px), expuesto por

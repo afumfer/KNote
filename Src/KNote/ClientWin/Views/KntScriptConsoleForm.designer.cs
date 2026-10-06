@@ -49,7 +49,7 @@
             panel1 = new Panel();
             splitContainer1 = new SplitContainer();
             textSourceCode = new TextBox();
-            panelInput = new Panel();
+            panelInput = new TableLayoutPanel();
             textInput = new TextBox();
             buttonCloseInput = new Button();
             labelInput = new Label();
@@ -235,33 +235,41 @@
             //
             // panelInput
             //
-            panelInput.Controls.Add(textInput);
-            panelInput.Controls.Add(buttonCloseInput);
-            panelInput.Controls.Add(labelInput);
+            panelInput.AutoSize = true;
+            panelInput.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            panelInput.ColumnCount = 3;
+            panelInput.ColumnStyles.Add(new ColumnStyle());
+            panelInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            panelInput.ColumnStyles.Add(new ColumnStyle());
+            panelInput.Controls.Add(labelInput, 0, 0);
+            panelInput.Controls.Add(textInput, 1, 0);
+            panelInput.Controls.Add(buttonCloseInput, 2, 0);
             panelInput.Dock = DockStyle.Bottom;
-            panelInput.Location = new Point(0, 590);
+            panelInput.Location = new Point(0, 586);
             panelInput.Name = "panelInput";
-            panelInput.Padding = new Padding(3);
-            panelInput.Size = new Size(533, 32);
+            panelInput.Padding = new Padding(6, 5, 6, 5);
+            panelInput.RowCount = 1;
+            panelInput.RowStyles.Add(new RowStyle());
+            panelInput.Size = new Size(537, 36);
             panelInput.TabIndex = 0;
             //
             // labelInput
             //
+            labelInput.Anchor = AnchorStyles.Left;
             labelInput.AutoSize = true;
-            labelInput.Dock = DockStyle.Left;
-            labelInput.Location = new Point(3, 7);
-            labelInput.Margin = new Padding(4, 6, 4, 0);
+            labelInput.Location = new Point(6, 15);
+            labelInput.Margin = new Padding(0, 0, 6, 0);
             labelInput.Name = "labelInput";
             labelInput.Size = new Size(38, 15);
             labelInput.TabIndex = 0;
             labelInput.Text = "Input:";
-            labelInput.TextAlign = ContentAlignment.MiddleLeft;
             //
             // buttonCloseInput
             //
-            buttonCloseInput.Dock = DockStyle.Right;
+            buttonCloseInput.Anchor = AnchorStyles.Right;
             buttonCloseInput.Enabled = false;
-            buttonCloseInput.Location = new Point(433, 3);
+            buttonCloseInput.Location = new Point(434, 5);
+            buttonCloseInput.Margin = new Padding(0);
             buttonCloseInput.Name = "buttonCloseInput";
             buttonCloseInput.Size = new Size(97, 26);
             buttonCloseInput.TabIndex = 2;
@@ -271,11 +279,12 @@
             //
             // textInput
             //
-            textInput.Dock = DockStyle.Fill;
+            textInput.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             textInput.Enabled = false;
-            textInput.Location = new Point(41, 3);
+            textInput.Location = new Point(50, 7);
+            textInput.Margin = new Padding(0, 0, 8, 0);
             textInput.Name = "textInput";
-            textInput.Size = new Size(392, 23);
+            textInput.Size = new Size(376, 23);
             textInput.TabIndex = 1;
             textInput.KeyDown += textInput_KeyDown;
             //
@@ -288,6 +297,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1111, 669);
+            MinimumSize = new Size(720, 420);
             Controls.Add(panel1);
             Controls.Add(statusStripKntConsole);
             Controls.Add(toolStripConsole);
@@ -322,7 +332,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TextBox textSourceCode;
-        private System.Windows.Forms.Panel panelInput;
+        private System.Windows.Forms.TableLayoutPanel panelInput;
         private System.Windows.Forms.TextBox textInput;
         private System.Windows.Forms.Button buttonCloseInput;
         private System.Windows.Forms.Label labelInput;

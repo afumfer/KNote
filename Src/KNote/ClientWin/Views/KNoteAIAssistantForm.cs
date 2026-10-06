@@ -35,11 +35,21 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         // when AutoScaleMode rescales the form at a different DPI than the Designer was
         // saved at. Reposition explicitly instead, driven by the header panel's own
         // Resize (fires on load, DPI change and splitter drag alike).
-        panelResultHeader.Resize += (s, e) => AlignControlsRight(panelResultHeader, 8, 8,
-            radioGetStream, radioGetCompletion, buttonMarkDown, buttonNavigate);
-        panelPromptHeader.Resize += (s, e) => AlignControlsRight(panelPromptHeader, 6, 6,
-            buttonSend, buttonRestart, panelSeparator, comboProviders, buttonManageProviders, buttonCatalogPrompts, buttonViewSystem);
+        panelResultHeader.Resize += (s, e) => AlignResultHeader();
+        panelPromptHeader.Resize += (s, e) => AlignPromptHeader();
+
+        // InitializeComponent has already docked both headers to their panel's width (the Designer's one less
+        // the panel's Padding), so their Resize has fired before these handlers existed: without aligning them
+        // now, the rightmost buttons keep the Designer's position and are cut until the window is resized.
+        AlignResultHeader();
+        AlignPromptHeader();
     }
+
+    private void AlignResultHeader() => AlignControlsRight(panelResultHeader, 8, 8,
+        radioGetStream, radioGetCompletion, buttonMarkDown, buttonNavigate);
+
+    private void AlignPromptHeader() => AlignControlsRight(panelPromptHeader, 6, 6,
+        buttonSend, buttonRestart, panelSeparator, comboProviders, buttonManageProviders, buttonCatalogPrompts, buttonViewSystem);
 
     private static void AlignControlsRight(Control header, int rightMargin, int spacing, params Control[] controlsLeftToRight)
     {

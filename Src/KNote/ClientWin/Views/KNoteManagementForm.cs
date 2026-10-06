@@ -43,12 +43,6 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 #endif
 
         SetIcons();
-
-        // The auto-sized toolbar fits its buttons too tightly at high scaling (noticeable at 200%):
-        // two extra logical pixels above and below.
-        int extra = toolBarManagement.LogicalToDeviceUnits(2);
-        var padding = toolBarManagement.Padding;
-        toolBarManagement.Padding = new Padding(padding.Left, padding.Top + extra, padding.Right, padding.Bottom + extra);
     }
 
     private void SetIcons()
