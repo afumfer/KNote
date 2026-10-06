@@ -371,7 +371,10 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   si el usuario cambió de monitor o de escala, puede caer fuera de todas las pantallas actuales (incluso en
   el hueco entre dos monitores). Un botón pegado a la derecha de la caja de texto sobre la que actúa (`...`,
   `X`) se iguala a ella con `Utils/ControlLayout.AlignToTextBox(...)` tras `InitializeComponent()`: el alto
-  real de una `TextBox` de una línea lo decide su fuente en tiempo de ejecución, no el Designer.
+  real de una `TextBox` de una línea lo decide su fuente en tiempo de ejecución, no el Designer. Los menús
+  contextuales son `Utils/KntContextMenuStrip`, no `ContextMenuStrip`: el de WinForms calcula su margen de
+  imagen/check y sus rellenos a 96 PPP y solo los reescala en `PerMonitorV2`, así que a 200 % la barra
+  lateral queda más estrecha que la casilla del check. Al añadir uno en el diseñador, cambia su tipo.
 - **Iconos**: salen de `KntIcons` (`KntIcon` + `SetKntIcon(...)`/`KntIconProvider`), asignados en código
   tras `InitializeComponent()`, nunca como imágenes en el diseñador. Ver `KntIcons/CLAUDE.md`. El icono de la
   aplicación es `Resources/Icons/KNote.ico` (el diseño de siempre, con fotogramas de 16 a 256 px), expuesto por
@@ -390,8 +393,9 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   notas (`DataGridViewStyle`, con cabeceras planas y su propio glifo de ordenación) y el visor Markdown
   (`KNoteWebViewStyle.css` con `prefers-color-scheme`, que `KntEditView` fija según el modo de la app).
   Dos valores por defecto del diseñador se pintan en oscuro como marcos blancos gruesos: el borde `Fixed3D`
-  (TextBox, ListBox, ListView, TreeView...) y `TabPage.UseVisualStyleBackColor = true`. `KntForm.OnLoad`
-  los corrige en todos sus controles (`AppTheme.AdjustControlsForDarkMode`); los que se añaden después del
+  (TextBox, ListBox, ListView, TreeView...) y `TabPage.UseVisualStyleBackColor = true`; y un combo
+  `DropDownList` con `FlatStyle.Standard` deja claros el texto seleccionado y la flecha (pasa a `Flat`).
+  `KntForm.OnLoad` los corrige en todos sus controles (`AppTheme.AdjustControlsForDarkMode`); los que se añaden después del
   `Load` (p. ej. los paneles embebidos vía `PanelView()` en `KNoteManagementForm.LinkComponents`, cuyas
   vistas nunca se cargan) necesitan llamarlo otra vez tras añadirlos. Al pasar un TextBox de una línea a
   `FixedSingle` lo encoge 1 px por arriba y por abajo (si no, el texto queda 1 px alto), y los botones

@@ -41,7 +41,7 @@ namespace KNote.ClientWin.Views
             panelCaptionHeader = new Panel();
             labelCaption = new LabelNoCopy();
             picMenu = new PictureBox();
-            menuPostIt = new ContextMenuStrip(components);
+            menuPostIt = new KNote.ClientWin.Utils.KntContextMenuStrip(components);
             menuHide = new ToolStripMenuItem();
             menuAlwaysFront = new ToolStripMenuItem();
             menuSaveNow = new ToolStripMenuItem();
@@ -409,7 +409,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Panel panelFooter;
         private System.Windows.Forms.PictureBox picMenu;
         private System.Windows.Forms.PictureBox picResize;
-        private System.Windows.Forms.ContextMenuStrip menuPostIt;
+        private KNote.ClientWin.Utils.KntContextMenuStrip menuPostIt;
         private System.Windows.Forms.ToolStripMenuItem menuHide;
         private System.Windows.Forms.ToolStripMenuItem menuAlwaysFront;
         private System.Windows.Forms.ToolStripMenuItem menuSaveNow;

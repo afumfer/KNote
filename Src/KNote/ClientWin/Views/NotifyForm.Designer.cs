@@ -31,7 +31,7 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NotifyForm));
             notifyKNote = new NotifyIcon(components);
-            contextKNoteMenu = new ContextMenuStrip(components);
+            contextKNoteMenu = new KNote.ClientWin.Utils.KntContextMenuStrip(components);
             menuNewNote = new ToolStripMenuItem();
             menuShowKNoteManagement = new ToolStripMenuItem();
             menuPostItsVisibles = new ToolStripMenuItem();
@@ -147,7 +147,7 @@
         #endregion
 
         internal System.Windows.Forms.NotifyIcon notifyKNote;
-        private System.Windows.Forms.ContextMenuStrip contextKNoteMenu;
+        private KNote.ClientWin.Utils.KntContextMenuStrip contextKNoteMenu;
         private System.Windows.Forms.ToolStripMenuItem menuNewNote;
         private System.Windows.Forms.ToolStripMenuItem menuShowKNoteManagement;
         private System.Windows.Forms.ToolStripMenuItem menuPostItsVisibles;
