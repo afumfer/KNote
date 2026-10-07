@@ -20,7 +20,7 @@ La aplicación de escritorio de Windows guarda su configuración en la carpeta `
 | Fichero | Qué contiene | Cuándo cambia |
 |---|---|---|
 | `KNoteData.config` | Lo que tú configuras: cómo entras, repositorios, proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat hub y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
-| `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), último repositorio y carpeta activos, posición y tamaño de las ventanas, disposición de las listas, paneles visibles y las filas del panel de alarmas. | Mientras usas la aplicación. |
+| `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), último repositorio y carpeta activos, posición y tamaño de las ventanas, disposición de las listas, paneles visibles, las filas del panel de alarmas, y el último proveedor de IA y las opciones de vista del asistente de IA. | Mientras usas la aplicación. |
 
 Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borrar `KNoteData.config` hace que KaNote arranque como si fuera la primera vez: tus bases de datos no se borran, pero se pierde la lista de repositorios y de proveedores de IA.
 
@@ -85,5 +85,30 @@ El editor de notas tiene su propio botón **Print**, que imprime el detalle de l
 **Ficheros CSV.** El nombre de fichero propuesto describe la carpeta, búsqueda o filtro de la lista. El fichero usa el separador de listas de tu configuración regional (`;` en español, por ejemplo) y la codificación UTF-8, de modo que Excel lo abre directamente con doble clic. Un texto que empieza por `=`, `+`, `-` o `@` (p. ej. un topic como `- Accesos rápidos`) se escribe con un apóstrofo delante, para que las hojas de cálculo lo muestren como texto en vez de intentar ejecutarlo como fórmula.
 
 Los diálogos de guardar (PDF y CSV) empiezan en la carpeta donde guardaste uno de ellos por última vez.
+
+### Asistente de IA (aplicación de escritorio)
+
+La ventana del asistente de IA muestra la conversación completa en su zona superior. Escribe una pregunta debajo y pulsa **Send**. La lista que hay junto a **Restart** elige el modelo de IA que responde.
+
+La conversación puede verse de dos formas, que se eligen con los botones que hay encima:
+
+| Botón | Vista |
+|---|---|
+| **Navigate** | Como un chat (la vista por defecto): tus preguntas a la derecha, en una burbuja, y cada respuesta debajo con su texto formateado (títulos, listas, tablas, código) y, al pie, los tokens y el tiempo que tardó. Los enlaces de una respuesta se abren en tu navegador web. |
+| **Markdown** | El texto de la conversación, tal como se guarda cuando la conservas como nota. |
+
+El menú **Actions** repite lo que hacen los botones y la lista: **Send** (`Ctrl+Enter`), **Restart**, **Model** (los mismos modelos que la lista), **Navigate view** y **Markdown view**. Sus opciones están disponibles justo cuando lo está su botón.
+
+El menú **Options** tiene el resto:
+
+| Opción | Qué hace |
+|---|---|
+| **Get stream** / **Get completion** | Cómo llegan las respuestas: a medida que se escriben (por defecto) o de una vez cuando están completas. |
+| **Get prompt from catalog ...** (`Ctrl+K`) | Empieza una conversación nueva a partir de un prompt del catálogo. |
+| **View system root ...** | Muestra las instrucciones que recibe el modelo antes de la conversación. |
+| **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta, los tokens y el tiempo que tardó, en las dos vistas y en la nota cuando se guarda la conversación. |
+| **Manage models ...** | Añade, cambia o quita los modelos de IA (proveedores) que puedes elegir. |
+
+Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. **Restart**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía.
 
 TODO: ...

@@ -45,6 +45,12 @@ public class SessionState
     // KntServerCOMCtrl). When empty, or no longer among the configured providers, the first one is used.
     public string LastAiProviderAlias { get; set; }
 
+    // The AI assistant shows the conversation as its Markdown source instead of as a chat (the default).
+    public bool AiAssistantMarkdownView { get; set; }
+
+    // The AI assistant shows the usage of each answer (tokens, time) below it.
+    public bool AiAssistantShowModelInfo { get; set; } = true;
+
     // Set automatically when a connection attempt to the chat hub fails, so the app stops retrying (and
     // freezing) on every startup until the user fixes the URL or retests it from Options.
     public bool ChatHubAutoConnectDisabled { get; set; }
