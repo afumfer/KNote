@@ -308,9 +308,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     // and conversation reset). Its check mark is updated when the submenu opens.
     private void PopulateModelMenu()
     {
-        foreach (ToolStripItem item in menuModel.DropDownItems)
+        // Disposing an item also removes it from its menu: enumerate a copy, not the collection that changes.
+        foreach (var item in menuModel.DropDownItems.Cast<ToolStripItem>().ToArray())
             item.Dispose();
-        menuModel.DropDownItems.Clear();
 
         foreach (var providerRef in _ctrl.AiProviderRefs)
         {
