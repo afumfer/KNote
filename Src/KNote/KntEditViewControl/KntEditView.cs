@@ -105,6 +105,18 @@ namespace KntWebView
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ForceHttps { get; set; } = false;
 
+        private bool _navigationBorder = false;
+        /// <summary>
+        /// Draws a thin border around the web content of the navigation view, which has none of its
+        /// own (unlike the text box of the markdown view).
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool NavigationBorder
+        {
+            get { return _navigationBorder; }
+            set { _navigationBorder = value; ApplyNavigationBorder(); }
+        }
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string? FolderForVirtualHostNameMapping { get; private set; }
 
@@ -519,24 +531,37 @@ namespace KntWebView
             ShowNavigationTools = false;
             ShowStatusInfo = false;            
             htmlContent.Visible = false;
-            textContent.Visible = true;            
+            textContent.Visible = true;
+            ApplyNavigationBorder();
         }
 
         private void EnableNavigationView()
         {
             textContent.Visible = false;
-            htmlContent.Visible = false;            
-            webView.Visible = true;            
+            htmlContent.Visible = false;
+            webView.Visible = true;
+            ApplyNavigationBorder();
         }
-        
+
         private void EnableHtmlView()
         {
             NavigationEnd?.Invoke(this, new EventArgs());
             textContent.Visible = false;
             ShowNavigationTools = false;
             ShowStatusInfo = false;
-            webView.Visible = false;            
-            htmlContent.Visible = true;            
+            webView.Visible = false;
+            htmlContent.Visible = true;
+            ApplyNavigationBorder();
+        }
+
+        // The border is the panel's background showing through a 1 px padding around the web view: the
+        // same discreet color as the URL box's border, in light and dark mode. Only in the navigation view,
+        // so the other views' own borders aren't doubled.
+        private void ApplyNavigationBorder()
+        {
+            var border = _navigationBorder && _contentType == "navigation";
+            panelWebView.Padding = border ? new Padding(1) : Padding.Empty;
+            panelWebView.BackColor = border ? SystemColors.ControlDark : SystemColors.Control;
         }
 
         private async Task Navigate()

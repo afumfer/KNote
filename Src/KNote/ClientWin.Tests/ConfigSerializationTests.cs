@@ -129,6 +129,37 @@ public class ConfigSerializationTests
     }
 
     [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void XmlSerializer_RoundTrip_PreservesAiAssistantMarkdownView(bool markdownView)
+    {
+        var state = new AppUserState();
+        state.Session.AiAssistantMarkdownView = markdownView;
+
+        Assert.AreEqual(markdownView, RoundTrip(state).Session.AiAssistantMarkdownView);
+    }
+
+    [TestMethod]
+    public void AppUserState_AiAssistantView_DefaultsToTheChatViewWithModelInfo()
+    {
+        var session = new AppUserState().Session;
+
+        Assert.IsFalse(session.AiAssistantMarkdownView);
+        Assert.IsTrue(session.AiAssistantShowModelInfo);
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void XmlSerializer_RoundTrip_PreservesAiAssistantShowModelInfo(bool showModelInfo)
+    {
+        var state = new AppUserState();
+        state.Session.AiAssistantShowModelInfo = showModelInfo;
+
+        Assert.AreEqual(showModelInfo, RoundTrip(state).Session.AiAssistantShowModelInfo);
+    }
+
+    [TestMethod]
     [DataRow(AppColorMode.Light)]
     [DataRow(AppColorMode.Dark)]
     [DataRow(AppColorMode.System)]

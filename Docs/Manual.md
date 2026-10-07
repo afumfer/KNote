@@ -20,7 +20,7 @@ The Windows desktop application keeps its configuration in the folder `%LocalApp
 | File | What it holds | When it changes |
 |---|---|---|
 | `KNoteData.config` | What you configure: how you sign in, repositories, AI providers, e-mail (SMTP) account, alarm and auto-save options, chat hub and ServerCOM settings. | Only when you change a setting. |
-| `KNoteState.config` | What KaNote remembers by itself: last user name you signed in with (never the password), last active repository and folder, window positions and sizes, list layout, visible panels and the rows of the alarms panel. | As you use the application. |
+| `KNoteState.config` | What KaNote remembers by itself: last user name you signed in with (never the password), last active repository and folder, window positions and sizes, list layout, visible panels, the rows of the alarms panel, and the last AI provider and view options of the AI assistant. | As you use the application. |
 
 Deleting `KNoteState.config` only resets the window layout. Deleting `KNoteData.config` makes KaNote start as if it were the first run: your databases are not deleted, but the list of repositories and AI providers is lost.
 
@@ -85,5 +85,30 @@ The note editor has its own **Print** button, which prints the details of the no
 **CSV files.** The proposed file name describes the folder, search or filter of the list. The file uses the list separator of your regional settings (`;` in Spanish, for instance) and UTF-8 encoding, so Excel opens it directly with a double click. A text that starts with `=`, `+`, `-` or `@` (e.g. a topic like `- Quick links`) is written with a leading apostrophe, so that spreadsheets show it as text instead of trying to run it as a formula.
 
 The save dialogs (PDF and CSV) start in the folder where you last saved one of them.
+
+### AI assistant (desktop app)
+
+The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. The list next to **Restart** chooses the AI model that answers.
+
+The conversation can be seen in two ways, chosen with the buttons above it:
+
+| Button | View |
+|---|---|
+| **Navigate** | As a chat (the default): your questions on the right, in a bubble, and each answer below with its text formatted (headings, lists, tables, code) and, at its foot, the tokens and the time it took. Links of an answer open in your web browser. |
+| **Markdown** | The text of the conversation, as it is saved when you keep it as a note. |
+
+The **Actions** menu repeats what the buttons and the list do: **Send** (`Ctrl+Enter`), **Restart**, **Model** (the same models as the list), **Navigate view** and **Markdown view**. Its options are available exactly when their button is.
+
+The **Options** menu has the rest:
+
+| Option | What it does |
+|---|---|
+| **Get stream** / **Get completion** | How answers arrive: as they are being written (the default) or all at once when they are complete. |
+| **Get prompt from catalog ...** (`Ctrl+K`) | Starts a new conversation from a prompt of the catalog. |
+| **View system root ...** | Shows the instructions the model receives before the conversation. |
+| **Show model info (tokens, time)** | Shows or hides, below each answer, the tokens and the time it took, in both views and in the note when the conversation is saved. |
+| **Manage models ...** | Adds, changes or removes the AI models (providers) you can choose. |
+
+Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. **Restart**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation.
 
 TODO: ...

@@ -94,6 +94,114 @@ public class KNoteAIAssistantCtrlTests
     }
 
     [TestMethod]
+    public async Task GetCompletionAsync_Success_AddsATurnWithItsUsage()
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetResponseImpl = (messages, options, ct) =>
+                Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Hi there"))
+                {
+                    Usage = new UsageDetails { InputTokenCount = 3, OutputTokenCount = 2, TotalTokenCount = 5 }
+                })
+        };
+        var ctrl = CreateCtrl(chatClient);
+
+        await ctrl.GetCompletionAsync("Hello");
+
+        Assert.AreEqual(1, ctrl.ChatTurns.Count);
+        var turn = ctrl.ChatTurns[0];
+        Assert.AreEqual("Hello", turn.Prompt);
+        Assert.AreEqual("Hi there", turn.Answer);
+        Assert.AreEqual(3L, turn.InputTokens);
+        Assert.AreEqual(2L, turn.OutputTokens);
+        Assert.AreEqual(5L, turn.TotalTokens);
+        Assert.IsFalse(turn.TokensEstimated);
+    }
+
+    [TestMethod]
+    public async Task GetCompletionAsync_ProviderThrows_AddsNoTurn()
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetResponseImpl = (messages, options, ct) => throw new InvalidOperationException("simulated provider failure")
+        };
+        var ctrl = CreateCtrl(chatClient);
+
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => ctrl.GetCompletionAsync("Hello"));
+
+        Assert.AreEqual(0, ctrl.ChatTurns.Count);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_Success_AddsATurnWithEstimatedTokens()
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) => StreamOf("Hi", " there")
+        };
+        var ctrl = CreateCtrl(chatClient);
+
+        await ctrl.StreamCompletionAsync("Hello");
+        await ctrl.StreamCompletionAsync("Again");
+
+        Assert.AreEqual(2, ctrl.ChatTurns.Count);
+        Assert.AreEqual("Hello", ctrl.ChatTurns[0].Prompt);
+        Assert.AreEqual("Again", ctrl.ChatTurns[1].Prompt);
+        Assert.AreEqual("Hi there", ctrl.ChatTurns[1].Answer);
+        Assert.IsTrue(ctrl.ChatTurns[1].TokensEstimated);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_WhileStreaming_StreamingResultHasTheAnswerSoFar()
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) => StreamOf("Hi", " there")
+        };
+        var ctrl = CreateCtrl(chatClient);
+        var seen = new List<string>();
+        ctrl.StreamToken += (s, e) => seen.Add(ctrl.StreamingResult);
+
+        await ctrl.StreamCompletionAsync("Hello");
+
+        // First the intro (nothing received yet), then each chunk, then the closing line break.
+        CollectionAssert.AreEqual(new[] { "", "Hi", "Hi there", "Hi there" }, seen);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_NextStream_StartsFromAnEmptyStreamingResult()
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) => StreamOf("Hi", " there")
+        };
+        var ctrl = CreateCtrl(chatClient);
+        await ctrl.StreamCompletionAsync("Hello");
+        string atStart = null;
+        ctrl.StreamToken += (s, e) => atStart ??= ctrl.StreamingResult;
+
+        await ctrl.StreamCompletionAsync("Again");
+
+        Assert.AreEqual("", atStart);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_ProviderThrowsMidStream_AddsNoTurnButKeepsThePartialAnswer()
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) => StreamThatThrowsAfterOneChunk()
+        };
+        var ctrl = CreateCtrl(chatClient);
+
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => ctrl.StreamCompletionAsync("Hello"));
+
+        Assert.AreEqual(0, ctrl.ChatTurns.Count);
+        // What the view shows of the failed answer.
+        Assert.AreEqual("partial", ctrl.StreamingResult);
+    }
+
+    [TestMethod]
     public void RestartAIAssistant_ClearsHistoryAndCounters()
     {
         var ctrl = CreateCtrl(new FakeChatClient());
@@ -105,6 +213,34 @@ public class KNoteAIAssistantCtrlTests
         Assert.AreEqual("", ctrl.ChatTextMessages.ToString());
         Assert.AreEqual(0, ctrl.TotalTokens);
         Assert.AreEqual(TimeSpan.Zero, ctrl.TotalProcessingTime);
+    }
+
+    [TestMethod]
+    public async Task RestartAIAssistant_ClearsTurnsAndStreamingResult()
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) => StreamOf("Hi", " there")
+        };
+        var ctrl = CreateCtrl(chatClient);
+        await ctrl.StreamCompletionAsync("Hello");
+
+        ctrl.RestartAIAssistant();
+
+        Assert.AreEqual(0, ctrl.ChatTurns.Count);
+        Assert.AreEqual("", ctrl.StreamingResult);
+    }
+
+    [TestMethod]
+    [DataRow(false, false)]
+    [DataRow(true, true)]
+    public void MarkdownResultView_ReadsTheRememberedMode(bool remembered, bool expected)
+    {
+        // Only read here: setting it saves the real config files of the user (see CreateCtrlWithProviders).
+        var store = new Store(new TestFactoryViews());
+        store.State.Session.AiAssistantMarkdownView = remembered;
+
+        Assert.AreEqual(expected, new KNoteAIAssistantCtrl(store).MarkdownResultView);
     }
 
     // GetPreferredProvider only reads the config; SetProvider is deliberately not exercised here because it

@@ -71,5 +71,7 @@
     <EmbeddedResource Include="Resources\KNoteReport.css" LogicalName="KNote.ClientWin.Resources.KNoteReport.css" />
     <None Remove="Resources\KNoteBook.css" />
     <EmbeddedResource Include="Resources\KNoteBook.css" LogicalName="KNote.ClientWin.Resources.KNoteBook.css" />
+    <None Remove="Resources\KNoteAIChat.css" />
+    <EmbeddedResource Include="Resources\KNoteAIChat.css" LogicalName="KNote.ClientWin.Resources.KNoteAIChat.css" />
   </ItemGroup>
 </Project>

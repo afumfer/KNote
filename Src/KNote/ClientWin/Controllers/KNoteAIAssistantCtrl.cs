@@ -37,6 +37,22 @@ public class KNoteAIAssistantCtrl : CtrlBase
         get { return _chatTextMessages; }
     }
 
+    // The same conversation turn by turn (kept in step with ChatMessages/ChatTextMessages), for the
+    // views that show each question and answer on its own.
+    private readonly List<AiChatTurn> _chatTurns = new List<AiChatTurn>();
+    public IReadOnlyList<AiChatTurn> ChatTurns
+    {
+        get { return _chatTurns; }
+    }
+
+    // The answer received so far by the running StreamCompletionAsync (or by the last one, until the next
+    // starts), so a view can repaint it while it streams in.
+    private readonly StringBuilder _streamingResult = new StringBuilder();
+    public string StreamingResult
+    {
+        get { return _streamingResult.ToString(); }
+    }
+
     // Former, misspelled name: scripts saved in users' notes may still use it.
     [Obsolete("Misspelled name kept only so existing scripts keep working; use ChatTextMessages.")]
     public StringBuilder ChatTextMessasges => ChatTextMessages;
@@ -81,6 +97,36 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // which always calls GetCompletionAsync) sets this to Completion first so the view reflects how
     // the already-obtained result was actually produced, without changing the default for normal use.
     public EAiResponseMode ResponseMode { get; set; } = EAiResponseMode.Stream;
+
+    // Whether the view shows the conversation as its Markdown source instead of as a chat (the default).
+    // Remembered in KNoteState.config (State.Session.AiAssistantMarkdownView), like the last provider.
+    public bool MarkdownResultView
+    {
+        get { return Store.State.Session.AiAssistantMarkdownView; }
+        set
+        {
+            if (Store.State.Session.AiAssistantMarkdownView == value)
+                return;
+
+            Store.State.Session.AiAssistantMarkdownView = value;
+            SaveState();
+        }
+    }
+
+    // Whether the view shows the usage of each answer (tokens, processing time) below it. Remembered in
+    // KNoteState.config (State.Session.AiAssistantShowModelInfo).
+    public bool ShowModelInfo
+    {
+        get { return Store.State.Session.AiAssistantShowModelInfo; }
+        set
+        {
+            if (Store.State.Session.AiAssistantShowModelInfo == value)
+                return;
+
+            Store.State.Session.AiAssistantShowModelInfo = value;
+            SaveState();
+        }
+    }
 
     // KNoteAIAssistant plan (Phase 3): the configured provider/model collection and the one
     // currently active. AiProviderRefs is exposed live from the settings so the view's picker
@@ -189,7 +235,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // Switching provider mid-session invalidates the in-flight conversation (a different
     // provider/model can't continue the same message history), so this always resets it.
     // The view is responsible for confirming with the user first if there is one in progress.
-    // The choice is remembered in KNoteData.config (State.Session.LastAiProviderAlias) so the next session
+    // The choice is remembered in KNoteState.config (State.Session.LastAiProviderAlias) so the next session
     // - of this assistant or of any other component built on it, like KntServerCOMCtrl - starts with it.
     public void SetProvider(AiProviderRef providerRef)
     {
@@ -224,14 +270,19 @@ public class KNoteAIAssistantCtrl : CtrlBase
             return;
 
         Store.State.Session.LastAiProviderAlias = alias;
+        SaveState();
+    }
+
+    private void SaveState()
+    {
         try
         {
             Store.SaveConfig();
         }
         catch (Exception)
         {
-            // Remembering the choice is a convenience: failing to write the config file must not
-            // undo a provider switch that already succeeded.
+            // Remembering a choice is a convenience: failing to write the config file must not
+            // undo a provider switch (or a view change) that already succeeded.
         }
     }
 
@@ -253,6 +304,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _chatMessages.Add(new ChatMessage(ChatRole.System, RootSystemChat));
 
         _chatTextMessages.Clear();
+        _chatTurns.Clear();
+        _streamingResult.Clear();
         _totalTokens = 0;
         _totalProcessingTime = TimeSpan.Zero;
     }
@@ -285,6 +338,13 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _totalTokens += (int)(response.Usage?.TotalTokenCount ?? 0);
         _totalProcessingTime += stopwatch.Elapsed;
 
+        _chatTurns.Add(new AiChatTurn(prompt, _result, _currentProviderRef?.Alias, stopwatch.Elapsed)
+        {
+            InputTokens = response.Usage?.InputTokenCount,
+            OutputTokens = response.Usage?.OutputTokenCount,
+            TotalTokens = response.Usage?.TotalTokenCount ?? 0
+        });
+
         _chatTextMessages.Append($"\r\n");
         _chatTextMessages.Append($"**User:** \r\n");
         _chatTextMessages.Append($"{prompt}\r\n");
@@ -313,7 +373,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public async Task StreamCompletionAsync(string prompt)
     {
-        StringBuilder resAssistant = new();
+        // Cleared before the first await, so a view repainting StreamingResult never shows the previous answer.
+        StringBuilder resAssistant = _streamingResult;
+        resAssistant.Clear();
         Stopwatch stopwatch = new();
 
         stopwatch.Start();
@@ -351,8 +413,14 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _chatMessages.Add(new ChatMessage(ChatRole.Assistant, resAssistant.ToString()));
         _prompt = prompt;
         _result = resAssistant.ToString();
-        _totalTokens += (prompt.Length + resAssistant.Length) / 4;    // TODO: hack, refactor this
+        var estimatedTokens = (prompt.Length + resAssistant.Length) / 4;    // TODO: hack, refactor this
+        _totalTokens += estimatedTokens;
         _totalProcessingTime += stopwatch.Elapsed;
+        _chatTurns.Add(new AiChatTurn(prompt, _result, _currentProviderRef?.Alias, stopwatch.Elapsed)
+        {
+            TotalTokens = estimatedTokens,
+            TokensEstimated = true
+        });
         _chatTextMessages.Append(resAssistant.ToString());
         _chatTextMessages.Append($"\r\n\r\n");
 

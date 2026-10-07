@@ -12,6 +12,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     #region Private fields
 
     private readonly KNoteAIAssistantCtrl _ctrl;
+    private readonly AiChatWebRenderer _chatView;
+    // The menu items with a keyboard shortcut, by its text (AiChatHtml.ShortcutText).
+    private readonly Dictionary<string, ToolStripMenuItem> _menuShortcuts;
     private int _countNRres;
     private StringBuilder _sbResult = new StringBuilder();
     private const string ViewCaptionText = "KNote AI Assistant";
@@ -30,6 +33,21 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         buttonNavigate.SetKntIcon(KntIcon.Navigate);
 
         _ctrl = ctrl;
+        _menuShortcuts = MenuItems(menuAssistant.Items)
+            .Where(item => item.ShortcutKeys != Keys.None)
+            .ToDictionary(item => AiChatHtml.ShortcutText(item.ShortcutKeys));
+        _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys);
+        _chatView.ShortcutPressed += ChatView_ShortcutPressed;
+        kntEditViewResult.NavigationBorder = true;
+        _chatView.ShowModelInfo(_ctrl.ShowModelInfo);
+
+        // The Actions menu repeats the buttons and the model list, running the same handlers: its items
+        // follow their enabled state, which also keeps the shortcuts off while they are off.
+        LinkMenuToControl(menuSend, buttonSend);
+        LinkMenuToControl(menuRestart, buttonRestart);
+        LinkMenuToControl(menuModel, comboProviders);
+        LinkMenuToControl(menuNavigateView, buttonNavigate);
+        LinkMenuToControl(menuMarkdownView, buttonMarkDown);
 
         // Anchor=Right is not reliable for controls nested inside a SplitContainer panel
         // when AutoScaleMode rescales the form at a different DPI than the Designer was
@@ -46,10 +64,19 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     }
 
     private void AlignResultHeader() => AlignControlsRight(panelResultHeader, 8, 8,
-        radioGetStream, radioGetCompletion, buttonMarkDown, buttonNavigate);
+        buttonMarkDown, buttonNavigate);
 
     private void AlignPromptHeader() => AlignControlsRight(panelPromptHeader, 6, 6,
-        buttonSend, buttonRestart, panelSeparator, comboProviders, buttonManageProviders, buttonCatalogPrompts, buttonViewSystem);
+        buttonSend, buttonRestart, panelSeparator, comboProviders);
+
+    private static IEnumerable<ToolStripMenuItem> MenuItems(ToolStripItemCollection items)
+        => items.OfType<ToolStripMenuItem>().SelectMany(item => MenuItems(item.DropDownItems).Prepend(item));
+
+    private static void LinkMenuToControl(ToolStripMenuItem item, Control control)
+    {
+        item.Enabled = control.Enabled;
+        control.EnabledChanged += (s, e) => item.Enabled = control.Enabled;
+    }
 
     private static void AlignControlsRight(Control header, int rightMargin, int spacing, params Control[] controlsLeftToRight)
     {
@@ -70,24 +97,20 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
         PopulateProviders();
-        MarkDownView();
-        radioGetCompletion.Checked = _ctrl.ResponseMode == EAiResponseMode.Completion;
-        radioGetStream.Checked = !radioGetCompletion.Checked;
+        UpdateOptionsMenu();
+        this.Show();
         // The ctrl may already carry a completed conversation by the time the view is shown
         // (e.g. the "ln" script engine calls GetCompletionAsync before ever showing this view) -
-        // sync the display to it instead of assuming a fresh, empty ctrl.
+        // sync the display to it instead of assuming a fresh, empty ctrl. After Show(): the chat
+        // view needs the WebView2 of a created window.
         RefreshView();
-        this.Show();
     }
 
     public override void RefreshView()
     {
-        kntEditViewResult.MarkdownContentControl.Text = _ctrl.ChatTextMessages.ToString();
-        kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
-        kntEditViewResult.MarkdownContentControl.ScrollToCaret();
         textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_ctrl.TotalProcessingTime}";
+        UpdateStatusInfo();
+        ShowResult();
     }
 
     #endregion
@@ -110,7 +133,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         if (!ViewFinalized)
         {
-            if (_ctrl.AutoSaveChatMessagesOnViewExit && !string.IsNullOrEmpty(kntEditViewResult.MarkdownText))
+            // From the ctrl, not the view: in the chat view the Markdown text box is not kept up to date.
+            if (_ctrl.AutoSaveChatMessagesOnViewExit && _ctrl.ChatTurns.Count > 0)
             {
                 await SaveChatMessages();
             }
@@ -125,7 +149,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             StatusProcessing(true);
 
-            if (radioGetCompletion.Checked)
+            if (_ctrl.ResponseMode == EAiResponseMode.Completion)
                 await GoGetCompletion(textPrompt.Text);
             else
                 await GoStreamCompletion(textPrompt.Text);
@@ -149,7 +173,39 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         Text = $"{ViewCaptionText}";
     }
 
-    private async void buttonCatalogPrompts_Click(object sender, EventArgs e)
+    // A menu shortcut pressed while the chat view had the focus: run it as the menu would have, only if the
+    // item and its menus are enabled.
+    private void ChatView_ShortcutPressed(object sender, string shortcut)
+    {
+        if (!_menuShortcuts.TryGetValue(shortcut, out var item))
+            return;
+
+        for (ToolStripItem i = item; i != null; i = i.OwnerItem)
+            if (!i.Enabled)
+                return;
+
+        item.PerformClick();
+    }
+
+    private void menuModel_DropDownOpening(object sender, EventArgs e)
+    {
+        foreach (ToolStripMenuItem item in menuModel.DropDownItems)
+            item.Checked = item.Tag == _ctrl.CurrentProviderRef;
+    }
+
+    private void menuGetStream_Click(object sender, EventArgs e)
+    {
+        _ctrl.ResponseMode = EAiResponseMode.Stream;
+        UpdateOptionsMenu();
+    }
+
+    private void menuGetCompletion_Click(object sender, EventArgs e)
+    {
+        _ctrl.ResponseMode = EAiResponseMode.Completion;
+        UpdateOptionsMenu();
+    }
+
+    private async void menuCatalogPrompts_Click(object sender, EventArgs e)
     {
         var assistantInfo = await _ctrl.GetCatalogPrompt();
         if (assistantInfo == null)
@@ -160,12 +216,22 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         textPrompt.Text = assistantInfo.User;
     }
 
-    private void buttonViewSystem_Click(object sender, EventArgs e)
+    private void menuViewSystem_Click(object sender, EventArgs e)
     {
         ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat ");
     }
 
-    private async void buttonManageProviders_Click(object sender, EventArgs e)
+    private void menuShowModelInfo_Click(object sender, EventArgs e)
+    {
+        _ctrl.ShowModelInfo = !_ctrl.ShowModelInfo;
+        UpdateOptionsMenu();
+        // The chat view hides/shows it in place; the Markdown view is rewritten with or without it.
+        _chatView.ShowModelInfo(_ctrl.ShowModelInfo);
+        if (!ChatView)
+            ShowResult();
+    }
+
+    private async void menuManageModels_Click(object sender, EventArgs e)
     {
         var manageCtrl = new AiProvidersManageCtrl(_ctrl.Store);
         await manageCtrl.LoadEntitiesAsync(null, false);
@@ -181,7 +247,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (comboProviders.SelectedItem is not AiProviderRef providerRef || providerRef == _ctrl.CurrentProviderRef)
             return;
 
-        if (!string.IsNullOrEmpty(_ctrl.ChatTextMessages.ToString()))
+        if (_ctrl.ChatTurns.Count > 0)
         {
             var result = ShowInfo("Switching the AI provider resets the current conversation. Continue?",
                 "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -202,12 +268,20 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private void buttonMarkDown_Click(object sender, EventArgs e)
     {
-        MarkDownView();
+        _ctrl.MarkdownResultView = true;
+        ShowResult();
     }
 
-    private async void buttonNavigate_Click(object sender, EventArgs e)
+    private void buttonNavigate_Click(object sender, EventArgs e)
     {
-        await NavigateView();
+        _ctrl.MarkdownResultView = false;
+        ShowResult();
+    }
+
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        _chatView.Dispose();
+        base.OnFormClosed(e);
     }
 
     #endregion
@@ -226,6 +300,24 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         SelectProviderInCombo(_ctrl.CurrentProviderRef);
 
         comboProviders.SelectedIndexChanged += comboProviders_SelectedIndexChanged;
+
+        PopulateModelMenu();
+    }
+
+    // Actions > Model: one item per provider, choosing it in the list as if picked there (same confirmation
+    // and conversation reset). Its check mark is updated when the submenu opens.
+    private void PopulateModelMenu()
+    {
+        foreach (ToolStripItem item in menuModel.DropDownItems)
+            item.Dispose();
+        menuModel.DropDownItems.Clear();
+
+        foreach (var providerRef in _ctrl.AiProviderRefs)
+        {
+            var item = new ToolStripMenuItem(providerRef.Alias?.Replace("&", "&&")) { Tag = providerRef };
+            item.Click += (s, e) => comboProviders.SelectedItem = providerRef;
+            menuModel.DropDownItems.Add(item);
+        }
     }
 
     private void SelectProviderInCombo(AiProviderRef providerRef)
@@ -245,7 +337,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
                 return;
             }
             noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
-            noteEditor.Model.Description = _ctrl.ChatTextMessages.ToString();
+            noteEditor.Model.Description = ChatTranscript();
             noteEditor.Model.Tags = "[AIAssistant]";
             noteEditor.Run();
         }
@@ -259,28 +351,87 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
         toolStripStatusLabelProcessingTime.Text = $" | Processing time: --";
-        kntEditViewResult.SetMarkdownContent(_ctrl.ChatTextMessages.ToString());
-        MarkDownView();
         _sbResult.Clear();
         textPrompt.Text = "";
         textPrompt.Focus();
+        ShowResult();
+    }
+
+    private void UpdateStatusInfo()
+    {
+        toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens} ";
+        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_ctrl.TotalProcessingTime}";
+    }
+
+    private bool ChatView => !_ctrl.MarkdownResultView;
+
+    // What the Markdown view shows (and what is saved as a note), with the model info if it is shown.
+    private string ChatTranscript() => AiChatTranscript.Markdown(_ctrl.ChatTurns, _ctrl.ShowModelInfo);
+
+    private void UpdateOptionsMenu()
+    {
+        menuGetStream.Checked = _ctrl.ResponseMode == EAiResponseMode.Stream;
+        menuGetCompletion.Checked = _ctrl.ResponseMode == EAiResponseMode.Completion;
+        menuShowModelInfo.Checked = _ctrl.ShowModelInfo;
+    }
+
+    // For the synchronous event handlers.
+    private async void ShowResult()
+    {
+        try
+        {
+            await ShowResultAsync();
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
+    }
+
+    // The whole conversation in the current mode: as a chat (Navigation, the default) or as its Markdown source.
+    private async Task ShowResultAsync()
+    {
+        if (ChatView)
+        {
+            await _chatView.LoadAsync(_ctrl.ChatTurns);
+            // Loading the page moves the focus into WebView2: back to the prompt, to type in it (and use the
+            // menu shortcuts) right away.
+            if (textPrompt.Enabled)
+                ActiveControl = textPrompt;
+        }
+        else
+            kntEditViewResult.ShowMarkdownContent(ChatTranscript());
+
+        ScrollMarkdownToEnd();
+        UpdateViewButtons();
+    }
+
+    // The button of the mode not shown is the enabled one.
+    private void UpdateViewButtons()
+    {
+        buttonMarkDown.Enabled = ChatView;
+        buttonNavigate.Enabled = !ChatView;
+    }
+
+    private void ScrollMarkdownToEnd()
+    {
+        if (ChatView)
+            return;
+
+        kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
+        kntEditViewResult.MarkdownContentControl.ScrollToCaret();
     }
 
     private void StatusProcessing(bool processing = false)
     {
         if (processing)
         {
-            MarkDownView();
             toolStripStatusLabelProcessing.Text = " Processing ...";
             textPrompt.Enabled = false;
             comboProviders.Enabled = false;
-            buttonManageProviders.Enabled = false;
+            menuOptions.Enabled = false;
             buttonSend.Enabled = false;
             buttonRestart.Enabled = false;
-            radioGetCompletion.Enabled = false;
-            radioGetStream.Enabled = false;
-            buttonCatalogPrompts.Enabled = false;
-            buttonViewSystem.Enabled = false;
             buttonMarkDown.Enabled = false;
             buttonNavigate.Enabled = false;
         }
@@ -289,43 +440,71 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             toolStripStatusLabelProcessing.Text = " ";
             textPrompt.Enabled = true;
             comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
-            buttonManageProviders.Enabled = true;
+            menuOptions.Enabled = true;
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
             buttonRestart.Enabled = true;
-            radioGetCompletion.Enabled = true;
-            radioGetStream.Enabled = true;
-            buttonCatalogPrompts.Enabled = true;
-            buttonViewSystem.Enabled = true;
-            // Every send leaves the result view in markdown mode (GoGetCompletion/GoStreamCompletion
-            // never navigate to the rendered HTML view), so Markdown must stay disabled here - matching
-            // what MarkDownView() already set - not force-reenabled like the rest of the controls.
-            buttonMarkDown.Enabled = false;
-            buttonNavigate.Enabled = true;
-            kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
-            kntEditViewResult.MarkdownContentControl.ScrollToCaret();
+            // Sending keeps the current mode: the chat view adds the turn as it arrives.
+            UpdateViewButtons();
+            ScrollMarkdownToEnd();
             ActiveControl = textPrompt;
         }
     }
 
     private async Task GoGetCompletion(string prompt)
     {
-        await _ctrl.GetCompletionAsync(prompt);
-        RefreshView();
+        // The view can't change while sending (StatusProcessing disables its buttons).
+        var chatView = ChatView;
+        if (chatView)
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, null);
+
+        try
+        {
+            await _ctrl.GetCompletionAsync(prompt);
+        }
+        catch
+        {
+            if (chatView)
+                _chatView.FailTurn();
+            throw;
+        }
+
+        if (chatView)
+            _chatView.EndTurn(_ctrl.ChatTurns[^1]);
+        else
+            kntEditViewResult.ShowMarkdownContent(ChatTranscript());
+
+        textPrompt.Text = "";
+        UpdateStatusInfo();
     }
 
     private async Task GoStreamCompletion(string prompt)
     {
-        // Start from the whole transcript so far, not an empty buffer: the streamed turn is appended
-        // to the conversation already shown. Reseeding from the ctrl (instead of keeping the buffer)
-        // also picks up turns obtained in Completion mode and drops the partial text of a failed stream.
-        _sbResult.Clear();
-        _sbResult.Append(_ctrl.ChatTextMessages);
-        _countNRres = 0;
-        _ctrl.StreamToken += _com_StreamToken;
+        var chatView = ChatView;
+        if (chatView)
+        {
+            // Repainted from the ctrl's StreamingResult while it streams in: no StreamToken handler needed.
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult);
+        }
+        else
+        {
+            // Start from the whole transcript so far, not an empty buffer: the streamed turn (the ctrl's
+            // StreamToken, same layout) is appended to the conversation already shown. Rebuilt from the
+            // ctrl's turns, it also drops the partial text of a failed stream.
+            _sbResult.Clear();
+            _sbResult.Append(ChatTranscript());
+            _countNRres = 0;
+            _ctrl.StreamToken += _com_StreamToken;
+        }
 
         try
         {
             await _ctrl.StreamCompletionAsync(prompt);
+        }
+        catch
+        {
+            if (chatView)
+                _chatView.FailTurn();
+            throw;
         }
         finally
         {
@@ -335,11 +514,14 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             _ctrl.StreamToken -= _com_StreamToken;
         }
 
-        RefreshStreamResult();
+        if (chatView)
+            _chatView.EndTurn(_ctrl.ChatTurns[^1]);
+        else
+            // The streamed text, plus the usage line of the new answer if the model info is shown.
+            kntEditViewResult.ShowMarkdownContent(ChatTranscript());
 
         textPrompt.Text = "";
-        toolStripStatusLabelTokens.Text = $"Tokens: {_ctrl.TotalTokens}";
-        toolStripStatusLabelProcessingTime.Text = $" | Processing time: {_ctrl.TotalProcessingTime}";
+        UpdateStatusInfo();
     }
 
     private void _com_StreamToken(object sender, ControllerEventArgs<string> e)
@@ -374,23 +556,6 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
         kntEditViewResult.MarkdownContentControl.ScrollToCaret();
         kntEditViewResult.MarkdownContentControl.Update();
-    }
-
-    private void MarkDownView()
-    {
-        kntEditViewResult.ShowMarkdownContent();
-        buttonMarkDown.Enabled = false;
-        buttonNavigate.Enabled = true;
-    }
-
-    private async Task NavigateView()
-    {
-        var service = _ctrl.ServiceRef.Service;
-        var content = kntEditViewResult.MarkdownText;
-        var htmlContent = service.Notes.UtilMarkdownToHtml(content.Replace(service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
-        await kntEditViewResult.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
-        buttonMarkDown.Enabled = true;
-        buttonNavigate.Enabled = false;
     }
 
     #endregion

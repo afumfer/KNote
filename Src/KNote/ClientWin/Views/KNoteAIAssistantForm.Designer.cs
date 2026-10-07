@@ -40,20 +40,34 @@ namespace KNote.ClientWin.Views
             buttonNavigate = new Button();
             buttonMarkDown = new Button();
             kntEditViewResult = new KntWebView.KntEditView();
-            radioGetStream = new RadioButton();
-            radioGetCompletion = new RadioButton();
             labelResult = new Label();
             panelSeparator = new Panel();
-            buttonViewSystem = new Button();
-            buttonCatalogPrompts = new Button();
             buttonRestart = new Button();
             labelPrompt = new Label();
             comboProviders = new ComboBox();
-            buttonManageProviders = new Button();
             textPrompt = new TextBox();
             buttonSend = new Button();
             panelResultHeader = new Panel();
             panelPromptHeader = new Panel();
+            menuAssistant = new MenuStrip();
+            menuActions = new ToolStripMenuItem();
+            menuSend = new ToolStripMenuItem();
+            menuRestart = new ToolStripMenuItem();
+            menuActionsSeparator1 = new ToolStripSeparator();
+            menuModel = new ToolStripMenuItem();
+            menuActionsSeparator2 = new ToolStripSeparator();
+            menuNavigateView = new ToolStripMenuItem();
+            menuMarkdownView = new ToolStripMenuItem();
+            menuOptions = new ToolStripMenuItem();
+            menuGetStream = new ToolStripMenuItem();
+            menuGetCompletion = new ToolStripMenuItem();
+            menuOptionsSeparator1 = new ToolStripSeparator();
+            menuCatalogPrompts = new ToolStripMenuItem();
+            menuViewSystem = new ToolStripMenuItem();
+            menuOptionsSeparator2 = new ToolStripSeparator();
+            menuShowModelInfo = new ToolStripMenuItem();
+            menuOptionsSeparator3 = new ToolStripSeparator();
+            menuManageModels = new ToolStripMenuItem();
             statusStripChat.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitChat).BeginInit();
             splitChat.Panel1.SuspendLayout();
@@ -61,6 +75,7 @@ namespace KNote.ClientWin.Views
             splitChat.SuspendLayout();
             panelResultHeader.SuspendLayout();
             panelPromptHeader.SuspendLayout();
+            menuAssistant.SuspendLayout();
             SuspendLayout();
             //
             // statusStripChat
@@ -139,8 +154,6 @@ namespace KNote.ClientWin.Views
             // panelResultHeader
             //
             panelResultHeader.Controls.Add(labelResult);
-            panelResultHeader.Controls.Add(radioGetStream);
-            panelResultHeader.Controls.Add(radioGetCompletion);
             panelResultHeader.Controls.Add(buttonMarkDown);
             panelResultHeader.Controls.Add(buttonNavigate);
             panelResultHeader.Dock = DockStyle.Top;
@@ -182,30 +195,6 @@ namespace KNote.ClientWin.Views
             kntEditViewResult.Size = new Size(858, 567);
             kntEditViewResult.TabIndex = 1;
             //
-            // radioGetStream
-            //
-            radioGetStream.AutoSize = true;
-            radioGetStream.Checked = true;
-            radioGetStream.Font = new Font("Segoe UI", 8.25F);
-            radioGetStream.Location = new Point(423, 9);
-            radioGetStream.Name = "radioGetStream";
-            radioGetStream.Size = new Size(81, 17);
-            radioGetStream.TabIndex = 1;
-            radioGetStream.TabStop = true;
-            radioGetStream.Text = "Get Stream";
-            radioGetStream.UseVisualStyleBackColor = true;
-            //
-            // radioGetCompletion
-            //
-            radioGetCompletion.AutoSize = true;
-            radioGetCompletion.Font = new Font("Segoe UI", 8.25F);
-            radioGetCompletion.Location = new Point(525, 9);
-            radioGetCompletion.Name = "radioGetCompletion";
-            radioGetCompletion.Size = new Size(106, 17);
-            radioGetCompletion.TabIndex = 2;
-            radioGetCompletion.Text = "Get Completion";
-            radioGetCompletion.UseVisualStyleBackColor = true;
-            //
             // labelResult
             //
             labelResult.AutoSize = true;
@@ -220,12 +209,9 @@ namespace KNote.ClientWin.Views
             //
             panelPromptHeader.Controls.Add(labelPrompt);
             panelPromptHeader.Controls.Add(comboProviders);
-            panelPromptHeader.Controls.Add(buttonManageProviders);
             panelPromptHeader.Controls.Add(buttonSend);
             panelPromptHeader.Controls.Add(buttonRestart);
             panelPromptHeader.Controls.Add(panelSeparator);
-            panelPromptHeader.Controls.Add(buttonCatalogPrompts);
-            panelPromptHeader.Controls.Add(buttonViewSystem);
             panelPromptHeader.Dock = DockStyle.Top;
             panelPromptHeader.Location = new Point(0, 0);
             panelPromptHeader.Name = "panelPromptHeader";
@@ -239,28 +225,6 @@ namespace KNote.ClientWin.Views
             panelSeparator.Name = "panelSeparator";
             panelSeparator.Size = new Size(3, 25);
             panelSeparator.TabIndex = 3;
-            //
-            // buttonViewSystem
-            //
-            buttonViewSystem.Font = new Font("Segoe UI", 8.25F);
-            buttonViewSystem.Location = new Point(740, 4);
-            buttonViewSystem.Name = "buttonViewSystem";
-            buttonViewSystem.Size = new Size(114, 26);
-            buttonViewSystem.TabIndex = 7;
-            buttonViewSystem.Text = "&View system root";
-            buttonViewSystem.UseVisualStyleBackColor = true;
-            buttonViewSystem.Click += buttonViewSystem_Click;
-            //
-            // buttonCatalogPrompts
-            //
-            buttonCatalogPrompts.Font = new Font("Segoe UI", 8.25F);
-            buttonCatalogPrompts.Location = new Point(580, 4);
-            buttonCatalogPrompts.Name = "buttonCatalogPrompts";
-            buttonCatalogPrompts.Size = new Size(154, 26);
-            buttonCatalogPrompts.TabIndex = 6;
-            buttonCatalogPrompts.Text = "Get prompt from &catalog";
-            buttonCatalogPrompts.UseVisualStyleBackColor = true;
-            buttonCatalogPrompts.Click += buttonCatalogPrompts_Click;
             //
             // buttonRestart
             //
@@ -295,17 +259,6 @@ namespace KNote.ClientWin.Views
             comboProviders.TabIndex = 4;
             comboProviders.SelectedIndexChanged += comboProviders_SelectedIndexChanged;
             //
-            // buttonManageProviders
-            //
-            buttonManageProviders.Font = new Font("Segoe UI", 8.25F);
-            buttonManageProviders.Location = new Point(504, 4);
-            buttonManageProviders.Name = "buttonManageProviders";
-            buttonManageProviders.Size = new Size(70, 26);
-            buttonManageProviders.TabIndex = 5;
-            buttonManageProviders.Text = "&Manage...";
-            buttonManageProviders.UseVisualStyleBackColor = true;
-            buttonManageProviders.Click += buttonManageProviders_Click;
-            //
             // textPrompt
             //
             textPrompt.Dock = DockStyle.Fill;
@@ -330,6 +283,134 @@ namespace KNote.ClientWin.Views
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
             //
+            // menuAssistant
+            //
+            menuAssistant.Items.AddRange(new ToolStripItem[] { menuActions, menuOptions });
+            menuAssistant.Location = new Point(0, 0);
+            menuAssistant.Name = "menuAssistant";
+            menuAssistant.Padding = new Padding(7, 2, 0, 2);
+            menuAssistant.Size = new Size(858, 24);
+            menuAssistant.TabIndex = 2;
+            menuAssistant.Text = "KNote AI Assistant menu";
+            //
+            // menuActions
+            //
+            menuActions.DropDownItems.AddRange(new ToolStripItem[] { menuSend, menuRestart, menuActionsSeparator1, menuModel, menuActionsSeparator2, menuNavigateView, menuMarkdownView });
+            menuActions.Name = "menuActions";
+            menuActions.Size = new Size(59, 20);
+            menuActions.Text = "&Actions";
+            //
+            // menuSend
+            //
+            menuSend.Name = "menuSend";
+            menuSend.ShortcutKeys = Keys.Control | Keys.Return;
+            menuSend.Size = new Size(200, 22);
+            menuSend.Text = "&Send";
+            menuSend.Click += buttonSend_Click;
+            //
+            // menuRestart
+            //
+            menuRestart.Name = "menuRestart";
+            menuRestart.Size = new Size(200, 22);
+            menuRestart.Text = "&Restart";
+            menuRestart.Click += buttonRestart_Click;
+            //
+            // menuActionsSeparator1
+            //
+            menuActionsSeparator1.Name = "menuActionsSeparator1";
+            menuActionsSeparator1.Size = new Size(197, 6);
+            //
+            // menuModel
+            //
+            menuModel.Name = "menuModel";
+            menuModel.Size = new Size(200, 22);
+            menuModel.Text = "&Model";
+            menuModel.DropDownOpening += menuModel_DropDownOpening;
+            //
+            // menuActionsSeparator2
+            //
+            menuActionsSeparator2.Name = "menuActionsSeparator2";
+            menuActionsSeparator2.Size = new Size(197, 6);
+            //
+            // menuNavigateView
+            //
+            menuNavigateView.Name = "menuNavigateView";
+            menuNavigateView.Size = new Size(200, 22);
+            menuNavigateView.Text = "&Navigate view";
+            menuNavigateView.Click += buttonNavigate_Click;
+            //
+            // menuMarkdownView
+            //
+            menuMarkdownView.Name = "menuMarkdownView";
+            menuMarkdownView.Size = new Size(200, 22);
+            menuMarkdownView.Text = "Mar&kdown view";
+            menuMarkdownView.Click += buttonMarkDown_Click;
+            //
+            // menuOptions
+            //
+            menuOptions.DropDownItems.AddRange(new ToolStripItem[] { menuGetStream, menuGetCompletion, menuOptionsSeparator1, menuCatalogPrompts, menuViewSystem, menuOptionsSeparator2, menuShowModelInfo, menuOptionsSeparator3, menuManageModels });
+            menuOptions.Name = "menuOptions";
+            menuOptions.Size = new Size(61, 20);
+            menuOptions.Text = "&Options";
+            //
+            // menuGetStream
+            //
+            menuGetStream.Name = "menuGetStream";
+            menuGetStream.Size = new Size(260, 22);
+            menuGetStream.Text = "Get &stream";
+            menuGetStream.Click += menuGetStream_Click;
+            //
+            // menuGetCompletion
+            //
+            menuGetCompletion.Name = "menuGetCompletion";
+            menuGetCompletion.Size = new Size(260, 22);
+            menuGetCompletion.Text = "Get c&ompletion";
+            menuGetCompletion.Click += menuGetCompletion_Click;
+            //
+            // menuOptionsSeparator1
+            //
+            menuOptionsSeparator1.Name = "menuOptionsSeparator1";
+            menuOptionsSeparator1.Size = new Size(257, 6);
+            //
+            // menuCatalogPrompts
+            //
+            menuCatalogPrompts.Name = "menuCatalogPrompts";
+            menuCatalogPrompts.ShortcutKeys = Keys.Control | Keys.K;
+            menuCatalogPrompts.Size = new Size(260, 22);
+            menuCatalogPrompts.Text = "Get prompt from &catalog ...";
+            menuCatalogPrompts.Click += menuCatalogPrompts_Click;
+            //
+            // menuViewSystem
+            //
+            menuViewSystem.Name = "menuViewSystem";
+            menuViewSystem.Size = new Size(260, 22);
+            menuViewSystem.Text = "&View system root ...";
+            menuViewSystem.Click += menuViewSystem_Click;
+            //
+            // menuOptionsSeparator2
+            //
+            menuOptionsSeparator2.Name = "menuOptionsSeparator2";
+            menuOptionsSeparator2.Size = new Size(257, 6);
+            //
+            // menuShowModelInfo
+            //
+            menuShowModelInfo.Name = "menuShowModelInfo";
+            menuShowModelInfo.Size = new Size(260, 22);
+            menuShowModelInfo.Text = "Show model &info (tokens, time)";
+            menuShowModelInfo.Click += menuShowModelInfo_Click;
+            //
+            // menuOptionsSeparator3
+            //
+            menuOptionsSeparator3.Name = "menuOptionsSeparator3";
+            menuOptionsSeparator3.Size = new Size(257, 6);
+            //
+            // menuManageModels
+            //
+            menuManageModels.Name = "menuManageModels";
+            menuManageModels.Size = new Size(260, 22);
+            menuManageModels.Text = "&Manage models ...";
+            menuManageModels.Click += menuManageModels_Click;
+            //
             // KNoteAIAssistantForm
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -338,6 +419,8 @@ namespace KNote.ClientWin.Views
             MinimumSize = new Size(820, 480);
             Controls.Add(splitChat);
             Controls.Add(statusStripChat);
+            Controls.Add(menuAssistant);
+            MainMenuStrip = menuAssistant;
             Name = "KNoteAIAssistantForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "KNote AI Assistant";
@@ -355,6 +438,8 @@ namespace KNote.ClientWin.Views
             panelResultHeader.PerformLayout();
             panelPromptHeader.ResumeLayout(false);
             panelPromptHeader.PerformLayout();
+            menuAssistant.ResumeLayout(false);
+            menuAssistant.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -370,20 +455,34 @@ namespace KNote.ClientWin.Views
         private Button buttonRestart;
         private Label labelPrompt;
         private ComboBox comboProviders;
-        private Button buttonManageProviders;
         private TextBox textPrompt;
         private Button buttonSend;
-        private Button buttonCatalogPrompts;
         private ToolStripStatusLabel toolStripStatusServiceRef;
         private ToolStripStatusLabel toolStripStatusLabel2;
-        private Button buttonViewSystem;
         private Panel panelSeparator;
         private KntWebView.KntEditView kntEditViewResult;
-        private RadioButton radioGetStream;
-        private RadioButton radioGetCompletion;
         private Button buttonMarkDown;
         private Button buttonNavigate;
         private Panel panelResultHeader;
         private Panel panelPromptHeader;
+        private MenuStrip menuAssistant;
+        private ToolStripMenuItem menuActions;
+        private ToolStripMenuItem menuSend;
+        private ToolStripMenuItem menuRestart;
+        private ToolStripSeparator menuActionsSeparator1;
+        private ToolStripMenuItem menuModel;
+        private ToolStripSeparator menuActionsSeparator2;
+        private ToolStripMenuItem menuNavigateView;
+        private ToolStripMenuItem menuMarkdownView;
+        private ToolStripMenuItem menuOptions;
+        private ToolStripMenuItem menuGetStream;
+        private ToolStripMenuItem menuGetCompletion;
+        private ToolStripSeparator menuOptionsSeparator1;
+        private ToolStripMenuItem menuCatalogPrompts;
+        private ToolStripMenuItem menuViewSystem;
+        private ToolStripSeparator menuOptionsSeparator2;
+        private ToolStripMenuItem menuShowModelInfo;
+        private ToolStripSeparator menuOptionsSeparator3;
+        private ToolStripMenuItem menuManageModels;
     }
 }
