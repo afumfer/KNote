@@ -315,7 +315,11 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private async Task GoStreamCompletion(string prompt)
     {
+        // Start from the whole transcript so far, not an empty buffer: the streamed turn is appended
+        // to the conversation already shown. Reseeding from the ctrl (instead of keeping the buffer)
+        // also picks up turns obtained in Completion mode and drops the partial text of a failed stream.
         _sbResult.Clear();
+        _sbResult.Append(_ctrl.ChatTextMessages);
         _countNRres = 0;
         _ctrl.StreamToken += _com_StreamToken;
 
