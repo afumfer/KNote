@@ -321,7 +321,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
         ChatResponse response;
         try
         {
-            response = await _chatClient.GetResponseAsync(_chatMessages);
+            // Streamed and put together here rather than one GetResponseAsync call: the answer then comes in
+            // as it is written, so a long one can't run into the HTTP timeout of a single response (10 minutes
+            // in the Anthropic SDK). It is still shown all at once.
+            response = await _chatClient.GetStreamingResponseAsync(_chatMessages).ToChatResponseAsync();
         }
         catch
         {
@@ -342,7 +345,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
         {
             InputTokens = response.Usage?.InputTokenCount,
             OutputTokens = response.Usage?.OutputTokenCount,
-            TotalTokens = response.Usage?.TotalTokenCount ?? 0
+            TotalTokens = response.Usage?.TotalTokenCount ?? 0,
+            Truncated = response.FinishReason == ChatFinishReason.Length
         });
 
         _chatTextMessages.Append($"\r\n");
@@ -377,6 +381,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
         StringBuilder resAssistant = _streamingResult;
         resAssistant.Clear();
         Stopwatch stopwatch = new();
+        ChatFinishReason? finishReason = null;
 
         stopwatch.Start();
 
@@ -390,6 +395,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
         {
             await foreach (ChatResponseUpdate update in _chatClient.GetStreamingResponseAsync(_chatMessages))
             {
+                // The last one given: the intermediate steps of a tool call carry their own.
+                finishReason = update.FinishReason ?? finishReason;
                 var res = update.Text?.Replace("\n", "\r\n");
                 if (string.IsNullOrEmpty(res))
                     continue;
@@ -419,7 +426,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _chatTurns.Add(new AiChatTurn(prompt, _result, _currentProviderRef?.Alias, stopwatch.Elapsed)
         {
             TotalTokens = estimatedTokens,
-            TokensEstimated = true
+            TokensEstimated = true,
+            Truncated = finishReason == ChatFinishReason.Length
         });
         _chatTextMessages.Append(resAssistant.ToString());
         _chatTextMessages.Append($"\r\n\r\n");

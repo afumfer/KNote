@@ -15,6 +15,11 @@ public sealed record AiChatTurn(string Prompt, string Answer, string ProviderAli
     // Stream mode only estimates the tokens (see KNoteAIAssistantCtrl.StreamCompletionAsync).
     public bool TokensEstimated { get; init; }
 
+    // The answer stopped at the output token limit, not because the model had finished.
+    public bool Truncated { get; init; }
+
+    public const string TruncatedNotice = "The answer was cut: it reached the output token limit.";
+
     // What the answer cost, in one line: "3 in · 2 out · 5 tokens · 1.2 s".
     public string UsageSummary
     {

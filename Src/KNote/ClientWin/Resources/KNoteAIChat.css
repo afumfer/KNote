@@ -10,6 +10,7 @@
   --chat-user-fg: #ffffff;
   --chat-muted: #707070;
   --chat-failed: #c42b1c;
+  --chat-warning: #9d5d00;
   --chat-dot: #8a8a8a;
 }
 
@@ -19,6 +20,7 @@
     --chat-user-fg: #f3f3f3;
     --chat-muted: #9d9d9d;
     --chat-failed: #f1707b;
+    --chat-warning: #fce100;
     --chat-dot: #9d9d9d;
   }
 }
@@ -76,6 +78,13 @@ body {
 .msg.assistant .meta {
   font-size: 11.5px;
   color: var(--chat-muted);
+  margin-top: 8px;
+}
+
+/* Answer cut at the output token limit: shown whether or not the model info is. */
+.msg.assistant .notice {
+  font-size: 12px;
+  color: var(--chat-warning);
   margin-top: 8px;
 }
 
