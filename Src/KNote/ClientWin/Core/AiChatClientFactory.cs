@@ -14,6 +14,8 @@ namespace KNote.ClientWin.Core;
 // wiring (e.g. it requires an Ollama model that supports function calling).
 public static class AiChatClientFactory
 {
+    internal const int AnthropicMaxOutputTokens = 64000;
+
     public static IChatClient Create(AiProviderRef providerRef, ServiceRef serviceRef, Store store)
     {
         if (providerRef is null)
@@ -34,10 +36,13 @@ public static class AiChatClientFactory
                 .AsIChatClient(providerRef.Model),
 #pragma warning restore OPENAI001
 
+            // The Messages API requires max_tokens and the SDK sends 1024 when none is given, which cuts long
+            // answers. It is only a ceiling (neither billed nor counted against the rate limits) and fits
+            // every model from Claude Haiku 4.5 on (64K output; the rest of the current models allow 128K).
             EnumAiProvider.Anthropic => new AnthropicClient
             {
                 ApiKey = ResolveApiKey(providerRef, "ANTHROPIC_API_KEY")
-            }.AsIChatClient(),
+            }.AsIChatClient(providerRef.Model, AnthropicMaxOutputTokens),
 
             EnumAiProvider.Ollama => new OllamaApiClient(providerRef.Host, providerRef.Model),
 
@@ -49,11 +54,6 @@ public static class AiChatClientFactory
         return baseClient.AsBuilder()
             .ConfigureOptions(o =>
             {
-                // OpenAI/Ollama already bake the model into the client at construction above;
-                // only the Anthropic bridge needs it set through ChatOptions.
-                if (providerRef.Provider == EnumAiProvider.Anthropic)
-                    o.ModelId = providerRef.Model;
-
                 // Unlike Chat Completions, the Responses API stores responses server-side by
                 // default (store=true) - keep them off OpenAI's servers, since tool results carry
                 // note contents. No reasoning_effort is sent: each model uses its own default.

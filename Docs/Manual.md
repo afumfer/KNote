@@ -109,6 +109,6 @@ The **Options** menu has the rest:
 | **Show model info (tokens, time)** | Shows or hides, below each answer, the tokens and the time it took, in both views and in the note when the conversation is saved. |
 | **Manage models ...** | Adds, changes or removes the AI models (providers) you can choose. |
 
-Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. **Restart**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation.
+Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. If an answer reaches the maximum length a model can write in one answer, it ends with a notice saying it was cut (shown even with **Show model info** off): ask the assistant to continue. **Restart**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation.
 
 TODO: ...

@@ -109,6 +109,6 @@ El menú **Options** tiene el resto:
 | **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta, los tokens y el tiempo que tardó, en las dos vistas y en la nota cuando se guarda la conversación. |
 | **Manage models ...** | Añade, cambia o quita los modelos de IA (proveedores) que puedes elegir. |
 
-Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. **Restart**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía.
+Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. Si una respuesta llega a la longitud máxima que un modelo puede escribir en una respuesta, termina con un aviso de que se ha cortado (visible aunque **Show model info** esté desactivada): pide al asistente que continúe. **Restart**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía.
 
 TODO: ...

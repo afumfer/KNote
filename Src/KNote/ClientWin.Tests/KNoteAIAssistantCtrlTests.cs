@@ -25,11 +25,9 @@ public class KNoteAIAssistantCtrlTests
     {
         var chatClient = new FakeChatClient
         {
-            GetResponseImpl = (messages, options, ct) =>
-                Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Hi there"))
-                {
-                    Usage = new UsageDetails { InputTokenCount = 3, OutputTokenCount = 2, TotalTokenCount = 5 }
-                })
+            // Completion streams too (see GetCompletionAsync), and puts the answer together.
+            GetStreamingResponseImpl = (messages, options, ct) => AnswerStream("Hi there",
+                new UsageDetails { InputTokenCount = 3, OutputTokenCount = 2, TotalTokenCount = 5 })
         };
         var ctrl = CreateCtrl(chatClient);
 
@@ -47,7 +45,7 @@ public class KNoteAIAssistantCtrlTests
     {
         var chatClient = new FakeChatClient
         {
-            GetResponseImpl = (messages, options, ct) => throw new InvalidOperationException("simulated provider failure")
+            GetStreamingResponseImpl = (messages, options, ct) => throw new InvalidOperationException("simulated provider failure")
         };
         var ctrl = CreateCtrl(chatClient);
         var messagesBeforeSend = ctrl.ChatMessages.Count;
@@ -98,11 +96,9 @@ public class KNoteAIAssistantCtrlTests
     {
         var chatClient = new FakeChatClient
         {
-            GetResponseImpl = (messages, options, ct) =>
-                Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Hi there"))
-                {
-                    Usage = new UsageDetails { InputTokenCount = 3, OutputTokenCount = 2, TotalTokenCount = 5 }
-                })
+            // Completion streams too (see GetCompletionAsync), and puts the answer together.
+            GetStreamingResponseImpl = (messages, options, ct) => AnswerStream("Hi there",
+                new UsageDetails { InputTokenCount = 3, OutputTokenCount = 2, TotalTokenCount = 5 })
         };
         var ctrl = CreateCtrl(chatClient);
 
@@ -119,11 +115,45 @@ public class KNoteAIAssistantCtrlTests
     }
 
     [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task GetCompletionAsync_AnswerStoppedByTheTokenLimit_MarksTheTurnAsTruncated(bool cut)
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) => AnswerStream("Once upon a",
+                finishReason: cut ? ChatFinishReason.Length : ChatFinishReason.Stop)
+        };
+        var ctrl = CreateCtrl(chatClient);
+
+        await ctrl.GetCompletionAsync("Tell me a long story");
+
+        Assert.AreEqual(cut, ctrl.ChatTurns[0].Truncated);
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task StreamCompletionAsync_AnswerStoppedByTheTokenLimit_MarksTheTurnAsTruncated(bool cut)
+    {
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) => AnswerStream("Once upon a",
+                finishReason: cut ? ChatFinishReason.Length : ChatFinishReason.Stop)
+        };
+        var ctrl = CreateCtrl(chatClient);
+
+        await ctrl.StreamCompletionAsync("Tell me a long story");
+
+        Assert.AreEqual(cut, ctrl.ChatTurns[0].Truncated);
+    }
+
+    [TestMethod]
     public async Task GetCompletionAsync_ProviderThrows_AddsNoTurn()
     {
         var chatClient = new FakeChatClient
         {
-            GetResponseImpl = (messages, options, ct) => throw new InvalidOperationException("simulated provider failure")
+            GetStreamingResponseImpl = (messages, options, ct) => throw new InvalidOperationException("simulated provider failure")
         };
         var ctrl = CreateCtrl(chatClient);
 
@@ -287,6 +317,20 @@ public class KNoteAIAssistantCtrlTests
         var ctrl = CreateCtrlWithProviders("anything");
 
         Assert.IsNull(ctrl.GetPreferredProvider());
+    }
+
+    // An answer as providers stream it: its text, then a last update with why it stopped and its usage.
+    private static async IAsyncEnumerable<ChatResponseUpdate> AnswerStream(string text, UsageDetails usage = null,
+        ChatFinishReason? finishReason = null)
+    {
+        await Task.Yield();
+        yield return new ChatResponseUpdate(ChatRole.Assistant, text);
+        yield return new ChatResponseUpdate
+        {
+            Role = ChatRole.Assistant,
+            FinishReason = finishReason ?? ChatFinishReason.Stop,
+            Contents = usage == null ? [] : [new UsageContent(usage)]
+        };
     }
 
     private static async IAsyncEnumerable<ChatResponseUpdate> StreamOf(params string[] chunks)

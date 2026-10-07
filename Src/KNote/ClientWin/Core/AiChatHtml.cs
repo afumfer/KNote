@@ -113,8 +113,11 @@ public static class AiChatHtml
     public static string UserMessage(string prompt)
         => $"<div class=\"msg user\"><div class=\"bubble\">{WebUtility.HtmlEncode(prompt?.Trim() ?? "")}</div></div>";
 
+    // The usage line is model info (hidden by the page's hide-model-info class); the notice of a cut answer
+    // is shown always.
     public static string AssistantMessage(AiChatTurn turn)
-        => Assistant("", turn.ProviderAlias, MarkdownToHtml(turn.Answer), turn.UsageSummary);
+        => Assistant("", turn.ProviderAlias, MarkdownToHtml(turn.Answer), turn.UsageSummary,
+            turn.Truncated ? AiChatTurn.TruncatedNotice : null);
 
     // An answer still arriving: the text received so far, or the typing indicator until the first of it.
     public static string PendingAnswer(string providerAlias, string answerSoFar)
@@ -133,12 +136,13 @@ public static class AiChatHtml
     public static string ScriptCall(string function, string argument)
         => $"window.kntChat.{function}({JsonSerializer.Serialize(argument ?? "")});";
 
-    private static string Assistant(string state, string providerAlias, string contentHtml, string footer)
+    private static string Assistant(string state, string providerAlias, string contentHtml, string footer, string notice = null)
     {
         var author = string.IsNullOrEmpty(providerAlias) ? "Assistant" : $"Assistant · {WebUtility.HtmlEncode(providerAlias)}";
+        var noticeHtml = string.IsNullOrEmpty(notice) ? "" : $"<div class=\"notice\">{WebUtility.HtmlEncode(notice)}</div>";
         var meta = string.IsNullOrEmpty(footer) ? "" : $"<div class=\"meta\">{WebUtility.HtmlEncode(footer)}</div>";
         var classes = string.IsNullOrEmpty(state) ? "msg assistant" : $"msg assistant {state}";
-        return $"<div class=\"{classes}\"><div class=\"author\">{author}</div><div class=\"content\">{contentHtml}</div>{meta}</div>";
+        return $"<div class=\"{classes}\"><div class=\"author\">{author}</div><div class=\"content\">{contentHtml}</div>{noticeHtml}{meta}</div>";
     }
 
     private static string Style
