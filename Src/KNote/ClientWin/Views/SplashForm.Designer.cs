@@ -93,7 +93,7 @@
             Controls.Add(labelMessage);
             Controls.Add(labelANotas);
             Controls.Add(iconoANotas);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(4, 3, 4, 3);
             MaximizeBox = false;
             MinimizeBox = false;
