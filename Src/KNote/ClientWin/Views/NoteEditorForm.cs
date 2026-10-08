@@ -238,6 +238,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         TopLevel = false;
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
+        MinimumSize = Size.Empty;
         toolBarNoteEditor.Visible = false;
         kntEditView.MarkdownContentControl.ReadOnly = true;
         kntEditView.MarkdownContentControl.BackColor = SystemColors.Window;
@@ -250,6 +251,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         TopLevel = true;
         Dock = DockStyle.None;
         FormBorderStyle = FormBorderStyle.Sizable;
+        // Below this the header fields overlap each other (Tags, Status) and the content buttons the
+        // "Content:" label. The window as a whole, so after setting its border.
+        MinimumSize = SizeFromClientSize(LogicalToDeviceUnits(new Size(600, 400)));
         toolBarNoteEditor.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
         _ctrl.EditMode = true;

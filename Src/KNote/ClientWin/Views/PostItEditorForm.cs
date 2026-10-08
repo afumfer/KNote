@@ -38,6 +38,10 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     {
         InitializeComponent();
 
+        // Room for the caption, a few lines of text and the status bar with its resize grip. Also applies to
+        // a saved size smaller than this, which grows when the PostIt is opened.
+        MinimumSize = LogicalToDeviceUnits(new Size(360, 240));
+
         // kntEditView hosts a WebView2 control, which - unlike plain GDI-rendered siblings -
         // owns its own native child window and can end up painting over the menu/resize icons
         // regardless of their position in the Controls collection. Forcing them to the front
