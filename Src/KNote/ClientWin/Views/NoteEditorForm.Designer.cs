@@ -784,7 +784,7 @@
             textStatus.Location = new Point(597, 62);
             textStatus.Margin = new Padding(4, 3, 4, 3);
             textStatus.Name = "textStatus";
-            textStatus.Size = new Size(193, 23);
+            textStatus.Size = new Size(188, 23);
             textStatus.TabIndex = 61;
             // 
             // label8
