@@ -90,6 +90,13 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         panelTraceToHeader.Resize += (s, e) => AlignButtonsRight(panelTraceToHeader, 3, 3,
             buttonTraceToAdd, buttonTraceToRemove, buttonTraceToEdit);
 
+        // Same for the expand/collapse arrow (an AutoSize label): with Anchor=Right it ended up over the
+        // "Html editor" button at run time. It follows that button instead, which keeps its anchor.
+        labelExpandContent.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        buttonViewHtml.LocationChanged += (s, e) => PlaceExpandContentLabel();
+        buttonViewHtml.SizeChanged += (s, e) => PlaceExpandContentLabel();
+        PlaceExpandContentLabel();
+
         // Drag & drop a file onto the form or the markdown editor uploads it as a resource, the
         // same way the "upload"/"paste from clipboard" toolbar buttons already do. WinForms
         // drag&drop does not bubble to parent controls, so each real drop surface needs its own
@@ -162,6 +169,11 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             btn.Left = right - btn.Width;
             right = btn.Left - spacing;
         }
+    }
+
+    private void PlaceExpandContentLabel()
+    {
+        labelExpandContent.Left = buttonViewHtml.Right + LogicalToDeviceUnits(3);
     }
 
     #endregion
@@ -238,6 +250,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         TopLevel = false;
         Dock = DockStyle.Fill;
         FormBorderStyle = FormBorderStyle.None;
+        MinimumSize = Size.Empty;
         toolBarNoteEditor.Visible = false;
         kntEditView.MarkdownContentControl.ReadOnly = true;
         kntEditView.MarkdownContentControl.BackColor = SystemColors.Window;
@@ -250,6 +263,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         TopLevel = true;
         Dock = DockStyle.None;
         FormBorderStyle = FormBorderStyle.Sizable;
+        // Below this the header fields overlap each other (Tags, Status) and the content buttons the
+        // "Content:" label. The window as a whole, so after setting its border.
+        MinimumSize = SizeFromClientSize(LogicalToDeviceUnits(new Size(600, 400)));
         toolBarNoteEditor.Visible = true;
         StartPosition = FormStartPosition.CenterScreen;
         _ctrl.EditMode = true;

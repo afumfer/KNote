@@ -115,9 +115,9 @@ namespace KNote.ClientWin.Views
             //
             // buttonSelectRelatedNote
             //
-            this.buttonSelectRelatedNote.Location = new System.Drawing.Point(361, 28);
+            this.buttonSelectRelatedNote.Location = new System.Drawing.Point(372, 28);
             this.buttonSelectRelatedNote.Name = "buttonSelectRelatedNote";
-            this.buttonSelectRelatedNote.Size = new System.Drawing.Size(38, 24);
+            this.buttonSelectRelatedNote.Size = new System.Drawing.Size(27, 24);
             this.buttonSelectRelatedNote.TabIndex = 0;
             this.buttonSelectRelatedNote.Text = "...";
             this.buttonSelectRelatedNote.UseVisualStyleBackColor = true;
@@ -128,7 +128,7 @@ namespace KNote.ClientWin.Views
             this.textRelatedNote.Location = new System.Drawing.Point(9, 29);
             this.textRelatedNote.Name = "textRelatedNote";
             this.textRelatedNote.ReadOnly = true;
-            this.textRelatedNote.Size = new System.Drawing.Size(346, 23);
+            this.textRelatedNote.Size = new System.Drawing.Size(358, 23);
             this.textRelatedNote.TabIndex = 9;
             this.textRelatedNote.TabStop = false;
             //

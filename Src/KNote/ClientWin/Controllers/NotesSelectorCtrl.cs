@@ -103,10 +103,7 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
                 if(refreshView)
                     View.RefreshView();
 
-                if (ListEntities?.Count > 0)
-                    SelectedEntity = ListEntities[0];
-                else
-                    SelectedEntity = null;
+                SelectDefaultEntity(refreshView);
             }
             else
             {
@@ -152,10 +149,7 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
                 if (refreshView)
                     View.RefreshView();
 
-                if (ListEntities?.Count > 0)
-                    SelectedEntity = ListEntities[0];
-                else
-                    SelectedEntity = null;
+                SelectDefaultEntity(refreshView);
             }
             else
             {
@@ -205,10 +199,7 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
                 if (refreshView)
                     View.RefreshView();
 
-                if (ListEntities?.Count > 0)
-                    SelectedEntity = ListEntities[0];
-                else
-                    SelectedEntity = null;
+                SelectDefaultEntity(refreshView);
             }
             else
             {
@@ -307,6 +298,16 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
         catch (Exception)
         {
         }
+    }
+
+    // A refreshed view has already selected its row (the previously selected note, if it is still in the
+    // list, see NotesSelectorForm.RefreshView): keep it. Otherwise, the first note.
+    private void SelectDefaultEntity(bool refreshView)
+    {
+        if (ListEntities == null || ListEntities.Count == 0)
+            SelectedEntity = null;
+        else if (!refreshView || SelectedEntity == null || !ListEntities.Any(n => n.NoteId == SelectedEntity.NoteId))
+            SelectedEntity = ListEntities[0];
     }
 
     public List<NoteMinimalDto> GetSelectedListNotesMinimal()

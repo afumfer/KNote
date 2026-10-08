@@ -50,5 +50,20 @@ public partial class SplashForm : Form
         labelVersion.Text = $"Version: {_appContext.AppVersion}";
     }
 
+    // Flat look: no window border (FormBorderStyle.None), just a thin line around it.
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+
+        int width = LogicalToDeviceUnits(1);
+        ControlPaint.DrawBorder(e.Graphics, ClientRectangle,
+            BorderColor, width, ButtonBorderStyle.Solid,
+            BorderColor, width, ButtonBorderStyle.Solid,
+            BorderColor, width, ButtonBorderStyle.Solid,
+            BorderColor, width, ButtonBorderStyle.Solid);
+    }
+
+    private static readonly Color BorderColor = Color.FromArgb(64, 64, 64);
+
     #endregion 
 }

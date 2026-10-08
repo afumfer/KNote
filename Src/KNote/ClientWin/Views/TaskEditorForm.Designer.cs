@@ -156,9 +156,9 @@ namespace KNote.ClientWin.Views
             // buttonSelDateEnd
             // 
             buttonSelDateEnd.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonSelDateEnd.Location = new Point(498, 375);
+            buttonSelDateEnd.Location = new Point(495, 375);
             buttonSelDateEnd.Name = "buttonSelDateEnd";
-            buttonSelDateEnd.Size = new Size(24, 24);
+            buttonSelDateEnd.Size = new Size(27, 24);
             buttonSelDateEnd.TabIndex = 7;
             buttonSelDateEnd.Text = "...";
             buttonSelDateEnd.UseVisualStyleBackColor = true;
@@ -169,7 +169,7 @@ namespace KNote.ClientWin.Views
             textEndDate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             textEndDate.Location = new Point(386, 376);
             textEndDate.Name = "textEndDate";
-            textEndDate.Size = new Size(106, 23);
+            textEndDate.Size = new Size(104, 23);
             textEndDate.TabIndex = 6;
             // 
             // label10
@@ -185,9 +185,9 @@ namespace KNote.ClientWin.Views
             // buttonSelDateStart
             // 
             buttonSelDateStart.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonSelDateStart.Location = new Point(285, 375);
+            buttonSelDateStart.Location = new Point(282, 375);
             buttonSelDateStart.Name = "buttonSelDateStart";
-            buttonSelDateStart.Size = new Size(24, 24);
+            buttonSelDateStart.Size = new Size(27, 24);
             buttonSelDateStart.TabIndex = 5;
             buttonSelDateStart.Text = "...";
             buttonSelDateStart.UseVisualStyleBackColor = true;
@@ -198,7 +198,7 @@ namespace KNote.ClientWin.Views
             textStartDate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             textStartDate.Location = new Point(172, 376);
             textStartDate.Name = "textStartDate";
-            textStartDate.Size = new Size(107, 23);
+            textStartDate.Size = new Size(105, 23);
             textStartDate.TabIndex = 4;
             // 
             // label9
@@ -291,9 +291,9 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelDateExE
             // 
-            buttonSelDateExE.Location = new Point(276, 46);
+            buttonSelDateExE.Location = new Point(273, 46);
             buttonSelDateExE.Name = "buttonSelDateExE";
-            buttonSelDateExE.Size = new Size(24, 24);
+            buttonSelDateExE.Size = new Size(27, 24);
             buttonSelDateExE.TabIndex = 15;
             buttonSelDateExE.Text = "...";
             buttonSelDateExE.UseVisualStyleBackColor = true;
@@ -301,9 +301,9 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelDateExS
             // 
-            buttonSelDateExS.Location = new Point(276, 16);
+            buttonSelDateExS.Location = new Point(273, 16);
             buttonSelDateExS.Name = "buttonSelDateExS";
-            buttonSelDateExS.Size = new Size(24, 24);
+            buttonSelDateExS.Size = new Size(27, 24);
             buttonSelDateExS.TabIndex = 13;
             buttonSelDateExS.Text = "...";
             buttonSelDateExS.UseVisualStyleBackColor = true;
@@ -327,14 +327,14 @@ namespace KNote.ClientWin.Views
             // 
             textExEndDate.Location = new Point(141, 45);
             textExEndDate.Name = "textExEndDate";
-            textExEndDate.Size = new Size(129, 23);
+            textExEndDate.Size = new Size(127, 23);
             textExEndDate.TabIndex = 14;
             // 
             // textExStartDate
             // 
             textExStartDate.Location = new Point(141, 16);
             textExStartDate.Name = "textExStartDate";
-            textExStartDate.Size = new Size(129, 23);
+            textExStartDate.Size = new Size(127, 23);
             textExStartDate.TabIndex = 12;
             // 
             // label8

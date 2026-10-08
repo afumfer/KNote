@@ -67,6 +67,12 @@ The options that don't belong to one repository (options, AI, chat, scripts, cre
 
 These permissions are enforced by the application. Somebody who connects to the database directly, with its connection string, is not restricted by them: protect shared databases with the database's own permissions too.
 
+### Notes list (desktop app)
+
+**Refreshing the list.** **Edit → Refresh notes list** (`Ctrl+R`) reads the notes of the selected folder, search or filter again from the database and sorts them again. Use it after changing the field the list is ordered by (the priority, for instance): an edited note is updated in the list, but it isn't moved to its new place until the list is refreshed. The selected note stays selected.
+
+**All the notes of a repository.** Clicking a repository's node in the folders tree (the one with its name in brackets) lists all of its notes. As that can take a long time in a large database, KaNote asks first: **Cancel** leaves the notes list and the note viewer empty. Refreshing the list you have already loaded doesn't ask again.
+
 ### Printing and exporting (desktop app)
 
 The **File** menu of the management window has these options, all working on the notes list exactly as you see it: the notes of the selected folder, or the result of a search or a filter, in the order and with the columns shown on screen (including the compact view and the list filter).

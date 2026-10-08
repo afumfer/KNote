@@ -695,7 +695,7 @@
             labelExpandContent.AutoSize = true;
             labelExpandContent.Font = new Font("Segoe UI", 10F);
             labelExpandContent.ForeColor = SystemColors.GrayText;
-            labelExpandContent.Location = new Point(766, 8);
+            labelExpandContent.Location = new Point(770, 8);
             labelExpandContent.Name = "labelExpandContent";
             labelExpandContent.Size = new Size(21, 19);
             labelExpandContent.TabIndex = 59;
@@ -707,7 +707,7 @@
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonNavigate.Font = new Font("Segoe UI", 8.25F);
-            buttonNavigate.Location = new Point(570, 2);
+            buttonNavigate.Location = new Point(573, 2);
             buttonNavigate.Margin = new Padding(4, 3, 4, 3);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(96, 26);
@@ -721,7 +721,7 @@
             // 
             buttonEditMarkdown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonEditMarkdown.Font = new Font("Segoe UI", 8.25F);
-            buttonEditMarkdown.Location = new Point(474, 2);
+            buttonEditMarkdown.Location = new Point(475, 2);
             buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
             buttonEditMarkdown.Name = "buttonEditMarkdown";
             buttonEditMarkdown.Size = new Size(96, 26);
@@ -735,7 +735,7 @@
             // 
             buttonViewHtml.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonViewHtml.Font = new Font("Segoe UI", 8.25F);
-            buttonViewHtml.Location = new Point(667, 2);
+            buttonViewHtml.Location = new Point(671, 2);
             buttonViewHtml.Margin = new Padding(4, 3, 4, 3);
             buttonViewHtml.Name = "buttonViewHtml";
             buttonViewHtml.Size = new Size(96, 26);
@@ -784,7 +784,7 @@
             textStatus.Location = new Point(597, 62);
             textStatus.Margin = new Padding(4, 3, 4, 3);
             textStatus.Name = "textStatus";
-            textStatus.Size = new Size(193, 23);
+            textStatus.Size = new Size(188, 23);
             textStatus.TabIndex = 61;
             // 
             // label8
@@ -940,7 +940,7 @@
             buttonDeleteType.BackColor = SystemColors.Control;
             buttonDeleteType.FlatStyle = FlatStyle.System;
             buttonDeleteType.Font = new Font("Segoe UI", 8.25F);
-            buttonDeleteType.Location = new Point(731, 14);
+            buttonDeleteType.Location = new Point(727, 14);
             buttonDeleteType.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteType.Name = "buttonDeleteType";
             buttonDeleteType.Size = new Size(27, 26);
@@ -971,7 +971,7 @@
             textNoteType.MaxLength = 255;
             textNoteType.Name = "textNoteType";
             textNoteType.ShortcutsEnabled = false;
-            textNoteType.Size = new Size(625, 23);
+            textNoteType.Size = new Size(619, 23);
             textNoteType.TabIndex = 1;
             // 
             // buttonNoteType

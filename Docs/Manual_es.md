@@ -67,6 +67,12 @@ Las opciones que no pertenecen a un repositorio (opciones, IA, chat, scripts, cr
 
 Estos permisos los aplica la aplicación. Quien se conecte a la base de datos directamente, con su cadena de conexión, no queda limitado por ellos: protege también las bases de datos compartidas con los permisos de la propia base de datos.
 
+### Lista de notas (aplicación de escritorio)
+
+**Refrescar la lista.** **Edit → Refresh notes list** (`Ctrl+R`) vuelve a leer de la base de datos las notas de la carpeta, búsqueda o filtro seleccionados y las ordena de nuevo. Úsalo después de cambiar el campo por el que se ordena la lista (la prioridad, por ejemplo): una nota editada se actualiza en la lista, pero no se mueve a su nuevo sitio hasta que se refresca la lista. La nota seleccionada sigue seleccionada.
+
+**Todas las notas de un repositorio.** Al pulsar el nodo de un repositorio en el árbol de carpetas (el de su nombre entre corchetes) se listan todas sus notas. Como puede tardar en una base de datos grande, KaNote pregunta antes: **Cancelar** deja vacíos la lista de notas y el visor de la nota. Refrescar la lista que ya has cargado no vuelve a preguntar.
+
 ### Impresión y exportación (aplicación de escritorio)
 
 El menú **File** de la ventana de gestión tiene estas opciones, todas sobre la lista de notas tal como la ves: las notas de la carpeta seleccionada, o el resultado de una búsqueda o de un filtro, en el orden y con las columnas que se muestran en pantalla (incluidas la vista compacta y el filtro de la lista).

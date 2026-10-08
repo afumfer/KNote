@@ -165,7 +165,7 @@ namespace KNote.ClientWin.Views
             // buttonFolderClear
             //
             this.buttonFolderClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonFolderClear.Location = new System.Drawing.Point(372, 346);
+            this.buttonFolderClear.Location = new System.Drawing.Point(369, 346);
             this.buttonFolderClear.Name = "buttonFolderClear";
             this.buttonFolderClear.Size = new System.Drawing.Size(27, 26);
             this.buttonFolderClear.TabIndex = 16;
@@ -180,7 +180,7 @@ namespace KNote.ClientWin.Views
             this.textFolder.Enabled = false;
             this.textFolder.Location = new System.Drawing.Point(7, 348);
             this.textFolder.Name = "textFolder";
-            this.textFolder.Size = new System.Drawing.Size(363, 23);
+            this.textFolder.Size = new System.Drawing.Size(357, 23);
             this.textFolder.TabIndex = 15;
             //
             // checkIncludeChildFolders
