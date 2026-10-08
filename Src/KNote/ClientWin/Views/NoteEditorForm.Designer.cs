@@ -695,7 +695,7 @@
             labelExpandContent.AutoSize = true;
             labelExpandContent.Font = new Font("Segoe UI", 10F);
             labelExpandContent.ForeColor = SystemColors.GrayText;
-            labelExpandContent.Location = new Point(766, 8);
+            labelExpandContent.Location = new Point(770, 8);
             labelExpandContent.Name = "labelExpandContent";
             labelExpandContent.Size = new Size(21, 19);
             labelExpandContent.TabIndex = 59;
@@ -707,7 +707,7 @@
             // 
             buttonNavigate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonNavigate.Font = new Font("Segoe UI", 8.25F);
-            buttonNavigate.Location = new Point(570, 2);
+            buttonNavigate.Location = new Point(573, 2);
             buttonNavigate.Margin = new Padding(4, 3, 4, 3);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(96, 26);
@@ -721,7 +721,7 @@
             // 
             buttonEditMarkdown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonEditMarkdown.Font = new Font("Segoe UI", 8.25F);
-            buttonEditMarkdown.Location = new Point(474, 2);
+            buttonEditMarkdown.Location = new Point(475, 2);
             buttonEditMarkdown.Margin = new Padding(4, 3, 4, 3);
             buttonEditMarkdown.Name = "buttonEditMarkdown";
             buttonEditMarkdown.Size = new Size(96, 26);
@@ -735,7 +735,7 @@
             // 
             buttonViewHtml.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonViewHtml.Font = new Font("Segoe UI", 8.25F);
-            buttonViewHtml.Location = new Point(667, 2);
+            buttonViewHtml.Location = new Point(671, 2);
             buttonViewHtml.Margin = new Padding(4, 3, 4, 3);
             buttonViewHtml.Name = "buttonViewHtml";
             buttonViewHtml.Size = new Size(96, 26);

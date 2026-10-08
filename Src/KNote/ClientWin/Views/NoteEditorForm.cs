@@ -90,6 +90,13 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         panelTraceToHeader.Resize += (s, e) => AlignButtonsRight(panelTraceToHeader, 3, 3,
             buttonTraceToAdd, buttonTraceToRemove, buttonTraceToEdit);
 
+        // Same for the expand/collapse arrow (an AutoSize label): with Anchor=Right it ended up over the
+        // "Html editor" button at run time. It follows that button instead, which keeps its anchor.
+        labelExpandContent.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        buttonViewHtml.LocationChanged += (s, e) => PlaceExpandContentLabel();
+        buttonViewHtml.SizeChanged += (s, e) => PlaceExpandContentLabel();
+        PlaceExpandContentLabel();
+
         // Drag & drop a file onto the form or the markdown editor uploads it as a resource, the
         // same way the "upload"/"paste from clipboard" toolbar buttons already do. WinForms
         // drag&drop does not bubble to parent controls, so each real drop surface needs its own
@@ -162,6 +169,11 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             btn.Left = right - btn.Width;
             right = btn.Left - spacing;
         }
+    }
+
+    private void PlaceExpandContentLabel()
+    {
+        labelExpandContent.Left = buttonViewHtml.Right + LogicalToDeviceUnits(3);
     }
 
     #endregion
