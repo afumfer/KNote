@@ -331,6 +331,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         {
             await _ctrl.MoveSelectedNotes();
         }
+        else if (menuSel == menuRefreshNotesList)
+        {
+            await _ctrl.RefreshNotesList();
+        }
         else if (menuSel == menuAddTags)
         {
             await _ctrl.ChangeTags(EnumChangeTag.Add);

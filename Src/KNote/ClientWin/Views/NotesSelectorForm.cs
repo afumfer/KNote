@@ -108,7 +108,9 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         }
         _sortOrder = getDefaultSortOrder();
 
-        RefreshDataGridNotes();
+        // Still the note selected before this load: reloading the same list (Refresh notes list, tab switch,
+        // after moving notes...) keeps it selected; a different list doesn't contain it and starts at row 0.
+        RefreshDataGridNotes(_ctrl.SelectedEntity?.NoteId);
 
         // Hack for refresh column 0 in modal form.
         dataGridNotes.Columns[0].Visible = false;
@@ -292,7 +294,7 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
 
     #region Private methods
 
-    private void RefreshDataGridNotes()
+    private void RefreshDataGridNotes(Guid? noteIdToSelect = null)
     {
         _skipSelectionChanged = true;
 
@@ -336,9 +338,26 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         // Checks the grid's actual row count, not _ctrl.ListEntities.Count: with a second filter
         // applied, the two can differ, and ActiveCurrentRow() would throw on an empty grid.
         if (dataGridNotes.Rows.Count > 0)
+        {
+            if (noteIdToSelect != null)
+                SelectRow(noteIdToSelect.Value);
             ActiveCurrentRow();
+        }
 
         _skipSelectionChanged = false;
+    }
+
+    // Selects (and scrolls to) the row of a note, if it is in the grid.
+    private void SelectRow(Guid noteId)
+    {
+        var row = dataGridNotes.Rows.Cast<DataGridViewRow>().FirstOrDefault(r => (Guid)r.Cells["NoteId"].Value == noteId);
+        var firstVisibleColumn = dataGridNotes.Columns.GetFirstColumn(DataGridViewElementStates.Visible);
+        if (row == null || firstVisibleColumn == null)
+            return;
+
+        dataGridNotes.CurrentCell = row.Cells[firstVisibleColumn.Index];
+        dataGridNotes.ClearSelection();
+        row.Selected = true;
     }
 
     // Second, in-memory filter over the already-loaded ListEntities (NotesSelectorCtrl.EnableTextFilter) -

@@ -1331,6 +1331,14 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         await RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef);
     }
 
+    // Reloads the current notes list (folder, search or filter) from the database, so it is sorted again
+    // after editing the field it is ordered by. The selected note stays selected if it is still in the list
+    // (see NotesSelectorForm.RefreshView).
+    public async Task RefreshNotesList()
+    {
+        await ForceRefreshListNotes();
+    }
+
     public async Task MoveSelectedNotes()
     {                
         var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal().ToList();

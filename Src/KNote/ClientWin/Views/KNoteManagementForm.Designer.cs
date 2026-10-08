@@ -62,6 +62,7 @@
             menuDeleteNote = new ToolStripMenuItem();
             menuEditS1 = new ToolStripSeparator();
             menuMoveSelectedNotes = new ToolStripMenuItem();
+            menuRefreshNotesList = new ToolStripMenuItem();
             menuEditS2 = new ToolStripSeparator();
             menuAddTags = new ToolStripMenuItem();
             menuRemoveTags = new ToolStripMenuItem();
@@ -309,7 +310,7 @@
             // 
             // menuEdit
             // 
-            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuNewNote, menuNewNoteAsPostIt, menuEditNote, menuEditNoteAsPostIt, menuDeleteNote, menuEditS1, menuMoveSelectedNotes, menuEditS2, menuAddTags, menuRemoveTags, menuTraceSelectedNotesTo, menuTraceSelectedNotesFrom, menuEditS3, menuMoreOptions });
+            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuNewNote, menuNewNoteAsPostIt, menuEditNote, menuEditNoteAsPostIt, menuDeleteNote, menuEditS1, menuMoveSelectedNotes, menuRefreshNotesList, menuEditS2, menuAddTags, menuRemoveTags, menuTraceSelectedNotesTo, menuTraceSelectedNotesFrom, menuEditS3, menuMoreOptions });
             menuEdit.Name = "menuEdit";
             menuEdit.Size = new Size(39, 20);
             menuEdit.Text = "&Edit";
@@ -363,6 +364,14 @@
             menuMoveSelectedNotes.Size = new Size(261, 22);
             menuMoveSelectedNotes.Text = "&Move selected notes ...";
             menuMoveSelectedNotes.Click += menu_Click;
+            // 
+            // menuRefreshNotesList
+            // 
+            menuRefreshNotesList.Name = "menuRefreshNotesList";
+            menuRefreshNotesList.ShortcutKeys = Keys.Control | Keys.R;
+            menuRefreshNotesList.Size = new Size(261, 22);
+            menuRefreshNotesList.Text = "&Refresh notes list";
+            menuRefreshNotesList.Click += menu_Click;
             // 
             // menuEditS2
             // 
@@ -1008,6 +1017,7 @@
         private ToolStripMenuItem menuDeleteNote;
         private ToolStripSeparator menuEditS1;
         private ToolStripMenuItem menuMoveSelectedNotes;
+        private ToolStripMenuItem menuRefreshNotesList;
         private ToolStripSeparator menuEditS2;
         private ToolStripMenuItem menuAddTags;
         private ToolStripMenuItem menuRemoveTags;
