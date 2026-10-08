@@ -147,9 +147,17 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     private async Task RefreshActiveFolderWithServiceRef(FolderWithServiceRef folderWithServideRef)
     {        
-        if (folderWithServideRef == null)               
+        if (folderWithServideRef == null)
             return;
-        
+
+        // The repository's root node lists all of its notes, which can take a long time in a large database.
+        if (folderWithServideRef.FolderInfo == null && !IsShowingAllNotesOf(folderWithServideRef.ServiceRef)
+            && !ConfirmLoadAllNotes(folderWithServideRef.ServiceRef))
+        {
+            ClearNotesList();
+            return;
+        }
+
         View.ActivateWaitState();
 
         SelectMode = EnumSelectMode.Folders;
@@ -167,6 +175,36 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         NotifyMessage($"Loaded notes list for folder {FolderCaption(folderWithServideRef.FolderInfo)}");
 
         View.DeactivateWaitState();
+    }
+
+    // A reload of the repository's notes already on screen (Refresh notes list, after moving notes...) was
+    // already accepted: only a new load asks.
+    private bool IsShowingAllNotesOf(ServiceRef serviceRef)
+        => SelectMode == EnumSelectMode.Folders && NotesSelectorCtrl.Folder == null
+            && NotesSelectorCtrl.Service == serviceRef?.Service && NotesSelectorCtrl.ListEntities?.Count > 0;
+
+    private bool ConfirmLoadAllNotes(ServiceRef serviceRef)
+    {
+        var message = $"You are going to load all the notes of the repository '{serviceRef?.Alias}'. " +
+            $"It may take a long time if the database contains a large number of notes.{Environment.NewLine}{Environment.NewLine}" +
+            "Do you want to continue?";
+
+        return View.ShowInfo(message, KntConst.AppName, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
+    }
+
+    // Leaves the root node selected with an empty notes list and note viewer.
+    private void ClearNotesList()
+    {
+        SelectMode = EnumSelectMode.Folders;
+        FolderPath = FoldersSelectorCtrl.Path;
+        CountNotes = 0;
+
+        _selectedNoteInfo = null;
+        NoteEditorCtrl.CleanView();
+        NotesSelectorCtrl.CleanView();
+
+        View.ShowInfo(null);
+        NotifyMessage("Loading all the notes of the repository canceled");
     }
 
     // Name and number, as the status bar shows a folder or a note: "'Name' (#12)".
