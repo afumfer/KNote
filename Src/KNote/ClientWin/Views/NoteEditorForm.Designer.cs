@@ -940,7 +940,7 @@
             buttonDeleteType.BackColor = SystemColors.Control;
             buttonDeleteType.FlatStyle = FlatStyle.System;
             buttonDeleteType.Font = new Font("Segoe UI", 8.25F);
-            buttonDeleteType.Location = new Point(731, 14);
+            buttonDeleteType.Location = new Point(727, 14);
             buttonDeleteType.Margin = new Padding(4, 3, 4, 3);
             buttonDeleteType.Name = "buttonDeleteType";
             buttonDeleteType.Size = new Size(27, 26);
@@ -971,7 +971,7 @@
             textNoteType.MaxLength = 255;
             textNoteType.Name = "textNoteType";
             textNoteType.ShortcutsEnabled = false;
-            textNoteType.Size = new Size(625, 23);
+            textNoteType.Size = new Size(619, 23);
             textNoteType.TabIndex = 1;
             // 
             // buttonNoteType

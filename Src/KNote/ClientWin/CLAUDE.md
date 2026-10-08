@@ -371,7 +371,11 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   si el usuario cambió de monitor o de escala, puede caer fuera de todas las pantallas actuales (incluso en
   el hueco entre dos monitores). Un botón pegado a la derecha de la caja de texto sobre la que actúa (`...`,
   `X`) se iguala a ella con `Utils/ControlLayout.AlignToTextBox(...)` tras `InitializeComponent()`: el alto
-  real de una `TextBox` de una línea lo decide su fuente en tiempo de ejecución, no el Designer. Los menús
+  real de una `TextBox` de una línea lo decide su fuente en tiempo de ejecución, no el Designer. Su ancho y su
+  separación con el control de su izquierda son los mismos en toda la app: `ControlLayout.SideButtonWidth`
+  (27) y `SideButtonGap` (5), en píxeles lógicos (la referencia es el botón de carpeta del editor de notas);
+  en el Designer se escriben esos valores, ajustando el ancho de la caja, y en código se pasan por
+  `LogicalToDeviceUnits`. En una pareja `X` + `...` la separación se aplica a los dos botones. Los menús
   contextuales son `Utils/KntContextMenuStrip`, no `ContextMenuStrip`: el de WinForms calcula su margen de
   imagen/check y sus rellenos a 96 PPP y solo los reescala en `PerMonitorV2`, así que a 200 % la barra
   lateral queda más estrecha que la casilla del check. Al añadir uno en el diseñador, cambia su tipo. Las

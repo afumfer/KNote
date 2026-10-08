@@ -208,10 +208,10 @@ namespace KNote.ClientWin.Views
             // buttonSelectDirectoryResources
             // 
             buttonSelectDirectoryResources.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSelectDirectoryResources.Location = new Point(595, 196);
+            buttonSelectDirectoryResources.Location = new Point(592, 196);
             buttonSelectDirectoryResources.Margin = new Padding(3);
             buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
-            buttonSelectDirectoryResources.Size = new Size(24, 23);
+            buttonSelectDirectoryResources.Size = new Size(27, 23);
             buttonSelectDirectoryResources.TabIndex = 8;
             buttonSelectDirectoryResources.Text = "...";
             buttonSelectDirectoryResources.UseVisualStyleBackColor = true;
@@ -240,7 +240,7 @@ namespace KNote.ClientWin.Views
             textResourcesContainerRoot.Location = new Point(8, 198);
             textResourcesContainerRoot.Margin = new Padding(3);
             textResourcesContainerRoot.Name = "textResourcesContainerRoot";
-            textResourcesContainerRoot.Size = new Size(582, 19);
+            textResourcesContainerRoot.Size = new Size(579, 19);
             textResourcesContainerRoot.TabIndex = 7;
             // 
             // labelContainerUrl
@@ -343,10 +343,10 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelectFile
             // 
-            buttonSelectFile.Location = new Point(589, 80);
+            buttonSelectFile.Location = new Point(586, 80);
             buttonSelectFile.Margin = new Padding(3);
             buttonSelectFile.Name = "buttonSelectFile";
-            buttonSelectFile.Size = new Size(24, 23);
+            buttonSelectFile.Size = new Size(27, 23);
             buttonSelectFile.TabIndex = 12;
             buttonSelectFile.Text = "...";
             buttonSelectFile.UseVisualStyleBackColor = true;
@@ -354,10 +354,10 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelectDirectory
             // 
-            buttonSelectDirectory.Location = new Point(588, 26);
+            buttonSelectDirectory.Location = new Point(586, 26);
             buttonSelectDirectory.Margin = new Padding(3);
             buttonSelectDirectory.Name = "buttonSelectDirectory";
-            buttonSelectDirectory.Size = new Size(24, 23);
+            buttonSelectDirectory.Size = new Size(27, 23);
             buttonSelectDirectory.TabIndex = 9;
             buttonSelectDirectory.Text = "...";
             buttonSelectDirectory.UseVisualStyleBackColor = true;
@@ -368,7 +368,7 @@ namespace KNote.ClientWin.Views
             textSqLiteDataBase.Location = new Point(3, 83);
             textSqLiteDataBase.Margin = new Padding(3);
             textSqLiteDataBase.Name = "textSqLiteDataBase";
-            textSqLiteDataBase.Size = new Size(580, 19);
+            textSqLiteDataBase.Size = new Size(578, 19);
             textSqLiteDataBase.TabIndex = 10;
             // 
             // labelSqLiteDataBase
@@ -386,7 +386,7 @@ namespace KNote.ClientWin.Views
             textSqLiteDirectory.Location = new Point(3, 28);
             textSqLiteDirectory.Margin = new Padding(3);
             textSqLiteDirectory.Name = "textSqLiteDirectory";
-            textSqLiteDirectory.Size = new Size(580, 19);
+            textSqLiteDirectory.Size = new Size(578, 19);
             textSqLiteDirectory.TabIndex = 8;
             // 
             // labelDirectory

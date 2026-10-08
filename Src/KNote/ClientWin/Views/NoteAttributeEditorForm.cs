@@ -96,9 +96,10 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
             textValue.Size = LogicalToDeviceUnits(new Size(478, 23));
         textValue.Text = _ctrl.Model.Value?.ToString();
         textValue.Visible = true;
-        textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
+        // The short box (a date) has its button on its right: it must not grow under it.
+        textValue.Anchor = widthShort
+            ? AnchorStyles.Top | AnchorStyles.Left
+            : AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
     }
 
     private void ModelToControlTextArea()
@@ -128,7 +129,8 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
     private void ModelToControlDateTime()
     {
         ModelToControlText(true);
-        buttonSelDate.Location = new Point(LogicalToDeviceUnits(216), LogicalToDeviceUnits(32));
+        buttonSelDate.Left = textValue.Right + LogicalToDeviceUnits(ControlLayout.SideButtonGap);
+        buttonSelDate.Width = LogicalToDeviceUnits(ControlLayout.SideButtonWidth);
         buttonSelDate.AlignToTextBox(textValue);
         buttonSelDate.Visible = true;
     }

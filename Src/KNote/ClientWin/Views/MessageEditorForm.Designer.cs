@@ -105,9 +105,9 @@ namespace KNote.ClientWin.Views
             // 
             // buttonSelectDate
             // 
-            this.buttonSelectDate.Location = new System.Drawing.Point(376, 67);
+            this.buttonSelectDate.Location = new System.Drawing.Point(373, 67);
             this.buttonSelectDate.Name = "buttonSelectDate";
-            this.buttonSelectDate.Size = new System.Drawing.Size(24, 24);
+            this.buttonSelectDate.Size = new System.Drawing.Size(27, 24);
             this.buttonSelectDate.TabIndex = 6;
             this.buttonSelectDate.Text = "...";
             this.buttonSelectDate.UseVisualStyleBackColor = true;
@@ -163,7 +163,7 @@ namespace KNote.ClientWin.Views
             // 
             this.textAlarmDateTime.Location = new System.Drawing.Point(127, 67);
             this.textAlarmDateTime.Name = "textAlarmDateTime";
-            this.textAlarmDateTime.Size = new System.Drawing.Size(243, 23);
+            this.textAlarmDateTime.Size = new System.Drawing.Size(241, 23);
             this.textAlarmDateTime.TabIndex = 5;
             // 
             // textContent
@@ -179,14 +179,14 @@ namespace KNote.ClientWin.Views
             this.textUserFullName.Enabled = false;
             this.textUserFullName.Location = new System.Drawing.Point(127, 38);
             this.textUserFullName.Name = "textUserFullName";
-            this.textUserFullName.Size = new System.Drawing.Size(243, 23);
+            this.textUserFullName.Size = new System.Drawing.Size(241, 23);
             this.textUserFullName.TabIndex = 2;
             //
             // buttonSelectUser
             //
-            this.buttonSelectUser.Location = new System.Drawing.Point(376, 38);
+            this.buttonSelectUser.Location = new System.Drawing.Point(373, 38);
             this.buttonSelectUser.Name = "buttonSelectUser";
-            this.buttonSelectUser.Size = new System.Drawing.Size(24, 24);
+            this.buttonSelectUser.Size = new System.Drawing.Size(27, 24);
             this.buttonSelectUser.TabIndex = 3;
             this.buttonSelectUser.Text = "...";
             this.buttonSelectUser.UseVisualStyleBackColor = true;

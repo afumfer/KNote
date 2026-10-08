@@ -175,7 +175,7 @@ namespace KNote.ClientWin.Views
             this.textParentFolder.Location = new System.Drawing.Point(8, 338);
             this.textParentFolder.Name = "textParentFolder";
             this.textParentFolder.ReadOnly = true;
-            this.textParentFolder.Size = new System.Drawing.Size(448, 23);
+            this.textParentFolder.Size = new System.Drawing.Size(447, 23);
             this.textParentFolder.TabIndex = 9;
             this.textParentFolder.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textParentFolder_KeyUp);
             //
