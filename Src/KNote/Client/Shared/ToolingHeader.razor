@@ -1,14 +1,10 @@
-﻿<div class="container-fluid">
-    <div class="row">
-        <div class="col-4">
-            <h3>@Title</h3>
-        </div>
-        <div class="col-8 text-right">                        
-            @Buttons
-        </div>
-    </div>
-</div>
-<hr class="mt-1" />
+﻿<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
+             Wrap="FlexWrap.Wrap" class="rz-px-4 rz-py-1 rz-border-bottom rz-mb-2">
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H3" class="rz-my-0">@Title</RadzenText>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        @Buttons
+    </RadzenStack>
+</RadzenStack>
 
 @code {
     [Parameter] public string Title { get; set; } = "---";

@@ -9,14 +9,10 @@
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="ChatGPT room">
-            <IndexMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="ChatGPT room">
+    <IndexMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
 <p class="mt-2 ml-2" style="font-size:small"><b>Total Tokens:</b> @totalTokens</p>
 

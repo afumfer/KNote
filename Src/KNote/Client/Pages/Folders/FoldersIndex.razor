@@ -9,18 +9,14 @@
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Folders admin">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                    <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTree" ></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="Folders admin">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTree" ></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
 <div class="container-fluid border pt-2">
     <div class="row">

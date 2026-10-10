@@ -1,13 +1,7 @@
-﻿<div class="row">
-    <div class="col-6">
-        <RadzenLabel Text="@TextLeft" />
-    </div>
-    <div class="col-6 ">
-        <span class="float-right">
-            <RadzenLabel Text="@TextRight" />
-        </span>
-    </div>
-</div>
+﻿<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.Wrap">
+    <RadzenLabel Text="@TextLeft" />
+    <RadzenLabel Text="@TextRight" />
+</RadzenStack>
 
 @code{
     [Parameter] public string TextLeft { get; set; } = "";

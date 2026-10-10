@@ -8,17 +8,13 @@
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Notes filter">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="Notes filter">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
 <RadzenCard class="docu pt-1 pl-0 pr-1 pb-0 mt-2">
     <div class="row">

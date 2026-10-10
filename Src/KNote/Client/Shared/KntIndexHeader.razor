@@ -1,19 +1,10 @@
-﻿<div class="col-6">
-    <h4 class="mt-2">@TextHead</h4>
-</div>
-<div class="col-6 pr-0">
-    <span class="float-right">
-        @if (IndexMenu == null)
-        {
-            <i>&nbsp;</i>     
-        }
-        else
-        {
-           @IndexMenu
-        }
-    </span>
-</div>
+﻿<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
+             Wrap="FlexWrap.Wrap" class="rz-border rz-px-4 rz-py-1">
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H4" class="rz-my-0">@TextHead</RadzenText>
+    @IndexMenu
+</RadzenStack>
+
 @code {
-    [Parameter] public string TextHead { get; set; }
-    [Parameter] public RenderFragment IndexMenu { get; set; }
+    [Parameter] public string TextHead { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? IndexMenu { get; set; }
 }

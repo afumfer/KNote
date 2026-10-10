@@ -15,34 +15,23 @@
         </RadzenTabsItem>
 
         <RadzenTabsItem Text="&nbsp;Modify">
-            <div class="btn-toolbar mb-1" role="toolbar" aria-label="Toolbar with button groups">
-                <div class="btn-group-sm mr-2" role="group" aria-label="Group 1">
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Bold))"><b>B</b></button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Strikethrough))"><del>S</del></button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Italic))"><i>I</i></button>
-                </div>
-                <div class="btn-group-sm mr-2" role="group" aria-label="Group 2">
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H1))">H1</button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H2))">H2</button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H3))">H3</button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.H4))">H3</button>
-                </div>
-                <div class="btn-group-sm mr-2" role="group" aria-label="Group 1">
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.List))"><i class="fa fa-list"></i></button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.ListOrdered))"><i class="fa fa-list-ol"></i></button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Line))"><b>-</b></button>
-                </div>
-                <div class="btn-group-sm mr-2" role="group" aria-label="Group 3">
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Link))"><i class="fa fa-link"></i></button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Image))"><i class="fa fa-image"></i></button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Code))"><i class="fa fa-code"></i></button>
-                    <button type="button" class="btn btn-light" @onclick="(() => InsertMarkDownCommand(enumMarkDownCommand.Table))"><i class="fa fa-table"></i></button>
-                </div>            
-            </div>                
+            <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap" Gap="0.75rem" class="rz-mb-1">
+                @foreach (var group in toolbarGroups)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.125rem">
+                        @foreach (var button in group)
+                        {
+                            <RadzenButton Icon="@button.Icon" Text="@button.Text" title="@button.Title"
+                                          ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                                          Click="@(() => InsertMarkDownCommand(button.Command))" />
+                        }
+                    </RadzenStack>
+                }
+            </RadzenStack>
             <div>
-                <InputTextArea @bind-Value="CurrentValue" />
+                <RadzenTextArea @bind-Value="CurrentValue" Style="width: 100%; height: 350px;" />
                 @if(For != null)
-                {                    
+                {
                     <ValidationMessage For="For" />
                 }
             </div>
@@ -54,6 +43,34 @@
 
 @code {
     [Parameter] public Expression<Func<TValue>> For { get; set; } = null!;
+
+    private record ToolbarButton(enumMarkDownCommand Command, string? Icon, string? Text, string Title);
+
+    private static readonly ToolbarButton[][] toolbarGroups =
+    [
+        [
+            new(enumMarkDownCommand.Bold, "format_bold", null, "Bold"),
+            new(enumMarkDownCommand.Strikethrough, "format_strikethrough", null, "Strikethrough"),
+            new(enumMarkDownCommand.Italic, "format_italic", null, "Italic")
+        ],
+        [
+            new(enumMarkDownCommand.H1, null, "H1", "Heading 1"),
+            new(enumMarkDownCommand.H2, null, "H2", "Heading 2"),
+            new(enumMarkDownCommand.H3, null, "H3", "Heading 3"),
+            new(enumMarkDownCommand.H4, null, "H4", "Heading 4")
+        ],
+        [
+            new(enumMarkDownCommand.List, "format_list_bulleted", null, "Bulleted list"),
+            new(enumMarkDownCommand.ListOrdered, "format_list_numbered", null, "Numbered list"),
+            new(enumMarkDownCommand.Line, "horizontal_rule", null, "Horizontal line")
+        ],
+        [
+            new(enumMarkDownCommand.Link, "link", null, "Link"),
+            new(enumMarkDownCommand.Image, "image", null, "Image"),
+            new(enumMarkDownCommand.Code, "code", null, "Code"),
+            new(enumMarkDownCommand.Table, "table_chart", null, "Table")
+        ]
+    ];
 
     private void InsertMarkDownCommand(enumMarkDownCommand command)
     {

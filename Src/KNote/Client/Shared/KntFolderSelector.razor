@@ -4,20 +4,18 @@
 @inject DialogService dialogService
 
 
-<div class="row">
-    <div class="col-md-12 overflow-auto" style="height:380px">
+<RadzenStack Gap="1rem">
+    <div style="height: 380px; overflow: auto;">
         <KntFoldersTreeView FoldersInfo="@foldersTree"
                             FolderSelected="OnFolderSelected">
         </KntFoldersTreeView>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-12 text-right">
-        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-    </div>
-</div>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" />
+        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
+    </RadzenStack>
+</RadzenStack>
 
 
 @code {

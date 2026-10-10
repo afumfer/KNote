@@ -6,17 +6,13 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Users admin">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New user ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="Users admin">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New user ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
 <div class="col-12 pt-2">
     <div class="row">

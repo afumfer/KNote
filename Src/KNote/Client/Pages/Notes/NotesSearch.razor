@@ -7,17 +7,13 @@
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Notes search">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="Notes search">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
 <!--- Move this to new component -->
 <div class="row pt-2">
