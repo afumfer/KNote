@@ -15,15 +15,22 @@ else
 @code {
     [Parameter] public string? MarkdownContent { get; set; }
     [Parameter] public RenderFragment? TemplateContent { get; set; }
-    
+
+    // For content that is not trusted (e.g. an AI answer, which may repeat what it read in other users' notes):
+    // its raw HTML is shown as text instead of being inserted into the page, where an attribute like onerror
+    // would run script with the user's session.
+    [Parameter] public bool DisableHtml { get; set; }
+
     private string? HtmlContent;
 
     protected override void OnParametersSet()
     {
         if (MarkdownContent != null)
         {
-            var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();            
-            HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, pipeline);
+            var builder = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions();
+            if (DisableHtml)
+                builder.DisableHtml();
+            HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, builder.Build());
         }
     }
 }

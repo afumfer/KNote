@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using KNote.ClientWin.Core;
+using KNote.Model.Dto;
 using KntWebView;
 using Microsoft.Web.WebView2.Core;
 
@@ -47,16 +48,17 @@ internal sealed class AiChatWebRenderer : IDisposable
     // Raised outside the WebView2 callback, so its handler may open a modal dialog.
     public event EventHandler<string> ShortcutPressed;
 
-    // Shows the whole conversation, replacing whatever the view had.
-    public async Task LoadAsync(IEnumerable<AiChatTurn> turns)
+    // Shows the whole conversation, replacing whatever the view had. providerAlias: the provider of its answers.
+    public async Task LoadAsync(IEnumerable<AiChatTurnDto> turns, string providerAlias)
     {
+        _providerAlias = providerAlias;
         _repaintTimer.Stop();
         _answerSoFar = null;
         _pageInSync = false;
         // Completed from the NavigationCompleted callback of WebView2: what follows must not run inside it.
         var pageLoaded = _pageLoaded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        await _editView.ShowNavigationContent(AiChatHtml.Page(turns, _markdownStyle, _showModelInfo, _shortcuts));
+        await _editView.ShowNavigationContent(AiChatHtml.Page(turns, providerAlias, _markdownStyle, _showModelInfo, _shortcuts));
 
         // Out of a possible WebView2 callback before going on: the caller may show a message box (see the
         // WebView2 notes of ClientWin/CLAUDE.md).
@@ -75,10 +77,10 @@ internal sealed class AiChatWebRenderer : IDisposable
     // turns is the conversation before this turn, to reload the page first if it is not in step with it
     // (after a failed turn). answerSoFar, for a streamed answer, returns the text received so far: it is
     // repainted periodically until EndTurn/FailTurn.
-    public async Task BeginTurnAsync(IEnumerable<AiChatTurn> turns, string prompt, string providerAlias, Func<string> answerSoFar)
+    public async Task BeginTurnAsync(IEnumerable<AiChatTurnDto> turns, string prompt, string providerAlias, Func<string> answerSoFar)
     {
         if (!_pageInSync)
-            await LoadAsync(turns);
+            await LoadAsync(turns, providerAlias);
 
         _providerAlias = providerAlias;
         _answerSoFar = answerSoFar;
@@ -90,11 +92,11 @@ internal sealed class AiChatWebRenderer : IDisposable
             _repaintTimer.Start();
     }
 
-    public void EndTurn(AiChatTurn turn)
+    public void EndTurn(AiChatTurnDto turn)
     {
         _repaintTimer.Stop();
         _answerSoFar = null;
-        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.AssistantMessage(turn)));
+        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.AssistantMessage(turn, _providerAlias)));
     }
 
     // The turn stays on screen, marked as failed, until the next one reloads the page without it: the ctrl

@@ -94,16 +94,18 @@ Los diálogos de guardar (PDF y CSV) empiezan en la carpeta donde guardaste uno 
 
 ### Asistente de IA (aplicación de escritorio)
 
-La ventana del asistente de IA muestra la conversación completa en su zona superior. Escribe una pregunta debajo y pulsa **Send**. La lista que hay junto a **Restart** elige el modelo de IA que responde.
+La ventana del asistente de IA muestra la conversación completa en su zona superior. Escribe una pregunta debajo y pulsa **Send**. La lista que hay junto a **New session** elige el modelo de IA que responde. A la derecha, el panel **Sessions** muestra tus conversaciones anteriores (ver *Sesiones del asistente de IA* más abajo).
+
+El asistente también puede trabajar con tus notas: pídele que busque notas sobre algo, que te diga qué contiene una nota o que apunte una tarea, y usará las notas del repositorio en el que estás trabajando. Una tarea que crea se guarda en tu carpeta por defecto y se abre en el editor de notas, donde puedes cambiarla, dejarla o borrarla. Las propias sesiones del asistente quedan fuera cuando busca en tus notas.
 
 La conversación puede verse de dos formas, que se eligen con los botones que hay encima:
 
 | Botón | Vista |
 |---|---|
 | **Navigate** | Como un chat (la vista por defecto): tus preguntas a la derecha, en una burbuja, y cada respuesta debajo con su texto formateado (títulos, listas, tablas, código) y, al pie, los tokens y el tiempo que tardó. Los enlaces de una respuesta se abren en tu navegador web. |
-| **Markdown** | El texto de la conversación, tal como se guarda cuando la conservas como nota. |
+| **Markdown** | El texto de la conversación exactamente como se guarda en su nota de sesión. Cada pregunta y cada respuesta van precedidas de una marca oculta (`<!-- knt-ai:user -->`, `<!-- knt-ai:assistant {...} -->`) que los visores de notas no muestran; la marca de una respuesta lleva sus tokens y su tiempo. |
 
-El menú **Actions** repite lo que hacen los botones y la lista: **Send** (`Ctrl+Enter`), **Restart**, **Model** (los mismos modelos que la lista), **Navigate view** y **Markdown view**. Sus opciones están disponibles justo cuando lo está su botón.
+El menú **Actions** repite lo que hacen los botones y la lista: **Send** (`Ctrl+Enter`), **New session**, **Model** (los mismos modelos que la lista), **Navigate view** y **Markdown view**. Sus opciones están disponibles justo cuando lo está su botón.
 
 El menú **Options** tiene el resto:
 
@@ -112,9 +114,65 @@ El menú **Options** tiene el resto:
 | **Get stream** / **Get completion** | Cómo llegan las respuestas: a medida que se escriben (por defecto) o de una vez cuando están completas. |
 | **Get prompt from catalog ...** (`Ctrl+K`) | Empieza una conversación nueva a partir de un prompt del catálogo. |
 | **View system root ...** | Muestra las instrucciones que recibe el modelo antes de la conversación. |
-| **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta, los tokens y el tiempo que tardó, en las dos vistas y en la nota cuando se guarda la conversación. |
+| **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta de la vista de chat, los tokens y el tiempo que tardó. La vista Markdown los tiene siempre, en la marca de cada respuesta. |
 | **Manage models ...** | Añade, cambia o quita los modelos de IA (proveedores) que puedes elegir. |
 
-Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. Si una respuesta llega a la longitud máxima que un modelo puede escribir en una respuesta, termina con un aviso de que se ha cortado (visible aunque **Show model info** esté desactivada): pide al asistente que continúe. **Restart**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía.
+Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. Los tokens son los que informa el proveedor de IA; cuando un proveedor no los informa, se estiman (el chat lo indica). Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. Si una respuesta llega a la longitud máxima que un modelo puede escribir en una respuesta, la vista de chat la termina con un aviso de que se ha cortado (visible aunque **Show model info** esté desactivada): pide al asistente que continúe. **New session**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía; la actual ya está guardada.
+
+### Sesiones del asistente de IA
+
+Cada conversación con el asistente de IA se conserva como una **sesión**, para que puedas volver a ella más tarde, en la aplicación de escritorio o en la Web: las dos usan las mismas sesiones.
+
+**Dónde se guardan.** Cada sesión es una nota del repositorio en el que estás trabajando, del tipo de nota **`@ChatSessions`**, en la carpeta **AI Assistant sessions**. El topic de la nota es la primera línea de tu primera pregunta, su descripción es la conversación (tal como la muestra la vista Markdown), sus atributos **AiProvider** y **AiModel** dicen qué modelo de IA respondió, y una tarea asignada a ti, que empieza cuando empezó la sesión, la vincula contigo. El tipo de nota, sus dos atributos y la carpeta se crean la primera vez que abres el asistente en un repositorio que no los tiene.
+
+**Cuándo se guardan.** Tras cada respuesta. Si el guardado falla, KaNote lo intenta de nuevo antes de que dejes la conversación (una sesión nueva, otra sesión, otro proveedor, cerrar la ventana) y, si aún no puede, te pregunta si descartas sus últimos mensajes.
+
+**Volver a una sesión.** El panel **Sessions** muestra tus sesiones, la más reciente primero; elige una para verla de nuevo y seguir con ella. Continúa con el modelo de IA con el que se mantuvo; si ese modelo ya no está configurado, continúa con el predefinido y KaNote te lo indica. El panel solo muestra tus propias sesiones, y solo tú puedes abrirlas o continuarlas desde el asistente.
+
+**Privacidad.** Las sesiones son notas normales: cualquiera que pueda ver la carpeta **AI Assistant sessions** de un repositorio compartido puede abrirlas como cualquier otra nota. No escribas en una conversación nada que no escribirías en una nota de ese repositorio.
+
+**Aplicación de escritorio.** Las sesiones solo se guardan cuando abres el asistente desde el menú. Cuando un script de KntScript o el código en lenguaje natural de una nota (`ln`) usa el asistente, no se guarda nada (un script puede activarlo con `PersistSession = true`). Entonces el panel **Sessions** se oculta.
+
+### Asistente de IA (aplicación Web)
+
+**AI Assistant**, en el menú lateral (rol Staff o superior), abre la versión Web del asistente. Su cabecera muestra los tokens de la conversación, la lista de modelos de IA (configurados en el servidor, ver más abajo) y el botón **New conversation**; el panel **Sessions** de la derecha muestra tus sesiones, como en la aplicación de escritorio (ver *Sesiones del asistente de IA*).
+
+Escribe una pregunta en el cuadro de abajo y pulsa el botón de enviar (o `Ctrl+Enter`). La respuesta aparece a medida que se escribe; mientras llega puedes detenerla con el botón de parar, y entonces la pregunta vuelve al cuadro. Una respuesta que falla o que detienes no forma parte de la conversación y no se guarda.
+
+El asistente puede buscar en tus notas y crear tareas, como en la aplicación de escritorio. Una nota que crea se guarda en la carpeta raíz (Home) del repositorio: KaNote te lo indica, y el chat muestra un enlace que la abre en otra pestaña.
+
+Cambiar el modelo de IA de una conversación ya empezada inicia una conversación nueva (KaNote lo pregunta antes). Por tu seguridad, el HTML que contenga una respuesta se muestra como texto, nunca como parte de la página.
+
+### Proveedores de IA de la aplicación Web (configuración del servidor)
+
+Los modelos de IA que ofrece la aplicación Web se configuran en el servidor, en la sección `ai` de `appsettings.json`, con los mismos campos que los proveedores de IA de la aplicación de escritorio:
+
+```json
+"ai": {
+  "providers": [
+    { "alias": "OpenAI gpt-4o-mini", "provider": "OpenAI", "model": "gpt-4o-mini", "apiKey": "" },
+    { "alias": "Anthropic Claude Haiku 4.5", "provider": "Anthropic", "model": "claude-haiku-4-5", "apiKey": "" },
+    { "alias": "Ollama llama3.1", "provider": "Ollama", "model": "llama3.1", "host": "http://localhost:11434" }
+  ]
+}
+```
+
+| Campo | Significado |
+|---|---|
+| `alias` | El nombre que se muestra en la lista. |
+| `provider` | `OpenAI`, `Anthropic` u `Ollama`. |
+| `model` | El modelo de ese proveedor. |
+| `apiKey` | La clave de API (OpenAI y Anthropic). Déjala vacía en `appsettings.json`: ver más abajo. |
+| `host` | La dirección del servidor de Ollama (solo Ollama). |
+
+El primer proveedor válido es el predefinido. Un proveedor cuya configuración no es válida se descarta (el log del servidor indica por qué).
+
+**Claves de API.** No las escribas nunca en `appsettings.json`. En desarrollo, guárdalas en los secretos de usuario (user secrets) del servidor, según la posición del proveedor en la lista (`ai:providers:0:apiKey`, `ai:providers:1:apiKey`...):
+
+```powershell
+dotnet user-secrets set "ai:providers:0:apiKey" "sk-..." --project Server/KNote.Server.csproj
+```
+
+En un servidor, usa variables de entorno (`ai__providers__0__apiKey`) o el almacén de secretos de tu hosting. Si una clave está vacía, el servidor usa la variable de entorno `OPENAI_API_KEY` o `ANTHROPIC_API_KEY`. Las claves nunca llegan al navegador: la aplicación Web solo recibe el alias, el proveedor y el modelo de cada una.
 
 TODO: ...

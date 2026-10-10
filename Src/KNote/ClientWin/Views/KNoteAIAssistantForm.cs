@@ -492,7 +492,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     // What the Markdown view shows: the conversation exactly as it is saved in its session note (the format shared
     // with the Web assistant), with the hidden marker of each message and the usage of each answer in it.
-    private string ChatTranscript() => AiChatSessionTranscript.Write(_ctrl.ChatTurns.Select(t => t.ToDto()));
+    private string ChatTranscript() => AiChatSessionTranscript.Write(_ctrl.ChatTurns);
 
     private void UpdateOptionsMenu()
     {
@@ -519,7 +519,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         if (ChatView)
         {
-            await _chatView.LoadAsync(_ctrl.ChatTurns);
+            await _chatView.LoadAsync(_ctrl.ChatTurns, _ctrl.CurrentProviderRef?.Alias);
             // Loading the page moves the focus into WebView2: back to the prompt, to type in it (and use the
             // menu shortcuts) right away.
             if (textPrompt.Enabled)

@@ -37,10 +37,11 @@ public class KNoteAIAssistantCtrl : CtrlBase
         get { return _chatTextMessages; }
     }
 
-    // The same conversation turn by turn (kept in step with ChatMessages/ChatTextMessages), for the
-    // views that show each question and answer on its own.
-    private readonly List<AiChatTurn> _chatTurns = new List<AiChatTurn>();
-    public IReadOnlyList<AiChatTurn> ChatTurns
+    // The same conversation turn by turn (kept in step with ChatMessages/ChatTextMessages), in the form shared
+    // with the Web assistant and the sessions: what is sent with the next prompt, what is saved, and what the
+    // views that show each question and answer on its own paint (all with CurrentProviderRef).
+    private readonly List<AiChatTurnDto> _chatTurns = new List<AiChatTurnDto>();
+    public IReadOnlyList<AiChatTurnDto> ChatTurns
     {
         get { return _chatTurns; }
     }
@@ -408,7 +409,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // orphaned user message behind to be resent with the next one.
     private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText)
     {
-        var history = _chatTurns.Select(t => t.ToDto()).ToList();
+        var history = _chatTurns.ToList();
         AiChatTurnDto completed = null;
 
         await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, RootSystemChat, history, prompt))
@@ -428,7 +429,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     {
         _chatMessages.Add(new ChatMessage(ChatRole.User, turn.Prompt));
         _chatMessages.Add(new ChatMessage(ChatRole.Assistant, turn.Answer));
-        _chatTurns.Add(AiChatTurn.FromDto(turn, _currentProviderRef?.Alias));
+        _chatTurns.Add(turn);
 
         _prompt = turn.Prompt;
         _result = turn.Answer;
@@ -466,7 +467,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
             // The session is held with the provider of its last answer (see AiProviderSelection).
             _session.Provider = _currentProviderRef?.Provider;
             _session.Model = _currentProviderRef?.Model;
-            _session.Turns = _chatTurns.Select(t => t.ToDto()).ToList();
+            _session.Turns = _chatTurns.ToList();
 
             var res = await ServiceRef.Service.AiSessions.SaveAsync(_session);
             if (res.IsValid)

@@ -2,6 +2,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using KNote.Model.Dto;
 using Markdig;
 
 namespace KNote.ClientWin.Core;
@@ -74,10 +75,11 @@ public static class AiChatHtml
 
     private const string TypingIndicator = "<div class=\"typing\"><span></span><span></span><span></span></div>";
 
+    // providerAlias: the provider of the answers (one per conversation: switching it starts a new one).
     // markdownStyle: the <style> element of the app's Markdown viewer (Store.KNoteWebViewStyle), for the
     // answers' text; the chat layout goes on top of it. showModelInfo: the usage line of each answer.
     // hostShortcuts: the keys the page passes on to the host (see ShortcutText).
-    public static string Page(IEnumerable<AiChatTurn> turns, string markdownStyle, bool showModelInfo = true,
+    public static string Page(IEnumerable<AiChatTurnDto> turns, string providerAlias, string markdownStyle, bool showModelInfo = true,
         IEnumerable<string> hostShortcuts = null)
     {
         var html = new StringBuilder();
@@ -87,7 +89,7 @@ public static class AiChatHtml
         html.Append(showModelInfo ? "<body>" : "<body class=\"hide-model-info\">");
         html.Append("<main id=\"chat\">");
         foreach (var turn in turns)
-            html.Append(UserMessage(turn.Prompt)).Append(AssistantMessage(turn));
+            html.Append(UserMessage(turn.Prompt)).Append(AssistantMessage(turn, providerAlias));
         html.Append("</main><script>");
         html.Append("window.kntChatShortcuts = ").Append(JsonSerializer.Serialize(hostShortcuts ?? Array.Empty<string>())).Append(';');
         html.Append(Script).Append("</script></body></html>");
@@ -115,9 +117,9 @@ public static class AiChatHtml
 
     // The usage line is model info (hidden by the page's hide-model-info class); the notice of a cut answer
     // is shown always.
-    public static string AssistantMessage(AiChatTurn turn)
-        => Assistant("", turn.ProviderAlias, MarkdownToHtml(turn.Answer), turn.UsageSummary,
-            turn.Truncated ? AiChatTurn.TruncatedNotice : null);
+    public static string AssistantMessage(AiChatTurnDto turn, string providerAlias)
+        => Assistant("", providerAlias, MarkdownToHtml(turn.Answer), turn.UsageSummary(),
+            turn.Truncated ? AiChatTurnDto.TruncatedNotice : null);
 
     // An answer still arriving: the text received so far, or the typing indicator until the first of it.
     public static string PendingAnswer(string providerAlias, string answerSoFar)
