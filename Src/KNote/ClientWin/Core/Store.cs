@@ -834,7 +834,7 @@ public class Store
             return;
 
         await assistantCtrl.GetCompletionAsync(prompt);
-        assistantCtrl.ShowAIAssistantView(autoCloseCtrlOnViewExit: true, autoSaveChatMessagesOnViewExit: false);
+        assistantCtrl.ShowAIAssistantView(autoCloseCtrlOnViewExit: true, persistSession: false);
     }
 
     // cs/py/js script engine: opens KntScriptConsole pre-loaded with the note's code and running

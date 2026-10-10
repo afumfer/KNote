@@ -163,8 +163,10 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   la sesión puede leerla o guardarla. La conversación se guarda en `Description`
   con `Model/Dto/AiChatSessionTranscript`: Markdown legible con un comentario HTML oculto por mensaje (el del
   asistente lleva el uso en JSON), del que se recuperan los turnos (`AiChatTurnDto`) exactamente; es el
-  formato común de `ClientWin` y la Web. `search_notes` deja fuera estas notas
-  (`NotesSearchDto.ExcludeNoteTypeId`).
+  formato común de `ClientWin` y la Web, que se retoman las sesiones la una a la otra (con su proveedor y
+  modelo si siguen configurados: `AiProviderSelection.ForSession`). `search_notes` deja fuera estas notas
+  (`NotesSearchDto.ExcludeNoteTypeId`). Usos: `KNoteAIAssistantCtrl` (ver `ClientWin/CLAUDE.md`) y
+  `AiAssistantController` + página `AIAssistant` (ver `Server/CLAUDE.md` y `Client/CLAUDE.md`).
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 

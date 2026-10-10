@@ -1,4 +1,4 @@
-using System.Globalization;
+using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Core;
 
@@ -18,22 +18,32 @@ public sealed record AiChatTurn(string Prompt, string Answer, string ProviderAli
     // The answer stopped at the output token limit, not because the model had finished.
     public bool Truncated { get; init; }
 
-    public const string TruncatedNotice = "The answer was cut: it reached the output token limit.";
+    public const string TruncatedNotice = AiChatTurnDto.TruncatedNotice;
 
-    // What the answer cost, in one line: "3 in · 2 out · 5 tokens · 1.2 s".
-    public string UsageSummary
-    {
-        get
+    // The shared form of a turn (KNote.Ai's AiChatTurnStreamer, the persisted sessions), which has no provider:
+    // a session is held with a single one.
+    public static AiChatTurn FromDto(AiChatTurnDto turn, string providerAlias) =>
+        new(turn.Prompt ?? "", turn.Answer ?? "", providerAlias, turn.ProcessingTime)
         {
-            string tokens;
-            if (TokensEstimated)
-                tokens = $"~{TotalTokens} tokens (estimated)";
-            else if (InputTokens.HasValue || OutputTokens.HasValue)
-                tokens = $"{InputTokens ?? 0} in · {OutputTokens ?? 0} out · {TotalTokens} tokens";
-            else
-                tokens = $"{TotalTokens} tokens";
+            InputTokens = turn.InputTokens,
+            OutputTokens = turn.OutputTokens,
+            TotalTokens = turn.TotalTokens,
+            TokensEstimated = turn.TokensEstimated,
+            Truncated = turn.Truncated
+        };
 
-            return $"{tokens} · {ProcessingTime.TotalSeconds.ToString("0.0", CultureInfo.InvariantCulture)} s";
-        }
-    }
+    public AiChatTurnDto ToDto() => new()
+    {
+        Prompt = Prompt,
+        Answer = Answer,
+        InputTokens = InputTokens,
+        OutputTokens = OutputTokens,
+        TotalTokens = TotalTokens,
+        TokensEstimated = TokensEstimated,
+        Truncated = Truncated,
+        ProcessingTime = ProcessingTime
+    };
+
+    // What the answer cost, in one line: "3 in · 2 out · 5 tokens · 1.2 s" (the same as the Web assistant).
+    public string UsageSummary => ToDto().UsageSummary();
 }

@@ -409,6 +409,9 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   igualados con `AlignToTextBox` lo siguen. Un `TabControl` cuyo contenido llega al borde con su propia
   scrollbar (el árbol de carpetas) usa `Utils/FlushTabControl`: en oscuro el margen interior entre páginas
   y marco se ve como un hueco junto a la scrollbar.
+  Un `ListView` desactivado (`Enabled = false`) se pinta en oscuro con fondo blanco y sin sus elementos: para
+  impedir usarlo un rato (p. ej. la lista de sesiones de `KNoteAIAssistantForm` mientras llega una respuesta),
+  déjalo activo e ignora la acción.
   En las vistas, usa `SystemColors.*` en vez de colores fijos (`Color.White`...): los fijos no cambian en
   oscuro. Los informes y su previsualización se quedan siempre en claro (son para imprimir).
 
@@ -552,6 +555,26 @@ la referencia al proyecto). `KNoteAIAssistantCtrl.ApplyProvider` los combina:
     `_uiContext.Post(...)` antes de construir el `NoteEditorCtrl`/`Form`; sin ello WinForms lanzaría una
     excepción de acceso entre hilos. Es la única dependencia de `Core` hacia `KNote.ClientWin.Controllers`
     (la dirección opuesta a la habitual), justificada por necesitar lanzar un `Ctrl` completo.
+- **Cada turno** (`GetCompletionAsync` y `StreamCompletionAsync`) es el común de `KNote.Ai`
+  (`AiChatTurnStreamer`, el mismo del asistente Web): se envían el prompt de sistema y los turnos anteriores
+  (`ChatTurns`), y el turno solo se añade a la conversación (`ChatTurns`, `ChatMessages` para los scripts,
+  totales) cuando la respuesta termina, así que un fallo del proveedor no deja mensajes huérfanos. El uso de
+  tokens es el que da el proveedor (en streaming también); si no lo da, se estima.
+- **Sesiones** (persistencia de las conversaciones, `IKntService.AiSessions` del `ServiceRef` del asistente,
+  el mismo en el que trabajan las tools; formato común con la Web, ver `CLAUDE.md` raíz). Solo si
+  `PersistSession`: lo activa `KNoteManagementCtrl` al abrir el asistente desde el menú
+  (`ShowAIAssistantView(autoCloseCtrlOnViewExit, persistSession)`); los scripts que manejan el `Ctrl`
+  (`ShowAIAssistantView()`, el motor "ln" de `Store.RunNaturalLanguageCode`) no crean sesiones salvo que pongan
+  `PersistSession = true`. Se guarda tras cada respuesta (modo Stream y Completion); si falla, queda
+  `SessionPendingSave` y se reintenta antes de dejar la conversación (`LeaveSessionAsync`: nueva conversación,
+  cambio de proveedor, prompt del catálogo, otra sesión) o al cerrar; si vuelve a fallar, el usuario decide si
+  la descarta. `OpenSessionAsync` retoma una sesión con su proveedor y modelo
+  (`AiProviderSelection.ForSession`) o, si ya no están configurados, con el preferido (`GetPreferredProvider`),
+  avisando. `KNoteAIAssistantForm` muestra las sesiones en un panel a la derecha (`splitSessions`, plegado si
+  no hay persistencia): elegir una la retoma. Su vista Markdown muestra la conversación tal como se guarda en la
+  nota (`AiChatSessionTranscript.Write`, con los comentarios `<!-- knt-ai:... -->` y el uso de cada respuesta en
+  ellos), haya o no persistencia. Sustituye al antiguo "guardar al salir" como nota con la etiqueta
+  `[AIAssistant]`.
 - `KNoteAIAssistantCtrl.SetChatClientForTesting` es `internal` (no `private`) solo para que los tests usen
   un `IChatClient` fake (`[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]` en
   `Properties/AssemblyInfo.cs`); `AiChatClientFactory.ResolveApiKey` lo es por lo mismo en `KNote.Ai`.

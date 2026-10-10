@@ -6,7 +6,6 @@ using KNote.Model.Dto;
 using KNote.Service.Core;
 using KntScript;
 using Microsoft.Extensions.AI;
-using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
@@ -84,7 +83,19 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public bool AutoCloseCtrlOnViewExit { get; set; } = false;
 
-    public bool AutoSaveChatMessagesOnViewExit { get; set; } = false;
+    // Whether each answer saves the conversation as an AI session of the user (IKntService.AiSessions, in
+    // ServiceRef - the repository the tools work on), which can be resumed later here or in the Web assistant.
+    // On when the assistant is opened from the menu (ShowAIAssistantView(..., persistSession: true)); a script
+    // driving the ctrl doesn't create sessions unless it turns this on.
+    public bool PersistSession { get; set; } = false;
+
+    // The session being held: NoteId is Guid.Empty until its first answer is saved.
+    private AiChatSessionDto _session = new();
+    public Guid SessionNoteId => _session.NoteId;
+    public string SessionTopic => _session.Topic;
+
+    // The last save of the session failed: it is saved again before leaving it.
+    public bool SessionPendingSave { get; private set; }
 
     public string Tag { get; set; } = "KNoteAIAssistantCtrl v0.1";
 
@@ -202,14 +213,14 @@ public class KNoteAIAssistantCtrl : CtrlBase
         }
     }
 
-    public void ShowAIAssistantView(bool autoCloseCtrlOnViewExit, bool autoSaveChatMessagesOnViewExit)
+    public void ShowAIAssistantView(bool autoCloseCtrlOnViewExit, bool persistSession)
     {
         // Refused by Run() (CheckPreconditions): already finalized, nothing to show.
         if (!PreconditionsMet)
             return;
 
         AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;
-        AutoSaveChatMessagesOnViewExit = autoSaveChatMessagesOnViewExit;
+        PersistSession = persistSession;
         AIAssistantView.ShowView();
     }
 
@@ -310,46 +321,19 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _streamingResult.Clear();
         _totalTokens = 0;
         _totalProcessingTime = TimeSpan.Zero;
+
+        _session = new AiChatSessionDto();
+        SessionPendingSave = false;
     }
 
     public async Task GetCompletionAsync(string prompt)
     {
-        Stopwatch stopwatch = new();
-
-        stopwatch.Start();
-
-        _chatMessages.Add(new ChatMessage(ChatRole.User, prompt));
-
-        ChatResponse response;
-        try
-        {
-            // Streamed and put together here rather than one GetResponseAsync call: the answer then comes in
-            // as it is written, so a long one can't run into the HTTP timeout of a single response (10 minutes
-            // in the Anthropic SDK). It is still shown all at once.
-            response = await _chatClient.GetStreamingResponseAsync(_chatMessages).ToChatResponseAsync();
-        }
-        catch
-        {
-            // Roll back the unanswered turn so a retry (or a provider/model switch) doesn't send
-            // an orphaned user message with no matching assistant reply.
-            _chatMessages.RemoveAt(_chatMessages.Count - 1);
-            throw;
-        }
-
-        _chatMessages.Add(new ChatMessage(ChatRole.Assistant, response.Text));
-
-        _prompt = prompt;
-        _result = response.Text.Replace("\n", "\r\n");
-        _totalTokens += (int)(response.Usage?.TotalTokenCount ?? 0);
-        _totalProcessingTime += stopwatch.Elapsed;
-
-        _chatTurns.Add(new AiChatTurn(prompt, _result, _currentProviderRef?.Alias, stopwatch.Elapsed)
-        {
-            InputTokens = response.Usage?.InputTokenCount,
-            OutputTokens = response.Usage?.OutputTokenCount,
-            TotalTokens = response.Usage?.TotalTokenCount ?? 0,
-            Truncated = response.FinishReason == ChatFinishReason.Length
-        });
+        // Streamed and put together (RunTurnAsync) rather than one GetResponseAsync call: the answer then comes
+        // in as it is written, so a long one can't run into the HTTP timeout of a single response (10 minutes in
+        // the Anthropic SDK). It is still shown all at once.
+        var turn = await RunTurnAsync(prompt, null);
+        turn.Answer = turn.Answer.Replace("\n", "\r\n");
+        AddTurn(turn);
 
         _chatTextMessages.Append($"\r\n");
         _chatTextMessages.Append($"**User:** \r\n");
@@ -358,12 +342,14 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _chatTextMessages.Append($"**Assistant:** \r\n");
         _chatTextMessages.Append(_result);
         _chatTextMessages.Append($"\r\n\r\n\r\n");
-        _chatTextMessages.Append($"(Tokens: {response.Usage?.InputTokenCount ?? 0} tokens.\r\n");
-        _chatTextMessages.Append($"(Tokens: {response.Usage?.OutputTokenCount ?? 0} tokens.\r\n");
-        _chatTextMessages.Append($"(Tokens: {response.Usage?.TotalTokenCount ?? 0} tokens.\r\n");
-        _chatTextMessages.Append($"(Processing time: {stopwatch.Elapsed})\r\n");
+        _chatTextMessages.Append($"(Tokens: {turn.InputTokens ?? 0} tokens.\r\n");
+        _chatTextMessages.Append($"(Tokens: {turn.OutputTokens ?? 0} tokens.\r\n");
+        _chatTextMessages.Append($"(Tokens: {turn.TotalTokens} tokens.\r\n");
+        _chatTextMessages.Append($"(Processing time: {turn.ProcessingTime})\r\n");
         _chatTextMessages.Append($"\r\n");
         _chatTextMessages.Append($"\r\n");
+
+        await SaveAnsweredTurnAsync();
     }
 
     // --------------------------------------------------------------------------
@@ -382,63 +368,212 @@ public class KNoteAIAssistantCtrl : CtrlBase
         // Cleared before the first await, so a view repainting StreamingResult never shows the previous answer.
         StringBuilder resAssistant = _streamingResult;
         resAssistant.Clear();
-        Stopwatch stopwatch = new();
-        ChatFinishReason? finishReason = null;
-
-        stopwatch.Start();
 
         var intro = $"**User:** \r\n{prompt}\r\n\r\n**Assistant:** \r\n";
         _chatTextMessages.Append(intro);
         StreamToken?.Invoke(this, new ControllerEventArgs<string>(intro));
 
-        _chatMessages.Add(new ChatMessage(ChatRole.User, prompt));
-
+        AiChatTurnDto turn;
         try
         {
-            await foreach (ChatResponseUpdate update in _chatClient.GetStreamingResponseAsync(_chatMessages))
+            turn = await RunTurnAsync(prompt, text =>
             {
-                // The last one given: the intermediate steps of a tool call carry their own.
-                finishReason = update.FinishReason ?? finishReason;
-                var res = update.Text?.Replace("\n", "\r\n");
-                if (string.IsNullOrEmpty(res))
-                    continue;
+                var res = text.Replace("\n", "\r\n");
                 resAssistant.Append(res);
                 StreamToken?.Invoke(this, new ControllerEventArgs<string>(res));
-            }
+            });
         }
         catch
         {
-            // Roll back the unanswered turn - both the message sent to the provider and the
-            // transcript's dangling intro - so a retry doesn't pile up orphaned turns. Whatever
-            // partial text already reached the view via StreamToken is left as-is; only the
-            // canonical history (resent to the provider, and persisted on save) is rolled back.
-            _chatMessages.RemoveAt(_chatMessages.Count - 1);
+            // Roll back the transcript's dangling intro, so a retry doesn't pile up orphaned turns. Whatever
+            // partial text already reached the view via StreamToken is left as-is; the turn itself (resent to the
+            // provider, and persisted) is only added once answered.
             _chatTextMessages.Length -= intro.Length;
             throw;
         }
 
-        stopwatch.Stop();
-
-        _chatMessages.Add(new ChatMessage(ChatRole.Assistant, resAssistant.ToString()));
-        _prompt = prompt;
-        _result = resAssistant.ToString();
-        var estimatedTokens = (prompt.Length + resAssistant.Length) / 4;    // TODO: hack, refactor this
-        _totalTokens += estimatedTokens;
-        _totalProcessingTime += stopwatch.Elapsed;
-        _chatTurns.Add(new AiChatTurn(prompt, _result, _currentProviderRef?.Alias, stopwatch.Elapsed)
-        {
-            TotalTokens = estimatedTokens,
-            TokensEstimated = true,
-            Truncated = finishReason == ChatFinishReason.Length
-        });
+        turn.Answer = resAssistant.ToString();
+        AddTurn(turn);
         _chatTextMessages.Append(resAssistant.ToString());
         _chatTextMessages.Append($"\r\n\r\n");
 
         StreamToken?.Invoke(this, new ControllerEventArgs<string>($"\r\n\r\n"));
+
+        await SaveAnsweredTurnAsync();
     }
+
+    // One turn, the same as the Web assistant (KNote.Ai's AiChatTurnStreamer): the system prompt and the turns so
+    // far are sent with the prompt, and the answer comes back piece by piece (onText) and then whole, with its
+    // usage. Nothing is added to the conversation here: an unanswered prompt (the provider failed) leaves no
+    // orphaned user message behind to be resent with the next one.
+    private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText)
+    {
+        var history = _chatTurns.Select(t => t.ToDto()).ToList();
+        AiChatTurnDto completed = null;
+
+        await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, RootSystemChat, history, prompt))
+        {
+            if (e.Type == AiChatStreamEventTypes.Delta)
+                onText?.Invoke(e.Text);
+            else if (e.Type == AiChatStreamEventTypes.Completed)
+                completed = e.Turn;
+        }
+
+        return completed ?? throw new InvalidOperationException("The AI provider ended the answer unexpectedly.");
+    }
+
+    // An answered turn joins the conversation: the messages kept for scripts (ChatMessages), the turns of the
+    // views and of the session, and the totals.
+    private void AddTurn(AiChatTurnDto turn)
+    {
+        _chatMessages.Add(new ChatMessage(ChatRole.User, turn.Prompt));
+        _chatMessages.Add(new ChatMessage(ChatRole.Assistant, turn.Answer));
+        _chatTurns.Add(AiChatTurn.FromDto(turn, _currentProviderRef?.Alias));
+
+        _prompt = turn.Prompt;
+        _result = turn.Answer;
+        _totalTokens += (int)turn.TotalTokens;
+        _totalProcessingTime += turn.ProcessingTime;
+    }
+
+    #region Sessions
+
+    // The user's sessions in ServiceRef, most recently modified first (empty when they can't be read).
+    public async Task<List<AiChatSessionInfoDto>> GetSessionsAsync()
+    {
+        try
+        {
+            var res = await ServiceRef.Service.AiSessions.GetUserSessionsAsync();
+            if (res.IsValid)
+                return res.Entity ?? new List<AiChatSessionInfoDto>();
+            AIAssistantView.ShowInfo($"The AI sessions could not be read: {res.ErrorMessage}");
+        }
+        catch (Exception ex)
+        {
+            AIAssistantView.ShowInfo($"The AI sessions could not be read: {ex.Message}");
+        }
+        return new List<AiChatSessionInfoDto>();
+    }
+
+    // Saves the session if it has something unsaved (SessionPendingSave). False if that failed.
+    public async Task<bool> SaveSessionAsync()
+    {
+        if (!SessionPendingSave || _chatTurns.Count == 0)
+            return true;
+
+        try
+        {
+            // The session is held with the provider of its last answer (see AiProviderSelection).
+            _session.Provider = _currentProviderRef?.Provider;
+            _session.Model = _currentProviderRef?.Model;
+            _session.Turns = _chatTurns.Select(t => t.ToDto()).ToList();
+
+            var res = await ServiceRef.Service.AiSessions.SaveAsync(_session);
+            if (res.IsValid)
+            {
+                _session.NoteId = res.Entity.NoteId;
+                _session.NoteNumber = res.Entity.NoteNumber;
+                _session.Topic = res.Entity.Topic;
+                _session.CreationDateTime = res.Entity.CreationDateTime;
+                _session.ModificationDateTime = res.Entity.ModificationDateTime;
+                SessionPendingSave = false;
+                return true;
+            }
+            AIAssistantView.ShowInfo($"The AI session could not be saved: {res.ErrorMessage}");
+        }
+        catch (Exception ex)
+        {
+            AIAssistantView.ShowInfo($"The AI session could not be saved: {ex.Message}");
+        }
+        return false;
+    }
+
+    // Before leaving the conversation (a new one, another session, another provider): saved if it has something
+    // unsaved; when that fails, the user decides whether to discard it. False to stay in it.
+    public async Task<bool> LeaveSessionAsync()
+    {
+        if (!PersistSession || await SaveSessionAsync())
+            return true;
+
+        return AIAssistantView.ShowInfo("The conversation could not be saved. Do you want to discard its last messages?",
+            "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes;
+    }
+
+    // Starts a new conversation, with the default system prompt. False if the current one is kept.
+    public async Task<bool> NewSessionAsync()
+    {
+        if (!await LeaveSessionAsync())
+            return false;
+
+        RootSystemChat = KntConst.DefaultRootSystemChat;
+        RestartAIAssistant();
+        return true;
+    }
+
+    // Resumes a saved session, with its provider and model or, when they are no longer configured, with the
+    // preferred one. False if it couldn't be opened (or the current conversation is kept).
+    public async Task<bool> OpenSessionAsync(Guid noteId)
+    {
+        if (noteId == _session.NoteId || !await LeaveSessionAsync())
+            return false;
+
+        Result<AiChatSessionDto> res;
+        try
+        {
+            res = await ServiceRef.Service.AiSessions.GetAsync(noteId);
+        }
+        catch (Exception ex)
+        {
+            AIAssistantView.ShowInfo($"The AI session could not be opened: {ex.Message}");
+            return false;
+        }
+        if (!res.IsValid)
+        {
+            AIAssistantView.ShowInfo($"The AI session could not be opened: {res.ErrorMessage}");
+            return false;
+        }
+
+        var session = res.Entity;
+        var providerRef = AiProviderSelection.ForSession(AiProviderRefs, session.Provider, session.Model);
+        if (providerRef == null)
+        {
+            providerRef = GetPreferredProvider();
+            if (providerRef == null)
+                return false;
+            AIAssistantView.ShowInfo($"{session.Provider} {session.Model}, the model of this session, is no longer configured: " +
+                $"it continues with {providerRef.Alias}.");
+        }
+
+        RootSystemChat = KntConst.DefaultRootSystemChat;
+        ApplyProvider(providerRef);
+
+        foreach (var turn in session.Turns)
+        {
+            AddTurn(turn);
+            _chatTextMessages.Append($"**User:** \r\n{turn.Prompt}\r\n\r\n**Assistant:** \r\n{turn.Answer}\r\n\r\n");
+        }
+        _session = session;
+        _session.Turns = new List<AiChatTurnDto>();
+        return true;
+    }
+
+    // After each answer, when the conversation is persisted.
+    private async Task SaveAnsweredTurnAsync()
+    {
+        if (!PersistSession)
+            return;
+
+        SessionPendingSave = true;
+        await SaveSessionAsync();
+    }
+
+    #endregion
 
     public async Task<KntAssistantInfo> GetCatalogPrompt()
     {
+        if (!await LeaveSessionAsync())
+            return null;
+
         var assistantServiceRef = Store.GetAssistantServiceRef() ?? ServiceRef;
         var catalogItem = await Store.GetCatalogItem(assistantServiceRef, KntConst.PromptTag, "Select prompt");
 

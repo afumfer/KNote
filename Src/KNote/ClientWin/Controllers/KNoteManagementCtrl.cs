@@ -1012,7 +1012,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     {
         var kNoteAIAssistantCtrl = new KNoteAIAssistantCtrl(Store);
         kNoteAIAssistantCtrl.Run();
-        kNoteAIAssistantCtrl.ShowAIAssistantView(true, true);
+        kNoteAIAssistantCtrl.ShowAIAssistantView(autoCloseCtrlOnViewExit: true, persistSession: true);
     }
 
     // KNoteAIAssistant plan (Phase 4): maintenance screen for the AI provider/model collection

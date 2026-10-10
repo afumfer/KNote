@@ -36,13 +36,17 @@ namespace KNote.ClientWin.Views
             toolStripStatusLabelProcessingTime = new ToolStripStatusLabel();
             toolStripStatusLabel2 = new ToolStripStatusLabel();
             toolStripStatusLabelProcessing = new ToolStripStatusLabel();
+            splitSessions = new SplitContainer();
             splitChat = new SplitContainer();
+            panelSessionsHeader = new Panel();
+            labelSessions = new Label();
+            listViewSessions = new ListView();
             buttonNavigate = new Button();
             buttonMarkDown = new Button();
             kntEditViewResult = new KntWebView.KntEditView();
             labelResult = new Label();
             panelSeparator = new Panel();
-            buttonRestart = new Button();
+            buttonNewSession = new Button();
             labelPrompt = new Label();
             comboProviders = new ComboBox();
             textPrompt = new TextBox();
@@ -52,7 +56,7 @@ namespace KNote.ClientWin.Views
             menuAssistant = new MenuStrip();
             menuActions = new ToolStripMenuItem();
             menuSend = new ToolStripMenuItem();
-            menuRestart = new ToolStripMenuItem();
+            menuNewSession = new ToolStripMenuItem();
             menuActionsSeparator1 = new ToolStripSeparator();
             menuModel = new ToolStripMenuItem();
             menuActionsSeparator2 = new ToolStripSeparator();
@@ -69,6 +73,11 @@ namespace KNote.ClientWin.Views
             menuOptionsSeparator3 = new ToolStripSeparator();
             menuManageModels = new ToolStripMenuItem();
             statusStripChat.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitSessions).BeginInit();
+            splitSessions.Panel1.SuspendLayout();
+            splitSessions.Panel2.SuspendLayout();
+            splitSessions.SuspendLayout();
+            panelSessionsHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitChat).BeginInit();
             splitChat.Panel1.SuspendLayout();
             splitChat.Panel2.SuspendLayout();
@@ -124,6 +133,60 @@ namespace KNote.ClientWin.Views
             toolStripStatusLabelProcessing.Name = "toolStripStatusLabelProcessing";
             toolStripStatusLabelProcessing.Size = new Size(0, 17);
             //
+            // splitSessions
+            //
+            splitSessions.Dock = DockStyle.Fill;
+            splitSessions.FixedPanel = FixedPanel.Panel2;
+            splitSessions.Location = new Point(0, 0);
+            splitSessions.Name = "splitSessions";
+            //
+            // splitSessions.Panel1
+            //
+            splitSessions.Panel1.Controls.Add(splitChat);
+            splitSessions.Panel1MinSize = 560;
+            //
+            // splitSessions.Panel2
+            //
+            splitSessions.Panel2.Controls.Add(listViewSessions);
+            splitSessions.Panel2.Controls.Add(panelSessionsHeader);
+            splitSessions.Panel2.Padding = new Padding(4);
+            splitSessions.Panel2MinSize = 160;
+            splitSessions.Size = new Size(1100, 601);
+            splitSessions.SplitterDistance = 840;
+            splitSessions.SplitterWidth = 6;
+            splitSessions.TabIndex = 0;
+            //
+            // panelSessionsHeader
+            //
+            panelSessionsHeader.Controls.Add(labelSessions);
+            panelSessionsHeader.Dock = DockStyle.Top;
+            panelSessionsHeader.Location = new Point(4, 4);
+            panelSessionsHeader.Name = "panelSessionsHeader";
+            panelSessionsHeader.Size = new Size(246, 34);
+            panelSessionsHeader.TabIndex = 0;
+            //
+            // labelSessions
+            //
+            labelSessions.AutoSize = true;
+            labelSessions.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelSessions.Location = new Point(4, 12);
+            labelSessions.Name = "labelSessions";
+            labelSessions.Size = new Size(59, 17);
+            labelSessions.TabIndex = 0;
+            labelSessions.Text = "Sessions:";
+            //
+            // listViewSessions
+            //
+            listViewSessions.Dock = DockStyle.Fill;
+            listViewSessions.HideSelection = false;
+            listViewSessions.Location = new Point(4, 38);
+            listViewSessions.MultiSelect = false;
+            listViewSessions.Name = "listViewSessions";
+            listViewSessions.Size = new Size(246, 559);
+            listViewSessions.TabIndex = 1;
+            listViewSessions.UseCompatibleStateImageBehavior = false;
+            listViewSessions.ItemSelectionChanged += listViewSessions_ItemSelectionChanged;
+            //
             // splitChat
             //
             splitChat.Dock = DockStyle.Fill;
@@ -146,7 +209,7 @@ namespace KNote.ClientWin.Views
             splitChat.Panel2.Padding = new Padding(4);
             splitChat.Panel2.TabIndex = 0;
             splitChat.Panel2MinSize = 50;
-            splitChat.Size = new Size(858, 601);
+            splitChat.Size = new Size(840, 601);
             splitChat.SplitterDistance = 409;
             splitChat.SplitterWidth = 6;
             splitChat.TabIndex = 0;
@@ -165,10 +228,10 @@ namespace KNote.ClientWin.Views
             // buttonNavigate
             //
             buttonNavigate.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonNavigate.Location = new Point(753, 4);
+            buttonNavigate.Location = new Point(650, 4);
             buttonNavigate.Name = "buttonNavigate";
             buttonNavigate.Size = new Size(98, 26);
-            buttonNavigate.TabIndex = 4;
+            buttonNavigate.TabIndex = 3;
             buttonNavigate.Text = "Navigate";
             buttonNavigate.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonNavigate.UseVisualStyleBackColor = true;
@@ -177,10 +240,10 @@ namespace KNote.ClientWin.Views
             // buttonMarkDown
             //
             buttonMarkDown.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            buttonMarkDown.Location = new Point(650, 4);
+            buttonMarkDown.Location = new Point(753, 4);
             buttonMarkDown.Name = "buttonMarkDown";
             buttonMarkDown.Size = new Size(98, 26);
-            buttonMarkDown.TabIndex = 3;
+            buttonMarkDown.TabIndex = 4;
             buttonMarkDown.Text = "Markdown";
             buttonMarkDown.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonMarkDown.UseVisualStyleBackColor = true;
@@ -210,7 +273,7 @@ namespace KNote.ClientWin.Views
             panelPromptHeader.Controls.Add(labelPrompt);
             panelPromptHeader.Controls.Add(comboProviders);
             panelPromptHeader.Controls.Add(buttonSend);
-            panelPromptHeader.Controls.Add(buttonRestart);
+            panelPromptHeader.Controls.Add(buttonNewSession);
             panelPromptHeader.Controls.Add(panelSeparator);
             panelPromptHeader.Dock = DockStyle.Top;
             panelPromptHeader.Location = new Point(0, 0);
@@ -226,17 +289,17 @@ namespace KNote.ClientWin.Views
             panelSeparator.Size = new Size(3, 25);
             panelSeparator.TabIndex = 3;
             //
-            // buttonRestart
+            // buttonNewSession
             //
-            buttonRestart.Font = new Font("Segoe UI", 8.25F);
-            buttonRestart.Location = new Point(224, 4);
-            buttonRestart.Name = "buttonRestart";
-            buttonRestart.Size = new Size(78, 26);
-            buttonRestart.TabIndex = 2;
-            buttonRestart.Text = "&Restart";
-            buttonRestart.TextImageRelation = TextImageRelation.ImageBeforeText;
-            buttonRestart.UseVisualStyleBackColor = true;
-            buttonRestart.Click += buttonRestart_Click;
+            buttonNewSession.Font = new Font("Segoe UI", 8.25F);
+            buttonNewSession.Location = new Point(224, 4);
+            buttonNewSession.Name = "buttonNewSession";
+            buttonNewSession.Size = new Size(104, 26);
+            buttonNewSession.TabIndex = 2;
+            buttonNewSession.Text = "N&ew session";
+            buttonNewSession.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonNewSession.UseVisualStyleBackColor = true;
+            buttonNewSession.Click += buttonNewSession_Click;
             //
             // labelPrompt
             //
@@ -295,7 +358,7 @@ namespace KNote.ClientWin.Views
             //
             // menuActions
             //
-            menuActions.DropDownItems.AddRange(new ToolStripItem[] { menuSend, menuRestart, menuActionsSeparator1, menuModel, menuActionsSeparator2, menuNavigateView, menuMarkdownView });
+            menuActions.DropDownItems.AddRange(new ToolStripItem[] { menuSend, menuNewSession, menuActionsSeparator1, menuModel, menuActionsSeparator2, menuNavigateView, menuMarkdownView });
             menuActions.Name = "menuActions";
             menuActions.Size = new Size(59, 20);
             menuActions.Text = "&Actions";
@@ -308,12 +371,12 @@ namespace KNote.ClientWin.Views
             menuSend.Text = "&Send";
             menuSend.Click += buttonSend_Click;
             //
-            // menuRestart
+            // menuNewSession
             //
-            menuRestart.Name = "menuRestart";
-            menuRestart.Size = new Size(200, 22);
-            menuRestart.Text = "&Restart";
-            menuRestart.Click += buttonRestart_Click;
+            menuNewSession.Name = "menuNewSession";
+            menuNewSession.Size = new Size(200, 22);
+            menuNewSession.Text = "N&ew session";
+            menuNewSession.Click += buttonNewSession_Click;
             //
             // menuActionsSeparator1
             //
@@ -415,9 +478,9 @@ namespace KNote.ClientWin.Views
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(858, 623);
+            ClientSize = new Size(1100, 623);
             MinimumSize = new Size(820, 480);
-            Controls.Add(splitChat);
+            Controls.Add(splitSessions);
             Controls.Add(statusStripChat);
             Controls.Add(menuAssistant);
             MainMenuStrip = menuAssistant;
@@ -428,6 +491,12 @@ namespace KNote.ClientWin.Views
             Load += KNoteAIAssistantForm_Load;
             statusStripChat.ResumeLayout(false);
             statusStripChat.PerformLayout();
+            splitSessions.Panel1.ResumeLayout(false);
+            splitSessions.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitSessions).EndInit();
+            splitSessions.ResumeLayout(false);
+            panelSessionsHeader.ResumeLayout(false);
+            panelSessionsHeader.PerformLayout();
             splitChat.Panel1.ResumeLayout(false);
             splitChat.Panel1.PerformLayout();
             splitChat.Panel2.ResumeLayout(false);
@@ -450,9 +519,13 @@ namespace KNote.ClientWin.Views
         private ToolStripStatusLabel toolStripStatusLabelProcessing;
         private ToolStripStatusLabel toolStripStatusLabelProcessingTime;
         private ToolStripStatusLabel toolStripStatusLabel1;
+        private SplitContainer splitSessions;
         private SplitContainer splitChat;
+        private Panel panelSessionsHeader;
+        private Label labelSessions;
+        private ListView listViewSessions;
         private Label labelResult;
-        private Button buttonRestart;
+        private Button buttonNewSession;
         private Label labelPrompt;
         private ComboBox comboProviders;
         private TextBox textPrompt;
@@ -468,7 +541,7 @@ namespace KNote.ClientWin.Views
         private MenuStrip menuAssistant;
         private ToolStripMenuItem menuActions;
         private ToolStripMenuItem menuSend;
-        private ToolStripMenuItem menuRestart;
+        private ToolStripMenuItem menuNewSession;
         private ToolStripSeparator menuActionsSeparator1;
         private ToolStripMenuItem menuModel;
         private ToolStripSeparator menuActionsSeparator2;

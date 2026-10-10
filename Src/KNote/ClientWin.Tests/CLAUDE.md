@@ -93,6 +93,12 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
   `KNoteAIAssistantCtrl.SetChatClientForTesting(chatClient, providerRef)` — un seam `internal` que
   bypassa `AiChatClientFactory` — habilitado por
   `[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]` en `ClientWin/Properties/AssemblyInfo.cs`.
+- `KNoteAIAssistantCtrlSessionTests.cs` — las sesiones del asistente: con `PersistSession` apagado no se guarda
+  nada; encendido, cada respuesta guarda la sesión (con sus turnos y su proveedor); un guardado fallido se
+  reintenta antes de dejarla y el usuario decide si la descarta; retomar una sesión usa su proveedor o, si ya no
+  está configurado, el preferido. Usa `Fakes/FakeKntAiSessionService` (vía `FakeKntService.AiSessionsFake`, con
+  el `ServiceRef` de `TestServiceRefFactory.CreateWithFakeService` añadido al `Store`) y `FakeAIAssistantView`
+  para las preguntas al usuario (`NextShowInfoResult`).
 
 Corren con cualquier `dotnet test`, sin configuración adicional:
 ```powershell

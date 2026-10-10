@@ -136,39 +136,12 @@ public class AiChatHtmlTests
     }
 
     [TestMethod]
-    public void Transcript_WithModelInfo_HasEachTurnAndItsUsage()
-    {
-        var text = AiChatTranscript.Markdown(new[] { Turn("First", "One"), Turn("Second", "Two") }, includeModelInfo: true);
-
-        Assert.AreEqual(
-            "**User:** \r\nFirst\r\n\r\n**Assistant:** \r\nOne\r\n\r\n*(3 in · 2 out · 5 tokens · 1.2 s)*\r\n\r\n" +
-            "**User:** \r\nSecond\r\n\r\n**Assistant:** \r\nTwo\r\n\r\n*(3 in · 2 out · 5 tokens · 1.2 s)*\r\n\r\n",
-            text);
-    }
-
-    [TestMethod]
     public void AssistantMessage_TruncatedAnswer_ShowsTheNoticeApartFromTheModelInfo()
     {
         var html = AiChatHtml.AssistantMessage(Turn("q", "Once upon a") with { Truncated = true });
 
         StringAssert.Contains(html, $"<div class=\"notice\">{WebUtility.HtmlEncode(AiChatTurn.TruncatedNotice)}</div>");
         Assert.IsFalse(AiChatHtml.AssistantMessage(Turn("q", "The end.")).Contains("class=\"notice\""));
-    }
-
-    [TestMethod]
-    public void Transcript_TruncatedAnswer_KeepsTheNoticeWithoutModelInfo()
-    {
-        var text = AiChatTranscript.Markdown(new[] { Turn("First", "One") with { Truncated = true } }, includeModelInfo: false);
-
-        Assert.AreEqual($"**User:** \r\nFirst\r\n\r\n**Assistant:** \r\nOne\r\n\r\n*({AiChatTurn.TruncatedNotice})*\r\n\r\n", text);
-    }
-
-    [TestMethod]
-    public void Transcript_WithoutModelInfo_HasNoUsage()
-    {
-        var text = AiChatTranscript.Markdown(new[] { Turn("First", "One") }, includeModelInfo: false);
-
-        Assert.AreEqual("**User:** \r\nFirst\r\n\r\n**Assistant:** \r\nOne\r\n\r\n", text);
     }
 
     [TestMethod]
