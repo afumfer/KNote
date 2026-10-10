@@ -94,16 +94,18 @@ The save dialogs (PDF and CSV) start in the folder where you last saved one of t
 
 ### AI assistant (desktop app)
 
-The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. The list next to **Restart** chooses the AI model that answers.
+The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. The list next to **New session** chooses the AI model that answers. On the right, the **Sessions** panel lists your previous conversations (see *AI assistant sessions* below).
+
+The assistant can also work with your notes: ask it to look for notes about something, to tell you what a note says, or to note down a task, and it uses the notes of the repository you are working in. A task it creates is saved in your default folder and opened in the note editor, where you can change it, keep it or delete it. The assistant's own sessions are left out when it searches your notes.
 
 The conversation can be seen in two ways, chosen with the buttons above it:
 
 | Button | View |
 |---|---|
 | **Navigate** | As a chat (the default): your questions on the right, in a bubble, and each answer below with its text formatted (headings, lists, tables, code) and, at its foot, the tokens and the time it took. Links of an answer open in your web browser. |
-| **Markdown** | The text of the conversation, as it is saved when you keep it as a note. |
+| **Markdown** | The text of the conversation exactly as it is saved in its session note. Each question and answer is preceded by a hidden marker (`<!-- knt-ai:user -->`, `<!-- knt-ai:assistant {...} -->`) that note viewers don't show; the marker of an answer holds its tokens and time. |
 
-The **Actions** menu repeats what the buttons and the list do: **Send** (`Ctrl+Enter`), **Restart**, **Model** (the same models as the list), **Navigate view** and **Markdown view**. Its options are available exactly when their button is.
+The **Actions** menu repeats what the buttons and the list do: **Send** (`Ctrl+Enter`), **New session**, **Model** (the same models as the list), **Navigate view** and **Markdown view**. Its options are available exactly when their button is.
 
 The **Options** menu has the rest:
 
@@ -112,9 +114,65 @@ The **Options** menu has the rest:
 | **Get stream** / **Get completion** | How answers arrive: as they are being written (the default) or all at once when they are complete. |
 | **Get prompt from catalog ...** (`Ctrl+K`) | Starts a new conversation from a prompt of the catalog. |
 | **View system root ...** | Shows the instructions the model receives before the conversation. |
-| **Show model info (tokens, time)** | Shows or hides, below each answer, the tokens and the time it took, in both views and in the note when the conversation is saved. |
+| **Show model info (tokens, time)** | Shows or hides, below each answer of the chat view, the tokens and the time it took. The Markdown view always has them, in the marker of each answer. |
 | **Manage models ...** | Adds, changes or removes the AI models (providers) you can choose. |
 
-Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. If an answer reaches the maximum length a model can write in one answer, it ends with a notice saying it was cut (shown even with **Show model info** off): ask the assistant to continue. **Restart**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation.
+Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. The tokens are the ones reported by the AI provider; when a provider doesn't report them, they are estimated (the chat says so). If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. If an answer reaches the maximum length a model can write in one answer, the chat view ends it with a notice saying it was cut (shown even with **Show model info** off): ask the assistant to continue. **New session**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation; the current one is already saved.
+
+### AI assistant sessions
+
+Every conversation with the AI assistant is kept as a **session**, so you can come back to it later, in the desktop app or in the web app: both use the same sessions.
+
+**Where they are kept.** Each session is a note of the repository you are working in, of the note type **`@ChatSessions`**, in the folder **AI Assistant sessions**. The note's topic is the first line of your first question, its description is the conversation (as the Markdown view shows it), its attributes **AiProvider** and **AiModel** say which AI model answered, and a task assigned to you, starting when the session began, links it to you. The note type, its two attributes and the folder are created the first time you open the assistant in a repository that doesn't have them.
+
+**When they are saved.** After every answer. If saving fails, KaNote tries again before you leave the conversation (a new session, another session, another provider, closing the window) and, if it still can't, asks you whether to discard its last messages.
+
+**Going back to a session.** The **Sessions** panel lists your sessions, the most recent first; choose one to see it again and go on with it. It continues with the AI model it was held with; if that model is no longer configured, it continues with your default one and KaNote tells you so. The panel only lists your own sessions, and only you can open or continue them from the assistant.
+
+**Privacy.** Sessions are ordinary notes: anybody who can browse the **AI Assistant sessions** folder of a shared repository can open them as any other note. Don't write in a conversation anything you wouldn't write in a note of that repository.
+
+**Desktop app.** Sessions are kept only when you open the assistant from the menu. When a KntScript script or a note's natural-language code (`ln`) uses the assistant, nothing is saved (a script can turn it on with `PersistSession = true`). The **Sessions** panel is hidden then.
+
+### AI Assistant (web app)
+
+**AI Assistant** in the side menu (Staff role or higher) opens the web version of the assistant. Its header shows the tokens of the conversation, the list of AI models (configured in the server, see below) and the **New conversation** button; the **Sessions** panel on the right lists your sessions, as in the desktop app (see *AI assistant sessions*).
+
+Write a question in the box at the bottom and click the send button (or press `Ctrl+Enter`). The answer appears as it is written; while it arrives you can stop it with the stop button, and then the question goes back to the box. An answer that fails or that you stop is not part of the conversation and is not saved.
+
+The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KaNote tells you, and the chat shows a link that opens it in a new tab.
+
+Changing the AI model of a conversation that has already started begins a new conversation (KaNote asks first). For your safety, any HTML that an answer contains is shown as text, never as part of the page.
+
+### AI providers of the web app (server configuration)
+
+The AI models offered by the web app are configured in the server, in the `ai` section of `appsettings.json`, with the same fields as the AI providers of the desktop app:
+
+```json
+"ai": {
+  "providers": [
+    { "alias": "OpenAI gpt-4o-mini", "provider": "OpenAI", "model": "gpt-4o-mini", "apiKey": "" },
+    { "alias": "Anthropic Claude Haiku 4.5", "provider": "Anthropic", "model": "claude-haiku-4-5", "apiKey": "" },
+    { "alias": "Ollama llama3.1", "provider": "Ollama", "model": "llama3.1", "host": "http://localhost:11434" }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `alias` | The name shown in the list. |
+| `provider` | `OpenAI`, `Anthropic` or `Ollama`. |
+| `model` | The model of that provider. |
+| `apiKey` | The API key (OpenAI and Anthropic). Leave it empty in `appsettings.json`: see below. |
+| `host` | The address of the Ollama server (Ollama only). |
+
+The first valid provider is the default one. A provider whose configuration is not valid is left out (the server log says why).
+
+**API keys.** Never write them in `appsettings.json`. In development, keep them in the server's user secrets, by the position of the provider in the list (`ai:providers:0:apiKey`, `ai:providers:1:apiKey`...):
+
+```powershell
+dotnet user-secrets set "ai:providers:0:apiKey" "sk-..." --project Server/KNote.Server.csproj
+```
+
+In a server, use environment variables (`ai__providers__0__apiKey`) or your hosting's secret store. If a key is empty, the server uses the `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable. The keys never reach the browser: the web app only receives the alias, provider and model of each one.
 
 TODO: ...
