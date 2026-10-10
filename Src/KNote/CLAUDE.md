@@ -14,7 +14,7 @@ detrás de dos implementaciones de repositorio intercambiables (Dapper, Entity F
 No hay un único `.sln` en la raíz; hay varios `.slnx` ("VS solution XML"), cada uno cubriendo una parte
 distinta del código:
 
-- `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `Repository*`, `ClientWin`, `Client`,
+- `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `KNote.Ai`, `Repository*`, `ClientWin`, `Client`,
   `KntScript`, `MessageBroker*`, `HtmlEditorControl`, `KntEditViewControl`, `KntIcons`. Úsalo para la mayoría del
   trabajo.
 - `KNoteTest.slnx` — solo `Model` + `Tests`, para ejecutar la suite de tests de integración de forma aislada.
@@ -55,7 +55,7 @@ llaves están permitidos y son habituales en este código.
 Hay dos suites de test independientes, en dos `.slnx` distintos, con propósitos distintos:
 
 - **`Tests/` (vía `KNoteTest.slnx`)** — backend (`Server`/`Model`/`Service`/`Repository*`).
-  `Tests/WebApiIntegrationTests/*.cs` (`ChatGPTTests`, `FoldersTests`, `KAttributesTests`, `NoteTypesTests`,
+  `Tests/WebApiIntegrationTests/*.cs` (`FoldersTests`, `KAttributesTests`, `NoteTypesTests`,
   `NotesTests`, `UsersTests`) son **tests de integración HTTP reales**, no tests unitarios.
   `Tests/Helpers/WebApiTestBase.cs` inicia sesión vía `POST {testsWebApiUrlBase}api/users/login` contra una
   instancia real de `Server` en ejecución y reutiliza el JWT en las siguientes peticiones. Configura
@@ -82,10 +82,11 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   ├─ MessageBroker
   │    └─ MessageBroker.RabbitMQ
   ├─ Service                          (→ Repository, Repository.Dapper, Repository.EntityFramework, MessageBroker*)
-  │    └─ ClientWin                   (→ también HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
+  │    ├─ KNote.Ai (carpeta Ai/)      (IChatClient por proveedor de IA, turno con streaming + tools sobre IKntService; todos los paquetes NuGet de IA)
+  │    └─ ClientWin                   (→ también KNote.Ai, HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
 
-Server → Client, Model, Service
+Server → Client, Model, Service, KNote.Ai
 KntEditViewControl → HtmlEditorControl, KntIcons
 HtmlEditorControl → KntIcons
 ```
@@ -93,6 +94,14 @@ HtmlEditorControl → KntIcons
 `KntScript` y `KntIcons` no tienen referencias a otros proyectos (son hojas). `KntIcons` dibuja los iconos de
 la UI WinForms (`ClientWin`, `HtmlEditorControl`, `KntEditViewControl`) a partir de una fuente vectorial para
 que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`.
+
+`KNote.Ai` es lo común del asistente de IA: `AiChatClientFactory.Create(AiProviderRef, tools)` construye el
+`IChatClient` de `Microsoft.Extensions.AI` para OpenAI (Responses API), Anthropic u Ollama, y `KNoteAiTools`
+expone a los modelos `search_notes`, `get_note_details` y `create_task` sobre la capa `Service`. Lo que
+`create_task` hace distinto en cada aplicación (dónde guarda la nota y cómo se la muestra al usuario) lo
+aporta un `IKNoteAiToolsHost` (el de `ClientWin` es `Core/KNoteAiToolsHost`). Las versiones de los paquetes de
+IA se suben solo aquí; tras subirlas, pasa los smoke tests `RequiresRealAiProvider` (ver
+`ClientWin.Tests/CLAUDE.md`).
 
 ### Patrón Repository (ORM intercambiable)
 
@@ -122,7 +131,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
 - `Service/Core` — clases base `KntService`/`IKntService` más `ServiceRef` (selección de repo/ORM, ver
   arriba).
 - `Service/Interfaces` + `Service/Services` — un par interfaz/implementación por objeto de dominio (Note,
-  Folder, KAttribute, NoteType, SystemValues, User).
+  Folder, KAttribute, NoteType, SystemValues, User, AiSession).
 - `Service/ServicesCommands` — clases de comando (`KntNoteCommands`, `KntFolderCommands`, etc.) construidas
   sobre `IPluginCommand`/`KntCommandServiceBase`. Exponen las operaciones de servicio a `KntScript`, el
   "lenguaje minimalista de automatización" mencionado en el README, invocado desde la consola de scripts de
@@ -141,6 +150,23 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   decide el rol del usuario nuevo (Admin mientras haya como mucho un Admin, Guest después); `CreateAsync` es
   el alta que hace un Admin, con el rol que elija. ClientWin añade encima la autorización de sus casos de
   uso (ver "Autenticación y autorización" en `ClientWin/CLAUDE.md`).
+- **Sesiones del asistente de IA** (`IKntService.AiSessions`, comandos en `KntAiSessionCommands.cs`, Staff).
+  Cada conversación es una nota del tipo `@ChatSessions` (`KntConst.ChatSessionsTag`) en la carpeta
+  `AI Assistant sessions`, con el proveedor y el modelo en los atributos `AiProvider`/`AiModel` del tipo y una
+  `NoteTask` del usuario (fecha de inicio = creación de la sesión) que la vincula a él; las sesiones de un
+  usuario se buscan con `NotesFilterDto.TaskUserId`. Todo pasa por los servicios de cada dominio (nunca por el
+  repositorio). Tipo, atributos y carpeta se crean la primera vez con sus propios comandos, que piden
+  Admin/ProjectManager: para que el asistente funcione con Staff, esa creación se hace dentro de un ámbito
+  `KntAuthorizationBypass` (`Service/Core`, `internal`, `AsyncLocal`, con motivo en el log), que solo omite la
+  comprobación de rol (no la validación, las reglas ni los eventos de los comandos) y solo mientras dura el
+  `using`. Úsalo solo así: dentro de un comando ya autorizado y para operaciones concretas. Solo el usuario de
+  la sesión puede leerla o guardarla. La conversación se guarda en `Description`
+  con `Model/Dto/AiChatSessionTranscript`: Markdown legible con un comentario HTML oculto por mensaje (el del
+  asistente lleva el uso en JSON), del que se recuperan los turnos (`AiChatTurnDto`) exactamente; es el
+  formato común de `ClientWin` y la Web, que se retoman las sesiones la una a la otra (con su proveedor y
+  modelo si siguen configurados: `AiProviderSelection.ForSession`). `search_notes` deja fuera estas notas
+  (`NotesSearchDto.ExcludeNoteTypeId`). Usos: `KNoteAIAssistantCtrl` (ver `ClientWin/CLAUDE.md`) y
+  `AiAssistantController` + página `AIAssistant` (ver `Server/CLAUDE.md` y `Client/CLAUDE.md`).
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 
@@ -160,8 +186,9 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 ### Server
 
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
-  `NoteTypesController`, `SystemValuesController`, `UsersController`, `ChatGPTController` (integración con
-  OpenAI), además del scaffold `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
+  `NoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
+  proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), además del scaffold
+  `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Hubs/ChatHub.cs` — hub de SignalR, mapeado en `/chathub`.
 - `Server` también sirve la app `Client` Blazor compilada

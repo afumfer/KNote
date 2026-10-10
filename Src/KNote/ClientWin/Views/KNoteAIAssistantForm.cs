@@ -2,6 +2,7 @@ using System.Text;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.ClientWin.Utils;
 using KntIcons;
 
@@ -18,6 +19,15 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     private int _countNRres;
     private StringBuilder _sbResult = new StringBuilder();
     private const string ViewCaptionText = "KNote AI Assistant";
+    // Designer widths of the window and of the sessions panel (logical units): without sessions the window
+    // keeps the width it had before the panel existed.
+    private const int DesignerClientWidth = 1100;
+    private const int WidthWithoutSessions = 858;
+    private const int SessionsPanelWidth = 254;
+    // The sessions list is being filled or its selection set from code: not the user choosing a session.
+    private bool _syncingSessions;
+    // An answer is being written (StatusProcessing).
+    private bool _processing;
 
     #endregion
 
@@ -28,11 +38,19 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         InitializeComponent();
 
         buttonSend.SetKntIcon(KntIcon.Send);
-        buttonRestart.SetKntIcon(KntIcon.Restart);
+        buttonNewSession.SetKntIcon(KntIcon.Restart);
         buttonMarkDown.SetKntIcon(KntIcon.Markdown);
         buttonNavigate.SetKntIcon(KntIcon.Navigate);
 
         _ctrl = ctrl;
+
+        ListViewStyle.ApplyStandard(listViewSessions);
+        listViewSessions.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+        listViewSessions.ShowItemToolTips = true;
+        listViewSessions.Columns.Add("Session", LogicalToDeviceUnits(140), HorizontalAlignment.Left);
+        listViewSessions.Columns.Add("Modified", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
+        ListViewColumnResizer.Attach(listViewSessions, 0);
+
         _menuShortcuts = MenuItems(menuAssistant.Items)
             .Where(item => item.ShortcutKeys != Keys.None)
             .ToDictionary(item => AiChatHtml.ShortcutText(item.ShortcutKeys));
@@ -44,7 +62,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         // The Actions menu repeats the buttons and the model list, running the same handlers: its items
         // follow their enabled state, which also keeps the shortcuts off while they are off.
         LinkMenuToControl(menuSend, buttonSend);
-        LinkMenuToControl(menuRestart, buttonRestart);
+        LinkMenuToControl(menuNewSession, buttonNewSession);
         LinkMenuToControl(menuModel, comboProviders);
         LinkMenuToControl(menuNavigateView, buttonNavigate);
         LinkMenuToControl(menuMarkdownView, buttonMarkDown);
@@ -64,10 +82,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     }
 
     private void AlignResultHeader() => AlignControlsRight(panelResultHeader, 8, 8,
-        buttonMarkDown, buttonNavigate);
+        buttonNavigate, buttonMarkDown);
 
     private void AlignPromptHeader() => AlignControlsRight(panelPromptHeader, 6, 6,
-        buttonSend, buttonRestart, panelSeparator, comboProviders);
+        buttonSend, buttonNewSession, panelSeparator, comboProviders);
 
     private static IEnumerable<ToolStripMenuItem> MenuItems(ToolStripItemCollection items)
         => items.OfType<ToolStripMenuItem>().SelectMany(item => MenuItems(item.DropDownItems).Prepend(item));
@@ -98,7 +116,26 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
         PopulateProviders();
         UpdateOptionsMenu();
+
+        // The sessions panel only when the conversation is persisted (the assistant opened from the menu).
+        if (_ctrl.PersistSession)
+            MinimumSize = new Size(MinimumSize.Width + LogicalToDeviceUnits(SessionsPanelWidth), MinimumSize.Height);
+        else
+        {
+            splitSessions.Panel2Collapsed = true;
+            ClientSize = new Size(ClientSize.Width - LogicalToDeviceUnits(DesignerClientWidth - WidthWithoutSessions), ClientSize.Height);
+        }
+
         this.Show();
+
+        if (_ctrl.PersistSession)
+        {
+            // In code: the Designer's SplitterDistance is not rescaled with the window (FixedPanel = Panel2).
+            splitSessions.SplitterDistance = Math.Max(splitSessions.Panel1MinSize,
+                splitSessions.Width - splitSessions.SplitterWidth - LogicalToDeviceUnits(SessionsPanelWidth));
+            LoadSessions();
+        }
+
         // The ctrl may already carry a completed conversation by the time the view is shown
         // (e.g. the "ln" script engine calls GetCompletionAsync before ever showing this view) -
         // sync the display to it instead of assuming a fresh, empty ctrl. After Show(): the chat
@@ -133,11 +170,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         if (!ViewFinalized)
         {
-            // From the ctrl, not the view: in the chat view the Markdown text box is not kept up to date.
-            if (_ctrl.AutoSaveChatMessagesOnViewExit && _ctrl.ChatTurns.Count > 0)
-            {
-                await SaveChatMessages();
-            }
+            // Saved after each answer: this only retries a save that failed.
+            if (_ctrl.PersistSession)
+                await _ctrl.SaveSessionAsync();
             if (_ctrl.AutoCloseCtrlOnViewExit)
                 _ctrl.Finalize();
         }
@@ -154,6 +189,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             else
                 await GoStreamCompletion(textPrompt.Text);
 
+            // The answer has just saved the session: a new one, or moved to the top of the list.
+            if (_ctrl.PersistSession)
+                await LoadSessionsAsync();
         }
         catch (Exception ex)
         {
@@ -165,12 +203,53 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         }
     }
 
-    private void buttonRestart_Click(object sender, EventArgs e)
+    // A new conversation (the current one is already saved, see KNoteAIAssistantCtrl.NewSessionAsync).
+    private async void buttonNewSession_Click(object sender, EventArgs e)
     {
-        _ctrl.RootSystemChat = KntConst.DefaultRootSystemChat;
-        _ctrl.RestartAIAssistant();
-        RestartAIAssistantView();
-        Text = $"{ViewCaptionText}";
+        try
+        {
+            if (!await _ctrl.NewSessionAsync())
+                return;
+
+            RestartAIAssistantView();
+            Text = $"{ViewCaptionText}";
+            SelectCurrentSession();
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
+    }
+
+    private async void listViewSessions_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+    {
+        if (_syncingSessions || !e.IsSelected || e.Item.Tag is not Guid noteId || noteId == _ctrl.SessionNoteId)
+            return;
+
+        // While an answer is being written: back to the session in the chat, once this selection change is over.
+        if (_processing)
+        {
+            BeginInvoke(SelectCurrentSession);
+            return;
+        }
+
+        try
+        {
+            if (await _ctrl.OpenSessionAsync(noteId))
+            {
+                // Resumed with its own provider, which may not be the one in the list.
+                SelectProviderInCombo(_ctrl.CurrentProviderRef);
+                buttonSend.Enabled = true;
+                Text = $"{ViewCaptionText} - {_ctrl.SessionTopic}";
+                RefreshView();
+            }
+            else
+                SelectCurrentSession();
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
     }
 
     // A menu shortcut pressed while the chat view had the focus: run it as the menu would have, only if the
@@ -214,6 +293,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         RestartAIAssistantView();
         Text = $"{ViewCaptionText} - {assistantInfo.Name}";
         textPrompt.Text = assistantInfo.User;
+        // A new conversation, not in the list yet.
+        SelectCurrentSession();
     }
 
     private void menuViewSystem_Click(object sender, EventArgs e)
@@ -225,10 +306,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         _ctrl.ShowModelInfo = !_ctrl.ShowModelInfo;
         UpdateOptionsMenu();
-        // The chat view hides/shows it in place; the Markdown view is rewritten with or without it.
+        // The chat view hides/shows it in place. The Markdown view always has it, in the marker of each answer.
         _chatView.ShowModelInfo(_ctrl.ShowModelInfo);
-        if (!ChatView)
-            ShowResult();
     }
 
     private async void menuManageModels_Click(object sender, EventArgs e)
@@ -242,28 +321,37 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         PopulateProviders();
     }
 
-    private void comboProviders_SelectedIndexChanged(object sender, EventArgs e)
+    // A different provider can't continue the conversation: it starts a new one (the current one is saved first).
+    private async void comboProviders_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (comboProviders.SelectedItem is not AiProviderRef providerRef || providerRef == _ctrl.CurrentProviderRef)
             return;
 
-        if (_ctrl.ChatTurns.Count > 0)
+        try
         {
-            var result = ShowInfo("Switching the AI provider resets the current conversation. Continue?",
-                "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (result != DialogResult.Yes)
+            if (_ctrl.ChatTurns.Count > 0)
             {
-                SelectProviderInCombo(_ctrl.CurrentProviderRef);
-                return;
+                var result = ShowInfo("Switching the AI provider starts a new conversation. Continue?",
+                    "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result != DialogResult.Yes || !await _ctrl.LeaveSessionAsync())
+                {
+                    SelectProviderInCombo(_ctrl.CurrentProviderRef);
+                    return;
+                }
             }
-        }
 
-        _ctrl.SetProvider(providerRef);
-        RestartAIAssistantView();
-        Text = ViewCaptionText;
-        // Covers the case where the assistant opened with zero providers configured (Send stays
-        // disabled until one is picked): SetProvider just succeeded, so it's safe to re-enable now.
-        buttonSend.Enabled = true;
+            _ctrl.SetProvider(providerRef);
+            RestartAIAssistantView();
+            Text = ViewCaptionText;
+            SelectCurrentSession();
+            // Covers the case where the assistant opened with zero providers configured (Send stays
+            // disabled until one is picked): SetProvider just succeeded, so it's safe to re-enable now.
+            buttonSend.Enabled = true;
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
     }
 
     private void buttonMarkDown_Click(object sender, EventArgs e)
@@ -326,24 +414,61 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         comboProviders.SelectedItem = providerRef;
     }
 
-    private async Task SaveChatMessages()
+    // For the synchronous ShowView.
+    private async void LoadSessions()
     {
         try
         {
-            var noteEditor = new NoteEditorCtrl(_ctrl.Store);
-            if (!await noteEditor.NewModel(_ctrl.Store.GetActiveOrDefaultService()))
-            {
-                noteEditor.Finalize();
-                return;
-            }
-            noteEditor.Model.Topic = $"{DateTime.Now.ToString()}";
-            noteEditor.Model.Description = ChatTranscript();
-            noteEditor.Model.Tags = "[AIAssistant]";
-            noteEditor.Run();
+            await LoadSessionsAsync();
         }
         catch (Exception ex)
         {
-            ShowInfo(ex.Message.ToString());
+            KntMessageBox.Show(ex.Message);
+        }
+    }
+
+    // The user's sessions, most recent first, with the one in the chat selected.
+    private async Task LoadSessionsAsync()
+    {
+        var sessions = await _ctrl.GetSessionsAsync();
+
+        _syncingSessions = true;
+        listViewSessions.BeginUpdate();
+        try
+        {
+            listViewSessions.Items.Clear();
+            foreach (var session in sessions)
+            {
+                var item = new ListViewItem(session.Topic) { Tag = session.NoteId, ToolTipText = session.Topic };
+                item.SubItems.Add(session.ModificationDateTime.ToString("g"));
+                listViewSessions.Items.Add(item);
+            }
+        }
+        finally
+        {
+            listViewSessions.EndUpdate();
+            _syncingSessions = false;
+        }
+
+        SelectCurrentSession();
+    }
+
+    // Selects the session in the chat in the list (none for a new conversation, not saved yet).
+    private void SelectCurrentSession()
+    {
+        _syncingSessions = true;
+        try
+        {
+            foreach (ListViewItem item in listViewSessions.Items)
+            {
+                item.Selected = item.Tag is Guid noteId && noteId == _ctrl.SessionNoteId;
+                if (item.Selected)
+                    item.EnsureVisible();
+            }
+        }
+        finally
+        {
+            _syncingSessions = false;
         }
     }
 
@@ -365,8 +490,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private bool ChatView => !_ctrl.MarkdownResultView;
 
-    // What the Markdown view shows (and what is saved as a note), with the model info if it is shown.
-    private string ChatTranscript() => AiChatTranscript.Markdown(_ctrl.ChatTurns, _ctrl.ShowModelInfo);
+    // What the Markdown view shows: the conversation exactly as it is saved in its session note (the format shared
+    // with the Web assistant), with the hidden marker of each message and the usage of each answer in it.
+    private string ChatTranscript() => AiChatSessionTranscript.Write(_ctrl.ChatTurns.Select(t => t.ToDto()));
 
     private void UpdateOptionsMenu()
     {
@@ -431,9 +557,12 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             comboProviders.Enabled = false;
             menuOptions.Enabled = false;
             buttonSend.Enabled = false;
-            buttonRestart.Enabled = false;
+            buttonNewSession.Enabled = false;
             buttonMarkDown.Enabled = false;
             buttonNavigate.Enabled = false;
+            // The sessions list stays enabled (disabled, the native list paints a white background in dark mode):
+            // choosing a session is ignored while processing (see listViewSessions_ItemSelectionChanged).
+            _processing = true;
         }
         else
         {
@@ -442,7 +571,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
             menuOptions.Enabled = true;
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
-            buttonRestart.Enabled = true;
+            buttonNewSession.Enabled = true;
+            _processing = false;
             // Sending keeps the current mode: the chat view adds the turn as it arrives.
             UpdateViewButtons();
             ScrollMarkdownToEnd();
@@ -488,8 +618,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         else
         {
             // Start from the whole transcript so far, not an empty buffer: the streamed turn (the ctrl's
-            // StreamToken, same layout) is appended to the conversation already shown. Rebuilt from the
-            // ctrl's turns, it also drops the partial text of a failed stream.
+            // StreamToken, still without its markers) is appended to the conversation already shown, and the view
+            // is rewritten in the saved format once it is answered. Rebuilt from the ctrl's turns, it also drops
+            // the partial text of a failed stream.
             _sbResult.Clear();
             _sbResult.Append(ChatTranscript());
             _countNRres = 0;
@@ -517,7 +648,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (chatView)
             _chatView.EndTurn(_ctrl.ChatTurns[^1]);
         else
-            // The streamed text, plus the usage line of the new answer if the model info is shown.
+            // The whole conversation in the saved format: the new turn now with its markers and usage.
             kntEditViewResult.ShowMarkdownContent(ChatTranscript());
 
         textPrompt.Text = "";

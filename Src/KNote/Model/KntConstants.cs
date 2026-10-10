@@ -31,6 +31,13 @@ public static class KntConst
     public static string AssistantTag { get; private set; } = "@Assistant";
     public static string DefaultRootSystemChat { get; private set; } = "You are a useful assistant.";
 
+    // AI assistant sessions are persisted as notes of this NoteType, kept in this folder, with the provider
+    // and model of the session in these two KAttributes of the type (see IKntAiSessionService).
+    public static string ChatSessionsTag { get; private set; } = "@ChatSessions";
+    public static string AiSessionsFolderName { get; private set; } = "AI Assistant sessions";
+    public static string AiProviderAttributeName { get; private set; } = "AiProvider";
+    public static string AiModelAttributeName { get; private set; } = "AiModel";
+
     static KntConst()
     {
         KAttributes = new Dictionary<EnumKAttributeDataType, string>

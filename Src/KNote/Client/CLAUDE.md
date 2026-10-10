@@ -56,7 +56,7 @@ Client/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
-├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/
+├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, AIAssistant/
 ├── Shared/                 – layout (MainLayout*) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntFolderSelector, KntFoldersTreeView, InputMarkdown, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
@@ -66,7 +66,7 @@ Client/
 ## Acceso a datos: `IStore` y los `I*WebApiService`
 
 - `IStore` (registrado `Scoped`; en WASM equivale a una instancia por pestaña) expone `Users`, `NoteTypes`,
-  `KAttributes`, `Folders`, `Notes`, `ChatGPT` como propiedades perezosas, igual que `IKntService` en el
+  `KAttributes`, `Folders`, `Notes`, `AiAssistant` como propiedades perezosas, igual que `IKntService` en el
   backend. Las páginas inyectan `@inject IStore store` y no usan `HttpClient` directamente.
 - Cada `XxxWebApiService` hereda de `BaseService` y sigue la nomenclatura de `Service`
   (`GetAllAsync`, `GetAsync`, `NewAsync`, `SaveAsync`, `DeleteAsync`...). `SaveAsync` decide POST/PUT según
@@ -181,8 +181,18 @@ de algún componente (`*.razor.css`). No añadas clases de Bootstrap (`row`, `co
 ## Otros
 
 - **Chat**: `Store` crea un `HubConnection` contra `chathub` (`Server/Hubs/ChatHub`); `MainLayout` lo arranca
-  (`ChatStartAsync`) y los mensajes recibidos llegan a `AppState.ChatMessages`. `NotesChatGPT` usa
-  `api/chatgpt` (OpenAI, en `Server`).
+  (`ChatStartAsync`) y los mensajes recibidos llegan a `AppState.ChatMessages`.
+- **Asistente de IA** (`Pages/AIAssistant`, ruta `aiassistant`, Staff+): `AIAssistant` es el caso de uso y
+  `AiChatView`/`AiSessionsList` la presentación. Usa `IStore.AiAssistant` (`api/aiassistant`, ver
+  `Server/CLAUDE.md`). La respuesta llega en streaming: `ChatAsync` lee los server-sent events con
+  `SetBrowserResponseStreamingEnabled(true)` + `ResponseHeadersRead` y devuelve un `IAsyncEnumerable` de
+  `AiChatStreamEventDto`; un error (antes o durante la respuesta) acaba en un evento `error` ya notificado. El
+  servidor no guarda la conversación: la página manda los turnos anteriores en cada pregunta y repinta como
+  mucho cada 100 ms mientras llega la respuesta. La sesión se guarda (`SaveSessionAsync`) tras cada respuesta, y
+  otra vez antes de dejarla (nueva conversación, otra sesión, salir de la página) si aquel guardado falló.
+  Cambiar de proveedor empieza una conversación nueva; al retomar una sesión se usa su proveedor y modelo
+  (`AiProviderSelection.ForSession`, en `Model`) o, si ya no están configurados, el predefinido. Las notas que
+  crea la tool `create_task` se enlazan en el chat (se abren en otra pestaña) mientras la página está abierta.
 - **Markdown**: las descripciones de nota se editan con `Shared/InputMarkdown` y se muestran con
   `Shared/ViewMarkdown` (Markdig). `Server` reescribe las URLs de recursos de la descripción al leer/guardar
   para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`).

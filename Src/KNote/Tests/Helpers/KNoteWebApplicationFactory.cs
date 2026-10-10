@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KNote.Tests.Helpers;
 
@@ -46,9 +49,25 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
             Environment.SetEnvironmentVariable(key, value);
     }
 
+    /// <summary>
+    /// Extra configuration, layered over appsettings.json when the host is built. Only for settings the Server
+    /// reads after that (through IOptions, like the "ai" section), not for the ones Program.cs reads up front
+    /// (AppSettings/RepositoryRef, see above). Set before the first CreateClient().
+    /// </summary>
+    public Dictionary<string, string?> AppConfiguration { get; } = new();
+
+    /// <summary>Replaces services of the Server (e.g. IAiChatClientProvider). Set before the first CreateClient().</summary>
+    public Action<IServiceCollection>? TestServices { get; set; }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+
+        if (AppConfiguration.Count > 0)
+            builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(AppConfiguration));
+
+        if (TestServices != null)
+            builder.ConfigureTestServices(TestServices);
     }
 
     protected override void Dispose(bool disposing)

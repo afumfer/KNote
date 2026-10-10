@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KNote.Ai;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Tests.Helpers;
@@ -19,12 +20,21 @@ public class KNoteAiToolsTests
         return result;
     }
 
+    // search_notes first looks up the note types (to leave out the AI sessions, see
+    // SearchNotes_LeavesOutTheAiSessionsNoteType); a repository with no such type unless given.
+    private static FakeKntService ServiceForSearch(params NoteTypeDto[] noteTypes)
+    {
+        var service = new FakeKntService();
+        service.NoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(Valid(noteTypes.ToList()));
+        return service;
+    }
+
     [TestMethod]
     public async Task SearchNotes_NoMatches_ReturnsFriendlyMessage()
     {
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = _ => Task.FromResult(Valid(new List<NoteMinimalDto>()));
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetSearchNotesTool(tools)("nothing matches this", false);
 
@@ -35,18 +45,37 @@ public class KNoteAiToolsTests
     public async Task SearchNotes_ForwardsTextSearchAndIncludeContentToTheQuery()
     {
         NotesSearchDto capturedSearch = null;
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = search =>
         {
             capturedSearch = search;
             return Task.FromResult(Valid(new List<NoteMinimalDto>()));
         };
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         await GetSearchNotesTool(tools)("invoice !draft", true);
 
         Assert.AreEqual("invoice !draft", capturedSearch.TextSearch);
         Assert.IsTrue(capturedSearch.SearchInDescription);
+        Assert.IsNull(capturedSearch.ExcludeNoteTypeId, "No AI sessions note type in this repository: nothing to leave out.");
+    }
+
+    [TestMethod]
+    public async Task SearchNotes_LeavesOutTheAiSessionsNoteType()
+    {
+        var sessionsType = new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.ChatSessionsTag };
+        NotesSearchDto capturedSearch = null;
+        var service = ServiceForSearch(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.CodeTag }, sessionsType);
+        service.NotesFake.GetSearchMinimalAsyncImpl = search =>
+        {
+            capturedSearch = search;
+            return Task.FromResult(Valid(new List<NoteMinimalDto>()));
+        };
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
+
+        await GetSearchNotesTool(tools)("invoice", false);
+
+        Assert.AreEqual(sessionsType.NoteTypeId, capturedSearch.ExcludeNoteTypeId);
     }
 
     [TestMethod]
@@ -60,9 +89,9 @@ public class KNoteAiToolsTests
             Tags = "[Personal]",
             Priority = 2
         };
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = _ => Task.FromResult(Valid(new List<NoteMinimalDto> { note }));
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetSearchNotesTool(tools)("test", false);
 
@@ -78,9 +107,9 @@ public class KNoteAiToolsTests
     [TestMethod]
     public async Task SearchNotes_ServiceReturnsError_ReturnsErrorTextToTheModel()
     {
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = _ => Task.FromResult(Invalid<List<NoteMinimalDto>>("boom"));
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetSearchNotesTool(tools)("test", false);
 
@@ -91,7 +120,7 @@ public class KNoteAiToolsTests
     public async Task GetNoteDetails_NeitherIdNorNumberProvided_ReturnsErrorWithoutCallingTheService()
     {
         var service = new FakeKntService();
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetNoteDetailsTool(tools)(null, null);
 
@@ -102,7 +131,7 @@ public class KNoteAiToolsTests
     public async Task GetNoteDetails_InvalidGuidNoteId_ReturnsErrorWithoutCallingTheService()
     {
         var service = new FakeKntService();
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetNoteDetailsTool(tools)("not-a-guid", null);
 
@@ -116,7 +145,7 @@ public class KNoteAiToolsTests
         var note = new NoteDto { NoteId = noteId, Topic = "Full note", Description = "The body" };
         var service = new FakeKntService();
         service.NotesFake.GetByIdAsyncImpl = id => id == noteId ? Task.FromResult(Valid(note)) : throw new InvalidOperationException("wrong id");
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetNoteDetailsTool(tools)(noteId.ToString(), null);
 
@@ -131,7 +160,7 @@ public class KNoteAiToolsTests
         var note = new NoteDto { NoteNumber = 42, Topic = "By number", Description = "Body" };
         var service = new FakeKntService();
         service.NotesFake.GetByNumberAsyncImpl = number => number == 42 ? Task.FromResult(Valid(note)) : throw new InvalidOperationException("wrong number");
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetNoteDetailsTool(tools)(null, 42);
 
@@ -146,7 +175,7 @@ public class KNoteAiToolsTests
         var noteId = Guid.NewGuid();
         var service = new FakeKntService();
         service.NotesFake.GetByIdAsyncImpl = _ => Task.FromResult(Valid<NoteDto>(null));
-        var tools = new KNoteAiTools(service, TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetNoteDetailsTool(tools)(noteId.ToString(), null);
 
@@ -161,7 +190,7 @@ public class KNoteAiToolsTests
     [TestMethod]
     public async Task CreateTask_EmptyTopic_ReturnsErrorWithoutTouchingStore()
     {
-        var tools = new KNoteAiTools(new FakeKntService(), TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(new FakeKntService(), new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetCreateTaskTool(tools)("   ", "some description");
 
@@ -173,7 +202,7 @@ public class KNoteAiToolsTests
     {
         // TestStoreFactory.CreateEmpty() leaves Store.DefaultFolderWithServiceRef unset (null) -
         // the same state a freshly-constructed Store is in before Program.cs's LoadAppStore runs.
-        var tools = new KNoteAiTools(new FakeKntService(), TestStoreFactory.CreateEmpty());
+        var tools = new KNoteAiTools(new FakeKntService(), new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
         var result = await GetCreateTaskTool(tools)("Buy milk", "2% milk, one gallon");
 
@@ -204,7 +233,7 @@ public class KNoteAiToolsTests
         // The "active" service (used by search_notes/get_note_details) is a separate, untouched
         // fake - create_task must use the default folder's service, not this one.
         var activeService = new FakeKntService();
-        var tools = new KNoteAiTools(activeService, store);
+        var tools = new KNoteAiTools(activeService, new KNoteAiToolsHost(store));
 
         var result = await GetCreateTaskTool(tools)("Buy milk", "2% milk, one gallon");
 
@@ -237,7 +266,7 @@ public class KNoteAiToolsTests
             ServiceRef = TestServiceRefFactory.CreateWithFakeService(defaultService),
             FolderInfo = new FolderInfoDto { FolderId = Guid.NewGuid(), Name = "Default folder" }
         };
-        var tools = new KNoteAiTools(new FakeKntService(), store);
+        var tools = new KNoteAiTools(new FakeKntService(), new KNoteAiToolsHost(store));
 
         await GetCreateTaskTool(tools)("Buy milk", null);
 
@@ -261,7 +290,7 @@ public class KNoteAiToolsTests
             ServiceRef = TestServiceRefFactory.CreateWithFakeService(defaultService),
             FolderInfo = new FolderInfoDto { FolderId = Guid.NewGuid(), Name = "Default folder" }
         };
-        var tools = new KNoteAiTools(new FakeKntService(), store);
+        var tools = new KNoteAiTools(new FakeKntService(), new KNoteAiToolsHost(store));
 
         var result = await GetCreateTaskTool(tools)("Buy milk", "details");
 
@@ -281,7 +310,7 @@ public class KNoteAiToolsTests
             ServiceRef = TestServiceRefFactory.CreateWithFakeService(defaultService),
             FolderInfo = new FolderInfoDto { FolderId = Guid.NewGuid(), Name = "Default folder" }
         };
-        var tools = new KNoteAiTools(new FakeKntService(), store);
+        var tools = new KNoteAiTools(new FakeKntService(), new KNoteAiToolsHost(store));
 
         var result = await GetCreateTaskTool(tools)("Buy milk", "details");
 

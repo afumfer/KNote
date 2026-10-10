@@ -1,0 +1,38 @@
+@* The user's AI assistant sessions, most recent first: choosing one resumes it. Presentation only (see AIAssistant). *@
+
+<RadzenStack Gap="0.5rem" Style="height: 100%" class="rz-p-2">
+    <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-my-0">Sessions</RadzenText>
+
+    @if (Sessions.Count == 0)
+    {
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-color-base-500">No sessions yet.</RadzenText>
+    }
+    else
+    {
+        <RadzenListBox TValue="Guid" Data="@Sessions" ValueProperty="NoteId" Value="@SelectedNoteId"
+                       Change="@OnChange" Disabled="@Disabled" Style="flex: 1; min-height: 0; width: 100%">
+            <Template>
+                @{ var session = (AiChatSessionInfoDto)context; }
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@session.Topic</RadzenText>
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-500 rz-my-0">@session.ModificationDateTime.ToString("g")</RadzenText>
+            </Template>
+        </RadzenListBox>
+    }
+</RadzenStack>
+
+@code {
+    [Parameter] [EditorRequired] public List<AiChatSessionInfoDto> Sessions { get; set; } = null!;
+
+    // The session in the chat (Guid.Empty for a new one, not saved yet).
+    [Parameter] public Guid SelectedNoteId { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public EventCallback<Guid> OnSelect { get; set; }
+
+    private async Task OnChange(object value)
+    {
+        if (value is Guid noteId && noteId != SelectedNoteId)
+            await OnSelect.InvokeAsync(noteId);
+    }
+}

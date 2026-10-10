@@ -42,6 +42,7 @@ try
     var repositoryRef = repositoryRefSection.Get<RepositoryRef>();
 
     builder.Services.KntAddServices(appSettings, repositoryRef);
+    builder.Services.KntAddAiAssistant(builder.Configuration);
 
     builder.Services.AddAuthentication().AddJwtBearer(options =>
          options.TokenValidationParameters = new TokenValidationParameters

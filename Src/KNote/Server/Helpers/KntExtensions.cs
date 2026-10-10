@@ -1,7 +1,9 @@
 ﻿using KNote.Model;
 using KNote.Repository;
+using KNote.Server.Ai;
 using KNote.Service.Core;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -28,6 +30,22 @@ public static class KntExtensions
         services.AddScoped<IKntRepository>(provider => KntRepositoryFactory.Create(repositoryRef));
 
         services.AddScoped<IKntService, KntService>();
+
+        return services;
+    }
+
+    // The Web AI assistant (AiAssistantController): the providers of the "ai" configuration section, bound when
+    // first used (so the in-process tests can still override them), and how their chat clients are built.
+    public static IServiceCollection KntAddAiAssistant(this IServiceCollection services, IConfiguration configuration)
+    {
+        if (services == null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        services.Configure<AiConfig>(configuration.GetSection("ai"));
+        services.AddSingleton<AiProvidersCatalog>();
+        services.AddSingleton<IAiChatClientProvider, AiChatClientProvider>();
 
         return services;
     }

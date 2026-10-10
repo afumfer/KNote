@@ -1350,6 +1350,9 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     ? query.Where(n => EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(notesFilter.Description))
                     : query.Where(n => EF.Functions.Like(n.Description, $"%{notesFilter.Description}%"));
 
+            if (notesFilter.TaskUserId != null)
+                query = query.Where(n => n.NoteTasks.Any(t => t.UserId == notesFilter.TaskUserId));
+
             foreach (var f in notesFilter.AttributesFilter)
             {
                 query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));
@@ -1477,6 +1480,9 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     }
                 }
             }
+
+            if (notesSearch.ExcludeNoteTypeId != null)
+                query = query.Where(n => n.NoteTypeId == null || n.NoteTypeId != notesSearch.ExcludeNoteTypeId);
 
             result.TotalCount = await query.CountAsync();
 

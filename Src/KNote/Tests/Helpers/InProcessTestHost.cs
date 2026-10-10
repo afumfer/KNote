@@ -17,9 +17,11 @@ namespace KNote.Tests.Helpers;
 /// </summary>
 public static class InProcessTestHost
 {
-    public static async Task<(KNoteWebApplicationFactory Factory, HttpClient Client)> CreateAuthenticatedClientAsync()
+    public static async Task<(KNoteWebApplicationFactory Factory, HttpClient Client)> CreateAuthenticatedClientAsync(
+        Action<KNoteWebApplicationFactory>? configure = null)
     {
         var factory = new KNoteWebApplicationFactory();
+        configure?.Invoke(factory);
         var client = factory.CreateClient();
 
         // Warm-up request: the first request against a freshly built WebApplicationFactory host can

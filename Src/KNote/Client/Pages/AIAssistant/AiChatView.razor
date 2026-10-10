@@ -1,0 +1,70 @@
+@* The conversation of the AI assistant: each turn as a question and its answer (Markdown) with what it cost,
+   the answer being written, and the notes the assistant created. Presentation only (see AIAssistant). *@
+
+<div id="@ContainerId" class="ai-chat">
+    @if (Turns.Count == 0 && PendingPrompt == null)
+    {
+        <RadzenText TextStyle="TextStyle.Body1" class="rz-color-base-500 rz-text-align-center rz-mt-8">
+            Ask the assistant anything. It can also search your notes and create tasks for you.
+        </RadzenText>
+    }
+
+    @for (var i = 0; i < Turns.Count; i++)
+    {
+        var turn = Turns[i];
+        <div class="ai-msg ai-user rz-background-color-base-200">@turn.Prompt</div>
+        <div class="ai-msg ai-assistant rz-border">
+            <ViewMarkdown MarkdownContent="@turn.Answer" />
+            @if (turn.Truncated)
+            {
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-warning rz-my-0">@AiChatTurnDto.TruncatedNotice</RadzenText>
+            }
+            <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-500 rz-my-0">@turn.UsageSummary()</RadzenText>
+        </div>
+        @CreatedNotesOf(i)
+    }
+
+    @if (PendingPrompt != null)
+    {
+        <div class="ai-msg ai-user rz-background-color-base-200">@PendingPrompt</div>
+        <div class="ai-msg ai-assistant rz-border">
+            @if (!string.IsNullOrEmpty(PendingAnswer))
+            {
+                <ViewMarkdown MarkdownContent="@PendingAnswer" />
+            }
+            <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-500 rz-my-0">
+                @(string.IsNullOrEmpty(ToolInUse) ? "Writing..." : $"Using {ToolInUse}...")
+            </RadzenText>
+            <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" ShowValue="false" Style="height: 4px" />
+        </div>
+        @CreatedNotesOf(Turns.Count)
+    }
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public IReadOnlyList<AiChatTurnDto> Turns { get; set; } = null!;
+
+    // The question being answered and what has arrived of its answer (null when there is none).
+    [Parameter] public string? PendingPrompt { get; set; }
+    [Parameter] public string? PendingAnswer { get; set; }
+    [Parameter] public string? ToolInUse { get; set; }
+
+    // The notes created by the assistant (create_task), by the index of the turn they were created in.
+    [Parameter] public IReadOnlyDictionary<int, List<AiChatStreamEventDto>>? CreatedNotes { get; set; }
+
+    [Parameter] public string ContainerId { get; set; } = "aichatcontainer";
+
+    private RenderFragment CreatedNotesOf(int turnIndex) => __builder =>
+    {
+        if (CreatedNotes != null && CreatedNotes.TryGetValue(turnIndex, out var notes))
+        {
+            foreach (var note in notes)
+            {
+                <div class="ai-note">
+                    <RadzenLink Icon="note_add" Path="@($"notes/edit/{note.NoteId}/index")" Target="_blank"
+                                Text="@($"Note #{note.NoteNumber} created: {note.Text}")" />
+                </div>
+            }
+        }
+    };
+}

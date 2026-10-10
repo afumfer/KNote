@@ -409,6 +409,9 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   igualados con `AlignToTextBox` lo siguen. Un `TabControl` cuyo contenido llega al borde con su propia
   scrollbar (el árbol de carpetas) usa `Utils/FlushTabControl`: en oscuro el margen interior entre páginas
   y marco se ve como un hueco junto a la scrollbar.
+  Un `ListView` desactivado (`Enabled = false`) se pinta en oscuro con fondo blanco y sin sus elementos: para
+  impedir usarlo un rato (p. ej. la lista de sesiones de `KNoteAIAssistantForm` mientras llega una respuesta),
+  déjalo activo e ignora la acción.
   En las vistas, usa `SystemColors.*` en vez de colores fijos (`Color.White`...): los fijos no cambian en
   oscuro. Los informes y su previsualización se quedan siempre en claro (son para imprimir).
 
@@ -529,30 +532,49 @@ Proyecto MSTest hermano (parte de `KNote.slnx`, referencia `ClientWin.csproj` di
 reales contra OpenAI/Anthropic/Ollama, pensada para detectar roturas tras actualizar los paquetes NuGet de
 IA — no se ejecuta por defecto).
 
-Dos detalles de `ClientWin` motivados exclusivamente por esa suite de tests, a tener en cuenta si tocas
-código de IA:
-- `ClientWin/Properties/AssemblyInfo.cs` declara `[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]`
-  — `AiChatClientFactory.ResolveApiKey` y `KNoteAIAssistantCtrl.SetChatClientForTesting` son `internal`
-  en vez de `private` únicamente para que los tests los ejerciten sin red real.
-- `KNoteAiTools` recibe `IKntService` en el constructor (no `ServiceRef`) para las tools de solo lectura
-  (`search_notes`/`get_note_details`) — así se pueden testear contra los fakes de servicio ya existentes
-  (`Fakes/FakeKntService.cs`) sin base de datos real. `AiChatClientFactory.Create` sigue recibiendo
-  `ServiceRef` (lo necesita para otras cosas) y le pasa `serviceRef.Service`. La tool `create_task`
-  necesita además un `Store` completo — para leer `Store.DefaultFolderWithServiceRef` — por eso
-  `KNoteAiTools` también recibe `Store`.
-  - `create_task` persiste la nota **solo por la capa Service** (`Service.Notes.NewExtendedAsync()` +
-    `SaveExtendedAsync(...)` contra el `IKntService` de `Store.DefaultFolderWithServiceRef`, el mismo
-    patrón que `search_notes`/`get_note_details`, no algo especial) y luego abre esa nota **ya
-    persistida** con el mismo camino "editar nota existente" que usa el resto de la app:
-    `NoteEditorCtrl.LoadModelById(service, noteId)` + `.Run()`. No modifica `NoteEditorCtrl` ni accede a
-    su `View` directamente — usa su API pública tal cual está, sin trucos de precarga de `Model`. Queda
-    bajo responsabilidad del usuario modificarla y volver a guardarla, salir sin más, o borrarla.
-  - Como la llamada a la tool ocurre dentro de la propia pipeline async del SDK de IA
-    (OpenAI/Anthropic/Ollama), que puede perder el `SynchronizationContext` de UI a mitad de camino,
-    `KNoteAiTools` captura `SynchronizationContext.Current` en el constructor (siempre el hilo de UI, ya
-    que `AiChatClientFactory.Create` solo se llama desde manejadores de eventos de UI) y usa
-    `_uiContext.Post(...)` para volver a él antes de construir el `NoteEditorCtrl`/`Form` — sin este
-    marshaling, mostrar el editor desde un hilo de fondo lanzaría una excepción de WinForms de acceso
-    entre hilos. Esta es la única parte de `create_task` con dependencia a `KNote.ClientWin.Controllers`
-    desde `Core` (la dirección opuesta a la habitual en este proyecto), justificada por necesitar lanzar
-    un `Ctrl` completo, no solo llamar a un método de servicio.
+### Asistente de IA: qué es de `KNote.Ai` y qué de `ClientWin`
+
+La construcción del `IChatClient` por proveedor (`AiChatClientFactory`) y las tools (`KNoteAiTools`:
+`search_notes`, `get_note_details`, `create_task`) viven en el proyecto compartido **`KNote.Ai`** (carpeta
+`Ai/`), que usa también `Server`; ahí están además todos los paquetes NuGet de IA (`ClientWin` los recibe por
+la referencia al proyecto). `KNoteAIAssistantCtrl.ApplyProvider` los combina:
+`AiChatClientFactory.Create(providerRef, new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store)).GetTools())`.
+
+- `KNoteAiTools` recibe `IKntService` (no `ServiceRef`), así que sus tests corren contra los fakes de
+  servicio (`Fakes/FakeKntService.cs`) sin base de datos real. Lo que `create_task` hace distinto en cada
+  aplicación lo pide a un `IKNoteAiToolsHost`; el de `ClientWin` es **`Core/KNoteAiToolsHost`**:
+  - destino de la nota: `Store.DefaultFolderWithServiceRef` (que puede ser otro repositorio que aquel sobre
+    el que trabajan `search_notes`/`get_note_details`);
+  - una vez guardada (siempre **solo por la capa Service**, `NewExtendedAsync` + `SaveExtendedAsync`), la abre
+    con el mismo camino "editar nota existente" que el resto de la app: `NoteEditorCtrl.LoadModelById(service,
+    noteId)` + `.Run()`, sin tocar su `View` ni precargar `Model`. Queda en manos del usuario modificarla,
+    dejarla o borrarla.
+  - Como la tool se ejecuta dentro de la pipeline async del SDK de IA, que puede perder el
+    `SynchronizationContext` de UI, `KNoteAiToolsHost` lo captura en su constructor (siempre en el hilo de UI:
+    se construye en `ApplyProvider`, al que solo se llega desde manejadores de UI) y usa
+    `_uiContext.Post(...)` antes de construir el `NoteEditorCtrl`/`Form`; sin ello WinForms lanzaría una
+    excepción de acceso entre hilos. Es la única dependencia de `Core` hacia `KNote.ClientWin.Controllers`
+    (la dirección opuesta a la habitual), justificada por necesitar lanzar un `Ctrl` completo.
+- **Cada turno** (`GetCompletionAsync` y `StreamCompletionAsync`) es el común de `KNote.Ai`
+  (`AiChatTurnStreamer`, el mismo del asistente Web): se envían el prompt de sistema y los turnos anteriores
+  (`ChatTurns`), y el turno solo se añade a la conversación (`ChatTurns`, `ChatMessages` para los scripts,
+  totales) cuando la respuesta termina, así que un fallo del proveedor no deja mensajes huérfanos. El uso de
+  tokens es el que da el proveedor (en streaming también); si no lo da, se estima.
+- **Sesiones** (persistencia de las conversaciones, `IKntService.AiSessions` del `ServiceRef` del asistente,
+  el mismo en el que trabajan las tools; formato común con la Web, ver `CLAUDE.md` raíz). Solo si
+  `PersistSession`: lo activa `KNoteManagementCtrl` al abrir el asistente desde el menú
+  (`ShowAIAssistantView(autoCloseCtrlOnViewExit, persistSession)`); los scripts que manejan el `Ctrl`
+  (`ShowAIAssistantView()`, el motor "ln" de `Store.RunNaturalLanguageCode`) no crean sesiones salvo que pongan
+  `PersistSession = true`. Se guarda tras cada respuesta (modo Stream y Completion); si falla, queda
+  `SessionPendingSave` y se reintenta antes de dejar la conversación (`LeaveSessionAsync`: nueva conversación,
+  cambio de proveedor, prompt del catálogo, otra sesión) o al cerrar; si vuelve a fallar, el usuario decide si
+  la descarta. `OpenSessionAsync` retoma una sesión con su proveedor y modelo
+  (`AiProviderSelection.ForSession`) o, si ya no están configurados, con el preferido (`GetPreferredProvider`),
+  avisando. `KNoteAIAssistantForm` muestra las sesiones en un panel a la derecha (`splitSessions`, plegado si
+  no hay persistencia): elegir una la retoma. Su vista Markdown muestra la conversación tal como se guarda en la
+  nota (`AiChatSessionTranscript.Write`, con los comentarios `<!-- knt-ai:... -->` y el uso de cada respuesta en
+  ellos), haya o no persistencia. Sustituye al antiguo "guardar al salir" como nota con la etiqueta
+  `[AIAssistant]`.
+- `KNoteAIAssistantCtrl.SetChatClientForTesting` es `internal` (no `private`) solo para que los tests usen
+  un `IChatClient` fake (`[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]` en
+  `Properties/AssemblyInfo.cs`); `AiChatClientFactory.ResolveApiKey` lo es por lo mismo en `KNote.Ai`.

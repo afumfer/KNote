@@ -1577,6 +1577,14 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             strWhere += $"Description{collate} LIKE @{descriptionParam} ";
         }
 
+        if (notesFilter.TaskUserId != null)
+        {
+            strWhere = AddAndToStringSQL(strWhere);
+            var taskUserIdParam = $"wTaskUserId{paramIndex++}";
+            parameters.Add(taskUserIdParam, notesFilter.TaskUserId.Value);
+            strWhere += $"Notes.NoteId IN (SELECT NoteTasks.NoteId FROM NoteTasks WHERE NoteTasks.UserId = @{taskUserIdParam}) ";
+        }
+
         foreach (var f in notesFilter.AttributesFilter)
         {
             strWhere = AddAndToStringSQL(strWhere);
@@ -1866,7 +1874,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             if (searchNumber > 0)
             {
-                sqlWhere = " WHERE NoteNumber = @searchNumber ";
+                sqlWhere = "NoteNumber = @searchNumber ";
                 parameters.Add("searchNumber", searchNumber);
             }
             else
@@ -1889,9 +1897,17 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                         ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " "
                         : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " ";
                 }
-                if (sqlWhere != "")
-                    sqlWhere = " WHERE " + sqlWhere;
             }
+
+            if (notesSearch.ExcludeNoteTypeId != null)
+            {
+                sqlWhere = AddAndToStringSQL(sqlWhere);
+                sqlWhere += "(Notes.NoteTypeId IS NULL OR Notes.NoteTypeId <> @excludeNoteTypeId) ";
+                parameters.Add("excludeNoteTypeId", notesSearch.ExcludeNoteTypeId.Value);
+            }
+
+            if (sqlWhere != "")
+                sqlWhere = " WHERE " + sqlWhere;
 
             sql = sql + sqlWhere + sqlOrder;
 

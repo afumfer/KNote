@@ -67,16 +67,20 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
 - `Fakes/FakeChatClient.cs` — fake de `IChatClient` (`Microsoft.Extensions.AI`), mismo patrón que el
   resto de `Fakes/` (`GetResponseImpl`/`GetStreamingResponseImpl` configurables).
 - `AiChatClientFactoryTests.cs` — `ResolveApiKey` (precedencia `AiProviderRef.ApiKey` > variable de
-  entorno), `Create` para los 3 proveedores (sin red real: la construcción del cliente es perezosa).
+  entorno), `Create` para los 3 proveedores, con y sin tools (sin red real: la construcción del cliente es
+  perezosa). `AiChatClientFactory` y `KNoteAiTools` viven en el proyecto compartido `KNote.Ai` (`Ai/`), que
+  declara su propio `InternalsVisibleTo("KNote.ClientWin.Tests")` para `ResolveApiKey`; sus tests siguen
+  aquí porque aquí están los fakes de servicio.
 - `KNoteAiToolsTests.cs` — `search_notes`/`get_note_details`/`create_task` contra
   `FakeKntService`/`FakeKntNoteService` (sin base de datos real). Como esos métodos son `private` en
   `KNoteAiTools` (solo pensados para llegar a través del `AITool` que construye `AIFunctionFactory.Create`
   en `GetTools()`), los tests los invocan por reflexión en vez de ensanchar su visibilidad solo para
-  testear. `create_task` persiste vía `Service.Notes.NewExtendedAsync()`/`SaveExtendedAsync(...)` — capa
+  testear. Se construyen con el host de `ClientWin`: `new KNoteAiTools(service, new KNoteAiToolsHost(store))`.
+  `create_task` persiste vía `Service.Notes.NewExtendedAsync()`/`SaveExtendedAsync(...)` — capa
   Service pura, igual que las otras dos tools — así que su lógica de negocio (Topic/Description/FolderId
   correctos, propagación de errores de `NewExtendedAsync`/`SaveExtendedAsync`) está totalmente cubierta
-  con fakes; solo su cola final (abrir la nota ya guardada con `NoteEditorCtrl.LoadModelById`+`.Run()`,
-  que muestra una `Form` real) queda sin cubrir aquí — no hay forma de automatizar esa UI desde este
+  con fakes; solo su cola final (`KNoteAiToolsHost.OnNoteCreated`: abrir la nota ya guardada con
+  `NoteEditorCtrl.LoadModelById`+`.Run()`, que muestra una `Form` real) queda sin cubrir aquí — no hay forma de automatizar esa UI desde este
   proyecto de test; verifícalo a mano si tocas esa parte.
   Para simular `Store.DefaultFolderWithServiceRef.ServiceRef.Service` como un fake sin abrir una base de
   datos real, usa `TestServiceRefFactory.CreateWithFakeService(fakeService)` — explota que
@@ -89,6 +93,12 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
   `KNoteAIAssistantCtrl.SetChatClientForTesting(chatClient, providerRef)` — un seam `internal` que
   bypassa `AiChatClientFactory` — habilitado por
   `[assembly: InternalsVisibleTo("KNote.ClientWin.Tests")]` en `ClientWin/Properties/AssemblyInfo.cs`.
+- `KNoteAIAssistantCtrlSessionTests.cs` — las sesiones del asistente: con `PersistSession` apagado no se guarda
+  nada; encendido, cada respuesta guarda la sesión (con sus turnos y su proveedor); un guardado fallido se
+  reintenta antes de dejarla y el usuario decide si la descarta; retomar una sesión usa su proveedor o, si ya no
+  está configurado, el preferido. Usa `Fakes/FakeKntAiSessionService` (vía `FakeKntService.AiSessionsFake`, con
+  el `ServiceRef` de `TestServiceRefFactory.CreateWithFakeService` añadido al `Store`) y `FakeAIAssistantView`
+  para las preguntas al usuario (`NextShowInfoResult`).
 
 Corren con cualquier `dotnet test`, sin configuración adicional:
 ```powershell
@@ -98,12 +108,12 @@ dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "TestCategory!
 ### Capa 2 — smoke tests con proveedores reales (`[TestCategory("RequiresRealAiProvider")]`)
 
 `OpenAiProviderSmokeTests.cs`, `AnthropicProviderSmokeTests.cs`, `OllamaProviderSmokeTests.cs`: hacen
-**llamadas HTTP reales** a través del mismo camino que usa producción (`AiChatClientFactory.Create`), para
+**llamadas HTTP reales** a través del mismo camino que usa producción (`Helpers/TestAiChatClientFactory`:
+`AiChatClientFactory.Create` con las tools de `KNoteAiTools`, igual que `KNoteAIAssistantCtrl.ApplyProvider`), para
 detectar roturas de comportamiento en tiempo de ejecución que un `dotnet build` no puede ver — por ejemplo,
 un paquete NuGet (`OpenAI`, `Anthropic`, `OllamaSharp`, `Microsoft.Extensions.AI*`) que cambia de versión y
 rompe la llamada real, aunque el código siga compilando sin problema. Por proveedor, 3 tests: completion,
-streaming, y un round-trip de function-calling contra `search_notes` (la tool que ya lleva incluida
-`AiChatClientFactory.Create`).
+streaming, y un round-trip de function-calling contra `search_notes`.
 
 **Por qué existen — precedente real**: esta suite ya encontró y ayudó a corregir dos bugs reales de
 producción en `AiChatClientFactory` el mismo día en que se escribió, cuando OpenAI se llamaba por Chat
@@ -132,7 +142,7 @@ Responses del SDK aún está marcada como experimental (`OPENAI001`) y puede cam
 dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "TestCategory=RequiresRealAiProvider"
 ```
 Ejecútalos explícitamente **después de subir de versión** `OpenAI`, `Anthropic`, `OllamaSharp` o
-`Microsoft.Extensions.AI`/`Microsoft.Extensions.AI.OpenAI` en `ClientWin/KNote.ClientWin.csproj`, antes de
+`Microsoft.Extensions.AI`/`Microsoft.Extensions.AI.OpenAI` en `Ai/KNote.Ai.csproj`, antes de
 dar el bump por bueno.
 
 ## Cómo configurar las ApiKeys para correr la Capa 2
