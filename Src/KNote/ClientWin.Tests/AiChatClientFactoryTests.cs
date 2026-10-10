@@ -1,4 +1,4 @@
-using KNote.ClientWin.Core;
+using KNote.Ai;
 using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
 
@@ -51,7 +51,7 @@ public class AiChatClientFactoryTests
     [TestMethod]
     public void Create_NullProviderRef_ThrowsArgumentNullException()
     {
-        Assert.ThrowsExactly<ArgumentNullException>(() => AiChatClientFactory.Create(null, null, null));
+        Assert.ThrowsExactly<ArgumentNullException>(() => AiChatClientFactory.Create(null));
     }
 
     [TestMethod]
@@ -59,7 +59,7 @@ public class AiChatClientFactoryTests
     {
         var providerRef = new AiProviderRef { Provider = "NotARealProvider", Model = "x" };
 
-        Assert.ThrowsExactly<ArgumentException>(() => AiChatClientFactory.Create(providerRef, null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => AiChatClientFactory.Create(providerRef));
     }
 
     [TestMethod]
@@ -69,9 +69,6 @@ public class AiChatClientFactoryTests
         // .AsBuilder()/.UseFunctionInvocation() wrapping) is all lazy - no request is made until a
         // GetResponseAsync/GetStreamingResponseAsync call - so a placeholder key/host is enough to
         // catch build-breaking API changes from a NuGet bump without needing real credentials.
-        var serviceRef = TestServiceRefFactory.CreateInMemorySqlite();
-        var store = TestStoreFactory.CreateEmpty();
-
         foreach (var provider in EnumAiProvider.All)
         {
             var providerRef = new AiProviderRef
@@ -83,9 +80,10 @@ public class AiChatClientFactoryTests
                 Host = "http://localhost:11434"
             };
 
-            var client = AiChatClientFactory.Create(providerRef, serviceRef, store);
-
-            Assert.IsNotNull(client, $"Create({provider}) returned null.");
+            // With and without tools: ClientWin always passes KNoteAiTools' (via TestAiChatClientFactory, the
+            // same wiring as KNoteAIAssistantCtrl), the bare factory call must work too.
+            Assert.IsNotNull(AiChatClientFactory.Create(providerRef), $"Create({provider}) returned null.");
+            Assert.IsNotNull(TestAiChatClientFactory.Create(providerRef), $"Create({provider}) with tools returned null.");
         }
     }
 }

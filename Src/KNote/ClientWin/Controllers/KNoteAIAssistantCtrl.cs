@@ -1,3 +1,4 @@
+using KNote.Ai;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
@@ -12,7 +13,7 @@ using System.Text.Json;
 namespace KNote.ClientWin.Controllers;
 
 // Built on Microsoft.Extensions.AI's IChatClient abstraction (provider-agnostic: OpenAI, Anthropic,
-// Ollama - see AiChatClientFactory). Replaces the retired KntChatGPTCtrl (OpenAI-only, built
+// Ollama - see KNote.Ai's AiChatClientFactory). Replaces the retired KntChatGPTCtrl (OpenAI-only, built
 // directly on the OpenAI.Chat SDK).
 [KntAuthorize(EnumRoles.Staff, AuthorizationScope.Application)]
 public class KNoteAIAssistantCtrl : CtrlBase
@@ -260,7 +261,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
             throw new ArgumentNullException(nameof(providerRef));
 
         _currentProviderRef = providerRef;
-        _chatClient = AiChatClientFactory.Create(providerRef, ServiceRef, Store);
+        var tools = new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store));
+        _chatClient = AiChatClientFactory.Create(providerRef, tools.GetTools());
         RestartAIAssistant();
     }
 
@@ -286,7 +288,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
         }
     }
 
-    // Test seam (ClientWin.Tests): sets the chat client directly, bypassing AiChatClientFactory, so
+    // Test seam (ClientWin.Tests): sets the chat client directly, bypassing KNote.Ai's AiChatClientFactory, so
     // unit tests can exercise GetCompletionAsync/StreamCompletionAsync/RestartAIAssistant against a
     // fake IChatClient with no real network call or API key.
     internal void SetChatClientForTesting(IChatClient chatClient, AiProviderRef providerRef = null)

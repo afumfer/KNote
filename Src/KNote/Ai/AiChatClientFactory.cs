@@ -1,22 +1,20 @@
 using Anthropic;
 using KNote.Model;
-using KNote.Service.Core;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 
-namespace KNote.ClientWin.Core;
+namespace KNote.Ai;
 
-// KNoteAIAssistant plan (Phase 2): builds the Microsoft.Extensions.AI IChatClient for a given
-// AiProviderRef, dispatching over the fixed provider set (EnumAiProvider). No DI container here -
-// ClientWin has none - so this mirrors the manual switch used by the PrimerChatbotSimple PoC.
-// Phase 5 adds KNoteAiTools (search_notes) uniformly to all three providers via
-// UseFunctionInvocation() - tool-calling support then depends on the chosen model, not on this
-// wiring (e.g. it requires an Ollama model that supports function calling).
+// Builds the Microsoft.Extensions.AI IChatClient for a given AiProviderRef, dispatching over the fixed
+// provider set (EnumAiProvider). Shared by ClientWin and Server: each one passes the tools it wants the
+// model to have (see KNoteAiTools), attached uniformly to all three providers via UseFunctionInvocation() -
+// tool-calling support then depends on the chosen model, not on this wiring (e.g. it requires an Ollama
+// model that supports function calling).
 public static class AiChatClientFactory
 {
-    internal const int AnthropicMaxOutputTokens = 64000;
+    public const int AnthropicMaxOutputTokens = 64000;
 
-    public static IChatClient Create(AiProviderRef providerRef, ServiceRef serviceRef, Store store)
+    public static IChatClient Create(AiProviderRef providerRef, IEnumerable<AITool> tools = null)
     {
         if (providerRef is null)
             throw new ArgumentNullException(nameof(providerRef));
@@ -49,7 +47,7 @@ public static class AiChatClientFactory
             _ => throw new ArgumentException($"Unknown AI provider: {providerRef.Provider}", nameof(providerRef))
         };
 
-        var tools = new KNoteAiTools(serviceRef.Service, store);
+        var toolList = tools?.ToList() ?? new List<AITool>();
 
         return baseClient.AsBuilder()
             .ConfigureOptions(o =>
@@ -62,17 +60,17 @@ public static class AiChatClientFactory
                     o.RawRepresentationFactory = _ => new OpenAI.Responses.CreateResponseOptions { StoredOutputEnabled = false };
 #pragma warning restore OPENAI001
 
-                o.Tools = [.. tools.GetTools()];
+                if (toolList.Count > 0)
+                    o.Tools = [.. toolList];
             })
             .UseFunctionInvocation()
             .Build();
     }
 
-    // KNoteData.config (AiProviderRef.ApiKey) takes precedence; the environment variable is only
-    // a fallback for local/manual testing when the config hasn't been filled in yet. Not used for
-    // Ollama, which authenticates the local/remote server by host instead of an API key.
-    // Internal (not private) so ClientWin.Tests/AiChatClientFactoryTests.cs can exercise the
-    // precedence logic directly, without a real network call.
+    // The configured key (AiProviderRef.ApiKey: KNoteData.config in ClientWin, appsettings/user-secrets in
+    // Server) takes precedence; the environment variable is only a fallback for local/manual testing when
+    // the configuration hasn't been filled in yet. Not used for Ollama, which authenticates the
+    // local/remote server by host instead of an API key.
     internal static string ResolveApiKey(AiProviderRef providerRef, string environmentVariableName)
     {
         if (!string.IsNullOrEmpty(providerRef.ApiKey))

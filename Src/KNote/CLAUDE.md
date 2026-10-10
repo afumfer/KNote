@@ -14,7 +14,7 @@ detrás de dos implementaciones de repositorio intercambiables (Dapper, Entity F
 No hay un único `.sln` en la raíz; hay varios `.slnx` ("VS solution XML"), cada uno cubriendo una parte
 distinta del código:
 
-- `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `Repository*`, `ClientWin`, `Client`,
+- `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `KNote.Ai`, `Repository*`, `ClientWin`, `Client`,
   `KntScript`, `MessageBroker*`, `HtmlEditorControl`, `KntEditViewControl`, `KntIcons`. Úsalo para la mayoría del
   trabajo.
 - `KNoteTest.slnx` — solo `Model` + `Tests`, para ejecutar la suite de tests de integración de forma aislada.
@@ -82,7 +82,8 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   ├─ MessageBroker
   │    └─ MessageBroker.RabbitMQ
   ├─ Service                          (→ Repository, Repository.Dapper, Repository.EntityFramework, MessageBroker*)
-  │    └─ ClientWin                   (→ también HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
+  │    ├─ KNote.Ai (carpeta Ai/)      (IChatClient por proveedor de IA + tools sobre IKntService; todos los paquetes NuGet de IA)
+  │    └─ ClientWin                   (→ también KNote.Ai, HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
 
 Server → Client, Model, Service
@@ -93,6 +94,14 @@ HtmlEditorControl → KntIcons
 `KntScript` y `KntIcons` no tienen referencias a otros proyectos (son hojas). `KntIcons` dibuja los iconos de
 la UI WinForms (`ClientWin`, `HtmlEditorControl`, `KntEditViewControl`) a partir de una fuente vectorial para
 que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`.
+
+`KNote.Ai` es lo común del asistente de IA: `AiChatClientFactory.Create(AiProviderRef, tools)` construye el
+`IChatClient` de `Microsoft.Extensions.AI` para OpenAI (Responses API), Anthropic u Ollama, y `KNoteAiTools`
+expone a los modelos `search_notes`, `get_note_details` y `create_task` sobre la capa `Service`. Lo que
+`create_task` hace distinto en cada aplicación (dónde guarda la nota y cómo se la muestra al usuario) lo
+aporta un `IKNoteAiToolsHost` (el de `ClientWin` es `Core/KNoteAiToolsHost`). Las versiones de los paquetes de
+IA se suben solo aquí; tras subirlas, pasa los smoke tests `RequiresRealAiProvider` (ver
+`ClientWin.Tests/CLAUDE.md`).
 
 ### Patrón Repository (ORM intercambiable)
 

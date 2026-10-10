@@ -1,47 +1,30 @@
 using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using KNote.ClientWin.Controllers;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.AI;
 
-namespace KNote.ClientWin.Core;
+namespace KNote.Ai;
 
-// KNoteAIAssistant plan (Phase 5): function-calling surface exposed to the assistant's IChatClient
-// (wired in AiChatClientFactory.Create). Wraps the Service layer - never Repository directly, per
-// ClientWin convention - so the model can act on the user's active KNote repository (the same
-// service the assistant was opened against, not the separate "assistant" repository used for
-// the prompt/system-prompt catalog). Takes IKntService directly (not ServiceRef) so it can be
-// exercised in ClientWin.Tests against the existing FakeKntService/FakeKntNoteService test doubles
-// without a real database.
-//
-// create_task additionally needs Store (to reach Store.DefaultFolderWithServiceRef and to
-// construct a NoteEditorCtrl) - a rare Core -> Controllers reference, the opposite of this
-// codebase's usual direction, justified by needing to launch a full Ctrl+View pair, not just call
-// a service method.
+// Function-calling surface exposed to the assistant's IChatClient (passed to AiChatClientFactory.Create).
+// Wraps the Service layer - never Repository directly - so the model can act on the user's KNote
+// repository (the same service the assistant works against). Takes IKntService directly (not ServiceRef)
+// so it can be exercised in tests against the existing FakeKntService/FakeKntNoteService test doubles
+// without a real database. What create_task does that depends on the application (where the note goes,
+// how it is shown) comes from the IKNoteAiToolsHost.
 public class KNoteAiTools
 {
     private const int MaxResults = 20;
 
     private readonly IKntService _service;
-    private readonly Store _store;
+    private readonly IKNoteAiToolsHost _host;
 
-    // Captured at construction time, which always happens on the UI thread (AiChatClientFactory.Create
-    // is only ever called from KNoteAIAssistantCtrl.SetProvider, itself only reached from UI event
-    // handlers). create_task uses it to marshal NoteEditorCtrl/Form construction back onto the UI
-    // thread, since by the time a tool call runs - deep inside the OpenAI/Anthropic/Ollama SDK's own
-    // async internals - the SynchronizationContext may already have been lost to a ConfigureAwait(false)
-    // somewhere in that chain.
-    private readonly SynchronizationContext _uiContext;
-
-    public KNoteAiTools(IKntService service, Store store)
+    public KNoteAiTools(IKntService service, IKNoteAiToolsHost host)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
-        _store = store ?? throw new ArgumentNullException(nameof(store));
-        _uiContext = SynchronizationContext.Current;
+        _host = host ?? throw new ArgumentNullException(nameof(host));
     }
 
     public IEnumerable<AITool> GetTools()
@@ -75,13 +58,12 @@ public class KNoteAiTools
         {
             Name = "create_task",
             Description = "Creates and saves a new KNote note/task from something the user asked to " +
-                "remember, note down, or turn into a task/reminder, then opens it in KNote's note editor " +
-                "for the user to see. Unlike a draft, this note is already persisted when the editor opens " +
-                "- from there it's entirely up to the user to modify and re-save it, leave it as-is, or " +
-                "delete it. Always determine a short topic and a full description from the user's request " +
-                "before calling this. The note is created in the application's default repository and " +
-                "folder (Store.DefaultFolderWithServiceRef), which may be different from whatever " +
-                "repository search_notes/get_note_details are currently operating on."
+                "remember, note down, or turn into a task/reminder, then shows it to the user. Unlike a " +
+                "draft, this note is already persisted when it is shown - from there it's entirely up to " +
+                "the user to modify and re-save it, leave it as-is, or delete it. Always determine a short " +
+                "topic and a full description from the user's request before calling this. The note is " +
+                "created in the application's default repository and folder, which may be different from " +
+                "whatever repository search_notes/get_note_details are currently operating on."
         });
     }
 
@@ -155,7 +137,7 @@ public class KNoteAiTools
         return JsonSerializer.Serialize(response.Entity);
     }
 
-    [Description("Creates and saves a new note/task with the given topic and description, then opens it in the note editor for the user to see - already persisted, not a draft.")]
+    [Description("Creates and saves a new note/task with the given topic and description, then shows it to the user - already persisted, not a draft.")]
     private async Task<string> CreateTaskAsync(
         [Description("Short title for the note/task, determined from the user's request.")]
         string topic,
@@ -165,18 +147,17 @@ public class KNoteAiTools
         if (string.IsNullOrWhiteSpace(topic))
             return "Error: topic is required and cannot be empty.";
 
-        var defaultFolderWithServiceRef = _store.DefaultFolderWithServiceRef;
-        if (defaultFolderWithServiceRef?.ServiceRef == null || defaultFolderWithServiceRef.FolderInfo == null)
+        var destination = await _host.GetNewNoteDestinationAsync();
+        if (destination?.Service == null || destination.Folder == null)
             return "Error: no default repository/folder is configured in this KNote instance.";
 
-        var service = defaultFolderWithServiceRef.ServiceRef.Service;
+        var service = destination.Service;
 
-        // Persisted through the Service layer only - same as search_notes/get_note_details - never
-        // through NoteEditorCtrl or its view. NewExtendedAsync gives the same defaults (note type,
-        // attribute completion) NoteEditorCtrl.NewModel itself gets from the same call - but, like
-        // NoteEditorCtrl.NewModel, it still has to fill in Tags itself: NewExtendedAsync leaves it
-        // null by design, and KntNotesSaveExtendedAsyncCommand.Execute unconditionally calls
-        // Param.Tags.Contains(...) - a null Tags throws a NullReferenceException on save.
+        // Persisted through the Service layer only - same as search_notes/get_note_details. NewExtendedAsync
+        // gives the same defaults (note type, attribute completion) the note editors get from the same call -
+        // but, like them, Tags still has to be filled in here: NewExtendedAsync leaves it null by design, and
+        // KntNotesSaveExtendedAsyncCommand.Execute unconditionally calls Param.Tags.Contains(...) - a null
+        // Tags throws a NullReferenceException on save.
         var newNoteResponse = await service.Notes.NewExtendedAsync();
         if (!newNoteResponse.IsValid)
             return $"Error creating note: {newNoteResponse.ErrorMessage}";
@@ -185,42 +166,17 @@ public class KNoteAiTools
         note.Topic = topic;
         note.Description = description ?? "";
         note.Tags = "";
-        note.FolderId = defaultFolderWithServiceRef.FolderInfo.FolderId;
-        note.FolderDto = defaultFolderWithServiceRef.FolderInfo.GetSimpleDto<FolderDto>();
+        note.FolderId = destination.Folder.FolderId;
+        note.FolderDto = destination.Folder.GetSimpleDto<FolderDto>();
 
         var saveResponse = await service.Notes.SaveExtendedAsync(note);
         if (!saveResponse.IsValid)
             return $"Error saving note: {saveResponse.ErrorMessage}";
 
-        ShowNoteForEditing(service, saveResponse.Entity.NoteId);
+        _host.OnNoteCreated(service, saveResponse.Entity);
 
         return $"Created and saved a new note titled \"{topic}\" (note #{saveResponse.Entity.NoteNumber}), " +
-            "and opened it in the KNote editor for the user to see. From here it is entirely the user's " +
-            "responsibility to modify and re-save it, leave it as it is, or delete it.";
-    }
-
-    // Fire-and-forget: the note is already saved by the time this runs, so the tool doesn't need to
-    // wait for the user to close the editor - it only needs to trigger showing it.
-    private void ShowNoteForEditing(IKntService service, Guid noteId)
-    {
-        void Show() => _ = ShowNoteForEditingAsync(service, noteId);
-
-        // Marshal onto the UI thread before touching NoteEditorCtrl/Form - see the _uiContext comment
-        // on the constructor for why this can't just call Show() directly.
-        if (_uiContext != null)
-            _uiContext.Post(_ => Show(), null);
-        else
-            Show();
-    }
-
-    private async Task ShowNoteForEditingAsync(IKntService service, Guid noteId)
-    {
-        // The same LoadModelById(service, id) + Run() the rest of the app uses to open an existing
-        // note for editing (e.g. double-clicking a note in the tree) - NoteEditorCtrl/its view are
-        // used exactly as designed, unmodified, with no direct access to view members from here.
-        var noteEditor = new NoteEditorCtrl(_store);
-        var loaded = await noteEditor.LoadModelById(service, noteId);
-        if (loaded)
-            noteEditor.Run();
+            "and showed it to the user. From here it is entirely the user's responsibility to modify and " +
+            "re-save it, leave it as it is, or delete it.";
     }
 }
