@@ -4,61 +4,35 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <div class="form-group row">
-        <label for="atrUserName" class="col-sm-2 col-form-label">User name:</label>
-        <div class="input-group col-sm-10" id="atrUserName">
-            <InputText class="form-control" @bind-Value="@User.UserName" />                    
-        </div>              
-        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-10 pl-4"  style="font-size:10px">
+    <RadzenStack Gap="1rem">
+
+        <KntFormField Label="User name:" Component="UserName" LabelSize="2">
+            <RadzenTextBox Name="UserName" @bind-Value="@User.UserName" Style="width: 100%" />
             <ValidationMessage For="@(() => User.UserName)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <div class="form-group row">
-        <label for="atrEmail" class="col-sm-2 col-form-label">Email:</label>
-        <div class="input-group col-sm-10" id="atrEmail">
-            <InputText class="form-control" @bind-Value="@User.EMail" />
-        </div>        
-        <label for="atrEmail" class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-10 pl-4"  style="font-size:10px">
+        <KntFormField Label="Email:" Component="EMail" LabelSize="2">
+            <RadzenTextBox Name="EMail" @bind-Value="@User.EMail" Style="width: 100%" />
             <ValidationMessage For="@(() => User.EMail)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <div class="form-group row">
-        <label for="atrFullName" class="col-sm-2 col-form-label">Full name:</label>
-        <div class="input-group col-sm-10" id="atrFullName">
-            <InputText class="form-control" @bind-Value="@User.FullName" />
-        </div>
-        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-10 pl-4"  style="font-size:10px">
-            <ValidationMessage For="@(() => User.FullName)"/>
-        </div>        
-    </div>
+        <KntFormField Label="Full name:" Component="FullName" LabelSize="2">
+            <RadzenTextBox Name="FullName" @bind-Value="@User.FullName" Style="width: 100%" />
+            <ValidationMessage For="@(() => User.FullName)" />
+        </KntFormField>
 
-    <div class="form-group row">
-
-        <label for="atrRoles" class="col-sm-2 col-form-label">Roles:</label>
-        <div class="input-group col-sm-10" id="atrRoles">                                      
-            <RadzenCheckBoxList @bind-Value=@valuesRoles TValue="string" Orientation="Orientation.Horizontal" 
-                            Data="@roles" TextProperty="Value" ValueProperty="Key" />
-        </div>
-
-        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-10 pl-4"  style="font-size:10px">
+        <KntFormField Label="Roles:" LabelSize="2">
+            <RadzenCheckBoxList @bind-Value=@valuesRoles TValue="string" Orientation="Orientation.Horizontal"
+                                Data="@roles" TextProperty="Value" ValueProperty="Key" />
             <ValidationMessage For="@(() => User.RoleDefinition)" />
-        </div>        
-    </div>
+        </KntFormField>
 
-    <hr class="mt-1" />
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
+    </RadzenStack>
 
 </EditForm>
 

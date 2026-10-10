@@ -5,10 +5,7 @@
 @inject IStore store
 @inject NotificationService notificationService
 
-<RadzenDialog/>
-<RadzenNotification/>
-<RadzenContextMenu/>
-<RadzenTooltip/>
+<RadzenComponents />
 
 <RadzenLayout>
 
@@ -38,7 +35,7 @@
         @Body
     </RadzenBody>
 
-    <RadzenFooter class="p-1 ml-1 mr-1">
+    <RadzenFooter class="rz-p-1 rz-mx-1">
         <MainLayoutFooter TextLeft="@($"{KntConst.AppName} - v{store.AppState.AppVersion}")"
                           TextRight="@KntConst.AppDescription" />
     </RadzenFooter>

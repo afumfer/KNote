@@ -9,44 +9,34 @@
 
     <DataAnnotationsValidator />
 
-    <div class="form-group">
-        <label>User name:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@user.UserName" />
+    <RadzenStack Gap="1rem">
+
+        <KntFormField Label="User name:" Component="UserName">
+            <RadzenTextBox Name="UserName" @bind-Value="@user.UserName" Style="width: 100%" />
             <ValidationMessage For="@(() => user.UserName)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <div class="form-group">
-        <label>Full name:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@user.FullName" />
+        <KntFormField Label="Full name:" Component="FullName">
+            <RadzenTextBox Name="FullName" @bind-Value="@user.FullName" Style="width: 100%" />
             <ValidationMessage For="@(() => user.FullName)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <div class="form-group">
-        <label>Email:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@user.EMail" />
+        <KntFormField Label="Email:" Component="EMail">
+            <RadzenTextBox Name="EMail" @bind-Value="@user.EMail" Style="width: 100%" />
             <ValidationMessage For="@(() => user.EMail)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <div class="form-group">
-        <label>Password:</label>
-        <div>
-            <InputPassword class="form-control" @bind-Value="@user.Password" />
+        <KntFormField Label="Password:" Component="Password">
+            <RadzenPassword Name="Password" @bind-Value="@user.Password" Style="width: 100%" />
             <ValidationMessage For="@(() => user.Password)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Register" Click="() => OnRegister(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Register" Click="() => OnRegister(formContext)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+
+    </RadzenStack>
 
 </EditForm>
 

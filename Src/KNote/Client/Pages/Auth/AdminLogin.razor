@@ -12,15 +12,15 @@
 
 <AuthorizeView>
     <Authorized>        
-        <RadzenIcon Icon="person" class="mr-1 ml-1"
+        <RadzenIcon Icon="person" class="rz-mx-1"
             MouseEnter="@(args => tooltipService.Open(args, @context?.User?.Identity?.Name, new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
-        <RadzenIcon Icon="logout" @onclick="@(() => GoLogout())" class="mr-1 ml-1" 
+        <RadzenIcon Icon="logout" @onclick="@(() => GoLogout())" class="rz-mx-1" 
             MouseEnter="@(args => tooltipService.Open(args, "Logout", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
     </Authorized>
     <NotAuthorized>        
-        <RadzenIcon Icon="how_to_reg" @onclick="@(() => GoRegister())" class="mr-1 ml-1" 
+        <RadzenIcon Icon="how_to_reg" @onclick="@(() => GoRegister())" class="rz-mx-1" 
             MouseEnter="@(args => tooltipService.Open(args, "Register", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />            
-        <RadzenIcon Icon="login" @onclick="@(() => GoLogin())" class="mr-1 ml-1" 
+        <RadzenIcon Icon="login" @onclick="@(() => GoLogin())" class="rz-mx-1" 
             MouseEnter="@(args => tooltipService.Open(args, "Login", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )"/>            
     </NotAuthorized>
 </AuthorizeView>
@@ -30,7 +30,7 @@
     private async Task GoRegister()
     {
         var resDialog = await dialogService.OpenAsync<Register>($"Login",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
 
         if(resDialog != null)
@@ -51,7 +51,7 @@
     private async Task GoLogin()
     {
         var resDialog = await dialogService.OpenAsync<Login>($"{KntConst.AppName} login",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "500px", Height = "350px", Resizable = true, Draggable = true });
 
         if(resDialog != null)

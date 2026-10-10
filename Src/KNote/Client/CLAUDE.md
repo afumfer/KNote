@@ -56,11 +56,11 @@ Client/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
-├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, Lab/
+├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/
 ├── Shared/                 – layout (MainLayout*) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntFolderSelector, KntFoldersTreeView, InputMarkdown, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
-└── wwwroot/                – index.html, css (app.css, Bootstrap heredado), js/filePaste.js
+└── wwwroot/                – index.html, css/app.css, js/filePaste.js
 ```
 
 ## Acceso a datos: `IStore` y los `I*WebApiService`
@@ -101,9 +101,10 @@ o parámetro que no aparezca ya en el código, en vez de suponer su API.
 
 Cómo está integrada:
 
-- Servicios en `Program.cs`: `DialogService`, `NotificationService`, `TooltipService`, `ContextMenuService`.
-- Componentes anfitriones en `Shared/MainLayout.razor`: `<RadzenDialog/>`, `<RadzenNotification/>`,
-  `<RadzenContextMenu/>`, `<RadzenTooltip/>`. Sin ellos los servicios anteriores no muestran nada.
+- Servicios en `Program.cs` con `builder.Services.AddRadzenComponents()` (`DialogService`,
+  `NotificationService`, `TooltipService`, `ContextMenuService`...).
+- `<RadzenComponents />` en `Shared/MainLayout.razor` (anfitrión de diálogos, notificaciones, menús
+  contextuales y tooltips). Sin él los servicios anteriores no muestran nada.
 - Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`.
 - Tema y script en `wwwroot/index.html`: `_content/Radzen.Blazor/css/software.css` y
   `_content/Radzen.Blazor/Radzen.Blazor.js`. Los iconos de Radzen (`Icon="save"`, `"edit"`, `"delete"`...)
@@ -111,9 +112,26 @@ Cómo está integrada:
 
 Patrones ya establecidos que hay que seguir:
 
+- **Formularios**: `EditForm` + `<DataAnnotationsValidator />` (las reglas de validación están en el SmartDTO)
+  con controles de Radzen (`RadzenTextBox`, `RadzenTextArea`, `RadzenNumeric`, `RadzenDropDown`,
+  `RadzenCheckBox`, `RadzenDatePicker`, `RadzenPassword`) enlazados con `@bind-Value` y su
+  `<ValidationMessage For="..." />` debajo. No se usan `InputText`/`InputNumber`/`InputSelect`... de Blazor
+  ni `RadzenTemplateForm`. Cada campo va en una fila con la etiqueta a la izquierda: `Shared/KntFormField`
+  (`Label`, `Component` = `Name` del control, `LabelSize` en columnas de 12, por defecto 3), que se apila en
+  pantallas pequeñas. Los campos se agrupan en un `<RadzenStack Gap="1rem">`. Referencia: `Types/TypeForm`.
+  Varios campos en una fila: `RadzenRow` con un `RadzenColumn Size="12" SizeMD="n"` por campo y un
+  `KntFormField` dentro (su `LabelSize` es relativo a la columna; ver `Notes/NoteTaskEditor`, `NoteForm`). En
+  paneles estrechos, `LabelSize="12"` pone la etiqueta encima del campo (`Notes/NotesFilterCriteria`). Para
+  elegir carpeta, `Shared/KntFolderPicker` (abre `KntFolderSelector`; el botón de quitar solo aparece si se
+  atiende `FolderReset`).
+- **Botones y espaciado**: grupos de botones en `<RadzenStack Orientation="Orientation.Horizontal"
+  JustifyContent="JustifyContent.End" Gap="0.5rem">`, sin clases de margen. Para maquetar,
+  `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen
+  (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
   `Shared/EntityList` (que pinta "cargando"/"sin registros"); acciones por fila con `RadzenButton` +
-  `tooltipService.Open(...)`. Cabecera de página con `KntIndexHeader` + `RadzenMenu`.
+  `tooltipService.Open(...)`. Cabecera de página con `KntIndexHeader` (título, `Icon` opcional) +
+  `RadzenMenu` en `IndexMenu`; la de un formulario de página completa, `ToolingHeader` (título + `Buttons`).
 - **Diálogos** (alta/edición de entidades pequeñas, selectores, login): `dialogService.OpenAsync<Componente>(
   título, parámetros, new DialogOptions {...})`; el componente devuelve su resultado con
   `dialogService.Close(resultado)` (`null` = cancelado). Confirmaciones con `dialogService.Confirm(...)`.
@@ -123,13 +141,11 @@ Patrones ya establecidos que hay que seguir:
 - Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y
   alarmas), `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
 
-**Código heredado (Bootstrap)**: parte de la UI es anterior a Radzen y usa Bootstrap 4
-(`wwwroot/css/bootstrap`, clases `form-group`, `col-sm-*`, `float-right`, `btn`...), Font Awesome 4.7 por CDN y
-open-iconic (`oi oi-*`), con `EditForm` + `InputText`/`InputNumber`/`InputSelect` y botones HTML (p. ej.
-`NoteForm`, `Login`, `InputMarkdown`, `ToolingHeader`). Al modificar uno de esos componentes, pasa la parte
-tocada a sus equivalentes de Radzen (`RadzenTextBox`, `RadzenNumeric`, `RadzenDropDown`, `RadzenFormField`,
-`RadzenStack`/`RadzenRow`/`RadzenColumn`, `RadzenButton`...), manteniendo la validación por DataAnnotations
-del DTO. No hagas migraciones masivas que no se hayan pedido.
+**No hay Bootstrap ni otras librerías de iconos o CSS**: la UI usa solo Radzen (tema `software`) más
+`wwwroot/css/app.css` (base `box-sizing`, tipografía, mensajes de validación, error de Blazor) y el CSS aislado
+de algún componente (`*.razor.css`). No añadas clases de Bootstrap (`row`, `col-*`, `form-control`, `btn`,
+`mr-1`...) ni iconos de Font Awesome: no hay hoja que los defina. Los parámetros de un diálogo se pasan como
+`new Dictionary<string, object?>()` (firma de `DialogService.OpenAsync` en Radzen 12).
 
 ## Páginas: organización y convenciones
 
@@ -146,7 +162,6 @@ del DTO. No hagas migraciones masivas que no se hayan pedido.
   desuscribe en `Dispose()`.
 - `Nullable` está activado en este proyecto: `[Parameter] [EditorRequired] public NoteDto Note { get; set; }
   = null!;` para parámetros obligatorios.
-- `Pages/Lab/` (`TestPage`, `FileUpload`) son páginas de pruebas, solo visibles para Admin.
 
 ## Autenticación y autorización
 

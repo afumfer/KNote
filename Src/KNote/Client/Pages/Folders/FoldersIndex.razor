@@ -9,34 +9,28 @@
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Folders admin">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                    <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTree" ></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="Folders admin">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTree" ></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
-<div class="container-fluid border pt-2">
-    <div class="row">
-        @if (foldersTree == null)
-        {            
-            <RadzenLabel class="m-2" Text="Loading tree folders ..." />
-        }
-        else
-        {
-            <KntFoldersTreeView FoldersInfo="foldersTree"
-                                EditMode="true"
-                                FolderSelected="OnFolderSelected"
-                                FolderEdit="OnEdit"
-                                FolderDelete="OnDelete" />
-        }
-    </div>
+<div class="rz-border rz-p-2 rz-mt-2">
+    @if (foldersTree == null)
+    {
+        <RadzenLabel class="rz-m-2" Text="Loading tree folders ..." />
+    }
+    else
+    {
+        <KntFoldersTreeView FoldersInfo="foldersTree"
+                            EditMode="true"
+                            FolderSelected="OnFolderSelected"
+                            FolderEdit="OnEdit"
+                            FolderDelete="OnDelete" />
+    }
 </div>
 
 
@@ -97,7 +91,7 @@
     async Task OnNew()
     {
         var res = await dialogService.OpenAsync<FolderNew>($"New folder",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
@@ -107,7 +101,7 @@
     async Task OnEdit(FolderDto folder)
     {
         var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
-               new Dictionary<string, object>() { { "FolderId", folder.FolderId.ToString() } },
+               new Dictionary<string, object?>() { { "FolderId", folder.FolderId.ToString() } },
                new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)        

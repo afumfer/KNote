@@ -6,98 +6,90 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <div class="col-md-12">
-        <div class="form-group row">
-            <label for="atrUserId" class="col-sm-2 col-form-label">User:</label>                                                                
-            <div class="input-group  col-sm-10" id="atrUserId">
-                <select class="form-control col-sm-11" @bind="@task.UserId">
-                    @if (Users != null)
-                    {
-                        @foreach (var user in Users)
-                        {
-                            <option value=@user.UserId>@user.FullName</option>
-                        }
-                    }
-                </select>
-                <ValidationMessage For="@(() => task.UserId)" />
-            </div>
-        </div>
-              
-        <div class="form-group">
-            <label>Description:</label>
-            <InputTextArea class="form-control p-2" @bind-Value="@task.Description" />
+    <RadzenStack Gap="1rem">
+
+        <KntFormField Label="User:" Component="UserId" LabelSize="2">
+            <RadzenDropDown Name="UserId" TValue="Guid" @bind-Value="@task.UserId"
+                            Data="@Users" TextProperty="FullName" ValueProperty="UserId" Style="width: 100%" />
+            <ValidationMessage For="@(() => task.UserId)" />
+        </KntFormField>
+
+        <KntFormField Label="Description:" Component="Description" LabelSize="2">
+            <RadzenTextArea Name="Description" @bind-Value="@task.Description" Style="width: 100%" />
             <ValidationMessage For="@(() => task.Description)" />
-        </div>
+        </KntFormField>
 
-        <div class="form-group row">
-            <label for="atrTags" class="col-sm-2 col-form-label">Tags:</label>
-            <div class="input-group col-sm-10" id="atrTags">
-                <InputText class="form-control" @bind-Value="@task.Tags" />
-            </div>
+        <KntFormField Label="Tags:" Component="Tags" LabelSize="2">
+            <RadzenTextBox Name="Tags" @bind-Value="@task.Tags" Style="width: 100%" />
             <ValidationMessage For="@(() => task.Tags)" />
-        </div>
+        </KntFormField>
 
-        <div class="form-group row">
-            <label for="atrPrority" class="col-sm-2 col-form-label">Prority:</label>
-            <div class="input-group col-sm-4" id="atrPrority">
-                <InputNumber class="form-control" @bind-Value="@task.Priority" />
-                <ValidationMessage For="@(() => task.Priority)" />
-            </div>
-            <label for="atrDifficulty" class="col-sm-2 col-form-label">Difficulty:</label>
-            <div class="input-group col-sm-4" id="atrDifficulty">
-                <InputNumber class="form-control" @bind-Value="@task.DifficultyLevel" />
-                <ValidationMessage For="@(() => task.DifficultyLevel)" />
-            </div>
-        </div>
+        @* Two fields per row: a column per field, each with its KntFormField (LabelSize relative to the column). *@
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Priority:" Component="Priority" LabelSize="4">
+                    <RadzenNumeric Name="Priority" @bind-Value="@task.Priority" Style="width: 100%" />
+                    <ValidationMessage For="@(() => task.Priority)" />
+                </KntFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Difficulty:" Component="DifficultyLevel" LabelSize="4">
+                    <RadzenNumeric Name="DifficultyLevel" TValue="double?" @bind-Value="@task.DifficultyLevel" Style="width: 100%" />
+                    <ValidationMessage For="@(() => task.DifficultyLevel)" />
+                </KntFormField>
+            </RadzenColumn>
+        </RadzenRow>
 
-        <div class="form-group row">
-            <label for="atrExtStartDate" class="col-sm-2 col-form-label">Exp. Start:</label>
-            <div class="input-group col-sm-4" id="atrExtStartDate">                                    
-                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedStartDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
-                <ValidationMessage For="@(() => task.ExpectedStartDate)" />
-            </div>
-            <label for="atrExpEndDate" class="col-sm-2 col-form-label">Exp. End:</label>
-            <div class="input-group col-sm-4" id="atrExpEndDate">                                    
-                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedEndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
-                <ValidationMessage For="@(() => task.ExpectedEndDate)" />
-            </div>
-        </div>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Exp. start:" LabelSize="4">
+                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedStartDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
+                    <ValidationMessage For="@(() => task.ExpectedStartDate)" />
+                </KntFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Exp. end:" LabelSize="4">
+                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedEndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
+                    <ValidationMessage For="@(() => task.ExpectedEndDate)" />
+                </KntFormField>
+            </RadzenColumn>
+        </RadzenRow>
 
-        <div class="form-group row">                                               
-            <label for="atrStartDate" class="col-sm-2 col-form-label">Start:</label>
-            <div class="input-group col-sm-4" id="atrStartDate">                                    
-                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.StartDate" ShowTime="true" ShowSeconds="true" HoursStep="1.5"  DateFormat="dd/MM/yyyy HH:mm" />
-                <ValidationMessage For="@(() => task.StartDate)" />
-            </div>
-            <label for="atrEndDate" class="col-sm-2 col-form-label">Resolv:</label>
-            <div class="input-group col-sm-4" id="atrEndDate">                                    
-                <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.EndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
-                <ValidationMessage For="@(() => task.EndDate)" />
-            </div>
-        </div>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Start:" LabelSize="4">
+                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.StartDate" ShowTime="true" ShowSeconds="true" HoursStep="1.5" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
+                    <ValidationMessage For="@(() => task.StartDate)" />
+                </KntFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Resolv:" LabelSize="4">
+                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.EndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
+                    <ValidationMessage For="@(() => task.EndDate)" />
+                </KntFormField>
+            </RadzenColumn>
+        </RadzenRow>
 
-        <div class="form-group row">
-            <label for="atrResolved" class="col-sm-2 col-form-label">Resolved:</label>
-            <div class="input-group col-sm-4" id="atrResolved">
-                <InputCheckbox class="form-control" @bind-Value="@task.Resolved" />
-            </div>
-            <label for="atrSpentTime" class="col-sm-2 col-form-label">SpentTime:</label>
-            <div class="input-group col-sm-4 align-content-start" id="atrSpentTime">
-                <InputNumber class="form-control" @bind-Value="@task.SpentTime" />
-                <ValidationMessage For="@(() => task.SpentTime)" />
-            </div>
-        </div>
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Resolved:" Component="Resolved" LabelSize="4">
+                    <RadzenCheckBox Name="Resolved" TValue="bool" @bind-Value="@task.Resolved" />
+                </KntFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntFormField Label="Spent time:" Component="SpentTime" LabelSize="4">
+                    <RadzenNumeric Name="SpentTime" TValue="double?" @bind-Value="@task.SpentTime" Style="width: 100%" />
+                    <ValidationMessage For="@(() => task.SpentTime)" />
+                </KntFormField>
+            </RadzenColumn>
+        </RadzenRow>
 
-    </div>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Ok" Click="() => OnConfirm(formContextTask)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
 
-    <hr class="mt-1" />
-
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Ok" Click="() => OnConfirm(formContextTask)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
+    </RadzenStack>
 
 </EditForm>
 

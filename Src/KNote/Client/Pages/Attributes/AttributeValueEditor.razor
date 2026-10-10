@@ -3,26 +3,24 @@
 
 <EditForm Model="atrValue" Context="formContextValue">
    
-    <div class="form-group">
-        <label>Value:</label>
-        <InputText class="form-control p-2" @bind-Value="@atrValue.Value" />
-        <ValidationMessage For="@(() => atrValue.Value)" />
-    </div>
+    <RadzenStack Gap="1rem">
 
-    <div class="form-group">
-        <label>Order:</label>
-        <InputNumber class="form-control p-2" @bind-Value="@atrValue.Order" />
-        <ValidationMessage For="@(() => atrValue.Order)" />
-    </div>
-   
-    <hr class="mt-1" />
+        <KntFormField Label="Value:" Component="Value">
+            <RadzenTextBox Name="Value" @bind-Value="@atrValue.Value" Style="width: 100%" />
+            <ValidationMessage For="@(() => atrValue.Value)" />
+        </KntFormField>
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Ok" Click="(() => OnConfirmSave(formContextValue))" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="OnCancel" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
+        <KntFormField Label="Order:" Component="Order">
+            <RadzenNumeric Name="Order" @bind-Value="@atrValue.Order" Style="width: 100%" />
+            <ValidationMessage For="@(() => atrValue.Order)" />
+        </KntFormField>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Ok" Click="(() => OnConfirmSave(formContextValue))" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="OnCancel" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+
+    </RadzenStack>
 
 </EditForm>
 

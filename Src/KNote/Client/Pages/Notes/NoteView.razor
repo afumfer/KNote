@@ -8,28 +8,24 @@
 
 <ToolingHeader Title="Note view">
     <Buttons>            
-        <RadzenButton Icon="logout" Click="() => OnExit()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1"  />  
+        <RadzenButton Icon="logout" Click="() => OnExit()" ButtonStyle="ButtonStyle.Secondary" title="Exit" />
     </Buttons>
 </ToolingHeader>
 
 @if (note != null)
 {
-    <RadzenCard >
-        <div>
-            <h4 class="h4">@note.Topic</h4>
-        </div>
-        <hr />
-        <div class="bg-white p-2">            
-            <ViewMarkdown MarkdownContent="@note.Description" />
-        </div>
-        <hr />
-        <div>
+    <RadzenCard>
+        <RadzenStack Gap="0.5rem">
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H4" class="rz-pb-2 rz-border-bottom">@note.Topic</RadzenText>
+            <div class="rz-p-2 rz-border-bottom">
+                <ViewMarkdown MarkdownContent="@note.Description" />
+            </div>
             <i>
                 <p>Tags: @(note.Tags)</p>
                 <p>Creation date: @(note.CreationDateTime)</p>
                 <p>Modification date: @(note.ModificationDateTime)</p>
             </i>
-        </div>
+        </RadzenStack>
     </RadzenCard>
 }
 else

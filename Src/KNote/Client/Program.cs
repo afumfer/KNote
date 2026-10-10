@@ -26,9 +26,6 @@ builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
     provider => provider.GetRequiredService<AuthenticationProviderJWT>()
 );
 
-builder.Services.AddScoped<DialogService>();
-builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<TooltipService>();
-builder.Services.AddScoped<ContextMenuService>();
+builder.Services.AddRadzenComponents();
 
 await builder.Build().RunAsync();

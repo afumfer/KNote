@@ -6,43 +6,37 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Attributes admin">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New attribute ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="Attributes admin">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New attribute ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
-<div class="container-fluid pt-2">
-    <div class="row">
-        <EntityList List="attributes">
-            <AllItems>
-                <RadzenDataGrid Data="@attributes" TItem="KAttributeInfoDto" AllowColumnResize="true" Density="@Density.Compact">
-                    <Columns>
-                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Order" Title="Order" Width="60px"/>
-                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Name" Title="Name" />
-                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="NoteTypeDto.Name" Title="Note type" Width="150px" />
-                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValueYesNo" Title="Requiered" Width="90px"/>                
-                        <RadzenDataGridColumn TItem="KAttributeInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                            <Template Context="data">                                                        
-                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
-                                    ButtonStyle="ButtonStyle.Primary" 
-                                    MouseEnter="@(args => tooltipService.Open(args, "Edit attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
-                                    ButtonStyle="ButtonStyle.Danger" 
-                                    MouseEnter="@(args => tooltipService.Open(args, "Delete attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />                           
-                            </Template>
-                        </RadzenDataGridColumn>
-                    </Columns> 
-                </RadzenDataGrid>
-            </AllItems>
-        </EntityList>
-    </div>
+<div class="rz-pt-2">
+    <EntityList List="attributes">
+        <AllItems>
+            <RadzenDataGrid Data="@attributes" TItem="KAttributeInfoDto" AllowColumnResize="true" Density="@Density.Compact">
+                <Columns>
+                    <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Order" Title="Order" Width="60px"/>
+                    <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Name" Title="Name" />
+                    <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="NoteTypeDto.Name" Title="Note type" Width="150px" />
+                    <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValueYesNo" Title="Requiered" Width="90px"/>                
+                    <RadzenDataGridColumn TItem="KAttributeInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                        <Template Context="data">                                                        
+                            <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
+                                ButtonStyle="ButtonStyle.Primary" 
+                                MouseEnter="@(args => tooltipService.Open(args, "Edit attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+                            <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
+                                ButtonStyle="ButtonStyle.Danger" 
+                                MouseEnter="@(args => tooltipService.Open(args, "Delete attribute ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />                           
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns> 
+            </RadzenDataGrid>
+        </AllItems>
+    </EntityList>
 </div>
 
 @code {
@@ -64,7 +58,7 @@
     async Task OnNew()
     {
         var res = await dialogService.OpenAsync<AttributeNew>($"New attribute",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "860px", Height = "600px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
@@ -74,7 +68,7 @@
     async Task OnEdit(KAttributeInfoDto attribute)
     {     
         var res = await dialogService.OpenAsync<AttributeEdit>($"Edit attribute",
-               new Dictionary<string, object>() { { "AttributeId", attribute.KAttributeId.ToString() } },
+               new Dictionary<string, object?>() { { "AttributeId", attribute.KAttributeId.ToString() } },
                new DialogOptions() { Width = "860px", Height = "600px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)        

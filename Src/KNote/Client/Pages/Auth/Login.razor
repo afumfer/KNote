@@ -10,30 +10,24 @@
     
     <DataAnnotationsValidator />
 
-    <div class="form-group">
-        <label class="mb-2">User name:</label>
-        <div>
-            <InputText class="form-control" @bind-Value="@user.UserName" />
+    <RadzenStack Gap="1rem">
+
+        <KntFormField Label="User name:" Component="UserName">
+            <RadzenTextBox Name="UserName" @bind-Value="@user.UserName" Style="width: 100%" />
             <ValidationMessage For="@(() => user.UserName)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <div class="form-group">
-        <label class="mb-2">Password:</label>
-        <div>
-            <InputPassword class="form-control" @bind-Value="@user.Password" />
+        <KntFormField Label="Password:" Component="Password">
+            <RadzenPassword Name="Password" @bind-Value="@user.Password" Style="width: 100%" />
             <ValidationMessage For="@(() => user.Password)" />
-        </div>
-    </div>
+        </KntFormField>
 
-    <hr class="mt-1" />
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Login" Click="() => OnLogin(formContext)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Login" Click="() => OnLogin(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
+    </RadzenStack>
 
 </EditForm>
 

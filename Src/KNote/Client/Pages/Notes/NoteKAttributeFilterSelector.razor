@@ -7,38 +7,25 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <div class="form-group row">
-        <label for="atrUserId" class="col-sm-2 col-form-label">Attribute:</label>
-        <div class="input-group  col-sm-10" id="atrUserId">
-            <select class="form-control col-sm-11" @bind="@Attribute.AtrId">
-                <option></option>
-                @if (listAtr != null)
-                {
-                    @foreach (var atr in listAtr)
-                    {
-                        <option value=@atr.KAttributeId>@atr.Name</option>
-                    }
-                }
-            </select>
-        </div>
-        <ValidationMessage For="@(() => Attribute.AtrId)" />
-    </div>
+    <RadzenStack Gap="1rem">
 
-    <div class="form-group row">
-        <label for="atrTags" class="col-sm-2 col-form-label">Value:</label>
-        <div class="input-group col-sm-10" id="atrTags">
-            <InputText class="form-control" @bind-Value="@Attribute.Value" />
-        </div>
-        <ValidationMessage For="@(() => Attribute.Value)" />
-    </div>
+        <KntFormField Label="Attribute:" Component="AtrId" LabelSize="2">
+            <RadzenDropDown Name="AtrId" TValue="Guid" @bind-Value="@Attribute.AtrId"
+                            Data="@listAtr" TextProperty="Name" ValueProperty="KAttributeId" Style="width: 100%" />
+            <ValidationMessage For="@(() => Attribute.AtrId)" />
+        </KntFormField>
 
-    <hr class="mt-1" />
-    <div class="row">
-        <div class="col-12 text-right">
-            <RadzenButton Text="Ok" Click="() => OnConfirm(formContextAtr)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />  
-        </div>
-    </div>
+        <KntFormField Label="Value:" Component="Value" LabelSize="2">
+            <RadzenTextBox Name="Value" @bind-Value="@Attribute.Value" Style="width: 100%" />
+            <ValidationMessage For="@(() => Attribute.Value)" />
+        </KntFormField>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Ok" Click="() => OnConfirm(formContextAtr)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+
+    </RadzenStack>
  
 </EditForm>
 

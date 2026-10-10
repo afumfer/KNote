@@ -16,9 +16,9 @@
                 @if (EditMode)
                 {
                     <span>
-                        <div class="pl-3" style="font-size:10px">
+                        <div class="rz-pl-3" style="font-size:10px">
                             <RadzenIcon Icon="edit" @onclick="@(() => OnFolderEdit((FolderDto)context.Value))"
-                                MouseEnter="@(args => tooltipService.Open(args, "Edit folder ...", new TooltipOptions(){ Position = TooltipPosition.Top }) )" Class="mr-0 mb-0" />
+                                MouseEnter="@(args => tooltipService.Open(args, "Edit folder ...", new TooltipOptions(){ Position = TooltipPosition.Top }) )" />
                             <RadzenIcon Icon="delete" @onclick="@(() => OnFolderDelete((FolderDto)context.Value))"
                                 MouseEnter="@(args => tooltipService.Open(args, "Delete folder ...", new TooltipOptions(){ Position = TooltipPosition.Right }) )" />
                         </div>

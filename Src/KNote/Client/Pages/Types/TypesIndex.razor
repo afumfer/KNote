@@ -6,41 +6,35 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Note types admin">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New type ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
-</div>
+<KntIndexHeader TextHead="Note types admin">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New type ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
 
-<div class="container-fluid pt-2">
-    <div class="row">
-        <EntityList List="noteTypes">
-            <AllItems>
-                <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" Density="@Density.Compact">
-                    <Columns>
-                        <RadzenDataGridColumn TItem="NoteTypeDto" Property="Name" Title="Name" />
-                        <RadzenDataGridColumn TItem="NoteTypeDto" Property="Description" Title="Full name" />                
-                        <RadzenDataGridColumn TItem="NoteTypeDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                            <Template Context="data">                                                        
-                                <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
-                                    ButtonStyle="ButtonStyle.Primary" 
-                                    MouseEnter="@(args => tooltipService.Open(args, "Edit note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                                <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
-                                    ButtonStyle="ButtonStyle.Danger" 
-                                    MouseEnter="@(args => tooltipService.Open(args, "Delete note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                            </Template>
-                        </RadzenDataGridColumn>
-                    </Columns> 
-                </RadzenDataGrid>
-            </AllItems>
-        </EntityList>
-    </div>
+<div class="rz-pt-2">
+    <EntityList List="noteTypes">
+        <AllItems>
+            <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" Density="@Density.Compact">
+                <Columns>
+                    <RadzenDataGridColumn TItem="NoteTypeDto" Property="Name" Title="Name" />
+                    <RadzenDataGridColumn TItem="NoteTypeDto" Property="Description" Title="Full name" />                
+                    <RadzenDataGridColumn TItem="NoteTypeDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                        <Template Context="data">                                                        
+                            <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
+                                ButtonStyle="ButtonStyle.Primary" 
+                                MouseEnter="@(args => tooltipService.Open(args, "Edit note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+                            <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
+                                ButtonStyle="ButtonStyle.Danger" 
+                                MouseEnter="@(args => tooltipService.Open(args, "Delete note type ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns> 
+            </RadzenDataGrid>
+        </AllItems>
+    </EntityList>
 </div>
 
 @code {
@@ -64,7 +58,7 @@
     async Task OnNew()
     {        
         var res = await dialogService.OpenAsync<TypeNew>($"New note type",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "500px", Height = "300px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
@@ -74,7 +68,7 @@
     async Task OnEdit(NoteTypeDto noteType)
     {        
         var res = await dialogService.OpenAsync<TypeEdit>($"Edit note type",
-               new Dictionary<string, object>() { { "TypeId", noteType.NoteTypeId.ToString() } },
+               new Dictionary<string, object?>() { { "TypeId", noteType.NoteTypeId.ToString() } },
                new DialogOptions() { Width = "500px", Height = "300px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)        

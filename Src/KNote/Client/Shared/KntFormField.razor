@@ -1,0 +1,18 @@
+﻿@* Form row with the label on the left and the field on the right (stacked on small screens).
+   LabelSize="12" puts the label above the field (narrow panels). *@
+
+<RadzenRow AlignItems="AlignItems.Center" Gap="0.5rem">
+    <RadzenColumn Size="12" SizeMD="@LabelSize">
+        <RadzenLabel Text="@Label" Component="@Component" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="@(LabelSize >= 12 ? 12 : 12 - LabelSize)">
+        @ChildContent
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    [Parameter] [EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter] public string? Component { get; set; }
+    [Parameter] public int LabelSize { get; set; } = 3;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

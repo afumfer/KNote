@@ -1,28 +1,17 @@
 ﻿@inject DialogService dialogService
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-10">
-            <div id="MultiSelectCheck">
-                @foreach (var item in Items)
-                {
-                    @if (item.Selected)
-                    {
-                        <div>
-                            <label>
-                                <input type="checkbox" id="@item.Key" checked="checked" onclick="return false;" />
-                                @item.Value
-                            </label>
-                        </div>
-                    }
-                }
-            </div>
-        </div>
-        <div class="col-2 float-right">
-            <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" class="float-right" />
-        </div>
-    </div>
-</div>
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Start" Style="width: 100%">
+    <RadzenStack Gap="0.25rem">
+        @foreach (var item in Items.Where(i => i.Selected))
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                <RadzenIcon Icon="check_box" />
+                <RadzenText Text="@item.Value" class="rz-my-0" />
+            </RadzenStack>
+        }
+    </RadzenStack>
+    <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" title="Select tags" />
+</RadzenStack>
 
 
 @code
@@ -34,7 +23,7 @@
     private async Task SelectTags()
     {
         var res = await dialogService.OpenAsync<InputMultiSelectList>($"Select tags",
-               new Dictionary<string, object>() { { "Items", Items } },
+               new Dictionary<string, object?>() { { "Items", Items } },
                new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
 
         if(res != null)

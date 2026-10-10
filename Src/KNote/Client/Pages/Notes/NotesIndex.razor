@@ -14,7 +14,7 @@
                     <Template Context="data">                                                
                         <RadzenButton Click="@(() => OnNoteEdit.InvokeAsync(data))" Icon="edit" Size="ButtonSize.Small"
                             ButtonStyle="ButtonStyle.Primary" 
-                            MouseEnter="@(args => tooltipService.Open(args, "Edit note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                            MouseEnter="@(args => tooltipService.Open(args, "Edit note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                         <RadzenButton Click="@(() => OnNoteDelete.InvokeAsync(data))" Icon="delete" Size="ButtonSize.Small"
                             ButtonStyle="ButtonStyle.Danger" 
                             MouseEnter="@(args => tooltipService.Open(args, "Delete note ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />

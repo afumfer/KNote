@@ -1,9 +1,9 @@
 ﻿@inject TooltipService tooltipService
 
 
-<div class="mb-1 text-right">
-    <RadzenButton Text="New task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Class="mr-1" />
-</div>
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" class="rz-mb-1">
+    <RadzenButton Text="New task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+</RadzenStack>
 
 <EntityList List="Tasks">
     <AllItems>
@@ -19,7 +19,7 @@
                     <Template Context="data">                                                        
                         <RadzenButton Click="@(() => OnEdit.InvokeAsync(data))" Icon="edit" Size="ButtonSize.Small"
                                       ButtonStyle="ButtonStyle.Primary" 
-                            MouseEnter="@(args => tooltipService.Open(args, "Edit task ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
+                            MouseEnter="@(args => tooltipService.Open(args, "Edit task ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                         <RadzenButton Click="@(() => OnDelete.InvokeAsync(data))" Icon="delete" Size="ButtonSize.Small"
                                       ButtonStyle="ButtonStyle.Danger" 
                             MouseEnter="@(args => tooltipService.Open(args, "Delete task ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />

@@ -7,53 +7,45 @@
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-<div class="container-fluid border">
-    <div class="row">
-        <KntIndexHeader TextHead="Notes tasks calendar">
-            <IndexMenu>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                </RadzenMenu>
-            </IndexMenu>
-        </KntIndexHeader>
-    </div>
+<KntIndexHeader TextHead="Notes tasks calendar">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
+
+<div class="rz-pt-2">
+    <RadzenSplitter> 
+
+         <RadzenSplitterPane Size="60%" Min="500px" Max="80%">   
+
+            <RadzenScheduler @ref=@scheduler  Data=@appointments LoadData="@OnLoadData" TItem="Appointment" 
+                StartProperty="Start" EndProperty="End" TextProperty="Text" 
+                SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect 
+                AppointmentRender=@OnAppointmentRender SlotRender=@OnSlotRender  
+                SelectedIndex="2" style="height: 640px;" > 
+                <RadzenDayView />
+                <RadzenWeekView />
+                <RadzenMonthView />
+            </RadzenScheduler>
+
+         </RadzenSplitterPane>
+         
+         <RadzenSplitterPane> 
+            <div class="rz-p-2 rz-border">
+                Item details
+            </div>
+            <p>@itemSelected</p>
+            <p>@slotSelected</p>
+            <p>@loadData</p>
+         </RadzenSplitterPane>
+
+    </RadzenSplitter>
 </div>
 
-<div class="row">
-    <div class="col-12 pt-2">
-        <RadzenSplitter> 
-
-             <RadzenSplitterPane Size="60%" Min="500px" Max="80%">   
-
-                <RadzenScheduler @ref=@scheduler  Data=@appointments LoadData="@OnLoadData" TItem="Appointment" 
-                    StartProperty="Start" EndProperty="End" TextProperty="Text" 
-                    SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect 
-                    AppointmentRender=@OnAppointmentRender SlotRender=@OnSlotRender  
-                    SelectedIndex="2" style="height: 640px;" > 
-                    <RadzenDayView />
-                    <RadzenWeekView />
-                    <RadzenMonthView />
-                </RadzenScheduler>
-
-             </RadzenSplitterPane>
-             
-             <RadzenSplitterPane> 
-                <div class="p-2 border">
-                    Item details
-                </div>
-                <p>@itemSelected</p>
-                <p>@slotSelected</p>
-                <p>@loadData</p>
-             </RadzenSplitterPane>
-
-        </RadzenSplitter>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12 pt-2">
-        <span> loading ... </span>
-    </div>
+<div class="rz-pt-2">
+    <span> loading ... </span>
 </div>
 
 
