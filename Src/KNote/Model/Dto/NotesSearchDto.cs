@@ -15,6 +15,9 @@ public class NotesSearchDto : SmartModelDtoBase
     // NoteTasks (1-to-n), not just the note's own Topic/Tags/Description.
     public bool SearchInNoteTasks { get; set; }
 
+    // Leaves out the notes of this NoteType (e.g. the AI assistant's own sessions, see KntConst.ChatSessionsTag).
+    public Guid? ExcludeNoteTypeId { get; set; }
+
     public PageIdentifier PageIdentifier { get; set; } = new PageIdentifier();
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

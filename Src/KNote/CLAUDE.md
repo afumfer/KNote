@@ -131,7 +131,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
 - `Service/Core` — clases base `KntService`/`IKntService` más `ServiceRef` (selección de repo/ORM, ver
   arriba).
 - `Service/Interfaces` + `Service/Services` — un par interfaz/implementación por objeto de dominio (Note,
-  Folder, KAttribute, NoteType, SystemValues, User).
+  Folder, KAttribute, NoteType, SystemValues, User, AiSession).
 - `Service/ServicesCommands` — clases de comando (`KntNoteCommands`, `KntFolderCommands`, etc.) construidas
   sobre `IPluginCommand`/`KntCommandServiceBase`. Exponen las operaciones de servicio a `KntScript`, el
   "lenguaje minimalista de automatización" mencionado en el README, invocado desde la consola de scripts de
@@ -150,6 +150,21 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   decide el rol del usuario nuevo (Admin mientras haya como mucho un Admin, Guest después); `CreateAsync` es
   el alta que hace un Admin, con el rol que elija. ClientWin añade encima la autorización de sus casos de
   uso (ver "Autenticación y autorización" en `ClientWin/CLAUDE.md`).
+- **Sesiones del asistente de IA** (`IKntService.AiSessions`, comandos en `KntAiSessionCommands.cs`, Staff).
+  Cada conversación es una nota del tipo `@ChatSessions` (`KntConst.ChatSessionsTag`) en la carpeta
+  `AI Assistant sessions`, con el proveedor y el modelo en los atributos `AiProvider`/`AiModel` del tipo y una
+  `NoteTask` del usuario (fecha de inicio = creación de la sesión) que la vincula a él; las sesiones de un
+  usuario se buscan con `NotesFilterDto.TaskUserId`. Todo pasa por los servicios de cada dominio (nunca por el
+  repositorio). Tipo, atributos y carpeta se crean la primera vez con sus propios comandos, que piden
+  Admin/ProjectManager: para que el asistente funcione con Staff, esa creación se hace dentro de un ámbito
+  `KntAuthorizationBypass` (`Service/Core`, `internal`, `AsyncLocal`, con motivo en el log), que solo omite la
+  comprobación de rol (no la validación, las reglas ni los eventos de los comandos) y solo mientras dura el
+  `using`. Úsalo solo así: dentro de un comando ya autorizado y para operaciones concretas. Solo el usuario de
+  la sesión puede leerla o guardarla. La conversación se guarda en `Description`
+  con `Model/Dto/AiChatSessionTranscript`: Markdown legible con un comentario HTML oculto por mensaje (el del
+  asistente lleva el uso en JSON), del que se recuperan los turnos (`AiChatTurnDto`) exactamente; es el
+  formato común de `ClientWin` y la Web. `search_notes` deja fuera estas notas
+  (`NotesSearchDto.ExcludeNoteTypeId`).
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 

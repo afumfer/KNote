@@ -60,12 +60,13 @@ public abstract class KntCommandServiceBase<TResult>
     /// Checked by KntServiceBase.ExecuteCommand before Execute(). With Service.EnforceAuthorization on,
     /// the command runs only if its class is marked [KntAllowAnonymous], or declares [KntAuthorize] and
     /// the current user's role in this repository (Service.GetCurrentUserRoleAsync) is at least that one.
-    /// A command declaring neither is refused: forgetting the attribute must not leave it open.
+    /// A command declaring neither is refused: forgetting the attribute must not leave it open. Skipped inside
+    /// a KntAuthorizationBypass scope, opened by a command that has already been authorized.
     /// </summary>
     public virtual async Task<Result> ValidateAuthorizationAsync()
     {
         var result = new Result();
-        if (!Service.EnforceAuthorization)
+        if (!Service.EnforceAuthorization || KntAuthorizationBypass.IsActive)
             return result;
 
         var commandType = GetType();

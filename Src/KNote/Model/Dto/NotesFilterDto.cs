@@ -20,6 +20,9 @@ public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
 
     public List<AtrFilterDto> AttributesFilter { get; set; } = new List<AtrFilterDto>();
 
+    // Only notes with at least one NoteTask assigned to this user.
+    public Guid? TaskUserId { get; set; }
+
     public PageIdentifier PageIdentifier { get; set; } = new PageIdentifier();
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

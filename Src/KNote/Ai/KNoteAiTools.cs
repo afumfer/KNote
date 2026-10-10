@@ -41,7 +41,8 @@ public class KNoteAiTools
                 "ModificationDateTime and FolderId - not just topic and tags. Use it to find notes the " +
                 "user refers to before answering questions about their content, to check whether a note " +
                 "about something already exists, or to answer follow-up questions about a note's number, " +
-                "dates, priority or folder without a further lookup."
+                "dates, priority or folder without a further lookup. The AI assistant's own saved chat " +
+                "sessions are not included."
         });
 
         yield return AIFunctionFactory.Create(GetNoteDetailsAsync, new AIFunctionFactoryOptions
@@ -85,7 +86,8 @@ public class KNoteAiTools
         var search = new NotesSearchDto
         {
             TextSearch = textSearch,
-            SearchInDescription = includeContent
+            SearchInDescription = includeContent,
+            ExcludeNoteTypeId = await GetChatSessionsNoteTypeIdAsync()
         };
 
         var response = await _service.Notes.GetSearchMinimalAsync(search);
@@ -107,6 +109,17 @@ public class KNoteAiTools
             sb.AppendLine($"... and {response.Entity.Count - MaxResults} more, not shown.");
 
         return sb.ToString();
+    }
+
+    // The assistant's own sessions (KntConst.ChatSessionsTag notes, of every user) are left out of search_notes:
+    // they are conversations, not the user's notes, and other users' ones must not reach the model.
+    private async Task<Guid?> GetChatSessionsNoteTypeIdAsync()
+    {
+        var response = await _service.NoteTypes.GetAllAsync();
+        if (!response.IsValid)
+            return null;
+
+        return response.Entity?.FirstOrDefault(t => t.Name == KntConst.ChatSessionsTag)?.NoteTypeId;
     }
 
     [Description("Gets the full detail of a single note (including its Description/content) by NoteId or NoteNumber.")]

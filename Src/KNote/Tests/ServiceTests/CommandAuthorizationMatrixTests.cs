@@ -63,6 +63,11 @@ public class CommandAuthorizationMatrixTests
             "KntNotesDeleteTraceNoteAsyncCommand", "KntNotesSaveWindowAsyncCommand", "KntNotesGetAlarmNotesIdAsyncCommand",
             "KntNotesPatchFolderAsyncCommand", "KntNotesPatchChangeTagsAsyncCommand");
 
+        // The AI assistant's sessions: notes and tasks of the user's own (Staff, like the assistant), also to
+        // read them, since the assistant itself requires Staff.
+        Add(nameof(EnumRoles.Staff),
+            "KntAiSessionsGetUserSessionsAsyncCommand", "KntAiSessionsGetAsyncCommand", "KntAiSessionsSaveAsyncCommand");
+
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand");
 

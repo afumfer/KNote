@@ -188,4 +188,108 @@ public class NotesQueryParityTests
         Assert.IsTrue(searchRes.IsValid, searchRes.ErrorMessage);
         Assert.IsTrue(searchRes.Entity.Any(n => n.NoteId == noteRes.Entity.NoteId));
     }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task GetFilterMinimalAsync_TaskUserId_MatchesOnlyNotesWithATaskOfThatUser(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+
+        // Seeded users (ModelBuilderExtensions.Seed()).
+        var userA = (await repo.Users.GetByUserNameAsync("adminKNote")).Entity;
+        var userB = (await repo.Users.GetByUserNameAsync("user1")).Entity;
+        Assert.IsNotNull(userA);
+        Assert.IsNotNull(userB);
+
+        var folderRes = await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Task User Parity Folder" });
+        Assert.IsTrue(folderRes.IsValid, folderRes.ErrorMessage);
+        var folderId = folderRes.Entity.FolderId;
+
+        var noteOfA = await AddNoteAsync(repo, folderId, "Note with a task of A");
+        var noteOfB = await AddNoteAsync(repo, folderId, "Note with a task of B");
+        var noteOfBoth = await AddNoteAsync(repo, folderId, "Note with tasks of A and B");
+        await AddNoteAsync(repo, folderId, "Note without tasks");
+        await AddTaskAsync(repo, noteOfA, userA.UserId);
+        await AddTaskAsync(repo, noteOfB, userB.UserId);
+        await AddTaskAsync(repo, noteOfBoth, userA.UserId);
+        await AddTaskAsync(repo, noteOfBoth, userB.UserId);
+
+        var filterRes = await repo.Notes.GetFilterMinimalAsync(new NotesFilterDto { FolderId = folderId, TaskUserId = userA.UserId });
+
+        Assert.IsTrue(filterRes.IsValid, filterRes.ErrorMessage);
+        CollectionAssert.AreEquivalent(new[] { noteOfA, noteOfBoth }, filterRes.Entity.Select(n => n.NoteId).ToList());
+        Assert.AreEqual(2, filterRes.TotalCount);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task GetSearchMinimalAsync_ExcludeNoteTypeId_LeavesOutOnlyThatType(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+
+        var excludedType = await repo.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = $"Excluded {Guid.NewGuid():N}" });
+        var otherType = await repo.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = $"Other {Guid.NewGuid():N}" });
+        Assert.IsTrue(excludedType.IsValid, excludedType.ErrorMessage);
+        Assert.IsTrue(otherType.IsValid, otherType.ErrorMessage);
+
+        var folderRes = await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Exclude Type Parity Folder" });
+        Assert.IsTrue(folderRes.IsValid, folderRes.ErrorMessage);
+        var folderId = folderRes.Entity.FolderId;
+
+        string uniqueToken = $"PARITYEXCLUDE{Guid.NewGuid():N}";
+        var excluded = await AddNoteAsync(repo, folderId, $"{uniqueToken} excluded", excludedType.Entity.NoteTypeId);
+        var ofOtherType = await AddNoteAsync(repo, folderId, $"{uniqueToken} other type", otherType.Entity.NoteTypeId);
+        var withoutType = await AddNoteAsync(repo, folderId, $"{uniqueToken} without type");
+
+        var searchRes = await repo.Notes.GetSearchMinimalAsync(new NotesSearchDto
+        {
+            TextSearch = uniqueToken,
+            ExcludeNoteTypeId = excludedType.Entity.NoteTypeId
+        });
+
+        Assert.IsTrue(searchRes.IsValid, searchRes.ErrorMessage);
+        CollectionAssert.AreEquivalent(new[] { ofOtherType, withoutType }, searchRes.Entity.Select(n => n.NoteId).ToList());
+
+        // Also when looking a note up by its number.
+        var excludedNumber = (await repo.Notes.GetAsync(excluded)).Entity.NoteNumber;
+        var byNumberRes = await repo.Notes.GetSearchMinimalAsync(new NotesSearchDto
+        {
+            TextSearch = $"#{excludedNumber}",
+            ExcludeNoteTypeId = excludedType.Entity.NoteTypeId
+        });
+        Assert.IsTrue(byNumberRes.IsValid, byNumberRes.ErrorMessage);
+        Assert.AreEqual(0, byNumberRes.Entity.Count);
+    }
+
+    private static async Task<Guid> AddNoteAsync(KNote.Repository.IKntRepository repo, Guid folderId, string topic, Guid? noteTypeId = null)
+    {
+        var noteRes = await repo.Notes.AddAsync(new NoteDto
+        {
+            NoteId = Guid.NewGuid(),
+            Topic = topic,
+            FolderId = folderId,
+            NoteTypeId = noteTypeId,
+            CreationDateTime = DateTime.Now,
+            ModificationDateTime = DateTime.Now
+        });
+        Assert.IsTrue(noteRes.IsValid, noteRes.ErrorMessage);
+        return noteRes.Entity.NoteId;
+    }
+
+    private static async Task AddTaskAsync(KNote.Repository.IKntRepository repo, Guid noteId, Guid userId)
+    {
+        var taskRes = await repo.Notes.AddNoteTaskAsync(new NoteTaskDto
+        {
+            NoteTaskId = Guid.NewGuid(),
+            NoteId = noteId,
+            UserId = userId,
+            Description = "Parity task",
+            Tags = ""
+        });
+        Assert.IsTrue(taskRes.IsValid, taskRes.ErrorMessage);
+    }
 }

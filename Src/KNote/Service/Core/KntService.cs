@@ -132,6 +132,17 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntAiSessionService _aiSessions;
+    public IKntAiSessionService AiSessions
+    {
+        get
+        {
+            if (_aiSessions == null)
+                _aiSessions = new KntAiSessionService(this);
+            return _aiSessions;
+        }
+    }
+
     public RepositoryRef RepositoryRef
     {
         get { return _repository.RepositoryRef; }

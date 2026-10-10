@@ -43,6 +43,7 @@ internal class FakeKntService : IKntService
     public IKntNoteService Notes => NotesFake;
     public IKntNoteTypeService NoteTypes => NoteTypesFake;
     public IKntTraceNoteTypeService TraceNoteTypes => TraceNoteTypesFake;
+    public IKntAiSessionService AiSessions => throw new NotSupportedException();
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();

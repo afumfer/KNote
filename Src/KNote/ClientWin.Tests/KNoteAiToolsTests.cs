@@ -20,10 +20,19 @@ public class KNoteAiToolsTests
         return result;
     }
 
+    // search_notes first looks up the note types (to leave out the AI sessions, see
+    // SearchNotes_LeavesOutTheAiSessionsNoteType); a repository with no such type unless given.
+    private static FakeKntService ServiceForSearch(params NoteTypeDto[] noteTypes)
+    {
+        var service = new FakeKntService();
+        service.NoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(Valid(noteTypes.ToList()));
+        return service;
+    }
+
     [TestMethod]
     public async Task SearchNotes_NoMatches_ReturnsFriendlyMessage()
     {
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = _ => Task.FromResult(Valid(new List<NoteMinimalDto>()));
         var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
@@ -36,7 +45,7 @@ public class KNoteAiToolsTests
     public async Task SearchNotes_ForwardsTextSearchAndIncludeContentToTheQuery()
     {
         NotesSearchDto capturedSearch = null;
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = search =>
         {
             capturedSearch = search;
@@ -48,6 +57,25 @@ public class KNoteAiToolsTests
 
         Assert.AreEqual("invoice !draft", capturedSearch.TextSearch);
         Assert.IsTrue(capturedSearch.SearchInDescription);
+        Assert.IsNull(capturedSearch.ExcludeNoteTypeId, "No AI sessions note type in this repository: nothing to leave out.");
+    }
+
+    [TestMethod]
+    public async Task SearchNotes_LeavesOutTheAiSessionsNoteType()
+    {
+        var sessionsType = new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.ChatSessionsTag };
+        NotesSearchDto capturedSearch = null;
+        var service = ServiceForSearch(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.CodeTag }, sessionsType);
+        service.NotesFake.GetSearchMinimalAsyncImpl = search =>
+        {
+            capturedSearch = search;
+            return Task.FromResult(Valid(new List<NoteMinimalDto>()));
+        };
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
+
+        await GetSearchNotesTool(tools)("invoice", false);
+
+        Assert.AreEqual(sessionsType.NoteTypeId, capturedSearch.ExcludeNoteTypeId);
     }
 
     [TestMethod]
@@ -61,7 +89,7 @@ public class KNoteAiToolsTests
             Tags = "[Personal]",
             Priority = 2
         };
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = _ => Task.FromResult(Valid(new List<NoteMinimalDto> { note }));
         var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
@@ -79,7 +107,7 @@ public class KNoteAiToolsTests
     [TestMethod]
     public async Task SearchNotes_ServiceReturnsError_ReturnsErrorTextToTheModel()
     {
-        var service = new FakeKntService();
+        var service = ServiceForSearch();
         service.NotesFake.GetSearchMinimalAsyncImpl = _ => Task.FromResult(Invalid<List<NoteMinimalDto>>("boom"));
         var tools = new KNoteAiTools(service, new KNoteAiToolsHost(TestStoreFactory.CreateEmpty()));
 
