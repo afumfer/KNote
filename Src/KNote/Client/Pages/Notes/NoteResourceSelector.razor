@@ -1,38 +1,33 @@
 ﻿@inject DialogService dialogService
 
 
-<div class="overflow-auto" style="height:400px">
+<RadzenStack Gap="1rem">
 
-    <InputFileUpload OnSelectedFile="OnFileSelected" />
+    <RadzenStack Gap="1rem" Style="height: 400px; overflow: auto;">
 
-    <div class="form-group">
-        <label>Description:</label>
-        <input type="text" class="form-control" @bind="@resource.Description" />
-    </div>
-    <div class="form-group">
-        <label>Order:</label>
-        <input type="text" class="form-control" @bind="@resource.Order" />
-    </div>
+        <InputFileUpload OnSelectedFile="OnFileSelected" />
 
-    @if (resourceFlowControl == null)
-    {
-        <p>Upload file .... </p>
-    }
-    else if (resourceFlowControl != "0")
-    {
-        <p></p>
-    }
+        <KntFormField Label="Description:" Component="Description">
+            <RadzenTextBox Name="Description" @bind-Value="@resource.Description" Style="width: 100%" />
+        </KntFormField>
 
-</div>
+        <KntFormField Label="Order:" Component="Order">
+            <RadzenNumeric Name="Order" @bind-Value="@resource.Order" Style="width: 100%" />
+        </KntFormField>
 
-<hr class="mt-1" />
+        @if (resourceFlowControl == null)
+        {
+            <RadzenText Text="Upload file .... " />
+        }
 
-<div class="row">
-    <div class="col-md-12 text-right">
-        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-    </div>
-</div>
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" />
+        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
+    </RadzenStack>
+
+</RadzenStack>
 
 @code {
     private ResourceInfoDto resource = new ResourceInfoDto();

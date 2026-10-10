@@ -119,6 +119,11 @@ Patrones ya establecidos que hay que seguir:
   ni `RadzenTemplateForm`. Cada campo va en una fila con la etiqueta a la izquierda: `Shared/KntFormField`
   (`Label`, `Component` = `Name` del control, `LabelSize` en columnas de 12, por defecto 3), que se apila en
   pantallas pequeñas. Los campos se agrupan en un `<RadzenStack Gap="1rem">`. Referencia: `Types/TypeForm`.
+  Varios campos en una fila: `RadzenRow` con un `RadzenColumn Size="12" SizeMD="n"` por campo y un
+  `KntFormField` dentro (su `LabelSize` es relativo a la columna; ver `Notes/NoteTaskEditor`, `NoteForm`). En
+  paneles estrechos, `LabelSize="12"` pone la etiqueta encima del campo (`Notes/NotesFilterCriteria`). Para
+  elegir carpeta, `Shared/KntFolderPicker` (abre `KntFolderSelector`; el botón de quitar solo aparece si se
+  atiende `FolderReset`).
 - **Botones y espaciado**: grupos de botones en `<RadzenStack Orientation="Orientation.Horizontal"
   JustifyContent="JustifyContent.End" Gap="0.5rem">`, sin clases de margen. Para maquetar,
   `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen

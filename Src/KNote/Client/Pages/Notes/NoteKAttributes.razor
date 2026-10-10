@@ -1,44 +1,33 @@
 ﻿@inject IStore store
-@inject NotificationService notificationService
 
 
-@foreach (var KAttribute in Attributes)
-{
-    <div class="form-group row">
-        <label for="atrTags" class="col-sm-3 col-form-label border-top">
-            @KAttribute.Name
-            @if (KAttribute.RequiredValue)
-            {
-                <span>(*)</span>
-            }
-            :
-        </label>
-        
-        <div class="input-group col-sm-9 border pt-1 pb-1" id="atrTags">
+<RadzenStack Gap="0.75rem">
+    @foreach (var KAttribute in Attributes)
+    {
+        <KntFormField Label="@($"{KAttribute.Name}{(KAttribute.RequiredValue ? " (*)" : "")}:")">
             @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.String)
             {
-                <InputText class="form-control" @bind-Value="@KAttribute.ValueString" />
+                <RadzenTextBox @bind-Value="@KAttribute.ValueString" Style="width: 100%" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TextArea)
             {
-                <InputTextArea class="form-control p-2" @bind-Value="@KAttribute.ValueString" />
+                <RadzenTextArea @bind-Value="@KAttribute.ValueString" Style="width: 100%" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.DateTime)
             {
-                <InputDate class="form-control" @bind-Value="@KAttribute.ValueDateTime" />
-                @*<ValidationMessage For="@(() => KAttribute.ValueDateTime)" />*@
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@KAttribute.ValueDateTime" DateFormat="dd/MM/yyyy" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Int)
             {
-                <InputNumber class="form-control" @bind-Value="@KAttribute.ValueInt" />
+                <RadzenNumeric TValue="int?" @bind-Value="@KAttribute.ValueInt" Style="width: 100%" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Double)
             {
-                <InputNumber class="form-control" @bind-Value="@KAttribute.ValueDouble" />
+                <RadzenNumeric TValue="double?" @bind-Value="@KAttribute.ValueDouble" Style="width: 100%" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Bool)
             {
-                <InputCheckbox class="form-control" @bind-Value="@KAttribute.ValueBool" />
+                <RadzenCheckBox TValue="bool" @bind-Value="@KAttribute.ValueBool" />
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
             {
@@ -46,17 +35,13 @@
             }
             else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
             {
-                <select class="form-control" @bind="@KAttribute.ValueTabulate">
-                    <option></option>
-                    @foreach (var item in KAttribute.TabulatedValues)
-                    {
-                        <option value=@item.Value @key="item.KAttributeTabulatedValueId">@item.Value</option>
-                    }
-                </select>
+                <RadzenDropDown TValue="string" @bind-Value="@KAttribute.ValueTabulate"
+                                Data="@KAttribute.TabulatedValues" TextProperty="Value" ValueProperty="Value"
+                                AllowClear="true" Style="width: 100%" />
             }
-        </div>
-    </div>
-}
+        </KntFormField>
+    }
+</RadzenStack>
 
 @code {
     [Parameter] public List<NoteKAttributeDto> Attributes { get; set; }
@@ -94,11 +79,11 @@
                         KAttribute.ValueBool = valB;
                     break;
                 case EnumKAttributeDataType.TabulatedValue:
-                    KAttribute.TabulatedValues = await GetTabulatedValues(KAttribute.KAttributeId);
+                    KAttribute.TabulatedValues = await GetTabulatedValues(store, KAttribute.KAttributeId);
                     KAttribute.ValueTabulate = KAttribute.Value;
                     break;
                 case EnumKAttributeDataType.TagsValue:
-                    KAttribute.TagsValues = await GetTagsValues(KAttribute.KAttributeId, KAttribute.Value);
+                    KAttribute.TagsValues = await GetTagsValues(store, KAttribute.KAttributeId, KAttribute.Value);
                     KAttribute.ValueTags = KAttribute.Value;
                     break;
                 default:
@@ -109,28 +94,25 @@
         await base.OnInitializedAsync();
     }
 
-    public async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(Guid idAttribute)
+    // Static so NoteForm can load the values of a new note type's attributes even when this component
+    // doesn't exist (RadzenTabs only renders the selected tab). A failed call is already notified by
+    // BaseService (AppState.NotifyError).
+    public static async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(IStore store, Guid idAttribute)
     {
         var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
-        {            
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.ErrorMessage, Duration = 12000 });
             return new List<KAttributeTabulatedValueDto>();
-        }
         else
-        {
             return result.Entity.ToList();
-        }
     }
 
-    public async Task<List<MultiSelectListDto>> GetTagsValues(Guid idAttribute, string tags)
+    public static async Task<List<MultiSelectListDto>> GetTagsValues(IStore store, Guid idAttribute, string tags)
     {
         List<MultiSelectListDto> tagsSel;
 
         var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
         if (!result.IsValid)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute tabulated values.", Detail = result.ErrorMessage, Duration = 12000 });
             tagsSel = new List<MultiSelectListDto>();
         }
         else

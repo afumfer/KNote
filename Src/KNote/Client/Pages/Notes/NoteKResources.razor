@@ -1,9 +1,9 @@
 ﻿@inject TooltipService tooltipService
 
 
-<div class="mb-1 text-right">
-    <RadzenButton Text="New resource" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Class="mr-1" />
-</div>
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" class="rz-mb-1">
+    <RadzenButton Text="New resource" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+</RadzenStack>
 
 <EntityList List="Resources">
     <AllItems>
@@ -14,9 +14,7 @@
                 <RadzenDataGridColumn TItem="ResourceInfoDto" Property="Content" Title="Content" Width="150px"TextAlign="TextAlign.Center">
                     <Template Context="item">
                         <a href="@item.FullUrl" target="_blank" rel="noopener noreferrer">
-                            <center>
-                                <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
-                            </center>
+                            <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
                         </a>
                     </Template>
                 </RadzenDataGridColumn>
@@ -26,7 +24,7 @@
                         <RadzenButton Click="@(() => OnInsertInDesription.InvokeAsync(data))" Icon="insert_page_break"
                                       ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                                       MouseEnter="@(args => tooltipService.Open(args, "Insert resource reference in note description ...",
-                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0" />
+                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
                         <RadzenButton Click="@(() => OnDelete.InvokeAsync(data))" Icon="delete"
                                       ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
                                       MouseEnter="@(args => tooltipService.Open(args, "Delete resource ...",

@@ -9,9 +9,9 @@
     
     <ToolingHeader Title="@Title">
         <Buttons>            
-            <RadzenButton Text="Save changes" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary" Class="mr-1" /> 
-            <RadzenButton Text="Save changes and new" Icon="save" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Primary" Class="mr-1" /> 
-            <RadzenButton Icon="logout" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1"  />  
+            <RadzenButton Text="Save changes" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Save changes and new" Icon="save" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Icon="logout" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" title="Exit" />
         </Buttons>
     </ToolingHeader>
 
@@ -19,78 +19,57 @@
         <Tabs>
             <RadzenTabsItem Text="&nbsp;Overview" Icon="article" >                
 
-                <div class="form-group row">
-                    <label for="atrTopic" class="col-sm-1 col-form-label">Topic:</label>
-                    <div class="input-group col-sm-11 d-flex flex-column" id="atrTopic">
-                        <div class="d-flex">
-                            <InputText class="form-control" @bind-Value="@Note.Topic" />
-                            <div class="input-group-append">
-                                <label class="btn btn-outline-secondary" data-toggle="tooltip" title="Note number (automatically assigned)">
-                                    #@Note.NoteNumber
-                                </label>
-                            </div>
-                        </div>
+                <RadzenStack Gap="1rem">
+
+                    <KntFormField Label="Topic:" Component="Topic" LabelSize="1">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <RadzenTextBox Name="Topic" @bind-Value="@Note.Topic" Style="flex: 1;" />
+                            <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"#{Note.NoteNumber}")" title="Note number (automatically assigned)" />
+                        </RadzenStack>
                         <ValidationMessage For="@(() => Note.Topic)" />
-                    </div>
-                </div>
+                    </KntFormField>
 
-                <div class="form-group row">
-                    <label for="atrFolder" class="col-sm-1 col-form-label">Folder:</label>
-                    <div class="input-group col-sm-11 d-flex flex-column" id="atrFolder">
-                        <div class="d-flex">
-                            <input type="text" disabled class="form-control" @bind="@Note.FolderDto.Name" />
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" @onclick="@OnFolderSelector"
-                                        data-toggle="tooltip" title="Select folder">
-                                    <i class="fa fa-folder" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
+                    <KntFormField Label="Folder:" LabelSize="1">
+                        <KntFolderPicker FolderName="@Note.FolderDto.Name" FolderSelected="OnFolderSelected" />
                         <ValidationMessage For="@(() => Note.FolderId)" />
-                    </div>
-                </div>
+                    </KntFormField>
 
-                <div class="form-group row">
-                    <label for="atrPriority" class="col-sm-1 col-form-label">Priority:</label>
-                    <div class="input-group col-sm-2" id="atrPriority">
-                        <InputNumber class="form-control col-sm-11" @bind-Value="@Note.Priority" />
-                        <ValidationMessage For="@(() => Note.Priority)" />
-                    </div>
+                    @* Several fields in one row: a column per field, each with its KntFormField
+                       (LabelSize is relative to the column). *@
+                    <RadzenRow Gap="1rem">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <KntFormField Label="Priority:" Component="Priority" LabelSize="4">
+                                <RadzenNumeric Name="Priority" @bind-Value="@Note.Priority" Style="width: 100%" />
+                                <ValidationMessage For="@(() => Note.Priority)" />
+                            </KntFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="5">
+                            <KntFormField Label="Tags:" Component="Tags" LabelSize="2">
+                                <RadzenTextBox Name="Tags" @bind-Value="@Note.Tags" Style="width: 100%" />
+                                <ValidationMessage For="@(() => Note.Tags)" />
+                            </KntFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <KntFormField Label="Type:" Component="NoteTypeId" LabelSize="3">
+                                <RadzenDropDown Name="NoteTypeId" TValue="Guid?" Data="@NoteTypes" TextProperty="Name" ValueProperty="NoteTypeId"
+                                                Value="@Note.NoteTypeId"
+                                                ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
+                                                ValueExpression="@(() => Note.NoteTypeId)"
+                                                AllowClear="true" Style="width: 100%" />
+                                <ValidationMessage For="@(() => Note.NoteTypeId)" />
+                            </KntFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
 
-                    <label for="atrTags" class="col-sm-1 col-form-label">Tags:</label>
-                    <div class="input-group col-sm-4" id="atrTags">
-                        <InputText class="form-control" @bind-Value="@Note.Tags" />
-                        <ValidationMessage For="@(() => Note.Tags)" />
-                    </div>
-
-                    <label for="atrNoteType" class="col-sm-1 col-form-label">Type:</label>
-                    <div class="input-group col-sm-3" id="atrNoteType">
-                        <InputSelect class="form-control col-sm11"
-                                        Value="@Note.NoteTypeId"
-                                        ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
-                                        ValueExpression="@(() => Note.NoteTypeId)">
-                            <option></option>
-                            @if (NoteTypes != null)
-                            {
-                                @foreach (var ntype in NoteTypes)
-                                {
-                                    <option value=@ntype.NoteTypeId>@ntype.Name</option>
-                                }
-                            }
-                        </InputSelect>                
-                        <ValidationMessage For="@(() => Note.NoteTypeId)" />
-                    </div>
-                </div>
-                               
-                <div class="form-group form-markdown">
                     <InputMarkdown @bind-Value="@Note.Description"
                                    For="@(() => Note.Description)"></InputMarkdown>
-                </div>
-            
+
+                </RadzenStack>
+
             </RadzenTabsItem>
             
             <RadzenTabsItem Text="&nbsp;Attributes" Icon="fact_check">                
-                <NoteKAttributes @ref="noteKAttributes"  Attributes="Note.KAttributesDto"></NoteKAttributes>
+                <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
             </RadzenTabsItem>
             
             <RadzenTabsItem Text="&nbsp;Resources" Icon="upload_file">                
@@ -140,7 +119,6 @@
     private List<NoteTaskDto>? tasks; 
     private NoteTaskDto? taskEdit; 
     private List<UserDto>? users;
-    private NoteKAttributes noteKAttributes = null!;
 
     private Guid? oldNoteType = null;
 
@@ -252,18 +230,10 @@
 
     #region Management FolderSelector
 
-    private async Task OnFolderSelector()
-    {        
-        var res = await dialogService.OpenAsync<KntFolderSelector>($"Folder selector",
-               new Dictionary<string, object>() {  },
-               new DialogOptions() { Width = "700px", Height = "520px"});        
-
-        if(res != null)
-        {
-            var f = (FolderDto)res;
-            Note.FolderDto = f.GetSimpleDto<FolderDto>();
-            Note.FolderId = f.FolderId;
-        }
+    private void OnFolderSelected(FolderDto f)
+    {
+        Note.FolderDto = f.GetSimpleDto<FolderDto>();
+        Note.FolderId = f.FolderId;
     }
 
     #endregion
@@ -425,9 +395,9 @@
             foreach (var a in Note.KAttributesDto)
             {
                 if (a.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
-                    a.TabulatedValues = await noteKAttributes.GetTabulatedValues(a.KAttributeId);
+                    a.TabulatedValues = await NoteKAttributes.GetTabulatedValues(webApiService, a.KAttributeId);
                 if (a.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-                    a.TagsValues = await noteKAttributes.GetTagsValues(a.KAttributeId, "");
+                    a.TagsValues = await NoteKAttributes.GetTagsValues(webApiService, a.KAttributeId, "");
             }
 
             if (NoteTypes != null)
