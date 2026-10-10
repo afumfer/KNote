@@ -24,6 +24,14 @@
             "console": "internalConsole"
         },
         {
+            // Server + Client (Blazor WebAssembly). Requires C# Dev Kit; uses the first "Project" profile of
+            // Server/Properties/launchSettings.json (inspectUri, launchUrl "KNote") and attaches the browser debugger.
+            "name": "KNote.Web (Server + Client WASM)",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Server/KNote.Server.csproj"
+        },
+        {
             "name": "KNote.ClientWin",
             "type": "coreclr",
             "request": "launch",

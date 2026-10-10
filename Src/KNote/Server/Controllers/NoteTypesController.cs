@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class NoteTypesController : ControllerBase
