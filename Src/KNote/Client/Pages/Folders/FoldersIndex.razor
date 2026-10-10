@@ -18,21 +18,19 @@
     </IndexMenu>
 </KntIndexHeader>
 
-<div class="container-fluid border pt-2">
-    <div class="row">
-        @if (foldersTree == null)
-        {            
-            <RadzenLabel class="m-2" Text="Loading tree folders ..." />
-        }
-        else
-        {
-            <KntFoldersTreeView FoldersInfo="foldersTree"
-                                EditMode="true"
-                                FolderSelected="OnFolderSelected"
-                                FolderEdit="OnEdit"
-                                FolderDelete="OnDelete" />
-        }
-    </div>
+<div class="rz-border rz-p-2 rz-mt-2">
+    @if (foldersTree == null)
+    {
+        <RadzenLabel class="rz-m-2" Text="Loading tree folders ..." />
+    }
+    else
+    {
+        <KntFoldersTreeView FoldersInfo="foldersTree"
+                            EditMode="true"
+                            FolderSelected="OnFolderSelected"
+                            FolderEdit="OnEdit"
+                            FolderDelete="OnDelete" />
+    }
 </div>
 
 

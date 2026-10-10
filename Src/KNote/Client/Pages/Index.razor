@@ -11,19 +11,12 @@
 
 @*@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]*@
 
-<div>
-    <h3>@KntConst.AppName home page</h3>
-    <p><i>@appInfo</i></p>
-    
-</div>
+<RadzenStack Gap="0.25rem" class="rz-pb-2 rz-mb-2 rz-border-bottom">
+    <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H3" class="rz-my-0">@KntConst.AppName home page</RadzenText>
+    <i>@appInfo</i>
+</RadzenStack>
 
-<hr />    
-
-<div class="row">
-    <div class="col-12">
-        <NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
-    </div>
-</div>
+<NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
 
 
 @code {    

@@ -14,9 +14,9 @@
     </IndexMenu>
 </KntIndexHeader>
 
-<p class="mt-2 ml-2" style="font-size:small"><b>Total Tokens:</b> @totalTokens</p>
+<p class="rz-mt-2 rz-ml-2" style="font-size:small"><b>Total Tokens:</b> @totalTokens</p>
 
-<div class="mt-3" id="chatcontainer" style="height:82%; width:100%; overflow: scroll;">
+<div class="rz-mt-3" id="chatcontainer" style="height:82%; width:100%; overflow: scroll;">
     @foreach (var item in messages)
     {
         <div>
@@ -59,24 +59,18 @@
 
 @if (!processing)
 {
-    <div class="row pt-2">
-        <div class="col-10 mb-2">
-            <input type="text" class="form-control" @bind-value="promptInput" @bind-value:event="oninput"
-               @onkeypress="@((KeyboardEventArgs e) => PromptKeyPress(e))"
-                   placeholder="Prompt  ..." />
-        </div>
-        <div class="col-2 mb-2">
-            <RadzenButton Icon="send" Click="() => CallChatGPT()" ButtonStyle="ButtonStyle.Primary" Class="mr-1"
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-pt-2 rz-mb-2">
+        <RadzenTextBox @bind-Value="promptInput" Immediate="true" Placeholder="Prompt  ..." Style="flex: 1;"
+                       @onkeypress="@((KeyboardEventArgs e) => PromptKeyPress(e))" />
+        <RadzenButton Icon="send" Click="() => CallChatGPT()" ButtonStyle="ButtonStyle.Primary"
                       MouseEnter="@(args => tooltipService.Open(args, "Call ChatGPT", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-            <RadzenButton Icon="cleaning_services" Click="() => RestartChatGPT()" ButtonStyle="ButtonStyle.Secondary" Class="mr-0"
+        <RadzenButton Icon="cleaning_services" Click="() => RestartChatGPT()" ButtonStyle="ButtonStyle.Secondary"
                       MouseEnter="@(args => tooltipService.Open(args, "Restart", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-        </div>
-    </div>
+    </RadzenStack>
 }
 else
 {
-    <br>
-    <h4>Processing...</h4>
+    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H4" class="rz-mt-4">Processing...</RadzenText>
 }
 <br />
 

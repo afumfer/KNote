@@ -17,35 +17,33 @@
     </IndexMenu>
 </KntIndexHeader>
 
-<div class="row">
-    <div class="col-12 pt-2">
-        <RadzenSplitter> 
+<div class="rz-pt-2">
+    <RadzenSplitter> 
 
-             <RadzenSplitterPane Size="60%" Min="500px" Max="80%">   
+         <RadzenSplitterPane Size="60%" Min="500px" Max="80%">   
 
-                <RadzenScheduler @ref=@scheduler  Data=@appointments LoadData="@OnLoadData" TItem="Appointment" 
-                    StartProperty="Start" EndProperty="End" TextProperty="Text" 
-                    SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect 
-                    AppointmentRender=@OnAppointmentRender SlotRender=@OnSlotRender  
-                    SelectedIndex="2" style="height: 640px;" > 
-                    <RadzenDayView />
-                    <RadzenWeekView />
-                    <RadzenMonthView />
-                </RadzenScheduler>
+            <RadzenScheduler @ref=@scheduler  Data=@appointments LoadData="@OnLoadData" TItem="Appointment" 
+                StartProperty="Start" EndProperty="End" TextProperty="Text" 
+                SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect 
+                AppointmentRender=@OnAppointmentRender SlotRender=@OnSlotRender  
+                SelectedIndex="2" style="height: 640px;" > 
+                <RadzenDayView />
+                <RadzenWeekView />
+                <RadzenMonthView />
+            </RadzenScheduler>
 
-             </RadzenSplitterPane>
-             
-             <RadzenSplitterPane> 
-                <div class="p-2 border">
-                    Item details
-                </div>
-                <p>@itemSelected</p>
-                <p>@slotSelected</p>
-                <p>@loadData</p>
-             </RadzenSplitterPane>
+         </RadzenSplitterPane>
+         
+         <RadzenSplitterPane> 
+            <div class="rz-p-2 rz-border">
+                Item details
+            </div>
+            <p>@itemSelected</p>
+            <p>@slotSelected</p>
+            <p>@loadData</p>
+         </RadzenSplitterPane>
 
-        </RadzenSplitter>
-    </div>
+    </RadzenSplitter>
 </div>
 
 @code {

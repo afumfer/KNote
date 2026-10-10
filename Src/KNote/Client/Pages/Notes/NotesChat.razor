@@ -14,30 +14,26 @@
     </IndexMenu>
 </KntIndexHeader>
 
-<div class="row">
-    <div class="col-12 pt-2">
-        <AuthorizeView>
-            <Authorized>
+<div class="rz-pt-2 rz-pb-2 rz-mb-2 rz-border-bottom">
+    <AuthorizeView>
+        <Authorized>
+            <RadzenStack Gap="1rem">
                 <RadzenCard>
-                    <div class="form-group text-right">
-                        <label>@(userInput = context?.User?.Identity?.Name)</label>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="mr-2 mb-2">Your message </label>
-                        <input type="text" @bind-value="messageInput" @bind-value:event="oninput" style="width:100%;" @onkeypress="@((KeyboardEventArgs e) => MessageKeyPress(e))" />
-                    </div>
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText class="rz-text-align-end rz-my-0">@(userInput = context?.User?.Identity?.Name)</RadzenText>
+                        <RadzenLabel Text="Your message" Component="MessageInput" />
+                        <RadzenTextBox Name="MessageInput" @bind-Value="messageInput" Immediate="true" Style="width: 100%"
+                                       @onkeypress="@((KeyboardEventArgs e) => MessageKeyPress(e))" />
+                    </RadzenStack>
                 </RadzenCard>
-        
-                <div class="col-md-12 text-center mt-3">
-                    <RadzenButton Text="Send" Click="() => Send()" ButtonStyle="ButtonStyle.Primary" Class="mr-1" Disabled="@(!store.ChatIsConnected)" />
-                </div>
-            </Authorized>
-        </AuthorizeView>
-    </div>
-</div>
 
-<hr />
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center">
+                    <RadzenButton Text="Send" Click="() => Send()" ButtonStyle="ButtonStyle.Primary" Disabled="@(!store.ChatIsConnected)" />
+                </RadzenStack>
+            </RadzenStack>
+        </Authorized>
+    </AuthorizeView>
+</div>
 
 <ul>
     @foreach (var message in messages)

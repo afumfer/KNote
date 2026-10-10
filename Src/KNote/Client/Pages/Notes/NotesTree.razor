@@ -9,55 +9,33 @@
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-<div class="col-lg-12 border">
-    <div class="row">
-        <div class="col-6">                    
-            @if(folder != null)
+<KntIndexHeader TextHead="@(folder?.Name ?? "( No folder selected )")" Icon="@(folder != null ? "folder" : null)">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
+
+<RadzenCard class="rz-p-1 rz-mt-2">
+    <RadzenSplitter>
+        <RadzenSplitterPane Size="25%" Min="200px" Max="45%">
+            <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
+        </RadzenSplitterPane>
+        <RadzenSplitterPane>
+            <RadzenPager Density="Density.Compact" @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
+                         HorizontalAlign="HorizontalAlign.Right"
+                         Count="@((int)paginationContext.TotalCount)"
+                         PageSize="@paginationContext.PageSize" PageNumbersCount="5"
+                         PageChanged=@PageChanged/>
+
+            @if (folder != null)
             {
-                <h4 class="mt-2"><span class="oi oi-folder pr-2"></span> @folder.Name</h4>
+                <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
             }
-            else
-            {
-                <h4 class="mt-2">( No folder selected )</h4>
-            }                    
-        </div>
-        <div class="col-6 pr-0">
-            <span class="float-right">
-                <RadzenMenu>
-                    <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-                    <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
-                </RadzenMenu>
-            </span>
-        </div>
-    </div>        
-</div>
-
-<RadzenCard class="docu pt-1 pl-0 pr-1 pb-0 mt-2">
-    <div class="col-lg-12">    
-        <div class="row">
-            <RadzenSplitter>
-                <RadzenSplitterPane Size="25%" Min="200px" Max="45%">            
-                    <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
-                </RadzenSplitterPane>
-                <RadzenSplitterPane>                            
-                    <RadzenPager Density="Density.Compact" @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
-                                 HorizontalAlign="HorizontalAlign.Right" 
-                                Count="@((int)paginationContext.TotalCount)" 
-                                PageSize="@paginationContext.PageSize" PageNumbersCount="5" 
-                                PageChanged=@PageChanged/>
-
-                    @if (folder == null)
-                    {
-                        <h5>  </h5>
-                    }
-                    else
-                    {
-                        <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
-                    }           
-                </RadzenSplitterPane>
-            </RadzenSplitter>
-        </div>
-    </div>
+        </RadzenSplitterPane>
+    </RadzenSplitter>
 </RadzenCard>
 
 
