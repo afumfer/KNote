@@ -195,7 +195,11 @@ de algún componente (`*.razor.css`). No añadas clases de Bootstrap (`row`, `co
   crea la tool `create_task` se enlazan en el chat (se abren en otra pestaña) mientras la página está abierta.
 - **Markdown**: las descripciones de nota se editan con `Shared/InputMarkdown` y se muestran con
   `Shared/ViewMarkdown` (Markdig). `Server` reescribe las URLs de recursos de la descripción al leer/guardar
-  para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`).
+  para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`). `ViewMarkdown` inserta en la página el HTML que
+  traiga el Markdown (`MarkupString`): para contenido no fiable usa `DisableHtml="true"`, que lo muestra como
+  texto. Lo usa el chat del asistente (las respuestas las escribe el modelo, que puede repetir lo que leyó en
+  notas de otros usuarios), igual que `AiChatHtml` en `ClientWin`. Las descripciones de nota siguen
+  insertando su HTML (es parte de su formato): está pendiente sanearlo (quitar scripts y atributos `on*`).
 
 ## Compilar, ejecutar y depurar
 

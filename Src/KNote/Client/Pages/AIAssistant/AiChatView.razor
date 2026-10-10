@@ -14,7 +14,7 @@
         var turn = Turns[i];
         <div class="ai-msg ai-user rz-background-color-base-200">@turn.Prompt</div>
         <div class="ai-msg ai-assistant rz-border">
-            <ViewMarkdown MarkdownContent="@turn.Answer" />
+            <ViewMarkdown MarkdownContent="@turn.Answer" DisableHtml="true" />
             @if (turn.Truncated)
             {
                 <RadzenText TextStyle="TextStyle.Caption" class="rz-color-warning rz-my-0">@AiChatTurnDto.TruncatedNotice</RadzenText>
@@ -30,7 +30,7 @@
         <div class="ai-msg ai-assistant rz-border">
             @if (!string.IsNullOrEmpty(PendingAnswer))
             {
-                <ViewMarkdown MarkdownContent="@PendingAnswer" />
+                <ViewMarkdown MarkdownContent="@PendingAnswer" DisableHtml="true" />
             }
             <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-500 rz-my-0">
                 @(string.IsNullOrEmpty(ToolInUse) ? "Writing..." : $"Using {ToolInUse}...")

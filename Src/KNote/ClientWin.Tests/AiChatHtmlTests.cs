@@ -1,19 +1,30 @@
 using System.Net;
 using System.Text.Json;
 using KNote.ClientWin.Core;
+using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Tests;
 
 [TestClass]
 public class AiChatHtmlTests
 {
-    private static AiChatTurn Turn(string prompt, string answer) =>
-        new(prompt, answer, "Claude", TimeSpan.FromSeconds(1.2)) { InputTokens = 3, OutputTokens = 2, TotalTokens = 5 };
+    private const string Provider = "Claude";
+
+    private static AiChatTurnDto Turn(string prompt, string answer, bool truncated = false) => new()
+    {
+        Prompt = prompt,
+        Answer = answer,
+        InputTokens = 3,
+        OutputTokens = 2,
+        TotalTokens = 5,
+        ProcessingTime = TimeSpan.FromSeconds(1.2),
+        Truncated = truncated
+    };
 
     [TestMethod]
     public void Page_ShowsEveryTurnInOrder_WithTheChatStyleAndScript()
     {
-        var html = AiChatHtml.Page(new[] { Turn("First question", "First answer"), Turn("Second question", "Second answer") }, "<style>/*md*/</style>");
+        var html = AiChatHtml.Page(new[] { Turn("First question", "First answer"), Turn("Second question", "Second answer") }, Provider, "<style>/*md*/</style>");
 
         var positions = new[] { "First question", "First answer", "Second question", "Second answer" }
             .Select(text => html.IndexOf(text, StringComparison.Ordinal)).ToArray();
@@ -27,7 +38,7 @@ public class AiChatHtmlTests
     [TestMethod]
     public void Page_NoTurns_HasAnEmptyChat()
     {
-        var html = AiChatHtml.Page(Array.Empty<AiChatTurn>(), "");
+        var html = AiChatHtml.Page(Array.Empty<AiChatTurnDto>(), Provider, "");
 
         StringAssert.Contains(html, "<main id=\"chat\"></main>");
     }
@@ -46,11 +57,11 @@ public class AiChatHtmlTests
     {
         var turn = Turn("q", "Some **bold** text");
 
-        var html = AiChatHtml.AssistantMessage(turn);
+        var html = AiChatHtml.AssistantMessage(turn, Provider);
 
         StringAssert.Contains(html, "<strong>bold</strong>");
         StringAssert.Contains(html, "Assistant · Claude");
-        StringAssert.Contains(html, $"<div class=\"meta\">{WebUtility.HtmlEncode(turn.UsageSummary)}</div>");
+        StringAssert.Contains(html, $"<div class=\"meta\">{WebUtility.HtmlEncode(turn.UsageSummary())}</div>");
         StringAssert.Contains(html, "class=\"msg assistant\"");
     }
 
@@ -95,22 +106,22 @@ public class AiChatHtmlTests
     [TestMethod]
     public void UsageSummary_ReportedTokens_ShowsInOutAndTotal()
     {
-        Assert.AreEqual("3 in · 2 out · 5 tokens · 1.2 s", Turn("q", "a").UsageSummary);
+        Assert.AreEqual("3 in · 2 out · 5 tokens · 1.2 s", Turn("q", "a").UsageSummary());
     }
 
     [TestMethod]
     public void UsageSummary_EstimatedTokens_SaysSo()
     {
-        var turn = new AiChatTurn("q", "a", null, TimeSpan.FromSeconds(2)) { TotalTokens = 12, TokensEstimated = true };
+        var turn = new AiChatTurnDto { Prompt = "q", Answer = "a", ProcessingTime = TimeSpan.FromSeconds(2), TotalTokens = 12, TokensEstimated = true };
 
-        Assert.AreEqual("~12 tokens (estimated) · 2.0 s", turn.UsageSummary);
+        Assert.AreEqual("~12 tokens (estimated) · 2.0 s", turn.UsageSummary());
     }
 
     [TestMethod]
     public void Page_ModelInfoHidden_HidesItWithTheBodyClass()
     {
-        Assert.IsFalse(AiChatHtml.Page(new[] { Turn("q", "a") }, "", showModelInfo: true).Contains("hide-model-info\">"));
-        StringAssert.Contains(AiChatHtml.Page(new[] { Turn("q", "a") }, "", showModelInfo: false), "<body class=\"hide-model-info\">");
+        Assert.IsFalse(AiChatHtml.Page(new[] { Turn("q", "a") }, Provider, "", showModelInfo: true).Contains("hide-model-info\">"));
+        StringAssert.Contains(AiChatHtml.Page(new[] { Turn("q", "a") }, Provider, "", showModelInfo: false), "<body class=\"hide-model-info\">");
     }
 
     [TestMethod]
@@ -128,7 +139,7 @@ public class AiChatHtmlTests
     {
         var shortcuts = new[] { "Ctrl+K", "Ctrl+Enter" };
 
-        var html = AiChatHtml.Page(Array.Empty<AiChatTurn>(), "", hostShortcuts: shortcuts);
+        var html = AiChatHtml.Page(Array.Empty<AiChatTurnDto>(), Provider, "", hostShortcuts: shortcuts);
 
         // As a JSON array, a valid JavaScript literal ("+" may be escaped as +: the same string).
         StringAssert.Contains(html, $"window.kntChatShortcuts = {JsonSerializer.Serialize(shortcuts)};");
@@ -138,10 +149,10 @@ public class AiChatHtmlTests
     [TestMethod]
     public void AssistantMessage_TruncatedAnswer_ShowsTheNoticeApartFromTheModelInfo()
     {
-        var html = AiChatHtml.AssistantMessage(Turn("q", "Once upon a") with { Truncated = true });
+        var html = AiChatHtml.AssistantMessage(Turn("q", "Once upon a", truncated: true), Provider);
 
-        StringAssert.Contains(html, $"<div class=\"notice\">{WebUtility.HtmlEncode(AiChatTurn.TruncatedNotice)}</div>");
-        Assert.IsFalse(AiChatHtml.AssistantMessage(Turn("q", "The end.")).Contains("class=\"notice\""));
+        StringAssert.Contains(html, $"<div class=\"notice\">{WebUtility.HtmlEncode(AiChatTurnDto.TruncatedNotice)}</div>");
+        Assert.IsFalse(AiChatHtml.AssistantMessage(Turn("q", "The end."), Provider).Contains("class=\"notice\""));
     }
 
     [TestMethod]
