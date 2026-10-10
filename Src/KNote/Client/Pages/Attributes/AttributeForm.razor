@@ -6,118 +6,86 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <div class="form-group row">
-        <label for="atrName" class="col-sm-2 col-form-label">Name:</label>
-        <div class="input-group col-sm-10" id="atrName">
-            <InputText class="form-control" @bind-Value="@KAttribute.Name" />
-        </div>        
-        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-10 pl-4"  style="font-size:10px">
-            <ValidationMessage For="@(() => KAttribute.Name)"/>
-        </div>
-    </div>
+    <RadzenStack Gap="1rem">
 
-    <div class="form-group row">
-        <label for="atrDescription" class="col-sm-2 col-form-label">Description:</label>
-        <div class="input-group col-sm-10" id="atrDescription">
-            <InputTextArea class="form-control" @bind-Value="@KAttribute.Description" />
-        </div>
-        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-10 pl-4"  style="font-size:10px">
+        <KntFormField Label="Name:" Component="Name" LabelSize="2">
+            <RadzenTextBox Name="Name" @bind-Value="@KAttribute.Name" Style="width: 100%" />
+            <ValidationMessage For="@(() => KAttribute.Name)" />
+        </KntFormField>
+
+        <KntFormField Label="Description:" Component="Description" LabelSize="2">
+            <RadzenTextArea Name="Description" @bind-Value="@KAttribute.Description" Style="width: 100%" />
             <ValidationMessage For="@(() => KAttribute.Description)" />
-        </div>        
-    </div>
+        </KntFormField>
 
-    <div class="form-group row">
-        <label for="atrRequired" class="col-sm-2 col-form-label">Required Value:</label>
-        <div class="input-group col-sm-1" id="atrRequired">
-            @*<InputCheckbox class="form-control ali" @bind-Value="@KAttribute.RequiredValue" />*@
-            <RadzenCheckBox Style="vertical-align: middle;"  @bind-Value=@KAttribute.RequiredValue  Name="CheckRequiredValue" TValue="bool" />
-        </div>
-        <label for="atrRequired" class="col-sm-1 col-form-label">Order:</label>
-        <div class="input-group col-sm-2" id="atrRequired">
-            <InputNumber class="form-control" @bind-Value="@KAttribute.Order" />
-        </div>
-        <label for="atrRequired" class="col-sm-2 col-form-label">Note type:</label>
-        <div class="input-group col-sm-4" id="atrRequired">
-            <select class="form-control" @bind="@KAttribute.NoteTypeId">
-                <option></option>
-                @foreach (var ntype in NoteTypes)
-                {
-                    <option value=@ntype.NoteTypeId>@ntype.Name</option>
-                }
-            </select>
-        </div>
-        <!-- -->
-        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-4 pl-1"  style="font-size:10px">
-            <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
-        </div> 
-        <label class="col-sm-1 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-2 pl-4"  style="font-size:10px">
-            <ValidationMessage For="@(() => KAttribute.Order)" />
-        </div>
-        <label class="col-sm-2 col-form-label" style="font-size:10px"></label>
-        <div class="col-sm-4 pl-4"  style="font-size:10px">
-            <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
-        </div>
-    </div>
+        @* Three fields in one row: the same label-left layout as KntFormField, column by column. *@
+        <RadzenRow AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenLabel Text="Required value:" Component="RequiredValue" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="1">
+                <RadzenCheckBox Name="RequiredValue" @bind-Value="@KAttribute.RequiredValue" TValue="bool" />
+                <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="1">
+                <RadzenLabel Text="Order:" Component="Order" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenNumeric Name="Order" @bind-Value="@KAttribute.Order" Style="width: 100%" />
+                <ValidationMessage For="@(() => KAttribute.Order)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenLabel Text="Note type:" Component="NoteTypeId" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenDropDown Name="NoteTypeId" @bind-Value="@KAttribute.NoteTypeId" TValue="Guid?"
+                                Data="@NoteTypes" TextProperty="Name" ValueProperty="NoteTypeId"
+                                AllowClear="true" Style="width: 100%" />
+                <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
+            </RadzenColumn>
+        </RadzenRow>
 
-    <div class="form-group row">
-        <label for="atrDataType" class="col-sm-2 col-form-label">Data Type:</label>
-        <div class="input-group col-sm-10" id="atrDataType">
-            <select class="form-control" @bind="@KAttribute.KAttributeDataType">
-                @foreach (var item in KntConst.KAttributes.Keys)
-                {
-                    <option value=@item>@KntConst.KAttributes[item]</option>
-                }
-            </select>
-        </div>
-        <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
-    </div>
+        <KntFormField Label="Data type:" Component="KAttributeDataType" LabelSize="2">
+            <RadzenDropDown Name="KAttributeDataType" @bind-Value="@KAttribute.KAttributeDataType" TValue="EnumKAttributeDataType"
+                            Data="@KntConst.KAttributes" TextProperty="Value" ValueProperty="Key" Style="width: 100%" />
+            <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
+        </KntFormField>
 
-    @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue || KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-    {
-        <div class="form-group row">
-            <label for="atrValues" class="col-sm-2 col-form-label">&nbsp;</label>
-            <div class="input-group col-sm-10" id="atrDescription">
-                <label class="float-left">Tabulated values for this attribute:</label>
-                <span class="float-left ml-3">
-                    <button class="btn btn-sm btn-light mr-2"
-                            @onclick="@(() => OnAtrValueNew())"
-                            data-toggle="tooltip" title="Add new value">
-                        <i class="fa fa-plus"></i>
-                    </button>
-                </span>
-                <RadzenDataGrid Data="@atributeValues" TItem="KAttributeTabulatedValueDto" AllowColumnResize="true" Density="@Density.Compact">
-                    <Columns>
-                        <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Value" Title="Value" />
-                        <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Order" Title="Order" Width="190px" />                
-                        <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                            <Template Context="data">                                                        
-                                <RadzenButton Click="@(() => OnAtrValueEdit(data))" Icon="edit" Size="ButtonSize.Small"
-                                    ButtonStyle="ButtonStyle.Primary" 
-                                    MouseEnter="@(args => tooltipService.Open(args, "Edit  ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" Class="mr-0 mb-0"  />
-                                <RadzenButton Click="@(() => OnAtrValueDelete(data))" Icon="delete" Size="ButtonSize.Small"
-                                    ButtonStyle="ButtonStyle.Danger" 
-                                    MouseEnter="@(args => tooltipService.Open(args, "Delete ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                            </Template>
-                        </RadzenDataGridColumn>
-                    </Columns> 
-                </RadzenDataGrid>
-            </div>
-        </div>
-    }
+        @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue || KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
+        {
+            <KntFormField Label="" LabelSize="2">
+                <RadzenStack Gap="0.5rem">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenLabel Text="Tabulated values for this attribute:" />
+                        <RadzenButton Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" title="Add new value"
+                                      Click="@(() => OnAtrValueNew())" />
+                    </RadzenStack>
+                    <RadzenDataGrid Data="@atributeValues" TItem="KAttributeTabulatedValueDto" AllowColumnResize="true" Density="@Density.Compact">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Value" Title="Value" />
+                            <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Order" Title="Order" Width="190px" />
+                            <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
+                                <Template Context="data">
+                                    <RadzenButton Click="@(() => OnAtrValueEdit(data))" Icon="edit" Size="ButtonSize.Small"
+                                        ButtonStyle="ButtonStyle.Primary"
+                                        MouseEnter="@(args => tooltipService.Open(args, "Edit  ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+                                    <RadzenButton Click="@(() => OnAtrValueDelete(data))" Icon="delete" Size="ButtonSize.Small"
+                                        ButtonStyle="ButtonStyle.Danger"
+                                        MouseEnter="@(args => tooltipService.Open(args, "Delete ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenStack>
+            </KntFormField>
+        }
 
-    <hr class="mt-1" />
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
-    
+    </RadzenStack>
 
 </EditForm>
 
