@@ -82,11 +82,11 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   ├─ MessageBroker
   │    └─ MessageBroker.RabbitMQ
   ├─ Service                          (→ Repository, Repository.Dapper, Repository.EntityFramework, MessageBroker*)
-  │    ├─ KNote.Ai (carpeta Ai/)      (IChatClient por proveedor de IA + tools sobre IKntService; todos los paquetes NuGet de IA)
+  │    ├─ KNote.Ai (carpeta Ai/)      (IChatClient por proveedor de IA, turno con streaming + tools sobre IKntService; todos los paquetes NuGet de IA)
   │    └─ ClientWin                   (→ también KNote.Ai, HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
 
-Server → Client, Model, Service
+Server → Client, Model, Service, KNote.Ai
 KntEditViewControl → HtmlEditorControl, KntIcons
 HtmlEditorControl → KntIcons
 ```
@@ -184,8 +184,9 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 ### Server
 
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
-  `NoteTypesController`, `SystemValuesController`, `UsersController`, `ChatGPTController` (integración con
-  OpenAI), además del scaffold `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
+  `NoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
+  proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatGPTController` (obsoleto, se
+  retira con la página "ChatGPT room"), además del scaffold `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Hubs/ChatHub.cs` — hub de SignalR, mapeado en `/chathub`.
 - `Server` también sirve la app `Client` Blazor compilada

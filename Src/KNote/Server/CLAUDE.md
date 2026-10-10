@@ -27,7 +27,11 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
 
 - Configuración: secciones `AppSettings` (`Helpers/AppSettings`: `Secret` del JWT, `ActivateMessageBroker`,
   `MountResourceContainerOnStartup`), `RepositoryRef` (`Model/Config/RepositoryRef`: `Orm`, `Provider`,
-  `ConnectionString`, contenedor de recursos...) y `OpenAIServiceOptions` (`ApiKey`).
+  `ConnectionString`, contenedor de recursos...), `ai` (proveedores del asistente de IA, ver "Asistente de IA")
+  y `OpenAIServiceOptions` (`ApiKey`, solo para el antiguo `ChatGPTController`).
+- `KntAddAiAssistant` registra lo del asistente de IA: `AiConfig` enlazado a la sección `ai` **al usarse** (no
+  leído al arrancar como `AppSettings`/`RepositoryRef`, así los tests en proceso pueden sobrescribirlo),
+  `Ai/AiProvidersCatalog` e `Ai/IAiChatClientProvider` (singletons).
 - `KntAddServices` registra, ambos `Scoped` (uno por petición):
   `IKntRepository` vía `KntRepositoryFactory.Create(repositoryRef)` (`Service/Core`; decide Dapper/EF según
   `RepositoryRef.Orm` y antes pasa por `KntSchemaUpdater.EnsureUpToDate` de EF) e `IKntService` → `KntService`.
@@ -119,10 +123,37 @@ public class FoldersController : ControllerBase
   `\r\n`). Está marcado como *hack* de compatibilidad con `ClientWin`: si lo cambias, comprueba que una nota
   editada en la Web se sigue viendo bien en el escritorio y viceversa.
 
+## Asistente de IA (`AiAssistantController`, `api/aiassistant`)
+
+Staff, ProjectManager y Admin (como `KNoteAIAssistantCtrl` en `ClientWin` y los comandos de sesiones):
+
+- `GET providers` — los proveedores configurados (`AiProviderInfoDto`: alias, proveedor, modelo, cuál es el
+  predefinido), **nunca** su `ApiKey` ni su `Host`.
+- `POST chat` (`AiChatRequestDto`: alias del proveedor, turnos anteriores y pregunta) — un turno con streaming
+  como **server-sent events** (`TypedResults.ServerSentEvents`): un `AiChatStreamEventDto` por evento, con su
+  `Type` como tipo de evento SSE (`AiChatStreamEventTypes`: `delta`, `tool`, `noteCreated`, `completed` con el
+  turno y su uso, `error`). El servidor no guarda la conversación: la manda entera el cliente en cada
+  pregunta. Lo que falla antes de empezar (pregunta vacía, proveedor desconocido) es un 400 con `Result`, como
+  siempre; lo que falla después, un evento `error`. La lógica del turno es la común de `KNote.Ai`
+  (`AiChatTurnStreamer`), con las tools de `KNoteAiTools`; su host en el Server (`Ai/ServerAiToolsHost`)
+  guarda las notas de `create_task` en la carpeta Home y las anuncia con eventos `noteCreated`. Cancelar la
+  petición (`RequestAborted`) corta la llamada al proveedor.
+- `GET sessions`, `GET sessions/{noteId}`, `POST sessions` — las sesiones del usuario
+  (`IKntService.AiSessions`, ver `CLAUDE.md` raíz). El cliente guarda la sesión tras cada respuesta.
+
+Proveedores: sección `ai.providers` de `appsettings.json`, con los mismos campos que `AiProviderRef` en
+`ClientWin` (`alias`, `provider` = `OpenAI`/`Anthropic`/`Ollama`, `model`, `apiKey`, `host` solo para Ollama).
+`Ai/AiProvidersCatalog` descarta (y registra en el log) los que no validan; el primero válido es el
+predefinido. Las `apiKey` no van en `appsettings.json`: user-secrets (`ai:providers:0:apiKey`, por posición) o,
+si están vacías, las variables `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (`AiChatClientFactory.ResolveApiKey`).
+`Ai/IAiChatClientProvider` construye el `IChatClient` (`AiChatClientFactory` de `KNote.Ai`); existe para que los
+tests lo sustituyan.
+
 ## Otros endpoints
 
-- `ChatGPTController` (`POST api/chatgpt`): llama a OpenAI (paquete `OpenAI`, modelo `gpt-4o-mini`) con la
-  clave de `OpenAIServiceOptions:ApiKey` o la variable de entorno `OPENAI_API_KEY`.
+- `ChatGPTController` (`POST api/chatgpt`): **obsoleto**, lo sustituye `AiAssistantController` y se retira
+  junto con la página "ChatGPT room" de `Client`. Llama a OpenAI (modelo `gpt-4o-mini`) con la clave de
+  `OpenAIServiceOptions:ApiKey` o la variable de entorno `OPENAI_API_KEY`.
 - `SystemValuesController`: solo Admin. `WeatherForecastController`: restos de la plantilla.
 - `Helpers/CheckUserPermissionsMiddleware`, `HttpContextExtensions` (cabeceras de paginación): sin uso
   actualmente.
@@ -130,7 +161,7 @@ public class FoldersController : ControllerBase
 ## Configuración y secretos
 
 `appsettings.json` solo contiene marcadores (`"... MyLongStringSecurityKeySecret ..."`). Los valores reales
-(`AppSettings:Secret`, `RepositoryRef:ConnectionString`, `OpenAIServiceOptions:ApiKey`...) van en
+(`AppSettings:Secret`, `RepositoryRef:ConnectionString`, `ai:providers:n:apiKey`...) van en
 user-secrets (`UserSecretsId` en `KNote.Server.csproj`) o variables de entorno (`RepositoryRef__Orm`, ...).
 No escribas secretos reales en `appsettings.json`.
 
@@ -149,7 +180,11 @@ En `Tests/` (`KNoteTest.slnx`), ver `CLAUDE.md` raíz:
 
 - `Tests/InProcessIntegrationTests` — levantan `Server` en proceso con `Tests/Helpers/KNoteWebApplicationFactory`
   (Sqlite temporal por instancia, configuración por variables de entorno `RepositoryRef__*`). Es donde se
-  añaden los tests de un endpoint nuevo.
+  añaden los tests de un endpoint nuevo. Antes de crear el cliente, `KNoteWebApplicationFactory.AppConfiguration`
+  sobrescribe configuración leída con `IOptions` (p. ej. `ai:providers`) y `TestServices` sustituye servicios
+  (ver `InProcessTestHost.CreateAuthenticatedClientAsync(configure)`). `AiAssistantInProcessTests` usa
+  `Helpers/ScriptedAiChatClientProvider`: un modelo con respuestas guionizadas (texto, uso, llamadas a tools)
+  envuelto con las tools y la invocación de funciones reales, sin llamar a ningún proveedor.
 - `Tests/WebApiIntegrationTests` — contra un `Server` real ya en ejecución.
 
 ## Añadir un endpoint
