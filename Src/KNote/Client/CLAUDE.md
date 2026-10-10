@@ -56,7 +56,7 @@ Client/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
-├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, Lab/
+├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/
 ├── Shared/                 – layout (MainLayout*) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntFolderSelector, KntFoldersTreeView, InputMarkdown, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
@@ -101,9 +101,10 @@ o parámetro que no aparezca ya en el código, en vez de suponer su API.
 
 Cómo está integrada:
 
-- Servicios en `Program.cs`: `DialogService`, `NotificationService`, `TooltipService`, `ContextMenuService`.
-- Componentes anfitriones en `Shared/MainLayout.razor`: `<RadzenDialog/>`, `<RadzenNotification/>`,
-  `<RadzenContextMenu/>`, `<RadzenTooltip/>`. Sin ellos los servicios anteriores no muestran nada.
+- Servicios en `Program.cs` con `builder.Services.AddRadzenComponents()` (`DialogService`,
+  `NotificationService`, `TooltipService`, `ContextMenuService`...).
+- `<RadzenComponents />` en `Shared/MainLayout.razor` (anfitrión de diálogos, notificaciones, menús
+  contextuales y tooltips). Sin él los servicios anteriores no muestran nada.
 - Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`.
 - Tema y script en `wwwroot/index.html`: `_content/Radzen.Blazor/css/software.css` y
   `_content/Radzen.Blazor/Radzen.Blazor.js`. Los iconos de Radzen (`Icon="save"`, `"edit"`, `"delete"`...)
@@ -111,6 +112,17 @@ Cómo está integrada:
 
 Patrones ya establecidos que hay que seguir:
 
+- **Formularios**: `EditForm` + `<DataAnnotationsValidator />` (las reglas de validación están en el SmartDTO)
+  con controles de Radzen (`RadzenTextBox`, `RadzenTextArea`, `RadzenNumeric`, `RadzenDropDown`,
+  `RadzenCheckBox`, `RadzenDatePicker`, `RadzenPassword`) enlazados con `@bind-Value` y su
+  `<ValidationMessage For="..." />` debajo. No se usan `InputText`/`InputNumber`/`InputSelect`... de Blazor
+  ni `RadzenTemplateForm`. Cada campo va en una fila con la etiqueta a la izquierda: `Shared/KntFormField`
+  (`Label`, `Component` = `Name` del control, `LabelSize` en columnas de 12, por defecto 3), que se apila en
+  pantallas pequeñas. Los campos se agrupan en un `<RadzenStack Gap="1rem">`. Referencia: `Types/TypeForm`.
+- **Botones y espaciado**: grupos de botones en `<RadzenStack Orientation="Orientation.Horizontal"
+  JustifyContent="JustifyContent.End" Gap="0.5rem">`, sin clases de margen. Para maquetar,
+  `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen
+  (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
   `Shared/EntityList` (que pinta "cargando"/"sin registros"); acciones por fila con `RadzenButton` +
   `tooltipService.Open(...)`. Cabecera de página con `KntIndexHeader` + `RadzenMenu`.
@@ -126,10 +138,9 @@ Patrones ya establecidos que hay que seguir:
 **Código heredado (Bootstrap)**: parte de la UI es anterior a Radzen y usa Bootstrap 4
 (`wwwroot/css/bootstrap`, clases `form-group`, `col-sm-*`, `float-right`, `btn`...), Font Awesome 4.7 por CDN y
 open-iconic (`oi oi-*`), con `EditForm` + `InputText`/`InputNumber`/`InputSelect` y botones HTML (p. ej.
-`NoteForm`, `Login`, `InputMarkdown`, `ToolingHeader`). Al modificar uno de esos componentes, pasa la parte
-tocada a sus equivalentes de Radzen (`RadzenTextBox`, `RadzenNumeric`, `RadzenDropDown`, `RadzenFormField`,
-`RadzenStack`/`RadzenRow`/`RadzenColumn`, `RadzenButton`...), manteniendo la validación por DataAnnotations
-del DTO. No hagas migraciones masivas que no se hayan pedido.
+`NoteForm`, `Login`, `InputMarkdown`, `ToolingHeader`). Se está migrando por fases en la rama
+`feature/client-radzen-migration` siguiendo los patrones de arriba; al terminar se retiran Bootstrap, Font
+Awesome y open-iconic de `index.html`/`wwwroot`, y esta sección desaparece.
 
 ## Páginas: organización y convenciones
 
@@ -146,7 +157,6 @@ del DTO. No hagas migraciones masivas que no se hayan pedido.
   desuscribe en `Dispose()`.
 - `Nullable` está activado en este proyecto: `[Parameter] [EditorRequired] public NoteDto Note { get; set; }
   = null!;` para parámetros obligatorios.
-- `Pages/Lab/` (`TestPage`, `FileUpload`) son páginas de pruebas, solo visibles para Admin.
 
 ## Autenticación y autorización
 

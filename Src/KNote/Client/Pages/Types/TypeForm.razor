@@ -4,26 +4,24 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <div class="form-group">
-        <label>Name:</label>
-        <InputText class="form-control" @bind-Value="@NoteType.Name" />
-        <ValidationMessage For="@(() => NoteType.Name)" />
-    </div>
+    <RadzenStack Gap="1rem">
 
-    <div class="form-group">
-        <label>Description:</label>
-        <InputText class="form-control" @bind-Value="@NoteType.Description" />
-        <ValidationMessage For="@(() => NoteType.Description)" />
-    </div>
+        <KntFormField Label="Name:" Component="Name">
+            <RadzenTextBox Name="Name" @bind-Value="@NoteType.Name" Style="width: 100%" />
+            <ValidationMessage For="@(() => NoteType.Name)" />
+        </KntFormField>
 
-   <hr class="mt-1" />
+        <KntFormField Label="Description:" Component="Description">
+            <RadzenTextBox Name="Description" @bind-Value="@NoteType.Description" Style="width: 100%" />
+            <ValidationMessage For="@(() => NoteType.Description)" />
+        </KntFormField>
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" Class="mr-1"  />  
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" Class="mr-1" />                                       
-        </div>
-    </div>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+
+    </RadzenStack>
 
 </EditForm>
 
