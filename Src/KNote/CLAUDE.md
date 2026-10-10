@@ -102,13 +102,15 @@ que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`
 interfaces. Cuál está activa se decide en tiempo de ejecución mediante `RepositoryRef.Orm` ("Dapper" o
 "EntityFramework") en la configuración:
 
+La bifurcación vive en un único punto, `Service/Core/KntRepositoryFactory.Create(repositoryRef)`, que antes
+pasa por `KntSchemaUpdater.EnsureUpToDate` de EF (EF es el único que crea/actualiza el esquema, sea cual sea
+el ORM que sirva las consultas después):
+
 - En `Server`: `Server/Program.cs` llama a `builder.Services.KntAddServices(appSettings, repositoryRef)`
-  (`Server/Helpers/KntExtensions.cs`), que bifurca según `Orm` y registra `IKntRepository` con la
-  implementación Dapper o EF vía DI.
-- En `ClientWin`: no hay contenedor de DI — `Service/Core/ServiceRef.cs` hace la misma bifurcación de forma
-  manual, construyendo `DP.KntRepository` o `EF.KntRepository` directamente, y `ClientWin/Core/Store.cs`
-  mantiene una lista de estos `ServiceRef` (cada app puede tener varias bases de datos de notas configuradas
-  abiertas a la vez).
+  (`Server/Helpers/KntExtensions.cs`), que registra `IKntRepository` (vía la factoría) e `IKntService` en DI.
+- En `ClientWin`: no hay contenedor de DI — `Service/Core/ServiceRef.cs` llama a la factoría de forma
+  perezosa, y `ClientWin/Core/Store.cs` mantiene una lista de estos `ServiceRef` (cada app puede tener varias
+  bases de datos de notas configuradas abiertas a la vez).
 
 `RepositoryRef` (en `Model`) también incluye `Provider` (`Microsoft.Data.SqlClient` vs
 `Microsoft.Data.Sqlite`) y `ConnectionString`, por lo que el motor de BD y el ORM son elecciones
@@ -149,14 +151,22 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   notas/carpetas/usuarios. Trata a `Server` y `ClientWin` como dos consumidores independientes de la misma
   capa `Service`, no como cliente/servidor entre sí.
 
+Ambas UIs siguen el mismo diseño: la UI no contiene lógica de negocio, que está en `Service` y en los
+SmartDTO de `Model/Dto` (compartidos). `Client` reproduce la estructura de `ClientWin` (un `Store` con el
+estado global y el acceso a datos, páginas que hacen de casos de uso, componentes de presentación) y su UI se
+construye con la librería de componentes **Radzen.Blazor** (<https://blazor.radzen.com/>). Detalles en
+`Client/CLAUDE.md`.
+
 ### Server
 
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
   `NoteTypesController`, `SystemValuesController`, `UsersController`, `ChatGPTController` (integración con
-  OpenAI), además del scaffold `WeatherForecastController`.
+  OpenAI), además del scaffold `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
+  con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Hubs/ChatHub.cs` — hub de SignalR, mapeado en `/chathub`.
 - `Server` también sirve la app `Client` Blazor compilada
-  (`Microsoft.AspNetCore.Components.WebAssembly.Server`).
+  (`Microsoft.AspNetCore.Components.WebAssembly.Server`), todo bajo la base `/KNote`.
+- Plantilla de controlador, JWT, configuración y tests: `Server/CLAUDE.md`.
 
 ### Model
 
