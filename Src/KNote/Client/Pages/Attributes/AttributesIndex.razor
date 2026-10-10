@@ -58,7 +58,7 @@
     async Task OnNew()
     {
         var res = await dialogService.OpenAsync<AttributeNew>($"New attribute",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "860px", Height = "600px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
@@ -68,7 +68,7 @@
     async Task OnEdit(KAttributeInfoDto attribute)
     {     
         var res = await dialogService.OpenAsync<AttributeEdit>($"Edit attribute",
-               new Dictionary<string, object>() { { "AttributeId", attribute.KAttributeId.ToString() } },
+               new Dictionary<string, object?>() { { "AttributeId", attribute.KAttributeId.ToString() } },
                new DialogOptions() { Width = "860px", Height = "600px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)        

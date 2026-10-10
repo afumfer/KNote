@@ -60,7 +60,7 @@ Client/
 ├── Shared/                 – layout (MainLayout*) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntFolderSelector, KntFoldersTreeView, InputMarkdown, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
-└── wwwroot/                – index.html, css (app.css, Bootstrap heredado), js/filePaste.js
+└── wwwroot/                – index.html, css/app.css, js/filePaste.js
 ```
 
 ## Acceso a datos: `IStore` y los `I*WebApiService`
@@ -130,7 +130,8 @@ Patrones ya establecidos que hay que seguir:
   (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
   `Shared/EntityList` (que pinta "cargando"/"sin registros"); acciones por fila con `RadzenButton` +
-  `tooltipService.Open(...)`. Cabecera de página con `KntIndexHeader` + `RadzenMenu`.
+  `tooltipService.Open(...)`. Cabecera de página con `KntIndexHeader` (título, `Icon` opcional) +
+  `RadzenMenu` en `IndexMenu`; la de un formulario de página completa, `ToolingHeader` (título + `Buttons`).
 - **Diálogos** (alta/edición de entidades pequeñas, selectores, login): `dialogService.OpenAsync<Componente>(
   título, parámetros, new DialogOptions {...})`; el componente devuelve su resultado con
   `dialogService.Close(resultado)` (`null` = cancelado). Confirmaciones con `dialogService.Confirm(...)`.
@@ -140,12 +141,11 @@ Patrones ya establecidos que hay que seguir:
 - Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y
   alarmas), `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
 
-**Código heredado (Bootstrap)**: parte de la UI es anterior a Radzen y usa Bootstrap 4
-(`wwwroot/css/bootstrap`, clases `form-group`, `col-sm-*`, `float-right`, `btn`...), Font Awesome 4.7 por CDN y
-open-iconic (`oi oi-*`), con `EditForm` + `InputText`/`InputNumber`/`InputSelect` y botones HTML (p. ej.
-`NoteForm`, `Login`, `InputMarkdown`, `ToolingHeader`). Se está migrando por fases en la rama
-`feature/client-radzen-migration` siguiendo los patrones de arriba; al terminar se retiran Bootstrap, Font
-Awesome y open-iconic de `index.html`/`wwwroot`, y esta sección desaparece.
+**No hay Bootstrap ni otras librerías de iconos o CSS**: la UI usa solo Radzen (tema `software`) más
+`wwwroot/css/app.css` (base `box-sizing`, tipografía, mensajes de validación, error de Blazor) y el CSS aislado
+de algún componente (`*.razor.css`). No añadas clases de Bootstrap (`row`, `col-*`, `form-control`, `btn`,
+`mr-1`...) ni iconos de Font Awesome: no hay hoja que los defina. Los parámetros de un diálogo se pasan como
+`new Dictionary<string, object?>()` (firma de `DialogService.OpenAsync` en Radzen 12).
 
 ## Páginas: organización y convenciones
 

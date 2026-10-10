@@ -23,7 +23,7 @@
     private async Task SelectTags()
     {
         var res = await dialogService.OpenAsync<InputMultiSelectList>($"Select tags",
-               new Dictionary<string, object>() { { "Items", Items } },
+               new Dictionary<string, object?>() { { "Items", Items } },
                new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
 
         if(res != null)

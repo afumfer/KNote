@@ -1,4 +1,7 @@
-﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+﻿/* Radzen themes don't set a global box model (Bootstrap's reboot did). */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -8,18 +11,8 @@ h1:focus {
     outline: none;
 }
 
-a, .btn-link {
+a {
     color: #0071c1;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.content {
-    padding-top: 1.1rem;
 }
 
 .valid.modified:not([type=checkbox]) {
@@ -63,34 +56,10 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
-.form-markdown {
-    /*display: flex;*/
-}
-
-    .form-markdown textarea {
-        width: 100%;
-        height: 350px;
-        margin-right: 15px;
-    }
-
-    .form-markdown .markdown-container {
-        border: 1px dashed black;
-        /*width: 500px;*/
-        height: 350px;
-    }
-
-.kpage-header {
-    display: flex;
-}
-
 ul {
     list-style-type: none;
     padding-left: 14px;
     cursor: pointer;
-}
-
-.container {
-    max-width: 100%;
 }
 
 img {

@@ -143,7 +143,7 @@
     async Task AtrValueEdit(KAttributeTabulatedValueDto atrValue)
     {
         var resAtrEdited = await dialogService.OpenAsync<AttributeValueEditor>($"Edit attribute tabulated value",
-               new Dictionary<string, object>() { { "AtrValue", atrValue } },
+               new Dictionary<string, object?>() { { "AtrValue", atrValue } },
                new DialogOptions() { Width = "600px", Height = "300px", Resizable = true, Draggable = true });
 
         if(resAtrEdited != null)

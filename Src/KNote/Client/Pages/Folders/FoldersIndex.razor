@@ -91,7 +91,7 @@
     async Task OnNew()
     {
         var res = await dialogService.OpenAsync<FolderNew>($"New folder",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
@@ -101,7 +101,7 @@
     async Task OnEdit(FolderDto folder)
     {
         var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
-               new Dictionary<string, object>() { { "FolderId", folder.FolderId.ToString() } },
+               new Dictionary<string, object?>() { { "FolderId", folder.FolderId.ToString() } },
                new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)        

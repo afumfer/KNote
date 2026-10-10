@@ -58,7 +58,7 @@
     async Task OnNew()
     {        
         var res = await dialogService.OpenAsync<TypeNew>($"New note type",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "500px", Height = "300px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
@@ -68,7 +68,7 @@
     async Task OnEdit(NoteTypeDto noteType)
     {        
         var res = await dialogService.OpenAsync<TypeEdit>($"Edit note type",
-               new Dictionary<string, object>() { { "TypeId", noteType.NoteTypeId.ToString() } },
+               new Dictionary<string, object?>() { { "TypeId", noteType.NoteTypeId.ToString() } },
                new DialogOptions() { Width = "500px", Height = "300px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)        

@@ -106,7 +106,7 @@
     async Task OnNew()
     {        
         var res = await dialogService.OpenAsync<UserNew>($"New user",
-               new Dictionary<string, object>() {  },
+               new Dictionary<string, object?>() {  },
                new DialogOptions() { Width = "700px", Height = "420px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)           
@@ -116,7 +116,7 @@
     async Task OnEdit(UserDto user)
     {        
         var res = await dialogService.OpenAsync<UserEdit>($"Edit user",
-               new Dictionary<string, object>() { { "UserId", user.UserId.ToString() } },
+               new Dictionary<string, object?>() { { "UserId", user.UserId.ToString() } },
                new DialogOptions() { Width = "700px", Height = "420px", Resizable = true, Draggable = true, ShowClose = false });
 
         if(res != null)

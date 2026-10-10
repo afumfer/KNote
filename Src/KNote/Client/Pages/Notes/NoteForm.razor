@@ -249,7 +249,7 @@
         else
         {            
             var resultDialog = await dialogService.OpenAsync<NoteResourceSelector>($"New resource and upload resource file",
-                   new Dictionary<string, object>() { },
+                   new Dictionary<string, object?>() { },
                    new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
 
             if(resultDialog != null)
