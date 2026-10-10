@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace KNote.Model.Dto;
 
@@ -26,6 +27,22 @@ public class AiChatTurnDto
     public bool Truncated { get; set; }
 
     public TimeSpan ProcessingTime { get; set; }
+
+    public const string TruncatedNotice = "The answer was cut: it reached the output token limit.";
+
+    // What the answer cost, in one line: "3 in · 2 out · 5 tokens · 1.2 s".
+    public string UsageSummary()
+    {
+        string tokens;
+        if (TokensEstimated)
+            tokens = $"~{TotalTokens} tokens (estimated)";
+        else if (InputTokens.HasValue || OutputTokens.HasValue)
+            tokens = $"{InputTokens ?? 0} in · {OutputTokens ?? 0} out · {TotalTokens} tokens";
+        else
+            tokens = $"{TotalTokens} tokens";
+
+        return $"{tokens} · {ProcessingTime.TotalSeconds.ToString("0.0", CultureInfo.InvariantCulture)} s";
+    }
 }
 
 // A session as listed in the sessions panel.

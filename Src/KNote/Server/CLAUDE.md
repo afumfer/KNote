@@ -27,8 +27,7 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
 
 - Configuración: secciones `AppSettings` (`Helpers/AppSettings`: `Secret` del JWT, `ActivateMessageBroker`,
   `MountResourceContainerOnStartup`), `RepositoryRef` (`Model/Config/RepositoryRef`: `Orm`, `Provider`,
-  `ConnectionString`, contenedor de recursos...), `ai` (proveedores del asistente de IA, ver "Asistente de IA")
-  y `OpenAIServiceOptions` (`ApiKey`, solo para el antiguo `ChatGPTController`).
+  `ConnectionString`, contenedor de recursos...) y `ai` (proveedores del asistente de IA, ver "Asistente de IA").
 - `KntAddAiAssistant` registra lo del asistente de IA: `AiConfig` enlazado a la sección `ai` **al usarse** (no
   leído al arrancar como `AppSettings`/`RepositoryRef`, así los tests en proceso pueden sobrescribirlo),
   `Ai/AiProvidersCatalog` e `Ai/IAiChatClientProvider` (singletons).
@@ -151,9 +150,6 @@ tests lo sustituyan.
 
 ## Otros endpoints
 
-- `ChatGPTController` (`POST api/chatgpt`): **obsoleto**, lo sustituye `AiAssistantController` y se retira
-  junto con la página "ChatGPT room" de `Client`. Llama a OpenAI (modelo `gpt-4o-mini`) con la clave de
-  `OpenAIServiceOptions:ApiKey` o la variable de entorno `OPENAI_API_KEY`.
 - `SystemValuesController`: solo Admin. `WeatherForecastController`: restos de la plantilla.
 - `Helpers/CheckUserPermissionsMiddleware`, `HttpContextExtensions` (cabeceras de paginación): sin uso
   actualmente.

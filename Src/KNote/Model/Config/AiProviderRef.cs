@@ -18,7 +18,7 @@ public static class EnumAiProvider
     public static readonly string[] All = { OpenAI, Anthropic, Ollama };
 }
 
-public class AiProviderRef : SmartModelDtoBase
+public class AiProviderRef : SmartModelDtoBase, IAiProviderIdentity
 {
     private string _alias;
     [Required(ErrorMessage = KMSG)]

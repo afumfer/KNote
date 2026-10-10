@@ -1,6 +1,4 @@
 ﻿using KNote.Client.AppStoreService.ClientDataServices;
-using KNote.Client.AppStoreService.ClientDataServices.Interfaces;
-using KNote.Client.AppStoreService.ClientDataServices.Services;
 using KNote.Client.Helpers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -117,14 +115,14 @@ public class Store : IStore, IDisposable
         }
     }
 
-    private IChatGPTService? _chatGPT;
-    public IChatGPTService ChatGPT
+    private IAiAssistantWebApiService? _aiAssistant;
+    public IAiAssistantWebApiService AiAssistant
     {
         get
         {
-            if (_chatGPT == null)
-                _chatGPT = new ChatGPTService(AppState, _httpClient);
-            return _chatGPT;
+            if (_aiAssistant == null)
+                _aiAssistant = new AiAssistantWebApiService(AppState, _httpClient);
+            return _aiAssistant;
         }
     }
 

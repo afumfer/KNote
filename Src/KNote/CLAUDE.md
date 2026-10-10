@@ -55,7 +55,7 @@ llaves están permitidos y son habituales en este código.
 Hay dos suites de test independientes, en dos `.slnx` distintos, con propósitos distintos:
 
 - **`Tests/` (vía `KNoteTest.slnx`)** — backend (`Server`/`Model`/`Service`/`Repository*`).
-  `Tests/WebApiIntegrationTests/*.cs` (`ChatGPTTests`, `FoldersTests`, `KAttributesTests`, `NoteTypesTests`,
+  `Tests/WebApiIntegrationTests/*.cs` (`FoldersTests`, `KAttributesTests`, `NoteTypesTests`,
   `NotesTests`, `UsersTests`) son **tests de integración HTTP reales**, no tests unitarios.
   `Tests/Helpers/WebApiTestBase.cs` inicia sesión vía `POST {testsWebApiUrlBase}api/users/login` contra una
   instancia real de `Server` en ejecución y reutiliza el JWT en las siguientes peticiones. Configura
@@ -185,8 +185,8 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
   `NoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
-  proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatGPTController` (obsoleto, se
-  retira con la página "ChatGPT room"), además del scaffold `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
+  proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), además del scaffold
+  `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Hubs/ChatHub.cs` — hub de SignalR, mapeado en `/chathub`.
 - `Server` también sirve la app `Client` Blazor compilada

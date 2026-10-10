@@ -1,0 +1,395 @@
+@page "/aiassistant"
+
+@using System.Text
+
+@inject IStore store
+@inject DialogService dialogService
+@inject NotificationService notificationService
+@inject TooltipService tooltipService
+@inject IJSRuntime jsRuntime
+
+@implements IDisposable
+
+@attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+
+<KntIndexHeader TextHead="AI Assistant" Icon="smart_toy">
+    <IndexMenu>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">@TotalTokens tokens</RadzenText>
+            <RadzenDropDown TValue="string" Data="@providers" TextProperty="Alias" ValueProperty="Alias"
+                            Value="@providerAlias" Change="@OnProviderChange" Disabled="@(streaming || providers.Count == 0)"
+                            Placeholder="No AI providers" Style="width: 16rem" />
+            <RadzenButton Icon="add_comment" ButtonStyle="ButtonStyle.Secondary" Click="NewConversation" Disabled="@streaming"
+                          MouseEnter="@(args => tooltipService.Open(args, "New conversation", new TooltipOptions { Position = TooltipPosition.Left }))" />
+        </RadzenStack>
+    </IndexMenu>
+</KntIndexHeader>
+
+@* Both panes sized in %: a pane without a size, or sized in px, left the sessions out of view. *@
+<RadzenSplitter Style="height: calc(100vh - 11rem)" class="rz-mt-2">
+    <RadzenSplitterPane Size="75%">
+        <RadzenStack Gap="0.5rem" Style="height: 100%" class="rz-pe-2">
+            <div style="flex: 1; min-height: 0">
+                <AiChatView Turns="@session.Turns" PendingPrompt="@pendingPrompt" PendingAnswer="@pendingAnswer.ToString()"
+                            ToolInUse="@toolInUse" CreatedNotes="@createdNotes" ContainerId="@ChatContainerId" />
+            </div>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.5rem">
+                <RadzenTextArea @bind-Value="promptInput" Immediate="true" Rows="3" Style="flex: 1; resize: none"
+                                Placeholder="Ask the assistant ... (Ctrl+Enter to send)" Disabled="@(streaming || currentProvider == null)"
+                                @onkeydown="OnPromptKeyDown" />
+                @if (streaming)
+                {
+                    <RadzenButton Icon="stop" ButtonStyle="ButtonStyle.Danger" Click="StopAnswer"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Stop the answer", new TooltipOptions { Position = TooltipPosition.Left }))" />
+                }
+                else
+                {
+                    <RadzenButton Icon="send" ButtonStyle="ButtonStyle.Primary" Click="Send"
+                                  Disabled="@(string.IsNullOrWhiteSpace(promptInput) || currentProvider == null)"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Send (Ctrl+Enter)", new TooltipOptions { Position = TooltipPosition.Left }))" />
+                }
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenSplitterPane>
+    <RadzenSplitterPane Size="25%" Min="200px" Max="45%" Collapsible="true">
+        <AiSessionsList Sessions="@sessions" SelectedNoteId="@session.NoteId" Disabled="@streaming"
+                        OnSelect="OpenSession" />
+    </RadzenSplitterPane>
+</RadzenSplitter>
+
+@code {
+    private const string ChatContainerId = "aichatcontainer";
+    private static readonly TimeSpan RefreshInterval = TimeSpan.FromMilliseconds(100);
+
+    private List<AiProviderInfoDto> providers = new();
+    private AiProviderInfoDto? currentProvider;
+    private string? providerAlias;
+
+    private List<AiChatSessionInfoDto> sessions = new();
+    private AiChatSessionDto session = new();
+    // The session has turns not saved yet (a save failed): saved again before leaving it.
+    private bool pendingSave;
+
+    private string? promptInput;
+    private bool streaming;
+    private string? pendingPrompt;
+    private readonly StringBuilder pendingAnswer = new();
+    private string? toolInUse;
+    private CancellationTokenSource? answerCancellation;
+    private DateTime lastRefresh;
+    private bool scrollToBottom;
+
+    // The notes created by the assistant in this session, by turn (shown only while the page is open).
+    private readonly Dictionary<int, List<AiChatStreamEventDto>> createdNotes = new();
+
+    private long TotalTokens => session.Turns.Sum(t => t.TotalTokens);
+
+    #region Life cycle
+
+    protected override async Task OnInitializedAsync()
+    {
+        var resProviders = await store.AiAssistant.GetProvidersAsync();
+        if (resProviders.IsValid)
+            providers = resProviders.Entity ?? new();
+        SetProvider(providers.FirstOrDefault(p => p.IsDefault) ?? providers.FirstOrDefault());
+
+        if (providers.Count == 0)
+            notificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "AI Assistant",
+                Detail = "No AI providers are configured in the server (section \"ai\" of its configuration).",
+                Duration = 10000
+            });
+
+        // Also creates, the first time, the note type and folder where the sessions are kept.
+        await LoadSessionsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!scrollToBottom)
+            return;
+        scrollToBottom = false;
+        try
+        {
+            await jsRuntime.InvokeVoidAsync("ScrollToBottom", ChatContainerId);
+        }
+        catch
+        {
+            // Only a convenience.
+        }
+    }
+
+    public void Dispose()
+    {
+        answerCancellation?.Cancel();
+        answerCancellation?.Dispose();
+    }
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        if (streaming)
+        {
+            var leave = await dialogService.Confirm("The assistant is still answering. Do you want to leave and lose the answer?",
+                "AI Assistant", new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+            if (leave != true)
+            {
+                context.PreventNavigation();
+                return;
+            }
+            answerCancellation?.Cancel();
+        }
+
+        if (!await SaveSessionAsync())
+        {
+            var leave = await dialogService.Confirm("The conversation could not be saved. Do you want to leave and lose its last messages?",
+                "AI Assistant", new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+            if (leave != true)
+                context.PreventNavigation();
+        }
+    }
+
+    #endregion
+
+    #region Conversation
+
+    private async Task OnPromptKeyDown(KeyboardEventArgs e)
+    {
+        if (e.CtrlKey && e.Key == "Enter")
+            await Send();
+    }
+
+    private async Task Send()
+    {
+        var prompt = promptInput;
+        var provider = currentProvider;
+        if (streaming || provider == null || string.IsNullOrWhiteSpace(prompt))
+            return;
+
+        var request = new AiChatRequestDto
+        {
+            ProviderAlias = provider.Alias,
+            History = session.Turns.ToList(),
+            Prompt = prompt
+        };
+
+        streaming = true;
+        promptInput = "";
+        pendingPrompt = prompt;
+        pendingAnswer.Clear();
+        toolInUse = null;
+        answerCancellation = new CancellationTokenSource();
+        scrollToBottom = true;
+        StateHasChanged();
+
+        AiChatTurnDto? completedTurn = null;
+        try
+        {
+            await foreach (var e in store.AiAssistant.ChatAsync(request, answerCancellation.Token))
+            {
+                switch (e.Type)
+                {
+                    case AiChatStreamEventTypes.Delta:
+                        pendingAnswer.Append(e.Text);
+                        toolInUse = null;
+                        RefreshWhileStreaming();
+                        break;
+                    case AiChatStreamEventTypes.Tool:
+                        toolInUse = e.Text;
+                        RefreshWhileStreaming(force: true);
+                        break;
+                    case AiChatStreamEventTypes.NoteCreated:
+                        AddCreatedNote(session.Turns.Count, e);
+                        break;
+                    case AiChatStreamEventTypes.Completed:
+                        completedTurn = e.Turn;
+                        break;
+                    // Error: already notified by the service; the turn stays unanswered.
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Stopped by the user, or the page was left.
+        }
+        finally
+        {
+            streaming = false;
+            pendingPrompt = null;
+            pendingAnswer.Clear();
+            toolInUse = null;
+            answerCancellation?.Dispose();
+            answerCancellation = null;
+        }
+
+        if (completedTurn != null)
+        {
+            // The session is held with the provider of its last answer (see AiProviderSelection).
+            session.Provider = provider.Provider;
+            session.Model = provider.Model;
+            session.Turns.Add(completedTurn);
+            pendingSave = true;
+            scrollToBottom = true;
+            StateHasChanged();
+            await SaveSessionAsync();
+        }
+        else
+        {
+            // Not answered (stopped or failed): the question is back in the box, to send it again.
+            promptInput = prompt;
+            createdNotes.Remove(session.Turns.Count);
+        }
+
+        StateHasChanged();
+    }
+
+    private void StopAnswer() => answerCancellation?.Cancel();
+
+    private void RefreshWhileStreaming(bool force = false)
+    {
+        if (!force && DateTime.Now - lastRefresh < RefreshInterval)
+            return;
+        lastRefresh = DateTime.Now;
+        scrollToBottom = true;
+        StateHasChanged();
+    }
+
+    private void AddCreatedNote(int turnIndex, AiChatStreamEventDto note)
+    {
+        if (!createdNotes.TryGetValue(turnIndex, out var notes))
+            createdNotes[turnIndex] = notes = new();
+        notes.Add(note);
+
+        notificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Success,
+            Summary = "AI Assistant",
+            Detail = $"Note #{note.NoteNumber} created: {note.Text}",
+            Duration = 6000
+        });
+        StateHasChanged();
+    }
+
+    #endregion
+
+    #region Sessions and provider
+
+    private async Task LoadSessionsAsync()
+    {
+        var res = await store.AiAssistant.GetSessionsAsync();
+        if (res.IsValid)
+            sessions = res.Entity ?? new();
+    }
+
+    // Saved after each answer; again before leaving the session when that failed. False if it could not be saved.
+    private async Task<bool> SaveSessionAsync()
+    {
+        if (!pendingSave || session.Turns.Count == 0)
+            return true;
+
+        var res = await store.AiAssistant.SaveSessionAsync(session);
+        if (!res.IsValid)
+            return false;
+
+        session.NoteId = res.Entity.NoteId;
+        session.NoteNumber = res.Entity.NoteNumber;
+        session.Topic = res.Entity.Topic;
+        session.CreationDateTime = res.Entity.CreationDateTime;
+        session.ModificationDateTime = res.Entity.ModificationDateTime;
+        pendingSave = false;
+
+        await LoadSessionsAsync();
+        StateHasChanged();
+        return true;
+    }
+
+    private async Task NewConversation()
+    {
+        if (streaming || !await LeaveSessionAsync())
+            return;
+
+        StartSession(new AiChatSessionDto());
+    }
+
+    private async Task OpenSession(Guid noteId)
+    {
+        if (streaming || noteId == session.NoteId || !await LeaveSessionAsync())
+            return;
+
+        var res = await store.AiAssistant.GetSessionAsync(noteId);
+        if (!res.IsValid)
+            return;
+
+        StartSession(res.Entity);
+
+        // Resumed with its provider and model, or with the default one when they are no longer configured.
+        var provider = AiProviderSelection.ForSession(providers, session.Provider, session.Model);
+        if (provider == null)
+        {
+            provider = providers.FirstOrDefault(p => p.IsDefault) ?? providers.FirstOrDefault();
+            if (provider != null)
+                notificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Info,
+                    Summary = "AI Assistant",
+                    Detail = $"{session.Provider} {session.Model}, the model of this session, is no longer available: it continues with {provider.Alias}.",
+                    Duration = 8000
+                });
+        }
+        SetProvider(provider);
+    }
+
+    // A different provider can't continue the conversation: it starts a new one.
+    private async Task OnProviderChange(object value)
+    {
+        var alias = value as string;
+        if (alias == currentProvider?.Alias)
+            return;
+
+        if (session.Turns.Count > 0)
+        {
+            var confirm = await dialogService.Confirm("Changing the AI provider starts a new conversation. Do you want to continue?",
+                "AI Assistant", new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+            if (confirm != true || !await LeaveSessionAsync())
+            {
+                // Back to the provider in use.
+                providerAlias = currentProvider?.Alias;
+                return;
+            }
+            StartSession(new AiChatSessionDto());
+        }
+
+        SetProvider(providers.FirstOrDefault(p => p.Alias == alias));
+    }
+
+    // Before leaving the session in the chat: saved, if it has something unsaved.
+    private async Task<bool> LeaveSessionAsync()
+    {
+        if (await SaveSessionAsync())
+            return true;
+
+        var discard = await dialogService.Confirm("The conversation could not be saved. Do you want to discard its last messages?",
+            "AI Assistant", new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+        return discard == true;
+    }
+
+    private void StartSession(AiChatSessionDto newSession)
+    {
+        session = newSession;
+        pendingSave = false;
+        promptInput = "";
+        createdNotes.Clear();
+        scrollToBottom = true;
+    }
+
+    private void SetProvider(AiProviderInfoDto? provider)
+    {
+        currentProvider = provider;
+        providerAlias = provider?.Alias;
+    }
+
+    #endregion
+}

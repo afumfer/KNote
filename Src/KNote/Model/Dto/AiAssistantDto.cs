@@ -6,7 +6,7 @@ namespace KNote.Model.Dto;
 // The Web AI assistant API (Server's AiAssistantController).
 
 // A configured AI provider as the client sees it: never its API key or host.
-public class AiProviderInfoDto
+public class AiProviderInfoDto : IAiProviderIdentity
 {
     public string Alias { get; set; }
 
