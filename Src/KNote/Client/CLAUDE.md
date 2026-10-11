@@ -124,9 +124,15 @@ Cómo está integrada:
   son nombres de Material Symbols.
 - **Colores y temas**: la app debe verse bien con cualquier tema de Radzen, claro u oscuro. Usa solo variables
   del tema (`--rz-primary`, `--rz-primary-lighter`, `--rz-on-primary`, `--rz-text-color`,
-  `--rz-base-background-color`...) y las de `knt-theme.css`; el único color fijo es `--knt-brand` (el ámbar del
-  logo). No uses `rz-background-color-base-*` ni `rz-color-base-*` para fondos: la escala `base` no se invierte
-  en los temas oscuros (fondo claro con texto claro); para un fondo suave usa `knt-background-subtle`.
+  `--rz-base-background-color`...) y las de `knt-theme.css`; los únicos colores fijos son `--knt-brand`
+  (el ámbar del logo), `--knt-ink` (cabecera de Home "ink") y `--knt-paper*` (ver abajo). No uses
+  `rz-background-color-base-*` ni `rz-color-base-*` para fondos: la escala `base` no se invierte
+  en los temas oscuros (fondo claro con texto claro); para un fondo suave usa `knt-background-subtle`. Los
+  colores de estado también salen del tema: validación (`.invalid`, `.validation-message`, en `knt-theme.css`),
+  resaltados de los calendarios (`--rz-warning-lighter`), citas marcadas (`--rz-danger`). El HTML de una nota
+  (`Shared/ViewMarkdown`, envuelto en `.knt-markdown`) puede traer colores propios de ClientWin (`<font color>`,
+  `style`, `bgcolor`), pensados para su editor blanco: en los temas oscuros esa nota se muestra sobre una hoja
+  blanca (`--knt-paper`, regla con `:has` en `knt-theme.css`); las notas sin colores propios siguen el tema.
   `knt-theme.css` también declara la fuente Inter (incluida en el paquete de Radzen) como
   `--knt-heading-font-family`, para títulos y cabeceras, y ajusta el ancho del sidebar a su texto
   (`max-content`). El logo de la app es `Shared/KntLogo` (SVG, color `currentColor` → `--knt-brand`). Un ajuste
@@ -175,7 +181,7 @@ Patrones ya establecidos que hay que seguir:
   alarmas), `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
 
 **No hay Bootstrap ni otras librerías de iconos o CSS**: la UI usa solo Radzen (tema `software` por defecto)
-más `wwwroot/css/app.css` (base `box-sizing`, tipografía, mensajes de validación, error de Blazor),
+más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 `wwwroot/css/knt-theme.css` (ajustes sobre el tema, ver arriba) y el CSS aislado de algún componente
 (`*.razor.css`; para estilar un componente hijo de Radzen hace falta `::deep`). No añadas clases de Bootstrap (`row`, `col-*`, `form-control`, `btn`,
 `mr-1`...) ni iconos de Font Awesome: no hay hoja que los defina. Los parámetros de un diálogo se pasan como
