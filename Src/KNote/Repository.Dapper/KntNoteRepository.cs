@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Dapper;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using Microsoft.Data.Sqlite;
 using System.Data;
@@ -1506,6 +1507,19 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 FROM Notes ";
     }
 
+    // The ORDER BY of the order asked for (only a known column name gets into the SQL), with the note number
+    // breaking ties so that the pages don't overlap; defaultOrderBy if none (or an unknown column) is asked.
+    private static string GetOrderBy(string orderColumn, bool ascending, string defaultOrderBy)
+    {
+        if (!NoteOrderCriteria.IsSortableColumn(orderColumn))
+            return defaultOrderBy;
+
+        var orderBy = $" ORDER BY [{orderColumn}] {(ascending ? "ASC" : "DESC")}";
+        if (orderColumn != "NoteNumber")
+            orderBy += ", NoteNumber";
+        return orderBy + " ";
+    }
+
     private string GetMinimalSelectNotes()
     {
         return @"SELECT NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,            
@@ -1816,7 +1830,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             result.TotalCount = GetCountNotes(db, sqlWhere, parameters);
 
-            sql = sql + sqlWhere + @" ORDER BY [Priority], Topic ";
+            sql = sql + sqlWhere + GetOrderBy(notesFilter.OrderColumn, notesFilter.OrderAscending, @" ORDER BY [Priority], Topic ");
 
             var pagination = notesFilter.PageIdentifier;
 
@@ -1868,7 +1882,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 sql = GetMinimalSelectNotes();
 
             sqlWhere = "";
-            sqlOrder = @" ORDER BY Topic ";
+            sqlOrder = GetOrderBy(notesSearch.OrderColumn, notesSearch.OrderAscending, @" ORDER BY Topic ");
             var parameters = new DynamicParameters();
             var paramIndex = 0;
 

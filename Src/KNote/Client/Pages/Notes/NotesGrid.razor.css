@@ -48,31 +48,8 @@
     padding: 0;
 }
 
-.knt-notes-grid-topic {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    min-width: 0;
-}
-
-/* The title keeps the space it needs; the tags take what is left. */
 .knt-notes-grid-title {
-    flex: 0 1 auto;
-    min-width: 0;
     font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.knt-notes-grid-tags {
-    flex: 1 1 0;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.75rem;
-    color: var(--rz-text-secondary-color);
 }
 
 .knt-notes-grid-summary {

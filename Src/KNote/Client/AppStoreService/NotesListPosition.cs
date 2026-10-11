@@ -11,4 +11,7 @@ public class NotesListPosition
     public double ScrollTop { get; set; }
 
     public Guid? LastNoteId { get; set; }
+
+    // The order chosen in the list (null: the list's own order).
+    public NotesOrder? Order { get; set; }
 }

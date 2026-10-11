@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
@@ -112,7 +113,16 @@ public class KntFoldersUpdateOrderNotesAsyncCommand : KntCommandServiceBase<(Gui
 
     public override async Task<Result> Execute()
     {
-        return await Repository.Folders.UpdateOrderNotesAsync(Param.FolderId, Param.OrderNotes);
+        // Only an order in NoteOrderCriteria's format (or "" for the default one) is remembered this way.
+        var orderNotes = Param.OrderNotes ?? "";
+        if (NoteOrderCriteria.Parse(orderNotes).Format() != orderNotes)
+        {
+            var result = new Result();
+            result.AddErrorMessage($"Unrecognized notes order: '{orderNotes}'.");
+            return result;
+        }
+
+        return await Repository.Folders.UpdateOrderNotesAsync(Param.FolderId, orderNotes);
     }
 }
 

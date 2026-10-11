@@ -136,6 +136,12 @@ export function getScrollTop(host) {
     return scrollArea(host)?.scrollTop ?? 0;
 }
 
+export function setScrollTop(host, value) {
+    const area = scrollArea(host);
+    if (area)
+        area.scrollTop = value;
+}
+
 // Scrolls to a position kept from before, once the grid has drawn its whole height (the space of the rows
 // not loaded yet), which happens some frames after the first rows arrive.
 export function restoreScrollTop(host, value) {

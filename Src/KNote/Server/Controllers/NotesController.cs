@@ -101,6 +101,8 @@ public class NotesController : ControllerBase
             if(notesSearchParam.PageNumber > 0)
                 notesSearch.PageIdentifier.PageNumber = notesSearchParam.PageNumber;
             notesSearch.PageIdentifier.PageSize = notesSearchParam.PageSize;
+            notesSearch.OrderColumn = notesSearchParam.OrderColumn;
+            notesSearch.OrderAscending = notesSearchParam.OrderAscending;
             // .....
 
             var resApi = await _service.Notes.GetSearchMinimalAsync(notesSearch);

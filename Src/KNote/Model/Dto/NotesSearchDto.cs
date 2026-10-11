@@ -18,6 +18,12 @@ public class NotesSearchDto : SmartModelDtoBase
     // Leaves out the notes of this NoteType (e.g. the AI assistant's own sessions, see KntConst.ChatSessionsTag).
     public Guid? ExcludeNoteTypeId { get; set; }
 
+    // Order of the notes: one of NoteOrderCriteria.SortableColumns (the note number breaks ties). Null, or
+    // any other value, keeps the query's own order.
+    public string OrderColumn { get; set; }
+
+    public bool OrderAscending { get; set; } = true;
+
     public PageIdentifier PageIdentifier { get; set; } = new PageIdentifier();
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -34,4 +40,6 @@ public class NotesSearchParam
     public string TextSearch { get; set; }
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
+    public string OrderColumn { get; set; }
+    public bool OrderAscending { get; set; } = true;
 }

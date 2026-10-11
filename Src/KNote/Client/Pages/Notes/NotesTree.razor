@@ -1,6 +1,8 @@
 ﻿@page "/notes/tree"
 @page "/tree"
 
+@using KNote.Model.Core
+
 @implements IDisposable
 
 @inject IStore store
@@ -28,8 +30,10 @@
         <RadzenSplitterPane>
             @if (folder != null)
             {
-                @* A new grid for each folder: it starts at the top (or where it was left) with its own data. *@
+                @* A new grid for each folder: it starts at the top (or where it was left) with its own data, in the
+                   folder's order (Folder.OrderNotes, as in ClientWin). *@
                 <NotesGrid @ref="notesGrid" @key="folder.FolderId" LoadPage="LoadNotesPage" Position="appState.NotesTreePosition"
+                           Order="FolderOrder()" OrderChanged="OnOrderChanged"
                            OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
             }
         </RadzenSplitterPane>
@@ -42,9 +46,15 @@
     private FolderDto? folder;
     private NotesGrid? notesGrid;
     private AppState appState = null!;
+    private bool canSaveOrder;
+
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthenticationState).User;
+        canSaveOrder = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
+
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
         await Load();
@@ -76,9 +86,10 @@
         {
             foldersTree = appState.FoldersTree;
 
-            // Back to the page: the folder that was shown (with the list where it was, NotesTreePosition).
+            // Back to the page: the folder that was shown (with the list where it was, NotesTreePosition), as
+            // it is in the tree (SelectedFolder is a copy, it may not have its last order of notes).
             if (appState.IsSelectedFolder())
-                FolderSelected(appState.SelectedFolder!);
+                FolderSelected(FindFolder(foldersTree, appState.SelectedFolder!.FolderId) ?? appState.SelectedFolder!);
         }
     }
 
@@ -101,10 +112,47 @@
         appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
     }
 
-    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page)
+    private static FolderDto? FindFolder(List<FolderDto>? folders, Guid folderId)
     {
+        foreach (var f in folders ?? [])
+        {
+            var found = f.FolderId == folderId ? f : FindFolder(f.ChildFolders, folderId);
+            if (found != null)
+                return found;
+        }
+        return null;
+    }
+
+    private NotesOrder FolderOrder() => NotesOrder.From(NoteOrderCriteria.Parse(folder?.OrderNotes));
+
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
+    {
+        // Without an order chosen in the list, the folder's one.
+        order ??= FolderOrder();
+
         // A new filter for each request: the grid may ask for several pages at the same time.
-        return await store.Notes.GetFilter(new NotesFilterDto { FolderId = folder?.FolderId, PageIdentifier = page });
+        return await store.Notes.GetFilter(new NotesFilterDto
+        {
+            FolderId = folder?.FolderId,
+            PageIdentifier = page,
+            OrderColumn = order.Column,
+            OrderAscending = order.Ascending
+        });
+    }
+
+    // Sorted with a header: a folder in Auto mode remembers it (NoteOrderCriteria.FormatUserOrder), as in ClientWin.
+    private async Task OnOrderChanged(NotesOrder? order)
+    {
+        if (order == null || folder == null || !canSaveOrder)
+            return;
+
+        var orderNotes = NoteOrderCriteria.Parse(folder.OrderNotes).FormatUserOrder(order.Column, order.Ascending);
+        if (orderNotes == null || orderNotes == folder.OrderNotes)
+            return;
+
+        var result = await store.Folders.UpdateOrderNotesAsync(folder.FolderId, orderNotes);
+        if (result.IsValid)
+            folder.OrderNotes = orderNotes;
     }
 
     async Task OnNew()

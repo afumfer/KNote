@@ -8,8 +8,8 @@
     Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
     height of its container. A click selects a row (the current row, js/notesGrid.js), which the arrows, page
     keys, Home and End move too; double click or Enter opens its note; the ⋮ button, a right click, the context
-    menu key or Shift+F10 show its actions, and Delete deletes it. With Position it remembers where the user
-    was when a note was opened.
+    menu key or Shift+F10 show its actions, and Delete deletes it. The headers sort the list (in the server:
+    LoadPage gets the order). With Position it remembers where the user was when a note was opened.
 *@
 
 <div @ref="host" class="knt-notes-grid-host" data-count="@count" @oncontextmenu:preventDefault="true">
@@ -18,32 +18,46 @@
                     Data="@notes" Count="@count" LoadData="OnLoadData" IsLoading="@isLoading"
                     AllowVirtualization="true" VirtualizationOverscanCount="10"
                     Density="Density.Compact" GridLines="DataGridGridLines.Horizontal" AllowAlternatingRows="false"
-                    AllowColumnResize="true" EmptyText="No notes found."
+                    AllowColumnResize="true" AllowSorting="true" EmptyText="No notes found."
                     RowRender="OnRowRender" RowDoubleClick="OnRowDoubleClick" CellContextMenu="OnCellContextMenu">
+        @* The columns of ClientWin's notes selector, in the same order. *@
         <Columns>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="NoteNumber" Title="#" Width="64px" TextAlign="TextAlign.Right">
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="NoteNumber" Title="#" Width="64px" TextAlign="TextAlign.Right"
+                                  SortOrder="@SortOrderOf("NoteNumber")">
                 <Template Context="note">
                     <span class="knt-notes-grid-muted">@note.NoteNumber</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Topic" Title="Topic">
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Topic" Title="Topic" SortOrder="@SortOrderOf("Topic")">
                 <Template Context="note">
-                    <div class="knt-notes-grid-topic">
-                        <span class="knt-notes-grid-title">@note.Topic</span>
-                        @if (!string.IsNullOrWhiteSpace(note.Tags))
-                        {
-                            <span class="knt-notes-grid-tags">@note.Tags</span>
-                        }
-                    </div>
+                    <span class="knt-notes-grid-title">@note.Topic</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Priority" Title="Priority" Width="72px" TextAlign="TextAlign.Center" />
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="CreationDateTime" Title="Created" Width="96px" TextAlign="TextAlign.Right">
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Priority" Title="Priority" Width="96px" TextAlign="TextAlign.Center"
+                                  SortOrder="@SortOrderOf("Priority")" />
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Tags" Title="Tags" Width="120px" SortOrder="@SortOrderOf("Tags")">
+                <Template Context="note">
+                    <span class="knt-notes-grid-muted">@note.Tags</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="InternalTags" Title="Status" Width="110px" SortOrder="@SortOrderOf("InternalTags")">
+                <Template Context="note">
+                    <span class="knt-notes-grid-muted">@note.InternalTags</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="ModificationDateTime" Title="Modified" Width="100px" TextAlign="TextAlign.Right"
+                                  SortOrder="@SortOrderOf("ModificationDateTime")">
+                <Template Context="note">
+                    <span class="knt-notes-grid-muted">@note.ModificationDateTime.ToShortDateString()</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="CreationDateTime" Title="Created" Width="100px" TextAlign="TextAlign.Right"
+                                  SortOrder="@SortOrderOf("CreationDateTime")">
                 <Template Context="note">
                     <span class="knt-notes-grid-muted">@note.CreationDateTime.ToShortDateString()</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Width="44px" TextAlign="TextAlign.Center" Resizable="false">
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Width="44px" TextAlign="TextAlign.Center" Resizable="false" Sortable="false">
                 <Template Context="note">
                     @* The span keeps the button clicks from reaching the row (a double click opens the note). Out
                        of the Tab order: from the keyboard the menu is opened with the context menu key. *@
@@ -59,8 +73,13 @@
 </div>
 
 @code {
-    [Parameter][EditorRequired] public Func<PageIdentifier, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
+    // Loads a page of the list in an order (null: the list's own order).
+    [Parameter][EditorRequired] public Func<PageIdentifier, NotesOrder?, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
     [Parameter] public NotesListPosition? Position { get; set; }
+    // The order the list starts with, unless Position remembers another one.
+    [Parameter] public NotesOrder? Order { get; set; }
+    // The user sorted the list with a header (null: removed the sort, back to the list's own order).
+    [Parameter] public EventCallback<NotesOrder?> OrderChanged { get; set; }
     [Parameter] public EventCallback<NoteMinimalDto> OnNoteView { get; set; }
     [Parameter] public EventCallback<NoteMinimalDto> OnNoteEdit { get; set; }
     [Parameter] public EventCallback<NoteMinimalDto> OnNoteDelete { get; set; }
@@ -86,10 +105,15 @@
     private bool restoreScroll;
     private readonly Dictionary<int, Task<List<NoteMinimalDto>?>> blocks = new();
     private int dataVersion;
+    private NotesOrder? order;
+    private NotesOrder? initialOrder;
+    private NotesOrder? gridSort;
+    private bool gridSortKnown;
 
     protected override async Task OnInitializedAsync()
     {
         restoreScroll = Position?.ScrollTop > 0;
+        order = initialOrder = Position?.Order ?? Order;
 
         var user = (await AuthenticationState).User;
         canEdit = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
@@ -133,8 +157,21 @@
             Position.LastNoteId = openedNote.NoteId;
     }
 
+    // Only the initial sort of the headers: then Radzen keeps it (changing it while the grid reloads its rows
+    // after a sort leaves the old rows in view).
+    private SortOrder? SortOrderOf(string column) =>
+        initialOrder?.Column != column ? null : initialOrder.Ascending ? SortOrder.Ascending : SortOrder.Descending;
+
     private async Task OnLoadData(LoadDataArgs args)
     {
+        // The sort of the headers changed (not just reported again, nor the initial one by a column not shown).
+        var sort = args.Sorts?.FirstOrDefault(s => s.SortOrder != null && s.Property != null);
+        var sortAsked = sort == null ? null : new NotesOrder(sort.Property!, sort.SortOrder == SortOrder.Ascending);
+        if (gridSortKnown && sortAsked != gridSort && sortAsked != order)
+            await ChangeOrderAsync(sortAsked);
+        gridSort = sortAsked;
+        gridSortKnown = true;
+
         var version = dataVersion;
         var skip = args.Skip ?? 0;
         var top = args.Top ?? FetchSize;
@@ -173,7 +210,7 @@
 
     private async Task<List<NoteMinimalDto>?> FetchBlockAsync(int block, int version)
     {
-        var result = await LoadPage(new PageIdentifier { PageNumber = block + 1, PageSize = FetchSize });
+        var result = await LoadPage(new PageIdentifier { PageNumber = block + 1, PageSize = FetchSize }, order);
         if (version != dataVersion)
             return null;
 
@@ -186,6 +223,19 @@
 
         count = (int)result.TotalCount;
         return result.Entity ?? new List<NoteMinimalDto>();
+    }
+
+    // A new order: the notes loaded are no longer valid, and the list starts again at the top.
+    private async Task ChangeOrderAsync(NotesOrder? newOrder)
+    {
+        order = newOrder;
+        if (Position != null)
+            Position.Order = newOrder;
+
+        blocks.Clear();
+        dataVersion++;
+        await (await GetModuleAsync()).InvokeVoidAsync("setScrollTop", host, 0);
+        await OrderChanged.InvokeAsync(newOrder);
     }
 
     private void OnRowRender(RowRenderEventArgs<NoteMinimalDto> args)
