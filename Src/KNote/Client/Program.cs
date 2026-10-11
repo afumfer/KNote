@@ -27,5 +27,6 @@ builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
 );
 
 builder.Services.AddRadzenComponents();
+builder.Services.AddRadzenCookieThemeService(options => options.Name = "KNoteTheme");
 
 await builder.Build().RunAsync();

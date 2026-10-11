@@ -12,7 +12,7 @@
         Selected=@ShouldSelected
         HasChildren=@(f => ((FolderDto)f).ChildFolders.Any()) >
             <Template>       
-                <RadzenIcon Icon="folder" Style="color: lightgray"/> @context.Text
+                <RadzenIcon Icon="folder" Style="color: var(--rz-base-400)"/> @context.Text
                 @if (EditMode)
                 {
                     <span>

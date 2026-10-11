@@ -1,0 +1,28 @@
+/* KNote customizations on top of the Radzen theme. Loaded right after the theme stylesheet (App.razor),
+   so it wins over the theme at equal specificity. Use only theme variables (--rz-*) for colors, so every
+   Radzen theme (light or dark) still looks right; --knt-brand is the only fixed color (the app icon). */
+
+/* Inter ships with Radzen.Blazor; the themes don't load it, so it is declared here for titles and headers. */
+@font-face {
+    font-family: "Inter";
+    src: url("../_content/Radzen.Blazor/fonts/InterVariable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --knt-brand: #F1C40F;
+    --knt-heading-font-family: "Inter", var(--rz-text-font-family);
+    --knt-sidebar-air: 1rem;
+}
+
+/* The sidebar is as wide as its longest menu entry (whatever the theme's font), plus some air on the right. */
+.rz-sidebar {
+    --rz-sidebar-width: max-content;
+    interpolate-size: allow-keywords;
+}
+
+    .rz-sidebar .rz-panel-menu .rz-navigation-item-link {
+        padding-inline-end: calc(var(--rz-panel-menu-item-padding-inline) + var(--knt-sidebar-air));
+    }

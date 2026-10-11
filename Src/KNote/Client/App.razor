@@ -1,4 +1,12 @@
-﻿<Router AppAssembly="@typeof(Program).Assembly">
+﻿@* Resolved here so the theme saved in the cookie is applied at startup and saved when it changes. *@
+@inject CookieThemeService cookieThemeService
+
+<HeadContent>
+    <RadzenTheme Theme="software" />
+    <link href="css/knt-theme.css" rel="stylesheet" />
+</HeadContent>
+
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">        
         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
             <Authorizing>
