@@ -14,6 +14,10 @@
 :root {
     --knt-brand: #F1C40F;
     --knt-ink: #161B1D; /* Base of the Home header, tinted with the theme's primary color. */
+    /* The page of ClientWin's HTML editor, where notes with colors of their own were written (see .knt-markdown). */
+    --knt-paper: #FFFFFF;
+    --knt-paper-text: #1F2328;
+    --knt-paper-link: #0B62A4;
     --knt-heading-font-family: "Inter", var(--rz-text-font-family);
     --knt-sidebar-air: 1rem;
 }
@@ -22,6 +26,20 @@
    Use it instead of rz-background-color-base-*: the base palette is not inverted by the dark themes. */
 .knt-background-subtle {
     background-color: color-mix(in srgb, var(--rz-text-color) 7%, transparent);
+}
+
+/* Form validation (Blazor's field classes and ValidationMessage) in the theme's status colors. The message mixes
+   the theme's red with its text color: darker on light themes and lighter on dark ones, readable on both. */
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid var(--rz-success);
+}
+
+.invalid {
+    outline: 1px solid var(--rz-danger);
+}
+
+.validation-message {
+    color: color-mix(in srgb, var(--rz-danger) 70%, var(--rz-text-color));
 }
 
 /* App icon (Shared/KntLogo): brand color unless the caller sets another one. */
@@ -47,6 +65,18 @@
     --rz-dialog-title-background-color: color-mix(in srgb, var(--rz-base-background-color), white 12%);
     --rz-dialog-mask-background-color: #000;
     --rz-dialog-shadow: 0 0 0 1px color-mix(in srgb, var(--rz-text-color) 14%, transparent), 0 22px 64px 0 rgb(0 0 0 / 0.6);
+}
+
+/* Note content (Shared/ViewMarkdown) with colors of its own, in a dark theme. They come from ClientWin's HTML
+   editor (<font color>), from pasted text (style="color/background...") or from old HTML (bgcolor), and were
+   chosen for that editor's white page: on a dark page dark text would vanish and light backgrounds glare. Such
+   a note is shown on a white sheet, as in ClientWin; notes without colors of their own follow the theme. */
+:root:has(link[href*="dark-base.css"]) .knt-markdown:has(font[color], [style*="color"], [style*="background"], [bgcolor]) {
+    --rz-link-color: var(--knt-paper-link);
+    padding: 0.75rem 1rem;
+    border-radius: var(--rz-border-radius);
+    background-color: var(--knt-paper);
+    color: var(--knt-paper-text);
 }
 
 /* The sidebar is as wide as its longest menu entry (whatever the theme's font), plus some air on the right. */

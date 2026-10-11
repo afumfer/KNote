@@ -8,8 +8,9 @@
     }
 }
 else
-{    
-    @((MarkupString)HtmlContent)    
+{
+    @* knt-markdown: see knt-theme.css (content with colors of its own in the dark themes). *@
+    <div class="knt-markdown">@((MarkupString)HtmlContent)</div>
 }
 
 @code {
