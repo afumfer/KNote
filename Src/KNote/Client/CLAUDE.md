@@ -58,9 +58,10 @@ Client/
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
 ├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, AIAssistant/
 ├── Shared/                 – layout (MainLayout*) y componentes reutilizables (EntityList, ToolingHeader,
-│                             KntIndexHeader, KntFolderSelector, KntFoldersTreeView, InputMarkdown, ...)
+│                             KntIndexHeader, KntSections, KntDialogs, KntLogo, KntFolderSelector,
+│                             KntFoldersTreeView, InputMarkdown, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
-└── wwwroot/                – index.html, css/app.css, js/filePaste.js
+└── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/filePaste.js, favicon.ico
 ```
 
 ## Acceso a datos: `IStore` y los `I*WebApiService`
@@ -106,9 +107,21 @@ Cómo está integrada:
 - `<RadzenComponents />` en `Shared/MainLayout.razor` (anfitrión de diálogos, notificaciones, menús
   contextuales y tooltips). Sin él los servicios anteriores no muestran nada.
 - Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`.
-- Tema y script en `wwwroot/index.html`: `_content/Radzen.Blazor/css/software.css` y
+- Tema: `<RadzenTheme Theme="software" />` en el `<HeadContent>` de `App.razor` (no un `<link>` fijo en
+  `index.html`), seguido de `css/knt-theme.css`. El tema elegido se recuerda en la cookie `KNoteTheme`
+  (`AddRadzenCookieThemeService` en `Program.cs`; `App.razor` inyecta `CookieThemeService` para que se active)
+  y `RadzenAppearanceToggle` (en `MainLayoutHeader`) cambia entre claro y oscuro (`software-dark`).
+  `index.html` carga `css/app.css` (lo que hace falta antes de arrancar Blazor) y
   `_content/Radzen.Blazor/Radzen.Blazor.js`. Los iconos de Radzen (`Icon="save"`, `"edit"`, `"delete"`...)
   son nombres de Material Symbols.
+- **Colores y temas**: la app debe verse bien con cualquier tema de Radzen, claro u oscuro. Usa solo variables
+  del tema (`--rz-primary`, `--rz-primary-lighter`, `--rz-on-primary`, `--rz-text-color`,
+  `--rz-base-background-color`...) y las de `knt-theme.css`; el único color fijo es `--knt-brand` (el ámbar del
+  logo). No uses `rz-background-color-base-*` ni `rz-color-base-*` para fondos: la escala `base` no se invierte
+  en los temas oscuros (fondo claro con texto claro); para un fondo suave usa `knt-background-subtle`.
+  `knt-theme.css` también declara la fuente Inter (incluida en el paquete de Radzen) como
+  `--knt-heading-font-family`, para títulos y cabeceras, y ajusta el ancho del sidebar a su texto
+  (`max-content`). El logo de la app es `Shared/KntLogo` (SVG, color `currentColor` → `--knt-brand`).
 
 Patrones ya establecidos que hay que seguir:
 
@@ -130,20 +143,31 @@ Patrones ya establecidos que hay que seguir:
   (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
   `Shared/EntityList` (que pinta "cargando"/"sin registros"); acciones por fila con `RadzenButton` +
-  `tooltipService.Open(...)`. Cabecera de página con `KntIndexHeader` (título, `Icon` opcional) +
-  `RadzenMenu` en `IndexMenu`; la de un formulario de página completa, `ToolingHeader` (título + `Buttons`).
+  `tooltipService.Open(...)`.
+- **Cabeceras**: la de una página de sección es `KntIndexHeader` con `Section="KntSections.Xxx"` (título e
+  icono de su entrada del menú; `TextHead`/`Icon` los sustituyen, como en `NotesTree`, que muestra la carpeta) y
+  la botonera en `IndexMenu` (normalmente un `RadzenMenu`, que la cabecera deja sin fondo). `Shared/KntSections`
+  es la única fuente de texto, ruta e icono de cada sección: la usan el menú lateral, las pestañas de `Admin` y
+  las cabeceras. Dentro de otra sección (las pestañas de `Admin` pasan el `CascadingValue`
+  `KntCompactHeader = true`) la cabecera sale compacta. La de un formulario de página completa es
+  `ToolingHeader` (`Title`, `Icon` opcional y `Buttons`), una versión más ligera de la misma familia.
+- **Tooltips**: siempre con `tooltipService.Open(...)` (en `MouseEnter`), no con el atributo `title`, que
+  muestra el tooltip del navegador con otro estilo.
 - **Diálogos** (alta/edición de entidades pequeñas, selectores, login): `dialogService.OpenAsync<Componente>(
-  título, parámetros, new DialogOptions {...})`; el componente devuelve su resultado con
+  título, parámetros, KntDialogs.Small()/Medium()/Large())`; el componente devuelve su resultado con
   `dialogService.Close(resultado)` (`null` = cancelado). Confirmaciones con `dialogService.Confirm(...)`.
   Ejemplos: `TypesIndex` → `TypeEdit`/`TypeNew`, `NoteForm` → `KntFolderSelector`/`NoteTaskEditor`.
+  `KntDialogs` no fija la altura: el diálogo mide lo que su contenido (sin hueco sobre los botones). Si tiene
+  una lista o un árbol que puede crecer, limita esa zona (`max-height: 60vh; overflow: auto`), no el diálogo.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y
   alarmas), `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
 
-**No hay Bootstrap ni otras librerías de iconos o CSS**: la UI usa solo Radzen (tema `software`) más
-`wwwroot/css/app.css` (base `box-sizing`, tipografía, mensajes de validación, error de Blazor) y el CSS aislado
-de algún componente (`*.razor.css`). No añadas clases de Bootstrap (`row`, `col-*`, `form-control`, `btn`,
+**No hay Bootstrap ni otras librerías de iconos o CSS**: la UI usa solo Radzen (tema `software` por defecto)
+más `wwwroot/css/app.css` (base `box-sizing`, tipografía, mensajes de validación, error de Blazor),
+`wwwroot/css/knt-theme.css` (ajustes sobre el tema, ver arriba) y el CSS aislado de algún componente
+(`*.razor.css`; para estilar un componente hijo de Radzen hace falta `::deep`). No añadas clases de Bootstrap (`row`, `col-*`, `form-control`, `btn`,
 `mr-1`...) ni iconos de Font Awesome: no hay hoja que los defina. Los parámetros de un diálogo se pasan como
 `new Dictionary<string, object?>()` (firma de `DialogService.OpenAsync` en Radzen 12).
 
@@ -223,6 +247,8 @@ No hay tests de `Client`. La API que consume se prueba en `Tests/` (ver `Server/
 2. Endpoint en `Server/Controllers` con su `[Authorize(Roles = ...)]`.
 3. Método en el `I*WebApiService` + implementación (heredando de `BaseService`); si es un objeto de dominio
    nuevo, su propiedad en `IStore`/`Store`.
-4. Página(s) y componentes con Radzen en `Pages/<Área>/`, con su `[Authorize(Roles = ...)]`, y entrada en
-   `Shared/MainLayoutNavMenu.razor` dentro del `<AuthorizeView>` correspondiente.
+4. Página(s) y componentes con Radzen en `Pages/<Área>/`, con su `[Authorize(Roles = ...)]`. Si es una
+   sección nueva del menú: su `KntSection` en `Shared/KntSections.cs`, su entrada en
+   `Shared/MainLayoutNavMenu.razor` dentro del `<AuthorizeView>` correspondiente y
+   `<KntIndexHeader Section="KntSections.Xxx">` en la página.
 5. Si cambia el comportamiento de cara al usuario, `Docs/Manual.md` y `Docs/Manual_es.md`.

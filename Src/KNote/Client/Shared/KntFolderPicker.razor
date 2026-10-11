@@ -2,14 +2,15 @@
    (shown only when FolderReset has a handler). *@
 
 @inject DialogService dialogService
+@inject TooltipService tooltipService
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
     <RadzenTextBox Value="@FolderName" ReadOnly="true" Style="flex: 1;" />
     @if (FolderReset.HasDelegate)
     {
-        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" title="@ResetTitle" Click="@(() => FolderReset.InvokeAsync())" />
+        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, ResetTitle))" Click="@(() => FolderReset.InvokeAsync())" />
     }
-    <RadzenButton Icon="folder" ButtonStyle="ButtonStyle.Light" title="Select folder" Click="SelectFolder" />
+    <RadzenButton Icon="folder" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, "Select folder"))" Click="SelectFolder" />
 </RadzenStack>
 
 @code {

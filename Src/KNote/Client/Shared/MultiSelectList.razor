@@ -1,4 +1,5 @@
 ﻿@inject DialogService dialogService
+@inject TooltipService tooltipService
 
 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Start" Style="width: 100%">
     <RadzenStack Gap="0.25rem">
@@ -10,7 +11,7 @@
             </RadzenStack>
         }
     </RadzenStack>
-    <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" title="Select tags" />
+    <RadzenButton Icon="playlist_add_check" Click="() => SelectTags()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" MouseEnter="@(args => tooltipService.Open(args, "Select tags"))" />
 </RadzenStack>
 
 
