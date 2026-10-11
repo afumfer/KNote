@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Core;
 using KNote.ClientWin.Views;
 using KNote.Model;
+using KNote.Model.Dto;
 using KntScript;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -124,6 +125,20 @@ public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
         KntScriptInOutDevice.Clear();
         await Store.RunNaturalLanguageCode(prompt);
         KntScriptInOutDevice.Print("Natural language prompt sent to the KNote AI Assistant - see its window for the response.");
+    }
+
+    // Same catalog as NoteEditorCtrl.GetCatalogCode. The console has no repository of its own, so
+    // without an Assistant repository the active folder's one is used. Null if cancelled.
+    public async Task<NoteDto> GetCatalogCode()
+    {
+        var serviceRef = Store.GetAssistantServiceRef() ?? Store.ActiveFolderWithServiceRef?.ServiceRef;
+        if (serviceRef == null)
+        {
+            View.ShowInfo("There is no repository available to look for code snippets.");
+            return null;
+        }
+
+        return await Store.GetCatalogItem(serviceRef, KntConst.CodeTag, "Select code snippet");
     }
 
     // Forwarded to the running process's stdin - a no-op if none is active. The view is

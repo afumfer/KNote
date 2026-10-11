@@ -15,6 +15,19 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
 
     private string _sourceCodeDirWork;
 
+    // The code was edited since it was last loaded, saved or cleared (New).
+    private bool _isDirty;
+
+    // Language (Store.ScriptTypes code) -> source file extension, for Open/Save.
+    private static readonly (string Code, string Extension, string Description)[] SourceFileTypes =
+    {
+        ("knt", ".knts", "KntScript file"),
+        ("cs", ".cs", "C# file"),
+        ("py", ".py", "Python file"),
+        ("js", ".js", "JavaScript file"),
+        ("ln", ".txt", "Natural language prompt"),
+    };
+
     private const int EM_SETTABSTOPS = 0x00CB;
     [DllImport("User32.dll", CharSet = CharSet.Auto)]
     private static extern IntPtr SendMessage(IntPtr h, int msg, int wParam, int[] lParam);
@@ -31,7 +44,12 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
         buttonNew.SetKntIcon(KntIcon.NewDocument);
         buttonOpen.SetKntIcon(KntIcon.FolderOpen);
         buttonSave.SetKntIcon(KntIcon.Save);
+        buttonInsertCode.SetKntIcon(KntIcon.Script);
         buttonRun.SetKntIcon(KntIcon.Run);
+
+        foreach (var scriptType in Store.ScriptTypes)
+            comboLanguage.Items.Add(scriptType.Text);
+        comboLanguage.SelectedIndex = 0;
 
         _ctrl = ctrl;
         _ctrl.ScriptExited += Ctrl_ScriptExited;
@@ -58,164 +76,58 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
         _ctrl.KntScriptInOutDevice.Show();
     }
 
-    // Auto-run mode has no "Run KntScript" action (toolStripConsole is hidden - there's no KntScript
-    // source here, textSourceCode holds the note's cs/py/js AutoRunCode instead). Without this guard,
-    // an F5 KeyUp can still land on this form right after it opens (it grabs focus mid-keystroke from
-    // the very F5 press in NoteEditor/KNoteManagement that triggered the auto-run), firing
-    // buttonRunKntSCode_Click and running the cs/py/js source through the KntScript engine by mistake.
-    // KntSEngine.Run swallows the resulting parser/scanner exception and prints its message straight
-    // into the shared KntScriptInOutDevice with no trailing newline, so it lands concatenated with
-    // whatever the real interactive session prints next (e.g. "expected EOFEnter your name: ").
-    private void KntScriptForm_KeyUp(object sender, KeyEventArgs e)
+    // Auto-run mode has no run actions (toolStripConsole is hidden - textSourceCode holds the note's
+    // cs/py/js AutoRunCode, already running). Without this guard, an F5 KeyUp can still land on this
+    // form right after it opens (it grabs focus mid-keystroke from the very F5 press in
+    // NoteEditor/KNoteManagement that triggered the auto-run), starting a second run of that source
+    // by mistake - with the KntScript engine, KntSEngine.Run swallowed the resulting parser/scanner
+    // exception and printed its message straight into the shared KntScriptInOutDevice with no
+    // trailing newline, concatenated with whatever the real interactive session printed next
+    // (e.g. "expected EOFEnter your name: ").
+    private async void KntScriptForm_KeyUp(object sender, KeyEventArgs e)
     {
-        if (_ctrl.AutoRunMode)
+        if (_ctrl.AutoRunMode || !toolStripConsole.Enabled)
             return;
 
         if (e.KeyData == Keys.F5)
-            buttonRunKntSCode_Click(this, new EventArgs());
+            await RunInIntegratedConsole();
+        else if (e.KeyData == (Keys.Shift | Keys.F5) && buttonRunStdOut.Enabled)
+            await RunInStdOut();
     }
 
-    private void buttonRunKntSCode_Click(object sender, EventArgs e)
+    private void comboLanguage_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
-        {
-            KntMessageBox.Show("No code found to run", "KntScript");
-            return;
-        }
-
-        try
-        {            
-            RefreshStatusAction(true);
-
-            _ctrl.RunKntSCode(textSourceCode.Text);
-        }
-        catch (Exception err)
-        {
-            KntMessageBox.Show(err.Message);
-        }
-        finally
-        {
-            RefreshStatusAction(false);
-        }
+        // "...in standard output" only makes sense for engines that shell out to a real OS process
+        // (cs/py/js) - disabled for knt/ln, which have no OS console to speak of.
+        buttonRunStdOut.Enabled = Store.SupportsStdOutConsole(SelectedLanguage);
     }
 
-    // cs/py/js (non-StdOut) are interactive: RunXxCode returns as soon as the process is
-    // launched, not when it finishes, so the toolbar/input box are re-enabled later from
-    // Ctrl_ScriptExited - not here in a finally, which would fire immediately after start.
-    private void buttonRunCSCode_Click(object sender, EventArgs e)
+    private async void buttonRunIntegrated_Click(object sender, EventArgs e)
     {
-        if (!TryStartInteractiveRun())
-            return;
-
-        _ctrl.RunCSCode(textSourceCode.Text);
+        await RunInIntegratedConsole();
     }
 
-    private void buttonRunCSCodeStdOut_Click(object sender, EventArgs e)
+    private async void buttonRunStdOut_Click(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
-        {
-            KntMessageBox.Show("No code found to run", "KntScript");
-            return;
-        }
-
-        try
-        {
-            RefreshStatusAction(true);
-            _ctrl.RunCSCodeStdOut(textSourceCode.Text);
-        }
-        catch (Exception err)
-        {
-            KntMessageBox.Show(err.Message);
-        }
-        finally
-        {
-            RefreshStatusAction(false);
-        }
+        await RunInStdOut();
     }
 
-    private void buttonRunPyCode_Click(object sender, EventArgs e)
+    private async void buttonInsertCode_Click(object sender, EventArgs e)
     {
-        if (!TryStartInteractiveRun())
+        var codeSnippet = await _ctrl.GetCatalogCode();
+        if (codeSnippet == null || string.IsNullOrEmpty(codeSnippet.Script))
             return;
 
-        _ctrl.RunPyCode(textSourceCode.Text);
+        SetLanguage(codeSnippet.GetContentTypeExt()?.ForScript);
+
+        // SelectedText replaces the selection (if any) at the caret, scrolls to it and keeps Undo.
+        textSourceCode.SelectedText = codeSnippet.Script.ReplaceLineEndings("\r\n");
+        textSourceCode.Focus();
     }
 
-    private void buttonRunPyCodeStdOut_Click(object sender, EventArgs e)
+    private void textSourceCode_TextChanged(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
-        {
-            KntMessageBox.Show("No code found to run", "KntScript");
-            return;
-        }
-
-        try
-        {
-            RefreshStatusAction(true);
-            _ctrl.RunPyCodeStdOut(textSourceCode.Text);
-        }
-        catch (Exception err)
-        {
-            KntMessageBox.Show(err.Message);
-        }
-        finally
-        {
-            RefreshStatusAction(false);
-        }
-    }
-
-    private void buttonRunJsCode_Click(object sender, EventArgs e)
-    {
-        if (!TryStartInteractiveRun())
-            return;
-
-        _ctrl.RunJsCode(textSourceCode.Text);
-    }
-
-    private void buttonRunJsCodeStdOut_Click(object sender, EventArgs e)
-    {
-        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
-        {
-            KntMessageBox.Show("No code found to run", "KntScript");
-            return;
-        }
-
-        try
-        {
-            RefreshStatusAction(true);
-            _ctrl.RunJsCodeStdOut(textSourceCode.Text);
-        }
-        catch (Exception err)
-        {
-            KntMessageBox.Show(err.Message);
-        }
-        finally
-        {
-            RefreshStatusAction(false);
-        }
-    }
-
-    private async void buttonRunNaturalLanguage_Click(object sender, EventArgs e)
-    {
-        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
-        {
-            KntMessageBox.Show("No code found to run", "KntScript");
-            return;
-        }
-
-        try
-        {
-            RefreshStatusAction(true);
-            await _ctrl.RunNaturalLanguageCode(textSourceCode.Text);
-        }
-        catch (Exception err)
-        {
-            KntMessageBox.Show(err.Message);
-        }
-        finally
-        {
-            RefreshStatusAction(false);
-        }
+        _isDirty = true;
     }
 
     private void textInput_KeyDown(object sender, KeyEventArgs e)
@@ -277,18 +189,25 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
 
     private void buttonNew_Click(object sender, EventArgs e)
     {
+        if (!ConfirmDiscardChanges())
+            return;
+
         _ctrl.CodeFile = "";
-        textSourceCode.Text = "";
+        SetSourceCode("");
         statusFileName.Text = "";
     }
 
     private void buttonOpen_Click(object sender, EventArgs e)
     {
+        if (!ConfirmDiscardChanges())
+            return;
+
         if (string.IsNullOrEmpty(_sourceCodeDirWork))
             _sourceCodeDirWork = Application.StartupPath;
-        openFileDialogScript.Title = "Open KntScript file";
+        openFileDialogScript.Title = "Open script file";
         openFileDialogScript.InitialDirectory = _sourceCodeDirWork;
-        openFileDialogScript.Filter = "KntScript file (*.knts)|*.knts|CSharp file (*.cs)|*.cs";
+        openFileDialogScript.Filter =
+            $"Script files|{string.Join(";", SourceFileTypes.Select(t => "*" + t.Extension))}|{SourceFileFilter()}";
         openFileDialogScript.FileName = "";
         openFileDialogScript.CheckFileExists = true;
 
@@ -300,15 +219,18 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
     {
         if (string.IsNullOrEmpty(_ctrl.CodeFile))
         {
-            saveFileDialogScript.Title = "Save KntScript file";
+            var fileTypeIndex = Math.Max(0, Array.FindIndex(SourceFileTypes, t => t.Code == SelectedLanguage));
+
+            saveFileDialogScript.Title = "Save script file";
             saveFileDialogScript.InitialDirectory = _sourceCodeDirWork;
-            saveFileDialogScript.Filter = "KntScript file (*.ants)|*.ants|CSharp file (*.cs)|*.cs";
+            saveFileDialogScript.Filter = SourceFileFilter();
+            saveFileDialogScript.FilterIndex = fileTypeIndex + 1;
             saveFileDialogScript.FileName = "";
 
             if (saveFileDialogScript.ShowDialog() == DialogResult.OK)
             {
                 if (Path.GetExtension(saveFileDialogScript.FileName) == "")
-                    saveFileDialogScript.FileName += @".ants";
+                    saveFileDialogScript.FileName += SourceFileTypes[fileTypeIndex].Extension;
                 _ctrl.CodeFile = saveFileDialogScript.FileName;
                 _sourceCodeDirWork = Path.GetDirectoryName(_ctrl.CodeFile);
                 SaveFile(_ctrl.CodeFile);
@@ -319,12 +241,111 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
             SaveFile(_ctrl.CodeFile);
     }
 
+    // Only when the user closes the window: a close requested by the application (OnClosingView)
+    // doesn't get here, and auto-run mode has no code of the user's to lose.
     protected override void OnUserClosing(FormClosingEventArgs e)
-        => _ctrl.Finalize();
+    {
+        if (!_ctrl.AutoRunMode && e.CloseReason == CloseReason.UserClosing && !ConfirmDiscardChanges())
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        _ctrl.Finalize();
+    }
 
     #endregion
 
     #region Private methods
+
+    private string SelectedLanguage => Store.ScriptTypes[comboLanguage.SelectedIndex].Code;
+
+    // Unknown or empty codes (e.g. a snippet with no script type) leave the current language as is.
+    private void SetLanguage(string forScript)
+    {
+        var index = Array.FindIndex(Store.ScriptTypes, t => t.Code == forScript);
+        if (index >= 0)
+            comboLanguage.SelectedIndex = index;
+    }
+
+    private static string SourceFileFilter() =>
+        string.Join("|", SourceFileTypes.Select(t => $"{t.Description} (*{t.Extension})|*{t.Extension}"));
+
+    // knt and ln (the AI assistant answers in its own window) wait for the run to finish; cs/py/js are
+    // interactive: they return as soon as the process is launched, and the toolbar/input box are
+    // re-enabled later from Ctrl_ScriptExited.
+    private async Task RunInIntegratedConsole()
+    {
+        switch (SelectedLanguage)
+        {
+            case "cs": RunInteractive(_ctrl.RunCSCode); break;
+            case "py": RunInteractive(_ctrl.RunPyCode); break;
+            case "js": RunInteractive(_ctrl.RunJsCode); break;
+            case "ln": await RunAndWait(_ctrl.RunNaturalLanguageCode); break;
+            default: await RunAndWait(code => { _ctrl.RunKntSCode(code); return Task.CompletedTask; }); break;
+        }
+    }
+
+    private async Task RunInStdOut()
+    {
+        switch (SelectedLanguage)
+        {
+            case "cs": await RunAndWait(code => { _ctrl.RunCSCodeStdOut(code); return Task.CompletedTask; }); break;
+            case "py": await RunAndWait(code => { _ctrl.RunPyCodeStdOut(code); return Task.CompletedTask; }); break;
+            case "js": await RunAndWait(code => { _ctrl.RunJsCodeStdOut(code); return Task.CompletedTask; }); break;
+        }
+    }
+
+    private async Task RunAndWait(Func<string, Task> run)
+    {
+        if (!HasCodeToRun())
+            return;
+
+        try
+        {
+            RefreshStatusAction(true);
+            await run(textSourceCode.Text);
+        }
+        catch (Exception err)
+        {
+            KntMessageBox.Show(err.Message);
+        }
+        finally
+        {
+            RefreshStatusAction(false);
+        }
+    }
+
+    private void RunInteractive(Action<string> run)
+    {
+        if (!TryStartInteractiveRun())
+            return;
+
+        run(textSourceCode.Text);
+    }
+
+    private bool HasCodeToRun()
+    {
+        if (!string.IsNullOrEmpty(textSourceCode.Text.Trim()))
+            return true;
+
+        KntMessageBox.Show("No code found to run", "KntScript");
+        return false;
+    }
+
+    private bool ConfirmDiscardChanges()
+    {
+        return !_isDirty
+            || ShowInfo("The code has unsaved changes. Do you want to discard them?", "KntScript",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+    }
+
+    // Replaces the whole code without counting as an edit of the user's.
+    private void SetSourceCode(string code)
+    {
+        textSourceCode.Text = code;
+        _isDirty = false;
+    }
 
     private void PersonalizeTabStop()
     {
@@ -340,20 +361,19 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
 
         if (File.Exists(sourceCodeFile))
         {
-            using (TextReader input = File.OpenText(sourceCodeFile))
-            {
-                textSourceCode.Text = input.ReadToEnd().ToString();
-                _ctrl.CodeFile = sourceCodeFile;
-                _sourceCodeDirWork = Path.GetDirectoryName(sourceCodeFile);
-                textSourceCode.Select(0, 0);
-                textSourceCode.Select(0, 0);
-                statusFileName.Text = _ctrl.CodeFile;                
-            }
+            SetSourceCode(File.ReadAllText(sourceCodeFile));
+            _ctrl.CodeFile = sourceCodeFile;
+            _sourceCodeDirWork = Path.GetDirectoryName(sourceCodeFile);
+            textSourceCode.Select(0, 0);
+            statusFileName.Text = _ctrl.CodeFile;
+
+            var extension = Path.GetExtension(sourceCodeFile);
+            SetLanguage(SourceFileTypes.FirstOrDefault(t => string.Equals(t.Extension, extension, StringComparison.OrdinalIgnoreCase)).Code);
         }
         else
         {
             ShowInfo("Source code file no exist.");
-        }        
+        }
     }
 
     private void SaveFile(string sourceCodeFile)
@@ -361,6 +381,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
         try
         {
             File.WriteAllLines(sourceCodeFile, textSourceCode.Lines);
+            _isDirty = false;
         }
         catch (Exception err)
         {
@@ -384,17 +405,14 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
         }
     }
 
-    // Shared precondition + status setup for the interactive cs/py/js runs (buttonRunCSCode_Click/
-    // buttonRunPyCode_Click/buttonRunJsCode_Click): validates there's code to run and that no
-    // interactive session is already active, then flips the UI into "running" state. The actual
-    // RunXxCode(...) call is left to the caller since it differs per engine.
+    // Shared precondition + status setup for the interactive cs/py/js runs (RunInteractive and
+    // StartAutoRun): validates there's code to run and that no interactive session is already
+    // active, then flips the UI into "running" state. The actual RunXxCode(...) call is left to the
+    // caller since it differs per engine.
     private bool TryStartInteractiveRun()
     {
-        if (string.IsNullOrEmpty(textSourceCode.Text.Trim()))
-        {
-            KntMessageBox.Show("No code found to run", "KntScript");
+        if (!HasCodeToRun())
             return false;
-        }
 
         if (_ctrl.IsScriptRunning)
         {
@@ -428,7 +446,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
         splitContainer1.Panel1Collapsed = true;
         Text = $"KntScript - Console ({_ctrl.AutoRunForScript})";
 
-        textSourceCode.Text = _ctrl.AutoRunCode;
+        SetSourceCode(_ctrl.AutoRunCode);
         statusFileName.Text = "";
 
         StartAutoRun();
@@ -449,7 +467,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
 
     #endregion
 
-    #region IView interface 
+    #region IView interface
 
     public override void RefreshView()
     {

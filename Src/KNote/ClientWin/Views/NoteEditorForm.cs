@@ -69,7 +69,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _traceNoteFromSorter = ListViewSortHelper.Attach(listViewTraceNoteFrom);
         _traceNoteToSorter = ListViewSortHelper.Attach(listViewTraceNoteTo);
 
-        foreach (var scriptType in ScriptTypes)
+        foreach (var scriptType in Store.ScriptTypes)
             comboScriptType.Items.Add(scriptType.Text);
 
         // TODO: options for new versión
@@ -671,16 +671,6 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         labelExpandContent.Text = panelHeaderData.Visible ? "▲" : "▼";
     }
 
-    // Display text -> ContentTypeExt.ForScript code, in the order shown in comboScriptType.
-    private static readonly (string Code, string Text)[] ScriptTypes =
-    {
-        ("knt", "KNote Script"),
-        ("cs", "C# Script"),
-        ("py", "Python Script"),
-        ("js", "JavaScript Script"),
-        ("ln", "Natural Language"),
-    };
-
     private void comboScriptType_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (comboScriptType.SelectedIndex < 0)
@@ -690,7 +680,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             return;
         }
 
-        var forScript = ScriptTypes[comboScriptType.SelectedIndex].Code;
+        var forScript = Store.ScriptTypes[comboScriptType.SelectedIndex].Code;
 
         var ct = _ctrl.Model.GetContentTypeExt();
         ct.ForScript = forScript;
@@ -707,7 +697,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private void SetScriptTypeCombo(string forScript)
     {
-        var index = Array.FindIndex(ScriptTypes, t => t.Code == forScript);
+        var index = Array.FindIndex(Store.ScriptTypes, t => t.Code == forScript);
         comboScriptType.SelectedIndex = index >= 0 ? index : 0;
     }
 

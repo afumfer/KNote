@@ -767,6 +767,17 @@ public class Store
         }
     }
 
+    // ContentTypeExt.ForScript code -> display text, in the order the script type selectors show them
+    // (NoteEditorForm.comboScriptType, KntScriptConsoleForm.comboLanguage).
+    public static readonly (string Code, string Text)[] ScriptTypes =
+    {
+        ("knt", "KNote Script"),
+        ("cs", "C# Script"),
+        ("py", "Python Script"),
+        ("js", "JavaScript Script"),
+        ("ln", "Natural Language"),
+    };
+
     private static string ScriptEngineLabel(string forScript) => forScript switch
     {
         "cs" => "C# script",

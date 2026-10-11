@@ -160,6 +160,41 @@ public class ConfigSerializationTests
     }
 
     [TestMethod]
+    public void XmlSerializer_RoundTrip_PreservesAiAssistantWindowState()
+    {
+        var state = new AppUserState();
+        state.AiAssistantWindow.Bounds.X = -1200;
+        state.AiAssistantWindow.Bounds.Y = 80;
+        state.AiAssistantWindow.Bounds.Width = 1300;
+        state.AiAssistantWindow.Bounds.Height = 750;
+        state.AiAssistantWindow.SessionsPanelWidth = 310;
+        state.AiAssistantWindow.PromptPanelHeight = 140;
+
+        var window = RoundTrip(state).AiAssistantWindow;
+
+        Assert.AreEqual(-1200, window.Bounds.X);
+        Assert.AreEqual(80, window.Bounds.Y);
+        Assert.AreEqual(1300, window.Bounds.Width);
+        Assert.AreEqual(750, window.Bounds.Height);
+        Assert.AreEqual(310, window.SessionsPanelWidth);
+        Assert.AreEqual(140, window.PromptPanelHeight);
+    }
+
+    [TestMethod]
+    public void XmlSerializer_StateWithoutAiAssistantWindow_KeepsTheDesignerLayout()
+    {
+        // A state file saved before the AI assistant remembered its window.
+        const string oldState = "<?xml version=\"1.0\"?><AppUserState schemaVersion=\"2\"><Session><RunCounter>3</RunCounter></Session></AppUserState>";
+
+        var state = (AppUserState)new XmlSerializer(typeof(AppUserState)).Deserialize(new StringReader(oldState))!;
+
+        Assert.AreEqual(3, state.Session.RunCounter);
+        Assert.AreEqual(0, state.AiAssistantWindow.Bounds.Width);
+        Assert.AreEqual(0, state.AiAssistantWindow.SessionsPanelWidth);
+        Assert.AreEqual(0, state.AiAssistantWindow.PromptPanelHeight);
+    }
+
+    [TestMethod]
     [DataRow(AppColorMode.Light)]
     [DataRow(AppColorMode.Dark)]
     [DataRow(AppColorMode.System)]

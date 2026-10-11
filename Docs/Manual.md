@@ -92,6 +92,19 @@ The note editor has its own **Print** button, which prints the details of the no
 
 The save dialogs (PDF and CSV) start in the folder where you last saved one of them.
 
+### KntScript console (desktop app)
+
+**Tools → KntScript console** (Project manager role or higher) opens an editor for code on the left and its output on the right. The toolbar has:
+
+| Button | What it does |
+|---|---|
+| **New**, **Open**, **Save** | Start empty code, open a code file (`.knts`, `.cs`, `.py`, `.js`, or `.txt` for a natural-language prompt) or save it. Opening a file selects its language from its extension. |
+| **Insert code snippet ...** | Inserts at the cursor a code snippet of the catalog (the notes of type `@Code` of the Assistant repository, or of the active folder's repository if there isn't one), the same catalog as the note editor's **Insert code snippet ...**. It also selects the snippet's language. |
+| **Language** | The language of the code: KntScript, C#, Python, JavaScript or Natural language. |
+| **Run** | **Run in integrated output console** (`F5`) shows the output in the console itself, where you can also type the input the program asks for. **Run in standard output (stdout)** (`Shift+F5`) runs it in a separate system console window; it is only available for C#, Python and JavaScript. A natural-language prompt is sent to the AI assistant, which answers in its own window. |
+
+If the code has changes that haven't been saved, **New**, **Open** and closing the window ask before discarding them.
+
 ### AI assistant (desktop app)
 
 The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. The list next to **New session** chooses the AI model that answers. On the right, the **Sessions** panel lists your previous conversations (see *AI assistant sessions* below).
@@ -117,7 +130,7 @@ The **Options** menu has the rest:
 | **Show model info (tokens, time)** | Shows or hides, below each answer of the chat view, the tokens and the time it took. The Markdown view always has them, in the marker of each answer. |
 | **Manage models ...** | Adds, changes or removes the AI models (providers) you can choose. |
 
-Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. The tokens are the ones reported by the AI provider; when a provider doesn't report them, they are estimated (the chat says so). If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. If an answer reaches the maximum length a model can write in one answer, the chat view ends it with a notice saying it was cut (shown even with **Show model info** off): ask the assistant to continue. **New session**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation; the current one is already saved.
+Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. The assistant opened from the menu also remembers its window's position and size, the width of the **Sessions** panel and the height of the question box. The tokens are the ones reported by the AI provider; when a provider doesn't report them, they are estimated (the chat says so). If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. If an answer reaches the maximum length a model can write in one answer, the chat view ends it with a notice saying it was cut (shown even with **Show model info** off): ask the assistant to continue. **New session**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation; the current one is already saved.
 
 ### AI assistant sessions
 

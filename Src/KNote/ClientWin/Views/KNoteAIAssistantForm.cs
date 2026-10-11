@@ -119,7 +119,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
         // The sessions panel only when the conversation is persisted (the assistant opened from the menu).
         if (_ctrl.PersistSession)
+        {
             MinimumSize = new Size(MinimumSize.Width + LogicalToDeviceUnits(SessionsPanelWidth), MinimumSize.Height);
+            RestoreWindowBounds();
+        }
         else
         {
             splitSessions.Panel2Collapsed = true;
@@ -131,8 +134,11 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (_ctrl.PersistSession)
         {
             // In code: the Designer's SplitterDistance is not rescaled with the window (FixedPanel = Panel2).
-            splitSessions.SplitterDistance = Math.Max(splitSessions.Panel1MinSize,
-                splitSessions.Width - splitSessions.SplitterWidth - LogicalToDeviceUnits(SessionsPanelWidth));
+            var state = _ctrl.Store.State.AiAssistantWindow;
+            var sessionsWidth = state.SessionsPanelWidth > 0 ? state.SessionsPanelWidth : LogicalToDeviceUnits(SessionsPanelWidth);
+            SetSplitterDistance(splitSessions, splitSessions.Width - splitSessions.SplitterWidth - sessionsWidth);
+            if (state.PromptPanelHeight > 0)
+                SetSplitterDistance(splitChat, splitChat.Height - splitChat.SplitterWidth - state.PromptPanelHeight);
             LoadSessions();
         }
 
@@ -168,6 +174,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private async void KNoteAIAssistantForm_FormClosing(object sender, FormClosingEventArgs e)
     {
+        if (_ctrl.PersistSession)
+            SaveWindowState();
+
         if (!ViewFinalized)
         {
             // Saved after each answer: this only retries a save that failed.
@@ -375,6 +384,47 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     #endregion
 
     #region Private methods
+
+    // Before the first Show(): StartPosition is still CenterScreen then, and switching it to Manual later
+    // (e.g. from Load) is unreliable (see AppInfoAlarmsForm). The saved position can be off every current
+    // screen (monitor or Windows scale changed since it was saved), and may legitimately be negative.
+    private void RestoreWindowBounds()
+    {
+        var bounds = _ctrl.Store.State.AiAssistantWindow.Bounds;
+        if (bounds.Width > 0)
+            Size = new Size(bounds.Width, bounds.Height);
+        if (bounds.X != 0 || bounds.Y != 0)
+        {
+            StartPosition = FormStartPosition.Manual;
+            Bounds = WindowPlacement.EnsureVisible(new Rectangle(new Point(bounds.X, bounds.Y), Size));
+        }
+    }
+
+    // On closing: RestoreBounds keeps the normal-state bounds while the window is maximized or minimized.
+    // Minimized, the panels may have been laid out to the collapsed window: their sizes aren't kept.
+    private void SaveWindowState()
+    {
+        var state = _ctrl.Store.State.AiAssistantWindow;
+        var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
+        state.Bounds.X = bounds.X;
+        state.Bounds.Y = bounds.Y;
+        state.Bounds.Width = bounds.Width;
+        state.Bounds.Height = bounds.Height;
+        if (WindowState != FormWindowState.Minimized)
+        {
+            state.SessionsPanelWidth = splitSessions.Panel2.Width;
+            state.PromptPanelHeight = splitChat.Panel2.Height;
+        }
+        _ctrl.SaveState();
+    }
+
+    // Kept within the panels' minimum sizes: the saved size may not fit a smaller window.
+    private static void SetSplitterDistance(SplitContainer split, int distance)
+    {
+        int length = split.Orientation == Orientation.Vertical ? split.Width : split.Height;
+        int max = length - split.SplitterWidth - split.Panel2MinSize;
+        split.SplitterDistance = Math.Max(split.Panel1MinSize, Math.Min(distance, max));
+    }
 
     private void PopulateProviders()
     {
