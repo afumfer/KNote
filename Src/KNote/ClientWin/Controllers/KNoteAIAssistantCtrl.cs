@@ -287,7 +287,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
         SaveState();
     }
 
-    private void SaveState()
+    // Also used by the view to remember its window bounds and panel sizes.
+    public void SaveState()
     {
         try
         {

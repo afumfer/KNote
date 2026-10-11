@@ -34,15 +34,13 @@
             buttonOpen = new ToolStripButton();
             buttonSave = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
+            buttonInsertCode = new ToolStripButton();
+            toolStripSeparator2 = new ToolStripSeparator();
+            labelLanguage = new ToolStripLabel();
+            comboLanguage = new ToolStripComboBox();
             buttonRun = new ToolStripDropDownButton();
-            buttonRunKntScript = new ToolStripMenuItem();
-            buttonRunCSCode = new ToolStripMenuItem();
-            buttonRunCSCodeStdOut = new ToolStripMenuItem();
-            buttonRunPyCode = new ToolStripMenuItem();
-            buttonRunPyCodeStdOut = new ToolStripMenuItem();
-            buttonRunJsCode = new ToolStripMenuItem();
-            buttonRunJsCodeStdOut = new ToolStripMenuItem();
-            buttonRunNaturalLanguage = new ToolStripMenuItem();
+            buttonRunIntegrated = new ToolStripMenuItem();
+            buttonRunStdOut = new ToolStripMenuItem();
             statusStripKntConsole = new StatusStrip();
             statusAction = new ToolStripStatusLabel();
             statusFileName = new ToolStripStatusLabel();
@@ -67,7 +65,7 @@
             // 
             // toolStripConsole
             // 
-            toolStripConsole.Items.AddRange(new ToolStripItem[] { buttonNew, buttonOpen, buttonSave, toolStripSeparator1, buttonRun });
+            toolStripConsole.Items.AddRange(new ToolStripItem[] { buttonNew, buttonOpen, buttonSave, toolStripSeparator1, buttonInsertCode, toolStripSeparator2, labelLanguage, comboLanguage, buttonRun });
             toolStripConsole.Location = new Point(0, 0);
             toolStripConsole.Name = "toolStripConsole";
             toolStripConsole.Size = new Size(1111, 25);
@@ -103,68 +101,54 @@
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(6, 25);
             // 
+            // buttonInsertCode
+            // 
+            buttonInsertCode.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonInsertCode.Name = "buttonInsertCode";
+            buttonInsertCode.Size = new Size(23, 22);
+            buttonInsertCode.Text = "Insert code snippet ...";
+            buttonInsertCode.Click += buttonInsertCode_Click;
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(6, 25);
+            // 
+            // labelLanguage
+            // 
+            labelLanguage.Name = "labelLanguage";
+            labelLanguage.Size = new Size(62, 22);
+            labelLanguage.Text = "Language:";
+            // 
+            // comboLanguage
+            // 
+            comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboLanguage.Name = "comboLanguage";
+            comboLanguage.Size = new Size(150, 25);
+            comboLanguage.SelectedIndexChanged += comboLanguage_SelectedIndexChanged;
+            // 
             // buttonRun
-            //
-            buttonRun.DropDownItems.AddRange(new ToolStripItem[] { buttonRunKntScript, buttonRunCSCode, buttonRunCSCodeStdOut, buttonRunPyCode, buttonRunPyCodeStdOut, buttonRunJsCode, buttonRunJsCodeStdOut, buttonRunNaturalLanguage });
+            // 
+            buttonRun.DropDownItems.AddRange(new ToolStripItem[] { buttonRunIntegrated, buttonRunStdOut });
             buttonRun.Name = "buttonRun";
             buttonRun.Size = new Size(57, 22);
             buttonRun.Text = "Run";
-            //
-            // buttonRunKntScript
-            //
-            buttonRunKntScript.Name = "buttonRunKntScript";
-            buttonRunKntScript.Size = new Size(212, 22);
-            buttonRunKntScript.Text = "KntScript code";
-            buttonRunKntScript.Click += buttonRunKntSCode_Click;
-            //
-            // buttonRunCSCode
-            //
-            buttonRunCSCode.Name = "buttonRunCSCode";
-            buttonRunCSCode.Size = new Size(212, 22);
-            buttonRunCSCode.Text = "C# code";
-            buttonRunCSCode.Click += buttonRunCSCode_Click;
-            //
-            // buttonRunCSCodeStdOut
-            //
-            buttonRunCSCodeStdOut.Name = "buttonRunCSCodeStdOut";
-            buttonRunCSCodeStdOut.Size = new Size(212, 22);
-            buttonRunCSCodeStdOut.Text = "C# code in stdout console";
-            buttonRunCSCodeStdOut.Click += buttonRunCSCodeStdOut_Click;
-            //
-            // buttonRunPyCode
-            //
-            buttonRunPyCode.Name = "buttonRunPyCode";
-            buttonRunPyCode.Size = new Size(212, 22);
-            buttonRunPyCode.Text = "Python code";
-            buttonRunPyCode.Click += buttonRunPyCode_Click;
-            //
-            // buttonRunPyCodeStdOut
-            //
-            buttonRunPyCodeStdOut.Name = "buttonRunPyCodeStdOut";
-            buttonRunPyCodeStdOut.Size = new Size(212, 22);
-            buttonRunPyCodeStdOut.Text = "Python code in stdout console";
-            buttonRunPyCodeStdOut.Click += buttonRunPyCodeStdOut_Click;
-            //
-            // buttonRunJsCode
-            //
-            buttonRunJsCode.Name = "buttonRunJsCode";
-            buttonRunJsCode.Size = new Size(212, 22);
-            buttonRunJsCode.Text = "JavaScript code";
-            buttonRunJsCode.Click += buttonRunJsCode_Click;
-            //
-            // buttonRunJsCodeStdOut
-            //
-            buttonRunJsCodeStdOut.Name = "buttonRunJsCodeStdOut";
-            buttonRunJsCodeStdOut.Size = new Size(212, 22);
-            buttonRunJsCodeStdOut.Text = "JavaScript code in stdout console";
-            buttonRunJsCodeStdOut.Click += buttonRunJsCodeStdOut_Click;
-            //
-            // buttonRunNaturalLanguage
-            //
-            buttonRunNaturalLanguage.Name = "buttonRunNaturalLanguage";
-            buttonRunNaturalLanguage.Size = new Size(212, 22);
-            buttonRunNaturalLanguage.Text = "Natural language";
-            buttonRunNaturalLanguage.Click += buttonRunNaturalLanguage_Click;
+            // 
+            // buttonRunIntegrated
+            // 
+            buttonRunIntegrated.Name = "buttonRunIntegrated";
+            buttonRunIntegrated.ShortcutKeyDisplayString = "F5";
+            buttonRunIntegrated.Size = new Size(320, 22);
+            buttonRunIntegrated.Text = "Run in integrated output console";
+            buttonRunIntegrated.Click += buttonRunIntegrated_Click;
+            // 
+            // buttonRunStdOut
+            // 
+            buttonRunStdOut.Name = "buttonRunStdOut";
+            buttonRunStdOut.ShortcutKeyDisplayString = "Shift+F5";
+            buttonRunStdOut.Size = new Size(320, 22);
+            buttonRunStdOut.Text = "Run in standard output (stdout)";
+            buttonRunStdOut.Click += buttonRunStdOut_Click;
             //
             // statusStripKntConsole
             // 
@@ -232,6 +216,7 @@
             textSourceCode.Size = new Size(569, 622);
             textSourceCode.TabIndex = 3;
             textSourceCode.WordWrap = false;
+            textSourceCode.TextChanged += textSourceCode_TextChanged;
             //
             // panelInput
             //
@@ -344,15 +329,12 @@
         private System.Windows.Forms.OpenFileDialog openFileDialogScript;
         private System.Windows.Forms.SaveFileDialog saveFileDialogScript;
         private ToolStripStatusLabel statusAction;
+        private ToolStripButton buttonInsertCode;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripLabel labelLanguage;
+        private ToolStripComboBox comboLanguage;
         private ToolStripDropDownButton buttonRun;
-        private ToolStripMenuItem buttonRunKntScript;
-        private ToolStripMenuItem cCodeToolStripMenuItem;
-        private ToolStripMenuItem buttonRunCSCodeStdOut;
-        private ToolStripMenuItem buttonRunCSCode;
-        private ToolStripMenuItem buttonRunPyCode;
-        private ToolStripMenuItem buttonRunPyCodeStdOut;
-        private ToolStripMenuItem buttonRunJsCode;
-        private ToolStripMenuItem buttonRunJsCodeStdOut;
-        private ToolStripMenuItem buttonRunNaturalLanguage;
+        private ToolStripMenuItem buttonRunIntegrated;
+        private ToolStripMenuItem buttonRunStdOut;
     }
 }

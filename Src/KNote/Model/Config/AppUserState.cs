@@ -21,6 +21,8 @@ public class AppUserState
 
     public AppInfoAlarmsWindowState AppInfoAlarmsWindow { get; set; } = new();
 
+    public AiAssistantWindowState AiAssistantWindow { get; set; } = new();
+
     public ReportsState Reports { get; set; } = new();
 }
 
@@ -119,6 +121,18 @@ public class AppInfoAlarmsWindowState
 
     // Rows shown in the "Application info" alarms panel; they stay until the user explicitly removes them.
     public List<AppInfoAlarmRow> Rows { get; set; } = new();
+}
+
+// The AI assistant opened from the menu (the one with the sessions panel). Panel sizes in pixels, like
+// Bounds; 0 means "never saved yet" (the Designer's layout is kept).
+[Serializable]
+public class AiAssistantWindowState
+{
+    public WindowBoundsState Bounds { get; set; } = new();
+
+    public int SessionsPanelWidth { get; set; }
+
+    public int PromptPanelHeight { get; set; }
 }
 
 [Serializable]

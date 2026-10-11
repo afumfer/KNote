@@ -92,6 +92,19 @@ El editor de notas tiene su propio botón **Print**, que imprime el detalle de l
 
 Los diálogos de guardar (PDF y CSV) empiezan en la carpeta donde guardaste uno de ellos por última vez.
 
+### Consola KntScript (aplicación de escritorio)
+
+**Tools → KntScript console** (rol Project manager o superior) abre un editor de código a la izquierda y su salida a la derecha. La barra de herramientas tiene:
+
+| Botón | Qué hace |
+|---|---|
+| **New**, **Open**, **Save** | Empezar un código vacío, abrir un fichero de código (`.knts`, `.cs`, `.py`, `.js`, o `.txt` para un prompt en lenguaje natural) o guardarlo. Al abrir un fichero se selecciona su lenguaje según su extensión. |
+| **Insert code snippet ...** | Inserta en el cursor un fragmento de código del catálogo (las notas de tipo `@Code` del repositorio Assistant, o del repositorio de la carpeta activa si no lo hay), el mismo catálogo que **Insert code snippet ...** del editor de notas. También selecciona el lenguaje del fragmento. |
+| **Language** | El lenguaje del código: KntScript, C#, Python, JavaScript o Natural language. |
+| **Run** | **Run in integrated output console** (`F5`) muestra la salida en la propia consola, donde también puedes escribir la entrada que pida el programa. **Run in standard output (stdout)** (`Shift+F5`) lo ejecuta en una ventana de consola del sistema aparte; solo está disponible para C#, Python y JavaScript. Un prompt en lenguaje natural se envía al asistente de IA, que responde en su propia ventana. |
+
+Si el código tiene cambios sin guardar, **New**, **Open** y cerrar la ventana preguntan antes de descartarlos.
+
 ### Asistente de IA (aplicación de escritorio)
 
 La ventana del asistente de IA muestra la conversación completa en su zona superior. Escribe una pregunta debajo y pulsa **Send**. La lista que hay junto a **New session** elige el modelo de IA que responde. A la derecha, el panel **Sessions** muestra tus conversaciones anteriores (ver *Sesiones del asistente de IA* más abajo).
@@ -117,7 +130,7 @@ El menú **Options** tiene el resto:
 | **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta de la vista de chat, los tokens y el tiempo que tardó. La vista Markdown los tiene siempre, en la marca de cada respuesta. |
 | **Manage models ...** | Añade, cambia o quita los modelos de IA (proveedores) que puedes elegir. |
 
-Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. Los tokens son los que informa el proveedor de IA; cuando un proveedor no los informa, se estiman (el chat lo indica). Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. Si una respuesta llega a la longitud máxima que un modelo puede escribir en una respuesta, la vista de chat la termina con un aviso de que se ha cortado (visible aunque **Show model info** esté desactivada): pide al asistente que continúe. **New session**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía; la actual ya está guardada.
+Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. El asistente abierto desde el menú recuerda también la posición y el tamaño de su ventana, el ancho del panel **Sessions** y la altura del cuadro de la pregunta. Los tokens son los que informa el proveedor de IA; cuando un proveedor no los informa, se estiman (el chat lo indica). Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. Si una respuesta llega a la longitud máxima que un modelo puede escribir en una respuesta, la vista de chat la termina con un aviso de que se ha cortado (visible aunque **Show model info** esté desactivada): pide al asistente que continúe. **New session**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía; la actual ya está guardada.
 
 ### Sesiones del asistente de IA
 
