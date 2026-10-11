@@ -17,6 +17,27 @@
     --knt-sidebar-air: 1rem;
 }
 
+/* Soft neutral background (a tint of the text color), for blocks that stand out from the page in any theme.
+   Use it instead of rz-background-color-base-*: the base palette is not inverted by the dark themes. */
+.knt-background-subtle {
+    background-color: color-mix(in srgb, var(--rz-text-color) 7%, transparent);
+}
+
+/* App icon (Shared/KntLogo): brand color unless the caller sets another one. */
+.knt-logo {
+    flex: none;
+    color: var(--knt-brand);
+}
+
+/* App name next to the logo in the top bar (MainLayout). */
+.knt-app-title {
+    font-family: var(--knt-heading-font-family);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--rz-header-color);
+}
+
 /* The sidebar is as wide as its longest menu entry (whatever the theme's font), plus some air on the right. */
 .rz-sidebar {
     --rz-sidebar-width: max-content;

@@ -11,25 +11,30 @@
 
 @*@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]*@
 
-<RadzenStack Gap="0.25rem" class="rz-pb-2 rz-mb-2 rz-border-bottom">
-    <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H3" class="rz-my-0">@KntConst.AppName home page</RadzenText>
-    <i>@appInfo</i>
-</RadzenStack>
+@* Home header: the app's entry point, with more presence than the section headers (KntIndexHeader). *@
+<div class="knt-home-hero">
+    <div class="knt-home-hero-brand">
+        <KntLogo Size="48" Class="knt-home-hero-logo" />
+        <h1 class="knt-home-hero-title">@KntConst.AppName</h1>
+    </div>
+    <div class="knt-home-hero-info">
+        <span class="knt-home-hero-subtitle">@KntConst.AppDescription</span>
+        <span class="knt-home-hero-version">v@(store.AppState.AppVersion)</span>
+    </div>
+</div>
 
 <NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
 
 
 @code {    
 
-    private List<NoteInfoDto>? notes;    
-    private string? appInfo;
-   
+    private List<NoteInfoDto>? notes;
+
 
     protected override async Task OnInitializedAsync()
     {        
         store.AppState.OnChange += StateHasChanged;
 
-        appInfo = $"{KntConst.AppDescription} ({store.AppState.AppVersion})";
         await LoadNotes();
     }
 

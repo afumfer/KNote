@@ -1,0 +1,94 @@
+/* Home header. Only theme variables (and --knt-* from knt-theme.css), so it follows the light/dark theme. */
+
+.knt-home-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem 1.5rem;
+    border-inline-start: 4px solid var(--knt-brand);
+    border-radius: calc(var(--rz-border-radius) * 2);
+    background: linear-gradient(135deg, var(--rz-primary-darker), var(--rz-primary));
+    color: var(--rz-on-primary);
+    box-shadow: var(--rz-shadow-2);
+}
+
+    /* Background: ruled lines, like a notebook page, fading out towards the left. */
+    .knt-home-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(180deg, transparent 0 13px, color-mix(in srgb, var(--rz-on-primary) 24%, transparent) 13px 14px);
+        -webkit-mask-image: linear-gradient(90deg, transparent 30%, #000 85%);
+        mask-image: linear-gradient(90deg, transparent 30%, #000 85%);
+        pointer-events: none;
+    }
+
+.knt-home-hero-brand,
+.knt-home-hero-info {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.knt-home-hero-brand {
+    gap: 1rem;
+}
+
+    .knt-home-hero-brand ::deep .knt-home-hero-logo {
+        filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.25));
+    }
+
+.knt-home-hero-title {
+    margin: 0;
+    font-family: var(--knt-heading-font-family);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: inherit;
+}
+
+/* Description with the version below, right-aligned. */
+.knt-home-hero-info {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    margin-inline-start: auto;
+    text-align: end;
+}
+
+.knt-home-hero-subtitle {
+    font-size: 1rem;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.knt-home-hero-version {
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background-color: color-mix(in srgb, var(--rz-on-primary) 18%, transparent);
+}
+
+@media (max-width: 576px) {
+    .knt-home-hero {
+        padding: 0.75rem 1rem;
+    }
+
+    .knt-home-hero-brand ::deep .knt-home-hero-logo {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .knt-home-hero-title {
+        font-size: 1.5rem;
+    }
+}
