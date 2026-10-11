@@ -1,0 +1,301 @@
+@implements IAsyncDisposable
+
+@inject TooltipService tooltipService
+@inject ContextMenuService contextMenuService
+@inject IJSRuntime js
+
+@*
+    Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
+    height of its container. A click selects a row (the current row, js/notesGrid.js), which the arrows, page
+    keys, Home and End move too; double click or Enter opens its note; the ⋮ button, a right click, the context
+    menu key or Shift+F10 show its actions, and Delete deletes it. With Position it remembers where the user
+    was when a note was opened.
+*@
+
+<div @ref="host" class="knt-notes-grid-host" data-count="@count" @oncontextmenu:preventDefault="true">
+    <div class="knt-notes-grid-summary">@count notes</div>
+    <RadzenDataGrid @ref="grid" TItem="NoteMinimalDto" KeyProperty="NoteId" class="knt-notes-grid"
+                    Data="@notes" Count="@count" LoadData="OnLoadData" IsLoading="@isLoading"
+                    AllowVirtualization="true" VirtualizationOverscanCount="10"
+                    Density="Density.Compact" GridLines="DataGridGridLines.Horizontal" AllowAlternatingRows="false"
+                    AllowColumnResize="true" EmptyText="No notes found."
+                    RowRender="OnRowRender" RowDoubleClick="OnRowDoubleClick" CellContextMenu="OnCellContextMenu">
+        <Columns>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="NoteNumber" Title="#" Width="64px" TextAlign="TextAlign.Right">
+                <Template Context="note">
+                    <span class="knt-notes-grid-muted">@note.NoteNumber</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Topic" Title="Topic">
+                <Template Context="note">
+                    <div class="knt-notes-grid-topic">
+                        <span class="knt-notes-grid-title">@note.Topic</span>
+                        @if (!string.IsNullOrWhiteSpace(note.Tags))
+                        {
+                            <span class="knt-notes-grid-tags">@note.Tags</span>
+                        }
+                    </div>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Priority" Title="Priority" Width="72px" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="CreationDateTime" Title="Created" Width="96px" TextAlign="TextAlign.Right">
+                <Template Context="note">
+                    <span class="knt-notes-grid-muted">@note.CreationDateTime.ToShortDateString()</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Width="44px" TextAlign="TextAlign.Center" Resizable="false">
+                <Template Context="note">
+                    @* The span keeps the button clicks from reaching the row (a double click opens the note). Out
+                       of the Tab order: from the keyboard the menu is opened with the context menu key. *@
+                    <span class="knt-notes-grid-actions" @onclick:stopPropagation="true" @ondblclick:stopPropagation="true">
+                        <RadzenButton Icon="more_vert" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.ExtraSmall"
+                                      TabIndex="-1" Click="@(args => OpenActions(note, args.Detail == 0 ? null : args))"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Actions ...", new TooltipOptions(){ Position = TooltipPosition.Left }))" />
+                    </span>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</div>
+
+@code {
+    [Parameter][EditorRequired] public Func<PageIdentifier, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
+    [Parameter] public NotesListPosition? Position { get; set; }
+    [Parameter] public EventCallback<NoteMinimalDto> OnNoteView { get; set; }
+    [Parameter] public EventCallback<NoteMinimalDto> OnNoteEdit { get; set; }
+    [Parameter] public EventCallback<NoteMinimalDto> OnNoteDelete { get; set; }
+
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    private enum NoteAction { View, Edit, Delete }
+
+    // Notes are requested from the API in blocks of this size, whatever rows the grid asks for, and kept
+    // until the next reload: scrolling back does not repeat requests. The pending request is what is kept,
+    // so the grid asking twice for the same rows makes a single request.
+    private const int FetchSize = 50;
+
+    private ElementReference host;
+    private IJSObjectReference? module;
+    private IJSObjectReference? keyboardHelper;
+    private DotNetObjectReference<NotesGrid>? dotNetRef;
+    private RadzenDataGrid<NoteMinimalDto>? grid;
+    private IEnumerable<NoteMinimalDto>? notes;
+    private int count;
+    private bool isLoading;
+    private bool canEdit;
+    private bool restoreScroll;
+    private readonly Dictionary<int, Task<List<NoteMinimalDto>?>> blocks = new();
+    private int dataVersion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        restoreScroll = Position?.ScrollTop > 0;
+
+        var user = (await AuthenticationState).User;
+        canEdit = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            keyboardHelper = await (await GetModuleAsync()).InvokeAsync<IJSObjectReference>("initialize", host, dotNetRef);
+        }
+
+        // Back to a list left before: once the first rows (and so the total) are drawn, scroll to where it
+        // was; the grid then asks for the rows of that place.
+        if (restoreScroll && notes != null && count > 0)
+        {
+            restoreScroll = false;
+            await (await GetModuleAsync()).InvokeVoidAsync("restoreScrollTop", host, Position!.ScrollTop);
+        }
+    }
+
+    /// <summary>Forgets the loaded notes and loads again the ones in view (e.g. after deleting a note).</summary>
+    public async Task ReloadAsync()
+    {
+        blocks.Clear();
+        dataVersion++;
+
+        if (grid != null)
+            await grid.RefreshDataAsync();
+    }
+
+    /// <summary>Remembers in Position where the list is scrolled (and the note being opened, if any).</summary>
+    public async Task SavePositionAsync(NoteMinimalDto? openedNote = null)
+    {
+        if (Position == null)
+            return;
+
+        Position.ScrollTop = await (await GetModuleAsync()).InvokeAsync<double>("getScrollTop", host);
+        if (openedNote != null)
+            Position.LastNoteId = openedNote.NoteId;
+    }
+
+    private async Task OnLoadData(LoadDataArgs args)
+    {
+        var version = dataVersion;
+        var skip = args.Skip ?? 0;
+        var top = args.Top ?? FetchSize;
+
+        isLoading = true;
+
+        var items = new List<NoteMinimalDto>();
+        var firstBlock = skip / FetchSize;
+        var lastBlock = (skip + top - 1) / FetchSize;
+        for (var block = firstBlock; block <= lastBlock; block++)
+        {
+            var blockNotes = await GetBlockAsync(block);
+            // A reload was requested while waiting: that reload will load the data.
+            if (version != dataVersion)
+                return;
+            if (blockNotes == null)
+                break;
+            items.AddRange(blockNotes);
+            if (blockNotes.Count < FetchSize)
+                break;
+        }
+
+        notes = items.Skip(skip - firstBlock * FetchSize).Take(top).ToList();
+        isLoading = false;
+    }
+
+    private Task<List<NoteMinimalDto>?> GetBlockAsync(int block)
+    {
+        if (!blocks.TryGetValue(block, out var blockTask))
+        {
+            blockTask = FetchBlockAsync(block, dataVersion);
+            blocks[block] = blockTask;
+        }
+        return blockTask;
+    }
+
+    private async Task<List<NoteMinimalDto>?> FetchBlockAsync(int block, int version)
+    {
+        var result = await LoadPage(new PageIdentifier { PageNumber = block + 1, PageSize = FetchSize });
+        if (version != dataVersion)
+            return null;
+
+        if (!result.IsValid)
+        {
+            // The error is already notified; forget it so that the block is requested again.
+            blocks.Remove(block);
+            return null;
+        }
+
+        count = (int)result.TotalCount;
+        return result.Entity ?? new List<NoteMinimalDto>();
+    }
+
+    private void OnRowRender(RowRenderEventArgs<NoteMinimalDto> args)
+    {
+        if (args.Data == null)
+            return;
+
+        // Used by notesGrid.js to know the note of the row highlighted with the keyboard.
+        args.Attributes["data-note-id"] = args.Data.NoteId;
+        if (args.Data.NoteId == Position?.LastNoteId)
+            args.Attributes["data-last-opened"] = true;
+    }
+
+    private async Task OnRowDoubleClick(DataGridRowMouseEventArgs<NoteMinimalDto> args)
+    {
+        if (args.Data != null)
+            await RunActionAsync(NoteAction.View, args.Data);
+    }
+
+    private async Task OnCellContextMenu(DataGridCellMouseEventArgs<NoteMinimalDto> args)
+    {
+        if (args.Data != null)
+            await OpenActions(args.Data, args);
+    }
+
+    /// <summary>A key pressed on the current row (js/notesGrid.js): "view", "menu" or "delete".</summary>
+    [JSInvokable]
+    public async Task OnKeyAction(string action, string noteId)
+    {
+        var note = FindLoadedNote(noteId);
+        if (note == null)
+            return;
+
+        if (action == "menu")
+            await OpenActions(note, null);
+        else if (action == "delete")
+        {
+            if (canEdit)
+                await RunActionAsync(NoteAction.Delete, note);
+        }
+        else
+            await RunActionAsync(NoteAction.View, note);
+    }
+
+    // Among all the notes loaded: the grid draws rows from several requests, `notes` is only the last one.
+    private NoteMinimalDto? FindLoadedNote(string noteId) =>
+        blocks.Values
+            .Where(blockTask => blockTask.IsCompletedSuccessfully && blockTask.Result != null)
+            .SelectMany(blockTask => blockTask.Result!)
+            .FirstOrDefault(n => n.NoteId.ToString() == noteId);
+
+    /// <summary>Shows the actions of a note at the mouse (args) or, from the keyboard, below its ⋮ button.</summary>
+    private async Task OpenActions(NoteMinimalDto note, MouseEventArgs? args)
+    {
+        tooltipService.Close();
+
+        if (args == null)
+        {
+            var anchor = await (await GetModuleAsync()).InvokeAsync<Point?>("getActionsAnchor", host, note.NoteId);
+            args = new MouseEventArgs { ClientX = anchor?.X ?? 0, ClientY = anchor?.Y ?? 0 };
+        }
+
+        var items = new List<ContextMenuItem>
+        {
+            new() { Text = "View", Value = NoteAction.View, Icon = "launch" }
+        };
+        if (canEdit)
+        {
+            items.Add(new() { Text = "Edit", Value = NoteAction.Edit, Icon = "edit" });
+            items.Add(new() { Text = "Delete", Value = NoteAction.Delete, Icon = "delete", IconColor = "var(--rz-danger)" });
+        }
+
+        contextMenuService.Open(args, items, e => OnActionClick(e, note));
+    }
+
+    private async void OnActionClick(MenuItemEventArgs args, NoteMinimalDto note)
+    {
+        contextMenuService.Close();
+
+        if (args.Value is NoteAction action)
+            await RunActionAsync(action, note);
+    }
+
+    private async Task RunActionAsync(NoteAction action, NoteMinimalDto note)
+    {
+        if (action == NoteAction.Delete)
+        {
+            await OnNoteDelete.InvokeAsync(note);
+            return;
+        }
+
+        // The note opens in another page: remember where the list was to come back to it.
+        await SavePositionAsync(note);
+        await (action == NoteAction.Edit ? OnNoteEdit : OnNoteView).InvokeAsync(note);
+    }
+
+    private async Task<IJSObjectReference> GetModuleAsync() =>
+        module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/notesGrid.js");
+
+    private record Point(double X, double Y);
+
+    public async ValueTask DisposeAsync()
+    {
+        if (keyboardHelper != null)
+        {
+            await keyboardHelper.InvokeVoidAsync("dispose");
+            await keyboardHelper.DisposeAsync();
+        }
+        if (module != null)
+            await module.DisposeAsync();
+        dotNetRef?.Dispose();
+    }
+}

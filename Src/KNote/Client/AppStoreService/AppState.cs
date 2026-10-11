@@ -88,6 +88,9 @@ public class AppState
         }
     }
 
+    // Not a change to notify: only read by the tree panel when it is shown again.
+    public NotesListPosition? NotesTreePosition { get; set; }
+
     public List<string> ChatMessages { get; } = new List<string>();
 
     public void AddChatMessage(string message)
