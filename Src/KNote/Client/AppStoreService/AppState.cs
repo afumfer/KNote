@@ -88,8 +88,13 @@ public class AppState
         }
     }
 
-    // Not a change to notify: only read by the tree panel when it is shown again.
+    // Not changes to notify: only read by the notes pages when they are shown again (tree panel; notes filter,
+    // with the filter applied and the name of its folder; search, with the text searched as the ListKey).
     public NotesListPosition? NotesTreePosition { get; set; }
+    public NotesFilterDto? NotesFilter { get; set; }
+    public string? NotesFilterFolderName { get; set; }
+    public NotesListPosition? NotesFilterPosition { get; set; }
+    public NotesListPosition? NotesSearchPosition { get; set; }
 
     public List<string> ChatMessages { get; } = new List<string>();
 

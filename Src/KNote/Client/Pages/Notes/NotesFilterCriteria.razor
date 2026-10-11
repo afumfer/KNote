@@ -68,7 +68,12 @@
 
 
 @code {
+    // A copy of the filter applied (the form can keep changing without applying it).
     [Parameter] public EventCallback<NotesFilterDto> FilterSelected { get; set; }
+    // The filter shown when the form opens (e.g. the one applied before) and the name of its folder.
+    [Parameter] public NotesFilterDto? Filter { get; set; }
+    [Parameter] public string? FolderName { get; set; }
+    [Parameter] public EventCallback<string?> FolderNameChanged { get; set; }
 
     private NotesFilterDto notesFilter = new NotesFilterDto();
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
@@ -76,6 +81,12 @@
 
     protected async override Task OnInitializedAsync()
     {
+        if (Filter != null)
+        {
+            notesFilter = Filter.GetSimpleDto<NotesFilterDto>();
+            folderName = FolderName ?? "";
+        }
+
         var result = await store.NoteTypes.GetAllAsync();
         //if (!result.IsValid)
         //{
@@ -107,7 +118,7 @@
             return;
         }
 
-        await FilterSelected.InvokeAsync(notesFilter);
+        await SelectFilterAsync();
     }
 
     protected async Task ClearFilter(EditContext formContext)
@@ -120,7 +131,13 @@
         notesFilter.AttributesFilter = new List<AtrFilterDto>();             
         folderName = "";
 
-        await FilterSelected.InvokeAsync(notesFilter);
+        await SelectFilterAsync();
+    }
+
+    private async Task SelectFilterAsync()
+    {
+        await FolderNameChanged.InvokeAsync(folderName);
+        await FilterSelected.InvokeAsync(notesFilter.GetSimpleDto<NotesFilterDto>());
     }
     
     private void OnFolderSelected(FolderDto f)

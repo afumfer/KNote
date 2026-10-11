@@ -146,6 +146,18 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 
 **Aplicación de escritorio.** Las sesiones solo se guardan cuando abres el asistente desde el menú. Cuando un script de KntScript o el código en lenguaje natural de una nota (`ln`) usa el asistente, no se guarda nada (un script puede activarlo con `PersistSession = true`). Entonces el panel **Sessions** se oculta.
 
+### Listas de notas (aplicación Web)
+
+Las páginas **Tree panel**, **Notes filter** y **Quick search** muestran sus notas en la misma lista, con las columnas de la lista de notas de la aplicación de escritorio. Ocupa la ventana y va cargando más notas a medida que te desplazas; encima se muestra el total. En el panel del árbol, el árbol de carpetas tiene su propio desplazamiento.
+
+**Seleccionar y abrir.** Un clic selecciona una nota; un doble clic o **Enter** la abre. Las flechas, **RePág**, **AvPág**, **Inicio** y **Fin** mueven la selección.
+
+**Acciones.** El botón **⋮** de una nota, un clic derecho sobre ella, la tecla de menú contextual o **Mayús+F10** muestran sus acciones (**View**, **Edit**, **Delete**), y **Supr** borra la nota seleccionada tras confirmarlo. Editar y borrar requieren el rol Staff o uno superior.
+
+**Ordenar.** Al pulsar la cabecera de una columna la lista se ordena por ella; un segundo clic invierte el orden y un tercero vuelve al orden propio de la lista. En el panel del árbol cada carpeta se abre con su orden de notas, como en la aplicación de escritorio: por número de nota, un orden fijo o, si la carpeta sigue el último orden usado, el último elegido en cualquiera de las dos aplicaciones (ordenar las notas de la carpeta lo guarda). El orden de notas de una carpeta se define en su formulario de edición (**Folders**), con las mismas opciones que en la aplicación de escritorio.
+
+**Volver a la lista.** Después de abrir una nota, la lista se muestra como estaba: la misma carpeta, filtro o búsqueda, el mismo orden y la misma posición, con una marca a la izquierda de la nota que abriste.
+
 ### Apariencia (aplicación Web)
 
 El botón de la paleta de la barra superior de la aplicación Web abre el panel **Appearance**, donde eliges el **tema** (Software, Standard, Material, Humanistic o Default), el **modo** (claro u oscuro), el estilo de la **cabecera de Home** (*Soft*, un tinte suave del color del tema, o *Ink*, oscura) y el **alto contraste (WCAG)**, que hace más fáciles de distinguir los textos y los bordes. Los cambios se aplican al momento. El botón del sol / la luna, a su lado, cambia directamente entre claro y oscuro. Tu navegador recuerda la elección (en cookies), así que cada navegador conserva la suya.

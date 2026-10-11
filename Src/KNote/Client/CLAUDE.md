@@ -160,6 +160,17 @@ Patrones ya establecidos que hay que seguir:
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
   `Shared/EntityList` (que pinta "cargando"/"sin registros"); acciones por fila con `RadzenButton` +
   `tooltipService.Open(...)`.
+- **Listas de notas** (árbol, filtro, búsqueda): `Pages/Notes/NotesGrid`, que llena la altura de su contenedor (la
+  página fija la suya, `calc(100vh - ...)`, y la página no hace scroll). Carga sus datos con `LoadPage(page,
+  order)`: virtualización de Radzen (`AllowVirtualization` + `LoadData`) sobre bloques de 50 notas cacheados, con
+  el orden en el servidor (`OrderColumn`/`OrderAscending` de `NotesFilterDto`/`NotesSearchDto`, columnas de
+  `NoteOrderCriteria.SortableColumns`, el número de nota desempata); el `SortOrder` de las columnas solo da el orden
+  inicial (cambiarlo mientras el grid recarga deja las filas viejas). Las mismas columnas que ClientWin. Clic
+  selecciona; doble clic/Enter abre; menú de acciones con `ContextMenuService` (⋮, clic derecho, tecla de menú,
+  Mayús+F10). La fila actual y el teclado los lleva `wwwroot/js/notesGrid.js`, no Radzen: su navegación con
+  flechas cuenta las filas dibujadas y con virtualización se pierde. Al abrir una nota la página guarda en
+  `AppState` (`NotesListPosition`) el desplazamiento, el orden y la nota, y al volver se restauran (con el filtro
+  o el texto buscado). Una lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`).
 - **Cabeceras**: la de una página de sección es `KntIndexHeader` con `Section="KntSections.Xxx"` (título e
   icono de su entrada del menú; `TextHead`/`Icon` los sustituyen, como en `NotesTree`, que muestra la carpeta) y
   la botonera en `IndexMenu` (normalmente un `RadzenMenu`, que la cabecera deja sin fondo). `Shared/KntSections`

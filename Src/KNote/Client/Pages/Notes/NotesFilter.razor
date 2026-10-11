@@ -16,74 +16,59 @@
     </IndexMenu>
 </KntIndexHeader>
 
-<RadzenCard class="rz-p-1 rz-mt-2">
+@* The panel takes the height left in the window: the criteria and the notes list scroll each on its own. *@
+<RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 11rem)">
     <RadzenSplitter>
-        <RadzenSplitterPane Size="30%" Min="200px" Max="50%">
-            <div class="rz-p-2 rz-border">
-                <NotesFilterCriteria FilterSelected="FilterSelected" />
+        <RadzenSplitterPane Size="30%" Min="200px" Max="50%" Style="overflow: auto">
+            <div class="rz-p-2">
+                <NotesFilterCriteria Filter="appState.NotesFilter" @bind-FolderName="folderName" FilterSelected="FilterSelected" />
             </div>
         </RadzenSplitterPane>
         <RadzenSplitterPane>
-            <RadzenPager Density="Density.Compact" @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
-                         HorizontalAlign="HorizontalAlign.Right"
-                         Count="@((int)paginationContext.TotalCount)"
-                         PageSize="@paginationContext.PageSize" PageNumbersCount="5"
-                         PageChanged=@PageChanged/>
-            <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
+            @* A new grid for each filter applied: it starts at the top (or where it was left) with its own data. *@
+            <NotesGrid @ref="notesGrid" @key="filterVersion" LoadPage="LoadNotesPage" Position="appState.NotesFilterPosition"
+                       OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
         </RadzenSplitterPane>
     </RadzenSplitter>
 </RadzenCard>
 
-@code {        
-    private List<NoteMinimalDto>? notes = new List<NoteMinimalDto>();
-    private NotesFilterDto filter = new NotesFilterDto();
-    private PaginationContext paginationContext = new PaginationContext();
-    private RadzenPager? pager;
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";        
-    private bool componentInitialized = false;
+@code {
+    private NotesGrid? notesGrid;
+    private AppState appState = null!;
+    private string? folderName;
+    private int filterVersion;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await SelectedPage(1);
-        await base.OnInitializedAsync();
-        componentInitialized = true;
+        // Back to the page: the filter applied before (and the list where it was), or all the notes.
+        appState = store.AppState;
+        appState.NotesFilter ??= new NotesFilterDto();
+        appState.NotesFilterPosition ??= new NotesListPosition { ListKey = "filter" };
+        folderName = appState.NotesFilterFolderName;
     }
 
-    private async Task FilterSelected(NotesFilterDto f)
+    private void FilterSelected(NotesFilterDto filter)
     {
-        filter = f;
-        await SelectedPage(1);
-        if(componentInitialized)
-            if (pager != null)
-                await pager.GoToPage(0);
+        appState.NotesFilter = filter;
+        appState.NotesFilterFolderName = folderName;
+        appState.NotesFilterPosition = new NotesListPosition { ListKey = "filter" };
+        filterVersion++;
     }
 
-    private async Task PageChanged(PagerEventArgs args)
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
     {
-        await SelectedPage(args.PageIndex + 1);                
+        // A new filter for each request: the grid may ask for several pages at the same time.
+        var filter = appState.NotesFilter!.GetSimpleDto<NotesFilterDto>();
+        filter.PageIdentifier = page;
+        filter.OrderColumn = order?.Column;
+        filter.OrderAscending = order?.Ascending ?? true;
+        return await store.Notes.GetFilter(filter);
     }
 
-    private async Task SelectedPage(int page)
+    async Task OnNew()
     {
-        paginationContext.CurrentPage = page;
-        await LoadNotesWithPagination();
-    }
-
-    private async Task LoadNotesWithPagination()
-    {
-        notes = null;
-
-        filter.PageIdentifier = paginationContext.PageIdentifier;
-        var result = await store.Notes.GetFilter(filter);
-        if (result.IsValid)
-        {
-            paginationContext.TotalCount = result.TotalCount;
-            notes = result.Entity;
-        }
-    }
-
-    void OnNew()
-    {
+        if (notesGrid != null)
+            await notesGrid.SavePositionAsync();
         store.NavigateTo($"notes/new/filter");
     }
 
@@ -98,18 +83,18 @@
     }
 
     async Task OnDelete(NoteMinimalDto item)
-    {                
+    {
         var resultDialog = await dialogService.Confirm(
-            $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 
-            "Delete note", 
+            $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?",
+            "Delete note",
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
         {
             var result = await store.Notes.DeleteAsync(item.NoteId);
-            if (result.IsValid)
+            if (result.IsValid && notesGrid != null)
             {
-                await LoadNotesWithPagination();
+                await notesGrid.ReloadAsync();
             }
         }
     }

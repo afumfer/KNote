@@ -146,6 +146,18 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 
 **Desktop app.** Sessions are kept only when you open the assistant from the menu. When a KntScript script or a note's natural-language code (`ln`) uses the assistant, nothing is saved (a script can turn it on with `PersistSession = true`). The **Sessions** panel is hidden then.
 
+### Notes lists (web app)
+
+The **Tree panel**, **Notes filter** and **Quick search** pages show their notes in the same list, with the columns of the desktop app's notes list. It fills the window and loads more notes as you scroll; the total is shown above it. In the tree panel, the folders tree has its own scroll.
+
+**Selecting and opening.** A click selects a note; a double click or **Enter** opens it. The arrows, **Page Up**, **Page Down**, **Home** and **End** move the selection.
+
+**Actions.** The **⋮** button of a note, a right click on it, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one.
+
+**Sorting.** Clicking a column header sorts the list by that column; a second click reverses the order and a third one goes back to the list's own order. In the tree panel each folder opens in its notes order, as in the desktop app: by note number, a fixed order, or, when the folder follows the last order used, the last one chosen in either app (sorting the folder's notes saves it). The notes order of a folder is set in its edit form (**Folders**), with the same options as in the desktop app.
+
+**Coming back to the list.** After opening a note, the list is shown again as it was: the same folder, filter or search, the same order and position, with a mark on the left of the note you opened.
+
 ### Appearance (web app)
 
 The palette button in the top bar of the web app opens the **Appearance** panel, where you choose the **theme** (Software, Standard, Material, Humanistic or Default), the **mode** (light or dark), the style of the **Home header** (*Soft*, a light tint of the theme's color, or *Ink*, dark) and **high contrast (WCAG)**, which makes text and borders easier to tell apart. Changes apply at once. The sun / moon button next to it switches between light and dark directly. Your browser remembers the choice (in cookies), so each browser keeps its own.
