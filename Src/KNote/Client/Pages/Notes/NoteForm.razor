@@ -250,7 +250,7 @@
         {            
             var resultDialog = await dialogService.OpenAsync<NoteResourceSelector>($"New resource and upload resource file",
                    new Dictionary<string, object?>() { },
-                   new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+                   KntDialogs.Medium());
 
             if(resultDialog != null)
             {                
@@ -314,7 +314,7 @@
 
             var result = await dialogService.OpenAsync<NoteTaskEditor>($"New task",
                    new Dictionary<string, object?>() { { "TaskEdit", null }, { "Users" , users} },
-                   new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+                   KntDialogs.Large());
 
             if(result != null)
                 await SaveEditedTask(result); 
@@ -327,7 +327,7 @@
 
         var result = await dialogService.OpenAsync<NoteTaskEditor>($"Edit task",
                new Dictionary<string, object?>() { { "TaskEdit", task }, { "Users" , users} },
-               new DialogOptions() { Width = "800px", Height = "600px", Resizable = true, Draggable = true });
+               KntDialogs.Large());
 
         if(result != null)
         {

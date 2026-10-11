@@ -24,7 +24,7 @@
     {
         var res = await dialogService.OpenAsync<InputMultiSelectList>($"Select tags",
                new Dictionary<string, object?>() { { "Items", Items } },
-               new DialogOptions() { Width = "700px", Height = "470px", Resizable = true, Draggable = true });
+               KntDialogs.Medium());
 
         if(res != null)
         {            

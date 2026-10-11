@@ -1,7 +1,7 @@
 ﻿@inject DialogService dialogService
 
 <RadzenStack Gap="1rem">
-    <div style="height: 320px; overflow: auto;">
+    <div style="max-height: 60vh; overflow: auto;">
         <RadzenCheckBoxList @bind-Value=@values TValue="string" Orientation="Orientation.Vertical"
                             Data="@Items" TextProperty="Value" ValueProperty="Key" />
     </div>

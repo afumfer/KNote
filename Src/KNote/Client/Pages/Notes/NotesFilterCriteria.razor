@@ -144,7 +144,7 @@
     {
         var res = await dialogService.OpenAsync<NoteKAttributeFilterSelector>($"Attribute filter selector",
                new Dictionary<string, object?>() { { "Attribute", new AtrFilterDto() } },
-               new DialogOptions() { Width = "700px", Height = "270px"});        
+               KntDialogs.Medium());        
 
         if(res != null)
         {
