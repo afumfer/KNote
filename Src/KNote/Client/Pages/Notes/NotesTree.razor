@@ -9,7 +9,7 @@
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-<KntIndexHeader TextHead="@(folder?.Name ?? "( No folder selected )")" Icon="@(folder != null ? "folder" : null)">
+<KntIndexHeader TextHead="@(folder?.Name ?? "( No folder selected )")" Icon="@KntSections.TreePanel.Icon">
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>

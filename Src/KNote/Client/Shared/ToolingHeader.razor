@@ -1,12 +1,21 @@
-﻿<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
-             Wrap="FlexWrap.Wrap" class="rz-px-4 rz-py-1 rz-border-bottom rz-mb-2">
-    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H3" class="rz-my-0">@Title</RadzenText>
-    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+@* Header of a full-page form (note edit/new, note view): icon, title and the form's buttons. A lighter
+   version of the section header (KntIndexHeader), so it reads as part of the section, not a new one. *@
+
+<div class="knt-tooling-header">
+    <div class="knt-tooling-header-caption">
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <span class="knt-tooling-header-icon"><RadzenIcon Icon="@Icon" /></span>
+        }
+        <h2 class="knt-tooling-header-title">@Title</h2>
+    </div>
+    <div class="knt-tooling-header-buttons">
         @Buttons
-    </RadzenStack>
-</RadzenStack>
+    </div>
+</div>
 
 @code {
     [Parameter] public string Title { get; set; } = "---";
+    [Parameter] public string? Icon { get; set; }
     [Parameter] public RenderFragment? Buttons { get; set; }
 }

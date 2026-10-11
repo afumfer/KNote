@@ -1,6 +1,6 @@
 ﻿﻿.file-drop-zone {
     width: 100%;
-    border: 2px dotted #333333;
+    border: 2px dotted var(--rz-text-tertiary-color);
     display: flex;
     align-items: center;
     margin-bottom: 2px;
@@ -9,7 +9,7 @@
 
 .hover {
     border-style: dotted;
-    background-color: #f2f2f2;
+    background-color: var(--rz-primary-lighter);
 }
 
 .image-container {
@@ -27,6 +27,6 @@
 }
 
 .error-message-container {
-    color: red;
+    color: var(--rz-danger);
     text-align: center;
 }

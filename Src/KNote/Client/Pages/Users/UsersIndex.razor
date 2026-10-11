@@ -6,7 +6,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-<KntIndexHeader TextHead="Users admin">
+<KntIndexHeader Section="KntSections.Users">
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New user ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
@@ -107,7 +107,7 @@
     {        
         var res = await dialogService.OpenAsync<UserNew>($"New user",
                new Dictionary<string, object?>() {  },
-               new DialogOptions() { Width = "700px", Height = "420px", Resizable = true, Draggable = true, ShowClose = false });
+               KntDialogs.Medium(showClose: false));
 
         if(res != null)           
             await Load(paginationContext.CurrentPage);        
@@ -117,7 +117,7 @@
     {        
         var res = await dialogService.OpenAsync<UserEdit>($"Edit user",
                new Dictionary<string, object?>() { { "UserId", user.UserId.ToString() } },
-               new DialogOptions() { Width = "700px", Height = "420px", Resizable = true, Draggable = true, ShowClose = false });
+               KntDialogs.Medium(showClose: false));
 
         if(res != null)
         {

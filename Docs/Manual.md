@@ -146,6 +146,10 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 
 **Desktop app.** Sessions are kept only when you open the assistant from the menu. When a KntScript script or a note's natural-language code (`ln`) uses the assistant, nothing is saved (a script can turn it on with `PersistSession = true`). The **Sessions** panel is hidden then.
 
+### Appearance (web app)
+
+The palette button in the top bar of the web app opens the **Appearance** panel, where you choose the **theme** (Software, Standard, Material, Humanistic or Default), the **mode** (light or dark), the style of the **Home header** (*Soft*, a light tint of the theme's color, or *Ink*, dark) and **high contrast (WCAG)**, which makes text and borders easier to tell apart. Changes apply at once. The sun / moon button next to it switches between light and dark directly. Your browser remembers the choice (in cookies), so each browser keeps its own.
+
 ### AI Assistant (web app)
 
 **AI Assistant** in the side menu (Staff role or higher) opens the web version of the assistant. Its header shows the tokens of the conversation, the list of AI models (configured in the server, see below) and the **New conversation** button; the **Sessions** panel on the right lists your sessions, as in the desktop app (see *AI assistant sessions*).

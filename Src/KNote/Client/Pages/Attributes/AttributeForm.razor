@@ -57,7 +57,7 @@
                 <RadzenStack Gap="0.5rem">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
                         <RadzenLabel Text="Tabulated values for this attribute:" />
-                        <RadzenButton Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" title="Add new value"
+                        <RadzenButton Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, "Add new value"))"
                                       Click="@(() => OnAtrValueNew())" />
                     </RadzenStack>
                     <RadzenDataGrid Data="@atributeValues" TItem="KAttributeTabulatedValueDto" AllowColumnResize="true" Density="@Density.Compact">
@@ -144,7 +144,7 @@
     {
         var resAtrEdited = await dialogService.OpenAsync<AttributeValueEditor>($"Edit attribute tabulated value",
                new Dictionary<string, object?>() { { "AtrValue", atrValue } },
-               new DialogOptions() { Width = "600px", Height = "300px", Resizable = true, Draggable = true });
+               KntDialogs.Small());
 
         if(resAtrEdited != null)
         {

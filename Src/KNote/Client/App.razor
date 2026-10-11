@@ -1,4 +1,14 @@
-﻿<Router AppAssembly="@typeof(Program).Assembly">
+﻿@implements IDisposable
+
+@inject ThemeService themeService
+@inject IJSRuntime js
+
+<HeadContent>
+    <RadzenTheme Theme="@KntThemes.Default" />
+    <link href="css/knt-theme.css" rel="stylesheet" />
+</HeadContent>
+
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">        
         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
             <Authorizing>
@@ -17,3 +27,33 @@
         </CascadingAuthenticationState>
     </NotFound>
 </Router>
+
+@code {
+
+    // Radzen's version, part of the theme stylesheet's URL (RadzenTheme); saved with the theme so that
+    // index.html preloads that same URL (cached) while the app starts.
+    private static readonly string? radzenVersion = typeof(ThemeService).Assembly.GetName().Version?.ToString();
+
+    protected override void OnInitialized()
+    {
+        // The theme saved in the browser (cookies, see kntTheme in index.html) is applied before RadzenTheme
+        // renders, so the app doesn't start with the default theme. Synchronous interop: WebAssembly only.
+        var saved = ((IJSInProcessRuntime)js).Invoke<SavedTheme?>("kntTheme.read");
+        if (saved != null && KntThemes.IsKnown(saved.Theme))
+            themeService.SetTheme(new ThemeOptions { Theme = saved.Theme, Wcag = saved.Wcag, TriggerChange = false });
+
+        themeService.ThemeChanged += SaveTheme;
+    }
+
+    public void Dispose()
+    {
+        themeService.ThemeChanged -= SaveTheme;
+    }
+
+    private void SaveTheme()
+    {
+        ((IJSInProcessRuntime)js).InvokeVoid("kntTheme.save", themeService.Theme, themeService.Wcag == true, radzenVersion);
+    }
+
+    private record SavedTheme(string? Theme, bool Wcag);
+}

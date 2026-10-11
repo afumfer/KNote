@@ -1,0 +1,14 @@
+@* KNote's app icon (the sticky note of ClientWin's KNote.ico) as vector, sharp at any size. It is painted
+   with currentColor: the brand color (--knt-brand, see .knt-logo in knt-theme.css) unless the caller sets
+   another color on it. *@
+
+<svg class="knt-logo @Class" width="@Size" height="@Size" viewBox="0 0 256 256" fill="currentColor"
+     role="img" aria-label="@KntConst.AppName" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 0H240A16 16 0 0 1 256 16V170H170V256H16A16 16 0 0 1 0 240V16A16 16 0 0 1 16 0Z" />
+    <path d="M192 192H252V202L202 252H192Z" />
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+    [Parameter] public string? Class { get; set; }
+}

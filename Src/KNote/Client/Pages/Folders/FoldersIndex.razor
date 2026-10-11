@@ -9,7 +9,7 @@
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
 
-<KntIndexHeader TextHead="Folders admin">
+<KntIndexHeader Section="KntSections.Folders">
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
@@ -92,7 +92,7 @@
     {
         var res = await dialogService.OpenAsync<FolderNew>($"New folder",
                new Dictionary<string, object?>() {  },
-               new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
+               KntDialogs.Medium(showClose: false));
 
         if(res != null)           
             await Load();  
@@ -102,7 +102,7 @@
     {
         var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
                new Dictionary<string, object?>() { { "FolderId", folder.FolderId.ToString() } },
-               new DialogOptions() { Width = "800px", Height = "550px", Resizable = true, Draggable = true, ShowClose = false });
+               KntDialogs.Medium(showClose: false));
 
         if(res != null)        
             await Load(); 

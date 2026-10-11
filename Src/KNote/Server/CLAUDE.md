@@ -38,6 +38,10 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
 - Autenticación JWT bearer (clave simétrica `AppSettings.Secret`, sin validar issuer/audience,
   `ClockSkew = 0`), `AddAuthorization`, CORS `KntPolicy` abierto (`*`), SignalR, compresión de respuesta,
   NLog (`nlog.config`, logs en `Log/`).
+- Los estáticos de `Client` (`UseStaticFiles` y `MapFallbackToFile("index.html")`) se sirven con
+  `Cache-Control: no-cache`: sus URLs no cambian entre versiones (`index.html`, `css/*.css`,
+  `KNote.Client.styles.css`) y sin esa cabecera el navegador sigue usando los antiguos tras un despliegue (HTML
+  nuevo con CSS viejo). Con `no-cache` revalida por ETag y recibe `304` si no han cambiado.
 - `IFileStore` → `LocalFileStore` (ficheros de recursos de notas en disco). `KntAddResourcesStaticFiles` monta
   el contenedor de recursos como estáticos solo si `MountResourceContainerOnStartup`.
 - `KntConfigureMessageBroker`: experimental, crea un `KntService` propio con RabbitMQ si

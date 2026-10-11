@@ -146,6 +146,10 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 
 **Aplicación de escritorio.** Las sesiones solo se guardan cuando abres el asistente desde el menú. Cuando un script de KntScript o el código en lenguaje natural de una nota (`ln`) usa el asistente, no se guarda nada (un script puede activarlo con `PersistSession = true`). Entonces el panel **Sessions** se oculta.
 
+### Apariencia (aplicación Web)
+
+El botón de la paleta de la barra superior de la aplicación Web abre el panel **Appearance**, donde eliges el **tema** (Software, Standard, Material, Humanistic o Default), el **modo** (claro u oscuro), el estilo de la **cabecera de Home** (*Soft*, un tinte suave del color del tema, o *Ink*, oscura) y el **alto contraste (WCAG)**, que hace más fáciles de distinguir los textos y los bordes. Los cambios se aplican al momento. El botón del sol / la luna, a su lado, cambia directamente entre claro y oscuro. Tu navegador recuerda la elección (en cookies), así que cada navegador conserva la suya.
+
 ### Asistente de IA (aplicación Web)
 
 **AI Assistant**, en el menú lateral (rol Staff o superior), abre la versión Web del asistente. Su cabecera muestra los tokens de la conversación, la lista de modelos de IA (configurados en el servidor, ver más abajo) y el botón **New conversation**; el panel **Sessions** de la derecha muestra tus sesiones, como en la aplicación de escritorio (ver *Sesiones del asistente de IA*).

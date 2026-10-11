@@ -10,37 +10,42 @@
 @attribute [Authorize(Roles = "Admin")]
 
 
-<KntIndexHeader TextHead="Admin panel">
+<KntIndexHeader Section="KntSections.Admin">
 </KntIndexHeader>
 
-<div class="rz-pt-2">    
+<div class="rz-pt-2">
 
-    <RadzenTabs TabPosition="TabPosition.Left">
-        <Tabs>
+    @* The admin pages shown in the tabs draw their headers in compact style. *@
+    <CascadingValue Name="KntCompactHeader" Value="true">
+        <RadzenTabs TabPosition="TabPosition.Left">
+            <Tabs>
 
-            <RadzenTabsItem Text="&nbsp;Users management" Icon="person" >
-                <UsersIndex></UsersIndex>
-            </RadzenTabsItem>
+                <RadzenTabsItem Text="@TabText(KntSections.Users)" Icon="@KntSections.Users.Icon">
+                    <UsersIndex></UsersIndex>
+                </RadzenTabsItem>
 
-            <RadzenTabsItem Text="&nbsp;Folders management" Icon="folder" >
-                <FoldersIndex></FoldersIndex>
-            </RadzenTabsItem>
+                <RadzenTabsItem Text="@TabText(KntSections.Folders)" Icon="@KntSections.Folders.Icon">
+                    <FoldersIndex></FoldersIndex>
+                </RadzenTabsItem>
 
-            <RadzenTabsItem Text="&nbsp;Notes types" Icon="edit_attributes" >
-                <TypesIndex></TypesIndex>
-            </RadzenTabsItem>
+                <RadzenTabsItem Text="@TabText(KntSections.NoteTypes)" Icon="@KntSections.NoteTypes.Icon">
+                    <TypesIndex></TypesIndex>
+                </RadzenTabsItem>
 
-            <RadzenTabsItem Text="&nbsp;Attributes management" Icon="format_list_bulleted" >
-                <AttributesIndex></AttributesIndex>
-            </RadzenTabsItem>
+                <RadzenTabsItem Text="@TabText(KntSections.Attributes)" Icon="@KntSections.Attributes.Icon">
+                    <AttributesIndex></AttributesIndex>
+                </RadzenTabsItem>
 
-        </Tabs>
-    </RadzenTabs>
+            </Tabs>
+        </RadzenTabs>
+    </CascadingValue>
 
 </div>
 
 
 @code {
 
+    // Non-breaking space: separates the tab text from its icon.
+    private static string TabText(KntSection section) => $" {section.Text}";
 
 }

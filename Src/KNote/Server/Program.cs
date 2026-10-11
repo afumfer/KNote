@@ -102,7 +102,18 @@ try
     app.UseHttpsRedirection();
     app.UseBlazorFrameworkFiles();
 
-    app.UseStaticFiles();
+    // index.html and the Client's css/js keep their URLs from one version to the next, so browsers must
+    // revalidate them (ETag, 304 when unchanged) or they keep using the old ones until a hard refresh.
+    var clientStaticFileOptions = new StaticFileOptions
+    {
+        OnPrepareResponse = context =>
+        {
+            if (!context.Context.Request.Path.StartsWithSegments("/_framework"))
+                context.Context.Response.Headers.CacheControl = "no-cache";
+        }
+    };
+
+    app.UseStaticFiles(clientStaticFileOptions);
     app.KntAddResourcesStaticFiles(appSettings, repositoryRef);
 
     app.UseRouting();
@@ -113,7 +124,7 @@ try
     app.MapRazorPages();
     app.MapControllers();
     app.MapHub<ChatHub>("/chathub");
-    app.MapFallbackToFile("index.html");
+    app.MapFallbackToFile("index.html", clientStaticFileOptions);
 
     await app.KntConfigureMessageBroker(appSettings, repositoryRef);
 

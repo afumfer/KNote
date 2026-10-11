@@ -1,0 +1,49 @@
+/* Lighter version of KntIndexHeader.razor.css: same family, no shadow, no icon badge, smaller title.
+   Only theme variables (and --knt-* from knt-theme.css), so it follows the light/dark theme. */
+
+.knt-tooling-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-inline-start: 3px solid var(--knt-brand);
+    border-radius: var(--rz-border-radius);
+    background: linear-gradient(90deg, var(--rz-primary-lighter), transparent 70%);
+}
+
+.knt-tooling-header-caption {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.knt-tooling-header-icon {
+    display: inline-flex;
+    color: var(--rz-primary);
+}
+
+    .knt-tooling-header-icon ::deep .rzi {
+        font-size: 1.25rem;
+    }
+
+.knt-tooling-header-title {
+    margin: 0;
+    font-family: var(--knt-heading-font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--rz-text-title-color);
+    overflow-wrap: anywhere;
+}
+
+.knt-tooling-header-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}

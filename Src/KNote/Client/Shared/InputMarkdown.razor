@@ -21,7 +21,7 @@
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.125rem">
                         @foreach (var button in group)
                         {
-                            <RadzenButton Icon="@button.Icon" Text="@button.Text" title="@button.Title"
+                            <RadzenButton Icon="@button.Icon" Text="@button.Text" MouseEnter="@(args => tooltipService.Open(args, button.Title))"
                                           ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
                                           Click="@(() => InsertMarkDownCommand(button.Command))" />
                         }

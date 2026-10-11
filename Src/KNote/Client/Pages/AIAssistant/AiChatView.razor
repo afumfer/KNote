@@ -12,7 +12,7 @@
     @for (var i = 0; i < Turns.Count; i++)
     {
         var turn = Turns[i];
-        <div class="ai-msg ai-user rz-background-color-base-200">@turn.Prompt</div>
+        <div class="ai-msg ai-user knt-background-subtle">@turn.Prompt</div>
         <div class="ai-msg ai-assistant rz-border">
             <ViewMarkdown MarkdownContent="@turn.Answer" DisableHtml="true" />
             @if (turn.Truncated)
@@ -26,7 +26,7 @@
 
     @if (PendingPrompt != null)
     {
-        <div class="ai-msg ai-user rz-background-color-base-200">@PendingPrompt</div>
+        <div class="ai-msg ai-user knt-background-subtle">@PendingPrompt</div>
         <div class="ai-msg ai-assistant rz-border">
             @if (!string.IsNullOrEmpty(PendingAnswer))
             {

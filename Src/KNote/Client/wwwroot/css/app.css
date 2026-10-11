@@ -4,7 +4,7 @@
 }
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--rz-text-font-family);
 }
 
 h1:focus {
@@ -12,7 +12,7 @@ h1:focus {
 }
 
 a {
-    color: #0071c1;
+    color: var(--rz-link-color);
 }
 
 .valid.modified:not([type=checkbox]) {

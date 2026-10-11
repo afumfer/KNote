@@ -3,7 +3,7 @@
 <RadzenCard class="rz-m-1 rz-p-1">
 
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
-                 Wrap="FlexWrap.Wrap" class="rz-m-1 rz-p-2 rz-background-color-base-100 rz-border-radius-1">
+                 Wrap="FlexWrap.Wrap" class="rz-m-1 rz-p-2 knt-background-subtle rz-border-radius-1">
         <RadzenStack Gap="0.25rem">
             <strong>@((MarkupString)Note.Topic) (#@Note.NoteNumber)</strong>
             <small class="rz-ml-4"><i>Creation: @(Note.CreationDateTime.ToShortDateString()) - Tags: @(Note.Tags)</i></small>

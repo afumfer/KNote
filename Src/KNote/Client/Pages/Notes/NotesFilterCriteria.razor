@@ -1,4 +1,5 @@
 ﻿@inject IStore store
+@inject TooltipService tooltipService
 @inject NavigationManager navigationManger
 @inject DialogService dialogService
 @inject NotificationService notificationService
@@ -35,7 +36,7 @@
         <KntFormField Label="Attributes:" LabelSize="12">
             <RadzenStack Gap="0.5rem">
                 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-                    <RadzenButton Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" title="Add new attribute filter"
+                    <RadzenButton Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, "Add new attribute filter"))"
                                   Click="@(() => OnAtrNew())" />
                 </RadzenStack>
                 @if (notesFilter.AttributesFilter.Count > 0)
@@ -46,7 +47,7 @@
                             <RadzenDataGridColumn TItem="AtrFilterDto" Property="Value" Title="Value" />
                             <RadzenDataGridColumn TItem="AtrFilterDto" Width="60px" TextAlign="TextAlign.Center">
                                 <Template Context="atr">
-                                    <RadzenButton Icon="remove" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Light" title="Delete attribute filter"
+                                    <RadzenButton Icon="remove" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, "Delete attribute filter"))"
                                                   Click="@(() => OnAtrDelete(atr))" />
                                 </Template>
                             </RadzenDataGridColumn>
@@ -144,7 +145,7 @@
     {
         var res = await dialogService.OpenAsync<NoteKAttributeFilterSelector>($"Attribute filter selector",
                new Dictionary<string, object?>() { { "Attribute", new AtrFilterDto() } },
-               new DialogOptions() { Width = "700px", Height = "270px"});        
+               KntDialogs.Medium());        
 
         if(res != null)
         {

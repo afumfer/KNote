@@ -15,7 +15,10 @@
                 <RadzenColumn Size="5">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
                         <RadzenSidebarToggle Click="@(() => sidebar = !sidebar)" />
-                        <RadzenLabel Text="@KntConst.AppName" Style="font-size:large" />
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <KntLogo Size="24" />
+                            <span class="knt-app-title">@KntConst.AppName</span>
+                        </RadzenStack>
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn Size="7">
