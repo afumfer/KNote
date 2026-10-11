@@ -1,11 +1,15 @@
 ﻿@using KNote.Client.Pages.Auth
 
 @inject TooltipService tooltipService
+@inject DialogService dialogService
 
 <AdminLogin />
 
 @* Tooltips with TooltipService, like AdminLogin's (not the browser's title). The toggle is wrapped because it
    doesn't raise MouseEnter itself. *@
+<RadzenButton Icon="palette" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Click="OpenThemeSelector"
+              MouseEnter="@(args => ShowTooltip(args, "Appearance"))" />
+
 <span @ref="themeToggle" @onmouseenter="@(() => ShowTooltip(themeToggle, "Light / dark mode"))">
     <RadzenAppearanceToggle />
 </span>
@@ -23,4 +27,9 @@
 
     private void ShowTooltip(ElementReference element, string text) =>
         tooltipService.Open(element, text, new TooltipOptions { Position = TooltipPosition.Bottom });
+
+    // Side panel without mask, so the page shows each change at once.
+    private async Task OpenThemeSelector() =>
+        await dialogService.OpenSideAsync<KntThemeSelector>("Appearance",
+            options: new SideDialogOptions { Position = DialogPosition.Right, Width = "320px", ShowMask = false });
 }

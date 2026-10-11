@@ -107,12 +107,20 @@ Cómo está integrada:
 - `<RadzenComponents />` en `Shared/MainLayout.razor` (anfitrión de diálogos, notificaciones, menús
   contextuales y tooltips). Sin él los servicios anteriores no muestran nada.
 - Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`.
-- Tema: `<RadzenTheme Theme="software" />` en el `<HeadContent>` de `App.razor` (no un `<link>` fijo en
-  `index.html`), seguido de `css/knt-theme.css`. El tema elegido se recuerda en la cookie `KNoteTheme`
-  (`AddRadzenCookieThemeService` en `Program.cs`; `App.razor` inyecta `CookieThemeService` para que se active)
-  y `RadzenAppearanceToggle` (en `MainLayoutHeader`) cambia entre claro y oscuro (`software-dark`).
-  `index.html` carga `css/app.css` (lo que hace falta antes de arrancar Blazor) y
-  `_content/Radzen.Blazor/Radzen.Blazor.js`. Los iconos de Radzen (`Icon="save"`, `"edit"`, `"delete"`...)
+- Tema: `<RadzenTheme Theme="@KntThemes.Default" />` en el `<HeadContent>` de `App.razor` (no un `<link>` fijo
+  en `index.html`), seguido de `css/knt-theme.css`. El usuario elige tema (los 5 gratuitos de Radzen,
+  `Shared/KntThemes`), modo claro/oscuro y alto contraste (WCAG) en el panel `Shared/KntThemeSelector` (botón
+  de paleta de `MainLayoutHeader`, panel lateral), y cambia de claro a oscuro con `RadzenAppearanceToggle`.
+  Todo pasa por `ThemeService`. La elección se guarda en cookies (`KNoteTheme`, `KNoteThemeWcag`,
+  `KNoteThemeVersion`): `App.razor` las lee de forma síncrona (`kntTheme.read`, interop de WebAssembly) antes de
+  que se pinte `RadzenTheme` y las escribe en `ThemeService.ThemeChanged` (`kntTheme.save`). `wwwroot/js/
+  knt-theme.js` (en el `<head>` de `index.html`) define esas funciones y carga la hoja del tema guardado antes de
+  que arranque Blazor (sin destello del tema por defecto); la quita en cuanto carga la de `RadzenTheme`
+  (`#radzen-theme-link`). No uses `CookieThemeService` de Radzen: no guarda el WCAG. El panel también elige el
+  estilo de la cabecera de Home (`soft` por defecto o `ink`), que no es de Radzen: lo guarda `knt-theme.js`
+  (cookie `KNoteHomeHeader`, `kntTheme.getHomeHeader`/`setHomeHeader`) como atributo `data-knt-home-header` de
+  `<html>`, puesto antes de que arranque Blazor, y `Pages/Index.razor.css` lo usa en sus selectores. `index.html` carga
+  además `css/app.css` (lo que hace falta antes de arrancar Blazor) y `_content/Radzen.Blazor/Radzen.Blazor.js`. Los iconos de Radzen (`Icon="save"`, `"edit"`, `"delete"`...)
   son nombres de Material Symbols.
 - **Colores y temas**: la app debe verse bien con cualquier tema de Radzen, claro u oscuro. Usa solo variables
   del tema (`--rz-primary`, `--rz-primary-lighter`, `--rz-on-primary`, `--rz-text-color`,
@@ -121,7 +129,9 @@ Cómo está integrada:
   en los temas oscuros (fondo claro con texto claro); para un fondo suave usa `knt-background-subtle`.
   `knt-theme.css` también declara la fuente Inter (incluida en el paquete de Radzen) como
   `--knt-heading-font-family`, para títulos y cabeceras, y ajusta el ancho del sidebar a su texto
-  (`max-content`). El logo de la app es `Shared/KntLogo` (SVG, color `currentColor` → `--knt-brand`).
+  (`max-content`). El logo de la app es `Shared/KntLogo` (SVG, color `currentColor` → `--knt-brand`). Un ajuste
+  solo para los temas oscuros va bajo `:root:has(link[href*="dark-base.css"])` (sus hojas son
+  `<tema>-dark-base.css` o `dark-base.css`), como el de los diálogos, que en oscuro se confundían con la página.
 
 Patrones ya establecidos que hay que seguir:
 

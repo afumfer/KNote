@@ -13,6 +13,7 @@
 
 :root {
     --knt-brand: #F1C40F;
+    --knt-ink: #161B1D; /* Base of the Home header, tinted with the theme's primary color. */
     --knt-heading-font-family: "Inter", var(--rz-text-font-family);
     --knt-sidebar-air: 1rem;
 }
@@ -36,6 +37,16 @@
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--rz-header-color);
+}
+
+/* Dialogs in the dark themes (their stylesheet is <theme>-dark-base.css, or dark-base.css for Default's dark
+   version): the theme paints them with the page's color over a mask of that same color, and their shadow
+   doesn't show on a dark page. Darker mask, a slightly lighter dialog and title bar, and a thin outline. */
+:root:has(link[href*="dark-base.css"]) {
+    --rz-dialog-background-color: color-mix(in srgb, var(--rz-base-background-color), white 7%);
+    --rz-dialog-title-background-color: color-mix(in srgb, var(--rz-base-background-color), white 12%);
+    --rz-dialog-mask-background-color: #000;
+    --rz-dialog-shadow: 0 0 0 1px color-mix(in srgb, var(--rz-text-color) 14%, transparent), 0 22px 64px 0 rgb(0 0 0 / 0.6);
 }
 
 /* The sidebar is as wide as its longest menu entry (whatever the theme's font), plus some air on the right. */

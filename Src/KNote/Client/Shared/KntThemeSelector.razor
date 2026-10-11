@@ -1,0 +1,103 @@
+@* Appearance panel (side dialog opened from MainLayoutHeader): theme, light/dark mode, Home header style and
+   high contrast. Changes apply at once: the theme through ThemeService (App.razor saves it in the browser), the
+   Home header style through js/knt-theme.js. *@
+
+@implements IDisposable
+
+@inject ThemeService themeService
+@inject IJSRuntime js
+
+<div class="knt-theme-selector">
+<RadzenStack Gap="1.5rem">
+
+    <RadzenStack Gap="0.5rem">
+        <RadzenText TextStyle="TextStyle.Overline" TagName="TagName.H3" class="rz-my-0">Theme</RadzenText>
+        @foreach (var family in KntThemes.Families)
+        {
+            var colors = KntThemes.Colors(dark ? family.Dark : family.Light);
+            var selected = family == KntThemes.FamilyOf(themeService.Theme);
+            <button type="button" class="knt-theme-option @(selected ? "knt-theme-option-selected" : null)"
+                    aria-pressed="@(selected ? "true" : "false")" @onclick="() => SetTheme(family, dark)">
+                <span class="knt-theme-preview" style="background-color: @colors.Base">
+                    <span class="knt-theme-preview-content" style="background-color: @colors.Content">
+                        <span style="background-color: @colors.Primary"></span>
+                        <span style="background-color: @colors.Secondary"></span>
+                    </span>
+                </span>
+                <span class="knt-theme-option-text">@family.Text</span>
+                @if (selected)
+                {
+                    <RadzenIcon Icon="check" />
+                }
+            </button>
+        }
+    </RadzenStack>
+
+    <RadzenStack Gap="0.5rem">
+        <RadzenText TextStyle="TextStyle.Overline" TagName="TagName.H3" class="rz-my-0">Mode</RadzenText>
+        <RadzenSelectBar TValue="bool" Value="@dark" Change="@(value => SetTheme(KntThemes.FamilyOf(themeService.Theme), value))"
+                         Style="width: 100%">
+            <Items>
+                <RadzenSelectBarItem Text="Light" Icon="light_mode" Value="false" />
+                <RadzenSelectBarItem Text="Dark" Icon="dark_mode" Value="true" />
+            </Items>
+        </RadzenSelectBar>
+    </RadzenStack>
+
+    <RadzenStack Gap="0.5rem">
+        <RadzenText TextStyle="TextStyle.Overline" TagName="TagName.H3" class="rz-my-0">Home header</RadzenText>
+        <RadzenSelectBar TValue="string" Value="@homeHeader" Change="@SetHomeHeader" Style="width: 100%">
+            <Items>
+                <RadzenSelectBarItem Text="Soft" Value="@("soft")" />
+                <RadzenSelectBarItem Text="Ink" Value="@("ink")" />
+            </Items>
+        </RadzenSelectBar>
+    </RadzenStack>
+
+    <RadzenStack Gap="0.5rem">
+        <RadzenText TextStyle="TextStyle.Overline" TagName="TagName.H3" class="rz-my-0">Accessibility</RadzenText>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenSwitch Name="Wcag" Value="@(themeService.Wcag == true)" Change="@(value => themeService.SetWcag(value))" />
+            <RadzenLabel Text="High contrast (WCAG)" Component="Wcag" />
+        </RadzenStack>
+    </RadzenStack>
+
+</RadzenStack>
+</div>
+
+@code {
+
+    private bool dark => KntThemes.IsDark(themeService.Theme);
+
+    // Style of the Home header: kept by js/knt-theme.js (cookie + attribute of <html>), not by ThemeService.
+    private string homeHeader = "soft";
+
+    protected override void OnInitialized()
+    {
+        homeHeader = ((IJSInProcessRuntime)js).Invoke<string>("kntTheme.getHomeHeader");
+
+        // The header's light/dark toggle can change the theme while the panel is open.
+        themeService.ThemeChanged += OnThemeChanged;
+    }
+
+    public void Dispose()
+    {
+        themeService.ThemeChanged -= OnThemeChanged;
+    }
+
+    private void SetTheme(KntThemeFamily family, bool dark)
+    {
+        themeService.SetTheme(dark ? family.Dark : family.Light);
+    }
+
+    private void SetHomeHeader(string style)
+    {
+        homeHeader = style;
+        ((IJSInProcessRuntime)js).InvokeVoid("kntTheme.setHomeHeader", style);
+    }
+
+    private void OnThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+}

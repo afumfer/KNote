@@ -146,9 +146,9 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 
 **Aplicación de escritorio.** Las sesiones solo se guardan cuando abres el asistente desde el menú. Cuando un script de KntScript o el código en lenguaje natural de una nota (`ln`) usa el asistente, no se guarda nada (un script puede activarlo con `PersistSession = true`). Entonces el panel **Sessions** se oculta.
 
-### Modo claro y oscuro (aplicación Web)
+### Apariencia (aplicación Web)
 
-El botón del sol / la luna de la barra superior de la aplicación Web cambia entre su aspecto claro y el oscuro. Tu navegador recuerda la elección (en una cookie), así que cada navegador conserva la suya.
+El botón de la paleta de la barra superior de la aplicación Web abre el panel **Appearance**, donde eliges el **tema** (Software, Standard, Material, Humanistic o Default), el **modo** (claro u oscuro), el estilo de la **cabecera de Home** (*Soft*, un tinte suave del color del tema, o *Ink*, oscura) y el **alto contraste (WCAG)**, que hace más fáciles de distinguir los textos y los bordes. Los cambios se aplican al momento. El botón del sol / la luna, a su lado, cambia directamente entre claro y oscuro. Tu navegador recuerda la elección (en cookies), así que cada navegador conserva la suya.
 
 ### Asistente de IA (aplicación Web)
 

@@ -1,4 +1,7 @@
-/* Home header. Only theme variables (and --knt-* from knt-theme.css), so it follows the light/dark theme. */
+/* Home header, in two styles the user picks in the Appearance panel (KntThemeSelector), set as
+   data-knt-home-header on <html> by js/knt-theme.js: "soft" (default, below), a light tint of the theme's
+   primary color; and "ink" (at the end), dark ink (--knt-ink) tinted with it, where the amber logo stands out.
+   Only theme variables (and --knt-* from knt-theme.css), so both follow the light/dark theme. */
 
 .knt-home-hero {
     position: relative;
@@ -12,9 +15,9 @@
     padding: 1rem 1.5rem;
     border-inline-start: 4px solid var(--knt-brand);
     border-radius: calc(var(--rz-border-radius) * 2);
-    background: linear-gradient(135deg, var(--rz-primary-darker), var(--rz-primary));
-    color: var(--rz-on-primary);
-    box-shadow: var(--rz-shadow-2);
+    background: linear-gradient(135deg, var(--rz-primary-lighter), transparent 75%), var(--rz-base-background-color);
+    color: var(--rz-text-title-color);
+    box-shadow: var(--rz-shadow-1);
 }
 
     /* Background: ruled lines, like a notebook page, fading out towards the left. */
@@ -22,7 +25,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: repeating-linear-gradient(180deg, transparent 0 13px, color-mix(in srgb, var(--rz-on-primary) 24%, transparent) 13px 14px);
+        background: repeating-linear-gradient(180deg, transparent 0 13px, color-mix(in srgb, var(--rz-text-color) 10%, transparent) 13px 14px);
         -webkit-mask-image: linear-gradient(90deg, transparent 30%, #000 85%);
         mask-image: linear-gradient(90deg, transparent 30%, #000 85%);
         pointer-events: none;
@@ -66,7 +69,7 @@
 .knt-home-hero-subtitle {
     font-size: 1rem;
     font-style: italic;
-    opacity: 0.9;
+    color: var(--rz-text-secondary-color);
 }
 
 .knt-home-hero-version {
@@ -75,7 +78,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    background-color: color-mix(in srgb, var(--rz-on-primary) 18%, transparent);
+    background-color: color-mix(in srgb, var(--rz-text-color) 10%, transparent);
 }
 
 @media (max-width: 576px) {
@@ -91,4 +94,24 @@
     .knt-home-hero-title {
         font-size: 1.5rem;
     }
+}
+
+/* "Ink" style. */
+html[data-knt-home-header="ink"] .knt-home-hero {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--rz-primary) 20%, var(--knt-ink)), color-mix(in srgb, var(--rz-primary) 45%, var(--knt-ink)));
+    color: var(--rz-on-primary);
+    box-shadow: var(--rz-shadow-2);
+}
+
+    html[data-knt-home-header="ink"] .knt-home-hero::before {
+        background: repeating-linear-gradient(180deg, transparent 0 13px, color-mix(in srgb, var(--rz-on-primary) 24%, transparent) 13px 14px);
+    }
+
+html[data-knt-home-header="ink"] .knt-home-hero-subtitle {
+    color: inherit;
+    opacity: 0.9;
+}
+
+html[data-knt-home-header="ink"] .knt-home-hero-version {
+    background-color: color-mix(in srgb, var(--rz-on-primary) 18%, transparent);
 }
