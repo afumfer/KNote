@@ -6,8 +6,10 @@
     <RadzenPanelMenuItem Text="@KntSections.NotesFilter.Text" Path="@KntSections.NotesFilter.Path" Icon="@KntSections.NotesFilter.Icon" />
     <AuthorizeView Roles="Staff, ProjectManager, Admin">
         <Authorized>
+            @* Hidden until developed: NotesTasksCalendar and NotesAlarmsCalendar still show demo data.
             <RadzenPanelMenuItem Text="@KntSections.TasksCalendar.Text" Path="@KntSections.TasksCalendar.Path" Icon="@KntSections.TasksCalendar.Icon" />
             <RadzenPanelMenuItem Text="@KntSections.Alarms.Text" Path="@KntSections.Alarms.Path" Icon="@KntSections.Alarms.Icon" />
+            *@
             <RadzenPanelMenuItem Text="@KntSections.ChatRoom.Text" Path="@KntSections.ChatRoom.Path" Icon="@KntSections.ChatRoom.Icon" />
             <RadzenPanelMenuItem Text="@KntSections.AiAssistant.Text" Path="@KntSections.AiAssistant.Path" Icon="@KntSections.AiAssistant.Icon" />
         </Authorized>
