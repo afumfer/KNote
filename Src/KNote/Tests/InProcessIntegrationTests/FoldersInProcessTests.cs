@@ -114,4 +114,39 @@ public class FoldersInProcessTests
         Assert.IsNotNull(res?.Entity);
         Assert.AreEqual(folderId, res!.Entity!.FolderId);
     }
+
+    [TestMethod]
+    public async Task OrderNotes_SavesTheOrderOfTheFolder()
+    {
+        var folderId = await AddFolderAsync("__TEST FOLDER ORDER NOTES__");
+
+        var httpRes = await _httpClient.PutAsJsonAsync($"api/folders/{folderId}/ordernotes", "AUTO|Topic|DESC");
+        var res = await httpRes.Content.ReadFromJsonAsync<Result>();
+
+        Assert.IsTrue(httpRes.IsSuccessStatusCode, res?.ErrorMessage);
+        var folder = await _httpClient.GetFromJsonAsync<Result<FolderDto>>($"api/folders/{folderId}");
+        Assert.AreEqual("AUTO|Topic|DESC", folder!.Entity!.OrderNotes);
+    }
+
+    [TestMethod]
+    public async Task OrderNotes_RejectsAnUnrecognizedOrder()
+    {
+        var folderId = await AddFolderAsync("__TEST FOLDER BAD ORDER NOTES__");
+
+        var httpRes = await _httpClient.PutAsJsonAsync($"api/folders/{folderId}/ordernotes", "AUTO|Description|DESC");
+        var res = await httpRes.Content.ReadFromJsonAsync<Result>();
+
+        Assert.IsFalse(httpRes.IsSuccessStatusCode);
+        Assert.IsFalse(res!.IsValid);
+        var folder = await _httpClient.GetFromJsonAsync<Result<FolderDto>>($"api/folders/{folderId}");
+        Assert.AreNotEqual("AUTO|Description|DESC", folder!.Entity!.OrderNotes);
+    }
+
+    private static async Task<Guid> AddFolderAsync(string name)
+    {
+        var httpRes = await _httpClient.PostAsJsonAsync("api/folders", new FolderDto { FolderId = Guid.Empty, FolderNumber = 0, Name = name });
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<FolderDto>>();
+        Assert.IsTrue(httpRes.IsSuccessStatusCode, res?.ErrorMessage);
+        return res!.Entity!.FolderId;
+    }
 }

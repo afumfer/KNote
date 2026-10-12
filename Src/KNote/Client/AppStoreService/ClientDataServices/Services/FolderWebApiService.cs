@@ -49,5 +49,12 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
         var httpRes = await _httpClient.DeleteAsync($"api/folders/{id}");
         return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Delete folder", true);
     }
+
+    // The order of the notes the folder remembers (Folder.OrderNotes, in NoteOrderCriteria's format).
+    public async Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes)
+    {
+        var httpRes = await _httpClient.PutAsJsonAsync($"api/folders/{folderId}/ordernotes", orderNotes);
+        return await ProcessResultFromHttpResponse<object>(httpRes, "Save order of notes");
+    }
 }
 

@@ -25,8 +25,8 @@
             <ValidationMessage For="@(() => Folder.Order)" />
         </KntFormField>
 
-        <KntFormField Label="Order notes:" Component="OrderNotes">
-            <RadzenTextBox Name="OrderNotes" @bind-Value="@Folder.OrderNotes" Style="width: 100%" />
+        <KntFormField Label="Notes order:" Component="OrderNotes">
+            <FolderNotesOrderEditor Name="OrderNotes" @bind-OrderNotes="@Folder.OrderNotes" />
             <ValidationMessage For="@(() => Folder.OrderNotes)" />
         </KntFormField>
 

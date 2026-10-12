@@ -1,0 +1,64 @@
+/* The list fills the height of its container (the grid scrolls inside), with compact one-line rows: tighter
+   padding than Radzen's compact density, and the same height on every row (virtualization needs it). Only
+   theme variables, so it follows any theme. */
+
+.knt-notes-grid-host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.knt-notes-grid-host ::deep .knt-notes-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.knt-notes-grid-host ::deep .knt-notes-grid.rz-density-compact {
+    --rz-grid-cell-padding: 0.125rem 0.5rem;
+    --rz-grid-cell-line-height: 1.25rem;
+}
+
+/* The current row (selected with a click or the keyboard, js/notesGrid.js) looks like Radzen's highlighted row, which is not used:
+   it loses its place with virtualization. */
+.knt-notes-grid-host ::deep .knt-notes-grid {
+    --rz-grid-cell-focus-background-color: transparent;
+    --rz-grid-cell-focus-color: var(--rz-grid-cell-color);
+}
+
+.knt-notes-grid-host ::deep .knt-notes-grid tr[data-knt-current] > td {
+    background-color: var(--rz-secondary-lighter);
+    color: var(--rz-on-secondary-lighter);
+}
+
+/* The note opened last, to see where the user was when coming back. */
+.knt-notes-grid-host ::deep .knt-notes-grid tr[data-last-opened] > td:first-child {
+    box-shadow: inset 3px 0 0 var(--rz-primary);
+}
+
+.knt-notes-grid-host ::deep .knt-notes-grid .rz-cell-data {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.knt-notes-grid-host ::deep .knt-notes-grid .rz-button-xs {
+    min-height: 1.25rem;
+    min-width: 1.25rem;
+    padding: 0;
+}
+
+.knt-notes-grid-title {
+    font-weight: 500;
+}
+
+.knt-notes-grid-summary {
+    padding: 0.25rem 0.5rem;
+    text-align: end;
+    font-size: 0.75rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-notes-grid-muted {
+    color: var(--rz-text-secondary-color);
+}

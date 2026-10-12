@@ -1,0 +1,35 @@
+@* Menu item of the notes pages that switches the notes list (NotesGrid) between the compact view (the default:
+   number, topic, priority and tags) and the extended one (all the columns), as ClientWin's notes list. The
+   choice is shared by the pages (AppState.NotesListCompact) and kept in the browser (localStorage). *@
+
+@inject IStore store
+@inject IJSRuntime js
+
+<RadzenMenuItem Text="@(Compact ? "Extended list" : "Compact list")" Icon="@(Compact ? "view_week" : "view_agenda")" Click="ToggleAsync" />
+
+@code {
+    // The page shows the list again with the view chosen.
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private const string StorageKey = "KNoteNotesListCompact";
+
+    private bool Compact => store.AppState.NotesListCompact ?? true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (store.AppState.NotesListCompact != null)
+            return;
+
+        var saved = await js.LocalStorageGetItem(StorageKey);
+        store.AppState.NotesListCompact = saved != "false";
+        if (!Compact)
+            await Changed.InvokeAsync();
+    }
+
+    private async Task ToggleAsync()
+    {
+        store.AppState.NotesListCompact = !Compact;
+        await js.LocalStorageSetItem(StorageKey, Compact ? "true" : "false");
+        await Changed.InvokeAsync();
+    }
+}

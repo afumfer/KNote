@@ -150,7 +150,9 @@ Patrones ya establecidos que hay que seguir:
   pantallas pequeñas. Los campos se agrupan en un `<RadzenStack Gap="1rem">`. Referencia: `Types/TypeForm`.
   Varios campos en una fila: `RadzenRow` con un `RadzenColumn Size="12" SizeMD="n"` por campo y un
   `KntFormField` dentro (su `LabelSize` es relativo a la columna; ver `Notes/NoteTaskEditor`, `NoteForm`). En
-  paneles estrechos, `LabelSize="12"` pone la etiqueta encima del campo (`Notes/NotesFilterCriteria`). Para
+  paneles estrechos, `LabelSize="12"` pone la etiqueta encima del campo. Un panel lateral de criterios junto a una
+  lista (`Notes/NotesFilterCriteria`) usa en cambio `RadzenFormField` `Variant.Outlined` (etiqueta flotante e
+  icono en `Start`) con `InputSize.Small`, del tamaño de la lista. Para
   elegir carpeta, `Shared/KntFolderPicker` (abre `KntFolderSelector`; el botón de quitar solo aparece si se
   atiende `FolderReset`).
 - **Botones y espaciado**: grupos de botones en `<RadzenStack Orientation="Orientation.Horizontal"
@@ -158,8 +160,28 @@ Patrones ya establecidos que hay que seguir:
   `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen
   (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
-  `Shared/EntityList` (que pinta "cargando"/"sin registros"); acciones por fila con `RadzenButton` +
-  `tooltipService.Open(...)`.
+  `Shared/EntityList` (que pinta "cargando"/"sin registros"). Las acciones de una fila (o de una tarjeta) van en
+  un menú ⋮, `Shared/KntActionsMenu` con una lista de `KntAction` (texto, icono, acción, `Danger` para borrar), no
+  en botones sueltos; el mismo menú con clic derecho (`CellContextMenu` → `KntActionsMenu.Open(...)`) y el doble
+  clic hace la acción principal (editar). Ver `Users/UsersIndex`. En un árbol, el menú va con el clic derecho
+  (`KntFoldersTreeView.FolderActions`, `ItemContextMenu` de `RadzenTree`) y los botones de la cabecera actúan sobre
+  el elemento seleccionado (`Folders/FoldersIndex`). Las listas de administración se ordenan con
+  `AllowSorting` (todos los datos en memoria, sin paginar) y, dentro de `Admin`, la clase `knt-admin-list` les da
+  la altura de la ventana con scroll propio (`Admin.razor.css`).
+- **Listas de notas** (árbol, filtro, búsqueda): `Pages/Notes/NotesGrid`, que llena la altura de su contenedor (la
+  página fija la suya, `calc(100vh - ...)`, contando con el padding de la página, `--rz-layout-body-padding`
+  de `knt-theme.css`, y la página no hace scroll). Carga sus datos con `LoadPage(page,
+  order)`: virtualización de Radzen (`AllowVirtualization` + `LoadData`) sobre bloques de 50 notas cacheados, con
+  el orden en el servidor (`OrderColumn`/`OrderAscending` de `NotesFilterDto`/`NotesSearchDto`, columnas de
+  `NoteOrderCriteria.SortableColumns`, el número de nota desempata); el `SortOrder` de las columnas solo da el orden
+  inicial (cambiarlo mientras el grid recarga deja las filas viejas). Las mismas columnas que ClientWin; vista compacta (#, Topic, Priority, Tags) o extendida con
+  `NotesListViewToggle` (botón de la cabecera, `AppState.NotesListCompact` + `localStorage`), y Topic con
+  `MinWidth`. Clic
+  selecciona; doble clic/Enter abre; menú de acciones con `ContextMenuService` (⋮, clic derecho, tecla de menú,
+  Mayús+F10). La fila actual y el teclado los lleva `wwwroot/js/notesGrid.js`, no Radzen: su navegación con
+  flechas cuenta las filas dibujadas y con virtualización se pierde. Al abrir una nota la página guarda en
+  `AppState` (`NotesListPosition`) el desplazamiento, el orden y la nota, y al volver se restauran (con el filtro
+  o el texto buscado). Una lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`).
 - **Cabeceras**: la de una página de sección es `KntIndexHeader` con `Section="KntSections.Xxx"` (título e
   icono de su entrada del menú; `TextHead`/`Icon` los sustituyen, como en `NotesTree`, que muestra la carpeta) y
   la botonera en `IndexMenu` (normalmente un `RadzenMenu`, que la cabecera deja sin fondo). `Shared/KntSections`

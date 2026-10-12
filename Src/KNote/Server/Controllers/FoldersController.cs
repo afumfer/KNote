@@ -121,6 +121,31 @@ public class FoldersController : ControllerBase
         }
     }
 
+    // The order of the notes a folder remembers (Folder.OrderNotes, in NoteOrderCriteria's format): saved when
+    // the user sorts the notes of a folder in "Auto" mode.
+    [HttpPut("{id}/[action]")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> OrderNotes(Guid id, [FromBody] string orderNotes)
+    {
+        try
+        {
+            _logger.LogTrace("OrderNotes {id} put at {dateTime}.", id, DateTime.Now);
+
+            var resApi = await _service.Folders.UpdateOrderNotesAsync(id, orderNotes);
+            if (resApi.IsValid)
+                return Ok(resApi);
+            else
+                return BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "OrderNotes {id} at {dateTime}.", id, DateTime.Now);
+            var resApi = new Result();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin, ProjectManager")]
     public async Task<IActionResult> Delete(Guid id)

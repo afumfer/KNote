@@ -11,159 +11,84 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <NotesListViewToggle Changed="StateHasChanged" />
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
 
-<RadzenStack Gap="0.5rem" class="rz-pt-2">
+@* The search box and, below, the notes list taking the height left in the window. *@
+<RadzenStack Gap="0.5rem" class="rz-pt-2" Style="height: calc(100vh - 9.5rem)">
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-        <RadzenTextBox @bind-Value="textSearch" Immediate="true" Placeholder="Text search  ..." Style="flex: 1;"
-                       @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))" />
-        <RadzenButton Text="Search" Icon="search" Click="() => OnLoadListNotes()" ButtonStyle="ButtonStyle.Primary" />
+        <RadzenFormField Text="Text search" Variant="Variant.Outlined" Style="flex: 1;">
+            <Start><RadzenIcon Icon="search" /></Start>
+            <ChildContent>
+                <RadzenTextBox @bind-Value="textSearch" Immediate="true" @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))" />
+            </ChildContent>
+        </RadzenFormField>
+        <RadzenButton Text="Search" Icon="search" Click="OnSearch" ButtonStyle="ButtonStyle.Primary" />
     </RadzenStack>
 
-    <RadzenPager Density="Density.Compact" @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
-                 HorizontalAlign="HorizontalAlign.Right"
-                 Count="@((int)paginationContext.TotalCount)"
-                 PageSize="@paginationContext.PageSize" PageNumbersCount="5"
-                 PageChanged=@PageChanged />
-
-    <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
+    <RadzenCard class="rz-p-1" Style="flex: 1; min-height: 0">
+        @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
+        <NotesGrid @ref="notesGrid" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
+                   OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
+    </RadzenCard>
 </RadzenStack>
 
 
 @code {
-    private List<NoteMinimalDto>? notes;            
+    private NotesGrid? notesGrid;
+    private AppState appState = null!;
     private string textSearch = "";
-    private Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
-    private PaginationContext paginationContext = new PaginationContext();
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    private RadzenPager? pager;
-    private bool componentInitialized = false;
+    private int searchVersion;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var url = store.GetUri();
-        var queries = store.GetQueryStrings(url);
-
-        if (queries == null)
-        {
-            await GetFilteredNotes(string.Empty);
-        }
+        // The text searched comes in the URL (notes/search?textSearch=...); back from a note, without it, the
+        // last search (with the list where it was, NotesSearchPosition, whose ListKey is the text searched).
+        appState = store.AppState;
+        var queries = store.GetQueryStrings(store.GetUri());
+        if (queries != null && queries.TryGetValue("textSearch", out var text))
+            textSearch = text;
         else
-        {
-            queryStringsDict = queries;
-            LoadFormControls();
-            var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
-            await GetFilteredNotes(queryStrings);
-        }
-        componentInitialized = true;
+            textSearch = appState.NotesSearchPosition?.ListKey ?? "";
+
+        if (appState.NotesSearchPosition?.ListKey != textSearch)
+            appState.NotesSearchPosition = new NotesListPosition { ListKey = textSearch };
     }
 
-    #region Utils
-
-    private void LoadFormControls()
+    private void OnSearch()
     {
-        if (queryStringsDict.ContainsKey("textSearch"))
-        {
-            textSearch = queryStringsDict["textSearch"];
-        }
-
-        if (queryStringsDict.ContainsKey("paginationContext.PageIdentifier.PageNumber"))
-        {
-            int currentPage;
-            int.TryParse(queryStringsDict["pageNumber"], out currentPage);
-            paginationContext.CurrentPage = currentPage;
-        }
+        appState.NotesSearchPosition = new NotesListPosition { ListKey = textSearch };
+        searchVersion++;
+        store.NavigateTo(string.IsNullOrEmpty(textSearch) ? "notes/search" : $"notes/search?textSearch={Uri.EscapeDataString(textSearch)}");
     }
 
-    private string BuildQueryStrings()
-    {
-        if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
-        queryStringsDict["textSearch"] = textSearch.ToString();
-        queryStringsDict["pageNumber"] = paginationContext.CurrentPage.ToString();
-        queryStringsDict["pageSize"] = paginationContext.PageSize.ToString();
-
-
-        var defaultValues = new List<string>() { "false", "", "0" };
-
-        var strReturn = string.Join("&", queryStringsDict
-            .Where(x => !defaultValues.Contains(x.Value.ToLower()))
-            .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
-
-        return strReturn;
-    }
-
-    #endregion
-
-    #region Navigation events
-
-    private async Task OnLoadListNotes()
-    {
-        paginationContext.CurrentPage = 1;
-        if(componentInitialized)
-            if(pager != null)
-                await pager.GoToPage(0);        
-        await LoadListNotes();
-    }
-
-    private async Task TopicKeyPress(KeyboardEventArgs e)
+    private void TopicKeyPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
-        {
-            await LoadListNotes();
-        }
+            OnSearch();
     }
 
-    private async Task PageChanged(PagerEventArgs args)
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
     {
-        await OnSelectedPage(args.PageIndex + 1);                
+        var search = appState.NotesSearchPosition?.ListKey ?? "";
+        var queryString = $"textSearch={Uri.EscapeDataString(search)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}";
+        if (order != null)
+            queryString += $"&orderColumn={order.Column}&orderAscending={order.Ascending}";
+        return await store.Notes.GetSearch(queryString);
     }
 
-    private async Task OnSelectedPage(int page)
+    async Task OnNew()
     {
-        paginationContext.CurrentPage = page;
-        await LoadListNotes();
+        if (notesGrid != null)
+            await notesGrid.SavePositionAsync();
+        store.NavigateTo($"notes/new/search");
     }
-
-    #endregion
-
-    #region Load data ....
-
-    private async Task LoadListNotes()
-    {
-        var queryStrings = BuildQueryStrings();
-        store.NavigateTo("notes/search?" + queryStrings);
-        await GetFilteredNotes(queryStrings);
-    }
-
-    private async Task GetFilteredNotes(string queryString)
-    {
-        notes = null;
-
-        if (string.IsNullOrEmpty(queryString))
-            queryString = $"pageNumber={paginationContext.CurrentPage}&pageSize={paginationContext.PageSize}";
-
-        var result = await store.Notes.GetSearch(queryString);
-        if (result.IsValid)
-        {
-            notes = result.Entity;
-            paginationContext.TotalCount = result.TotalCount;
-        }
-    }
-
-    #endregion
-
-    #region  Edit / Delete events ...
 
     private void OnView(NoteMinimalDto note)
     {
         store.NavigateTo($"notes/{note.NoteId}/search");
-    }
-
-    void OnNew()
-    {
-        store.NavigateTo($"notes/new/search");
     }
 
     private void OnEdit(NoteMinimalDto note)
@@ -172,21 +97,19 @@
     }
 
     async Task OnDelete(NoteMinimalDto item)
-    {                
+    {
         var resultDialog = await dialogService.Confirm(
-            $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?", 
-            "Delete note", 
+            $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?",
+            "Delete note",
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
         {
             var result = await store.Notes.DeleteAsync(item.NoteId);
-            if (result.IsValid)
+            if (result.IsValid && notesGrid != null)
             {
-                await LoadListNotes();
+                await notesGrid.ReloadAsync();
             }
         }
     }
-
-    #endregion
 }

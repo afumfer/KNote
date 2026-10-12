@@ -1,6 +1,8 @@
 ﻿@page "/notes/tree"
 @page "/tree"
 
+@using KNote.Model.Core
+
 @implements IDisposable
 
 @inject IStore store
@@ -13,26 +15,27 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <NotesListViewToggle Changed="StateHasChanged" />
             <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
 
-<RadzenCard class="rz-p-1 rz-mt-2">
+@* The panel takes the height left in the window: the tree and the notes list scroll each on its own, the page
+   doesn't. *@
+<RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 10rem)">
     <RadzenSplitter>
-        <RadzenSplitterPane Size="25%" Min="200px" Max="45%">
+        <RadzenSplitterPane Size="20%" Min="160px" Max="45%" Style="overflow: auto">
             <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
         </RadzenSplitterPane>
         <RadzenSplitterPane>
-            <RadzenPager Density="Density.Compact" @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
-                         HorizontalAlign="HorizontalAlign.Right"
-                         Count="@((int)paginationContext.TotalCount)"
-                         PageSize="@paginationContext.PageSize" PageNumbersCount="5"
-                         PageChanged=@PageChanged/>
-
             @if (folder != null)
             {
-                <NotesIndex Notes="notes" OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView"></NotesIndex>
+                @* A new grid for each folder: it starts at the top (or where it was left) with its own data, in the
+                   folder's order (Folder.OrderNotes, as in ClientWin). *@
+                <NotesGrid @ref="notesGrid" Compact="@(appState.NotesListCompact ?? true)" @key="folder.FolderId" LoadPage="LoadNotesPage" Position="appState.NotesTreePosition"
+                           Order="FolderOrder()" OrderChanged="OnOrderChanged"
+                           OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
             }
         </RadzenSplitterPane>
     </RadzenSplitter>
@@ -41,21 +44,21 @@
 
 @code {
     private List<FolderDto>? foldersTree;
-    private List<NoteMinimalDto>? notes;
     private FolderDto? folder;
-    private NotesFilterDto filter = new NotesFilterDto();
-    private PaginationContext paginationContext = new PaginationContext();
-    private RadzenPager pager;
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";    
-    private bool componentInitialized = false;
+    private NotesGrid? notesGrid;
     private AppState appState = null!;
+    private bool canSaveOrder;
+
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthenticationState).User;
+        canSaveOrder = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
+
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
         await Load();
-        componentInitialized = true;
     }
 
     private async Task Load()
@@ -76,13 +79,18 @@
                 if (f != null)
                 {
                     f.Selected = true;
-                    await FolderSelected(f);
+                    FolderSelected(f);
                 }
             }
         }
         else
         {
-            foldersTree = appState.FoldersTree;            
+            foldersTree = appState.FoldersTree;
+
+            // Back to the page: the folder that was shown (with the list where it was, NotesTreePosition), as
+            // it is in the tree (SelectedFolder is a copy, it may not have its last order of notes).
+            if (appState.IsSelectedFolder())
+                FolderSelected(FindFolder(foldersTree, appState.SelectedFolder!.FolderId) ?? appState.SelectedFolder!);
         }
     }
 
@@ -91,48 +99,67 @@
         appState.OnChange -= StateHasChanged;
     }
 
-    private async Task FolderSelected(FolderDto f)
+    private void FolderSelected(FolderDto f)
     {
+        // The tree also reports the folder it shows selected when it is drawn: nothing changes then.
+        if (folder?.FolderId == f.FolderId)
+            return;
+
+        var listKey = f.FolderId.ToString();
+        if (appState.NotesTreePosition?.ListKey != listKey)
+            appState.NotesTreePosition = new NotesListPosition { ListKey = listKey };
+
         folder = f;
         appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
-
-        paginationContext.CurrentPage = 1;
-        if(componentInitialized)
-            await pager.GoToPage(0);
-
-        await SelectedPage(1);
     }
 
-    private async Task PageChanged(PagerEventArgs args)
+    private static FolderDto? FindFolder(List<FolderDto>? folders, Guid folderId)
     {
-        await SelectedPage(args.PageIndex + 1);                
-    }
-
-    private async Task SelectedPage(int page)
-    {
-        paginationContext.CurrentPage = page;
-        await LoadNotesWithPagination();
-    }
-
-    private async Task LoadNotesWithPagination()
-    {
-        notes = null;        
-
-        filter.FolderId = folder?.FolderId;
-        filter.PageIdentifier = paginationContext.PageIdentifier;
-
-        var result = await store.Notes.GetFilter(filter);
-        if (result.IsValid)
+        foreach (var f in folders ?? [])
         {
-            notes = result.Entity;
-            paginationContext.TotalCount = result.TotalCount;
+            var found = f.FolderId == folderId ? f : FindFolder(f.ChildFolders, folderId);
+            if (found != null)
+                return found;
         }
-
-        StateHasChanged();
+        return null;
     }
 
-    void OnNew()
+    private NotesOrder FolderOrder() => NotesOrder.From(NoteOrderCriteria.Parse(folder?.OrderNotes));
+
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
     {
+        // Without an order chosen in the list, the folder's one.
+        order ??= FolderOrder();
+
+        // A new filter for each request: the grid may ask for several pages at the same time.
+        return await store.Notes.GetFilter(new NotesFilterDto
+        {
+            FolderId = folder?.FolderId,
+            PageIdentifier = page,
+            OrderColumn = order.Column,
+            OrderAscending = order.Ascending
+        });
+    }
+
+    // Sorted with a header: a folder in Auto mode remembers it (NoteOrderCriteria.FormatUserOrder), as in ClientWin.
+    private async Task OnOrderChanged(NotesOrder? order)
+    {
+        if (order == null || folder == null || !canSaveOrder)
+            return;
+
+        var orderNotes = NoteOrderCriteria.Parse(folder.OrderNotes).FormatUserOrder(order.Column, order.Ascending);
+        if (orderNotes == null || orderNotes == folder.OrderNotes)
+            return;
+
+        var result = await store.Folders.UpdateOrderNotesAsync(folder.FolderId, orderNotes);
+        if (result.IsValid)
+            folder.OrderNotes = orderNotes;
+    }
+
+    async Task OnNew()
+    {
+        if (notesGrid != null)
+            await notesGrid.SavePositionAsync();
         store.NavigateTo($"notes/new/tree");
     }
 
@@ -156,9 +183,9 @@
         if (resultDialog == true)
         {
             var result = await store.Notes.DeleteAsync(item.NoteId);
-            if (result.IsValid)
+            if (result.IsValid && notesGrid != null)
             {
-                await LoadNotesWithPagination();
+                await notesGrid.ReloadAsync();
             }
         }
     }
@@ -166,7 +193,7 @@
     private async Task RefreshTreeFolders()
     {
         foldersTree = null;
-        notes = null;
+        folder = null;
         appState.FoldersTree = null;
         await Load();
     }

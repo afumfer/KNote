@@ -13,12 +13,14 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Edit folder ..." Icon="edit" Disabled="@(selectedFolder == null)" Click="@(() => OnEdit(selectedFolder!))"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete folder ..." Icon="delete" Disabled="@(selectedFolder == null)" Click="@(() => OnDelete(selectedFolder!))"></RadzenMenuItem>
             <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTree" ></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
 
-<div class="rz-border rz-p-2 rz-mt-2">
+<div class="rz-border rz-p-2 rz-mt-2 knt-admin-list" style="overflow: auto">
     @if (foldersTree == null)
     {
         <RadzenLabel class="rz-m-2" Text="Loading tree folders ..." />
@@ -26,10 +28,9 @@
     else
     {
         <KntFoldersTreeView FoldersInfo="foldersTree"
-                            EditMode="true"
                             FolderSelected="OnFolderSelected"
-                            FolderEdit="OnEdit"
-                            FolderDelete="OnDelete" />
+                            FolderActions="ActionsOf"
+                            FolderDoubleClick="OnEdit" />
     }
 </div>
 
@@ -97,6 +98,13 @@
         if(res != null)           
             await Load();  
     }
+
+    // A right click on a folder; the header buttons and a double click act on the selected one.
+    private List<KntAction> ActionsOf(FolderDto folder) =>
+    [
+        new("Edit", "edit", () => OnEdit(folder)),
+        new("Delete", "delete", () => OnDelete(folder), Danger: true)
+    ];
 
     async Task OnEdit(FolderDto folder)
     {

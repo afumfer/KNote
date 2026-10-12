@@ -23,6 +23,12 @@ public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
     // Only notes with at least one NoteTask assigned to this user.
     public Guid? TaskUserId { get; set; }
 
+    // Order of the notes: one of NoteOrderCriteria.SortableColumns (the note number breaks ties). Null, or
+    // any other value, keeps the query's own order.
+    public string OrderColumn { get; set; }
+
+    public bool OrderAscending { get; set; } = true;
+
     public PageIdentifier PageIdentifier { get; set; } = new PageIdentifier();
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

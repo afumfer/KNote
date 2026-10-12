@@ -223,11 +223,12 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         // Only in Folder mode, and only when the folder is set to "follow my last order in the
         // selector" (Auto), does a header click get persisted back to Folder.OrderNotes. Fixed and
         // Default folders, and Filters/Search mode (Folder == null), only get the visual re-sort above.
-        if (_ctrl.Folder != null && NoteOrderCriteria.Parse(_ctrl.Folder.OrderNotes).Mode == NoteOrderMode.Auto)
+        if (_ctrl.Folder != null)
         {
             var columnName = dataGridNotes.Columns[OrderColNumber].Name;
-            var newCriteria = new NoteOrderCriteria(NoteOrderMode.Auto, columnName, _sortOrder == SortOrder.Ascending);
-            _ = _ctrl.PersistFolderOrderNotesAsync(newCriteria.Format());
+            var orderNotes = NoteOrderCriteria.Parse(_ctrl.Folder.OrderNotes).FormatUserOrder(columnName, _sortOrder == SortOrder.Ascending);
+            if (orderNotes != null)
+                _ = _ctrl.PersistFolderOrderNotesAsync(orderNotes);
         }
     }
 

@@ -3,6 +3,7 @@
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
+@inject ContextMenuService contextMenuService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -15,28 +16,20 @@
 </KntIndexHeader>
 
 <RadzenStack Gap="0.5rem" class="rz-pt-2">
-    <RadzenPager Density="Density.Compact"  @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
-            HorizontalAlign="HorizontalAlign.Right"
-            Count="@((int)paginationContext.TotalCount)"
-            PageSize="@paginationContext.PageSize" PageNumbersCount="5"
-            PageChanged=@PageChanged />
-
     <EntityList List="users">
         <AllItems>
-            <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" Density="@Density.Compact">
+            <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" AllowSorting="true" Density="@Density.Compact"
+                            class="knt-admin-list"
+                            CellContextMenu="@(args => KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!)))"
+                            RowDoubleClick="@(args => OnEdit(args.Data!))">
                 <Columns>
                     <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="User name" />
                     <RadzenDataGridColumn TItem="UserDto" Property="FullName" Title="Full name" />
                     <RadzenDataGridColumn TItem="UserDto" Property="EMail" Title="Email"  />
                     <RadzenDataGridColumn TItem="UserDto" Property="RoleDefinition" Title="Roles" />                
-                    <RadzenDataGridColumn TItem="UserDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                        <Template Context="data">                                                        
-                            <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
-                                ButtonStyle="ButtonStyle.Primary" 
-                                MouseEnter="@(args => tooltipService.Open(args, "Edit user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                            <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
-                                ButtonStyle="ButtonStyle.Danger" 
-                                MouseEnter="@(args => tooltipService.Open(args, "Delete user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+                    <RadzenDataGridColumn TItem="UserDto" Width="52px" TextAlign="TextAlign.Center" Resizable="false" Sortable="false">
+                        <Template Context="data">
+                            <KntActionsMenu Actions="@ActionsOf(data)" />
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns> 
@@ -49,35 +42,17 @@
 
     private List<UserDto>? users { get; set; }
     
-    private PaginationContext paginationContext = new PaginationContext();
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    private RadzenPager pager;
 
     protected async override Task OnInitializedAsync()
     {
         await Load();
     }
 
-    private async Task PageChanged(PagerEventArgs args)
+    private async Task Load()
     {
-        await OnSelectedPage(args.PageIndex + 1);                
-    }
-
-    private async Task OnSelectedPage(int page)
-    {        
-        await Load(page);
-    }
-
-    private async Task Load(int page = 1)
-    {
-        paginationContext.CurrentPage = page;
-
-        var result = await store.Users.GetAllAsync(paginationContext.PageIdentifier);
+        var result = await store.Users.GetAllAsync();
         if (result.IsValid)
-        {
             users = result.Entity;
-            paginationContext.TotalCount = result.TotalCount;            
-        }
 
         StateHasChanged();
     }
@@ -110,8 +85,14 @@
                KntDialogs.Medium(showClose: false));
 
         if(res != null)           
-            await Load(paginationContext.CurrentPage);        
+            await Load();        
     }
+
+    private List<KntAction> ActionsOf(UserDto user) =>
+    [
+        new("Edit", "edit", () => OnEdit(user)),
+        new("Delete", "delete", () => OnDelete(user), Danger: true)
+    ];
 
     async Task OnEdit(UserDto user)
     {        
@@ -121,7 +102,7 @@
 
         if(res != null)
         {
-            await Load(paginationContext.CurrentPage);
+            await Load();
         }        
     }
 

@@ -121,4 +121,22 @@ public class NoteOrderCriteriaTests
         Assert.AreEqual(original.Column, roundTripped.Column);
         Assert.AreEqual(original.Ascending, roundTripped.Ascending);
     }
+
+    [TestMethod]
+    [DataRow("AUTO")]
+    [DataRow("AUTO|Priority|ASC")]
+    public void FormatUserOrder_Auto_RemembersTheColumnAndDirection(string orderNotes)
+    {
+        var userOrder = NoteOrderCriteria.Parse(orderNotes).FormatUserOrder("Topic", false);
+
+        Assert.AreEqual("AUTO|Topic|DESC", userOrder);
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("FIXED|Priority|ASC")]
+    public void FormatUserOrder_DefaultOrFixed_RemembersNothing(string orderNotes)
+    {
+        Assert.IsNull(NoteOrderCriteria.Parse(orderNotes).FormatUserOrder("Topic", false));
+    }
 }

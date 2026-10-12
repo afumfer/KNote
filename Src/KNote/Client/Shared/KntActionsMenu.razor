@@ -1,0 +1,68 @@
+@* ⋮ button that shows the actions of a row or item in a menu (ContextMenuService). Open shows the same menu
+   from elsewhere (e.g. a right click on the row). Pressed with the keyboard, the menu goes below the button.
+   The button's clicks don't reach the row (where a double click usually opens or edits the item). *@
+
+@implements IAsyncDisposable
+
+@inject ContextMenuService contextMenuService
+@inject TooltipService tooltipService
+@inject IJSRuntime js
+
+<span @ref="anchor" class="knt-actions-menu" @onclick:stopPropagation="true" @ondblclick:stopPropagation="true">
+    <RadzenButton Icon="more_vert" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="@Size" TabIndex="@TabIndex"
+                  Click="OnClick"
+                  MouseEnter="@(args => tooltipService.Open(args, Tooltip, new TooltipOptions(){ Position = TooltipPosition.Left }))" />
+</span>
+
+@code {
+    [Parameter][EditorRequired] public IEnumerable<KntAction> Actions { get; set; } = null!;
+    [Parameter] public string Tooltip { get; set; } = "Actions ...";
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Small;
+    [Parameter] public int TabIndex { get; set; }
+
+    private ElementReference anchor;
+    private IJSObjectReference? module;
+
+    /// <summary>Shows the menu of the actions at the point of args (the mouse).</summary>
+    public static void Open(ContextMenuService contextMenuService, MouseEventArgs args, IEnumerable<KntAction> actions)
+    {
+        var list = actions.ToList();
+        var items = list.Select((action, index) => new ContextMenuItem
+        {
+            Text = action.Text,
+            Icon = action.Icon,
+            IconColor = action.Danger ? "var(--rz-danger)" : null,
+            Value = index
+        });
+
+        contextMenuService.Open(args, items, async e =>
+        {
+            contextMenuService.Close();
+            if (e.Value is int index)
+                await list[index].Run();
+        });
+    }
+
+    private async Task OnClick(MouseEventArgs args)
+    {
+        tooltipService.Close();
+
+        // Pressed with the keyboard: the click has no position.
+        if (args.Detail == 0)
+        {
+            module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/kntElements.js");
+            var point = await module.InvokeAsync<Point>("bottomLeft", anchor);
+            args = new MouseEventArgs { ClientX = point.X, ClientY = point.Y };
+        }
+
+        Open(contextMenuService, args, Actions);
+    }
+
+    private record Point(double X, double Y);
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module != null)
+            await module.DisposeAsync();
+    }
+}

@@ -1,0 +1,23 @@
+/* Compact tree: smaller text, icons and rows, in line with the notes lists. */
+
+.knt-folders-tree ::deep .rz-tree {
+    --rz-tree-node-padding-block: 0.125rem;
+    --rz-tree-node-padding-inline: 0.25rem;
+    --rz-tree-node-margin-block: 0;
+    font-size: 0.8125rem;
+}
+
+.knt-folders-tree ::deep .rz-treenode-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    line-height: 1.25rem;
+}
+
+.knt-folders-tree ::deep .rz-treenode-label .rzi,
+.knt-folders-tree ::deep .rz-tree-toggler {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    line-height: 1rem;
+}

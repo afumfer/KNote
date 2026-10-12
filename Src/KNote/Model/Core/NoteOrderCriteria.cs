@@ -23,6 +23,8 @@ public class NoteOrderCriteria
         "NoteNumber", "Topic", "Priority", "Tags", "InternalTags", "ModificationDateTime", "CreationDateTime"
     };
 
+    public static bool IsSortableColumn(string column) => column != null && SortableColumns.Contains(column);
+
     public NoteOrderMode Mode { get; }
     public string Column { get; }
     public bool Ascending { get; }
@@ -67,6 +69,12 @@ public class NoteOrderCriteria
 
         return new NoteOrderCriteria(NoteOrderMode.Default, DefaultColumn, true);
     }
+
+    // What to save in Folder.OrderNotes when the user sorts the folder's notes by a column (ClientWin's notes
+    // selector, the Web's tree panel): only a folder in Auto mode remembers it; null for the other modes, whose
+    // order only changes in the view.
+    public string FormatUserOrder(string column, bool ascending) =>
+        Mode == NoteOrderMode.Auto ? new NoteOrderCriteria(NoteOrderMode.Auto, column, ascending).Format() : null;
 
     public string Format()
     {

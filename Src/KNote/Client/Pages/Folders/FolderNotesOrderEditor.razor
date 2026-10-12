@@ -1,0 +1,108 @@
+@using KNote.Model.Core
+
+@* Editor of a folder's notes order (Folder.OrderNotes, in NoteOrderCriteria's format), like ClientWin's folder
+   editor: the mode, and the column and direction of a fixed order. OrderNotes only changes when the user
+   changes something (a value in another format is kept otherwise). *@
+
+<RadzenStack Gap="0.5rem">
+    <RadzenDropDown Name="@Name" Data="@modes" TextProperty="Text" ValueProperty="Value" TValue="NoteOrderMode"
+                    Value="@mode" ValueChanged="@((NoteOrderMode m) => OnModeChanged(m))" Style="width: 100%" />
+    <RadzenRow Gap="0.5rem">
+        <RadzenColumn Size="12" SizeSM="7">
+            <RadzenDropDown Data="@columns" TextProperty="Text" ValueProperty="Value" TValue="string"
+                            Value="@column" ValueChanged="@((string c) => OnColumnChanged(c))"
+                            Disabled="@(mode != NoteOrderMode.Fixed)" Style="width: 100%" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeSM="5">
+            <RadzenDropDown Data="@directions" TextProperty="Text" ValueProperty="Value" TValue="bool"
+                            Value="@ascending" ValueChanged="@((bool a) => OnDirectionChanged(a))"
+                            Disabled="@(mode != NoteOrderMode.Fixed)" Style="width: 100%" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenText TextStyle="TextStyle.Caption">@Description()</RadzenText>
+</RadzenStack>
+
+@code {
+    [Parameter] public string? OrderNotes { get; set; }
+    [Parameter] public EventCallback<string> OrderNotesChanged { get; set; }
+    [Parameter] public string? Name { get; set; }
+
+    private record Option<T>(T Value, string Text);
+
+    private static readonly Option<NoteOrderMode>[] modes =
+    [
+        new(NoteOrderMode.Default, "By note number (default)"),
+        new(NoteOrderMode.Fixed, "Fixed order"),
+        new(NoteOrderMode.Auto, "Follow last order used in the notes list")
+    ];
+
+    // Same columns and labels as ClientWin's folder editor (NoteOrderCriteria.SortableColumns).
+    private static readonly Option<string>[] columns =
+    [
+        new("NoteNumber", "Number"),
+        new("Topic", "Topic"),
+        new("Priority", "Priority"),
+        new("Tags", "Tags"),
+        new("InternalTags", "Status"),
+        new("ModificationDateTime", "Modification date"),
+        new("CreationDateTime", "Creation date")
+    ];
+
+    private static readonly Option<bool>[] directions = [new(true, "Ascending"), new(false, "Descending")];
+
+    // What was loaded: in Auto mode it keeps the last order used, which the column/direction don't edit.
+    private NoteOrderCriteria loaded = NoteOrderCriteria.Parse(null);
+    private NoteOrderMode mode;
+    private string column = NoteOrderCriteria.DefaultColumn;
+    private bool ascending = true;
+
+    protected override void OnInitialized()
+    {
+        loaded = NoteOrderCriteria.Parse(OrderNotes);
+        mode = loaded.Mode;
+        column = loaded.EffectiveColumn;
+        ascending = loaded.Ascending;
+    }
+
+    private Task OnModeChanged(NoteOrderMode value)
+    {
+        mode = value;
+        return NotifyAsync();
+    }
+
+    private Task OnColumnChanged(string value)
+    {
+        column = value;
+        return NotifyAsync();
+    }
+
+    private Task OnDirectionChanged(bool value)
+    {
+        ascending = value;
+        return NotifyAsync();
+    }
+
+    private Task NotifyAsync()
+    {
+        var criteria = mode switch
+        {
+            NoteOrderMode.Fixed => new NoteOrderCriteria(NoteOrderMode.Fixed, column, ascending),
+            NoteOrderMode.Auto => loaded.Mode == NoteOrderMode.Auto ? loaded : new NoteOrderCriteria(NoteOrderMode.Auto, null, true),
+            _ => NoteOrderCriteria.Parse(null)
+        };
+        return OrderNotesChanged.InvokeAsync(criteria.Format());
+    }
+
+    private static string ColumnText(string? value) => columns.FirstOrDefault(c => c.Value == value)?.Text ?? value ?? "";
+
+    private static string DirectionText(bool value) => value ? "ascending" : "descending";
+
+    private string Description() => mode switch
+    {
+        NoteOrderMode.Fixed => $"Notes in this folder will always be shown ordered by: {ColumnText(column)} ({DirectionText(ascending)}).",
+        NoteOrderMode.Auto when loaded.Mode == NoteOrderMode.Auto && loaded.Column != null =>
+            $"The current order for this folder is: {ColumnText(loaded.Column)} ({DirectionText(loaded.Ascending)}) - it is updated automatically each time you sort this folder's notes.",
+        NoteOrderMode.Auto => "This folder will follow the last order you apply to its notes. None has been set yet, so note number will be used meanwhile.",
+        _ => "Notes in this folder will be shown ordered by note number."
+    };
+}

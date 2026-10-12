@@ -20,6 +20,9 @@
     --knt-paper-link: #0B62A4;
     --knt-heading-font-family: "Inter", var(--rz-text-font-family);
     --knt-sidebar-air: 1rem;
+    /* Room around the page (section header and content): half the themes' 1rem, more space for the lists. The
+       pages that fill the window height (calc(100vh - ...)) count on it. */
+    --rz-layout-body-padding: 0.5rem;
 }
 
 /* Soft neutral background (a tint of the text color), for blocks that stand out from the page in any theme.

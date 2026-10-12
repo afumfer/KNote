@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Repository.EntityFramework.Entities;
 using System.Transactions;
@@ -1306,6 +1308,26 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    // The order asked for (one of NoteOrderCriteria.SortableColumns), with the note number breaking ties so that
+    // the pages don't overlap; null if none (or an unknown column) is asked. Same as the Dapper repository.
+    private static IQueryable<Note> OrderNotes(IQueryable<Note> query, string orderColumn, bool ascending)
+    {
+        IOrderedQueryable<Note> By<TKey>(Expression<Func<Note, TKey>> key) =>
+            ascending ? query.OrderBy(key) : query.OrderByDescending(key);
+
+        return orderColumn switch
+        {
+            "NoteNumber" => By(n => n.NoteNumber),
+            "Topic" => By(n => n.Topic).ThenBy(n => n.NoteNumber),
+            "Priority" => By(n => n.Priority).ThenBy(n => n.NoteNumber),
+            "Tags" => By(n => n.Tags).ThenBy(n => n.NoteNumber),
+            "InternalTags" => By(n => n.InternalTags).ThenBy(n => n.NoteNumber),
+            "ModificationDateTime" => By(n => n.ModificationDateTime).ThenBy(n => n.NoteNumber),
+            "CreationDateTime" => By(n => n.CreationDateTime).ThenBy(n => n.NoteNumber),
+            _ => null
+        };
+    }
+
     private async Task<Result<List<T>>> GetFilterPrivateAsync<T>(NotesFilterDto notesFilter) where T : NoteMinimalDto, new()
     {
         try
@@ -1361,9 +1383,9 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             result.TotalCount = await query.CountAsync();
 
             // Order by and pagination
-            query = query
-                .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
-                .Pagination(notesFilter.PageIdentifier);
+            query = OrderNotes(query, notesFilter.OrderColumn, notesFilter.OrderAscending)
+                ?? query.OrderBy(n => n.Priority).ThenBy(n => n.Topic);
+            query = query.Pagination(notesFilter.PageIdentifier);
 
             // Get content
             result.Entity = await query
@@ -1487,9 +1509,10 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             result.TotalCount = await query.CountAsync();
 
             // Order by and pagination
-            query = query
-                .OrderBy(n => n.Priority).ThenBy(n => n.Topic)
-                .Pagination(notesSearch.PageIdentifier);
+            // By default by Topic, as the Dapper repository.
+            query = OrderNotes(query, notesSearch.OrderColumn, notesSearch.OrderAscending)
+                ?? query.OrderBy(n => n.Topic);
+            query = query.Pagination(notesSearch.PageIdentifier);
 
             // Get content
             result.Entity = await query

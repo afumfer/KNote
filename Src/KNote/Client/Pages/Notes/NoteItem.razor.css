@@ -1,0 +1,15 @@
+/* Header of a note card (Home): the topic stands out, the date and tags below it. */
+
+.knt-note-card-title {
+    font-family: var(--knt-heading-font-family);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+}
+
+.knt-note-card-info {
+    margin-inline-start: 1rem;
+    font-size: 0.8125rem;
+    font-style: italic;
+    color: var(--rz-text-secondary-color);
+}
