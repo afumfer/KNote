@@ -11,6 +11,8 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New attribute ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Edit attribute ..." Icon="edit" Disabled="@(Selected == null)" Click="@(() => OnEdit(Selected!))"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete attribute ..." Icon="delete" Disabled="@(Selected == null)" Click="@(() => OnDelete(Selected!))"></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -19,19 +21,15 @@
     <EntityList List="attributes">
         <AllItems>
             <RadzenDataGrid Data="@attributes" TItem="KAttributeInfoDto" AllowColumnResize="true" AllowSorting="true" Density="@Density.Compact"
-                            class="knt-admin-list"
-                            CellContextMenu="@(args => KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!)))"
+                            class="knt-admin-list knt-list" AllowAlternatingRows="false"
+                            SelectionMode="DataGridSelectionMode.Single" @bind-Value="selection"
+                            CellContextMenu="OnCellContextMenu"
                             RowDoubleClick="@(args => OnEdit(args.Data!))">
                 <Columns>
                     <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Order" Title="Order" Width="60px"/>
                     <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="Name" Title="Name" />
                     <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="NoteTypeDto.Name" Title="Note type" Width="150px" />
                     <RadzenDataGridColumn TItem="KAttributeInfoDto" Property="RequiredValueYesNo" Title="Requiered" Width="90px"/>                
-                    <RadzenDataGridColumn TItem="KAttributeInfoDto" Width="52px" TextAlign="TextAlign.Center" Resizable="false" Sortable="false">
-                        <Template Context="data">
-                            <KntActionsMenu Actions="@ActionsOf(data)" />
-                        </Template>
-                    </RadzenDataGridColumn>
                 </Columns> 
             </RadzenDataGrid>
         </AllItems>
@@ -52,6 +50,7 @@
         var result = await store.KAttributes.GetAllAsync();
         if (result.IsValid)
             attributes = result.Entity;
+            selection = attributes!.Where(x => selection.Any(s => s.KAttributeId == x.KAttributeId)).ToList();
     }
 
     async Task OnNew()
@@ -62,6 +61,16 @@
 
         if(res != null)           
             await Load();  
+    }
+
+    // The selected row: what the header's Edit and Delete act on.
+    private IList<KAttributeInfoDto> selection = new List<KAttributeInfoDto>();
+    private KAttributeInfoDto? Selected => selection.FirstOrDefault();
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<KAttributeInfoDto> args)
+    {
+        selection = [args.Data!];
+        KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!));
     }
 
     private List<KntAction> ActionsOf(KAttributeInfoDto attribute) =>

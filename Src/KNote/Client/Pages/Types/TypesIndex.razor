@@ -11,6 +11,8 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New type ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Edit type ..." Icon="edit" Disabled="@(Selected == null)" Click="@(() => OnEdit(Selected!))"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete type ..." Icon="delete" Disabled="@(Selected == null)" Click="@(() => OnDelete(Selected!))"></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -19,17 +21,13 @@
     <EntityList List="noteTypes">
         <AllItems>
             <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" AllowSorting="true" Density="@Density.Compact"
-                            class="knt-admin-list"
-                            CellContextMenu="@(args => KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!)))"
+                            class="knt-admin-list knt-list" AllowAlternatingRows="false"
+                            SelectionMode="DataGridSelectionMode.Single" @bind-Value="selection"
+                            CellContextMenu="OnCellContextMenu"
                             RowDoubleClick="@(args => OnEdit(args.Data!))">
                 <Columns>
                     <RadzenDataGridColumn TItem="NoteTypeDto" Property="Name" Title="Name" />
                     <RadzenDataGridColumn TItem="NoteTypeDto" Property="Description" Title="Full name" />                
-                    <RadzenDataGridColumn TItem="NoteTypeDto" Width="52px" TextAlign="TextAlign.Center" Resizable="false" Sortable="false">
-                        <Template Context="data">
-                            <KntActionsMenu Actions="@ActionsOf(data)" />
-                        </Template>
-                    </RadzenDataGridColumn>
                 </Columns> 
             </RadzenDataGrid>
         </AllItems>
@@ -50,6 +48,7 @@
         var result = await store.NoteTypes.GetAllAsync();
         if (result.IsValid)
             noteTypes = result.Entity;
+            selection = noteTypes!.Where(x => selection.Any(s => s.NoteTypeId == x.NoteTypeId)).ToList();
 
         StateHasChanged();
     }
@@ -62,6 +61,16 @@
 
         if(res != null)           
             await Load();        
+    }
+
+    // The selected row: what the header's Edit and Delete act on.
+    private IList<NoteTypeDto> selection = new List<NoteTypeDto>();
+    private NoteTypeDto? Selected => selection.FirstOrDefault();
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<NoteTypeDto> args)
+    {
+        selection = [args.Data!];
+        KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!));
     }
 
     private List<KntAction> ActionsOf(NoteTypeDto noteType) =>

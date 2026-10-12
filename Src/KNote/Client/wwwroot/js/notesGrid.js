@@ -1,6 +1,7 @@
 // DOM helpers for Pages/Notes/NotesGrid (a RadzenDataGrid with virtualization). host is the element that wraps
 // the grid (with the total of notes in data-count); rows carry the id of their note in data-note-id (RowRender)
-// and their position in the whole list in aria-rowindex (Radzen, 1 is the header row).
+// and their position in the whole list in data-knt-index (Radzen's aria-rowindex goes wrong when the grid is
+// drawn again by its parent).
 
 function scrollArea(host) {
     return host.querySelector('.rz-data-grid-data');
@@ -12,9 +13,9 @@ function scrollArea(host) {
 export function initialize(host, dotNet) {
     let current = -1;
 
-    const rows = () => [...host.querySelectorAll('tr.rz-data-row[aria-rowindex]')];
-    const indexOf = row => Number(row.getAttribute('aria-rowindex')) - 2;
-    const rowAt = index => host.querySelector(`tr.rz-data-row[aria-rowindex="${index + 2}"]`);
+    const rows = () => [...host.querySelectorAll('tr.rz-data-row[data-knt-index]')];
+    const indexOf = row => Number(row.dataset.kntIndex);
+    const rowAt = index => host.querySelector(`tr.rz-data-row[data-knt-index="${index}"]`);
     const count = () => Number(host.dataset.count || 0);
     const metrics = () => {
         const area = scrollArea(host);
@@ -25,8 +26,16 @@ export function initialize(host, dotNet) {
         };
     };
 
-    // Rows are drawn again while scrolling (and reused for other notes): the mark follows the index.
+    // Rows are drawn again while scrolling (and reused for other notes): the mark follows the index. Coming back
+    // to the list, the note opened last is the current one. .NET hears of the note of the current row
+    // (OnCurrentChanged) when it changes.
+    let notifiedNoteId = null;
     const sync = () => {
+        if (current < 0) {
+            const last = host.querySelector('tr.rz-data-row[data-last-opened][data-knt-index]');
+            if (last)
+                current = indexOf(last);
+        }
         host.querySelectorAll('tr[data-knt-current]').forEach(row => {
             if (indexOf(row) !== current)
                 row.removeAttribute('data-knt-current');
@@ -34,6 +43,10 @@ export function initialize(host, dotNet) {
         const row = rowAt(current);
         if (row && !row.hasAttribute('data-knt-current'))
             row.setAttribute('data-knt-current', '');
+        if (row && row.dataset.noteId !== notifiedNoteId) {
+            notifiedNoteId = row.dataset.noteId;
+            dotNet.invokeMethodAsync('OnCurrentChanged', notifiedNoteId);
+        }
     };
 
     const visibleRows = () => {
@@ -109,9 +122,9 @@ export function initialize(host, dotNet) {
         e.stopPropagation();
     };
 
-    // A row pressed with the mouse becomes the current one.
+    // A row pressed with the mouse (also with the right button) becomes the current one.
     const onMouseDown = e => {
-        const row = e.target.closest('tr.rz-data-row[aria-rowindex]');
+        const row = e.target.closest('tr.rz-data-row[data-knt-index]');
         if (row) {
             current = indexOf(row);
             sync();
@@ -119,7 +132,7 @@ export function initialize(host, dotNet) {
     };
 
     const observer = new MutationObserver(sync);
-    observer.observe(host, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-rowindex'] });
+    observer.observe(host, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-knt-index'] });
     host.addEventListener('keydown', onKeyDown, true);
     host.addEventListener('mousedown', onMouseDown, true);
 
@@ -156,11 +169,11 @@ export function restoreScrollTop(host, value) {
     restore();
 }
 
-// Point below the actions button of a row, to open its menu there.
+// Point below a row, at its topic, to open its menu there.
 export function getActionsAnchor(host, noteId) {
-    const button = host.querySelector(`tr[data-note-id="${noteId}"] .knt-actions-menu button`);
-    if (!button)
+    const cell = host.querySelector(`tr[data-note-id="${noteId}"] td:nth-child(2)`);
+    if (!cell)
         return null;
-    const rect = button.getBoundingClientRect();
-    return { x: rect.left, y: rect.bottom };
+    const rect = cell.getBoundingClientRect();
+    return { x: rect.left + 16, y: rect.bottom };
 }

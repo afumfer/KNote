@@ -91,3 +91,24 @@
     .rz-sidebar .rz-panel-menu .rz-navigation-item-link {
         padding-inline-end: calc(var(--rz-panel-menu-item-padding-inline) + var(--knt-sidebar-air));
     }
+
+/* Lists with a selected row (admin lists, class knt-list on the RadzenDataGrid): the compact rows of the notes
+   lists (NotesGrid), the selected row in the color of the notes lists' current row and a softer hover, so the
+   selection stands out (the grids use AllowAlternatingRows="false"). */
+.rz-data-grid.knt-list.rz-density-compact {
+    --rz-grid-cell-padding: 0.125rem 0.5rem;
+    --rz-grid-cell-line-height: 1.25rem;
+}
+
+.rz-data-grid.knt-list {
+    --rz-grid-selected-background-color: var(--rz-secondary-lighter);
+    --rz-grid-selected-color: var(--rz-on-secondary-lighter);
+    --rz-grid-hover-background-color: color-mix(in srgb, var(--rz-text-color) 7%, transparent);
+    --rz-grid-hover-color: var(--rz-text-color);
+}
+
+    .rz-data-grid.knt-list .rz-button-xs {
+        min-height: 1.25rem;
+        min-width: 1.25rem;
+        padding: 0;
+    }

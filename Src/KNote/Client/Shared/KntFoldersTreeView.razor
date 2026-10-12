@@ -16,7 +16,9 @@
         HasChildren=@(f => ((FolderDto)f).ChildFolders.Any()) >
             <Template>
                 <span class="knt-folders-tree-item" @ondblclick="@(() => FolderDoubleClick.InvokeAsync((FolderDto)context.Value!))">
-                    <RadzenIcon Icon="folder" Style="color: var(--rz-base-400)"/> @context.Text
+                    @* The selected folder shows an open folder. *@
+                    <RadzenIcon Icon="@(IsSelected(context.Value) ? "folder_open" : "folder")" class="knt-folders-tree-icon" />
+                    <span>@context.Text</span>
                 </span>
             </Template>
     </RadzenTreeLevel>            
@@ -56,8 +58,13 @@
     private async Task OnFolderSelected(TreeEventArgs args)
     {
         var folder = args.Value as FolderDto;
+        selectedFolderId = folder?.FolderId;
         await FolderSelected.InvokeAsync(folder);
     }
+
+    private Guid? selectedFolderId;
+
+    private bool IsSelected(object? value) => value is FolderDto folder && folder.FolderId == selectedFolderId;
 
     private void OnItemContextMenu(TreeItemContextMenuEventArgs args)
     {

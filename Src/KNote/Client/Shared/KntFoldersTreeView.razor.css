@@ -21,3 +21,18 @@
     height: 1rem;
     line-height: 1rem;
 }
+
+/* Icon and name centered on the same line; the icon greyed, but in the colors of the selected node. */
+.knt-folders-tree-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.knt-folders-tree ::deep .knt-folders-tree-icon {
+    color: var(--rz-text-tertiary-color);
+}
+
+.knt-folders-tree ::deep .rz-treenode-content-selected .knt-folders-tree-icon {
+    color: inherit;
+}

@@ -11,6 +11,8 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
             <NotesListViewToggle Changed="StateHasChanged" />
         </RadzenMenu>
     </IndexMenu>
@@ -30,7 +32,7 @@
 
     <RadzenCard class="rz-p-1" Style="flex: 1; min-height: 0">
         @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
-        <NotesGrid @ref="notesGrid" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
+        <NotesGrid @ref="notesGrid" CurrentChanged="StateHasChanged" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
                    OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
     </RadzenCard>
 </RadzenStack>
