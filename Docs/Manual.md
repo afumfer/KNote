@@ -150,9 +150,11 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 
 The **Tree panel**, **Notes filter** and **Quick search** pages show their notes in the same list, with the columns of the desktop app's notes list. It fills the window and loads more notes as you scroll; the total is shown above it. The **Extended list** / **Compact list** button of the page switches between all the columns and the compact view (number, topic, priority and tags), which is the default; the choice applies to the three pages and the browser remembers it. The topic column keeps a minimum width: in a narrow window the list scrolls sideways. In the tree panel, the folders tree has its own scroll.
 
-**Selecting and opening.** A click (also a right click) selects a note, which is highlighted; a double click or **Enter** opens it. The arrows, **Page Up**, **Page Down**, **Home** and **End** move the selection. Coming back to the list, the note you opened is the selected one.
+**Selecting and opening.** A click (also a right click) selects a note, which is highlighted; a double click or **Enter** edits it (users who can't edit view it). The arrows, **Page Up**, **Page Down**, **Home** and **End** move the selection. Coming back to the page (e.g. from the side menu), the list is where you left it, with the same note selected.
 
-**Actions.** The **Edit note** and **Delete note** buttons of the page header act on the selected note. A right click on a note, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one. The notes of **Home** show their actions in a **⋮** menu.
+**Actions.** The **Edit note**, **Delete note** and **View note** buttons of the page header act on the selected note. A right click on a note, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one. The notes of **Home** show their actions in a **⋮** menu.
+
+**Note windows.** Viewing, editing or creating a note (**New note**) opens it in a window of its own, without the app's menus, so you can keep it next to the list; new windows open in cascade from the main one. Each note has one view window and one edit window: opening it again brings that window to the front. Each **New note** opens a new window, in the folder selected in the tree panel; once saved, it is that note's edit window. When a note is saved in its edit window, the lists, Home and the note's view window show it changed. The exit button of the edit window closes it, asking first if there are unsaved changes (as does closing the window). If the browser blocks the window, allow pop-ups for the app's site.
 
 **Admin panel.** The lists of users, note types and attributes work the same way: a click selects a row, the **Edit** and **Delete** buttons of the header act on it, a right click shows the same actions and a double click edits the item. Those lists sort by clicking their headers and scroll on their own. In **Folders management**, the header buttons edit or delete the selected folder; a right click on a folder shows the same actions and a double click edits it.
 
@@ -170,7 +172,7 @@ The palette button in the top bar of the web app opens the **Appearance** panel,
 
 Write a question in the box at the bottom and click the send button (or press `Ctrl+Enter`). The answer appears as it is written; while it arrives you can stop it with the stop button, and then the question goes back to the box. An answer that fails or that you stop is not part of the conversation and is not saved.
 
-The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KaNote tells you, and the chat shows a link that opens it in a new tab.
+The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KaNote tells you, and the chat shows a link that opens it in its edit window.
 
 Changing the AI model of a conversation that has already started begins a new conversation (KaNote asks first). For your safety, any HTML that an answer contains is shown as text, never as part of the page.
 

@@ -2,6 +2,7 @@
 @page "/taskscalendar"
 
 @inject IStore store
+@inject NoteWindows noteWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 
@@ -134,10 +135,7 @@
         }
     }
 
-    void OnNew()
-    {
-        store.NavigateTo($"notes/new/taskscalendar");
-    }
+    Task OnNew() => noteWindows.OpenNewAsync();
 
     public class Appointment
     {

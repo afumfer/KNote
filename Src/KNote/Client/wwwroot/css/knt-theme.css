@@ -112,3 +112,11 @@
         min-width: 1.25rem;
         padding: 0;
     }
+
+/* A separator line before an item of a RadzenMenu (the notes pages' header: View note after the edit items). */
+.rz-menu .rz-navigation-item.knt-menu-separator {
+    margin-inline-start: 0.25rem;
+    padding-inline-start: 0.25rem;
+    border-inline-start: var(--rz-border-normal);
+    border-radius: 0;
+}

@@ -7,10 +7,12 @@
 @*
     Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
     height of its container. A click selects a row (the current row, js/notesGrid.js), which the arrows, page
-    keys, Home and End move too (a right click selects it as well); double click or Enter opens its note; a right
-    click, the context menu key or Shift+F10 show its actions, and Delete deletes it. The page's header acts on the
-    selected note too (Current, EditCurrentAsync, DeleteCurrentAsync). The headers sort the list (in the server:
-    LoadPage gets the order). With Position it remembers where the user was when a note was opened.
+    keys, Home and End move too (a right click selects it as well); double click or Enter edits its note (views it,
+    for who can't edit); a right click, the context menu key or Shift+F10 show its actions, and Delete deletes it.
+    View and edit open the note in a window of its own (the page's OnNoteView/OnNoteEdit, see NoteWindows). The
+    page's header acts on the selected note too (Current, ViewCurrentAsync, EditCurrentAsync, DeleteCurrentAsync).
+    The headers sort the list (in the server: LoadPage gets the order). With Position it remembers where the user
+    was when the page is left, to show the list there again.
 *@
 
 <div @ref="host" class="knt-notes-grid-host" data-count="@count" @oncontextmenu:preventDefault="true">
@@ -81,8 +83,13 @@
     /// <summary>The note of the selected (current) row, if any.</summary>
     public NoteMinimalDto? Current { get; private set; }
 
+    /// <summary>Whether there is a selected note to view.</summary>
+    public bool CanViewCurrent => Current != null;
+
     /// <summary>Whether the user can edit or delete the selected note.</summary>
     public bool CanEditCurrent => Current != null && canEdit;
+
+    public Task ViewCurrentAsync() => Current == null ? Task.CompletedTask : RunActionAsync(NoteAction.View, Current);
 
     public Task EditCurrentAsync() => Current == null ? Task.CompletedTask : RunActionAsync(NoteAction.Edit, Current);
 
@@ -175,27 +182,28 @@
     /// <summary>Forgets the loaded notes and loads again the ones in view (e.g. after deleting a note).</summary>
     public async Task ReloadAsync()
     {
-        blocks.Clear();
-        noteIndexes.Clear();
-        dataVersion++;
-
         // The selected note may be gone: the current row tells the new one once it is drawn again.
         Current = null;
         await CurrentChanged.InvokeAsync();
 
-        if (grid != null)
-            await grid.RefreshDataAsync();
+        await RefreshAsync();
     }
 
-    /// <summary>Remembers in Position where the list is scrolled (and the note being opened, if any).</summary>
-    public async Task SavePositionAsync(NoteMinimalDto? openedNote = null)
+    /// <summary>Loads again the notes in view, keeping the selected one (e.g. after a note is saved in its
+    /// window).</summary>
+    public async Task RefreshAsync()
     {
-        if (Position == null)
-            return;
+        blocks.Clear();
+        noteIndexes.Clear();
+        dataVersion++;
 
-        Position.ScrollTop = await (await GetModuleAsync()).InvokeAsync<double>("getScrollTop", host);
-        if (openedNote != null)
-            Position.LastNoteId = openedNote.NoteId;
+        if (grid != null)
+        {
+            await grid.RefreshDataAsync();
+            // Radzen's virtualization (Virtualize.RefreshDataAsync) loads the rows again but doesn't draw them:
+            // with the same rows as before (a note saved) the old ones would stay in view.
+            StateHasChanged();
+        }
     }
 
     // Only the initial sort of the headers: then Radzen keeps it (changing it while the grid reloads its rows
@@ -293,14 +301,17 @@
         if (noteIndexes.TryGetValue(args.Data.NoteId, out var index))
             args.Attributes["data-knt-index"] = index;
         if (args.Data.NoteId == Position?.LastNoteId)
-            args.Attributes["data-last-opened"] = true;
+            args.Attributes["data-last-selected"] = true;
     }
 
     private async Task OnRowDoubleClick(DataGridRowMouseEventArgs<NoteMinimalDto> args)
     {
         if (args.Data != null)
-            await RunActionAsync(NoteAction.View, args.Data);
+            await RunActionAsync(OpenAction, args.Data);
     }
+
+    // Double click or Enter: edit the note, or view it for who can't edit.
+    private NoteAction OpenAction => canEdit ? NoteAction.Edit : NoteAction.View;
 
     private async Task OnCellContextMenu(DataGridCellMouseEventArgs<NoteMinimalDto> args)
     {
@@ -316,7 +327,7 @@
         await CurrentChanged.InvokeAsync();
     }
 
-    /// <summary>A key pressed on the current row (js/notesGrid.js): "view", "menu" or "delete".</summary>
+    /// <summary>A key pressed on the current row (js/notesGrid.js): "open", "menu" or "delete".</summary>
     [JSInvokable]
     public async Task OnKeyAction(string action, string noteId)
     {
@@ -332,7 +343,7 @@
                 await RunActionAsync(NoteAction.Delete, note);
         }
         else
-            await RunActionAsync(NoteAction.View, note);
+            await RunActionAsync(OpenAction, note);
     }
 
     // Among all the notes loaded: the grid draws rows from several requests, `notes` is only the last one.
@@ -367,18 +378,12 @@
         KntActionsMenu.Open(contextMenuService, args, ActionsOf(note));
     }
 
-    private async Task RunActionAsync(NoteAction action, NoteMinimalDto note)
+    private Task RunActionAsync(NoteAction action, NoteMinimalDto note) => action switch
     {
-        if (action == NoteAction.Delete)
-        {
-            await OnNoteDelete.InvokeAsync(note);
-            return;
-        }
-
-        // The note opens in another page: remember where the list was to come back to it.
-        await SavePositionAsync(note);
-        await (action == NoteAction.Edit ? OnNoteEdit : OnNoteView).InvokeAsync(note);
-    }
+        NoteAction.View => OnNoteView.InvokeAsync(note),
+        NoteAction.Edit => OnNoteEdit.InvokeAsync(note),
+        _ => OnNoteDelete.InvokeAsync(note)
+    };
 
     private async Task<IJSObjectReference> GetModuleAsync() =>
         module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/notesGrid.js");
@@ -389,6 +394,14 @@
     {
         if (keyboardHelper != null)
         {
+            // The page is left (or the list replaced by another one): Position remembers where the list was
+            // scrolled and its selected note, to show them again when the user comes back.
+            if (Position != null)
+            {
+                Position.ScrollTop = await keyboardHelper.InvokeAsync<double>("scrollTop");
+                if (Current != null)
+                    Position.LastNoteId = Current.NoteId;
+            }
             await keyboardHelper.InvokeVoidAsync("dispose");
             await keyboardHelper.DisposeAsync();
         }

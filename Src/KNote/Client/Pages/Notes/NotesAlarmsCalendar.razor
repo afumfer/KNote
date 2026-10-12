@@ -3,6 +3,7 @@
 
 @inject IStore webApiService
 @inject NavigationManager navigationManager
+@inject NoteWindows noteWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject NotificationService notificationService
@@ -115,10 +116,7 @@
         }
     }
 
-    void OnNew()
-    {
-        navigationManager.NavigateTo($"notes/new/alarmscalendar");
-    }
+    Task OnNew() => noteWindows.OpenNewAsync();
 
     public class Appointment
     {

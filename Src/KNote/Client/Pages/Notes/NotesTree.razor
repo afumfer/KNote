@@ -6,6 +6,7 @@
 @implements IDisposable
 
 @inject IStore store
+@inject NoteWindows noteWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 
@@ -17,6 +18,7 @@
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="View note" Icon="launch" class="knt-menu-separator" Disabled="@(!(notesGrid?.CanViewCurrent ?? false))" Click="@(() => notesGrid!.ViewCurrentAsync())"></RadzenMenuItem>
             <NotesListViewToggle Changed="StateHasChanged" />
             <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
         </RadzenMenu>
@@ -60,6 +62,7 @@
 
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
+        noteWindows.NoteSaved += OnNoteSaved;
         await Load();
     }
 
@@ -99,6 +102,7 @@
     public void Dispose()
     {
         appState.OnChange -= StateHasChanged;
+        noteWindows.NoteSaved -= OnNoteSaved;
     }
 
     private void FolderSelected(FolderDto f)
@@ -158,21 +162,16 @@
             folder.OrderNotes = orderNotes;
     }
 
-    async Task OnNew()
-    {
-        if (notesGrid != null)
-            await notesGrid.SavePositionAsync();
-        store.NavigateTo($"notes/new/tree");
-    }
+    Task OnNew() => noteWindows.OpenNewAsync();
 
-    void OnView(NoteMinimalDto note)
-    {
-        store.NavigateTo($"notes/{note.NoteId}/tree");
-    }
+    Task OnView(NoteMinimalDto note) => noteWindows.OpenViewAsync(note.NoteId);
 
-    void OnEdit(NoteMinimalDto note)
+    Task OnEdit(NoteMinimalDto note) => noteWindows.OpenEditAsync(note.NoteId);
+
+    // A note saved in its window: the list shows it changed (or moved, or gone from it).
+    void OnNoteSaved(Guid noteId)
     {
-        store.NavigateTo($"notes/edit/{note.NoteId}/tree");
+        _ = InvokeAsync(() => notesGrid?.RefreshAsync() ?? Task.CompletedTask);
     }
 
     async Task OnDelete(NoteMinimalDto item)

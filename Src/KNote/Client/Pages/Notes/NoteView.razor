@@ -1,33 +1,33 @@
-﻿@page "/notes/{NoteId}/{PageReturn}"
+﻿@page "/notes/view/{NoteId:guid}"
+@layout KntWindowLayout
+
+@implements IDisposable
 
 @inject IStore store
+@inject NoteWindows noteWindows
 @inject TooltipService tooltipService
-@inject DialogService dialogService
 
-@*@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]*@
+@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
+
+@* The window where a note is read (NoteWindows.OpenViewAsync), apart from the main window. It shows the note
+   again when it is saved in another window. *@
+
+<PageTitle>@(note?.Topic ?? KntConst.AppName)</PageTitle>
 
 <ToolingHeader Title="Note view" Icon="article">
     <Buttons>
-        <RadzenButton Icon="logout" Click="() => OnExit()" ButtonStyle="ButtonStyle.Secondary"
-                      MouseEnter="@(args => tooltipService.Open(args, "Exit", new TooltipOptions { Position = TooltipPosition.Left }))" />
+        <RadzenButton Icon="close" Click="noteWindows.CloseAsync" ButtonStyle="ButtonStyle.Secondary"
+                      MouseEnter="@(args => tooltipService.Open(args, "Close", new TooltipOptions { Position = TooltipPosition.Left }))" />
     </Buttons>
 </ToolingHeader>
 
 @if (note != null)
 {
-    <RadzenCard>
-        <RadzenStack Gap="0.5rem">
-            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H4" class="rz-pb-2 rz-border-bottom">@note.Topic</RadzenText>
-            <div class="rz-p-2 rz-border-bottom">
-                <ViewMarkdown MarkdownContent="@note.Description" />
-            </div>
-            <i>
-                <p>Tags: @(note.Tags)</p>
-                <p>Creation date: @(note.CreationDateTime)</p>
-                <p>Modification date: @(note.ModificationDateTime)</p>
-            </i>
-        </RadzenStack>
-    </RadzenCard>
+    <NoteViewer Note="note" />
+}
+else if (notFound)
+{
+    <text>The note could not be loaded.</text>
 }
 else
 {
@@ -36,29 +36,34 @@ else
 
 
 @code {
-    [Parameter] public string NoteId { get; set; } = null!;
-    [Parameter] public string PageReturn { get; set; } = null!;
+    [Parameter] public Guid NoteId { get; set; }
 
     private NoteDto? note;
+    private bool notFound;
 
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        var result = await store.Notes.GetAsync(Guid.Parse(NoteId));
-        if (!result.IsValid)
-        {            
-            store.NavigateTo("index");
-        }
-        else
-        {
+        noteWindows.NoteSaved += OnNoteSaved;
+        await LoadNote();
+    }
+
+    public void Dispose()
+    {
+        noteWindows.NoteSaved -= OnNoteSaved;
+    }
+
+    private async Task LoadNote()
+    {
+        var result = await store.Notes.GetAsync(NoteId);
+        if (result.IsValid)
             note = result.Entity;
-        }
-
-        base.OnInitialized();
+        else
+            notFound = note == null;
     }
 
-    private void OnExit()
+    private void OnNoteSaved(Guid noteId)
     {
-        store.NavigateTo(PageReturn);
+        if (noteId == NoteId)
+            _ = InvokeAsync(async () => { await LoadNote(); StateHasChanged(); });
     }
-
 }

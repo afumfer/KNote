@@ -1,7 +1,10 @@
 ﻿@page "/notes/search"
 @page "/search"
 
+@implements IDisposable
+
 @inject IStore store
+@inject NoteWindows noteWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 
@@ -13,6 +16,7 @@
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="View note" Icon="launch" class="knt-menu-separator" Disabled="@(!(notesGrid?.CanViewCurrent ?? false))" Click="@(() => notesGrid!.ViewCurrentAsync())"></RadzenMenuItem>
             <NotesListViewToggle Changed="StateHasChanged" />
         </RadzenMenu>
     </IndexMenu>
@@ -57,6 +61,13 @@
 
         if (appState.NotesSearchPosition?.ListKey != textSearch)
             appState.NotesSearchPosition = new NotesListPosition { ListKey = textSearch };
+
+        noteWindows.NoteSaved += OnNoteSaved;
+    }
+
+    public void Dispose()
+    {
+        noteWindows.NoteSaved -= OnNoteSaved;
     }
 
     private void OnSearch()
@@ -81,21 +92,16 @@
         return await store.Notes.GetSearch(queryString);
     }
 
-    async Task OnNew()
-    {
-        if (notesGrid != null)
-            await notesGrid.SavePositionAsync();
-        store.NavigateTo($"notes/new/search");
-    }
+    Task OnNew() => noteWindows.OpenNewAsync();
 
-    private void OnView(NoteMinimalDto note)
-    {
-        store.NavigateTo($"notes/{note.NoteId}/search");
-    }
+    private Task OnView(NoteMinimalDto note) => noteWindows.OpenViewAsync(note.NoteId);
 
-    private void OnEdit(NoteMinimalDto note)
+    private Task OnEdit(NoteMinimalDto note) => noteWindows.OpenEditAsync(note.NoteId);
+
+    // A note saved in its window: the list shows it changed (or moved, or gone from it).
+    private void OnNoteSaved(Guid noteId)
     {
-        store.NavigateTo($"notes/edit/{note.NoteId}/search");
+        _ = InvokeAsync(() => notesGrid?.RefreshAsync() ?? Task.CompletedTask);
     }
 
     async Task OnDelete(NoteMinimalDto item)

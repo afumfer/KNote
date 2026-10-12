@@ -3,6 +3,7 @@
 @implements IDisposable
 
 @inject IStore store
+@inject NoteWindows noteWindows
 @inject NotificationService notificationService
 
 <RadzenComponents />
@@ -57,6 +58,7 @@
         store.AppState.OnNotifyError += NotifyError;
         store.AppState.OnNotifySuccess += NotifySuccess;
 
+        await noteWindows.StartAsync();
         await store.ChatStartAsync();
     }
 

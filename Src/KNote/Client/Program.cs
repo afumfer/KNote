@@ -16,6 +16,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddOptions();
 
 builder.Services.AddScoped<IStore, Store>();
+builder.Services.AddScoped<NoteWindows>();
 
 builder.Services.AddAuthorizationCore();            
 builder.Services.AddScoped<AuthenticationProviderJWT>();

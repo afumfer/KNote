@@ -27,12 +27,12 @@ export function initialize(host, dotNet) {
     };
 
     // Rows are drawn again while scrolling (and reused for other notes): the mark follows the index. Coming back
-    // to the list, the note opened last is the current one. .NET hears of the note of the current row
+    // to the list, the note selected last is the current one. .NET hears of the note of the current row
     // (OnCurrentChanged) when it changes.
     let notifiedNoteId = null;
     const sync = () => {
         if (current < 0) {
-            const last = host.querySelector('tr.rz-data-row[data-last-opened][data-knt-index]');
+            const last = host.querySelector('tr.rz-data-row[data-last-selected][data-knt-index]');
             if (last)
                 current = indexOf(last);
         }
@@ -58,10 +58,10 @@ export function initialize(host, dotNet) {
         });
     };
 
-    // Where the keyboard starts: the note opened last if it is in view, or the first row in view.
+    // Where the keyboard starts: the note selected last if it is in view, or the first row in view.
     const startIndex = () => {
         const visible = visibleRows();
-        const last = visible.find(row => row.hasAttribute('data-last-opened'));
+        const last = visible.find(row => row.hasAttribute('data-last-selected'));
         return last ? indexOf(last) : (visible.length ? indexOf(visible[0]) : 0);
     };
 
@@ -107,7 +107,7 @@ export function initialize(host, dotNet) {
             case 'PageUp': moveTo(from - page); break;
             case 'Home': moveTo(0); break;
             case 'End': moveTo(count() - 1); break;
-            case 'Enter': act('view'); break;
+            case 'Enter': act('open'); break;
             case 'Delete': act('delete'); break;
             case 'ContextMenu': act('menu'); break;
             case 'F10':
@@ -131,22 +131,29 @@ export function initialize(host, dotNet) {
         }
     };
 
+    // Where the list is scrolled, kept while it scrolls: .NET asks for it when the grid is disposed, when its rows
+    // may be gone from the page.
+    let scrollTop = 0;
+    const onScroll = e => {
+        if (e.target === scrollArea(host))
+            scrollTop = e.target.scrollTop;
+    };
+
     const observer = new MutationObserver(sync);
     observer.observe(host, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-knt-index'] });
     host.addEventListener('keydown', onKeyDown, true);
     host.addEventListener('mousedown', onMouseDown, true);
+    host.addEventListener('scroll', onScroll, true);
 
     return {
+        scrollTop: () => scrollTop,
         dispose: () => {
             observer.disconnect();
             host.removeEventListener('keydown', onKeyDown, true);
             host.removeEventListener('mousedown', onMouseDown, true);
+            host.removeEventListener('scroll', onScroll, true);
         }
     };
-}
-
-export function getScrollTop(host) {
-    return scrollArea(host)?.scrollTop ?? 0;
 }
 
 export function setScrollTop(host, value) {
