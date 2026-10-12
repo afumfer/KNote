@@ -1,0 +1,20 @@
+@* A note to read: topic, description, tags and dates. Used by the note's window (NoteView) and the preview
+   beside the notes lists (NotePreviewPane). *@
+
+<RadzenCard>
+    <RadzenStack Gap="0.5rem">
+        <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H4" class="rz-pb-2 rz-border-bottom">@Note.Topic</RadzenText>
+        <div class="rz-p-2 rz-border-bottom">
+            <ViewMarkdown MarkdownContent="@Note.Description" />
+        </div>
+        <i>
+            <p>Tags: @(Note.Tags)</p>
+            <p>Creation date: @(Note.CreationDateTime)</p>
+            <p>Modification date: @(Note.ModificationDateTime)</p>
+        </i>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter][EditorRequired] public NoteDto Note { get; set; } = null!;
+}

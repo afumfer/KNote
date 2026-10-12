@@ -1,5 +1,8 @@
 @* The conversation of the AI assistant: each turn as a question and its answer (Markdown) with what it cost,
-   the answer being written, and the notes the assistant created. Presentation only (see AIAssistant). *@
+   the answer being written, and the notes the assistant created (they open in their edit window, NoteWindows).
+   Presentation only (see AIAssistant). *@
+
+@inject NoteWindows noteWindows
 
 <div id="@ContainerId" class="ai-chat">
     @if (Turns.Count == 0 && PendingPrompt == null)
@@ -61,8 +64,11 @@
             foreach (var note in notes)
             {
                 <div class="ai-note">
-                    <RadzenLink Icon="note_add" Path="@($"notes/edit/{note.NoteId}/index")" Target="_blank"
-                                Text="@($"Note #{note.NoteNumber} created: {note.Text}")" />
+                    @* Markup of a RadzenLink, which has no click of its own. *@
+                    <a class="rz-link" href="@($"notes/edit/{note.NoteId}")"
+                       @onclick="@(() => noteWindows.OpenEditAsync(note.NoteId!.Value))" @onclick:preventDefault="true">
+                        <i class="notranslate rzi">note_add</i><span class="rz-link-text">Note #@note.NoteNumber created: @note.Text</span>
+                    </a>
                 </div>
             }
         }

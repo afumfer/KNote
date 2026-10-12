@@ -121,6 +121,24 @@ public class NotesController : ControllerBase
         }
     }
 
+    // The HTML of a note's description (Markdown with HTML of its own) made safe to show: the web app shows notes
+    // with it (Shared/ViewMarkdown), so that both apps use the same rules (KntHtmlSanitizer, in Service).
+    [HttpPost("[action]")]
+    public IActionResult Html([FromBody] string markdown)
+    {
+        try
+        {
+            return Ok(new Result<string>(_service.Notes.UtilMarkdownToHtml(markdown)));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Html at {dateTime}.", DateTime.Now);
+            var resApi = new Result<string>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     [AllowAnonymous]
     [HttpGet("[action]")]
     public async Task<IActionResult> HomeNotes()
@@ -135,6 +153,10 @@ public class NotesController : ControllerBase
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.
                 ListNotesUpdateResourceInDescriptionForRead(resApi.Entity, _service.RepositoryRef);
                 // ----
+                // Home is shown without signing in, where api/notes/html can't be used: the descriptions go as
+                // HTML made safe (Shared/ViewMarkdown's SafeHtml in Client).
+                foreach (var note in resApi.Entity)
+                    note.Description = _service.Notes.UtilMarkdownToHtml(note.Description);
                 return Ok(resApi);
             }
             else

@@ -125,6 +125,11 @@ public class FoldersController : ControllerBase
   (`Service`) y se ajusta el tipo de contenido (`html` si empieza por `<BODY`, si no `markdown` con `\n` →
   `\r\n`). Está marcado como *hack* de compatibilidad con `ClientWin`: si lo cambias, comprueba que una nota
   editada en la Web se sigue viendo bien en el escritorio y viceversa.
+- **HTML de las notas para la Web**: `POST api/notes/html` (cualquier usuario autenticado; cuerpo: el Markdown
+  como cadena JSON) devuelve el HTML de una descripción saneado (`Notes.UtilMarkdownToHtml`: Markdig +
+  `KntHtmlSanitizer` de `Service`, las mismas reglas que `ClientWin`); `Client` no genera HTML de notas.
+  `HomeNotes`, que es anónimo, devuelve las descripciones ya convertidas así (no hay un endpoint anónimo que
+  convierta Markdown arbitrario).
 
 ## Asistente de IA (`AiAssistantController`, `api/aiassistant`)
 

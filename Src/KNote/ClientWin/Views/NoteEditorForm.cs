@@ -72,6 +72,12 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         foreach (var scriptType in Store.ScriptTypes)
             comboScriptType.Items.Add(scriptType.Text);
 
+        // The views of the note show HTML written by users (made safe by Service.Notes.UtilMarkdownToHtml), which
+        // doesn't need scripts: none runs there.
+        kntEditView.ContentScriptsEnabled = false;
+        kntEditViewTask.ContentScriptsEnabled = false;
+        webViewResource.ContentScriptsEnabled = false;
+
         // TODO: options for new versión
         buttonCheck.Visible = false;
         toolStripS3.Visible = false;
@@ -1016,7 +1022,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         if (ct.ForDescription == "html")
         {
             ProgressBarOn();
-            kntEditView.ShowHtmlContent(kntEditView.MarkdownText);
+            // The HTML editor (Internet Explorer's engine) gets the description made safe.
+            kntEditView.ShowHtmlContent(_ctrl.Service.Notes.UtilSanitizeHtml(kntEditView.MarkdownText));
             ProgressBarOff();
             EnableHtmlView();
         }

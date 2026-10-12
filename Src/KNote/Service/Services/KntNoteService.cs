@@ -495,17 +495,21 @@ public class KntNoteService : KntServiceBase, IKntNoteService
             SmartHrefHandling = true // remove markdown output for links where appropriate
         };
         var converter = new ReverseMarkdown.Converter(config);
-        string result = converter.Convert(html);
+        // Colors and fonts given with a style (span, p, div...) would be dropped: they go in a <font>, kept as is.
+        string result = converter.Convert(KntHtmlStylesForMarkdown.Prepare(html));
         return result;
     }
 
     public string UtilMarkdownToHtml(string markdown)
     {        
         var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-        var htmlContent = Markdig.Markdown.ToHtml(markdown, pipeline);
+        var htmlContent = Markdig.Markdown.ToHtml(markdown ?? "", pipeline);
 
-        return htmlContent;
+        // Markdown keeps the HTML written in it, and writes links too (javascript:...): safe to show.
+        return KntHtmlSanitizer.Sanitize(htmlContent);
     }
+
+    public string UtilSanitizeHtml(string html) => KntHtmlSanitizer.Sanitize(html);
 
     #endregion
 

@@ -97,6 +97,8 @@ public class AppState
     public NotesListPosition? NotesSearchPosition { get; set; }
     // Compact or extended view of the notes lists (NotesListViewToggle); null until read from the browser.
     public bool? NotesListCompact { get; set; }
+    // Preview of the selected note beside the notes lists (NotesPreviewToggle); null until read from the browser.
+    public bool? NotesPreviewVisible { get; set; }
 
     public List<string> ChatMessages { get; } = new List<string>();
 

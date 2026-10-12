@@ -1,19 +1,28 @@
-﻿@page "/notes/edit/{NoteId}/{PageReturn}"
+﻿@page "/notes/edit/{NoteId:guid}"
+@page "/notes/new"
+@layout KntWindowLayout
 
-@implements IDisposable
+@implements IAsyncDisposable
 
 @inject IStore store
-@inject NotificationService notificationService
+@inject NoteWindows noteWindows
 @inject DialogService dialogService
-@inject IJSRuntime js
 
 @attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
 
-<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" ConfirmExternalNavigation=true />
+@* The window where a note is edited (NoteWindows.OpenEditAsync) or created (NoteWindows.OpenNewAsync, in the
+   folder of the query string), apart from the main window: exit closes it, and each note saved is told to the
+   other windows (their lists show it changed). Closing it with unsaved changes asks first. *@
+
+<PageTitle>@(string.IsNullOrEmpty(note?.Topic) ? KntConst.AppName : note.Topic)</PageTitle>
 
 @if (showForm)
 {
-    <NoteForm Title="Note edit" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Title="@(note!.IsNew() ? "Note new" : "Note edit")" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
+}
+else if (loadFailed)
+{
+    <text>The note could not be loaded.</text>
 }
 else
 {
@@ -21,67 +30,65 @@ else
 }
 
 @code {
-    [Parameter] public string NoteId { get; set; } = string.Empty;
-    [Parameter] public string? PageReturn { get; set; }
+    // None: a new note.
+    [Parameter] public Guid? NoteId { get; set; }
+
+    // The folder of a new note.
+    [SupplyParameterFromQuery] public Guid? FolderId { get; set; }
 
     private NoteDto? note;
     private List<NoteTypeDto>? noteTypes;
 
     private bool showForm = false;
+    private bool loadFailed;
+    private bool closing;
+    private DotNetObjectReference<NoteEdit>? dotNetRef;
+    private IJSObjectReference? unsavedChangesWatch;
 
     #region Initialize and Dispose
 
     protected async override Task OnInitializedAsync()
-    {        
-        store.AppState.OnChange += StateHasChanged;
-
+    {
         var result = await store.NoteTypes.GetAllAsync();
-        if (!result.IsValid)
-        {            
-            store.NavigateTo("index");
-        }
-        else
+        if (result.IsValid)
         {
             noteTypes = result.Entity;
-
-            await GetNote();
-
-            showForm = true;
+            if (NoteId == null)
+                await GetNewNote(await GetFolder(FolderId));
+            else
+                await GetNote(NoteId.Value);
         }
 
-        if (PageReturn == null)
-            PageReturn = "index";
-        else if (PageReturn == "tree")
-            PageReturn = "notes/tree";
-
-        await base.OnInitializedAsync();
+        loadFailed = !showForm;
     }
 
-    public void Dispose()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        store.AppState.OnChange -= StateHasChanged;
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            unsavedChangesWatch = await noteWindows.WatchUnsavedChangesAsync(dotNetRef);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (unsavedChangesWatch != null)
+        {
+            await unsavedChangesWatch.InvokeVoidAsync("dispose");
+            await unsavedChangesWatch.DisposeAsync();
+        }
+        dotNetRef?.Dispose();
     }
 
     #endregion
 
     #region Data methods
 
-    private async Task GetNote()
-    {        
-        Guid id;
-        var parseOk = Guid.TryParse(NoteId, out id);
-        if (!parseOk)
-        {
-            await dialogService.Alert("Invalid note identifier.");            
-            store.NavigateTo("index");            
-        }
-
-        var result = await store.Notes.GetAsync(id);
-        if (!result.IsValid)
-        {                        
-            store.NavigateTo("index");
-        }
-        else
+    private async Task GetNote(Guid noteId)
+    {
+        var result = await store.Notes.GetAsync(noteId);
+        if (result.IsValid)
         {
             note = result.Entity;
             note.SetIsDirty(false);
@@ -89,36 +96,48 @@ else
         }
     }
 
-    private async Task SaveNote()
+    private async Task<bool> SaveNote()
     {
-        if (!note!.IsDirty())
-        {
-            return;
-        }
-        else
-        {
-            var result = await store.Notes.SaveAsync(note);
+        if (!note!.IsNew() && !note.IsDirty())
+            return true;
 
-            if (result.IsValid)
-            {
-                note = result.Entity;
-                note.SetIsDirty(false);
-            }
-        }
+        var isNew = note.IsNew();
+        var result = await store.Notes.SaveAsync(note);
+        if (!result.IsValid)
+            return false;
+
+        note = result.Entity;
+        note.SetIsNew(false);
+        note.SetIsDirty(false);
+        if (isNew)
+            await noteWindows.BecomeEditWindowAsync(note.NoteId);
+        await noteWindows.NotifyNoteSavedAsync(note.NoteId);
+        return true;
     }
 
-    private async Task GetNewNote()
+    private async Task<FolderDto?> GetFolder(Guid? folderId)
+    {
+        if (folderId == null)
+            return null;
+
+        var result = await store.Folders.GetAsync(folderId.Value);
+        return result.IsValid ? result.Entity : null;
+    }
+
+    // A new note (IsNew: resources and tasks wait until it is saved), in the given folder.
+    private async Task GetNewNote(FolderInfoDto? folder)
     {
         var result = await store.Notes.NewAsync();
 
         if (result.IsValid)
         {
             note = result.Entity;
-            if (store.AppState.IsSelectedFolder())
+            if (folder != null && folder.FolderId != Guid.Empty)
             {
-                note.FolderDto = store.AppState.SelectedFolder.GetSimpleDto<FolderDto>();
-                note.FolderId = store.AppState.SelectedFolder.FolderId;
+                note.FolderDto = folder.GetSimpleDto<FolderDto>();
+                note.FolderId = folder.FolderId;
             }
+            note.SetIsNew(true);
             note.SetIsDirty(false);
             showForm = true;
         }
@@ -135,33 +154,31 @@ else
 
     private async Task OnSaveAndNew()
     {
-        await SaveNote();
-        await GetNewNote();
+        // In the folder of the note saved.
+        if (await SaveNote())
+            await GetNewNote(note!.FolderDto);
     }
 
-    private void OnExit()
-    {        
-        store.NavigateTo(PageReturn!);
-    }
-
-    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    private async Task OnExit()
     {
-        if (note == null)
-            return;
-
-        if (note.IsDirty())
+        if (note != null && note.IsDirty())
         {
             var resultDialog = await dialogService.Confirm(
-                @"Do you want to leave the page and lose your changes?",
+                @"Do you want to close the window and lose your changes?",
                 $"{KntConst.AppName}",
                 new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
             if (resultDialog != true)
-            {
-                context.PreventNavigation();
-            }            
+                return;
         }
+
+        closing = true;
+        await noteWindows.CloseAsync();
     }
+
+    /// <summary>Asked by the browser before the window is closed or reloaded (NoteWindows.WatchUnsavedChangesAsync).</summary>
+    [JSInvokable]
+    public bool HasUnsavedChanges() => !closing && (note?.IsDirty() ?? false);
 
     #endregion
 

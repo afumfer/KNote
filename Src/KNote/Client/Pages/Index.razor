@@ -6,6 +6,7 @@
 @implements IDisposable
 
 @inject IStore store
+@inject NoteWindows noteWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 
@@ -34,6 +35,7 @@
     protected override async Task OnInitializedAsync()
     {        
         store.AppState.OnChange += StateHasChanged;
+        noteWindows.NoteSaved += OnNoteSaved;
 
         await LoadNotes();
     }
@@ -41,6 +43,7 @@
     public void Dispose()
     {
         store.AppState.OnChange -= StateHasChanged;
+        noteWindows.NoteSaved -= OnNoteSaved;
     }
 
     private async Task LoadNotes()
@@ -51,14 +54,14 @@
             notes = result.Entity;
     }
 
-    private void OnNoteView(NoteInfoDto note)
-    {
-        store.NavigateTo($"notes/{note.NoteId}/index");
-    }
+    private Task OnNoteView(NoteInfoDto note) => noteWindows.OpenViewAsync(note.NoteId);
 
-    private void OnNoteEdit(NoteInfoDto note)
+    private Task OnNoteEdit(NoteInfoDto note) => noteWindows.OpenEditAsync(note.NoteId);
+
+    // A note saved in its window: Home shows it changed.
+    private void OnNoteSaved(Guid noteId)
     {
-        store.NavigateTo($"notes/edit/{note.NoteId}/index");
+        _ = InvokeAsync(async () => { await LoadNotes(); StateHasChanged(); });
     }
 
     async Task OnNoteDelete(NoteInfoDto item)

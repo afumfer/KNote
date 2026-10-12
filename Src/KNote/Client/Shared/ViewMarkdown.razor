@@ -1,6 +1,10 @@
-﻿@using Markdig
+@using Markdig
+@using Markdig.Syntax
+@using Markdig.Syntax.Inlines
 
-@if (string.IsNullOrEmpty(HtmlContent))
+@inject IStore store
+
+@if (string.IsNullOrEmpty(htmlContent))
 {
     if (TemplateContent != null)
     {
@@ -10,28 +14,82 @@
 else
 {
     @* knt-markdown: see knt-theme.css (content with colors of its own in the dark themes). *@
-    <div class="knt-markdown">@((MarkupString)HtmlContent)</div>
+    <div class="knt-markdown">@((MarkupString)htmlContent)</div>
 }
 
 @code {
+    // A note's description (Markdown, with HTML of its own): its HTML, made safe to show, comes from Server
+    // (api/notes/html; KntHtmlSanitizer in Service), with the same rules ClientWin uses. Sanitizing in the browser
+    // (WebAssembly) was too slow with big notes.
     [Parameter] public string? MarkdownContent { get; set; }
+
+    // HTML already made safe by Server (the descriptions of HomeNotes): shown as it is.
+    [Parameter] public string? SafeHtml { get; set; }
+
     [Parameter] public RenderFragment? TemplateContent { get; set; }
 
-    // For content that is not trusted (e.g. an AI answer, which may repeat what it read in other users' notes):
-    // its raw HTML is shown as text instead of being inserted into the page, where an attribute like onerror
-    // would run script with the user's session.
+    // Content that is not meant to have HTML and changes often (an AI answer, drawn while it arrives): rendered
+    // here, with its raw HTML shown as text and only safe links (http, https, mailto or relative).
     [Parameter] public bool DisableHtml { get; set; }
 
-    private string? HtmlContent;
+    private static readonly MarkdownPipeline PipelineWithoutHtml =
+        new MarkdownPipelineBuilder().UseAdvancedExtensions().DisableHtml().Build();
 
-    protected override void OnParametersSet()
+    private string? htmlContent;
+    private string? renderedMarkdown;
+    private int version;
+
+    protected override async Task OnParametersSetAsync()
     {
-        if (MarkdownContent != null)
+        if (SafeHtml != null)
         {
-            var builder = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions();
-            if (DisableHtml)
-                builder.DisableHtml();
-            HtmlContent = Markdig.Markdown.ToHtml(MarkdownContent, builder.Build());
+            htmlContent = SafeHtml;
+            return;
         }
+
+        if (MarkdownContent == renderedMarkdown)
+            return;
+
+        renderedMarkdown = MarkdownContent;
+        var current = ++version;
+        if (string.IsNullOrEmpty(MarkdownContent))
+            htmlContent = null;
+        else if (DisableHtml)
+            htmlContent = RenderWithoutHtml(MarkdownContent);
+        else
+        {
+            // The content shown so far stays until the new one arrives (and an older answer is ignored).
+            var result = await store.Notes.HtmlAsync(MarkdownContent);
+            if (current == version)
+                htmlContent = result.IsValid ? result.Entity : null;
+        }
+    }
+
+    private static string RenderWithoutHtml(string markdown)
+    {
+        var document = Markdown.Parse(markdown, PipelineWithoutHtml);
+        foreach (var link in document.Descendants<LinkInline>())
+            if (!IsSafeUrl(link.Url))
+                link.Url = "";
+        foreach (var link in document.Descendants<AutolinkInline>())
+            if (!IsSafeUrl(link.Url))
+                link.Url = "";
+        return document.ToHtml(PipelineWithoutHtml);
+    }
+
+    // Relative, or http, https or mailto (a javascript: link would run script with the user's session).
+    private static bool IsSafeUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return true;
+
+        var colon = url.IndexOf(':');
+        var path = url.IndexOfAny(['/', '?', '#']);
+        if (colon < 0 || (path >= 0 && path < colon))
+            return true;
+
+        // Browsers ignore spaces and control characters in the scheme (java\tscript:).
+        var scheme = new string(url[..colon].Where(c => !char.IsWhiteSpace(c) && !char.IsControl(c)).ToArray()).ToLowerInvariant();
+        return scheme is "http" or "https" or "mailto";
     }
 }

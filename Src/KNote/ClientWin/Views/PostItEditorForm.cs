@@ -49,6 +49,9 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         picMenu.BringToFront();
         picResize.BringToFront();
 
+        // The note's HTML (made safe by Service.Notes.UtilMarkdownToHtml) doesn't need scripts: none runs there.
+        kntEditView.ContentScriptsEnabled = false;
+
         // In navigation mode picMenu is placed from the URL box's bounds, first while this form is still being
         // built: the URL box keeps moving and growing afterwards (kntEditView finishes its own scaling later,
         // e.g. at 200%), so picMenu is placed again whenever it does.
@@ -355,7 +358,8 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         if (ct.ForDescription == "html")
         {
             Text = KntConst.AppName + " Html editor";
-            kntEditView.ShowHtmlContent(kntEditView.MarkdownText);
+            // The HTML editor (Internet Explorer's engine) gets the description made safe.
+            kntEditView.ShowHtmlContent(_ctrl.Service.Notes.UtilSanitizeHtml(kntEditView.MarkdownText));
             kntEditView.BorderStyle = BorderStyle.None;
             kntEditView.HtmlContentControl.BorderStyle = BorderStyle.None;
             kntEditView.HtmlContentControl.ToolbarVisible = false;

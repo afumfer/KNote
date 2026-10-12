@@ -150,6 +150,10 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   decide el rol del usuario nuevo (Admin mientras haya como mucho un Admin, Guest después); `CreateAsync` es
   el alta que hace un Admin, con el rol que elija. ClientWin añade encima la autorización de sus casos de
   uso (ver "Autenticación y autorización" en `ClientWin/CLAUDE.md`).
+- **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben
+  los usuarios, así que su HTML (tras Markdig) se sanea antes de mostrarse, con las mismas reglas en las dos
+  apps: `IKntNoteService.UtilMarkdownToHtml`/`UtilSanitizeHtml` en `ClientWin` y `POST api/notes/html` en la Web.
+  Tests en `Tests/KntHtmlSanitizerTests`.
 - **Sesiones del asistente de IA** (`IKntService.AiSessions`, comandos en `KntAiSessionCommands.cs`, Staff).
   Cada conversación es una nota del tipo `@ChatSessions` (`KntConst.ChatSessionsTag`) en la carpeta
   `AI Assistant sessions`, con el proveedor y el modelo en los atributos `AiProvider`/`AiModel` del tipo y una

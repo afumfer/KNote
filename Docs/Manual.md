@@ -73,6 +73,8 @@ These permissions are enforced by the application. Somebody who connects to the 
 
 **All the notes of a repository.** Clicking a repository's node in the folders tree (the one with its name in brackets) lists all of its notes. As that can take a long time in a large database, KaNote asks first: **Cancel** leaves the notes list and the note viewer empty. Refreshing the list you have already loaded doesn't ask again.
 
+**Safe notes.** A note's description can carry HTML (written in the HTML editor or in Markdown). To protect whoever reads it, KaNote shows it without what could run code on its own (scripts, `javascript:` links, forms...), both in the desktop app and in the web app; the formatting (fonts, colors, tables, images, links) is kept.
+
 ### Printing and exporting (desktop app)
 
 The **File** menu of the management window has these options, all working on the notes list exactly as you see it: the notes of the selected folder, or the result of a search or a filter, in the order and with the columns shown on screen (including the compact view and the list filter).
@@ -150,9 +152,13 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 
 The **Tree panel**, **Notes filter** and **Quick search** pages show their notes in the same list, with the columns of the desktop app's notes list. It fills the window and loads more notes as you scroll; the total is shown above it. The **Extended list** / **Compact list** button of the page switches between all the columns and the compact view (number, topic, priority and tags), which is the default; the choice applies to the three pages and the browser remembers it. The topic column keeps a minimum width: in a narrow window the list scrolls sideways. In the tree panel, the folders tree has its own scroll.
 
-**Selecting and opening.** A click (also a right click) selects a note, which is highlighted; a double click or **Enter** opens it. The arrows, **Page Up**, **Page Down**, **Home** and **End** move the selection. Coming back to the list, the note you opened is the selected one.
+**Selecting and opening.** A click (also a right click) selects a note, which is highlighted; a double click or **Enter** edits it (users who can't edit view it). The arrows, **Page Up**, **Page Down**, **Home** and **End** move the selection. Coming back to the page (e.g. from the side menu), the list is where you left it, with the same note selected.
 
-**Actions.** The **Edit note** and **Delete note** buttons of the page header act on the selected note. A right click on a note, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one. The notes of **Home** show their actions in a **⋮** menu.
+**Actions.** The **Edit note**, **Delete note** and **View note** buttons of the page header act on the selected note. A right click on a note, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one. The notes of **Home** show their actions in a **⋮** menu.
+
+**Preview.** The **Show preview** / **Hide preview** button of the page shows, at the right of the list, the note that is selected; it changes as you select another one, and shows the note's changes when it is saved in its window. The pane can be resized with the bar between it and the list. The choice applies to the three pages and the browser remembers it, as well as the sizes you give to the panes of each page.
+
+**Note windows.** Viewing, editing or creating a note (**New note**) opens it in a window of its own, without the app's menus, so you can keep it next to the list; new windows open in cascade from the main one. Each note has one view window and one edit window: opening it again brings that window to the front. Each **New note** opens a new window, in the folder selected in the tree panel; once saved, it is that note's edit window. When a note is saved in its edit window, the lists, Home and the note's view window show it changed. The exit button of the edit window closes it, asking first if there are unsaved changes (as does closing the window). If the browser blocks the window, allow pop-ups for the app's site.
 
 **Admin panel.** The lists of users, note types and attributes work the same way: a click selects a row, the **Edit** and **Delete** buttons of the header act on it, a right click shows the same actions and a double click edits the item. Those lists sort by clicking their headers and scroll on their own. In **Folders management**, the header buttons edit or delete the selected folder; a right click on a folder shows the same actions and a double click edits it.
 
@@ -170,7 +176,7 @@ The palette button in the top bar of the web app opens the **Appearance** panel,
 
 Write a question in the box at the bottom and click the send button (or press `Ctrl+Enter`). The answer appears as it is written; while it arrives you can stop it with the stop button, and then the question goes back to the box. An answer that fails or that you stop is not part of the conversation and is not saved.
 
-The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KaNote tells you, and the chat shows a link that opens it in a new tab.
+The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KaNote tells you, and the chat shows a link that opens it in its edit window.
 
 Changing the AI model of a conversation that has already started begins a new conversation (KaNote asks first). For your safety, any HTML that an answer contains is shown as text, never as part of the page.
 

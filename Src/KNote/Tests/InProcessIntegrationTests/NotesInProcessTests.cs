@@ -51,6 +51,57 @@ public class NotesInProcessTests
         Assert.AreEqual(2, res!.Entity!.Count);
     }
 
+    // A description with what could run script, and formatting.
+    private const string UnsafeDescription = "**bold** <img src=\"x\" onerror=\"alert(1)\"> [link](javascript:alert(2)) <script>alert(3)</script>";
+
+    private static void AssertSafeHtml(string? html)
+    {
+        Assert.IsNotNull(html);
+        Assert.IsTrue(html.Contains("<strong>bold</strong>"), html);
+        Assert.IsFalse(html.Contains("onerror") || html.Contains("javascript:") || html.Contains("<script"), html);
+    }
+
+    [TestMethod]
+    public async Task Html_ReturnsTheDescriptionAsSafeHtml()
+    {
+        var httpRes = await _httpClient.PostAsJsonAsync("api/notes/html", UnsafeDescription);
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<string>>();
+
+        Assert.IsTrue(httpRes.IsSuccessStatusCode);
+        AssertSafeHtml(res?.Entity);
+    }
+
+    [TestMethod]
+    public async Task Html_WithoutSigningIn_IsUnauthorized()
+    {
+        using var anonymous = _factory.CreateClient();
+
+        var httpRes = await anonymous.PostAsJsonAsync("api/notes/html", "**bold**");
+
+        Assert.AreEqual(System.Net.HttpStatusCode.Unauthorized, httpRes.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task Get_HomeNotes_GivesTheDescriptionsAsSafeHtml()
+    {
+        var folders = await (await _httpClient.GetAsync("api/folders")).Content.ReadFromJsonAsync<Result<List<FolderInfoDto>>>();
+        var home = folders!.Entity!.First(f => f.Name == "Home");
+        var note = await CreateNoteAsync("__TEST HOME HTML__", UnsafeDescription, home);
+        try
+        {
+            using var anonymous = _factory.CreateClient();
+            var httpRes = await anonymous.GetAsync("api/notes/homenotes");
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<List<NoteInfoDto>>>();
+
+            Assert.IsTrue(httpRes.IsSuccessStatusCode);
+            AssertSafeHtml(res!.Entity!.Single(n => n.NoteId == note.NoteId).Description);
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/notes/{note.NoteId}");
+        }
+    }
+
     [TestMethod]
     public async Task Execute_Search_And_Filter()
     {
@@ -143,18 +194,18 @@ public class NotesInProcessTests
         Assert.AreEqual(note.NoteId, res!.Entity!.NoteId);
     }
 
-    private static async Task<NoteDto> CreateNoteAsync(string topic)
+    private static async Task<NoteDto> CreateNoteAsync(string topic, string description = "Created by NotesInProcessTests.", FolderInfoDto? folder = null)
     {
         NoteDto note = new()
         {
             NoteId = Guid.Empty,
             Topic = topic,
-            Description = "Created by NotesInProcessTests.",
-            FolderId = _folder.FolderId,
+            Description = description,
+            FolderId = (folder ?? _folder).FolderId,
             // MVC validates this nested complex property recursively, and NoteDto.FolderDto's getter
             // lazily defaults to an empty FolderDto if left unset - which then fails its own
             // [Required] Name validation. Provide the matching folder to avoid that.
-            FolderDto = _folder,
+            FolderDto = folder ?? _folder,
             CreationDateTime = DateTime.Now,
             ModificationDateTime = DateTime.Now
         };

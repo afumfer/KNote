@@ -52,12 +52,13 @@ Client/
 ├── AppStoreService/
 │     IStore.cs, Store.cs   – estado global + acceso a los servicios Web API + conexión SignalR (chat)
 │     AppState.cs           – estado de la app (usuario, carpeta seleccionada, árbol de carpetas, chat) y eventos
+│     NoteWindows.cs        – ventanas de vista/edición de notas y aviso entre ventanas de las notas guardadas
 │     ClientDataServices/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
 ├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, AIAssistant/
-├── Shared/                 – layout (MainLayout*) y componentes reutilizables (EntityList, ToolingHeader,
+├── Shared/                 – layouts (MainLayout*, KntWindowLayout) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntSections, KntDialogs, KntLogo, KntFolderSelector,
 │                             KntFoldersTreeView, InputMarkdown, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
@@ -86,8 +87,9 @@ Los DTO de `Model/Dto` heredan de `SmartModelDtoBase` (`Model/Core`): no son POC
 validación que ambas UIs usan directamente:
 
 - `IsDirty()`/`SetIsDirty(...)`, `IsNew()`/`SetIsNew(...)` (recorren también los hijos). Patrón habitual:
-  tras cargar o guardar, `SetIsDirty(false)`; antes de guardar, `if (!dto.IsDirty()) return;`; y al salir,
-  `<NavigationLock OnBeforeInternalNavigation=...>` pide confirmación si `IsDirty()` (ver `NoteEdit.razor`).
+  tras cargar o guardar, `SetIsDirty(false)`; antes de guardar, `if (!dto.IsDirty()) return;`; y al salir se
+  pide confirmación si `IsDirty()` (en una ventana de nota, con `NoteWindows.WatchUnsavedChangesAsync`, ver
+  `NoteEdit.razor`).
 - Validación: DataAnnotations en las propiedades + `Validate(...)`/`IsValid()`/`GetErrorMessage()` de
   `ModelBase`. Los formularios usan `<DataAnnotationsValidator />`, así que las reglas viven en el DTO, no en
   la página.
@@ -106,7 +108,8 @@ Cómo está integrada:
   `NotificationService`, `TooltipService`, `ContextMenuService`...).
 - `<RadzenComponents />` en `Shared/MainLayout.razor` (anfitrión de diálogos, notificaciones, menús
   contextuales y tooltips). Sin él los servicios anteriores no muestran nada.
-- Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`.
+- Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`. Las
+  ventanas de nota usan `Shared/KntWindowLayout` (solo `RadzenBody`, con su propio `<RadzenComponents />`).
 - Tema: `<RadzenTheme Theme="@KntThemes.Default" />` en el `<HeadContent>` de `App.razor` (no un `<link>` fijo
   en `index.html`), seguido de `css/knt-theme.css`. El usuario elige tema (los 5 gratuitos de Radzen,
   `Shared/KntThemes`), modo claro/oscuro y alto contraste (WCAG) en el panel `Shared/KntThemeSelector` (botón
@@ -182,15 +185,29 @@ Patrones ya establecidos que hay que seguir:
   inicial (cambiarlo mientras el grid recarga deja las filas viejas). Las mismas columnas que ClientWin; vista compacta (#, Topic, Priority, Tags) o extendida con
   `NotesListViewToggle` (botón de la cabecera, `AppState.NotesListCompact` + `localStorage`), y Topic con
   `MinWidth`. Clic
-  (también el derecho) selecciona; doble clic/Enter abre; menú de acciones con clic derecho, tecla de menú o
-  Mayús+F10; la cabecera de la página tiene Edit/Delete de la nota seleccionada (`NotesGrid.Current`,
-  `CurrentChanged`, `EditCurrentAsync`/`DeleteCurrentAsync`). La fila actual y el teclado los lleva
+  (también el derecho) selecciona; doble clic/Enter edita (ve, quien no puede editar); menú de acciones con clic
+  derecho, tecla de menú o Mayús+F10; la cabecera de la página tiene Edit/Delete y, tras un separador (clase
+  `knt-menu-separator` de `knt-theme.css`), View de la nota seleccionada (`NotesGrid.Current`, `CurrentChanged`,
+  `ViewCurrentAsync`/`EditCurrentAsync`/`DeleteCurrentAsync`). Ver y editar abren la nota en su ventana (ver
+  "Ventanas de nota"). **Vista previa**: `NotesPreviewToggle` (botón de la cabecera, `AppState.NotesPreviewVisible`
+  + `localStorage`, común a las tres páginas) muestra a la derecha de la lista `NotePreviewPane`, que carga la nota
+  seleccionada cuando la selección se para 250 ms (con las flechas no carga cada nota del camino) y la recarga si
+  se guarda en su ventana. Su `RadzenSplitterPane` está siempre, con el tamaño de todos los paneles fijado desde el
+  principio: Radzen reparte los tamaños al registrar los paneles y uno añadido después no cabe (el anterior pasa a
+  `flex: 0 0` con su tamaño). Oculto, lo esconde la clase `knt-preview-hidden` del splitter (`knt-theme.css`) y la
+  lista (`knt-notes-list-pane`) ocupa su sitio; así `NotesGrid` no se recrea y conserva su estado. Los tamaños
+  que deja el usuario en los paneles de cada página se recuerdan en el navegador con `Shared/KntPaneSizes`
+  (`Size="@paneSizes[i]"` en cada panel y `Resize="paneSizes.Resized"` en el splitter; Radzen solo informa del
+  panel arrastrado, y el siguiente se queda con el resto del espacio de los dos). La fila actual y el teclado los lleva
   `wwwroot/js/notesGrid.js`, no Radzen: su navegación con flechas cuenta las filas dibujadas y con virtualización
   se pierde; la posición de cada fila va en `data-knt-index` (el `aria-rowindex` de Radzen se estropea al
   redibujar). `NotesGrid` no se redibuja por su página salvo si cambia `Compact` (`ShouldRender`): redibujarlo
-  mientras Radzen carga filas lo deja vacío o con filas viejas. Al abrir una nota la página guarda en
-  `AppState` (`NotesListPosition`) el desplazamiento, el orden y la nota, y al volver se restauran (con el filtro
-  o el texto buscado). Una lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`).
+  mientras Radzen carga filas lo deja vacío o con filas viejas. Al dejar la página (p. ej. por el menú lateral)
+  `NotesGrid` guarda en `AppState` (`NotesListPosition`, en su `DisposeAsync`; el desplazamiento lo va anotando
+  `notesGrid.js`, porque entonces sus filas ya pueden no estar) el desplazamiento, el orden y la nota
+  seleccionada, y al volver se restauran (con el filtro o el texto buscado). Una nota guardada en otra ventana recarga las filas a la vista sin perder la
+  selección (`RefreshAsync`; la virtualización de Radzen recarga sin redibujar, de ahí su `StateHasChanged`). Una
+  lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`).
 - **Cabeceras**: la de una página de sección es `KntIndexHeader` con `Section="KntSections.Xxx"` (título e
   icono de su entrada del menú; `TextHead`/`Icon` los sustituyen, como en `NotesTree`, que muestra la carpeta) y
   la botonera en `IndexMenu` (normalmente un `RadzenMenu`, que la cabecera deja sin fondo). `Shared/KntSections`
@@ -229,8 +246,24 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Rutas relativas**: la app se sirve bajo `/KNote/` (`<base href="/KNote/" />` en `index.html`, a juego con
   `app.UsePathBase("/KNote")` en `Server`). Navega con rutas sin `/` inicial (`store.NavigateTo("notes/tree")`,
   `Path="index"`), o se saldrá de la base.
-- Estado compartido entre páginas en `store.AppState` (p. ej. `SelectedFolder`, que usan `NoteNew`/`NoteEdit`
-  para preasignar carpeta). Un componente que se suscriba a `AppState.OnChange` implementa `IDisposable` y se
+- **Ventanas de nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`), editarla
+  (`notes/edit/{id}`, `NoteEdit`) y crearla (`notes/new?folderId=...`, la misma `NoteEdit`) se hace en una
+  ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/NoteWindows`
+  (`OpenViewAsync`/`OpenEditAsync`/`OpenNewAsync`, `wwwroot/js/kntWindows.js`): una por nota y uso, que se trae al
+  frente si ya está abierta (sin recargarla ni moverla: no pierde una edición en curso); las nuevas se abren en
+  cascada desde la ventana que las abre (`openWindow`, dentro de la pantalla). Cada "New note" abre una ventana
+  nueva, en la carpeta de `AppState.SelectedFolder`; al guardarla por primera vez pasa a ser la ventana de edición
+  de esa nota (`BecomeEditWindowAsync`: cambia su nombre y su URL). El navegador
+  solo deja abrirla justo tras un clic o una tecla: no pongas otra espera delante (el script se carga de antemano
+  en `NoteWindows.StartAsync`, que llaman los dos layouts); si la bloquea, se avisa. Cada ventana es otra
+  instancia de la app (su propio `AppState`; la sesión sí se comparte, el JWT está en `localStorage`). Al guardar,
+  `NoteEdit` avisa a las demás ventanas (`NotifyNoteSavedAsync`, `BroadcastChannel`) y quien muestre notas se
+  suscribe a `NoteWindows.NoteSaved` para refrescarse (las listas, Home, `NoteView`). La salida de `NoteEdit`
+  cierra la ventana (`CloseAsync`; si no la abrió un script, va a Home) y cerrarla con cambios sin guardar
+  pregunta (`WatchUnsavedChangesAsync`, `beforeunload`), sin `NavigationLock`, que preguntaría siempre.
+- Estado compartido entre páginas en `store.AppState` (p. ej. `SelectedFolder`, la carpeta de una nota nueva,
+  que `NoteWindows.OpenNewAsync` pasa en la URL: `AppState` no llega a las ventanas de nota, que son otra
+  instancia de la app). Un componente que se suscriba a `AppState.OnChange` implementa `IDisposable` y se
   desuscribe en `Dispose()`.
 - `Nullable` está activado en este proyecto: `[Parameter] [EditorRequired] public NoteDto Note { get; set; }
   = null!;` para parámetros obligatorios.
@@ -264,14 +297,18 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   otra vez antes de dejarla (nueva conversación, otra sesión, salir de la página) si aquel guardado falló.
   Cambiar de proveedor empieza una conversación nueva; al retomar una sesión se usa su proveedor y modelo
   (`AiProviderSelection.ForSession`, en `Model`) o, si ya no están configurados, el predefinido. Las notas que
-  crea la tool `create_task` se enlazan en el chat (se abren en otra pestaña) mientras la página está abierta.
+  crea la tool `create_task` se enlazan en el chat (se abren en su ventana de edición) mientras la página está
+  abierta.
 - **Markdown**: las descripciones de nota se editan con `Shared/InputMarkdown` y se muestran con
   `Shared/ViewMarkdown` (Markdig). `Server` reescribe las URLs de recursos de la descripción al leer/guardar
-  para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`). `ViewMarkdown` inserta en la página el HTML que
-  traiga el Markdown (`MarkupString`): para contenido no fiable usa `DisableHtml="true"`, que lo muestra como
-  texto. Lo usa el chat del asistente (las respuestas las escribe el modelo, que puede repetir lo que leyó en
-  notas de otros usuarios), igual que `AiChatHtml` en `ClientWin`. Las descripciones de nota siguen
-  insertando su HTML (es parte de su formato): está pendiente sanearlo (quitar scripts y atributos `on*`).
+  para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`). **El HTML de una nota no se genera en el
+  navegador**: `ViewMarkdown` lo pide ya saneado a `Server` (`IStore.Notes.HtmlAsync` → `POST api/notes/html`,
+  Markdig + `KntHtmlSanitizer` de `Service`), con las mismas reglas que `ClientWin`; las descripciones de Home ya
+  llegan así de `HomeNotes` (anónimo) y se pasan con `SafeHtml`. Sanear en WebAssembly (HtmlSanitizer/AngleSharp)
+  se descartó: +680 KB de descarga y 1-2 s con una nota de 130 KB. No insertes HTML de usuario de otra forma
+  (`MarkupString`), tampoco el tema de una nota. Para contenido sin HTML que cambia a menudo (el chat del
+  asistente, que se repinta mientras llega la respuesta) `DisableHtml="true"` lo genera en el navegador, con su
+  HTML como texto y solo enlaces `http`, `https`, `mailto` o relativos, igual que `AiChatHtml` en `ClientWin`.
 
 ## Compilar, ejecutar y depurar
 
