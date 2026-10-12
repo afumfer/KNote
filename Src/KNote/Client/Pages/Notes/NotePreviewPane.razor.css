@@ -1,0 +1,13 @@
+/* The pane scrolls on its own, beside the notes list. Only theme variables, so it follows any theme. */
+
+.knt-note-preview {
+    height: 100%;
+    overflow: auto;
+    padding: 0 0.25rem;
+}
+
+.knt-note-preview-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--rz-text-secondary-color);
+}

@@ -1,0 +1,35 @@
+@* Menu item of the notes pages that shows or hides the preview of the selected note, a pane at the right of the
+   notes list (NotePreviewPane). The choice is shared by the pages (AppState.NotesPreviewVisible) and kept in the
+   browser (localStorage). *@
+
+@inject IStore store
+@inject IJSRuntime js
+
+<RadzenMenuItem Text="@(Visible ? "Hide preview" : "Show preview")" Icon="@(Visible ? "right_panel_close" : "right_panel_open")" Click="ToggleAsync" />
+
+@code {
+    // The page shows the list again with the preview or without it.
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private const string StorageKey = "KNoteNotesPreview";
+
+    private bool Visible => store.AppState.NotesPreviewVisible ?? false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (store.AppState.NotesPreviewVisible != null)
+            return;
+
+        var saved = await js.LocalStorageGetItem(StorageKey);
+        store.AppState.NotesPreviewVisible = saved == "true";
+        if (Visible)
+            await Changed.InvokeAsync();
+    }
+
+    private async Task ToggleAsync()
+    {
+        store.AppState.NotesPreviewVisible = !Visible;
+        await js.LocalStorageSetItem(StorageKey, Visible ? "true" : "false");
+        await Changed.InvokeAsync();
+    }
+}

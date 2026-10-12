@@ -189,7 +189,16 @@ Patrones ya establecidos que hay que seguir:
   derecho, tecla de menú o Mayús+F10; la cabecera de la página tiene Edit/Delete y, tras un separador (clase
   `knt-menu-separator` de `knt-theme.css`), View de la nota seleccionada (`NotesGrid.Current`, `CurrentChanged`,
   `ViewCurrentAsync`/`EditCurrentAsync`/`DeleteCurrentAsync`). Ver y editar abren la nota en su ventana (ver
-  "Ventanas de nota"). La fila actual y el teclado los lleva
+  "Ventanas de nota"). **Vista previa**: `NotesPreviewToggle` (botón de la cabecera, `AppState.NotesPreviewVisible`
+  + `localStorage`, común a las tres páginas) muestra a la derecha de la lista `NotePreviewPane`, que carga la nota
+  seleccionada cuando la selección se para 250 ms (con las flechas no carga cada nota del camino) y la recarga si
+  se guarda en su ventana. Su `RadzenSplitterPane` está siempre, con el tamaño de todos los paneles fijado desde el
+  principio: Radzen reparte los tamaños al registrar los paneles y uno añadido después no cabe (el anterior pasa a
+  `flex: 0 0` con su tamaño). Oculto, lo esconde la clase `knt-preview-hidden` del splitter (`knt-theme.css`) y la
+  lista (`knt-notes-list-pane`) ocupa su sitio; así `NotesGrid` no se recrea y conserva su estado. Los tamaños
+  que deja el usuario en los paneles de cada página se recuerdan en el navegador con `Shared/KntPaneSizes`
+  (`Size="@paneSizes[i]"` en cada panel y `Resize="paneSizes.Resized"` en el splitter; Radzen solo informa del
+  panel arrastrado, y el siguiente se queda con el resto del espacio de los dos). La fila actual y el teclado los lleva
   `wwwroot/js/notesGrid.js`, no Radzen: su navegación con flechas cuenta las filas dibujadas y con virtualización
   se pierde; la posición de cada fila va en `data-knt-index` (el `aria-rowindex` de Radzen se estropea al
   redibujar). `NotesGrid` no se redibuja por su página salvo si cambia `Compact` (`ShouldRender`): redibujarlo

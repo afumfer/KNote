@@ -7,6 +7,7 @@
 @inject NoteWindows noteWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
+@inject IJSRuntime js
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
@@ -17,6 +18,7 @@
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="View note" Icon="launch" class="knt-menu-separator" Disabled="@(!(notesGrid?.CanViewCurrent ?? false))" Click="@(() => notesGrid!.ViewCurrentAsync())"></RadzenMenuItem>
+            <NotesPreviewToggle Changed="StateHasChanged" />
             <NotesListViewToggle Changed="StateHasChanged" />
         </RadzenMenu>
     </IndexMenu>
@@ -35,9 +37,22 @@
     </RadzenStack>
 
     <RadzenCard class="rz-p-1" Style="flex: 1; min-height: 0">
-        @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
-        <NotesGrid @ref="notesGrid" CurrentChanged="StateHasChanged" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
-                   OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
+        @* The list and, at its right, the preview of the selected note (if shown). *@
+        <RadzenSplitter class="@(appState.NotesPreviewVisible == true ? null : "knt-preview-hidden")" Resize="paneSizes.Resized">
+            <RadzenSplitterPane Size="@paneSizes[0]" Min="320px" class="knt-notes-list-pane">
+                @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
+                <NotesGrid @ref="notesGrid" CurrentChanged="StateHasChanged" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
+                           OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
+            </RadzenSplitterPane>
+            @* Always there, with the sizes of all the panes set from the start (Radzen sizes the panes when they are
+               added): hidden with knt-preview-hidden, see knt-theme.css. *@
+            <RadzenSplitterPane Size="@paneSizes[1]" Min="240px" class="knt-note-preview-pane">
+                @if (appState.NotesPreviewVisible == true)
+                {
+                    <NotePreviewPane NoteId="@notesGrid?.Current?.NoteId" />
+                }
+            </RadzenSplitterPane>
+        </RadzenSplitter>
     </RadzenCard>
 </RadzenStack>
 
@@ -47,9 +62,13 @@
     private AppState appState = null!;
     private string textSearch = "";
     private int searchVersion;
+    // The sizes of the panes the user left, kept in the browser.
+    private KntPaneSizes paneSizes = null!;
 
     protected override void OnInitialized()
     {
+        paneSizes = new KntPaneSizes(js, "KNoteNotesSearchPanes", "60%", "40%");
+
         // The text searched comes in the URL (notes/search?textSearch=...); back from a note, without it, the
         // last search (with the list where it was, NotesSearchPosition, whose ListKey is the text searched).
         appState = store.AppState;

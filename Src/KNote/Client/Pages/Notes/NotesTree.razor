@@ -9,6 +9,7 @@
 @inject NoteWindows noteWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
+@inject IJSRuntime js
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
@@ -19,6 +20,7 @@
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="View note" Icon="launch" class="knt-menu-separator" Disabled="@(!(notesGrid?.CanViewCurrent ?? false))" Click="@(() => notesGrid!.ViewCurrentAsync())"></RadzenMenuItem>
+            <NotesPreviewToggle Changed="StateHasChanged" />
             <NotesListViewToggle Changed="StateHasChanged" />
             <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
         </RadzenMenu>
@@ -28,11 +30,11 @@
 @* The panel takes the height left in the window: the tree and the notes list scroll each on its own, the page
    doesn't. *@
 <RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 10rem)">
-    <RadzenSplitter>
-        <RadzenSplitterPane Size="20%" Min="160px" Max="45%" Style="overflow: auto">
+    <RadzenSplitter class="@(appState.NotesPreviewVisible == true ? null : "knt-preview-hidden")" Resize="paneSizes.Resized">
+        <RadzenSplitterPane Size="@paneSizes[0]" Min="160px" Max="45%" Style="overflow: auto">
             <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
         </RadzenSplitterPane>
-        <RadzenSplitterPane>
+        <RadzenSplitterPane Size="@paneSizes[1]" Min="320px" class="knt-notes-list-pane">
             @if (folder != null)
             {
                 @* A new grid for each folder: it starts at the top (or where it was left) with its own data, in the
@@ -40,6 +42,14 @@
                 <NotesGrid @ref="notesGrid" CurrentChanged="StateHasChanged" Compact="@(appState.NotesListCompact ?? true)" @key="folder.FolderId" LoadPage="LoadNotesPage" Position="appState.NotesTreePosition"
                            Order="FolderOrder()" OrderChanged="OnOrderChanged"
                            OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
+            }
+        </RadzenSplitterPane>
+        @* Always there, with the sizes of all the panes set from the start (Radzen sizes the panes when they are
+           added): hidden with knt-preview-hidden, see knt-theme.css. *@
+        <RadzenSplitterPane Size="@paneSizes[2]" Min="240px" class="knt-note-preview-pane">
+            @if (appState.NotesPreviewVisible == true)
+            {
+                <NotePreviewPane NoteId="@notesGrid?.Current?.NoteId" />
             }
         </RadzenSplitterPane>
     </RadzenSplitter>
@@ -52,11 +62,15 @@
     private NotesGrid? notesGrid;
     private AppState appState = null!;
     private bool canSaveOrder;
+    // The sizes of the panes the user left, kept in the browser.
+    private KntPaneSizes paneSizes = null!;
 
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
+        paneSizes = new KntPaneSizes(js, "KNoteNotesTreePanes", "20%", "45%", "35%");
+
         var user = (await AuthenticationState).User;
         canSaveOrder = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
 

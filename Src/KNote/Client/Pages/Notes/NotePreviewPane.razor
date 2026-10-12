@@ -1,0 +1,84 @@
+@implements IDisposable
+
+@inject IStore store
+@inject NoteWindows noteWindows
+
+@* Preview of the note selected in a notes list (NotesPreviewToggle), at its right. The note is loaded once the
+   selection stops for a moment (moving with the arrows doesn't load every note on the way), and again when it is
+   saved in its window. *@
+
+<div class="knt-note-preview">
+    @if (note != null)
+    {
+        <NoteViewer Note="note" />
+    }
+    else
+    {
+        <div class="knt-note-preview-empty">@(NoteId == null ? "Select a note to preview it." : loadFailed ? "The note could not be loaded." : "Loading ...")</div>
+    }
+</div>
+
+@code {
+    // The note selected in the list (none: nothing to show).
+    [Parameter] public Guid? NoteId { get; set; }
+
+    // Time the selection has to stay on a note to load it.
+    private const int SelectionDelay = 250;
+
+    private NoteDto? note;
+    private bool loadFailed;
+    private Guid? requestedId;
+    private int version;
+
+    protected override void OnInitialized()
+    {
+        noteWindows.NoteSaved += OnNoteSaved;
+    }
+
+    public void Dispose()
+    {
+        noteWindows.NoteSaved -= OnNoteSaved;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (NoteId == requestedId)
+            return;
+
+        requestedId = NoteId;
+        var current = ++version;
+        if (NoteId == null)
+        {
+            note = null;
+            return;
+        }
+
+        // The note shown so far stays while the next one is loaded.
+        await Task.Delay(SelectionDelay);
+        if (current == version)
+            await LoadNote(NoteId.Value, current);
+    }
+
+    private async Task LoadNote(Guid noteId, int current)
+    {
+        var result = await store.Notes.GetAsync(noteId);
+        // Another note selected meanwhile: that one is loaded instead.
+        if (current != version)
+            return;
+
+        note = result.IsValid ? result.Entity : null;
+        loadFailed = !result.IsValid;
+    }
+
+    private void OnNoteSaved(Guid noteId)
+    {
+        if (noteId != NoteId)
+            return;
+
+        _ = InvokeAsync(async () =>
+        {
+            await LoadNote(noteId, version);
+            StateHasChanged();
+        });
+    }
+}

@@ -120,3 +120,16 @@
     border-inline-start: var(--rz-border-normal);
     border-radius: 0;
 }
+
+/* Notes pages with the preview of the selected note (Pages/Notes/NotePreviewPane): the preview pane is always in
+   the RadzenSplitter, with the sizes of all the panes set from the start (Radzen sizes them when they are added,
+   a pane added later doesn't fit). Hidden, the list takes its place: Radzen sets the panes' size inline, hence
+   !important. The size the user gives them is kept while the page is shown. */
+.rz-splitter.knt-preview-hidden > .knt-note-preview-pane,
+.rz-splitter.knt-preview-hidden > .knt-notes-list-pane + .rz-splitter-bar {
+    display: none;
+}
+
+.rz-splitter.knt-preview-hidden > .knt-notes-list-pane {
+    flex: 1 1 0 !important;
+}
