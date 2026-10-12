@@ -495,7 +495,8 @@ public class KntNoteService : KntServiceBase, IKntNoteService
             SmartHrefHandling = true // remove markdown output for links where appropriate
         };
         var converter = new ReverseMarkdown.Converter(config);
-        string result = converter.Convert(html);
+        // Colors and fonts given with a style (span, p, div...) would be dropped: they go in a <font>, kept as is.
+        string result = converter.Convert(KntHtmlStylesForMarkdown.Prepare(html));
         return result;
     }
 

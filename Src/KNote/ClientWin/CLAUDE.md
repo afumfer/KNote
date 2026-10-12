@@ -421,6 +421,9 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   colores como `#rrggbb`) recibe `Service.Notes.UtilSanitizeHtml(...)`. Además esas vistas no ejecutan scripts
   (`KntEditView.ContentScriptsEnabled = false`, solo para el HTML mostrado con `ShowNavigationContent`; una URL
   navegada sí los ejecuta). El chat de IA (`AiChatHtml`) tiene su propia página con scripts y escapa el HTML.
+  Al pasar una nota HTML a Markdown (`Service.Notes.UtilHtmlToMarkdown`, ReverseMarkdown) los colores y fuentes
+  dados con `style` (`span`, `p`, `div`..., típicos del texto pegado) se pasan antes a un `<font style>`
+  (`Service/Core/KntHtmlStylesForMarkdown`), que el conversor conserva tal cual; si no, se perderían.
 
 ## Autenticación y autorización
 
