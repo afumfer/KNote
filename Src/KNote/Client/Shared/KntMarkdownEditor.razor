@@ -1,0 +1,85 @@
+@using System.Text.RegularExpressions
+
+@inject IJSRuntime js
+
+@* Editor of a note's description (Markdown, with HTML of its own): Design (Radzen's WYSIWYG editor), Markdown (its
+   source, with the same toolbar) or Preview (the note as it is shown, made safe by Server: ViewMarkdown). The mode
+   chosen is kept in the browser. Radzen's editor shows the note's HTML (written in ClientWin) as text in Design
+   mode; it keeps it as written, and Preview shows it as it looks. *@
+
+<div class="knt-md-editor">
+    <div class="knt-md-editor-bar">
+        <RadzenSelectBar TValue="string" Value="@mode" ValueChanged="@((string value) => SetModeAsync(value))" Size="ButtonSize.Small">
+            <Items>
+                <RadzenSelectBarItem Text="Design" Value="@DesignMode" Icon="edit_note" />
+                <RadzenSelectBarItem Text="Markdown" Value="@SourceMode" Icon="code" />
+                <RadzenSelectBarItem Text="Preview" Value="@PreviewMode" Icon="visibility" />
+            </Items>
+        </RadzenSelectBar>
+        @if (mode == DesignMode && HasHtml)
+        {
+            <span class="knt-md-editor-hint">
+                <RadzenIcon Icon="info" />
+                This note has HTML: here it shows as text; Preview shows it as it looks.
+            </span>
+        }
+    </div>
+
+    @if (mode == PreviewMode)
+    {
+        <div class="knt-md-editor-preview" style="height: @Height">
+            <ViewMarkdown MarkdownContent="@Value">
+                <TemplateContent>
+                    <span class="knt-md-editor-empty">No description yet.</span>
+                </TemplateContent>
+            </ViewMarkdown>
+        </div>
+    }
+    else
+    {
+        <RadzenMarkdownEditor Value="@Value" ValueChanged="@((string value) => OnValueChanged(value))"
+                              Mode="@(mode == SourceMode ? MarkdownEditorMode.Source : MarkdownEditorMode.Design)"
+                              ModeChanged="@((MarkdownEditorMode value) => SetModeAsync(value == MarkdownEditorMode.Source ? SourceMode : DesignMode))"
+                              Style="@($"height: {Height}")" />
+    }
+</div>
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    // Height of the editing (or preview) area.
+    [Parameter] public string Height { get; set; } = "max(20rem, calc(100vh - 24rem))";
+
+    private const string DesignMode = "design";
+    private const string SourceMode = "source";
+    private const string PreviewMode = "preview";
+    private const string StorageKey = "KNoteDescriptionEditorMode";
+
+    private string mode = DesignMode;
+
+    // HTML tags in the text (written in ClientWin's HTML editor or by hand).
+    private bool HasHtml => Value != null && HtmlTag.IsMatch(Value);
+
+    private static readonly Regex HtmlTag = new(@"<(?:[a-zA-Z][a-zA-Z0-9]*|!--)[\s>/]", RegexOptions.Compiled);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var saved = await js.LocalStorageGetItem(StorageKey);
+        if (saved is DesignMode or SourceMode or PreviewMode)
+            mode = saved;
+    }
+
+    private async Task SetModeAsync(string value)
+    {
+        if (value == mode)
+            return;
+        mode = value;
+        await js.LocalStorageSetItem(StorageKey, mode);
+    }
+
+    private Task OnValueChanged(string value)
+    {
+        Value = value;
+        return ValueChanged.InvokeAsync(value);
+    }
+}

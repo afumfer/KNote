@@ -6,105 +6,166 @@
 <EditForm Model="Note" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
-    
-    <ToolingHeader Title="@Title" Icon="edit_note">
-        <Buttons>
-            <RadzenButton Text="Save changes" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Save changes and new" Icon="save" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Icon="logout" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary"
-                          MouseEnter="@(args => tooltipService.Open(args, "Exit", new TooltipOptions { Position = TooltipPosition.Left }))" />
-        </Buttons>
-    </ToolingHeader>
 
-    <RadzenTabs Change=@ShowPanel TabPosition = "TabPosition.Top" @bind-SelectedIndex="tabsSelectedIndex">
+    <div class="knt-note-editor">
+
+    @* The note: what it is and where it is, and the buttons to save it or leave. *@
+    <div class="knt-note-header">
+        <span class="knt-note-header-icon"><RadzenIcon Icon="@(Note.IsNew() ? "note_add" : "edit_note")" /></span>
+        <div class="knt-note-header-caption">
+            <div class="knt-note-header-kicker">
+                @Title
+                @if (!Note.IsNew())
+                {
+                    <span class="knt-note-header-number">#@Note.NoteNumber</span>
+                }
+            </div>
+            <h1 class="knt-note-header-title">@(string.IsNullOrWhiteSpace(Note.Topic) ? "Untitled note" : Note.Topic)</h1>
+            <div class="knt-note-header-meta">
+                <span><RadzenIcon Icon="folder" />@(string.IsNullOrEmpty(folderPath) ? "No folder" : folderPath)</span>
+                @if (Note.NoteTypeId != null && Note.NoteTypeDto != null)
+                {
+                    <span><RadzenIcon Icon="@KntSections.NoteTypes.Icon" />@Note.NoteTypeDto.Name</span>
+                }
+                <span><RadzenIcon Icon="schedule" />@(Note.IsNew() ? "Not saved yet" : $"Modified {Note.ModificationDateTime:g}")</span>
+            </div>
+        </div>
+        <div class="knt-note-header-actions">
+            <RadzenButton Text="Save and new" Icon="library_add" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Base" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Click="() => OnExit.InvokeAsync(null)"
+                          MouseEnter="@(args => tooltipService.Open(args, "Close", new TooltipOptions { Position = TooltipPosition.Left }))" />
+        </div>
+    </div>
+
+    <RadzenTabs Change=@ShowPanel TabPosition="TabPosition.Top" @bind-SelectedIndex="tabsSelectedIndex" class="knt-note-tabs">
         <Tabs>
-            <RadzenTabsItem Text="&nbsp;Overview" Icon="article" >                
+            <RadzenTabsItem Text="Overview" Icon="article">
 
-                <RadzenStack Gap="1rem">
-
-                    <KntFormField Label="Topic:" Component="Topic" LabelSize="1">
-                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                            <RadzenTextBox Name="Topic" @bind-Value="@Note.Topic" Style="flex: 1;" />
-                            <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"#{Note.NoteNumber}")" MouseEnter="@(args => tooltipService.Open(args, "Note number (automatically assigned)"))" />
+                <RadzenRow Gap="1.5rem">
+                    <RadzenColumn Size="12" SizeLG="8">
+                        <RadzenStack Gap="1rem">
+                            <KntField Label="Topic" Component="Topic" Required="true">
+                                <RadzenTextBox Name="Topic" @bind-Value="@Note.Topic" Placeholder="What the note is about" class="knt-note-topic" />
+                                <ValidationMessage For="@(() => Note.Topic)" />
+                            </KntField>
+                            <KntField Label="Description">
+                                <KntMarkdownEditor @bind-Value="@Note.Description" />
+                                <ValidationMessage For="@(() => Note.Description)" />
+                            </KntField>
                         </RadzenStack>
-                        <ValidationMessage For="@(() => Note.Topic)" />
-                    </KntFormField>
+                    </RadzenColumn>
 
-                    <KntFormField Label="Folder:" LabelSize="1">
-                        <KntFolderPicker FolderName="@Note.FolderDto.Name" FolderSelected="OnFolderSelected" />
-                        <ValidationMessage For="@(() => Note.FolderId)" />
-                    </KntFormField>
+                    <RadzenColumn Size="12" SizeLG="4">
+                        <div class="knt-note-side">
+                            <KntFormSection Icon="info" Title="Details" Description="Where the note is and how it is classified.">
+                                <KntField Label="Folder" Required="true">
+                                    <KntFolderPicker FolderName="@folderPath" FolderSelected="OnFolderSelected" />
+                                    <ValidationMessage For="@(() => Note.FolderId)" />
+                                </KntField>
+                                <KntField Label="Type" Component="NoteTypeId" Help="The type gives the note its attributes.">
+                                    <RadzenDropDown Name="NoteTypeId" TValue="Guid?" Data="@NoteTypes" TextProperty="Name" ValueProperty="NoteTypeId"
+                                                    Value="@Note.NoteTypeId"
+                                                    ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
+                                                    ValueExpression="@(() => Note.NoteTypeId)"
+                                                    AllowClear="true" Placeholder="No type" />
+                                    <ValidationMessage For="@(() => Note.NoteTypeId)" />
+                                </KntField>
+                                <RadzenRow Gap="1rem">
+                                    <RadzenColumn Size="12" SizeSM="4" SizeLG="5">
+                                        <KntField Label="Priority" Component="Priority">
+                                            <RadzenNumeric Name="Priority" @bind-Value="@Note.Priority" />
+                                            <ValidationMessage For="@(() => Note.Priority)" />
+                                        </KntField>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="12" SizeSM="8" SizeLG="7">
+                                        <KntField Label="Tags" Component="Tags">
+                                            <RadzenTextBox Name="Tags" @bind-Value="@Note.Tags" />
+                                            <ValidationMessage For="@(() => Note.Tags)" />
+                                        </KntField>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </KntFormSection>
 
-                    @* Several fields in one row: a column per field, each with its KntFormField
-                       (LabelSize is relative to the column). *@
-                    <RadzenRow Gap="1rem">
-                        <RadzenColumn Size="12" SizeMD="3">
-                            <KntFormField Label="Priority:" Component="Priority" LabelSize="4">
-                                <RadzenNumeric Name="Priority" @bind-Value="@Note.Priority" Style="width: 100%" />
-                                <ValidationMessage For="@(() => Note.Priority)" />
-                            </KntFormField>
-                        </RadzenColumn>
-                        <RadzenColumn Size="12" SizeMD="5">
-                            <KntFormField Label="Tags:" Component="Tags" LabelSize="2">
-                                <RadzenTextBox Name="Tags" @bind-Value="@Note.Tags" Style="width: 100%" />
-                                <ValidationMessage For="@(() => Note.Tags)" />
-                            </KntFormField>
-                        </RadzenColumn>
-                        <RadzenColumn Size="12" SizeMD="4">
-                            <KntFormField Label="Type:" Component="NoteTypeId" LabelSize="3">
-                                <RadzenDropDown Name="NoteTypeId" TValue="Guid?" Data="@NoteTypes" TextProperty="Name" ValueProperty="NoteTypeId"
-                                                Value="@Note.NoteTypeId"
-                                                ValueChanged="@((Guid? noteTypeId) => OnChangeNoteTypeActions(noteTypeId))"
-                                                ValueExpression="@(() => Note.NoteTypeId)"
-                                                AllowClear="true" Style="width: 100%" />
-                                <ValidationMessage For="@(() => Note.NoteTypeId)" />
-                            </KntFormField>
-                        </RadzenColumn>
-                    </RadzenRow>
-
-                    <InputMarkdown @bind-Value="@Note.Description"
-                                   For="@(() => Note.Description)"></InputMarkdown>
-
-                </RadzenStack>
+                            <KntFormSection Icon="history" Title="Record" Description="Assigned by the app.">
+                                <dl class="knt-note-facts">
+                                    <dt>Number</dt>
+                                    <dd>@(Note.IsNew() ? "When it is saved" : $"#{Note.NoteNumber}")</dd>
+                                    <dt>Created</dt>
+                                    <dd>@(Note.IsNew() ? "-" : Note.CreationDateTime.ToString("g"))</dd>
+                                    <dt>Modified</dt>
+                                    <dd>@(Note.IsNew() ? "-" : Note.ModificationDateTime.ToString("g"))</dd>
+                                    <dt>Status</dt>
+                                    <dd>@(string.IsNullOrEmpty(Note.InternalTags) ? "-" : Note.InternalTags)</dd>
+                                </dl>
+                            </KntFormSection>
+                        </div>
+                    </RadzenColumn>
+                </RadzenRow>
 
             </RadzenTabsItem>
-            
-            <RadzenTabsItem Text="&nbsp;Attributes" Icon="fact_check">                
-                <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
+
+            <RadzenTabsItem Icon="fact_check">
+                <Template Context="tab">
+                    <span class="knt-tab-text">Attributes</span><span class="knt-tab-count">@Note.KAttributesDto.Count</span>
+                </Template>
+                <ChildContent>
+                    <NoteKAttributes Attributes="Note.KAttributesDto"></NoteKAttributes>
+                </ChildContent>
             </RadzenTabsItem>
-            
-            <RadzenTabsItem Text="&nbsp;Resources" Icon="upload_file">                
-                @if (resources == null)
-                {
-                    <p>Loading resources ...</p>
-                }
-                else
-                {
-                    <NoteKResources Resources="resources"
-                                    OnDelete="OnDeleteResource"
-                                    OnInsertInDesription="InsertInDescription"
-                                    OnNew="OnNewResource">
-                    </NoteKResources>
-                }
+
+            <RadzenTabsItem Icon="attach_file">
+                <Template Context="tab">
+                    <span class="knt-tab-text">Resources</span>
+                    @if (resources != null)
+                    {
+                        <span class="knt-tab-count">@resources.Count</span>
+                    }
+                </Template>
+                <ChildContent>
+                    @if (resources == null && !Note.IsNew())
+                    {
+                        <p>Loading resources ...</p>
+                    }
+                    else
+                    {
+                        <NoteKResources Resources="resources ?? new()"
+                                        OnDelete="OnDeleteResource"
+                                        OnInsertInDesription="InsertInDescription"
+                                        OnNew="OnNewResource">
+                        </NoteKResources>
+                    }
+                </ChildContent>
             </RadzenTabsItem>
-            
-            <RadzenTabsItem Text="&nbsp;Tasks" Icon="task">                
-                @if (tasks == null)
-                {
-                    <p>Loading tasks ...</p>
-                }
-                else
-                {
-                    <NoteKTasks Tasks="tasks"
-                                OnDelete="OnDeleteTask"
-                                OnNew="OnNewTask"
-                                OnEdit="OnEditTask">
-                    </NoteKTasks>
-                }
+
+            <RadzenTabsItem Icon="task_alt">
+                <Template Context="tab">
+                    <span class="knt-tab-text">Tasks</span>
+                    @if (tasks != null)
+                    {
+                        <span class="knt-tab-count">@tasks.Count</span>
+                    }
+                </Template>
+                <ChildContent>
+                    @if (tasks == null && !Note.IsNew())
+                    {
+                        <p>Loading tasks ...</p>
+                    }
+                    else
+                    {
+                        <NoteKTasks Tasks="tasks ?? new()"
+                                    OnDelete="OnDeleteTask"
+                                    OnNew="OnNewTask"
+                                    OnEdit="OnEditTask">
+                        </NoteKTasks>
+                    }
+                </ChildContent>
             </RadzenTabsItem>
 
         </Tabs>
     </RadzenTabs>
+
+    </div>
 
 </EditForm>
 
@@ -123,6 +184,10 @@
 
     private Guid? oldNoteType = null;
 
+    // The note whose path, resources and tasks are loaded (another one after "Save and new").
+    private Guid? loadedNoteId;
+    private string folderPath = "";
+
     private int tabsSelectedIndex { get; set; } = 0;
 
     #region Initialized
@@ -135,9 +200,49 @@
             users = result.Entity;
         }
 
-        oldNoteType = Note.NoteTypeId;
-
         await base.OnInitializedAsync();
+    }
+
+    // A note shown for the first time, or another one (after "Save and new"): its folder's path, and its resources
+    // and tasks (the tabs show how many there are).
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Note.NoteId == loadedNoteId)
+            return;
+
+        loadedNoteId = Note.NoteId;
+        oldNoteType = Note.NoteTypeId;
+        resources = null;
+        tasks = null;
+
+        await LoadFolderPathAsync();
+        if (!Note.IsNew())
+            await Task.WhenAll(LoadResourcesAsync(), LoadTasksAsync());
+    }
+
+    // The path of the note's folder, as ClientWin shows it (Service: Folders.GetPathAsync).
+    private async Task LoadFolderPathAsync()
+    {
+        folderPath = "";
+        if (Note.FolderId == Guid.Empty)
+            return;
+
+        var result = await webApiService.Folders.GetPathAsync(Note.FolderId);
+        folderPath = result.IsValid ? result.Entity : Note.FolderDto?.Name ?? "";
+    }
+
+    private async Task LoadResourcesAsync()
+    {
+        var result = await webApiService.Notes.GetResourcesAsync(Note.NoteId);
+        if (result.IsValid)
+            resources = result.Entity;
+    }
+
+    private async Task LoadTasksAsync()
+    {
+        var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
+        if (result.IsValid)
+            tasks = result.Entity;
     }
 
     #endregion
@@ -210,19 +315,11 @@
 
     private async Task ShowPanel(int panel)
     {        
-        if (panel == 2 && resources == null)
-        {
-            var result = await webApiService.Notes.GetResourcesAsync(Note.NoteId);
-            if (result.IsValid)
-                resources = result.Entity;
-        }
+        if (panel == 2 && resources == null && !Note.IsNew())
+            await LoadResourcesAsync();
 
-        if (panel == 3 && tasks == null)
-        {
-            var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
-            if (result.IsValid)
-                tasks = result.Entity;
-        }
+        if (panel == 3 && tasks == null && !Note.IsNew())
+            await LoadTasksAsync();
 
         StateHasChanged();
     }
@@ -231,10 +328,11 @@
 
     #region Management FolderSelector
 
-    private void OnFolderSelected(FolderDto f)
+    private async Task OnFolderSelected(FolderDto f)
     {
         Note.FolderDto = f.GetSimpleDto<FolderDto>();
         Note.FolderId = f.FolderId;
+        await LoadFolderPathAsync();
     }
 
     #endregion

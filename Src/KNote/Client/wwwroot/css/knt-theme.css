@@ -146,3 +146,21 @@
     background-color: var(--rz-primary);
     color: var(--rz-on-primary);
 }
+
+/* Tables in a note's content (Markdown or the HTML of ClientWin's editor, Shared/ViewMarkdown): lines and room, as
+   in the editor. */
+.knt-markdown table {
+    border-collapse: collapse;
+    margin: 0.5rem 0;
+}
+
+    .knt-markdown table th,
+    .knt-markdown table td {
+        padding: 0.375rem 0.75rem;
+        border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    }
+
+    .knt-markdown table th {
+        background-color: color-mix(in srgb, currentColor 6%, transparent);
+        font-weight: 600;
+    }

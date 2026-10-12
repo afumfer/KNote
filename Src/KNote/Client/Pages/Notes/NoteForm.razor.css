@@ -1,0 +1,186 @@
+/* The note editor (its window, NoteEdit): header, tabs, the Overview's side panel. Only theme variables (and
+   --knt-* from knt-theme.css), so it follows the light/dark theme. */
+
+/* Header: icon, what and where the note is, and the buttons. */
+.knt-note-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 0.875rem 1rem 0.875rem 1.25rem;
+    margin-bottom: 0.75rem;
+    border-inline-start: 3px solid var(--knt-brand);
+    border-radius: var(--rz-border-radius);
+    background: linear-gradient(110deg, var(--rz-primary-lighter), transparent 80%), var(--rz-base-background-color);
+    box-shadow: var(--rz-shadow-1);
+}
+
+.knt-note-header-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background-color: var(--rz-primary);
+    color: var(--rz-on-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--rz-primary) 18%, transparent);
+}
+
+    .knt-note-header-icon ::deep .rzi {
+        font-size: 1.5rem;
+    }
+
+.knt-note-header-caption {
+    flex: 1 1 20rem;
+    min-width: 0;
+}
+
+.knt-note-header-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-note-header-number {
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background-color: var(--rz-primary-lighter);
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+    letter-spacing: 0;
+}
+
+.knt-note-header-title {
+    margin: 0.125rem 0 0.25rem;
+    font-family: var(--knt-heading-font-family);
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--rz-text-title-color);
+    overflow-wrap: anywhere;
+}
+
+.knt-note-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+    .knt-note-header-meta > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .knt-note-header-meta ::deep .rzi {
+        font-size: 1rem;
+    }
+
+.knt-note-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+}
+
+/* Tabs: underlined, without boxes, with how many items each one has. */
+.knt-note-editor ::deep .knt-note-tabs.rz-tabview {
+    --rz-tabs-tab-selected-background-color: transparent;
+    --rz-tabs-tab-background-color: transparent;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.knt-note-editor ::deep .knt-note-tabs .rz-tabview-nav {
+    gap: 0.25rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+}
+
+    .knt-note-editor ::deep .knt-note-tabs .rz-tabview-nav li {
+        background: transparent;
+        border: none;
+        border-radius: var(--rz-border-radius) var(--rz-border-radius) 0 0;
+        box-shadow: none;
+    }
+
+        .knt-note-editor ::deep .knt-note-tabs .rz-tabview-nav li:hover {
+            background-color: color-mix(in srgb, var(--rz-primary) 8%, transparent);
+        }
+
+        .knt-note-editor ::deep .knt-note-tabs .rz-tabview-nav li.rz-tabview-selected {
+            box-shadow: inset 0 -2px 0 var(--rz-primary);
+        }
+
+            .knt-note-editor ::deep .knt-note-tabs .rz-tabview-nav li.rz-tabview-selected a,
+            .knt-note-editor ::deep .knt-note-tabs .rz-tabview-nav li.rz-tabview-selected .rzi {
+                color: var(--rz-text-title-color);
+            }
+
+.knt-note-editor ::deep .knt-note-tabs .rz-tabview-panels {
+    padding: 1.25rem 0 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.knt-note-editor ::deep .knt-tab-text + .knt-tab-count {
+    margin-inline-start: 0.375rem;
+}
+
+.knt-note-editor ::deep .knt-tab-count {
+    display: inline-block;
+    min-width: 1.375rem;
+    padding: 0 0.375rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    text-align: center;
+    background-color: var(--rz-primary-lighter);
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+/* Overview: a larger topic, and the side panel with the note's details and record. */
+.knt-note-editor ::deep .knt-note-topic.rz-textbox {
+    font-size: 1.0625rem;
+    font-weight: 500;
+}
+
+.knt-note-side {
+    padding: 1rem 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    border-radius: var(--rz-border-radius);
+    background-color: color-mix(in srgb, var(--rz-text-color) 3%, transparent);
+}
+
+.knt-note-facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.375rem 1rem;
+    margin: 0;
+    font-size: 0.8125rem;
+}
+
+    .knt-note-facts dt {
+        color: var(--rz-text-secondary-color);
+    }
+
+    .knt-note-facts dd {
+        margin: 0;
+        color: var(--rz-text-color);
+        overflow-wrap: anywhere;
+    }

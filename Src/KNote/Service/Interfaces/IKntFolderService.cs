@@ -13,6 +13,8 @@ public interface IKntFolderService
     Task<Result<FolderDto>> GetHomeAsync();
     Task<Result<FolderDto>> GetAsync(Guid folderId);
     Task<Result<FolderDto>> GetAsync(int folderNumber);
+    // The folder's path in the folders tree, from the root (e.g. "Home\Projects\KNote").
+    Task<Result<string>> GetPathAsync(Guid folderId);
     Task<Result<FolderDto>> SaveAsync(FolderDto entityInfo);
     Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes);
     Task<Result<FolderDto>> DeleteAsync(Guid id);

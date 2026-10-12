@@ -664,39 +664,16 @@ public class Store
             return null;
     }
 
+    // The folder's path in the folders tree (Service: Folders.GetPathAsync, shared with the web app).
     public async Task<string> GetKNoteFolerPath(ServiceRef serviceRef, Guid folderId)
     {
-        string folderPath = string.Empty;
-        Guid? parentFolderId = null;        
-
-        if(serviceRef == null)
+        if (serviceRef == null)
             return string.Empty;
 
-        do
-        {
-            var res = await serviceRef.Service.Folders.GetAsync(folderId);
-
-            if(res.IsValid)
-            {
-                FolderDto folder = res.Entity;
-                if (folder == null)
-                    break;
-                if (string.IsNullOrEmpty(folderPath))
-                    folderPath = folder.Name;
-                else
-                    folderPath = folder.Name + "\\" + folderPath;
-                parentFolderId = folder.ParentId;
-                folderId = parentFolderId ?? Guid.Empty; // If no parent, exit loop
-            }
-            else
-            {
-                Logger?.LogError("GetKNoteFolerPath: {message}", res.ErrorMessage);
-                break;
-            }
-
-        } while (parentFolderId != null);
-
-        return folderPath;
+        var res = await serviceRef.Service.Folders.GetPathAsync(folderId);
+        if (!res.IsValid)
+            Logger?.LogError("GetKNoteFolerPath: {message}", res.ErrorMessage);
+        return res.IsValid ? res.Entity : string.Empty;
     }
 
     #endregion

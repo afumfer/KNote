@@ -16,9 +16,13 @@
 
 <PageTitle>@(string.IsNullOrEmpty(note?.Topic) ? KntConst.AppName : note.Topic)</PageTitle>
 
+@* A link inside the description (e.g. a javascript: link made empty by the editor) could take the window to another
+   page of the app: with unsaved changes, it asks first. *@
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+
 @if (showForm)
 {
-    <NoteForm Title="@(note!.IsNew() ? "Note new" : "Note edit")" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Title="@(note!.IsNew() ? "New note" : "Edit note")" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
 }
 else if (loadFailed)
 {
@@ -174,6 +178,20 @@ else
 
         closing = true;
         await noteWindows.CloseAsync();
+    }
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        if (!HasUnsavedChanges())
+            return;
+
+        var resultDialog = await dialogService.Confirm(
+            "Do you want to leave the note and lose your changes?",
+            $"{KntConst.AppName}",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (resultDialog != true)
+            context.PreventNavigation();
     }
 
     /// <summary>Asked by the browser before the window is closed or reloaded (NoteWindows.WatchUnsavedChangesAsync).</summary>
