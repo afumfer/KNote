@@ -57,7 +57,7 @@
     {
         var res = await dialogService.OpenAsync<AttributeNew>($"New attribute",
                new Dictionary<string, object?>() {  },
-               KntDialogs.Large(showClose: false));
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if(res != null)           
             await Load();  
@@ -83,7 +83,7 @@
     {     
         var res = await dialogService.OpenAsync<AttributeEdit>($"Edit attribute",
                new Dictionary<string, object?>() { { "AttributeId", attribute.KAttributeId.ToString() } },
-               KntDialogs.Large(showClose: false));
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if(res != null)        
             await Load(); 

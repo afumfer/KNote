@@ -4,24 +4,24 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <RadzenStack Gap="1rem">
-
-        <KntFormField Label="Name:" Component="Name">
-            <RadzenTextBox Name="Name" @bind-Value="@NoteType.Name" Style="width: 100%" />
-            <ValidationMessage For="@(() => NoteType.Name)" />
-        </KntFormField>
-
-        <KntFormField Label="Description:" Component="Description">
-            <RadzenTextBox Name="Description" @bind-Value="@NoteType.Description" Style="width: 100%" />
-            <ValidationMessage For="@(() => NoteType.Description)" />
-        </KntFormField>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
+    <KntDialogFrame Icon="@KntSections.NoteTypes.Icon" Title="@Title" Subtitle="@Subtitle" OnClose="() => OnExit.InvokeAsync(null)">
+        <ChildContent>
+            <KntFormSection Icon="badge" Title="General" Description="A type groups notes that share attributes.">
+                <KntField Label="Name" Component="Name" Required="true">
+                    <RadzenTextBox Name="Name" @bind-Value="@NoteType.Name" />
+                    <ValidationMessage For="@(() => NoteType.Name)" />
+                </KntField>
+                <KntField Label="Description" Component="Description">
+                    <RadzenTextArea Name="Description" @bind-Value="@NoteType.Description" Rows="3" />
+                    <ValidationMessage For="@(() => NoteType.Description)" />
+                </KntField>
+            </KntFormSection>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
@@ -30,6 +30,8 @@
     [Parameter] public string Title { get; set; } = "...";    
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
+
+    private string Subtitle => NoteType.NoteTypeId == Guid.Empty ? "A new type of note." : NoteType.Name;
 
     protected async Task Save(EditContext formContext)
     {

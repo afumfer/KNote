@@ -2,31 +2,35 @@
 @inject DialogService dialogService
 
 <EditForm Model="atrValue" Context="formContextValue">
-   
-    <RadzenStack Gap="1rem">
 
-        <KntFormField Label="Value:" Component="Value">
-            <RadzenTextBox Name="Value" @bind-Value="@atrValue.Value" Style="width: 100%" />
-            <ValidationMessage For="@(() => atrValue.Value)" />
-        </KntFormField>
+    <DataAnnotationsValidator />
 
-        <KntFormField Label="Order:" Component="Order">
-            <RadzenNumeric Name="Order" @bind-Value="@atrValue.Order" Style="width: 100%" />
-            <ValidationMessage For="@(() => atrValue.Order)" />
-        </KntFormField>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Ok" Click="(() => OnConfirmSave(formContextValue))" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="OnCancel" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
+    <KntDialogFrame Icon="list" Title="@(AtrValue == null ? "New value" : "Edit value")" Subtitle="@AttributeName">
+        <ChildContent>
+            <RadzenStack Gap="1rem">
+                <KntField Label="Value" Component="Value" Required="true">
+                    <RadzenTextBox Name="Value" @bind-Value="@atrValue.Value" />
+                    <ValidationMessage For="@(() => atrValue.Value)" />
+                </KntField>
+                <KntField Label="Order" Component="Order" Help="Position in the list of values.">
+                    <RadzenNumeric Name="Order" @bind-Value="@atrValue.Order" />
+                    <ValidationMessage For="@(() => atrValue.Order)" />
+                </KntField>
+            </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="OnCancel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Ok" Icon="check" Click="(() => OnConfirmSave(formContextValue))" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
 
 @code {
     [Parameter] public KAttributeTabulatedValueDto AtrValue { get; set; }
+    // The attribute the value belongs to (the dialog's subtitle).
+    [Parameter] public string? AttributeName { get; set; }
 
     private KAttributeTabulatedValueDto atrValue { get; set; }
 
@@ -53,10 +57,10 @@
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Edit attribute tabulated value.", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });            
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Edit attribute tabulated value.", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
-        
+
         dialogService.Close(atrValue);
     }
 

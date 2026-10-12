@@ -57,7 +57,7 @@
     {        
         var res = await dialogService.OpenAsync<TypeNew>($"New note type",
                new Dictionary<string, object?>() {  },
-               KntDialogs.Small(showClose: false));
+               KntDialogs.Framed(KntDialogs.Small()));
 
         if(res != null)           
             await Load();        
@@ -83,7 +83,7 @@
     {        
         var res = await dialogService.OpenAsync<TypeEdit>($"Edit note type",
                new Dictionary<string, object?>() { { "TypeId", noteType.NoteTypeId.ToString() } },
-               KntDialogs.Small(showClose: false));
+               KntDialogs.Framed(KntDialogs.Small()));
 
         if(res != null)        
             await Load();        

@@ -1,0 +1,10 @@
+/* The tree in a bordered box that scrolls on its own when it is long. Only theme variables. */
+
+.knt-folder-selector {
+    max-height: 50vh;
+    min-height: 12rem;
+    overflow: auto;
+    padding: 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 14%, transparent);
+    border-radius: var(--rz-border-radius);
+}

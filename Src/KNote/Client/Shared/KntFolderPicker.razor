@@ -1,17 +1,26 @@
-﻿@* Read-only folder name with a button that opens KntFolderSelector, and an optional reset button
-   (shown only when FolderReset has a handler). *@
+﻿@* Read-only folder name (or path) in a field with a folder icon, a button that opens KntFolderSelector and an
+   optional reset button (shown only when FolderReset has a handler). *@
 
 @inject DialogService dialogService
 @inject TooltipService tooltipService
 
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
-    <RadzenTextBox Value="@FolderName" ReadOnly="true" Style="flex: 1;" />
-    @if (FolderReset.HasDelegate)
-    {
-        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, ResetTitle))" Click="@(() => FolderReset.InvokeAsync())" />
-    }
-    <RadzenButton Icon="folder" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, "Select folder"))" Click="SelectFolder" />
-</RadzenStack>
+<RadzenFormField Variant="Variant.Outlined" AllowFloatingLabel="false" class="knt-folder-picker">
+    <Start>
+        <RadzenIcon Icon="folder" />
+    </Start>
+    <ChildContent>
+        <RadzenTextBox Value="@FolderName" ReadOnly="true" />
+    </ChildContent>
+    <End>
+        @if (FolderReset.HasDelegate)
+        {
+            <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                          MouseEnter="@(args => tooltipService.Open(args, ResetTitle))" Click="@(() => FolderReset.InvokeAsync())" />
+        }
+        <RadzenButton Text="Change" Icon="drive_file_move" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                      MouseEnter="@(args => tooltipService.Open(args, "Select folder"))" Click="SelectFolder" />
+    </End>
+</RadzenFormField>
 
 @code {
     [Parameter] public string? FolderName { get; set; }
@@ -23,7 +32,7 @@
     {
         var res = await dialogService.OpenAsync<KntFolderSelector>("Folder selector",
                new Dictionary<string, object?>(),
-               KntDialogs.Medium());
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if (res is FolderDto folder)
             await FolderSelected.InvokeAsync(folder);

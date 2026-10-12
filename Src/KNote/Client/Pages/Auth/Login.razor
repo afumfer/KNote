@@ -5,29 +5,31 @@
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
+@* Sign in dialog (Shared/MainLayoutHeader → AdminLogin opens it framed): the result is the credentials, or null.
+   Enter signs in (the form's submit). *@
 
-<EditForm Model="@user" Context="formContext" >
-    
+<EditForm Model="@user" Context="formContext" OnSubmit="OnLogin">
+
     <DataAnnotationsValidator />
 
-    <RadzenStack Gap="1rem">
-
-        <KntFormField Label="User name:" Component="UserName">
-            <RadzenTextBox Name="UserName" @bind-Value="@user.UserName" Style="width: 100%" />
-            <ValidationMessage For="@(() => user.UserName)" />
-        </KntFormField>
-
-        <KntFormField Label="Password:" Component="Password">
-            <RadzenPassword Name="Password" @bind-Value="@user.Password" Style="width: 100%" />
-            <ValidationMessage For="@(() => user.Password)" />
-        </KntFormField>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Login" Click="() => OnLogin(formContext)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
+    <KntDialogFrame Icon="login" Title="Sign in" Subtitle="@($"Welcome to {KntConst.AppName}.")">
+        <ChildContent>
+            <RadzenStack Gap="1rem">
+                <KntField Label="User name" Component="UserName" Required="true">
+                    <RadzenTextBox Name="UserName" @bind-Value="@user.UserName" AutoCompleteType="AutoCompleteType.Username" />
+                    <ValidationMessage For="@(() => user.UserName)" />
+                </KntField>
+                <KntField Label="Password" Component="Password" Required="true">
+                    <RadzenPassword Name="Password" @bind-Value="@user.Password" AutoCompleteType="AutoCompleteType.CurrentPassword" />
+                    <ValidationMessage For="@(() => user.Password)" />
+                </KntField>
+            </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Sign in" Icon="login" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
@@ -36,10 +38,10 @@
     private UserCredentialsDto user = new UserCredentialsDto();
 
     private void OnLogin(EditContext formContext)
-    {        
+    {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
-        {            
+        {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Login user.", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }

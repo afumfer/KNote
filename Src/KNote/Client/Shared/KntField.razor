@@ -1,0 +1,26 @@
+@* A field of an editor: its label above (with a mark if it is required), the control at full width, and a help
+   line below. The ValidationMessage goes in ChildContent, after the control. *@
+
+<div class="knt-field">
+    <div class="knt-field-label">
+        <RadzenLabel Text="@Label" Component="@Component" />
+        @if (Required)
+        {
+            <span class="knt-field-required" aria-hidden="true">*</span>
+        }
+    </div>
+    @ChildContent
+    @if (!string.IsNullOrEmpty(Help))
+    {
+        <div class="knt-field-help">@Help</div>
+    }
+</div>
+
+@code {
+    [Parameter][EditorRequired] public string Label { get; set; } = "";
+    // The Name of the control, so that clicking the label focuses it.
+    [Parameter] public string? Component { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public string? Help { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

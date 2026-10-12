@@ -4,35 +4,55 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <RadzenStack Gap="1rem">
+    <KntDialogFrame Icon="@(IsNew ? "person_add" : KntSections.Users.Icon)" Title="@Title" Subtitle="@Subtitle" OnClose="() => OnExit.InvokeAsync(null)">
+        <ChildContent>
 
-        <KntFormField Label="User name:" Component="UserName" LabelSize="2">
-            <RadzenTextBox Name="UserName" @bind-Value="@User.UserName" Style="width: 100%" />
-            <ValidationMessage For="@(() => User.UserName)" />
-        </KntFormField>
+            <KntFormSection Icon="badge" Title="Account" Description="Who the user is and how to reach them.">
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="5">
+                        <KntField Label="User name" Component="UserName" Required="true" Help="To sign in.">
+                            <RadzenTextBox Name="UserName" @bind-Value="@User.UserName" />
+                            <ValidationMessage For="@(() => User.UserName)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="7">
+                        <KntField Label="Email" Component="EMail" Required="true">
+                            <RadzenTextBox Name="EMail" @bind-Value="@User.EMail" Placeholder="name@example.com" />
+                            <ValidationMessage For="@(() => User.EMail)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <KntField Label="Full name" Component="FullName" Required="true">
+                    <RadzenTextBox Name="FullName" @bind-Value="@User.FullName" />
+                    <ValidationMessage For="@(() => User.FullName)" />
+                </KntField>
+            </KntFormSection>
 
-        <KntFormField Label="Email:" Component="EMail" LabelSize="2">
-            <RadzenTextBox Name="EMail" @bind-Value="@User.EMail" Style="width: 100%" />
-            <ValidationMessage For="@(() => User.EMail)" />
-        </KntFormField>
+            <KntFormSection Icon="admin_panel_settings" Title="Roles" Description="What the user can do. The highest role selected is the one that counts.">
+                <div class="knt-role-options">
+                    @foreach (var role in roles)
+                    {
+                        var selected = valuesRoles.Contains(role.Key);
+                        @* The whole tile toggles the role (the checkbox only shows it). *@
+                        <div class="knt-role-option @(selected ? "knt-role-option-selected" : null)" role="checkbox" aria-checked="@(selected ? "true" : "false")"
+                             tabindex="0" @onclick="() => OnRoleChanged(role.Key, !selected)" @onkeydown="e => OnRoleKey(e, role.Key, selected)">
+                            <RadzenCheckBox TValue="bool" Value="@selected" ReadOnly="true" Style="pointer-events: none" TabIndex="-1" />
+                            <span class="knt-role-option-text">
+                                <span class="knt-role-option-name">@role.Value</span>
+                                <span class="knt-role-option-description">@RoleDescription(role.Key)</span>
+                            </span>
+                        </div>
+                    }
+                </div>
+                <ValidationMessage For="@(() => User.RoleDefinition)" />
+            </KntFormSection>
 
-        <KntFormField Label="Full name:" Component="FullName" LabelSize="2">
-            <RadzenTextBox Name="FullName" @bind-Value="@User.FullName" Style="width: 100%" />
-            <ValidationMessage For="@(() => User.FullName)" />
-        </KntFormField>
-
-        <KntFormField Label="Roles:" LabelSize="2">
-            <RadzenCheckBoxList @bind-Value=@valuesRoles TValue="string" Orientation="Orientation.Horizontal"
-                                Data="@roles" TextProperty="Value" ValueProperty="Key" />
-            <ValidationMessage For="@(() => User.RoleDefinition)" />
-        </KntFormField>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
@@ -45,6 +65,30 @@
     List<MultiSelectListDto> roles = new List<MultiSelectListDto>();
     
     IEnumerable<string> valuesRoles = null!;
+
+    private bool IsNew => User.UserId == Guid.Empty;
+
+    private string Subtitle => IsNew ? "A new user of the app." : $"{User.UserName} · {User.FullName}";
+
+    private void OnRoleChanged(string role, bool selected)
+    {
+        valuesRoles = selected ? valuesRoles.Append(role).Distinct().ToArray() : valuesRoles.Where(r => r != role).ToArray();
+    }
+
+    private void OnRoleKey(KeyboardEventArgs e, string role, bool selected)
+    {
+        if (e.Key == " " || e.Key == "Enter")
+            OnRoleChanged(role, !selected);
+    }
+
+    private static string RoleDescription(string role) => role switch
+    {
+        nameof(EnumRoles.Guest) => "Reads the notes.",
+        nameof(EnumRoles.Staff) => "Creates and edits notes, and uses the AI assistant.",
+        nameof(EnumRoles.ProjectManager) => "Also manages folders and note types.",
+        nameof(EnumRoles.Admin) => "Manages everything, users included.",
+        _ => ""
+    };
 
     protected override void OnInitialized()
     {

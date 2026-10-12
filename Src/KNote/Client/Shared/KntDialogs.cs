@@ -18,6 +18,18 @@ public static class KntDialogs
     /// <summary>Fields side by side, or a grid.</summary>
     public static DialogOptions Large(bool showClose = true) => Create("860px", showClose);
 
+    /// <summary>
+    /// A dialog drawn by Shared/KntDialogFrame (an entity's editor): without Radzen's title bar, since the frame has
+    /// its own header (icon, title, subtitle, close button) and footer. E.g. KntDialogs.Framed(KntDialogs.Medium()).
+    /// </summary>
+    public static DialogOptions Framed(DialogOptions options)
+    {
+        options.ShowTitle = false;
+        options.ShowClose = false;
+        options.CssClass = "knt-framed-dialog";
+        return options;
+    }
+
     private static DialogOptions Create(string width, bool showClose) =>
         new() { Width = width, Resizable = true, Draggable = true, ShowClose = showClose };
 }

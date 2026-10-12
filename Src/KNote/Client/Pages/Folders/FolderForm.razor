@@ -1,47 +1,52 @@
 ﻿@inject NotificationService notificationService
-@inject TooltipService tooltipService
 
 <EditForm Model="Folder" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <RadzenStack Gap="1rem">
+    <KntDialogFrame Icon="@(IsNew ? "create_new_folder" : "folder")" Title="@Title" Subtitle="@Subtitle" OnClose="() => OnExit.InvokeAsync(null)">
+        <ChildContent>
 
-        <KntFormField Label="Name:" Component="Name">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                <RadzenTextBox Name="Name" @bind-Value="@Folder.Name" Style="flex: 1;" />
-                <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"#{Folder.FolderNumber}")" MouseEnter="@(args => tooltipService.Open(args, "Folder number (automatically assigned)"))" />
-            </RadzenStack>
-            <ValidationMessage For="@(() => Folder.Name)" />
-        </KntFormField>
+            <KntFormSection Icon="badge" Title="General" Description="The folder's name and how it is found.">
+                <KntField Label="Name" Component="Name" Required="true">
+                    <RadzenTextBox Name="Name" @bind-Value="@Folder.Name" Placeholder="Folder name" />
+                    <ValidationMessage For="@(() => Folder.Name)" />
+                </KntField>
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="8">
+                        <KntField Label="Tags" Component="Tags" Help="Words to find or classify the folder.">
+                            <RadzenTextBox Name="Tags" @bind-Value="@Folder.Tags" />
+                            <ValidationMessage For="@(() => Folder.Tags)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="4">
+                        <KntField Label="Order" Component="Order" Help="Among its sibling folders.">
+                            <RadzenNumeric Name="Order" @bind-Value="@Folder.Order" />
+                            <ValidationMessage For="@(() => Folder.Order)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </KntFormSection>
 
-        <KntFormField Label="Tags:" Component="Tags">
-            <RadzenTextBox Name="Tags" @bind-Value="@Folder.Tags" Style="width: 100%" />
-            <ValidationMessage For="@(() => Folder.Tags)" />
-        </KntFormField>
+            <KntFormSection Icon="account_tree" Title="Location" Description="Where the folder is in the folders tree.">
+                <KntField Label="Parent folder" Help="Leave it empty for a folder at the root of the tree.">
+                    <KntFolderPicker FolderName="@nameParent" ResetTitle="Move to the root"
+                                     FolderSelected="OnFolderSelected" FolderReset="OnResetParentFolder" />
+                    <ValidationMessage For="@(() => Folder.ParentId)" />
+                </KntField>
+            </KntFormSection>
 
-        <KntFormField Label="Order:" Component="Order">
-            <RadzenNumeric Name="Order" @bind-Value="@Folder.Order" Style="width: 100%" />
-            <ValidationMessage For="@(() => Folder.Order)" />
-        </KntFormField>
+            <KntFormSection Icon="sort" Title="Notes order" Description="How the notes of this folder are listed.">
+                <FolderNotesOrderEditor Name="OrderNotes" @bind-OrderNotes="@Folder.OrderNotes" />
+                <ValidationMessage For="@(() => Folder.OrderNotes)" />
+            </KntFormSection>
 
-        <KntFormField Label="Notes order:" Component="OrderNotes">
-            <FolderNotesOrderEditor Name="OrderNotes" @bind-OrderNotes="@Folder.OrderNotes" />
-            <ValidationMessage For="@(() => Folder.OrderNotes)" />
-        </KntFormField>
-
-        <KntFormField Label="Parent folder:">
-            <KntFolderPicker FolderName="@nameParent" ResetTitle="Reset parent folder"
-                             FolderSelected="OnFolderSelected" FolderReset="OnResetParentFolder" />
-            <ValidationMessage For="@(() => Folder.ParentId)" />
-        </KntFormField>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
@@ -52,6 +57,10 @@
     [Parameter] public EventCallback OnExit { get; set; }
 
     private string nameParent = "(root)";
+
+    private bool IsNew => Folder.FolderId == Guid.Empty;
+
+    private string Subtitle => IsNew ? "A new folder in the folders tree." : $"Folder #{Folder.FolderNumber}";
 
     protected override void OnInitialized()
     {

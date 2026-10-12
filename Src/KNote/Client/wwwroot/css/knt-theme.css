@@ -133,3 +133,16 @@
 .rz-splitter.knt-preview-hidden > .knt-notes-list-pane {
     flex: 1 1 0 !important;
 }
+
+/* Dialogs drawn by Shared/KntDialogFrame (KntDialogs.Framed): its header and footer reach the dialog's edges. */
+.rz-dialog.knt-framed-dialog .rz-dialog-content {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* The selected option of a RadzenSelectBar (segmented choice in the editors): the theme's own look is too faint,
+   above all in the dark themes, where it reads as disabled. */
+.rz-selectbar .rz-button.rz-state-active {
+    background-color: var(--rz-primary);
+    color: var(--rz-on-primary);
+}

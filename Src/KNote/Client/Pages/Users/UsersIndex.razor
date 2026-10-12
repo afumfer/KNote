@@ -81,7 +81,7 @@
     {        
         var res = await dialogService.OpenAsync<UserNew>($"New user",
                new Dictionary<string, object?>() {  },
-               KntDialogs.Medium(showClose: false));
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if(res != null)           
             await Load();        
@@ -107,7 +107,7 @@
     {        
         var res = await dialogService.OpenAsync<UserEdit>($"Edit user",
                new Dictionary<string, object?>() { { "UserId", user.UserId.ToString() } },
-               KntDialogs.Medium(showClose: false));
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if(res != null)
         {

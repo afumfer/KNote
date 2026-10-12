@@ -3,24 +3,25 @@
 @inject IStore store
 @inject DialogService dialogService
 
+@* Dialog to choose a folder in the folders tree (KntFolderPicker opens it framed): the result is the folder
+   chosen, or null if cancelled. Double click chooses a folder at once. *@
 
-<RadzenStack Gap="1rem">
-    <div style="max-height: 60vh; overflow: auto;">
-        <KntFoldersTreeView FoldersInfo="@foldersTree"
-                            FolderSelected="OnFolderSelected">
-        </KntFoldersTreeView>
-    </div>
-
-    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-        <RadzenButton Text="Ok" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" />
-        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
-    </RadzenStack>
-</RadzenStack>
+<KntDialogFrame Icon="folder_open" Title="Select folder" Subtitle="@(folderSelected?.Name is { Length: > 0 } name ? $"Selected: {name}" : "Choose a folder in the folders tree.")">
+    <ChildContent>
+        <div class="knt-folder-selector" @ondblclick="OnConfirm">
+            <KntFoldersTreeView FoldersInfo="@foldersTree" FolderSelected="OnFolderSelected" />
+        </div>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+        <RadzenButton Text="Select" Icon="check" Click="() => OnConfirm()" ButtonStyle="ButtonStyle.Primary" Disabled="@(folderSelected == null)" />
+    </Footer>
+</KntDialogFrame>
 
 
 @code {
 
-    private List<FolderDto> foldersTree;    
+    private List<FolderDto> foldersTree;
     private FolderDto folderSelected;
     private AppState appState;
 
@@ -62,12 +63,13 @@
     }
 
     void OnConfirm()
-    {        
-        dialogService.Close(folderSelected);
+    {
+        if (folderSelected != null)
+            dialogService.Close(folderSelected);
     }
 
     void OnCancel()
-    {        
+    {
         dialogService.Close(null);
     }
 }

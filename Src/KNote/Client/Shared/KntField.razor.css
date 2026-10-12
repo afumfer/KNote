@@ -1,0 +1,41 @@
+/* Only theme variables, so the field follows the light/dark theme. The controls take the field's width. */
+
+.knt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+.knt-field-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+    .knt-field-label ::deep .rz-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--rz-text-color);
+    }
+
+.knt-field-required {
+    color: var(--rz-danger);
+    font-weight: 600;
+}
+
+.knt-field-help {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-field ::deep > .rz-textbox,
+.knt-field ::deep > .rz-textarea,
+.knt-field ::deep > .rz-numeric,
+.knt-field ::deep > .rz-dropdown,
+.knt-field ::deep > .rz-datepicker,
+.knt-field ::deep > .rz-form-field,
+.knt-field ::deep > .rz-selectbar {
+    width: 100%;
+}

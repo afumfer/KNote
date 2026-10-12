@@ -93,7 +93,7 @@
     {
         var res = await dialogService.OpenAsync<FolderNew>($"New folder",
                new Dictionary<string, object?>() {  },
-               KntDialogs.Medium(showClose: false));
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if(res != null)           
             await Load();  
@@ -110,7 +110,7 @@
     {
         var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
                new Dictionary<string, object?>() { { "FolderId", folder.FolderId.ToString() } },
-               KntDialogs.Medium(showClose: false));
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if(res != null)        
             await Load(); 
