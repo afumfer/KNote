@@ -414,6 +414,13 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   déjalo activo e ignora la acción.
   En las vistas, usa `SystemColors.*` en vez de colores fijos (`Color.White`...): los fijos no cambian en
   oscuro. Los informes y su previsualización se quedan siempre en claro (son para imprimir).
+- **HTML de las notas**: lo escriben los usuarios (en un repositorio compartido, otros), así que se muestra
+  saneado con las mismas reglas que la Web (`KntHtmlSanitizer` de `Service`): `Service.Notes.UtilMarkdownToHtml`
+  ya lo devuelve saneado (vistas WebView2 de `NoteEditorForm`/`PostItEditorForm`, informes) y el editor HTML
+  (`HtmlEditorControl`, motor de Internet Explorer en modo IE7: sin `rgba()`, por eso el saneador escribe los
+  colores como `#rrggbb`) recibe `Service.Notes.UtilSanitizeHtml(...)`. Además esas vistas no ejecutan scripts
+  (`KntEditView.ContentScriptsEnabled = false`, solo para el HTML mostrado con `ShowNavigationContent`; una URL
+  navegada sí los ejecuta). El chat de IA (`AiChatHtml`) tiene su propia página con scripts y escapa el HTML.
 
 ## Autenticación y autorización
 

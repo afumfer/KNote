@@ -106,4 +106,5 @@ internal class FakeKntNoteService : IKntNoteService
     public string UtilHtmlToMarkdown(string html) => throw new NotSupportedException();
     public string UtilMarkdownToHtml(string markdown) =>
         (UtilMarkdownToHtmlImpl ?? throw new NotSupportedException($"{nameof(UtilMarkdownToHtml)} not configured for this test"))(markdown);
+    public string UtilSanitizeHtml(string html) => throw new NotSupportedException();
 }

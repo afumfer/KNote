@@ -301,11 +301,14 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   abierta.
 - **Markdown**: las descripciones de nota se editan con `Shared/InputMarkdown` y se muestran con
   `Shared/ViewMarkdown` (Markdig). `Server` reescribe las URLs de recursos de la descripción al leer/guardar
-  para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`). `ViewMarkdown` inserta en la página el HTML que
-  traiga el Markdown (`MarkupString`): para contenido no fiable usa `DisableHtml="true"`, que lo muestra como
-  texto. Lo usa el chat del asistente (las respuestas las escribe el modelo, que puede repetir lo que leyó en
-  notas de otros usuarios), igual que `AiChatHtml` en `ClientWin`. Las descripciones de nota siguen
-  insertando su HTML (es parte de su formato): está pendiente sanearlo (quitar scripts y atributos `on*`).
+  para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`). **El HTML de una nota no se genera en el
+  navegador**: `ViewMarkdown` lo pide ya saneado a `Server` (`IStore.Notes.HtmlAsync` → `POST api/notes/html`,
+  Markdig + `KntHtmlSanitizer` de `Service`), con las mismas reglas que `ClientWin`; las descripciones de Home ya
+  llegan así de `HomeNotes` (anónimo) y se pasan con `SafeHtml`. Sanear en WebAssembly (HtmlSanitizer/AngleSharp)
+  se descartó: +680 KB de descarga y 1-2 s con una nota de 130 KB. No insertes HTML de usuario de otra forma
+  (`MarkupString`), tampoco el tema de una nota. Para contenido sin HTML que cambia a menudo (el chat del
+  asistente, que se repinta mientras llega la respuesta) `DisableHtml="true"` lo genera en el navegador, con su
+  HTML como texto y solo enlaces `http`, `https`, `mailto` o relativos, igual que `AiChatHtml` en `ClientWin`.
 
 ## Compilar, ejecutar y depurar
 

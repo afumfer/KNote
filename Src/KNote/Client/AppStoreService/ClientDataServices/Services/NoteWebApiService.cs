@@ -36,6 +36,13 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         return await ProcessResultFromHttpResponse<NoteDto>(httpRes, "Get note");
     }
 
+    // The HTML of a note's description made safe to show (by Server, the same rules as ClientWin).
+    public async Task<Result<string>> HtmlAsync(string markdown)
+    {
+        var httpRes = await _httpClient.PostAsJsonAsync("api/notes/html", markdown);
+        return await ProcessResultFromHttpResponse<string>(httpRes, "Show note");
+    }
+
     public async Task<Result<NoteDto>> NewAsync()
     {        
         var httpRes = await _httpClient.GetAsync($"api/notes/new");

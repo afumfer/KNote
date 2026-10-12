@@ -66,6 +66,9 @@ public interface IKntNoteService
     string UtilUpdateResourceInDescriptionForRead(string description, bool considerRootPath = false);
     string UtilUpdateResourceInDescriptionForWrite(string description, bool considerRootPath = false);
     string UtilHtmlToMarkdown(string html);
+    // The HTML of a note's description (Markdown, with HTML of its own), made safe to show (KntHtmlSanitizer).
     string UtilMarkdownToHtml(string markdown);
+    // The HTML of a note (e.g. a description written in ClientWin's HTML editor), made safe to show.
+    string UtilSanitizeHtml(string html);
     #endregion
 }

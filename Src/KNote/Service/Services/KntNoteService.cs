@@ -502,10 +502,13 @@ public class KntNoteService : KntServiceBase, IKntNoteService
     public string UtilMarkdownToHtml(string markdown)
     {        
         var pipeline = new Markdig.MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-        var htmlContent = Markdig.Markdown.ToHtml(markdown, pipeline);
+        var htmlContent = Markdig.Markdown.ToHtml(markdown ?? "", pipeline);
 
-        return htmlContent;
+        // Markdown keeps the HTML written in it, and writes links too (javascript:...): safe to show.
+        return KntHtmlSanitizer.Sanitize(htmlContent);
     }
+
+    public string UtilSanitizeHtml(string html) => KntHtmlSanitizer.Sanitize(html);
 
     #endregion
 

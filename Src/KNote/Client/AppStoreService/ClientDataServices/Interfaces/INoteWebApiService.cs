@@ -7,6 +7,7 @@ public interface INoteWebApiService
 {
     Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync();
     Task<Result<NoteDto>> GetAsync(Guid noteId);
+    Task<Result<string>> HtmlAsync(string markdown);
     Task<Result<NoteDto>> NewAsync();
     Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true);
     Task<Result<NoteDto>> DeleteAsync(Guid noteId);

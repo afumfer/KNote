@@ -3,14 +3,15 @@
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
                  Wrap="FlexWrap.Wrap" class="rz-m-1 rz-p-2 knt-background-subtle rz-border-radius-1">
         <RadzenStack Gap="0.25rem">
-            <span class="knt-note-card-title">@((MarkupString)Note.Topic) (#@Note.NoteNumber)</span>
+            <span class="knt-note-card-title">@Note.Topic (#@Note.NoteNumber)</span>
             <span class="knt-note-card-info">Last modification: @(Note.ModificationDateTime.ToShortDateString()) - Tags: @(Note.Tags)</span>
         </RadzenStack>
         <KntActionsMenu Actions="@actions" />
     </RadzenStack>
 
     <div class="rz-p-2">
-        <ViewMarkdown MarkdownContent="@Note.Description" />
+        @* HomeNotes gives the descriptions as HTML already made safe (Home is shown without signing in). *@
+        <ViewMarkdown SafeHtml="@Note.Description" />
     </div>
 
 </RadzenCard>

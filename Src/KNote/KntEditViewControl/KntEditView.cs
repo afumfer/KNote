@@ -67,6 +67,14 @@ namespace KntWebView
             set { textUrl.Text = value; }  
         }
 
+        /// <summary>
+        /// Whether the HTML shown with ShowNavigationContent can run scripts (true by default). The host turns it
+        /// off for content that doesn't need them (a note's description, written by users). A page navigated to
+        /// (ShowNavigationUrlContent, the address box) always can, as in a browser.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ContentScriptsEnabled { get; set; } = true;
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowNavigationTools
         {
@@ -574,6 +582,7 @@ namespace KntWebView
                     if (!string.IsNullOrEmpty(textUrl.Text))
                     {
                         NavigationStart?.Invoke(this, new EventArgs());
+                        webView.CoreWebView2.Settings.IsScriptEnabled = true;
                         webView.CoreWebView2.Navigate(textUrl.Text);
                     }
             }
@@ -595,6 +604,8 @@ namespace KntWebView
                 if (webView.CoreWebView2 != null)
                 {
                     NavigationStart?.Invoke(this, new EventArgs());
+                    // Applies from the next navigation on (ExecuteScriptAsync, used by the host, still works).
+                    webView.CoreWebView2.Settings.IsScriptEnabled = ContentScriptsEnabled;
                     webView.NavigateToString(contentString);
                 }
             }

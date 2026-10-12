@@ -73,6 +73,8 @@ Estos permisos los aplica la aplicación. Quien se conecte a la base de datos di
 
 **Todas las notas de un repositorio.** Al pulsar el nodo de un repositorio en el árbol de carpetas (el de su nombre entre corchetes) se listan todas sus notas. Como puede tardar en una base de datos grande, KaNote pregunta antes: **Cancelar** deja vacíos la lista de notas y el visor de la nota. Refrescar la lista que ya has cargado no vuelve a preguntar.
 
+**Notas seguras.** La descripción de una nota puede llevar HTML (escrito en el editor HTML o en Markdown). Para proteger a quien la lee, KaNote la muestra sin lo que podría ejecutar código por sí solo (scripts, enlaces `javascript:`, formularios...), tanto en la aplicación de escritorio como en la Web; el formato (fuentes, colores, tablas, imágenes, enlaces) se conserva.
+
 ### Impresión y exportación (aplicación de escritorio)
 
 El menú **File** de la ventana de gestión tiene estas opciones, todas sobre la lista de notas tal como la ves: las notas de la carpeta seleccionada, o el resultado de una búsqueda o de un filtro, en el orden y con las columnas que se muestran en pantalla (incluidas la vista compacta y el filtro de la lista).
