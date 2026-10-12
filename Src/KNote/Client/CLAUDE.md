@@ -209,7 +209,8 @@ Patrones ya establecidos que hay que seguir:
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y
-  alarmas), `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
+  alarmas, `Notes/NotesTasksCalendar` y `NotesAlarmsCalendar`: aún son una prueba de concepto con datos de
+  ejemplo, sin entrada en el menú hasta que se desarrollen), `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
 
 **No hay Bootstrap ni otras librerías de iconos o CSS**: la UI usa solo Radzen (tema `software` por defecto)
 más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
