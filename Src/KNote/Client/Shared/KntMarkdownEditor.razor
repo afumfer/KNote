@@ -1,0 +1,110 @@
+@inject IJSRuntime js
+
+@* Editor of a note's description: its Markdown (Radzen's editor in its source mode, with its toolbar) or a Preview
+   (the note as it is shown, made safe by Server: ViewMarkdown). The mode chosen is kept in the browser. Radzen's
+   Design (WYSIWYG) mode is left out: there Enter makes a new paragraph, which Markdown writes as an extra blank
+   line, and ClientWin shows the Markdown as text, line by line. *@
+
+@* Drawn once the mode saved is known (the editor shown for a moment would give its text back). *@
+@if (modeLoaded)
+{
+<div class="knt-md-editor">
+    @if (!Locked)
+    {
+    <div class="knt-md-editor-bar">
+        <RadzenSelectBar TValue="string" Value="@mode" ValueChanged="@((string value) => SetModeAsync(value))" Size="ButtonSize.Small">
+            <Items>
+                <RadzenSelectBarItem Text="Markdown" Value="@SourceMode" Icon="code" />
+                <RadzenSelectBarItem Text="Preview" Value="@PreviewMode" Icon="visibility" />
+            </Items>
+        </RadzenSelectBar>
+    </div>
+    }
+
+    @if (Locked || mode == PreviewMode)
+    {
+        <div class="knt-md-editor-preview" style="height: @Height">
+            <ViewMarkdown MarkdownContent="@Value">
+                <TemplateContent>
+                    <span class="knt-md-editor-empty">No description yet.</span>
+                </TemplateContent>
+            </ViewMarkdown>
+        </div>
+    }
+    else
+    {
+        @* Its toolbar without the Design/Source switch (RadzenMarkdownEditorSource). *@
+        <RadzenMarkdownEditor Value="@Value" ValueChanged="@((string value) => OnValueChanged(value))"
+                              Mode="MarkdownEditorMode.Source" Style="@($"height: {Height}")">
+            <RadzenMarkdownEditorUndo />
+            <RadzenMarkdownEditorRedo />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorFormatBlock />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorBold />
+            <RadzenMarkdownEditorItalic />
+            <RadzenMarkdownEditorStrikethrough />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorQuote />
+            <RadzenMarkdownEditorCode />
+            <RadzenMarkdownEditorCodeBlock />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorUnorderedList />
+            <RadzenMarkdownEditorOrderedList />
+            <RadzenMarkdownEditorTaskList />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorLink />
+            <RadzenMarkdownEditorImage />
+            <RadzenMarkdownEditorHorizontalRule />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorTable />
+        </RadzenMarkdownEditor>
+    }
+</div>
+}
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    // The note's content is locked (ContentType's DescriptionBlocked): only its preview, no editor.
+    [Parameter] public bool Locked { get; set; }
+    // Height of the editing (or preview) area.
+    [Parameter] public string Height { get; set; } = "max(20rem, calc(100vh - 24rem))";
+
+    private const string SourceMode = "source";
+    private const string PreviewMode = "preview";
+    private const string StorageKey = "KNoteDescriptionEditorMode";
+
+    private string mode = SourceMode;
+    private bool modeLoaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Preview, or Markdown (also for the Design mode saved by a former version).
+        if (await js.LocalStorageGetItem(StorageKey) == PreviewMode)
+            mode = PreviewMode;
+        modeLoaded = true;
+    }
+
+    private async Task SetModeAsync(string value)
+    {
+        if (value == mode)
+            return;
+        mode = value;
+        await js.LocalStorageSetItem(StorageKey, mode);
+    }
+
+    // Radzen's editor gives the text back when it starts, with its line breaks as LF (notes keep CR LF, as ClientWin
+    // writes them): that is not a change of the note.
+    private Task OnValueChanged(string value)
+    {
+        if (SameText(value, Value))
+            return Task.CompletedTask;
+
+        Value = value;
+        return ValueChanged.InvokeAsync(value);
+    }
+
+    private static bool SameText(string? a, string? b) =>
+        (a ?? "").Replace("\r\n", "\n").TrimEnd() == (b ?? "").Replace("\r\n", "\n").TrimEnd();
+}

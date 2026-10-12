@@ -207,7 +207,7 @@ public class FolderInfoDto : SmartModelDtoBase
         if (FolderId == ParentId)
         {
             results.Add(new ValidationResult
-             ("KMSG: A folder cannot be the parent of itself "
+             ("A folder cannot be the parent of itself "
              , new[] { "FolderId", "ParentId" }));
         }
 

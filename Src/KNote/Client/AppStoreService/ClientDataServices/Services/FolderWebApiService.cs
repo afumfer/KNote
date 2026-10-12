@@ -30,6 +30,13 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
         return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Get folder");
     }
 
+    // The folder's path in the folders tree, from the root (Service: Folders.GetPathAsync, as ClientWin shows it).
+    public async Task<Result<string>> GetPathAsync(Guid folderId)
+    {
+        var httpRes = await _httpClient.GetAsync($"api/folders/{folderId}/path");
+        return await ProcessResultFromHttpResponse<string>(httpRes, "Get folder path");
+    }
+
     public async Task<Result<FolderDto>> SaveAsync(FolderDto folder)
     {
         HttpResponseMessage httpRes;

@@ -122,9 +122,19 @@ public class FoldersController : ControllerBase
 - `NotesController` completa en su constructor `RepositoryRef.ResourcesContainerRootPath`/`RootUrl` con los
   valores del host (`IFileStore`) cuando vienen vacíos en la configuración.
 - Al leer y guardar notas, la descripción pasa por `UtilUpdateResourceInDescriptionForRead`/`ForWrite`
-  (`Service`) y se ajusta el tipo de contenido (`html` si empieza por `<BODY`, si no `markdown` con `\n` →
-  `\r\n`). Está marcado como *hack* de compatibilidad con `ClientWin`: si lo cambias, comprueba que una nota
+  (`Service`), y al guardar se ajustan el `ContentType` y los saltos de línea (ver el punto siguiente). Está
+  marcado como *hack* de compatibilidad con `ClientWin`: si lo cambias, comprueba que una nota
   editada en la Web se sigue viendo bien en el escritorio y viceversa.
+- **`ContentType` y saltos de línea al guardar una nota desde la Web** (`NotesController.Post`): el
+  `ContentType` es el JSON de `ClientWin` (`ContentTypeExt`: vista de la descripción `des` = `markdown`,
+  `navigation` o `html`; lenguaje del script `scr`; contenido bloqueado `blk`). Se lee con `GetContentTypeExt`
+  (que también lee el formato antiguo de texto plano, `markdown`, `navigation#`...) y se guarda siempre con
+  `SetContentTypeExt`, en JSON. Solo se decide la vista: `html` si la descripción empieza por `<BODY`; si no,
+  Markdown, conservando `navigation` (vista renderizada en `ClientWin`) o `markdown`; `scr` y `blk` se respetan.
+  Los saltos de línea de la descripción se normalizan a un CR LF cada uno (`\r*\n|\r`), como los escribe
+  `ClientWin`: un `Replace("\n", "\r\n")` anterior convertía los CR LF en CR CR LF.
+- **Ruta de una carpeta**: `GET api/folders/{id}/path` (`Folders.GetPathAsync` de `Service`, la misma que usa
+  `ClientWin`), para el editor de notas.
 - **HTML de las notas para la Web**: `POST api/notes/html` (cualquier usuario autenticado; cuerpo: el Markdown
   como cadena JSON) devuelve el HTML de una descripción saneado (`Notes.UtilMarkdownToHtml`: Markdig +
   `KntHtmlSanitizer` de `Service`, las mismas reglas que `ClientWin`); `Client` no genera HTML de notas.

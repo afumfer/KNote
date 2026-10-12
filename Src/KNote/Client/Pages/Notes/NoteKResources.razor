@@ -1,67 +1,101 @@
 ﻿@inject TooltipService tooltipService
+@inject DialogService dialogService
 
+@* The note's resources as a gallery: a card for each, with its image (any image type) or an icon of its kind of
+   file, its description and name, and its actions (view, open, insert in the description, delete). *@
 
-<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" class="rz-mb-1">
-    <RadzenButton Text="New resource" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
-</RadzenStack>
+<div class="knt-list-header">
+    <span>@Resources.Count @(Resources.Count == 1 ? "resource" : "resources")</span>
+    <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+</div>
 
-<EntityList List="Resources">
-    <AllItems>
-        <RadzenDataGrid Data="@Resources" TItem="ResourceInfoDto" AllowColumnResize="true" Density="@Density.Compact">
-            <Columns>
-                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="NameOut" Title="Resource name" />
-                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="Description" Title="Description" />
-                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="Content" Title="Content" Width="150px"TextAlign="TextAlign.Center">
-                    <Template Context="item">
-                        <a href="@item.FullUrl" target="_blank" rel="noopener noreferrer">
-                            <img style="width: @(ImgWidth(item))px" src="@ImgPreview(item)" />
-                        </a>
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="ResourceInfoDto" Property="Order" Title="Order" Width="80px" TextAlign="TextAlign.Center" />
-                <RadzenDataGridColumn TItem="ResourceInfoDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                    <Template Context="data">
-                        <RadzenButton Click="@(() => OnInsertInDesription.InvokeAsync(data))" Icon="insert_page_break"
-                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
-                                      MouseEnter="@(args => tooltipService.Open(args, "Insert resource reference in note description ...",
-                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                        <RadzenButton Click="@(() => OnDelete.InvokeAsync(data))" Icon="delete"
-                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                      MouseEnter="@(args => tooltipService.Open(args, "Delete resource ...",
-                                    new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                    </Template>
-                </RadzenDataGridColumn>
-            </Columns>
-        </RadzenDataGrid>
-    </AllItems>
-</EntityList>
+@if (Resources.Count == 0)
+{
+    <div class="knt-empty-state">
+        <RadzenIcon Icon="attach_file" />
+        <div class="knt-empty-state-title">No resources yet</div>
+        <div class="knt-empty-state-text">Add images, documents or any file to the note (a new note has to be saved first).</div>
+    </div>
+}
+else
+{
+    <div class="knt-resources">
+        @foreach (var resource in Resources.OrderBy(r => r.Order))
+        {
+            var image = ImageSource(resource);
+            <div class="knt-resource">
+                <div class="knt-resource-thumb @(image == null ? "knt-resource-thumb-icon" : null)"
+                     @onclick="() => ViewAsync(resource)" title="@(image == null ? "Open" : "View")">
+                    @if (image != null)
+                    {
+                        <img src="@image" alt="@resource.Description" loading="lazy" />
+                    }
+                    else
+                    {
+                        <RadzenIcon Icon="@KntFileTypes.Icon(resource.FileType)" />
+                        <span class="knt-resource-ext">@Extension(resource)</span>
+                    }
+                </div>
+                <div class="knt-resource-body">
+                    <div class="knt-resource-title">@(string.IsNullOrWhiteSpace(resource.Description) ? resource.NameOut : resource.Description)</div>
+                    <div class="knt-resource-meta">
+                        <span class="knt-resource-order">@resource.Order</span>
+                        <span class="knt-resource-name">@resource.NameOut</span>
+                    </div>
+                </div>
+                <div class="knt-resource-actions">
+                    <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => OpenAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Open in a new tab"))" />
+                    <RadzenButton Icon="add_link" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => OnInsertInDesription.InvokeAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Insert in the description"))" />
+                    <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                  Click="@(() => OnDelete.InvokeAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Delete resource"))" />
+                </div>
+            </div>
+        }
+    </div>
+}
 
 @code {
-    [Parameter] public List<ResourceInfoDto> Resources { get; set; }
+    [Parameter] public List<ResourceInfoDto> Resources { get; set; } = new();
     [Parameter] public EventCallback<ResourceInfoDto> OnDelete { get; set; }
     [Parameter] public EventCallback<ResourceInfoDto> OnInsertInDesription { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
 
-    private string ImgPreview(ResourceInfoDto resource)
-    {
-        var imgSrc = "";
-        if (resource.FileType == "image/jpeg")
-            imgSrc = "data:image/jpeg;base64, " + resource.ContentBase64;
-        else if (resource.FileType == "application/pdf")
-            imgSrc = @"https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg";
-        else
-            imgSrc = @"https://img.icons8.com/ios/50/000000/document-1.png";
+    [Inject] private IJSRuntime js { get; set; } = null!;
 
-        return imgSrc;
+    // The image of a resource that is one: its content if it came with the resource, otherwise its URL.
+    public static string? ImageSource(ResourceInfoDto resource)
+    {
+        if (!KntFileTypes.IsImage(resource.FileType))
+            return null;
+        return string.IsNullOrEmpty(resource.ContentBase64) ? resource.FullUrl : $"data:{resource.FileType};base64,{resource.ContentBase64}";
     }
 
-    private int ImgWidth(ResourceInfoDto resource)
+    private static string Extension(ResourceInfoDto resource)
     {
-        var imgW = 50;
-        if (resource.FileType == "image/jpeg")
-            imgW = 100;
-
-        return imgW;
+        var name = resource.NameOut ?? resource.Name ?? "";
+        var dot = name.LastIndexOf('.');
+        return dot >= 0 && dot < name.Length - 1 ? name[(dot + 1)..].ToUpperInvariant() : "";
     }
 
+    // An image is shown in a dialog; any other file opens in a new tab.
+    private async Task ViewAsync(ResourceInfoDto resource)
+    {
+        var image = ImageSource(resource);
+        if (image == null)
+        {
+            await OpenAsync(resource);
+            return;
+        }
+
+        await dialogService.OpenAsync(string.IsNullOrWhiteSpace(resource.Description) ? resource.NameOut : resource.Description,
+            PreviewOf(image, resource.Description), KntDialogs.Large());
+    }
+
+    private RenderFragment<DialogService> PreviewOf(string image, string? description) =>
+        _ => @<div class="knt-resource-preview"><img src="@image" alt="@description" /></div>;
+
+    private async Task OpenAsync(ResourceInfoDto resource) =>
+        await js.InvokeVoidAsync("open", resource.FullUrl, "_blank", "noopener");
 }

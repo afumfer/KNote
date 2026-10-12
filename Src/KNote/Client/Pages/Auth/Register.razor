@@ -5,38 +5,45 @@
 
 @using KNote.Client.Auth
 
-<EditForm Model="@user" Context="formContext">
+@* Register dialog (Shared/MainLayoutHeader → AdminLogin opens it framed): the result is the new user's data, or
+   null. Enter registers (the form's submit). The new user's role is decided by the server. *@
+
+<EditForm Model="@user" Context="formContext" OnSubmit="OnRegister">
 
     <DataAnnotationsValidator />
 
-    <RadzenStack Gap="1rem">
-
-        <KntFormField Label="User name:" Component="UserName">
-            <RadzenTextBox Name="UserName" @bind-Value="@user.UserName" Style="width: 100%" />
-            <ValidationMessage For="@(() => user.UserName)" />
-        </KntFormField>
-
-        <KntFormField Label="Full name:" Component="FullName">
-            <RadzenTextBox Name="FullName" @bind-Value="@user.FullName" Style="width: 100%" />
-            <ValidationMessage For="@(() => user.FullName)" />
-        </KntFormField>
-
-        <KntFormField Label="Email:" Component="EMail">
-            <RadzenTextBox Name="EMail" @bind-Value="@user.EMail" Style="width: 100%" />
-            <ValidationMessage For="@(() => user.EMail)" />
-        </KntFormField>
-
-        <KntFormField Label="Password:" Component="Password">
-            <RadzenPassword Name="Password" @bind-Value="@user.Password" Style="width: 100%" />
-            <ValidationMessage For="@(() => user.Password)" />
-        </KntFormField>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Register" Click="() => OnRegister(formContext)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
+    <KntDialogFrame Icon="how_to_reg" Title="Create account" Subtitle="@($"Register to use {KntConst.AppName}.")">
+        <ChildContent>
+            <RadzenStack Gap="1rem">
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="5">
+                        <KntField Label="User name" Component="UserName" Required="true" Help="To sign in.">
+                            <RadzenTextBox Name="UserName" @bind-Value="@user.UserName" AutoCompleteType="AutoCompleteType.Username" />
+                            <ValidationMessage For="@(() => user.UserName)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="7">
+                        <KntField Label="Full name" Component="FullName" Required="true">
+                            <RadzenTextBox Name="FullName" @bind-Value="@user.FullName" AutoCompleteType="AutoCompleteType.Name" />
+                            <ValidationMessage For="@(() => user.FullName)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <KntField Label="Email" Component="EMail" Required="true">
+                    <RadzenTextBox Name="EMail" @bind-Value="@user.EMail" Placeholder="name@example.com" AutoCompleteType="AutoCompleteType.Email" />
+                    <ValidationMessage For="@(() => user.EMail)" />
+                </KntField>
+                <KntField Label="Password" Component="Password" Required="true">
+                    <RadzenPassword Name="Password" @bind-Value="@user.Password" AutoCompleteType="AutoCompleteType.NewPassword" />
+                    <ValidationMessage For="@(() => user.Password)" />
+                </KntField>
+            </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Register" Icon="how_to_reg" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
@@ -44,10 +51,10 @@
     private UserRegisterDto user = new UserRegisterDto();
 
     private void OnRegister(EditContext formContext)
-    {        
+    {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
-        {            
+        {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Register user", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }

@@ -8,6 +8,7 @@ public interface IFolderWebApiService
     Task<Result<List<FolderInfoDto>>> GetAllAsync();
     Task<Result<List<FolderDto>>> GetTreeAsync();
     Task<Result<FolderDto>> GetAsync(Guid folderId);
+    Task<Result<string>> GetPathAsync(Guid folderId);
     Task<Result<FolderDto>> SaveAsync(FolderDto folder);
     Task<Result<FolderDto>> DeleteAsync(Guid id);
     Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes);

@@ -166,6 +166,18 @@ The **Tree panel**, **Notes filter** and **Quick search** pages show their notes
 
 **Coming back to the list.** After opening a note, the list is shown again as it was: the same folder, filter or search, the same order and position, with a mark on the left of the note you opened.
 
+### Note editor (web app)
+
+A note is edited in its own window. Its header shows the note's topic and number, the full path of its folder, its type and when it was modified, with **Save and new**, **Save** and the button that closes the window (it asks first if there are unsaved changes).
+
+- **Overview**: the topic and the description and, at the right, the note's details (folder, type, priority, tags) and its record (number, dates, status). The description is written in Markdown, with a toolbar for its formats (headings, bold, lists, tasks, links, images, tables...); **Preview** shows it as it looks. The browser remembers which of the two you use.
+- **Locked content**: the **Content** switch of the record locks the note's description: it is shown, not edited, until it is unlocked. The lock is saved with the note, and it is the same one the desktop app sets.
+- **Attributes**: the fields of the note's type and the general ones; the required ones are marked with an asterisk.
+- **Resources**: the note's files as cards. Click an image to see it bigger; any file can be opened in a new tab, inserted in the description or deleted. **Add resource** uploads a file: drop it on the box, paste it or click to choose it.
+- **Tasks**: who each task is for, its priority, planned dates and time spent; resolved tasks go last. **Add task** and the edit button open the task with its assignment, planning and progress.
+
+A new note has to be saved before adding resources or tasks to it, and deleting a resource or a task asks first. The dialogs of the admin panel (users, folders, note types, attributes) and the sign in and register ones follow the same style: labels above the fields, grouped in sections.
+
 ### Appearance (web app)
 
 The palette button in the top bar of the web app opens the **Appearance** panel, where you choose the **theme** (Software, Standard, Material, Humanistic or Default), the **mode** (light or dark), the style of the **Home header** (*Soft*, a light tint of the theme's color, or *Ink*, dark) and **high contrast (WCAG)**, which makes text and borders easier to tell apart. Changes apply at once. The sun / moon button next to it switches between light and dark directly. Your browser remembers the choice (in cookies), so each browser keeps its own.

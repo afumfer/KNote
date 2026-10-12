@@ -123,14 +123,14 @@ public class AiProviderRef : SmartModelDtoBase, IAiProviderIdentity
         if (Array.IndexOf(EnumAiProvider.All, Provider) < 0)
         {
             results.Add(new ValidationResult
-             ($"KMSG: Provider is invalid. (Supported providers are {string.Join(", ", EnumAiProvider.All)})."
+             ($"Provider is invalid. (Supported providers are {string.Join(", ", EnumAiProvider.All)})."
              , new[] { "Provider" }));
         }
 
         if (Provider == EnumAiProvider.Ollama && string.IsNullOrEmpty(Host))
         {
             results.Add(new ValidationResult
-             ("KMSG: Host is required for the Ollama provider."
+             ("Host is required for the Ollama provider."
              , new[] { "Host" }));
         }
 

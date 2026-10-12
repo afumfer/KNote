@@ -1,0 +1,28 @@
+@* A group of related fields of an editor: an icon, a title and a line saying what the group is for, and its
+   fields (KntField) below. Consecutive sections are separated by a line. *@
+
+<section class="knt-section">
+    <div class="knt-section-head">
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <span class="knt-section-icon"><RadzenIcon Icon="@Icon" /></span>
+        }
+        <div>
+            <h3 class="knt-section-title">@Title</h3>
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <div class="knt-section-description">@Description</div>
+            }
+        </div>
+    </div>
+    <div class="knt-section-fields">
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    [Parameter] public string? Icon { get; set; }
+    [Parameter][EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

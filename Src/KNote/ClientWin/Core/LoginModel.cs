@@ -42,10 +42,10 @@ public class LoginModel : SmartModelDtoBase
         var results = new List<ValidationResult>();
 
         if (string.IsNullOrWhiteSpace(UserName))
-            results.Add(new ValidationResult("KMSG: The user name is required.", new[] { "UserName" }));
+            results.Add(new ValidationResult("The user name is required.", new[] { "UserName" }));
 
         if (string.IsNullOrWhiteSpace(Password))
-            results.Add(new ValidationResult("KMSG: The password is required.", new[] { "Password" }));
+            results.Add(new ValidationResult("The password is required.", new[] { "Password" }));
 
         return results;
     }

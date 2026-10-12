@@ -1,0 +1,51 @@
+@* Frame of an entity's dialog (opened with KntDialogs.Framed, without Radzen's title bar): a header with the
+   entity's icon, title and subtitle, the form's sections in the body (it scrolls if it doesn't fit) and the
+   buttons in a footer that is always in view. *@
+
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+
+<div class="knt-dialog">
+    <div class="knt-dialog-header">
+        <span class="knt-dialog-icon"><RadzenIcon Icon="@Icon" /></span>
+        <div class="knt-dialog-caption">
+            <h2 class="knt-dialog-title">@Title</h2>
+            @if (!string.IsNullOrEmpty(Subtitle))
+            {
+                <div class="knt-dialog-subtitle">@Subtitle</div>
+            }
+        </div>
+        @* Out of the tab order, so that the dialog focuses its first field (Esc also closes it). *@
+        <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="knt-dialog-close" TabIndex="-1"
+                      Click="CloseAsync" MouseEnter="@(args => tooltipService.Open(args, "Close"))" />
+    </div>
+    <div class="knt-dialog-body">
+        @ChildContent
+    </div>
+    @if (Footer != null)
+    {
+        <div class="knt-dialog-footer">
+            @Footer
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Icon { get; set; } = "edit_note";
+    [Parameter][EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    // The buttons (Cancel, Save...), at the right.
+    [Parameter] public RenderFragment? Footer { get; set; }
+    // The header's close button: by default the dialog closes with no result (cancelled).
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private async Task CloseAsync()
+    {
+        tooltipService.Close();
+        if (OnClose.HasDelegate)
+            await OnClose.InvokeAsync();
+        else
+            dialogService.Close(null);
+    }
+}

@@ -1,4 +1,4 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Json;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -52,6 +52,44 @@ public class FoldersInProcessTests
         Assert.IsTrue(httpRes.IsSuccessStatusCode);
         Assert.IsNotNull(res?.Entity);
         Assert.IsTrue(res!.Entity!.Count > 0);
+    }
+
+    [TestMethod]
+    public async Task Get_Path_GivesTheNamesFromTheRoot()
+    {
+        var parent = await PostFolderAsync(new FolderDto { FolderId = Guid.Empty, Name = "__TEST PATH PARENT__" });
+        var child = await PostFolderAsync(new FolderDto { FolderId = Guid.Empty, Name = "__TEST PATH CHILD__", ParentId = parent.FolderId });
+        try
+        {
+            var httpRes = await _httpClient.GetAsync($"api/folders/{child.FolderId}/path");
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<string>>();
+
+            Assert.IsTrue(httpRes.IsSuccessStatusCode);
+            Assert.AreEqual(@"__TEST PATH PARENT__\__TEST PATH CHILD__", res?.Entity);
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/folders/{child.FolderId}");
+            await _httpClient.DeleteAsync($"api/folders/{parent.FolderId}");
+        }
+    }
+
+    [TestMethod]
+    public async Task Get_Path_OfAFolderThatDoesNotExist_IsAnError()
+    {
+        var httpRes = await _httpClient.GetAsync($"api/folders/{Guid.NewGuid()}/path");
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<string>>();
+
+        Assert.IsFalse(httpRes.IsSuccessStatusCode);
+        Assert.IsFalse(res!.IsValid);
+    }
+
+    private static async Task<FolderDto> PostFolderAsync(FolderDto folder)
+    {
+        var httpRes = await _httpClient.PostAsJsonAsync("api/folders", folder);
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<FolderDto>>();
+        Assert.IsTrue(httpRes.IsSuccessStatusCode, res?.ErrorMessage);
+        return res!.Entity!;
     }
 
     [TestMethod]

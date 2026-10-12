@@ -102,7 +102,7 @@ public class ResourceDto : ResourceInfoDto
         if (ContentInDB == true && ContentArrayBytes == null)
         {
             results.Add(new ValidationResult
-             ("KMSG: If the content is in the database, you must enter its content "
+             ("If the content is in the database, you must enter its content "
              , new[] { "ContentInDB", "ContentArrayBytes" }));
         }
 

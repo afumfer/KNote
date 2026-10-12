@@ -130,7 +130,7 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
             treeViewFolders.SelectedNode = newNode;
         }
         else
-            _ctrl.ShowMessage("KMSG: The parent node of the new node is not correct.", KntConst.AppName);
+            _ctrl.ShowMessage("The parent node of the new node is not correct.", KntConst.AppName);
     }
 
     public void DeleteItem(FolderWithServiceRef item)

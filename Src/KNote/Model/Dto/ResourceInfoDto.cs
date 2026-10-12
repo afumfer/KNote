@@ -136,10 +136,10 @@ public class ResourceInfoDto : SmartModelDtoBase
                 return Name;
             else
             {
-                // Drop the guid prefix from filename 
-                var i = Name.IndexOf("_") + 1;
-                if (i == 37)
-                    return Name.Substring(i, Name.Length - i);
+                // Drop the note's guid prefix from the file name ("{guid}_{name}"; the file store may have written the
+                // guid's dashes as underscores).
+                if (Name.Length > 37 && Name[36] == '_' && Guid.TryParse(Name.Substring(0, 36).Replace('_', '-'), out _))
+                    return Name.Substring(37);
                 else
                     return Name;
             }
@@ -200,7 +200,7 @@ public class ResourceInfoDto : SmartModelDtoBase
         if (_contentBase64 == null)
         {
             results.Add(new ValidationResult
-             ("KMSG: If the content is in the database, you must enter its content in base 64  "
+             ("If the content is in the database, you must enter its content in base 64  "
              , new[] { "ContentBase64" }));
         }
 

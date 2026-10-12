@@ -31,7 +31,7 @@
     {
         var resDialog = await dialogService.OpenAsync<Register>($"Register",
                new Dictionary<string, object?>() {  },
-               KntDialogs.Medium());
+               KntDialogs.Framed(KntDialogs.Medium()));
 
         if(resDialog != null)
         {
@@ -52,7 +52,7 @@
     {
         var resDialog = await dialogService.OpenAsync<Login>($"{KntConst.AppName} login",
                new Dictionary<string, object?>() {  },
-               KntDialogs.Small());
+               KntDialogs.Framed(KntDialogs.Small()));
 
         if(resDialog != null)
         {

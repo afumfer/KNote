@@ -59,28 +59,28 @@ public class NoteKAttributeDto : NoteKAttributeInfoDto
                     int outputInt;
                     if (!int.TryParse(Value, out outputInt))
                         results.Add(new ValidationResult
-                            ("KMSG: The value must be integer type."
+                            ("The value must be integer type."
                             , new[] { "Value" }));
                     break;
                 case EnumKAttributeDataType.Double:
                     double outputDbl;
                     if (!double.TryParse(Value, out outputDbl))
                         results.Add(new ValidationResult
-                         ("KMSG: The value must be double type. "
+                         ("The value must be double type. "
                          , new[] { "Value" }));
                     break;
                 case EnumKAttributeDataType.DateTime:
                     DateTime outputDateTime;
                     if (!DateTime.TryParse(Value, out outputDateTime))
                         results.Add(new ValidationResult
-                         ("KMSG: The value must be Date Time type. "
+                         ("The value must be Date Time type. "
                          , new[] { "Value" }));
                     break;
                 case EnumKAttributeDataType.Bool:
                     bool outputBool;
                     if (!bool.TryParse(Value, out outputBool))
                         results.Add(new ValidationResult
-                         ("KMSG: The value must be boolean type. "
+                         ("The value must be boolean type. "
                          , new[] { "Value" }));
                     break;
                 default:
@@ -90,7 +90,7 @@ public class NoteKAttributeDto : NoteKAttributeInfoDto
 
         if (RequiredValue && string.IsNullOrEmpty(Value))
             results.Add(new ValidationResult
-                     ("KMSG: Value is required. "
+                     ("Value is required. "
                      , new[] { "Value" }));
 
         // ---

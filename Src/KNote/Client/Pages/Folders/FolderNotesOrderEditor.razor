@@ -4,22 +4,28 @@
    editor: the mode, and the column and direction of a fixed order. OrderNotes only changes when the user
    changes something (a value in another format is kept otherwise). *@
 
-<RadzenStack Gap="0.5rem">
-    <RadzenDropDown Name="@Name" Data="@modes" TextProperty="Text" ValueProperty="Value" TValue="NoteOrderMode"
-                    Value="@mode" ValueChanged="@((NoteOrderMode m) => OnModeChanged(m))" Style="width: 100%" />
-    <RadzenRow Gap="0.5rem">
-        <RadzenColumn Size="12" SizeSM="7">
-            <RadzenDropDown Data="@columns" TextProperty="Text" ValueProperty="Value" TValue="string"
-                            Value="@column" ValueChanged="@((string c) => OnColumnChanged(c))"
-                            Disabled="@(mode != NoteOrderMode.Fixed)" Style="width: 100%" />
-        </RadzenColumn>
-        <RadzenColumn Size="12" SizeSM="5">
-            <RadzenDropDown Data="@directions" TextProperty="Text" ValueProperty="Value" TValue="bool"
-                            Value="@ascending" ValueChanged="@((bool a) => OnDirectionChanged(a))"
-                            Disabled="@(mode != NoteOrderMode.Fixed)" Style="width: 100%" />
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenText TextStyle="TextStyle.Caption">@Description()</RadzenText>
+<RadzenStack Gap="1rem">
+    <KntField Label="Mode" Component="@Name" Help="@Description()">
+        <RadzenSelectBar Name="@Name" Data="@modes" TextProperty="Text" ValueProperty="Value" TValue="NoteOrderMode"
+                         Value="@mode" ValueChanged="@((NoteOrderMode m) => OnModeChanged(m))" Size="ButtonSize.Small" />
+    </KntField>
+    @if (mode == NoteOrderMode.Fixed)
+    {
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeSM="7">
+                <KntField Label="Order by">
+                    <RadzenDropDown Data="@columns" TextProperty="Text" ValueProperty="Value" TValue="string"
+                                    Value="@column" ValueChanged="@((string c) => OnColumnChanged(c))" />
+                </KntField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeSM="5">
+                <KntField Label="Direction">
+                    <RadzenSelectBar Data="@directions" TextProperty="Text" ValueProperty="Value" TValue="bool"
+                                     Value="@ascending" ValueChanged="@((bool a) => OnDirectionChanged(a))" Size="ButtonSize.Small" />
+                </KntField>
+            </RadzenColumn>
+        </RadzenRow>
+    }
 </RadzenStack>
 
 @code {
@@ -31,9 +37,9 @@
 
     private static readonly Option<NoteOrderMode>[] modes =
     [
-        new(NoteOrderMode.Default, "By note number (default)"),
+        new(NoteOrderMode.Default, "Note number"),
         new(NoteOrderMode.Fixed, "Fixed order"),
-        new(NoteOrderMode.Auto, "Follow last order used in the notes list")
+        new(NoteOrderMode.Auto, "Last order used")
     ];
 
     // Same columns and labels as ClientWin's folder editor (NoteOrderCriteria.SortableColumns).

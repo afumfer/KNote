@@ -6,86 +6,107 @@
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <RadzenStack Gap="1rem">
+    <KntDialogFrame Icon="@KntSections.Attributes.Icon" Title="@Title" Subtitle="@Subtitle" OnClose="() => OnExit.InvokeAsync(null)">
+        <ChildContent>
 
-        <KntFormField Label="Name:" Component="Name" LabelSize="2">
-            <RadzenTextBox Name="Name" @bind-Value="@KAttribute.Name" Style="width: 100%" />
-            <ValidationMessage For="@(() => KAttribute.Name)" />
-        </KntFormField>
+            <KntFormSection Icon="badge" Title="General" Description="An attribute is a field that notes can fill in.">
+                <KntField Label="Name" Component="Name" Required="true">
+                    <RadzenTextBox Name="Name" @bind-Value="@KAttribute.Name" />
+                    <ValidationMessage For="@(() => KAttribute.Name)" />
+                </KntField>
+                <KntField Label="Description" Component="Description">
+                    <RadzenTextArea Name="Description" @bind-Value="@KAttribute.Description" Rows="2" />
+                    <ValidationMessage For="@(() => KAttribute.Description)" />
+                </KntField>
+            </KntFormSection>
 
-        <KntFormField Label="Description:" Component="Description" LabelSize="2">
-            <RadzenTextArea Name="Description" @bind-Value="@KAttribute.Description" Style="width: 100%" />
-            <ValidationMessage For="@(() => KAttribute.Description)" />
-        </KntFormField>
-
-        @* Three fields in one row: the same label-left layout as KntFormField, column by column. *@
-        <RadzenRow AlignItems="AlignItems.Center" Gap="0.5rem">
-            <RadzenColumn Size="12" SizeMD="2">
-                <RadzenLabel Text="Required value:" Component="RequiredValue" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="1">
-                <RadzenCheckBox Name="RequiredValue" @bind-Value="@KAttribute.RequiredValue" TValue="bool" />
-                <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="1">
-                <RadzenLabel Text="Order:" Component="Order" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="2">
-                <RadzenNumeric Name="Order" @bind-Value="@KAttribute.Order" Style="width: 100%" />
-                <ValidationMessage For="@(() => KAttribute.Order)" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="2">
-                <RadzenLabel Text="Note type:" Component="NoteTypeId" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="4">
-                <RadzenDropDown Name="NoteTypeId" @bind-Value="@KAttribute.NoteTypeId" TValue="Guid?"
-                                Data="@NoteTypes" TextProperty="Name" ValueProperty="NoteTypeId"
-                                AllowClear="true" Style="width: 100%" />
-                <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
-            </RadzenColumn>
-        </RadzenRow>
-
-        <KntFormField Label="Data type:" Component="KAttributeDataType" LabelSize="2">
-            <RadzenDropDown Name="KAttributeDataType" @bind-Value="@KAttribute.KAttributeDataType" TValue="EnumKAttributeDataType"
-                            Data="@KntConst.KAttributes" TextProperty="Value" ValueProperty="Key" Style="width: 100%" />
-            <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
-        </KntFormField>
-
-        @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue || KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-        {
-            <KntFormField Label="" LabelSize="2">
-                <RadzenStack Gap="0.5rem">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                        <RadzenLabel Text="Tabulated values for this attribute:" />
-                        <RadzenButton Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light" MouseEnter="@(args => tooltipService.Open(args, "Add new value"))"
-                                      Click="@(() => OnAtrValueNew())" />
-                    </RadzenStack>
-                    <RadzenDataGrid Data="@atributeValues" TItem="KAttributeTabulatedValueDto" AllowColumnResize="true" Density="@Density.Compact">
-                        <Columns>
-                            <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Value" Title="Value" />
-                            <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Property="Order" Title="Order" Width="190px" />
-                            <RadzenDataGridColumn TItem="KAttributeTabulatedValueDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                                <Template Context="data">
-                                    <RadzenButton Click="@(() => OnAtrValueEdit(data))" Icon="edit" Size="ButtonSize.Small"
-                                        ButtonStyle="ButtonStyle.Primary"
-                                        MouseEnter="@(args => tooltipService.Open(args, "Edit  ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                                    <RadzenButton Click="@(() => OnAtrValueDelete(data))" Icon="delete" Size="ButtonSize.Small"
-                                        ButtonStyle="ButtonStyle.Danger"
-                                        MouseEnter="@(args => tooltipService.Open(args, "Delete ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+            <KntFormSection Icon="tune" Title="Behavior" Description="What the attribute holds and which notes have it.">
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Data type" Component="KAttributeDataType" Required="true">
+                            <RadzenDropDown Name="KAttributeDataType" @bind-Value="@KAttribute.KAttributeDataType" TValue="EnumKAttributeDataType"
+                                            Data="@KntConst.KAttributes" TextProperty="Value" ValueProperty="Key">
+                                <Template Context="dataType">
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                        <RadzenIcon Icon="@KntDataTypes.Icon(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Key)" />
+                                        <span>@(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Value)</span>
+                                    </RadzenStack>
                                 </Template>
-                            </RadzenDataGridColumn>
-                        </Columns>
-                    </RadzenDataGrid>
-                </RadzenStack>
-            </KntFormField>
-        }
+                                <ValueTemplate Context="dataType">
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                        <RadzenIcon Icon="@KntDataTypes.Icon(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Key)" />
+                                        <span>@(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Value)</span>
+                                    </RadzenStack>
+                                </ValueTemplate>
+                            </RadzenDropDown>
+                            <ValidationMessage For="@(() => KAttribute.KAttributeDataType)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Note type" Component="NoteTypeId" Help="Only the notes of this type have it. Empty: all the notes.">
+                            <RadzenDropDown Name="NoteTypeId" @bind-Value="@KAttribute.NoteTypeId" TValue="Guid?"
+                                            Data="@NoteTypes" TextProperty="Name" ValueProperty="NoteTypeId"
+                                            AllowClear="true" Placeholder="All the notes" />
+                            <ValidationMessage For="@(() => KAttribute.NoteTypeId)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Order" Component="Order" Help="Position among the note's attributes.">
+                            <RadzenNumeric Name="Order" @bind-Value="@KAttribute.Order" />
+                            <ValidationMessage For="@(() => KAttribute.Order)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Required value" Component="RequiredValue" Help="A note can't be saved without it.">
+                            <RadzenSwitch Name="RequiredValue" @bind-Value="@KAttribute.RequiredValue" />
+                            <ValidationMessage For="@(() => KAttribute.RequiredValue)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </KntFormSection>
 
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
+            @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue || KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
+            {
+                <KntFormSection Icon="list" Title="Values" Description="@(KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue ? "The tags a note can choose (several)." : "The values a note can choose (one).")">
+                    <div class="knt-values">
+                        <div class="knt-values-header">
+                            <span>@atributeValues!.Count @(atributeValues.Count == 1 ? "value" : "values")</span>
+                            <RadzenButton Text="Add value" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(() => OnAtrValueNew())" />
+                        </div>
+                        @if (atributeValues.Count == 0)
+                        {
+                            <div class="knt-values-empty">
+                                <RadzenIcon Icon="playlist_add" />
+                                <span>No values yet: add the first one.</span>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var value in atributeValues.OrderBy(v => v.Order))
+                            {
+                                <div class="knt-value-row" @ondblclick="() => OnAtrValueEdit(value)">
+                                    <span class="knt-value-order">@value.Order</span>
+                                    <span class="knt-value-text">@value.Value</span>
+                                    <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                                  MouseEnter="@(args => tooltipService.Open(args, "Edit value"))" Click="@(() => OnAtrValueEdit(value))" />
+                                    <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                                  MouseEnter="@(args => tooltipService.Open(args, "Delete value"))" Click="@(() => OnAtrValueDelete(value))" />
+                                </div>
+                            }
+                        }
+                    </div>
+                </KntFormSection>
+            }
 
-    </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
@@ -96,6 +117,13 @@
     [Parameter] public List<NoteTypeDto> NoteTypes { get; set; } = new List<NoteTypeDto>();
     
     List<KAttributeTabulatedValueDto>? atributeValues;
+
+    private bool IsNew => KAttribute.KAttributeId == Guid.Empty;
+
+    private string Title => IsNew ? "New attribute" : "Edit attribute";
+
+    private string Subtitle => IsNew ? "A new field for the notes." : KAttribute.Name;
+
 
     protected override void OnInitialized()
     {
@@ -130,7 +158,7 @@
     {
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete this attribute tabulated value?", 
-            "Delete note type", 
+            "Delete value", 
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
@@ -143,8 +171,8 @@
     async Task AtrValueEdit(KAttributeTabulatedValueDto atrValue)
     {
         var resAtrEdited = await dialogService.OpenAsync<AttributeValueEditor>($"Edit attribute tabulated value",
-               new Dictionary<string, object?>() { { "AtrValue", atrValue } },
-               KntDialogs.Small());
+               new Dictionary<string, object?>() { { "AtrValue", atrValue }, { "AttributeName", KAttribute.Name } },
+               KntDialogs.Framed(KntDialogs.Small()));
 
         if(resAtrEdited != null)
         {

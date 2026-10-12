@@ -97,6 +97,24 @@ public class FoldersController : ControllerBase
         }
     }
 
+    // The folder's path in the folders tree, from the root (the note editor shows it).
+    [HttpGet("{id}/[action]")]
+    public async Task<IActionResult> Path(Guid id)
+    {
+        try
+        {
+            var resApi = await _service.Folders.GetPathAsync(id);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Path {id} at {dateTime}.", id, DateTime.Now);
+            var resApi = new Result<string>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     [HttpPost]
     [HttpPut]
     [Authorize(Roles = "Admin, ProjectManager")]

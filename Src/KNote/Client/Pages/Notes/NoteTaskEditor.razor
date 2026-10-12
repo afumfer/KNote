@@ -1,101 +1,114 @@
 ﻿@inject NotificationService notificationService
 @inject DialogService dialogService
 
+@* Dialog of a note's task (NoteForm opens it framed): who it is for and what, its planning and its progress. The
+   result is the task edited, or null if cancelled. *@
 
 <EditForm Model="task" Context="formContextTask">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <RadzenStack Gap="1rem">
+    <KntDialogFrame Icon="@(TaskEdit == null ? "add_task" : "task_alt")" Title="@(TaskEdit == null ? "New task" : "Edit task")"
+                    Subtitle="@(string.IsNullOrEmpty(NoteTopic) ? "A task of the note." : NoteTopic)">
+        <ChildContent>
 
-        <KntFormField Label="User:" Component="UserId" LabelSize="2">
-            <RadzenDropDown Name="UserId" TValue="Guid" @bind-Value="@task.UserId"
-                            Data="@Users" TextProperty="FullName" ValueProperty="UserId" Style="width: 100%" />
-            <ValidationMessage For="@(() => task.UserId)" />
-        </KntFormField>
+            <KntFormSection Icon="person" Title="Assignment" Description="Who the task is for, and what it is.">
+                <KntField Label="User" Component="UserId" Required="true">
+                    <RadzenDropDown Name="UserId" TValue="Guid" @bind-Value="@task.UserId"
+                                    Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" Placeholder="Choose a user" />
+                    <ValidationMessage For="@(() => task.UserId)" />
+                </KntField>
+                <KntField Label="Description" Component="Description">
+                    <RadzenTextArea Name="Description" @bind-Value="@task.Description" Rows="2" />
+                    <ValidationMessage For="@(() => task.Description)" />
+                </KntField>
+                <KntField Label="Tags" Component="Tags" Help="Words separated by spaces or commas.">
+                    <RadzenTextBox Name="Tags" @bind-Value="@task.Tags" />
+                    <ValidationMessage For="@(() => task.Tags)" />
+                </KntField>
+            </KntFormSection>
 
-        <KntFormField Label="Description:" Component="Description" LabelSize="2">
-            <RadzenTextArea Name="Description" @bind-Value="@task.Description" Style="width: 100%" />
-            <ValidationMessage For="@(() => task.Description)" />
-        </KntFormField>
+            <KntFormSection Icon="event" Title="Planning" Description="How important and hard it is, and when it is expected.">
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="4">
+                        <KntField Label="Priority" Component="Priority">
+                            <RadzenNumeric Name="Priority" @bind-Value="@task.Priority" />
+                            <ValidationMessage For="@(() => task.Priority)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="4">
+                        <KntField Label="Difficulty" Component="DifficultyLevel">
+                            <RadzenNumeric Name="DifficultyLevel" TValue="double?" @bind-Value="@task.DifficultyLevel" />
+                            <ValidationMessage For="@(() => task.DifficultyLevel)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="4">
+                        <KntField Label="Estimated time (h)" Component="EstimatedTime">
+                            <RadzenNumeric Name="EstimatedTime" TValue="double?" @bind-Value="@task.EstimatedTime" />
+                            <ValidationMessage For="@(() => task.EstimatedTime)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Expected start">
+                            <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedStartDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                            <ValidationMessage For="@(() => task.ExpectedStartDate)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Expected end">
+                            <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedEndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                            <ValidationMessage For="@(() => task.ExpectedEndDate)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </KntFormSection>
 
-        <KntFormField Label="Tags:" Component="Tags" LabelSize="2">
-            <RadzenTextBox Name="Tags" @bind-Value="@task.Tags" Style="width: 100%" />
-            <ValidationMessage For="@(() => task.Tags)" />
-        </KntFormField>
+            <KntFormSection Icon="trending_up" Title="Progress" Description="When the work started and ended, and the time spent.">
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Start">
+                            <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.StartDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                            <ValidationMessage For="@(() => task.StartDate)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="End">
+                            <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.EndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                            <ValidationMessage For="@(() => task.EndDate)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Spent time (h)" Component="SpentTime">
+                            <RadzenNumeric Name="SpentTime" TValue="double?" @bind-Value="@task.SpentTime" />
+                            <ValidationMessage For="@(() => task.SpentTime)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Resolved" Component="Resolved" Help="The task is done.">
+                            <RadzenSwitch Name="Resolved" @bind-Value="@task.Resolved" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </KntFormSection>
 
-        @* Two fields per row: a column per field, each with its KntFormField (LabelSize relative to the column). *@
-        <RadzenRow Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Priority:" Component="Priority" LabelSize="4">
-                    <RadzenNumeric Name="Priority" @bind-Value="@task.Priority" Style="width: 100%" />
-                    <ValidationMessage For="@(() => task.Priority)" />
-                </KntFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Difficulty:" Component="DifficultyLevel" LabelSize="4">
-                    <RadzenNumeric Name="DifficultyLevel" TValue="double?" @bind-Value="@task.DifficultyLevel" Style="width: 100%" />
-                    <ValidationMessage For="@(() => task.DifficultyLevel)" />
-                </KntFormField>
-            </RadzenColumn>
-        </RadzenRow>
-
-        <RadzenRow Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Exp. start:" LabelSize="4">
-                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedStartDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
-                    <ValidationMessage For="@(() => task.ExpectedStartDate)" />
-                </KntFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Exp. end:" LabelSize="4">
-                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.ExpectedEndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
-                    <ValidationMessage For="@(() => task.ExpectedEndDate)" />
-                </KntFormField>
-            </RadzenColumn>
-        </RadzenRow>
-
-        <RadzenRow Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Start:" LabelSize="4">
-                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.StartDate" ShowTime="true" ShowSeconds="true" HoursStep="1.5" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
-                    <ValidationMessage For="@(() => task.StartDate)" />
-                </KntFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Resolv:" LabelSize="4">
-                    <RadzenDatePicker TValue="DateTime?" @bind-Value="@task.EndDate" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" Style="width: 100%" />
-                    <ValidationMessage For="@(() => task.EndDate)" />
-                </KntFormField>
-            </RadzenColumn>
-        </RadzenRow>
-
-        <RadzenRow Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Resolved:" Component="Resolved" LabelSize="4">
-                    <RadzenCheckBox Name="Resolved" TValue="bool" @bind-Value="@task.Resolved" />
-                </KntFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="6">
-                <KntFormField Label="Spent time:" Component="SpentTime" LabelSize="4">
-                    <RadzenNumeric Name="SpentTime" TValue="double?" @bind-Value="@task.SpentTime" Style="width: 100%" />
-                    <ValidationMessage For="@(() => task.SpentTime)" />
-                </KntFormField>
-            </RadzenColumn>
-        </RadzenRow>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Ok" Click="() => OnConfirm(formContextTask)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Ok" Icon="check" Click="() => OnConfirm(formContextTask)" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
 </EditForm>
 
 @code {
-    [Parameter] public List<UserDto> Users { get; set; }    
+    [Parameter] public List<UserDto> Users { get; set; }
     [Parameter] public  NoteTaskDto TaskEdit { get; set; }
+    // The note the task belongs to (the dialog's subtitle).
+    [Parameter] public string? NoteTopic { get; set; }
 
     private NoteTaskDto task;
 
@@ -105,8 +118,8 @@
             task = TaskEdit.GetSimpleDto<NoteTaskDto>();
         else
         {
-            task = new NoteTaskDto();            
-        }        
+            task = new NoteTaskDto();
+        }
         return base.OnInitializedAsync();
     }
 
@@ -114,7 +127,7 @@
     {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
-        {            
+        {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Validating task.", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
@@ -125,7 +138,7 @@
     }
 
     private void OnCancel()
-    {        
+    {
         dialogService.Close(null);
     }
 }

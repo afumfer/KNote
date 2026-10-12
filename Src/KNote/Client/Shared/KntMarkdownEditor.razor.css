@@ -1,0 +1,31 @@
+/* Only theme variables, so the editor follows the light/dark theme. */
+
+.knt-md-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.knt-md-editor-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+.knt-md-editor ::deep .rz-markdown-editor {
+    width: 100%;
+}
+
+.knt-md-editor-preview {
+    overflow: auto;
+    padding: 1rem 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 14%, transparent);
+    border-radius: var(--rz-border-radius);
+}
+
+.knt-md-editor-empty {
+    color: var(--rz-text-secondary-color);
+    font-style: italic;
+}

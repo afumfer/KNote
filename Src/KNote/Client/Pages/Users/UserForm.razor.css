@@ -1,0 +1,45 @@
+/* The roles as selectable tiles: a checkbox, the role and what it allows. Only theme variables. */
+
+.knt-role-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.625rem;
+}
+
+.knt-role-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 14%, transparent);
+    border-radius: var(--rz-border-radius);
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+    .knt-role-option:hover,
+    .knt-role-option:focus-visible {
+        border-color: var(--rz-primary);
+        outline: none;
+    }
+
+.knt-role-option-selected {
+    border-color: var(--rz-primary);
+    background-color: var(--rz-primary-lighter);
+}
+
+.knt-role-option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.knt-role-option-name {
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+}
+
+.knt-role-option-description {
+    font-size: 0.75rem;
+    color: var(--rz-text-secondary-color);
+}

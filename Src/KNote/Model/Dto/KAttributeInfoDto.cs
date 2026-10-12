@@ -177,7 +177,7 @@ public class KAttributeInfoDto : SmartModelDtoBase
         //if (string.IsNullOrEmpty(Description))
         //{
         //    results.Add(new ValidationResult
-        //     ("KMSG: Attribute description is required. "
+        //     ("Attribute description is required. "
         //     , new[] { "Description" }));
         //}
 
