@@ -2,31 +2,23 @@
 
 @inject IStore store
 @inject TooltipService tooltipService
+@inject ContextMenuService contextMenuService
 
 
 @* Compact: the same text size as the notes lists (NotesGrid), so the tree takes less room. *@
 <div class="knt-folders-tree">
-<RadzenTree Data=@FoldersInfo Change=@OnFolderSelected>
+<RadzenTree Data=@FoldersInfo Change=@OnFolderSelected ItemContextMenu=@OnItemContextMenu>
     <RadzenTreeLevel 
         TextProperty="Name" 
         ChildrenProperty="ChildFolders"     
         Expanded=@ShouldExpanded 
         Selected=@ShouldSelected
         HasChildren=@(f => ((FolderDto)f).ChildFolders.Any()) >
-            <Template>       
-                <RadzenIcon Icon="folder" Style="color: var(--rz-base-400)"/> @context.Text
-                @if (EditMode)
-                {
-                    <span>
-                        <div class="rz-pl-3" style="font-size:10px">
-                            <RadzenIcon Icon="edit" @onclick="@(() => OnFolderEdit((FolderDto)context.Value))"
-                                MouseEnter="@(args => tooltipService.Open(args, "Edit folder ...", new TooltipOptions(){ Position = TooltipPosition.Top }) )" />
-                            <RadzenIcon Icon="delete" @onclick="@(() => OnFolderDelete((FolderDto)context.Value))"
-                                MouseEnter="@(args => tooltipService.Open(args, "Delete folder ...", new TooltipOptions(){ Position = TooltipPosition.Right }) )" />
-                        </div>
-                    </span>                    
-                }
-        </Template>
+            <Template>
+                <span class="knt-folders-tree-item" @ondblclick="@(() => FolderDoubleClick.InvokeAsync((FolderDto)context.Value!))">
+                    <RadzenIcon Icon="folder" Style="color: var(--rz-base-400)"/> @context.Text
+                </span>
+            </Template>
     </RadzenTreeLevel>            
 </RadzenTree>
 </div>
@@ -35,9 +27,9 @@
 @code {
     [Parameter] public List<FolderDto> FoldersInfo { get; set; } = null!;
     [Parameter] public EventCallback<FolderDto> FolderSelected { get; set; }
-    [Parameter] public EventCallback<FolderDto> FolderDelete { get; set; }
-    [Parameter] public EventCallback<FolderDto> FolderEdit { get; set; }
-    [Parameter] public bool EditMode { get; set; }    
+    // Actions of a folder, shown with a right click on it (KntActionsMenu); none if not given.
+    [Parameter] public Func<FolderDto, IEnumerable<KntAction>>? FolderActions { get; set; }
+    [Parameter] public EventCallback<FolderDto> FolderDoubleClick { get; set; }
 
     private AppState appState = null!;
 
@@ -67,14 +59,10 @@
         await FolderSelected.InvokeAsync(folder);
     }
 
-    private async Task OnFolderDelete(FolderDto folder)
+    private void OnItemContextMenu(TreeItemContextMenuEventArgs args)
     {
-        await FolderDelete.InvokeAsync(folder);
-    }
-
-    private async Task OnFolderEdit(FolderDto folder)
-    {
-        await FolderEdit.InvokeAsync(folder);
+        if (FolderActions != null && args.Value is FolderDto folder)
+            KntActionsMenu.Open(contextMenuService, args, FolderActions(folder));
     }
 
     private bool ShouldSelected(object data)

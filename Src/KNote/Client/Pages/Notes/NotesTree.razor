@@ -15,6 +15,7 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <NotesListViewToggle Changed="StateHasChanged" />
             <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
@@ -22,7 +23,7 @@
 
 @* The panel takes the height left in the window: the tree and the notes list scroll each on its own, the page
    doesn't. *@
-<RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 11rem)">
+<RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 10rem)">
     <RadzenSplitter>
         <RadzenSplitterPane Size="20%" Min="160px" Max="45%" Style="overflow: auto">
             <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
@@ -32,7 +33,7 @@
             {
                 @* A new grid for each folder: it starts at the top (or where it was left) with its own data, in the
                    folder's order (Folder.OrderNotes, as in ClientWin). *@
-                <NotesGrid @ref="notesGrid" @key="folder.FolderId" LoadPage="LoadNotesPage" Position="appState.NotesTreePosition"
+                <NotesGrid @ref="notesGrid" Compact="@(appState.NotesListCompact ?? true)" @key="folder.FolderId" LoadPage="LoadNotesPage" Position="appState.NotesTreePosition"
                            Order="FolderOrder()" OrderChanged="OnOrderChanged"
                            OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
             }

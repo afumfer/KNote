@@ -28,7 +28,7 @@
                     <span class="knt-notes-grid-muted">@note.NoteNumber</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Topic" Title="Topic" SortOrder="@SortOrderOf("Topic")">
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Topic" Title="Topic" MinWidth="220px" SortOrder="@SortOrderOf("Topic")">
                 <Template Context="note">
                     <span class="knt-notes-grid-title">@note.Topic</span>
                 </Template>
@@ -40,18 +40,18 @@
                     <span class="knt-notes-grid-muted">@note.Tags</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="InternalTags" Title="Status" Width="110px" SortOrder="@SortOrderOf("InternalTags")">
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="InternalTags" Title="Status" Width="110px" Visible="@(!Compact)" SortOrder="@SortOrderOf("InternalTags")">
                 <Template Context="note">
                     <span class="knt-notes-grid-muted">@note.InternalTags</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="ModificationDateTime" Title="Modified" Width="100px" TextAlign="TextAlign.Right"
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="ModificationDateTime" Title="Modified" Width="100px" TextAlign="TextAlign.Right" Visible="@(!Compact)"
                                   SortOrder="@SortOrderOf("ModificationDateTime")">
                 <Template Context="note">
                     <span class="knt-notes-grid-muted">@note.ModificationDateTime.ToShortDateString()</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="CreationDateTime" Title="Created" Width="100px" TextAlign="TextAlign.Right"
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Property="CreationDateTime" Title="Created" Width="100px" TextAlign="TextAlign.Right" Visible="@(!Compact)"
                                   SortOrder="@SortOrderOf("CreationDateTime")">
                 <Template Context="note">
                     <span class="knt-notes-grid-muted">@note.CreationDateTime.ToShortDateString()</span>
@@ -71,6 +71,8 @@
     // Loads a page of the list in an order (null: the list's own order).
     [Parameter][EditorRequired] public Func<PageIdentifier, NotesOrder?, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
     [Parameter] public NotesListPosition? Position { get; set; }
+    // Compact view: number, topic, priority and tags (NotesListViewToggle).
+    [Parameter] public bool Compact { get; set; } = true;
     // The order the list starts with, unless Position remembers another one.
     [Parameter] public NotesOrder? Order { get; set; }
     // The user sorted the list with a header (null: removed the sort, back to the list's own order).

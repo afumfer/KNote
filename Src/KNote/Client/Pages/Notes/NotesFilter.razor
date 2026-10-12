@@ -12,12 +12,13 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <NotesListViewToggle Changed="StateHasChanged" />
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
 
 @* The panel takes the height left in the window: the criteria and the notes list scroll each on its own. *@
-<RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 11rem)">
+<RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 10rem)">
     <RadzenSplitter>
         <RadzenSplitterPane Size="22%" Min="200px" Max="50%" Style="overflow: auto">
             <div class="rz-p-2">
@@ -26,7 +27,7 @@
         </RadzenSplitterPane>
         <RadzenSplitterPane>
             @* A new grid for each filter applied: it starts at the top (or where it was left) with its own data. *@
-            <NotesGrid @ref="notesGrid" @key="filterVersion" LoadPage="LoadNotesPage" Position="appState.NotesFilterPosition"
+            <NotesGrid @ref="notesGrid" Compact="@(appState.NotesListCompact ?? true)" @key="filterVersion" LoadPage="LoadNotesPage" Position="appState.NotesFilterPosition"
                        OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
         </RadzenSplitterPane>
     </RadzenSplitter>

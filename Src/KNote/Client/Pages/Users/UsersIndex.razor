@@ -16,15 +16,10 @@
 </KntIndexHeader>
 
 <RadzenStack Gap="0.5rem" class="rz-pt-2">
-    <RadzenPager Density="Density.Compact"  @ref="pager" ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
-            HorizontalAlign="HorizontalAlign.Right"
-            Count="@((int)paginationContext.TotalCount)"
-            PageSize="@paginationContext.PageSize" PageNumbersCount="5"
-            PageChanged=@PageChanged />
-
     <EntityList List="users">
         <AllItems>
-            <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" Density="@Density.Compact"
+            <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" AllowSorting="true" Density="@Density.Compact"
+                            class="knt-admin-list"
                             CellContextMenu="@(args => KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!)))"
                             RowDoubleClick="@(args => OnEdit(args.Data!))">
                 <Columns>
@@ -47,35 +42,17 @@
 
     private List<UserDto>? users { get; set; }
     
-    private PaginationContext paginationContext = new PaginationContext();
-    private string pagingSummaryFormat = "Displaying page {0} of {1} (total {2} records)";
-    private RadzenPager pager;
 
     protected async override Task OnInitializedAsync()
     {
         await Load();
     }
 
-    private async Task PageChanged(PagerEventArgs args)
+    private async Task Load()
     {
-        await OnSelectedPage(args.PageIndex + 1);                
-    }
-
-    private async Task OnSelectedPage(int page)
-    {        
-        await Load(page);
-    }
-
-    private async Task Load(int page = 1)
-    {
-        paginationContext.CurrentPage = page;
-
-        var result = await store.Users.GetAllAsync(paginationContext.PageIdentifier);
+        var result = await store.Users.GetAllAsync();
         if (result.IsValid)
-        {
             users = result.Entity;
-            paginationContext.TotalCount = result.TotalCount;            
-        }
 
         StateHasChanged();
     }
@@ -108,7 +85,7 @@
                KntDialogs.Medium(showClose: false));
 
         if(res != null)           
-            await Load(paginationContext.CurrentPage);        
+            await Load();        
     }
 
     private List<KntAction> ActionsOf(UserDto user) =>
@@ -125,7 +102,7 @@
 
         if(res != null)
         {
-            await Load(paginationContext.CurrentPage);
+            await Load();
         }        
     }
 

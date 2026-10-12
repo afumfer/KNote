@@ -1,0 +1,10 @@
+/* The tabs' pages start right below the tabs' top edge, and each list (class knt-admin-list in the pages) takes
+   the height left in the window and scrolls on its own, so the page doesn't grow. */
+
+.knt-admin ::deep .rz-tabview-panel {
+    padding: 0.5rem 1rem 1rem;
+}
+
+.knt-admin ::deep .knt-admin-list {
+    height: calc(100vh - 15.5rem);
+}

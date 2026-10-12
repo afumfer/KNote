@@ -11,21 +11,26 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <NotesListViewToggle Changed="StateHasChanged" />
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
 
 @* The search box and, below, the notes list taking the height left in the window. *@
-<RadzenStack Gap="0.5rem" class="rz-pt-2" Style="height: calc(100vh - 10.5rem)">
+<RadzenStack Gap="0.5rem" class="rz-pt-2" Style="height: calc(100vh - 9.5rem)">
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-        <RadzenTextBox @bind-Value="textSearch" Immediate="true" Placeholder="Text search  ..." Style="flex: 1;"
-                       @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))" />
+        <RadzenFormField Text="Text search" Variant="Variant.Outlined" Style="flex: 1;">
+            <Start><RadzenIcon Icon="search" /></Start>
+            <ChildContent>
+                <RadzenTextBox @bind-Value="textSearch" Immediate="true" @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))" />
+            </ChildContent>
+        </RadzenFormField>
         <RadzenButton Text="Search" Icon="search" Click="OnSearch" ButtonStyle="ButtonStyle.Primary" />
     </RadzenStack>
 
     <RadzenCard class="rz-p-1" Style="flex: 1; min-height: 0">
         @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
-        <NotesGrid @ref="notesGrid" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
+        <NotesGrid @ref="notesGrid" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
                    OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
     </RadzenCard>
 </RadzenStack>

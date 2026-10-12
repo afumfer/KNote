@@ -18,7 +18,8 @@
 <div class="rz-pt-2">
     <EntityList List="noteTypes">
         <AllItems>
-            <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" Density="@Density.Compact"
+            <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" AllowSorting="true" Density="@Density.Compact"
+                            class="knt-admin-list"
                             CellContextMenu="@(args => KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!)))"
                             RowDoubleClick="@(args => OnEdit(args.Data!))">
                 <Columns>

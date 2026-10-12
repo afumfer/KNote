@@ -3,8 +3,8 @@
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
                  Wrap="FlexWrap.Wrap" class="rz-m-1 rz-p-2 knt-background-subtle rz-border-radius-1">
         <RadzenStack Gap="0.25rem">
-            <strong>@((MarkupString)Note.Topic) (#@Note.NoteNumber)</strong>
-            <small class="rz-ml-4"><i>Creation: @(Note.CreationDateTime.ToShortDateString()) - Tags: @(Note.Tags)</i></small>
+            <span class="knt-note-card-title">@((MarkupString)Note.Topic) (#@Note.NoteNumber)</span>
+            <span class="knt-note-card-info">Last modification: @(Note.ModificationDateTime.ToShortDateString()) - Tags: @(Note.Tags)</span>
         </RadzenStack>
         <KntActionsMenu Actions="@actions" />
     </RadzenStack>
