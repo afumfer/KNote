@@ -196,7 +196,7 @@
     {
         var res = await dialogService.OpenAsync<NoteKAttributeFilterSelector>($"Attribute filter selector",
                new Dictionary<string, object?>() { { "Attribute", new AtrFilterDto() } },
-               KntDialogs.Medium());        
+               KntDialogs.Framed(KntDialogs.Small()));        
 
         if(res != null)
         {

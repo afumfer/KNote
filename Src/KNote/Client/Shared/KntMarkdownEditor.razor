@@ -1,31 +1,27 @@
-@using System.Text.RegularExpressions
-
 @inject IJSRuntime js
 
-@* Editor of a note's description (Markdown, with HTML of its own): Design (Radzen's WYSIWYG editor), Markdown (its
-   source, with the same toolbar) or Preview (the note as it is shown, made safe by Server: ViewMarkdown). The mode
-   chosen is kept in the browser. Radzen's editor shows the note's HTML (written in ClientWin) as text in Design
-   mode; it keeps it as written, and Preview shows it as it looks. *@
+@* Editor of a note's description: its Markdown (Radzen's editor in its source mode, with its toolbar) or a Preview
+   (the note as it is shown, made safe by Server: ViewMarkdown). The mode chosen is kept in the browser. Radzen's
+   Design (WYSIWYG) mode is left out: there Enter makes a new paragraph, which Markdown writes as an extra blank
+   line, and ClientWin shows the Markdown as text, line by line. *@
 
+@* Drawn once the mode saved is known (the editor shown for a moment would give its text back). *@
+@if (modeLoaded)
+{
 <div class="knt-md-editor">
+    @if (!Locked)
+    {
     <div class="knt-md-editor-bar">
         <RadzenSelectBar TValue="string" Value="@mode" ValueChanged="@((string value) => SetModeAsync(value))" Size="ButtonSize.Small">
             <Items>
-                <RadzenSelectBarItem Text="Design" Value="@DesignMode" Icon="edit_note" />
                 <RadzenSelectBarItem Text="Markdown" Value="@SourceMode" Icon="code" />
                 <RadzenSelectBarItem Text="Preview" Value="@PreviewMode" Icon="visibility" />
             </Items>
         </RadzenSelectBar>
-        @if (mode == DesignMode && HasHtml)
-        {
-            <span class="knt-md-editor-hint">
-                <RadzenIcon Icon="info" />
-                This note has HTML: here it shows as text; Preview shows it as it looks.
-            </span>
-        }
     </div>
+    }
 
-    @if (mode == PreviewMode)
+    @if (Locked || mode == PreviewMode)
     {
         <div class="knt-md-editor-preview" style="height: @Height">
             <ViewMarkdown MarkdownContent="@Value">
@@ -37,36 +33,57 @@
     }
     else
     {
+        @* Its toolbar without the Design/Source switch (RadzenMarkdownEditorSource). *@
         <RadzenMarkdownEditor Value="@Value" ValueChanged="@((string value) => OnValueChanged(value))"
-                              Mode="@(mode == SourceMode ? MarkdownEditorMode.Source : MarkdownEditorMode.Design)"
-                              ModeChanged="@((MarkdownEditorMode value) => SetModeAsync(value == MarkdownEditorMode.Source ? SourceMode : DesignMode))"
-                              Style="@($"height: {Height}")" />
+                              Mode="MarkdownEditorMode.Source" Style="@($"height: {Height}")">
+            <RadzenMarkdownEditorUndo />
+            <RadzenMarkdownEditorRedo />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorFormatBlock />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorBold />
+            <RadzenMarkdownEditorItalic />
+            <RadzenMarkdownEditorStrikethrough />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorQuote />
+            <RadzenMarkdownEditorCode />
+            <RadzenMarkdownEditorCodeBlock />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorUnorderedList />
+            <RadzenMarkdownEditorOrderedList />
+            <RadzenMarkdownEditorTaskList />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorLink />
+            <RadzenMarkdownEditorImage />
+            <RadzenMarkdownEditorHorizontalRule />
+            <RadzenMarkdownEditorSeparator />
+            <RadzenMarkdownEditorTable />
+        </RadzenMarkdownEditor>
     }
 </div>
+}
 
 @code {
     [Parameter] public string? Value { get; set; }
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    // The note's content is locked (ContentType's DescriptionBlocked): only its preview, no editor.
+    [Parameter] public bool Locked { get; set; }
     // Height of the editing (or preview) area.
     [Parameter] public string Height { get; set; } = "max(20rem, calc(100vh - 24rem))";
 
-    private const string DesignMode = "design";
     private const string SourceMode = "source";
     private const string PreviewMode = "preview";
     private const string StorageKey = "KNoteDescriptionEditorMode";
 
-    private string mode = DesignMode;
-
-    // HTML tags in the text (written in ClientWin's HTML editor or by hand).
-    private bool HasHtml => Value != null && HtmlTag.IsMatch(Value);
-
-    private static readonly Regex HtmlTag = new(@"<(?:[a-zA-Z][a-zA-Z0-9]*|!--)[\s>/]", RegexOptions.Compiled);
+    private string mode = SourceMode;
+    private bool modeLoaded;
 
     protected override async Task OnInitializedAsync()
     {
-        var saved = await js.LocalStorageGetItem(StorageKey);
-        if (saved is DesignMode or SourceMode or PreviewMode)
-            mode = saved;
+        // Preview, or Markdown (also for the Design mode saved by a former version).
+        if (await js.LocalStorageGetItem(StorageKey) == PreviewMode)
+            mode = PreviewMode;
+        modeLoaded = true;
     }
 
     private async Task SetModeAsync(string value)
@@ -77,9 +94,17 @@
         await js.LocalStorageSetItem(StorageKey, mode);
     }
 
+    // Radzen's editor gives the text back when it starts, with its line breaks as LF (notes keep CR LF, as ClientWin
+    // writes them): that is not a change of the note.
     private Task OnValueChanged(string value)
     {
+        if (SameText(value, Value))
+            return Task.CompletedTask;
+
         Value = value;
         return ValueChanged.InvokeAsync(value);
     }
+
+    private static bool SameText(string? a, string? b) =>
+        (a ?? "").Replace("\r\n", "\n").TrimEnd() == (b ?? "").Replace("\r\n", "\n").TrimEnd();
 }

@@ -2,31 +2,40 @@
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
+@* Dialog of the notes filter (NotesFilterCriteria opens it framed): an attribute and the value its notes have in
+   it. The result is the attribute filter, or null if cancelled. *@
 
 <EditForm Model="Attribute" Context="formContextAtr">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <RadzenStack Gap="1rem">
+    <KntDialogFrame Icon="filter_list" Title="Filter by attribute" Subtitle="The notes whose attribute has this value.">
+        <ChildContent>
+            <RadzenStack Gap="1rem">
+                <KntField Label="Attribute" Component="AtrId" Required="true">
+                    <RadzenDropDown Name="AtrId" TValue="Guid" @bind-Value="@Attribute.AtrId"
+                                    Data="@listAtr" TextProperty="Name" ValueProperty="KAttributeId" AllowFiltering="true" Placeholder="Choose an attribute">
+                        <Template Context="atr">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenIcon Icon="@KntDataTypes.Icon(((KAttributeInfoDto)atr).KAttributeDataType)" />
+                                <span>@(((KAttributeInfoDto)atr).Name)</span>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDropDown>
+                    <ValidationMessage For="@(() => Attribute.AtrId)" />
+                </KntField>
+                <KntField Label="Value" Component="Value" Required="true">
+                    <RadzenTextBox Name="Value" @bind-Value="@Attribute.Value" />
+                    <ValidationMessage For="@(() => Attribute.Value)" />
+                </KntField>
+            </RadzenStack>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Add filter" Icon="filter_alt" Click="() => OnConfirm(formContextAtr)" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
 
-        <KntFormField Label="Attribute:" Component="AtrId" LabelSize="2">
-            <RadzenDropDown Name="AtrId" TValue="Guid" @bind-Value="@Attribute.AtrId"
-                            Data="@listAtr" TextProperty="Name" ValueProperty="KAttributeId" Style="width: 100%" />
-            <ValidationMessage For="@(() => Attribute.AtrId)" />
-        </KntFormField>
-
-        <KntFormField Label="Value:" Component="Value" LabelSize="2">
-            <RadzenTextBox Name="Value" @bind-Value="@Attribute.Value" Style="width: 100%" />
-            <ValidationMessage For="@(() => Attribute.Value)" />
-        </KntFormField>
-
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton Text="Ok" Click="() => OnConfirm(formContextAtr)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Secondary" />
-        </RadzenStack>
-
-    </RadzenStack>
- 
 </EditForm>
 
 
@@ -43,26 +52,26 @@
 
         if(Attribute == null)
             Attribute = new AtrFilterDto();
-      
+
         await base.OnInitializedAsync();
     }
 
     private void OnConfirm(EditContext formContext)
-    {        
+    {
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
-        {            
+        {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Loading attribute info.", Detail = "Incorrect data, check the required attributes.", Duration = 12000 });
             return;
         }
 
         Attribute.AtrName = listAtr.Where(_ => _.KAttributeId == Attribute.AtrId).Select(_ => _.Name).FirstOrDefault();
-        
+
         dialogService.Close(Attribute);
     }
 
     private void OnCancel()
-    {        
+    {
         dialogService.Close(null);
     }
 }

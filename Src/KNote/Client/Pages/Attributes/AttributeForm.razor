@@ -28,13 +28,13 @@
                                             Data="@KntConst.KAttributes" TextProperty="Value" ValueProperty="Key">
                                 <Template Context="dataType">
                                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                                        <RadzenIcon Icon="@DataTypeIcon(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Key)" />
+                                        <RadzenIcon Icon="@KntDataTypes.Icon(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Key)" />
                                         <span>@(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Value)</span>
                                     </RadzenStack>
                                 </Template>
                                 <ValueTemplate Context="dataType">
                                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                                        <RadzenIcon Icon="@DataTypeIcon(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Key)" />
+                                        <RadzenIcon Icon="@KntDataTypes.Icon(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Key)" />
                                         <span>@(((KeyValuePair<EnumKAttributeDataType, string>)dataType).Value)</span>
                                     </RadzenStack>
                                 </ValueTemplate>
@@ -124,19 +124,6 @@
 
     private string Subtitle => IsNew ? "A new field for the notes." : KAttribute.Name;
 
-    // The icon of each data type, in the data type list.
-    public static string DataTypeIcon(EnumKAttributeDataType dataType) => dataType switch
-    {
-        EnumKAttributeDataType.String => "short_text",
-        EnumKAttributeDataType.TextArea => "notes",
-        EnumKAttributeDataType.Int => "pin",
-        EnumKAttributeDataType.Double => "decimal_increase",
-        EnumKAttributeDataType.DateTime => "event",
-        EnumKAttributeDataType.Bool => "toggle_on",
-        EnumKAttributeDataType.TabulatedValue => "list",
-        EnumKAttributeDataType.TagsValue => "sell",
-        _ => "label"
-    };
 
     protected override void OnInitialized()
     {

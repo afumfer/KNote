@@ -1,46 +1,70 @@
 ﻿@inject TooltipService tooltipService
 
+@* The note's tasks: each one with whether it is resolved, its description and tags, who it is for, its priority,
+   dates and time spent, and its actions. Double click edits a task. *@
 
-<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" class="rz-mb-1">
-    <RadzenButton Text="New task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
-</RadzenStack>
+<div class="knt-list-header">
+    <span>@Tasks.Count @(Tasks.Count == 1 ? "task" : "tasks")@(Tasks.Count > 0 ? $" · {Tasks.Count(t => t.Resolved)} resolved" : "")</span>
+    <RadzenButton Text="Add task" Icon="add_task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+</div>
 
-<EntityList List="Tasks">
-    <AllItems>
-        <RadzenDataGrid Data="@Tasks" TItem="NoteTaskDto" AllowColumnResize="true" Density="@Density.Compact" >
-            <Columns>
-                <RadzenDataGridColumn TItem="NoteTaskDto" Property="UserFullName" Title="User name" />
-                <RadzenDataGridColumn TItem="NoteTaskDto" Property="Description" Title="Description" />
-                <RadzenDataGridColumn TItem="NoteTaskDto" Property="Priority" Title="Priority"  />
-                <RadzenDataGridColumn TItem="NoteTaskDto" Property="ExpectedStartDate" Title="Expected start" />                
-                <RadzenDataGridColumn TItem="NoteTaskDto" Property="ExpectedEndDate" Title="Expected end" />
-                <RadzenDataGridColumn TItem="NoteTaskDto" Property="SpentTime" Title="Spent time" />
-                <RadzenDataGridColumn TItem="NoteTaskDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                    <Template Context="data">                                                        
-                        <RadzenButton Click="@(() => OnEdit.InvokeAsync(data))" Icon="edit" Size="ButtonSize.Small"
-                                      ButtonStyle="ButtonStyle.Primary" 
-                            MouseEnter="@(args => tooltipService.Open(args, "Edit task ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                        <RadzenButton Click="@(() => OnDelete.InvokeAsync(data))" Icon="delete" Size="ButtonSize.Small"
-                                      ButtonStyle="ButtonStyle.Danger" 
-                            MouseEnter="@(args => tooltipService.Open(args, "Delete task ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                    </Template>
-                </RadzenDataGridColumn>
-            </Columns> 
-        </RadzenDataGrid>
-    </AllItems>
-</EntityList>
+@if (Tasks.Count == 0)
+{
+    <div class="knt-empty-state">
+        <RadzenIcon Icon="task_alt" />
+        <div class="knt-empty-state-title">No tasks yet</div>
+        <div class="knt-empty-state-text">Add tasks to plan the work of the note and follow it (a new note has to be saved first).</div>
+    </div>
+}
+else
+{
+    <div class="knt-tasks">
+        @foreach (var task in Tasks.OrderBy(t => t.Resolved).ThenByDescending(t => t.Priority))
+        {
+            <div class="knt-task @(task.Resolved ? "knt-task-resolved" : null)" @ondblclick="() => OnEdit.InvokeAsync(task)">
+                <RadzenIcon Icon="@(task.Resolved ? "check_circle" : "radio_button_unchecked")" class="knt-task-state" />
+                <div class="knt-task-body">
+                    <div class="knt-task-title">
+                        <span>@(string.IsNullOrWhiteSpace(task.Description) ? "(No description)" : task.Description)</span>
+                        @foreach (var tag in Tags(task))
+                        {
+                            <span class="knt-task-tag">@tag</span>
+                        }
+                    </div>
+                    <div class="knt-task-meta">
+                        <span><RadzenIcon Icon="person" />@(task.UserFullName ?? "-")</span>
+                        <span><RadzenIcon Icon="flag" />Priority @task.Priority</span>
+                        @if (task.ExpectedStartDate != null || task.ExpectedEndDate != null)
+                        {
+                            <span><RadzenIcon Icon="event" />@Dates(task.ExpectedStartDate, task.ExpectedEndDate)</span>
+                        }
+                        @if (task.SpentTime != null)
+                        {
+                            <span><RadzenIcon Icon="timer" />@task.SpentTime h</span>
+                        }
+                    </div>
+                </div>
+                <div class="knt-task-actions">
+                    <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => OnEdit.InvokeAsync(task))" MouseEnter="@(args => tooltipService.Open(args, "Edit task"))" />
+                    <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                  Click="@(() => OnDelete.InvokeAsync(task))" MouseEnter="@(args => tooltipService.Open(args, "Delete task"))" />
+                </div>
+            </div>
+        }
+    </div>
+}
 
 @code {
-    [Parameter] public List<NoteTaskDto> Tasks { get; set; }
+    [Parameter] public List<NoteTaskDto> Tasks { get; set; } = new();
     [Parameter] public EventCallback<NoteTaskDto> OnDelete { get; set; }
     [Parameter] public EventCallback<NoteTaskDto> OnEdit { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
 
-    private string ToShortDate(DateTime? dt)
-    {
-        if (dt == null)
-            return "";
-        else
-            return dt.Value.ToShortDateString();
-    }
+    private static IEnumerable<string> Tags(NoteTaskDto task) =>
+        (task.Tags ?? "").Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    // Planned dates: "12/10/2026 → 15/10/2026", or the one there is.
+    private static string Dates(DateTime? start, DateTime? end) =>
+        start != null && end != null ? $"{start:d} → {end:d}" : start != null ? $"From {start:d}" : $"Until {end:d}";
 }

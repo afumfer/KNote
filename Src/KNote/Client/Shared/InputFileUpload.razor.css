@@ -1,32 +1,80 @@
-﻿﻿.file-drop-zone {
-    width: 100%;
-    border: 2px dotted var(--rz-text-tertiary-color);
+/* The zone to choose a file: dashed, highlighted while a file is dragged over it; the hidden file input covers it,
+   so a click anywhere opens the file chooser. Only theme variables. */
+
+.knt-dropzone {
+    position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 2px;
-    min-height: 80px;
-}
-
-.hover {
-    border-style: dotted;
-    background-color: var(--rz-primary-lighter);
-}
-
-.image-container {
-    display: flex;
     justify-content: center;
+    gap: 0.25rem;
+    min-height: 9rem;
+    padding: 1.25rem;
+    text-align: center;
+    border: 2px dashed color-mix(in srgb, var(--rz-text-color) 25%, transparent);
+    border-radius: var(--rz-border-radius);
+    color: var(--rz-text-secondary-color);
+    transition: border-color 0.15s, background-color 0.15s;
 }
 
-    .image-container img {
-        width: 50%;
+    .knt-dropzone:hover,
+    .knt-dropzone:focus-visible,
+    .knt-dropzone-hover {
+        border-color: var(--rz-primary);
+        background-color: color-mix(in srgb, var(--rz-primary) 8%, transparent);
+        outline: none;
     }
 
-::deep input[type=file] {
-    width: 100%;
-    padding: 20px;
+.knt-dropzone-chosen {
+    border-style: solid;
 }
 
-.error-message-container {
-    color: var(--rz-danger);
-    text-align: center;
+.knt-dropzone ::deep .knt-dropzone-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.knt-dropzone ::deep .knt-dropzone-icon {
+    font-size: 2.5rem;
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+.knt-dropzone-title {
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+    overflow-wrap: anywhere;
+}
+
+.knt-dropzone-text {
+    font-size: 0.75rem;
+}
+
+.knt-dropzone-file {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 100%;
+    text-align: start;
+}
+
+    .knt-dropzone-file img {
+        width: 7rem;
+        height: 5rem;
+        flex: none;
+        object-fit: cover;
+        border-radius: var(--rz-border-radius);
+    }
+
+.knt-dropzone-file ::deep .knt-dropzone-file-icon {
+    flex: none;
+    font-size: 3rem;
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+.knt-dropzone-file-text {
+    min-width: 0;
 }

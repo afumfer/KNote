@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -235,6 +236,10 @@ public class NotesController : ControllerBase
         {
             _logger.LogTrace("Post/Put {topic} at {dateTime}.", note.Topic?.ToString(), DateTime.Now);
             
+            // ContentType (as ClientWin keeps it): a JSON with the description's view in ClientWin ("des"), the
+            // script's language ("scr") and whether the description is locked ("blk"). A note in the old plain format
+            // ("markdown", "navigation#"...) is read into it (GetContentTypeExt) and always saved in the JSON one;
+            // only the view is decided here, the rest is kept as it is.
             var ct = note.GetContentTypeExt();
 
             // Hack to make it compatible with the desktop application. ----------------------------------
@@ -242,17 +247,20 @@ public class NotesController : ControllerBase
             if(note.Description != null)
             {
                 if (note.Description.StartsWith(@"<BODY"))
-                {
                     ct.ForDescription = "html";
-                    note.SetContentTypeExt(ct);
-                }
                 else
                 {                
-                    note.Description = note.Description.Replace("\n", "\r\n");
-                    ct.ForDescription = "markdown";
-                    note.SetContentTypeExt(ct);
+                    // Line breaks as ClientWin writes them (CR LF), whatever the browser or the editor sent: LF, CR LF or
+                    // CR CR LF (a CR LF made CR CR LF by a former version of this line).
+                    note.Description = Regex.Replace(note.Description, @"\r*\n|\r", "\r\n");
+                    // Markdown, shown as text ("markdown") or rendered ("navigation"), as the user left it in ClientWin.
+                    if (ct.ForDescription != "navigation")
+                        ct.ForDescription = "markdown";
                 }
             }
+            if (string.IsNullOrEmpty(ct.ForDescription))
+                ct.ForDescription = "markdown";
+            note.SetContentTypeExt(ct);
             // -------------------------------------------------------------------------------------------
 
             var resApi = await _service.Notes.SaveAsync(note);

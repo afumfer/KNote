@@ -50,7 +50,7 @@
                                 <ValidationMessage For="@(() => Note.Topic)" />
                             </KntField>
                             <KntField Label="Description">
-                                <KntMarkdownEditor @bind-Value="@Note.Description" />
+                                <KntMarkdownEditor @bind-Value="@Note.Description" Locked="@ContentLocked" />
                                 <ValidationMessage For="@(() => Note.Description)" />
                             </KntField>
                         </RadzenStack>
@@ -87,7 +87,7 @@
                                 </RadzenRow>
                             </KntFormSection>
 
-                            <KntFormSection Icon="history" Title="Record" Description="Assigned by the app.">
+                            <KntFormSection Icon="history" Title="Record" Description="Assigned by the app, and whether the content can be edited.">
                                 <dl class="knt-note-facts">
                                     <dt>Number</dt>
                                     <dd>@(Note.IsNew() ? "When it is saved" : $"#{Note.NoteNumber}")</dd>
@@ -97,6 +97,14 @@
                                     <dd>@(Note.IsNew() ? "-" : Note.ModificationDateTime.ToString("g"))</dd>
                                     <dt>Status</dt>
                                     <dd>@(string.IsNullOrEmpty(Note.InternalTags) ? "-" : Note.InternalTags)</dd>
+                                    <dt>Content</dt>
+                                    <dd class="knt-note-lock">
+                                        <RadzenSwitch Value="@ContentLocked" ValueChanged="@((bool locked) => SetContentLocked(locked))" />
+                                        <span>
+                                            <RadzenIcon Icon="@(ContentLocked ? "lock" : "lock_open")" />
+                                            @(ContentLocked ? "Locked content" : "Editable content")
+                                        </span>
+                                    </dd>
                                 </dl>
                             </KntFormSection>
                         </div>
@@ -183,6 +191,17 @@
     private List<UserDto>? users;
 
     private Guid? oldNoteType = null;
+
+    // The note's content (its description) is locked: shown, not edited (ContentType's DescriptionBlocked, saved with
+    // the note).
+    private bool ContentLocked => Note.GetContentTypeExt().DescriptionBlocked;
+
+    private void SetContentLocked(bool locked)
+    {
+        var ct = Note.GetContentTypeExt();
+        ct.DescriptionBlocked = locked;
+        Note.SetContentTypeExt(ct);
+    }
 
     // The note whose path, resources and tasks are loaded (another one after "Save and new").
     private Guid? loadedNoteId;
@@ -348,8 +367,8 @@
         else
         {            
             var resultDialog = await dialogService.OpenAsync<NoteResourceSelector>($"New resource and upload resource file",
-                   new Dictionary<string, object?>() { },
-                   KntDialogs.Medium());
+                   new Dictionary<string, object?>() { { "NoteTopic", Note.Topic } },
+                   KntDialogs.Framed(KntDialogs.Medium()));
 
             if(resultDialog != null)
             {                
@@ -373,6 +392,12 @@
 
     private async Task OnDeleteResource(ResourceInfoDto resource)
     {
+        var confirmed = await dialogService.Confirm(
+            $"Are you sure you want to delete the resource - {resource.Description} -?", "Delete resource",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (confirmed != true)
+            return;
+
         var result = await webApiService.Notes.DeleteResourceAsync(resource.ResourceId);
         if (result.IsValid)
         {
@@ -388,7 +413,7 @@
 
     private void InsertInDescription(ResourceInfoDto resource)
     {
-        if (resource.FileType == "image/jpeg")
+        if (KntFileTypes.IsImage(resource.FileType))
             Note.Description += "\n\n![alt text](" + resource?.FullUrl + " '" + resource?.Description + "' )";
         else
             Note.Description += "\n\n<a href=" + resource?.FullUrl + " target='_blank'>" + resource?.Description + "</a>";
@@ -412,8 +437,8 @@
             taskEdit = null;            
 
             var result = await dialogService.OpenAsync<NoteTaskEditor>($"New task",
-                   new Dictionary<string, object?>() { { "TaskEdit", null }, { "Users" , users} },
-                   KntDialogs.Large());
+                   new Dictionary<string, object?>() { { "TaskEdit", null }, { "Users" , users}, { "NoteTopic", Note.Topic } },
+                   KntDialogs.Framed(KntDialogs.Large()));
 
             if(result != null)
                 await SaveEditedTask(result); 
@@ -425,8 +450,8 @@
         taskEdit = task;        
 
         var result = await dialogService.OpenAsync<NoteTaskEditor>($"Edit task",
-               new Dictionary<string, object?>() { { "TaskEdit", task }, { "Users" , users} },
-               KntDialogs.Large());
+               new Dictionary<string, object?>() { { "TaskEdit", task }, { "Users" , users}, { "NoteTopic", Note.Topic } },
+               KntDialogs.Framed(KntDialogs.Large()));
 
         if(result != null)
         {
@@ -448,6 +473,12 @@
 
     private async Task OnDeleteTask(NoteTaskDto task)
     {
+        var confirmed = await dialogService.Confirm(
+            $"Are you sure you want to delete the task - {task.Description} -?", "Delete task",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (confirmed != true)
+            return;
+
         var result = await webApiService.Notes.DeleteNoteTaskAsync(task.NoteTaskId);
         if (result.IsValid)
         {

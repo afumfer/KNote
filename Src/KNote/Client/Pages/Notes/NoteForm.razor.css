@@ -184,3 +184,21 @@
         color: var(--rz-text-color);
         overflow-wrap: anywhere;
     }
+
+/* Record's Content: the switch that locks the note's content, and what it is now. */
+.knt-note-facts dd.knt-note-lock {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .knt-note-facts dd.knt-note-lock > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .knt-note-lock ::deep .rzi {
+        font-size: 1rem;
+    }
+

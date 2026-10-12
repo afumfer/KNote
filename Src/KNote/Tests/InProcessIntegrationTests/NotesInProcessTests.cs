@@ -71,6 +71,87 @@ public class NotesInProcessTests
         AssertSafeHtml(res?.Entity);
     }
 
+    // The web app may send a description's line breaks as LF (browser, Markdown editor), CR LF (as loaded) or, after
+    // a former bug, CR CR LF: they are saved as ClientWin writes them, a single CR LF each.
+    [TestMethod]
+    [DataRow("one\ntwo\n\nthree")]
+    [DataRow("one\r\ntwo\r\n\r\nthree")]
+    [DataRow("one\r\r\ntwo\r\r\n\r\r\nthree")]
+    [DataRow("one\r\ntwo\n\r\r\nthree")]
+    public async Task Post_SavesTheDescriptionLineBreaksAsCrLf(string description)
+    {
+        var note = await CreateNoteAsync("__TEST LINE BREAKS__", description);
+        try
+        {
+            var res = await (await _httpClient.GetAsync($"api/notes/{note.NoteId}")).Content.ReadFromJsonAsync<Result<NoteDto>>();
+
+            Assert.AreEqual("one\r\ntwo\r\n\r\nthree", res!.Entity!.Description);
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/notes/{note.NoteId}");
+        }
+    }
+
+    // The description's view in ClientWin (ContentType): a Markdown note saved from the web keeps "navigation"
+    // (rendered) or "markdown" (text); an HTML one is "html"; an "html" note whose description is no longer HTML
+    // goes back to "markdown".
+    [TestMethod]
+    [DataRow("navigation", "Markdown text", "navigation")]
+    [DataRow("markdown", "Markdown text", "markdown")]
+    [DataRow("html", "Markdown text", "markdown")]
+    [DataRow("markdown", "<BODY><P>html</P></BODY>", "html")]
+    public async Task Post_KeepsTheDescriptionViewOfClientWin(string view, string description, string expected)
+    {
+        var note = await CreateNoteAsync("__TEST CONTENT TYPE__");
+        try
+        {
+            var loaded = (await (await _httpClient.GetAsync($"api/notes/{note.NoteId}")).Content.ReadFromJsonAsync<Result<NoteDto>>())!.Entity!;
+            loaded.SetContentTypeExt(new ContentTypeExt { ForDescription = view, ForScript = "knt" });
+            loaded.Description = description;
+            loaded.FolderDto = _folder;
+            var httpRes = await _httpClient.PutAsJsonAsync("api/notes", loaded);
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, await httpRes.Content.ReadAsStringAsync());
+
+            var saved = (await (await _httpClient.GetAsync($"api/notes/{note.NoteId}")).Content.ReadFromJsonAsync<Result<NoteDto>>())!.Entity!;
+            Assert.AreEqual(expected, saved.GetContentTypeExt().ForDescription);
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/notes/{note.NoteId}");
+        }
+    }
+
+    // ContentType saved from the web is always ClientWin's JSON (a note in the old plain format is turned into it),
+    // and keeps the script's language and the description's lock.
+    [TestMethod]
+    [DataRow("navigation#", "navigation", "knt", true)]
+    [DataRow("markdown", "markdown", "knt", false)]
+    [DataRow("{\"des\":\"markdown\",\"scr\":\"cs\",\"blk\":true}", "markdown", "cs", true)]
+    [DataRow("{\"des\":\"navigation\",\"scr\":\"py\",\"blk\":false}", "navigation", "py", false)]
+    public async Task Post_SavesContentTypeAsJsonKeepingScriptAndLock(string contentType, string view, string script, bool locked)
+    {
+        var note = await CreateNoteAsync("__TEST CONTENT TYPE JSON__");
+        try
+        {
+            var loaded = (await (await _httpClient.GetAsync($"api/notes/{note.NoteId}")).Content.ReadFromJsonAsync<Result<NoteDto>>())!.Entity!;
+            loaded.ContentType = contentType;
+            loaded.FolderDto = _folder;
+            var httpRes = await _httpClient.PutAsJsonAsync("api/notes", loaded);
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, await httpRes.Content.ReadAsStringAsync());
+
+            var saved = (await (await _httpClient.GetAsync($"api/notes/{note.NoteId}")).Content.ReadFromJsonAsync<Result<NoteDto>>())!.Entity!;
+            Assert.IsTrue(ContentTypeExtJsonHelper.TryDeserialize(saved.ContentType, out var ct), saved.ContentType);
+            Assert.AreEqual(view, ct.ForDescription);
+            Assert.AreEqual(script, ct.ForScript);
+            Assert.AreEqual(locked, ct.DescriptionBlocked);
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/notes/{note.NoteId}");
+        }
+    }
+
     [TestMethod]
     public async Task Html_WithoutSigningIn_IsUnauthorized()
     {

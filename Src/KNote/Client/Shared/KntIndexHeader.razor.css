@@ -1,4 +1,4 @@
-/* Only theme variables (and --knt-* from knt-theme.css), so the header follows the light/dark theme. */
+﻿/* Only theme variables (and --knt-* from knt-theme.css), so the header follows the light/dark theme. */
 
 .knt-section-header {
     display: flex;
@@ -60,6 +60,15 @@
         --rz-menu-top-item-background-color: transparent;
         --rz-menu-top-item-border-radius: var(--rz-border-radius);
         --rz-menu-top-item-hover-background-color: var(--rz-primary-lighter);
+        /* The theme's hover text is faint: with the soft background it read as a disabled item. */
+        --rz-menu-top-item-hover-color: var(--rz-text-title-color);
+        --rz-menu-top-item-icon-hover-color: var(--rz-text-title-color);
+        /* Radzen keeps the item clicked "selected" (it is meant for submenus, which these menus don't have): it
+           looked disabled, e.g. Edit note after opening the note's window. */
+        --rz-menu-top-item-selected-background-color: transparent;
+        --rz-menu-top-item-selected-color: var(--rz-menu-top-item-color);
+        --rz-menu-item-selected-background-color: transparent;
+        --rz-menu-item-selected-color: var(--rz-menu-top-item-color);
         background-color: transparent;
         border: none;
     }

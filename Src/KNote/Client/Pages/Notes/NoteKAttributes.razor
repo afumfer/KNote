@@ -1,47 +1,70 @@
 ﻿@inject IStore store
 
 
-<RadzenStack Gap="0.75rem">
-    @foreach (var KAttribute in Attributes)
-    {
-        <KntFormField Label="@($"{KAttribute.Name}{(KAttribute.RequiredValue ? " (*)" : "")}:")">
-            @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.String)
+@* The note's attributes (those of its type and the general ones): a field for each, with its label above, a mark
+   if it is required and its description as help. *@
+
+@if (Attributes.Count == 0)
+{
+    <div class="knt-empty-state">
+        <RadzenIcon Icon="fact_check" />
+        <div class="knt-empty-state-title">This note has no attributes</div>
+        <div class="knt-empty-state-text">Choose a type in Overview: the note gets the attributes of its type.</div>
+    </div>
+}
+else
+{
+    <KntFormSection Icon="fact_check" Title="Attributes" Description="The fields of the note's type, and the ones of all the notes.">
+        <RadzenRow Gap="1rem">
+            @foreach (var KAttribute in Attributes)
             {
-                <RadzenTextBox @bind-Value="@KAttribute.ValueString" Style="width: 100%" />
+                var wide = KAttribute.KAttributeDataType is EnumKAttributeDataType.TextArea or EnumKAttributeDataType.TagsValue;
+                <RadzenColumn Size="12" SizeMD="@(wide ? 12 : 6)">
+                    <KntField Label="@KAttribute.Name" Required="@KAttribute.RequiredValue" Help="@KAttribute.Description">
+                        @if (KAttribute.KAttributeDataType == EnumKAttributeDataType.String)
+                        {
+                            <RadzenTextBox @bind-Value="@KAttribute.ValueString" />
+                        }
+                        else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TextArea)
+                        {
+                            <RadzenTextArea @bind-Value="@KAttribute.ValueString" Rows="3" />
+                        }
+                        else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.DateTime)
+                        {
+                            <RadzenDatePicker TValue="DateTime?" @bind-Value="@KAttribute.ValueDateTime" DateFormat="dd/MM/yyyy" />
+                        }
+                        else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Int)
+                        {
+                            <RadzenNumeric TValue="int?" @bind-Value="@KAttribute.ValueInt" />
+                        }
+                        else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Double)
+                        {
+                            <RadzenNumeric TValue="double?" @bind-Value="@KAttribute.ValueDouble" />
+                        }
+                        else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Bool)
+                        {
+                            <RadzenSwitch @bind-Value="@KAttribute.ValueBool" />
+                        }
+                        else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
+                        {
+                            <RadzenDropDown TValue="IEnumerable<string>" Multiple="true" Chips="true" AllowClear="true" AllowSelectAll="false"
+                                            Data="@KAttribute.TagsValues" TextProperty="Value" ValueProperty="Key"
+                                            Value="@SelectedTags(KAttribute)"
+                                            ValueChanged="@((IEnumerable<string> tags) => onAttributeChange(KAttribute, string.Join(", ", tags ?? [])))"
+                                            Placeholder="Choose tags" />
+                        }
+                        else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
+                        {
+                            <RadzenDropDown TValue="string" @bind-Value="@KAttribute.ValueTabulate"
+                                            Data="@KAttribute.TabulatedValues" TextProperty="Value" ValueProperty="Value"
+                                            AllowClear="true" Placeholder="Choose a value" />
+                        }
+                    </KntField>
+                </RadzenColumn>
             }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TextArea)
-            {
-                <RadzenTextArea @bind-Value="@KAttribute.ValueString" Style="width: 100%" />
-            }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.DateTime)
-            {
-                <RadzenDatePicker TValue="DateTime?" @bind-Value="@KAttribute.ValueDateTime" DateFormat="dd/MM/yyyy" />
-            }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Int)
-            {
-                <RadzenNumeric TValue="int?" @bind-Value="@KAttribute.ValueInt" Style="width: 100%" />
-            }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Double)
-            {
-                <RadzenNumeric TValue="double?" @bind-Value="@KAttribute.ValueDouble" Style="width: 100%" />
-            }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.Bool)
-            {
-                <RadzenCheckBox TValue="bool" @bind-Value="@KAttribute.ValueBool" />
-            }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-            {
-                <MultiSelectList Items="KAttribute.TagsValues" OnAttributeChange="(it) => onAttributeChange(KAttribute, it)" />
-            }
-            else if (KAttribute.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
-            {
-                <RadzenDropDown TValue="string" @bind-Value="@KAttribute.ValueTabulate"
-                                Data="@KAttribute.TabulatedValues" TextProperty="Value" ValueProperty="Value"
-                                AllowClear="true" Style="width: 100%" />
-            }
-        </KntFormField>
-    }
-</RadzenStack>
+        </RadzenRow>
+    </KntFormSection>
+}
 
 @code {
     [Parameter] public List<NoteKAttributeDto> Attributes { get; set; }
@@ -132,6 +155,9 @@
 
         return tagsSel;
     }
+
+    private static IEnumerable<string> SelectedTags(NoteKAttributeDto item) =>
+        item.TagsValues.Where(t => t.Selected).Select(t => t.Key).ToList();
 
     private void onAttributeChange(NoteKAttributeDto item, string value)
     {

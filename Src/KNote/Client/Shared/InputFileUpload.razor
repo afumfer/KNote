@@ -4,14 +4,34 @@
 
 @implements IAsyncDisposable
 
-<div @ref="fileDropContainer" class="file-drop-zone @HoverClass" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter">
-        <InputFile OnChange="LoadFile" @ref="inputFile" />
-</div>
+@* Zone to choose a file: click it, drop a file on it or paste one (js/filePaste.js). Once chosen, it shows the
+   file (its image, or an icon of its kind), its name and size. *@
 
-<div class="image-container" >  
-    @if (imgSrc != null)
+<div @ref="fileDropContainer" class="knt-dropzone @HoverClass @(fileSelected != null ? "knt-dropzone-chosen" : null)" tabindex="0"
+     @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter" @ondrop="OnDragLeave">
+    <InputFile OnChange="LoadFile" @ref="inputFile" class="knt-dropzone-input" title="" />
+    @if (fileSelected == null)
     {
-        <img src="@imgSrc" style="width: @(imgWidth)px;" />        
+        <RadzenIcon Icon="cloud_upload" class="knt-dropzone-icon" />
+        <div class="knt-dropzone-title">Drop a file here, paste it, or click to choose it</div>
+        <div class="knt-dropzone-text">Up to @KntFileTypes.Size(KntConst.MaxLenResourceFile).</div>
+    }
+    else
+    {
+        <div class="knt-dropzone-file">
+            @if (imgSrc != null)
+            {
+                <img src="@imgSrc" alt="@fileSelected.Name" />
+            }
+            else
+            {
+                <RadzenIcon Icon="@KntFileTypes.Icon(fileSelected.Type)" class="knt-dropzone-file-icon" />
+            }
+            <div class="knt-dropzone-file-text">
+                <div class="knt-dropzone-title">@fileSelected.Name</div>
+                <div class="knt-dropzone-text">@KntFileTypes.Size(fileSelected.Size) · Click or drop another file to change it.</div>
+            </div>
+        </div>
     }
 </div>
 
@@ -26,19 +46,9 @@
 
     private string? HoverClass;
     private string? imgSrc;
-    private int imgWidth = 50;
 
     private IJSObjectReference _filePasteModule = null!;
     private IJSObjectReference _filePasteFunctionReference = null!;
-
-    protected override void OnInitialized()
-    {
-        if (!string.IsNullOrEmpty(ContentBase64))
-        {
-            imgSrc = "data:image/jpeg;base64, " + ContentBase64;
-        }
-        base.OnInitialized();
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -50,53 +60,34 @@
         }
     }
 
-    void OnDragEnter(DragEventArgs e) => HoverClass = "hover";
+    void OnDragEnter(DragEventArgs e) => HoverClass = "knt-dropzone-hover";
 
     void OnDragLeave(DragEventArgs e) => HoverClass = string.Empty;
 
-    async Task LoadFile(InputFileChangeEventArgs e)    
+    async Task LoadFile(InputFileChangeEventArgs e)
     {
         foreach(var file in e.GetMultipleFiles())
         {
-            try
-            {                    
-                using var stream = file.OpenReadStream(KntConst.MaxLenResourceFile);
-                using var ms = new MemoryStream();
-                await stream.CopyToAsync(ms);
+            using var stream = file.OpenReadStream(KntConst.MaxLenResourceFile);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
 
-                ContentBase64 = Convert.ToBase64String(ms.ToArray());
+            ContentBase64 = Convert.ToBase64String(ms.ToArray());
 
-                fileSelected = new KntFileInfo
-                    {
-                        Name = file.Name,
-                        Type = file.ContentType,
-                        Size = file.Size,
-                        LastModifiedDate = file.LastModified.DateTime,
-                        ContentBase64 = ContentBase64
-                    };
-
-                if (fileSelected.Type == "image/jpeg")
+            fileSelected = new KntFileInfo
                 {
-                    imgWidth = 400;
-                    imgSrc = "data:image/jpeg;base64, " + ContentBase64;
-                }
-                else if (fileSelected.Type == "application/pdf")
-                {
-                    imgWidth = 50;
-                    imgSrc = @"https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg";
-                }
-                else
-                    imgSrc = @"https://img.icons8.com/ios/50/000000/document-1.png";
+                    Name = file.Name,
+                    Type = file.ContentType,
+                    Size = file.Size,
+                    LastModifiedDate = file.LastModified.DateTime,
+                    ContentBase64 = ContentBase64
+                };
 
-                await OnSelectedFile.InvokeAsync(fileSelected);
-                StateHasChanged();
+            imgSrc = KntFileTypes.IsImage(fileSelected.Type) ? $"data:{fileSelected.Type};base64,{ContentBase64}" : null;
+            HoverClass = string.Empty;
 
-            }
-            catch (Exception)
-            {
-                // TODO: Write in log ...
-                throw;
-            }
+            await OnSelectedFile.InvokeAsync(fileSelected);
+            StateHasChanged();
         }
     }
 
