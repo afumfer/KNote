@@ -158,7 +158,7 @@ export function restoreScrollTop(host, value) {
 
 // Point below the actions button of a row, to open its menu there.
 export function getActionsAnchor(host, noteId) {
-    const button = host.querySelector(`tr[data-note-id="${noteId}"] .knt-notes-grid-actions button`);
+    const button = host.querySelector(`tr[data-note-id="${noteId}"] .knt-actions-menu button`);
     if (!button)
         return null;
     const rect = button.getBoundingClientRect();

@@ -3,6 +3,7 @@
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
+@inject ContextMenuService contextMenuService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -23,20 +24,17 @@
 
     <EntityList List="users">
         <AllItems>
-            <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" Density="@Density.Compact">
+            <RadzenDataGrid Data="@users" TItem="UserDto" AllowColumnResize="true" Density="@Density.Compact"
+                            CellContextMenu="@(args => KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!)))"
+                            RowDoubleClick="@(args => OnEdit(args.Data!))">
                 <Columns>
                     <RadzenDataGridColumn TItem="UserDto" Property="UserName" Title="User name" />
                     <RadzenDataGridColumn TItem="UserDto" Property="FullName" Title="Full name" />
                     <RadzenDataGridColumn TItem="UserDto" Property="EMail" Title="Email"  />
                     <RadzenDataGridColumn TItem="UserDto" Property="RoleDefinition" Title="Roles" />                
-                    <RadzenDataGridColumn TItem="UserDto" Title="Actions" Width="100px" TextAlign="TextAlign.Center" >
-                        <Template Context="data">                                                        
-                            <RadzenButton Click="@(() => OnEdit(data))" Icon="edit" Size="ButtonSize.Small"
-                                ButtonStyle="ButtonStyle.Primary" 
-                                MouseEnter="@(args => tooltipService.Open(args, "Edit user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
-                            <RadzenButton Click="@(() => OnDelete(data))" Icon="delete" Size="ButtonSize.Small"
-                                ButtonStyle="ButtonStyle.Danger" 
-                                MouseEnter="@(args => tooltipService.Open(args, "Delete user ...", new TooltipOptions(){ Position = TooltipPosition.Left }) )" />
+                    <RadzenDataGridColumn TItem="UserDto" Width="52px" TextAlign="TextAlign.Center" Resizable="false" Sortable="false">
+                        <Template Context="data">
+                            <KntActionsMenu Actions="@ActionsOf(data)" />
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns> 
@@ -112,6 +110,12 @@
         if(res != null)           
             await Load(paginationContext.CurrentPage);        
     }
+
+    private List<KntAction> ActionsOf(UserDto user) =>
+    [
+        new("Edit", "edit", () => OnEdit(user)),
+        new("Delete", "delete", () => OnDelete(user), Danger: true)
+    ];
 
     async Task OnEdit(UserDto user)
     {        

@@ -4,6 +4,8 @@
 @inject TooltipService tooltipService
 
 
+@* Compact: the same text size as the notes lists (NotesGrid), so the tree takes less room. *@
+<div class="knt-folders-tree">
 <RadzenTree Data=@FoldersInfo Change=@OnFolderSelected>
     <RadzenTreeLevel 
         TextProperty="Name" 
@@ -27,6 +29,7 @@
         </Template>
     </RadzenTreeLevel>            
 </RadzenTree>
+</div>
 
 
 @code {

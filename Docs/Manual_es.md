@@ -152,7 +152,7 @@ Las páginas **Tree panel**, **Notes filter** y **Quick search** muestran sus no
 
 **Seleccionar y abrir.** Un clic selecciona una nota; un doble clic o **Enter** la abre. Las flechas, **RePág**, **AvPág**, **Inicio** y **Fin** mueven la selección.
 
-**Acciones.** El botón **⋮** de una nota, un clic derecho sobre ella, la tecla de menú contextual o **Mayús+F10** muestran sus acciones (**View**, **Edit**, **Delete**), y **Supr** borra la nota seleccionada tras confirmarlo. Editar y borrar requieren el rol Staff o uno superior.
+**Acciones.** El botón **⋮** de una nota, un clic derecho sobre ella, la tecla de menú contextual o **Mayús+F10** muestran sus acciones (**View**, **Edit**, **Delete**), y **Supr** borra la nota seleccionada tras confirmarlo. Editar y borrar requieren el rol Staff o uno superior. El mismo menú **⋮** (y el clic derecho) se usa en las notas de **Home** y en las listas del **Admin panel** (usuarios, tipos de nota y atributos), donde un doble clic edita el elemento.
 
 **Ordenar.** Al pulsar la cabecera de una columna la lista se ordena por ella; un segundo clic invierte el orden y un tercero vuelve al orden propio de la lista. En el panel del árbol cada carpeta se abre con su orden de notas, como en la aplicación de escritorio: por número de nota, un orden fijo o, si la carpeta sigue el último orden usado, el último elegido en cualquiera de las dos aplicaciones (ordenar las notas de la carpeta lo guarda). El orden de notas de una carpeta se define en su formulario de edición (**Folders**), con las mismas opciones que en la aplicación de escritorio.
 

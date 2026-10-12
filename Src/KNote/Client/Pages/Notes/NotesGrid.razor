@@ -59,13 +59,8 @@
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="NoteMinimalDto" Width="44px" TextAlign="TextAlign.Center" Resizable="false" Sortable="false">
                 <Template Context="note">
-                    @* The span keeps the button clicks from reaching the row (a double click opens the note). Out
-                       of the Tab order: from the keyboard the menu is opened with the context menu key. *@
-                    <span class="knt-notes-grid-actions" @onclick:stopPropagation="true" @ondblclick:stopPropagation="true">
-                        <RadzenButton Icon="more_vert" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.ExtraSmall"
-                                      TabIndex="-1" Click="@(args => OpenActions(note, args.Detail == 0 ? null : args))"
-                                      MouseEnter="@(args => tooltipService.Open(args, "Actions ...", new TooltipOptions(){ Position = TooltipPosition.Left }))" />
-                    </span>
+                    @* Out of the Tab order: from the keyboard the menu is opened with the context menu key. *@
+                    <KntActionsMenu Actions="@ActionsOf(note)" Size="ButtonSize.ExtraSmall" TabIndex="-1" />
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
@@ -287,6 +282,17 @@
             .SelectMany(blockTask => blockTask.Result!)
             .FirstOrDefault(n => n.NoteId.ToString() == noteId);
 
+    private List<KntAction> ActionsOf(NoteMinimalDto note)
+    {
+        var actions = new List<KntAction> { new("View", "launch", () => RunActionAsync(NoteAction.View, note)) };
+        if (canEdit)
+        {
+            actions.Add(new("Edit", "edit", () => RunActionAsync(NoteAction.Edit, note)));
+            actions.Add(new("Delete", "delete", () => RunActionAsync(NoteAction.Delete, note), Danger: true));
+        }
+        return actions;
+    }
+
     /// <summary>Shows the actions of a note at the mouse (args) or, from the keyboard, below its ⋮ button.</summary>
     private async Task OpenActions(NoteMinimalDto note, MouseEventArgs? args)
     {
@@ -298,25 +304,7 @@
             args = new MouseEventArgs { ClientX = anchor?.X ?? 0, ClientY = anchor?.Y ?? 0 };
         }
 
-        var items = new List<ContextMenuItem>
-        {
-            new() { Text = "View", Value = NoteAction.View, Icon = "launch" }
-        };
-        if (canEdit)
-        {
-            items.Add(new() { Text = "Edit", Value = NoteAction.Edit, Icon = "edit" });
-            items.Add(new() { Text = "Delete", Value = NoteAction.Delete, Icon = "delete", IconColor = "var(--rz-danger)" });
-        }
-
-        contextMenuService.Open(args, items, e => OnActionClick(e, note));
-    }
-
-    private async void OnActionClick(MenuItemEventArgs args, NoteMinimalDto note)
-    {
-        contextMenuService.Close();
-
-        if (args.Value is NoteAction action)
-            await RunActionAsync(action, note);
+        KntActionsMenu.Open(contextMenuService, args, ActionsOf(note));
     }
 
     private async Task RunActionAsync(NoteAction action, NoteMinimalDto note)

@@ -1,0 +1,20 @@
+/* Compact criteria, in line with the notes list: smaller labels and icons. */
+
+.knt-filter-criteria ::deep .rz-form-field {
+    width: 100%;
+}
+
+.knt-filter-criteria ::deep .rz-form-field-start .rzi,
+.knt-filter-criteria ::deep .rz-form-field-end .rzi {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+}
+
+.knt-filter-criteria ::deep .rz-form-field-label {
+    font-size: 0.8125rem;
+}
+
+.knt-filter-criteria-none {
+    color: var(--rz-text-tertiary-color);
+}

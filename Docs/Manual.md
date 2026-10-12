@@ -152,7 +152,7 @@ The **Tree panel**, **Notes filter** and **Quick search** pages show their notes
 
 **Selecting and opening.** A click selects a note; a double click or **Enter** opens it. The arrows, **Page Up**, **Page Down**, **Home** and **End** move the selection.
 
-**Actions.** The **⋮** button of a note, a right click on it, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one.
+**Actions.** The **⋮** button of a note, a right click on it, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one. The same **⋮** menu (and right click) is used in the notes of **Home** and in the lists of the **Admin panel** (users, note types and attributes), where a double click edits the item.
 
 **Sorting.** Clicking a column header sorts the list by that column; a second click reverses the order and a third one goes back to the list's own order. In the tree panel each folder opens in its notes order, as in the desktop app: by note number, a fixed order, or, when the folder follows the last order used, the last one chosen in either app (sorting the folder's notes saves it). The notes order of a folder is set in its edit form (**Folders**), with the same options as in the desktop app.
 
