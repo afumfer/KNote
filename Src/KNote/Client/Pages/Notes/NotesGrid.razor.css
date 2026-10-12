@@ -42,10 +42,9 @@
     text-overflow: ellipsis;
 }
 
-.knt-notes-grid-host ::deep .knt-notes-grid .rz-button-xs {
-    min-height: 1.25rem;
-    min-width: 1.25rem;
-    padding: 0;
+/* A soft hover, so that the current (selected) row stands out, as in the admin lists (knt-list). */
+.knt-notes-grid-host ::deep .knt-notes-grid tbody tr.rz-data-row:hover:not([data-knt-current]) > td {
+    background-color: color-mix(in srgb, var(--rz-text-color) 7%, transparent);
 }
 
 .knt-notes-grid-title {

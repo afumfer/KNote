@@ -7,8 +7,9 @@
 @*
     Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
     height of its container. A click selects a row (the current row, js/notesGrid.js), which the arrows, page
-    keys, Home and End move too; double click or Enter opens its note; the ⋮ button, a right click, the context
-    menu key or Shift+F10 show its actions, and Delete deletes it. The headers sort the list (in the server:
+    keys, Home and End move too (a right click selects it as well); double click or Enter opens its note; a right
+    click, the context menu key or Shift+F10 show its actions, and Delete deletes it. The page's header acts on the
+    selected note too (Current, EditCurrentAsync, DeleteCurrentAsync). The headers sort the list (in the server:
     LoadPage gets the order). With Position it remembers where the user was when a note was opened.
 *@
 
@@ -57,12 +58,6 @@
                     <span class="knt-notes-grid-muted">@note.CreationDateTime.ToShortDateString()</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="NoteMinimalDto" Width="44px" TextAlign="TextAlign.Center" Resizable="false" Sortable="false">
-                <Template Context="note">
-                    @* Out of the Tab order: from the keyboard the menu is opened with the context menu key. *@
-                    <KntActionsMenu Actions="@ActionsOf(note)" Size="ButtonSize.ExtraSmall" TabIndex="-1" />
-                </Template>
-            </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
 </div>
@@ -80,6 +75,18 @@
     [Parameter] public EventCallback<NoteMinimalDto> OnNoteView { get; set; }
     [Parameter] public EventCallback<NoteMinimalDto> OnNoteEdit { get; set; }
     [Parameter] public EventCallback<NoteMinimalDto> OnNoteDelete { get; set; }
+    // The selected (current) row changed: the page shows its header buttons again.
+    [Parameter] public EventCallback CurrentChanged { get; set; }
+
+    /// <summary>The note of the selected (current) row, if any.</summary>
+    public NoteMinimalDto? Current { get; private set; }
+
+    /// <summary>Whether the user can edit or delete the selected note.</summary>
+    public bool CanEditCurrent => Current != null && canEdit;
+
+    public Task EditCurrentAsync() => Current == null ? Task.CompletedTask : RunActionAsync(NoteAction.Edit, Current);
+
+    public Task DeleteCurrentAsync() => Current == null ? Task.CompletedTask : RunActionAsync(NoteAction.Delete, Current);
 
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
@@ -101,6 +108,9 @@
     private bool canEdit;
     private bool restoreScroll;
     private readonly Dictionary<int, Task<List<NoteMinimalDto>?>> blocks = new();
+    // Position of each note loaded in the whole list (data-knt-index of its row, for js/notesGrid.js: Radzen's
+    // aria-rowindex can't be trusted, it goes wrong when the grid is drawn again by its parent).
+    private readonly Dictionary<Guid, int> noteIndexes = new();
     private int dataVersion;
     private NotesOrder? order;
     private NotesOrder? initialOrder;
@@ -109,11 +119,36 @@
 
     protected override async Task OnInitializedAsync()
     {
+        renderedCompact = Compact;
         restoreScroll = Position?.ScrollTop > 0;
         order = initialOrder = Position?.Order ?? Order;
 
         var user = (await AuthenticationState).User;
         canEdit = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
+    }
+
+    // The page draws itself again often (its header follows the selected note, AppState changes...). If that
+    // draws the grid again while Radzen loads rows (virtualization), the grid can be left without rows or with
+    // old ones: the grid only draws again for the page when its view (Compact) changes. Its own changes (rows
+    // loaded, order, selection) draw it as usual.
+    private bool parentRender;
+    private bool renderedCompact;
+
+    protected override void OnParametersSet()
+    {
+        parentRender = true;
+    }
+
+    protected override bool ShouldRender()
+    {
+        if (!parentRender)
+            return true;
+
+        parentRender = false;
+        if (renderedCompact == Compact)
+            return false;
+        renderedCompact = Compact;
+        return true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -122,6 +157,10 @@
         {
             dotNetRef = DotNetObjectReference.Create(this);
             keyboardHelper = await (await GetModuleAsync()).InvokeAsync<IJSObjectReference>("initialize", host, dotNetRef);
+
+            // A new list has no selected note yet: the page updates its header buttons (it may have shown those of
+            // the previous list).
+            await CurrentChanged.InvokeAsync();
         }
 
         // Back to a list left before: once the first rows (and so the total) are drawn, scroll to where it
@@ -137,7 +176,12 @@
     public async Task ReloadAsync()
     {
         blocks.Clear();
+        noteIndexes.Clear();
         dataVersion++;
+
+        // The selected note may be gone: the current row tells the new one once it is drawn again.
+        Current = null;
+        await CurrentChanged.InvokeAsync();
 
         if (grid != null)
             await grid.RefreshDataAsync();
@@ -219,7 +263,10 @@
         }
 
         count = (int)result.TotalCount;
-        return result.Entity ?? new List<NoteMinimalDto>();
+        var notesOfBlock = result.Entity ?? new List<NoteMinimalDto>();
+        for (var i = 0; i < notesOfBlock.Count; i++)
+            noteIndexes[notesOfBlock[i].NoteId] = block * FetchSize + i;
+        return notesOfBlock;
     }
 
     // A new order: the notes loaded are no longer valid, and the list starts again at the top.
@@ -230,6 +277,7 @@
             Position.Order = newOrder;
 
         blocks.Clear();
+        noteIndexes.Clear();
         dataVersion++;
         await (await GetModuleAsync()).InvokeVoidAsync("setScrollTop", host, 0);
         await OrderChanged.InvokeAsync(newOrder);
@@ -240,8 +288,10 @@
         if (args.Data == null)
             return;
 
-        // Used by notesGrid.js to know the note of the row highlighted with the keyboard.
+        // Used by notesGrid.js: the note of each row and its position in the whole list.
         args.Attributes["data-note-id"] = args.Data.NoteId;
+        if (noteIndexes.TryGetValue(args.Data.NoteId, out var index))
+            args.Attributes["data-knt-index"] = index;
         if (args.Data.NoteId == Position?.LastNoteId)
             args.Attributes["data-last-opened"] = true;
     }
@@ -256,6 +306,14 @@
     {
         if (args.Data != null)
             await OpenActions(args.Data, args);
+    }
+
+    /// <summary>The current row changed (js/notesGrid.js): a click, the keyboard or a reload.</summary>
+    [JSInvokable]
+    public async Task OnCurrentChanged(string? noteId)
+    {
+        Current = noteId == null ? null : FindLoadedNote(noteId);
+        await CurrentChanged.InvokeAsync();
     }
 
     /// <summary>A key pressed on the current row (js/notesGrid.js): "view", "menu" or "delete".</summary>
@@ -295,7 +353,7 @@
         return actions;
     }
 
-    /// <summary>Shows the actions of a note at the mouse (args) or, from the keyboard, below its ⋮ button.</summary>
+    /// <summary>Shows the actions of a note at the mouse (args) or, from the keyboard, below its row.</summary>
     private async Task OpenActions(NoteMinimalDto note, MouseEventArgs? args)
     {
         tooltipService.Close();

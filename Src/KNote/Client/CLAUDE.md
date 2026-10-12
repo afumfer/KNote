@@ -160,14 +160,19 @@ Patrones ya establecidos que hay que seguir:
   `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen
   (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
-  `Shared/EntityList` (que pinta "cargando"/"sin registros"). Las acciones de una fila (o de una tarjeta) van en
-  un menú ⋮, `Shared/KntActionsMenu` con una lista de `KntAction` (texto, icono, acción, `Danger` para borrar), no
-  en botones sueltos; el mismo menú con clic derecho (`CellContextMenu` → `KntActionsMenu.Open(...)`) y el doble
-  clic hace la acción principal (editar). Ver `Users/UsersIndex`. En un árbol, el menú va con el clic derecho
+  `Shared/EntityList` (que pinta "cargando"/"sin registros"). Las acciones de una fila van en la cabecera de
+  la página (Edit/Delete junto a New, sobre la fila seleccionada) y en un menú con clic derecho
+  (`CellContextMenu` → `KntActionsMenu.Open(...)` con una lista de `KntAction`: texto, icono, acción, `Danger` para
+  borrar; el clic derecho también selecciona la fila); el doble clic hace la acción principal (editar). Sin
+  columna de acciones ni botones por fila. Ver `Users/UsersIndex`. Fuera de una lista (las tarjetas de Home) el
+  menú es el botón ⋮ de `Shared/KntActionsMenu`. En un árbol, el menú va con el clic derecho
   (`KntFoldersTreeView.FolderActions`, `ItemContextMenu` de `RadzenTree`) y los botones de la cabecera actúan sobre
   el elemento seleccionado (`Folders/FoldersIndex`). Las listas de administración se ordenan con
   `AllowSorting` (todos los datos en memoria, sin paginar) y, dentro de `Admin`, la clase `knt-admin-list` les da
-  la altura de la ventana con scroll propio (`Admin.razor.css`).
+  la altura de la ventana con scroll propio (`Admin.razor.css`). Tienen selección simple (`SelectionMode.Single`,
+  el clic derecho también selecciona) y la clase `knt-list` (`knt-theme.css`: filas como las de las listas de notas,
+  sin rayado, `AllowAlternatingRows="false"`, y la fila seleccionada con el color de su fila actual); la cabecera
+  lleva Edit/Delete del elemento seleccionado junto a New, como en `Folders/FoldersIndex`.
 - **Listas de notas** (árbol, filtro, búsqueda): `Pages/Notes/NotesGrid`, que llena la altura de su contenedor (la
   página fija la suya, `calc(100vh - ...)`, contando con el padding de la página, `--rz-layout-body-padding`
   de `knt-theme.css`, y la página no hace scroll). Carga sus datos con `LoadPage(page,
@@ -177,9 +182,13 @@ Patrones ya establecidos que hay que seguir:
   inicial (cambiarlo mientras el grid recarga deja las filas viejas). Las mismas columnas que ClientWin; vista compacta (#, Topic, Priority, Tags) o extendida con
   `NotesListViewToggle` (botón de la cabecera, `AppState.NotesListCompact` + `localStorage`), y Topic con
   `MinWidth`. Clic
-  selecciona; doble clic/Enter abre; menú de acciones con `ContextMenuService` (⋮, clic derecho, tecla de menú,
-  Mayús+F10). La fila actual y el teclado los lleva `wwwroot/js/notesGrid.js`, no Radzen: su navegación con
-  flechas cuenta las filas dibujadas y con virtualización se pierde. Al abrir una nota la página guarda en
+  (también el derecho) selecciona; doble clic/Enter abre; menú de acciones con clic derecho, tecla de menú o
+  Mayús+F10; la cabecera de la página tiene Edit/Delete de la nota seleccionada (`NotesGrid.Current`,
+  `CurrentChanged`, `EditCurrentAsync`/`DeleteCurrentAsync`). La fila actual y el teclado los lleva
+  `wwwroot/js/notesGrid.js`, no Radzen: su navegación con flechas cuenta las filas dibujadas y con virtualización
+  se pierde; la posición de cada fila va en `data-knt-index` (el `aria-rowindex` de Radzen se estropea al
+  redibujar). `NotesGrid` no se redibuja por su página salvo si cambia `Compact` (`ShouldRender`): redibujarlo
+  mientras Radzen carga filas lo deja vacío o con filas viejas. Al abrir una nota la página guarda en
   `AppState` (`NotesListPosition`) el desplazamiento, el orden y la nota, y al volver se restauran (con el filtro
   o el texto buscado). Una lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`).
 - **Cabeceras**: la de una página de sección es `KntIndexHeader` con `Section="KntSections.Xxx"` (título e
