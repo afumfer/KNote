@@ -268,7 +268,7 @@ public class NoteTaskDto : SmartModelDtoBase
         if (ModificationDateTime < CreationDateTime)
         {
             results.Add(new ValidationResult
-             ("KMSG: Modification date cannot be greater than creation date "
+             ("Modification date cannot be greater than creation date "
              , new[] { "ModificationDateTime", "CreationDateTime" }));
         }
 
@@ -276,7 +276,7 @@ public class NoteTaskDto : SmartModelDtoBase
             if (ExpectedStartDate > ExpectedEndDate)
             {
                 results.Add(new ValidationResult
-                 ("KMSG: The end date cannot be higher than the start date"
+                 ("The end date cannot be higher than the start date"
                  , new[] { "ExpectedStartDate", "ExpectedEndDate" }));
             }
 
@@ -284,14 +284,14 @@ public class NoteTaskDto : SmartModelDtoBase
             if (StartDate > EndDate)
             {
                 results.Add(new ValidationResult
-                 ("KMSG: The start date cannot be higher than the resolution date "
+                 ("The start date cannot be higher than the resolution date "
                  , new[] { "StartDate", "EndDate" }));
             }
 
         if (Resolved == true && EndDate == null)
         {
             results.Add(new ValidationResult
-             ("KMSG: If the resolved indicator is active, you must enter a resolution date "
+             ("If the resolved indicator is active, you must enter a resolution date "
              , new[] { "Resolved", "EndDate" }));
         }
 

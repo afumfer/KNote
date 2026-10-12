@@ -60,7 +60,7 @@ Client/
 ├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, AIAssistant/
 ├── Shared/                 – layouts (MainLayout*, KntWindowLayout) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntSections, KntDialogs, KntLogo, KntFolderSelector,
-│                             KntFoldersTreeView, InputMarkdown, ...)
+│                             KntFoldersTreeView, KntDialogFrame, KntFormSection, KntField, KntMarkdownEditor, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
 └── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/filePaste.js, favicon.ico
 ```
@@ -144,20 +144,22 @@ Cómo está integrada:
 
 Patrones ya establecidos que hay que seguir:
 
-- **Formularios**: `EditForm` + `<DataAnnotationsValidator />` (las reglas de validación están en el SmartDTO)
-  con controles de Radzen (`RadzenTextBox`, `RadzenTextArea`, `RadzenNumeric`, `RadzenDropDown`,
-  `RadzenCheckBox`, `RadzenDatePicker`, `RadzenPassword`) enlazados con `@bind-Value` y su
-  `<ValidationMessage For="..." />` debajo. No se usan `InputText`/`InputNumber`/`InputSelect`... de Blazor
-  ni `RadzenTemplateForm`. Cada campo va en una fila con la etiqueta a la izquierda: `Shared/KntFormField`
-  (`Label`, `Component` = `Name` del control, `LabelSize` en columnas de 12, por defecto 3), que se apila en
-  pantallas pequeñas. Los campos se agrupan en un `<RadzenStack Gap="1rem">`. Referencia: `Types/TypeForm`.
-  Varios campos en una fila: `RadzenRow` con un `RadzenColumn Size="12" SizeMD="n"` por campo y un
-  `KntFormField` dentro (su `LabelSize` es relativo a la columna; ver `Notes/NoteTaskEditor`, `NoteForm`). En
-  paneles estrechos, `LabelSize="12"` pone la etiqueta encima del campo. Un panel lateral de criterios junto a una
-  lista (`Notes/NotesFilterCriteria`) usa en cambio `RadzenFormField` `Variant.Outlined` (etiqueta flotante e
-  icono en `Start`) con `InputSize.Small`, del tamaño de la lista. Para
-  elegir carpeta, `Shared/KntFolderPicker` (abre `KntFolderSelector`; el botón de quitar solo aparece si se
-  atiende `FolderReset`).
+- **Formularios** (los editores de entidades y sus diálogos): `EditForm` + `<DataAnnotationsValidator />` (las
+  reglas de validación están en el SmartDTO) con controles de Radzen (`RadzenTextBox`, `RadzenTextArea`,
+  `RadzenNumeric`, `RadzenDropDown`, `RadzenSwitch` para los booleanos, `RadzenDatePicker`, `RadzenPassword`,
+  `RadzenSelectBar` para elegir entre pocas opciones) enlazados con `@bind-Value` y su
+  `<ValidationMessage For="..." />` después. No se usan `InputText`/`InputNumber`/`InputSelect`... de Blazor ni
+  `RadzenTemplateForm`. **La etiqueta va encima del campo**: `Shared/KntField` (`Label`, `Component` = `Name` del
+  control, `Required` pone el asterisco, `Help` una línea de ayuda debajo; el control ocupa el ancho del campo, sin
+  `Style="width: 100%"`). Los campos se agrupan en secciones, `Shared/KntFormSection` (icono, título y una línea
+  de para qué sirve; dos seguidas se separan con una línea). Varios campos en una fila: `RadzenRow Gap="1rem"` con
+  un `RadzenColumn Size="12" SizeSM="n"` por campo. Referencias: `Folders/FolderForm`, `Attributes/AttributeForm`,
+  `Notes/NoteTaskEditor`. Un panel lateral de criterios junto a una lista (`Notes/NotesFilterCriteria`) usa en
+  cambio `RadzenFormField` `Variant.Outlined` (etiqueta flotante e icono en `Start`) con `InputSize.Small`, del
+  tamaño de la lista. Para elegir carpeta, `Shared/KntFolderPicker` (un campo con icono, el botón "Change" que abre
+  `KntFolderSelector` y el de quitar, solo si se atiende `FolderReset`; muestra lo que se le pase, el nombre o la
+  ruta). En los temas oscuros los botones `Variant.Outlined` del color principal parecen deshabilitados: usa los
+  rellenos. La opción activa de un `RadzenSelectBar` usa el color principal (`knt-theme.css`).
 - **Botones y espaciado**: grupos de botones en `<RadzenStack Orientation="Orientation.Horizontal"
   JustifyContent="JustifyContent.End" Gap="0.5rem">`, sin clases de margen. Para maquetar,
   `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen
@@ -217,12 +219,33 @@ Patrones ya establecidos que hay que seguir:
   `ToolingHeader` (`Title`, `Icon` opcional y `Buttons`), una versión más ligera de la misma familia.
 - **Tooltips**: siempre con `tooltipService.Open(...)` (en `MouseEnter`), no con el atributo `title`, que
   muestra el tooltip del navegador con otro estilo.
-- **Diálogos** (alta/edición de entidades pequeñas, selectores, login): `dialogService.OpenAsync<Componente>(
-  título, parámetros, KntDialogs.Small()/Medium()/Large())`; el componente devuelve su resultado con
-  `dialogService.Close(resultado)` (`null` = cancelado). Confirmaciones con `dialogService.Confirm(...)`.
-  Ejemplos: `TypesIndex` → `TypeEdit`/`TypeNew`, `NoteForm` → `KntFolderSelector`/`NoteTaskEditor`.
-  `KntDialogs` no fija la altura: el diálogo mide lo que su contenido (sin hueco sobre los botones). Si tiene
-  una lista o un árbol que puede crecer, limita esa zona (`max-height: 60vh; overflow: auto`), no el diálogo.
+- **Diálogos** (alta/edición de entidades, selectores, login): `dialogService.OpenAsync<Componente>(título,
+  parámetros, KntDialogs.Framed(KntDialogs.Small()/Medium()/Large()))` y el componente se dibuja dentro de
+  `Shared/KntDialogFrame` (`Icon`, `Title`, `Subtitle`, el contenido y los botones en `Footer`): cabecera con el
+  icono de la entidad (el de su `KntSection`) y su botón de cerrar, cuerpo con scroll y pie siempre visible.
+  `Framed` quita la barra de título de Radzen (el diálogo no se arrastra). Botones del pie: "Cancel"
+  (`ButtonStyle.Base`, `Variant.Text`) y la acción principal con icono (`ButtonStyle.Primary`). El botón de cerrar
+  de la cabecera está fuera del orden de tabulación, para que Radzen enfoque el primer campo; Esc también cierra.
+  Si Enter debe enviar (login, registro), `EditForm OnSubmit` + `ButtonType.Submit`. El componente devuelve su
+  resultado con `dialogService.Close(resultado)` (`null` = cancelado); confirmaciones con
+  `dialogService.Confirm(...)`. Ejemplos: `TypesIndex` → `TypeEdit`/`TypeNew`, `NoteForm` →
+  `NoteTaskEditor`/`NoteResourceSelector`, `KntFolderPicker` → `KntFolderSelector`. `KntDialogs` no fija la altura:
+  el diálogo mide lo que su contenido; si tiene una lista o un árbol que puede crecer, limita esa zona
+  (`max-height`), no el diálogo.
+- **Listas dentro de un editor** (los valores de un atributo, los recursos y las tareas de una nota): una cabecera
+  con cuántos hay y el botón de añadir (`.knt-list-header` de `knt-theme.css`), filas o tarjetas con sus botones
+  (`Variant.Text`) y un estado vacío que dice cómo llenarla (`.knt-empty-state`). Son pequeñas y no siguen la
+  convención de las listas de página (acciones en la cabecera y clic derecho). Borrar pide confirmación. Iconos:
+  `Shared/KntFileTypes` (tipo de fichero) y `Shared/KntDataTypes` (tipo de dato de un atributo); ninguna imagen de
+  otros sitios.
+- **Editor de notas** (`Notes/NoteForm`, en su ventana): cabecera con la nota (tema, número, ruta de la carpeta,
+  tipo, modificación) y sus botones; pestañas con contadores (`RadzenTabsItem` `Template`); Overview en dos
+  columnas (tema y descripción; panel "Details" y "Record"). La ruta de la carpeta la da `Server`
+  (`IStore.Folders.GetPathAsync` → `api/folders/{id}/path`, `Folders.GetPathAsync` de `Service`, la misma de
+  `ClientWin`). "Record" tiene el interruptor que bloquea el contenido de la nota (`ContentType` → JSON con
+  `DescriptionBlocked`): bloqueado, la descripción solo se ve (sin editor). La Web no menciona `ClientWin` en la
+  interfaz. Las pestañas de recursos y tareas se cargan al abrir la nota y otra vez si cambia (`OnParametersSetAsync`
+  por `NoteId`, p. ej. tras "Save and new").
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y
@@ -299,8 +322,13 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   (`AiProviderSelection.ForSession`, en `Model`) o, si ya no están configurados, el predefinido. Las notas que
   crea la tool `create_task` se enlazan en el chat (se abren en su ventana de edición) mientras la página está
   abierta.
-- **Markdown**: las descripciones de nota se editan con `Shared/InputMarkdown` y se muestran con
-  `Shared/ViewMarkdown` (Markdig). `Server` reescribe las URLs de recursos de la descripción al leer/guardar
+- **Markdown**: las descripciones de nota se editan con `Shared/KntMarkdownEditor` y se muestran con
+  `Shared/ViewMarkdown` (Markdig). `KntMarkdownEditor` es el `RadzenMarkdownEditor` en modo `Source` (el Markdown,
+  con su barra; la barra se le da explícita, sin `RadzenMarkdownEditorSource`) más una vista "Preview"
+  (`ViewMarkdown`); el modo se recuerda en el navegador. El modo Design (WYSIWYG) de Radzen se quitó: Enter crea un
+  párrafo y Markdown lo escribe como una línea en blanco más, y `ClientWin` muestra el Markdown como texto, línea a
+  línea. Radzen devuelve el texto al arrancar con saltos LF y las notas los guardan CR LF: ese "cambio" se ignora
+  (si no, la nota quedaría modificada sin tocarla), y el componente no se dibuja hasta saber el modo guardado. `Server` reescribe las URLs de recursos de la descripción al leer/guardar
   para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`). **El HTML de una nota no se genera en el
   navegador**: `ViewMarkdown` lo pide ya saneado a `Server` (`IStore.Notes.HtmlAsync` → `POST api/notes/html`,
   Markdig + `KntHtmlSanitizer` de `Service`), con las mismas reglas que `ClientWin`; las descripciones de Home ya

@@ -176,7 +176,7 @@ public class KMessageDto : SmartModelDtoBase, IAlarmSchedule
         if (AlarmDateTime  == null)
         {
             results.Add(new ValidationResult
-             ("KMSG: The message or alarm date-time in mandatory."
+             ("The message or alarm date-time in mandatory."
              , new[] { "AlarmDateTime" }));
         }
 
@@ -184,7 +184,7 @@ public class KMessageDto : SmartModelDtoBase, IAlarmSchedule
         if(AlarmType == EnumAlarmType.InMinutes && AlarmMinutes < 1)
         {
             results.Add(new ValidationResult
-             ("KMSG: The minutes are mandatory in types of periodic alarms 'in minutes'."
+             ("The minutes are mandatory in types of periodic alarms 'in minutes'."
              , new[] { "AlarmMinutes" }));
         }
 

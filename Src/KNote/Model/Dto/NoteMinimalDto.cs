@@ -175,14 +175,14 @@ public class NoteMinimalDto : SmartModelDtoBase
         if (FolderId == Guid.Empty)
         {
             results.Add(new ValidationResult
-                ("KMSG: The FolderId attribute cannot be empty."
+                ("The FolderId attribute cannot be empty."
                 , new[] { nameof(FolderId) }));  // ### Aplicar este ambio a todas las validaciones
         }
 
         if (ModificationDateTime < CreationDateTime)
         {
             results.Add(new ValidationResult
-                ("KMSG: Modification date cannot be greater than creation date."
+                ("Modification date cannot be greater than creation date."
                 , new[] { "ModificationDateTime", "CreationDateTime" }));
         }
         

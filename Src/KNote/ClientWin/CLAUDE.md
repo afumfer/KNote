@@ -414,6 +414,8 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   déjalo activo e ignora la acción.
   En las vistas, usa `SystemColors.*` en vez de colores fijos (`Color.White`...): los fijos no cambian en
   oscuro. Los informes y su previsualización se quedan siempre en claro (son para imprimir).
+- **Ruta de una carpeta** (`Store.GetKNoteFolerPath`): la calcula `Service` (`Folders.GetPathAsync`), la misma que
+  muestra el editor de notas de la Web.
 - **HTML de las notas**: lo escriben los usuarios (en un repositorio compartido, otros), así que se muestra
   saneado con las mismas reglas que la Web (`KntHtmlSanitizer` de `Service`): `Service.Notes.UtilMarkdownToHtml`
   ya lo devuelve saneado (vistas WebView2 de `NoteEditorForm`/`PostItEditorForm`, informes) y el editor HTML

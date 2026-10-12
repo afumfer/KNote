@@ -201,21 +201,21 @@ public class RepositoryRef : SmartModelDtoBase
         if (Provider != "Microsoft.Data.Sqlite" && Provider != "Microsoft.Data.SqlClient")
         {
             results.Add(new ValidationResult
-             ("KMSG: Provider is invalid. (Supported providers are Microsoft.Data.SqlClient or Microsoft.Data.Sqlite."
+             ("Provider is invalid. (Supported providers are Microsoft.Data.SqlClient or Microsoft.Data.Sqlite."
              , new[] { "ConnectionString" }));
         }
 
         if (!Directory.Exists(ResourcesContainerRootPath))
         {
             results.Add(new ValidationResult
-             ("KMSG: Resources root path directory does not exist."
+             ("Resources root path directory does not exist."
              , new[] { "ResourcesContainerRootPath" }));
         }
 
         if (Orm != "Dapper" && Orm != "EntityFramework")
         {
             results.Add(new ValidationResult
-             ("KMSG: ORM is invalid. (Supported ORMs are Dapper or EntityFramework."
+             ("ORM is invalid. (Supported ORMs are Dapper or EntityFramework."
              , new[] { "ConnectionString" }));
         }
 
@@ -227,14 +227,14 @@ public class RepositoryRef : SmartModelDtoBase
             if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(dataBase))
             {
                 results.Add(new ValidationResult
-                 ("KMSG: Database directory and file name cannot be empty."
+                 ("Database directory and file name cannot be empty."
                  , new[] { "ConnectionString" }));
             }
 
             if (!Directory.Exists(directory))
             {
                 results.Add(new ValidationResult
-                 ("KMSG: Database directory does not exist."
+                 ("Database directory does not exist."
                  , new[] { "ConnectionString" }));
             }
         }
@@ -245,7 +245,7 @@ public class RepositoryRef : SmartModelDtoBase
             if (string.IsNullOrEmpty(sqlServer) || string.IsNullOrEmpty(dataBase))
             {
                 results.Add(new ValidationResult
-                 ("KMSG: Database and sql server name cannot be empty."
+                 ("Database and sql server name cannot be empty."
                  , new[] { "ConnectionString" }));
             }
         }

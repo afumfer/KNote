@@ -121,7 +121,7 @@ public class TraceNoteDto : SmartModelDtoBase
         if (FromId == ToId)
         {
             results.Add(new ValidationResult
-             ("KMSG: A note cannot be traced to itself (FromId and ToId are the same note)."
+             ("A note cannot be traced to itself (FromId and ToId are the same note)."
              , new[] { "FromId", "ToId" }));
         }
 

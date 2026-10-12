@@ -106,7 +106,7 @@ public class KAttributeTabulatedValueDto : SmartModelDtoBase
         //if (MyProperty == "bad value")
         //{
         //    results.Add(new ValidationResult
-        //     ("KMSG: Value can't be 'bad value' "
+        //     ("Value can't be 'bad value' "
         //     , new[] { "MyProperty" }));
         //}
 

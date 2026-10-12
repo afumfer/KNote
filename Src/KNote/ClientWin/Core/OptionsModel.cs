@@ -278,14 +278,14 @@ public class OptionsModel : SmartModelDtoBase
         if (AlarmSeconds < 30 || AlarmSeconds > 300)
         {
             results.Add(new ValidationResult
-                ("KMSG: The alarm seconds must be in a range between 30 and 300."
+                ("The alarm seconds must be in a range between 30 and 300."
                 , new[] { "AlarmSeconds" }));
         }
 
         if (AutoSaveSeconds < 60 || AutoSaveSeconds > 600)
         {
             results.Add(new ValidationResult
-                ("KMSG: The auto save seconds must be in a range between 60 and 600."
+                ("The auto save seconds must be in a range between 60 and 600."
                 , new[] { "AutoSaveSeconds" }));
         }
 

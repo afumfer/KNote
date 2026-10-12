@@ -330,7 +330,7 @@ public class WindowDto : SmartModelDtoBase
         //if (ModificationDateTime < CreationDateTime)
         //{
         //    results.Add(new ValidationResult
-        //     ("KMSG: The modification date cannot be greater than the creation date "
+        //     ("The modification date cannot be greater than the creation date "
         //     , new[] { "ModificationDateTime", "CreationDateTime" }));
         //}
 

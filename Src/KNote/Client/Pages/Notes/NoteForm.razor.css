@@ -104,6 +104,8 @@
 }
 
 .knt-note-editor ::deep .knt-note-tabs .rz-tabview-nav {
+    /* On a phone the tabs go on to a second line instead of widening the page. */
+    flex-wrap: wrap;
     gap: 0.25rem;
     background: transparent;
     border: none;

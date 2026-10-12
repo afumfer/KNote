@@ -200,7 +200,7 @@ public class ResourceInfoDto : SmartModelDtoBase
         if (_contentBase64 == null)
         {
             results.Add(new ValidationResult
-             ("KMSG: If the content is in the database, you must enter its content in base 64  "
+             ("If the content is in the database, you must enter its content in base 64  "
              , new[] { "ContentBase64" }));
         }
 

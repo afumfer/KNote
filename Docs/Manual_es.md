@@ -166,6 +166,18 @@ Las páginas **Tree panel**, **Notes filter** y **Quick search** muestran sus no
 
 **Volver a la lista.** Después de abrir una nota, la lista se muestra como estaba: la misma carpeta, filtro o búsqueda, el mismo orden y la misma posición, con una marca a la izquierda de la nota que abriste.
 
+### Editor de notas (aplicación Web)
+
+Una nota se edita en su propia ventana. Su cabecera muestra el tema y el número de la nota, la ruta completa de su carpeta, su tipo y cuándo se modificó, con **Save and new**, **Save** y el botón que cierra la ventana (pregunta antes si hay cambios sin guardar).
+
+- **Overview**: el tema y la descripción y, a la derecha, los detalles de la nota (carpeta, tipo, prioridad, etiquetas) y su registro (número, fechas, estado). La descripción se escribe en Markdown, con una barra para sus formatos (títulos, negrita, listas, tareas, enlaces, imágenes, tablas...); **Preview** la muestra tal como se ve. El navegador recuerda cuál de los dos usas.
+- **Contenido bloqueado**: el interruptor **Content** del registro bloquea la descripción de la nota: se muestra, pero no se edita, hasta que se desbloquea. El bloqueo se guarda con la nota y es el mismo que pone la aplicación de escritorio.
+- **Attributes**: los campos del tipo de la nota y los generales; los obligatorios llevan un asterisco.
+- **Resources**: los ficheros de la nota como tarjetas. Al pulsar una imagen se ve en grande; cualquier fichero se puede abrir en otra pestaña, insertar en la descripción o borrar. **Add resource** sube un fichero: suéltalo en la zona, pégalo o pulsa para elegirlo.
+- **Tasks**: para quién es cada tarea, su prioridad, fechas previstas y tiempo dedicado; las resueltas van al final. **Add task** y el botón de editar abren la tarea con su asignación, planificación y progreso.
+
+Una nota nueva tiene que guardarse antes de añadirle recursos o tareas, y borrar un recurso o una tarea pide confirmación. Los diálogos del panel de administración (usuarios, carpetas, tipos de nota, atributos) y los de acceso y registro siguen el mismo estilo: etiquetas encima de los campos, agrupados en secciones.
+
 ### Apariencia (aplicación Web)
 
 El botón de la paleta de la barra superior de la aplicación Web abre el panel **Appearance**, donde eliges el **tema** (Software, Standard, Material, Humanistic o Default), el **modo** (claro u oscuro), el estilo de la **cabecera de Home** (*Soft*, un tinte suave del color del tema, o *Ink*, oscura) y el **alto contraste (WCAG)**, que hace más fáciles de distinguir los textos y los bordes. Los cambios se aplican al momento. El botón del sol / la luna, a su lado, cambia directamente entre claro y oscuro. Tu navegador recuerda la elección (en cookies), así que cada navegador conserva la suya.
