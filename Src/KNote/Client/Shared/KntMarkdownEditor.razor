@@ -70,10 +70,11 @@
     [Parameter] public bool Locked { get; set; }
     // Height of the editing (or preview) area.
     [Parameter] public string Height { get; set; } = "max(20rem, calc(100vh - 24rem))";
+    // Where the mode chosen is kept in the browser: each use of the editor (a note, a task...) remembers its own.
+    [Parameter] public string StorageKey { get; set; } = "KNoteDescriptionEditorMode";
 
     private const string SourceMode = "source";
     private const string PreviewMode = "preview";
-    private const string StorageKey = "KNoteDescriptionEditorMode";
 
     private string mode = SourceMode;
     private bool modeLoaded;

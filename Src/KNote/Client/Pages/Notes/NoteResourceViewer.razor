@@ -1,0 +1,73 @@
+@inject DialogService dialogService
+@inject IJSRuntime js
+
+@* A note's resource shown in the window where the note is (NoteKResources opens it framed, almost the whole window):
+   an image (fitted, or at its size with a click), a PDF (the browser's viewer), a video or an audio (their player)
+   or a text. The other files can't be shown in the browser: only opened. *@
+
+<KntDialogFrame Icon="@KntFileTypes.Icon(Resource.FileType, Resource.Name)" Title="@Title" Subtitle="@Resource.NameOut">
+    <ChildContent>
+        <div class="knt-resource-viewer">
+            @switch (kind)
+            {
+                case KntFileTypes.Kind.Image:
+                    <div class="knt-resource-viewer-image @(actualSize ? "knt-resource-viewer-actual" : null)"
+                         title="@(actualSize ? "Fit to the window" : "Actual size")" @onclick="() => actualSize = !actualSize">
+                        <img src="@NoteKResources.ImageSource(Resource)" alt="@Title" />
+                    </div>
+                    break;
+                case KntFileTypes.Kind.Pdf:
+                    <iframe src="@Resource.FullUrl" title="@Title"></iframe>
+                    break;
+                case KntFileTypes.Kind.Video:
+                    <video src="@Resource.FullUrl" controls></video>
+                    break;
+                case KntFileTypes.Kind.Audio:
+                    <div class="knt-resource-viewer-center"><audio src="@Resource.FullUrl" controls></audio></div>
+                    break;
+                case KntFileTypes.Kind.Text:
+                    @* Sandboxed: a file saved as text may be HTML, its scripts don't run. *@
+                    <iframe src="@Resource.FullUrl" title="@Title" sandbox=""></iframe>
+                    break;
+                default:
+                    <div class="knt-resource-viewer-center">
+                        <div class="knt-empty-state">
+                            <RadzenIcon Icon="@KntFileTypes.Icon(Resource.FileType, Resource.Name)" />
+                            <div class="knt-empty-state-title">This file can't be shown here</div>
+                            <div class="knt-empty-state-text">Open it in a new tab to see it or download it.</div>
+                        </div>
+                    </div>
+                    break;
+            }
+        </div>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Open in a new tab" Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                      Disabled="@string.IsNullOrEmpty(Resource.FullUrl)" Click="OpenAsync" />
+        <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Primary" Click="() => dialogService.Close(null)" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter] [EditorRequired] public ResourceInfoDto Resource { get; set; } = null!;
+
+    private KntFileTypes.Kind kind;
+    private bool actualSize;
+
+    private string Title => string.IsNullOrWhiteSpace(Resource.Description) ? Resource.NameOut : Resource.Description;
+
+    protected override void OnParametersSet()
+    {
+        kind = KntFileTypes.KindOf(Resource.FileType, Resource.Name);
+        // Without its URL, only an image (its content came with it) can be shown.
+        if (kind != KntFileTypes.Kind.Image && string.IsNullOrEmpty(Resource.FullUrl))
+            kind = KntFileTypes.Kind.Other;
+    }
+
+    private async Task OpenAsync() =>
+        await js.InvokeVoidAsync("open", Resource.FullUrl, "_blank", "noopener");
+
+    /// <summary>The options of its dialog: almost the whole window.</summary>
+    public static DialogOptions Options() =>
+        KntDialogs.Framed(new DialogOptions { Width = "min(1400px, calc(100vw - 2rem))", Resizable = true, Draggable = true });
+}

@@ -1513,7 +1513,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         var itemList = new ListViewItem(task.Priority.ToString());
         itemList.Name = task.NoteTaskId.ToString();
-        itemList.SubItems.Add(task.Tags);
+        // Without a topic, the first line of its description.
+        itemList.SubItems.Add(task.GetTopic());
         itemList.SubItems.Add(task.Resolved.ToString());
         itemList.SubItems.Add(task.StartDate.ToString());
         itemList.SubItems.Add(task.EndDate.ToString());
@@ -1646,7 +1647,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     {
         var item = listViewTasks.Items[task.NoteTaskId.ToString()];
         item.SubItems[0].Text = task.Priority.ToString();
-        item.SubItems[1].Text = task.Tags.ToString();
+        item.SubItems[1].Text = task.GetTopic();
         item.SubItems[2].Text = task.Resolved.ToString();
         item.SubItems[3].Text = task.StartDate.ToString();
         item.SubItems[4].Text = task.EndDate.ToString();

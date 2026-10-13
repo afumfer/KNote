@@ -229,7 +229,7 @@ Patrones ya establecidos que hay que seguir:
   Si Enter debe enviar (login, registro), `EditForm OnSubmit` + `ButtonType.Submit`. El componente devuelve su
   resultado con `dialogService.Close(resultado)` (`null` = cancelado); confirmaciones con
   `dialogService.Confirm(...)`. Ejemplos: `TypesIndex` → `TypeEdit`/`TypeNew`, `NoteForm` →
-  `NoteTaskEditor`/`NoteResourceSelector`, `KntFolderPicker` → `KntFolderSelector`. `KntDialogs` no fija la altura:
+  `NoteTaskEditor`/`NoteResourceEditor`, `KntFolderPicker` → `KntFolderSelector`. `KntDialogs` no fija la altura:
   el diálogo mide lo que su contenido; si tiene una lista o un árbol que puede crecer, limita esa zona
   (`max-height`), no el diálogo.
 - **Listas dentro de un editor** (los valores de un atributo, los recursos y las tareas de una nota): una cabecera
@@ -246,6 +246,23 @@ Patrones ya establecidos que hay que seguir:
   `DescriptionBlocked`): bloqueado, la descripción solo se ve (sin editor). La Web no menciona `ClientWin` en la
   interfaz. Las pestañas de recursos y tareas se cargan al abrir la nota y otra vez si cambia (`OnParametersSetAsync`
   por `NoteId`, p. ej. tras "Save and new").
+- **Recursos de la nota** (`NoteKResources`, galería; `NoteResourceEditor`, diálogo de alta y edición): al editar
+  un recurso solo cambian su descripción y su orden; el fichero no se cambia ni se reenvía (`Server` conserva el
+  fichero y el contenido guardado en la BD, ver `Server/CLAUDE.md`). Al pulsar un recurso se ve en la misma ventana
+  de la nota (`NoteResourceViewer`, casi a ventana completa): imagen (ajustada o a su tamaño), PDF (visor del
+  navegador), vídeo, audio o texto (en un `iframe` con `sandbox`: un fichero guardado como texto puede ser HTML). Los
+  demás se abren en otra pestaña: la ventana de la nota es emergente y no tiene pestañas, así que se abren en la
+  ventana principal. El tipo se deduce del MIME o, si no lo hay, de la extensión (`KntFileTypes.KindOf`: `ClientWin`
+  solo guarda el tipo de unos pocos ficheros).
+- **Tareas de la nota** (`NoteKTasks`), como en `ClientWin`: la lista (por prioridad y tema) y, al lado, la tarea
+  seleccionada con sus datos y su descripción en HTML (`ViewMarkdown`: Markdown largo, con imágenes), en un
+  `RadzenSplitter` con tamaños guardados (`KntPaneSizes`, clave `KNoteNoteTasksPanes`); en una ventana estrecha la
+  tarea va debajo (`.knt-tasks-split` en `knt-theme.css`). El título de una tarea es su `Tags` ("Topic / Tags",
+  como en `ClientWin`) o, sin él, la primera línea de su descripción (`NoteTaskDto.GetTopic`, el mismo en la
+  lista de tareas de `ClientWin`). Una tarea resuelta solo se distingue por su
+  marca y su estado (sin tachar). `NoteTaskEditor` edita la descripción con `KntMarkdownEditor` (su modo se guarda
+  aparte: `StorageKey`), y como `ClientWin` una tarea nueva es del usuario conectado, con prioridad n+1 y empezada
+  ahora, y al resolverla sin fecha de fin se le pone la actual.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y

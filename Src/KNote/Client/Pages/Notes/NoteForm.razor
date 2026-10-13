@@ -138,6 +138,7 @@
                     else
                     {
                         <NoteKResources Resources="resources ?? new()"
+                                        OnEdit="OnEditResource"
                                         OnDelete="OnDeleteResource"
                                         OnInsertInDesription="InsertInDescription"
                                         OnNew="OnNewResource">
@@ -366,7 +367,7 @@
         }
         else
         {            
-            var resultDialog = await dialogService.OpenAsync<NoteResourceSelector>($"New resource and upload resource file",
+            var resultDialog = await dialogService.OpenAsync<NoteResourceEditor>($"New resource and upload resource file",
                    new Dictionary<string, object?>() { { "NoteTopic", Note.Topic } },
                    KntDialogs.Framed(KntDialogs.Medium()));
 
@@ -387,6 +388,25 @@
                     await ShowPanel(2);
                 }
             }
+        }
+    }
+
+    // Its description and order (not its file).
+    private async Task OnEditResource(ResourceInfoDto resource)
+    {
+        var resultDialog = await dialogService.OpenAsync<NoteResourceEditor>("Edit resource",
+               new Dictionary<string, object?>() { { "Resource", resource }, { "NoteTopic", Note.Topic } },
+               KntDialogs.Framed(KntDialogs.Medium()));
+        if (resultDialog is not ResourceInfoDto edited)
+            return;
+
+        // Server keeps the file as it is: no need to send it back.
+        edited.ContentBase64 = null;
+        var resultApi = await webApiService.Notes.SaveResourceAsync(edited);
+        if (resultApi.IsValid)
+        {
+            resources = null;
+            await ShowPanel(2);
         }
     }
 
@@ -413,7 +433,7 @@
 
     private void InsertInDescription(ResourceInfoDto resource)
     {
-        if (KntFileTypes.IsImage(resource.FileType))
+        if (KntFileTypes.IsImage(resource.FileType, resource.Name))
             Note.Description += "\n\n![alt text](" + resource?.FullUrl + " '" + resource?.Description + "' )";
         else
             Note.Description += "\n\n<a href=" + resource?.FullUrl + " target='_blank'>" + resource?.Description + "</a>";
@@ -434,10 +454,21 @@
         }
         else
         {
-            taskEdit = null;            
+            taskEdit = null;
+
+            // As ClientWin starts it: for the user signed in, after the other tasks, started now.
+            var user = users?.FirstOrDefault(u => u.UserName == webApiService.AppState.UserName);
+            var newTask = new NoteTaskDto
+            {
+                NoteId = Note.NoteId,
+                UserId = user?.UserId ?? Guid.Empty,
+                UserFullName = user?.FullName,
+                Priority = (tasks?.Count ?? 0) + 1,
+                StartDate = DateTime.Now
+            };
 
             var result = await dialogService.OpenAsync<NoteTaskEditor>($"New task",
-                   new Dictionary<string, object?>() { { "TaskEdit", null }, { "Users" , users}, { "NoteTopic", Note.Topic } },
+                   new Dictionary<string, object?>() { { "TaskEdit", newTask }, { "Users" , users}, { "NoteTopic", Note.Topic } },
                    KntDialogs.Framed(KntDialogs.Large()));
 
             if(result != null)

@@ -1,0 +1,59 @@
+/* A resource shown in the note's window: its content fills the dialog (KntDialogFrame: header, body, footer).
+   Only theme variables. */
+
+.knt-resource-viewer {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 18rem);
+    min-height: 12rem;
+}
+
+    .knt-resource-viewer iframe,
+    .knt-resource-viewer video {
+        flex: 1;
+        width: 100%;
+        min-height: 0;
+        border: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+        border-radius: var(--rz-border-radius);
+        background-color: var(--rz-base-background-color);
+    }
+
+    .knt-resource-viewer video {
+        background-color: #000;
+    }
+
+/* An image fitted to the dialog; a click shows it at its size (scrolling), another one fits it again. */
+.knt-resource-viewer-image {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+    cursor: zoom-in;
+}
+
+    .knt-resource-viewer-image img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: var(--rz-border-radius);
+    }
+
+.knt-resource-viewer-actual {
+    display: block;
+    overflow: auto;
+    cursor: zoom-out;
+}
+
+    .knt-resource-viewer-actual img {
+        max-width: none;
+        max-height: none;
+    }
+
+.knt-resource-viewer-center {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}

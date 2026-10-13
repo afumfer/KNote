@@ -1,7 +1,9 @@
-﻿@inject TooltipService tooltipService
+@inject TooltipService tooltipService
+@inject IJSRuntime js
 
-@* The note's tasks: each one with whether it is resolved, its description and tags, who it is for, its priority,
-   dates and time spent, and its actions. Double click edits a task. *@
+@* The note's tasks, as in ClientWin: their list and, beside it, the task selected, with its data and its description
+   (Markdown, shown as HTML: it may be long and have images). The sizes of the panes are kept in the browser; in a
+   narrow window the task goes below the list. Double click (or Enter) edits a task. *@
 
 <div class="knt-list-header">
     <span>@Tasks.Count @(Tasks.Count == 1 ? "task" : "tasks")@(Tasks.Count > 0 ? $" · {Tasks.Count(t => t.Resolved)} resolved" : "")</span>
@@ -18,41 +20,81 @@
 }
 else
 {
-    <div class="knt-tasks">
-        @foreach (var task in Tasks.OrderBy(t => t.Resolved).ThenByDescending(t => t.Priority))
-        {
-            <div class="knt-task @(task.Resolved ? "knt-task-resolved" : null)" @ondblclick="() => OnEdit.InvokeAsync(task)">
-                <RadzenIcon Icon="@(task.Resolved ? "check_circle" : "radio_button_unchecked")" class="knt-task-state" />
-                <div class="knt-task-body">
-                    <div class="knt-task-title">
-                        <span>@(string.IsNullOrWhiteSpace(task.Description) ? "(No description)" : task.Description)</span>
-                        @foreach (var tag in Tags(task))
-                        {
-                            <span class="knt-task-tag">@tag</span>
-                        }
+    <RadzenSplitter class="knt-tasks-split" Style="@($"height: {Height}")" Resize="paneSizes.Resized">
+        <RadzenSplitterPane Size="@paneSizes[0]" Min="240px">
+            <div class="knt-tasks" role="listbox" aria-label="Tasks">
+                @foreach (var task in Ordered)
+                {
+                    <div class="knt-task @(task.Resolved ? "knt-task-resolved" : null) @(task.NoteTaskId == selected?.NoteTaskId ? "knt-task-selected" : null)"
+                         role="option" aria-selected="@(task.NoteTaskId == selected?.NoteTaskId)" tabindex="0"
+                         @onclick="() => selected = task" @ondblclick="() => OnEdit.InvokeAsync(task)"
+                         @onkeydown="@(e => OnTaskKey(e, task))">
+                        <RadzenIcon Icon="@(task.Resolved ? "check_circle" : "radio_button_unchecked")" class="knt-task-state" />
+                        <div class="knt-task-body">
+                            <div class="knt-task-title">@Title(task)</div>
+                            <div class="knt-task-meta">
+                                <span><RadzenIcon Icon="person" />@(task.UserFullName ?? "-")</span>
+                                <span><RadzenIcon Icon="flag" />@task.Priority</span>
+                                @if (task.ExpectedStartDate != null || task.ExpectedEndDate != null)
+                                {
+                                    <span><RadzenIcon Icon="event" />@Dates(task.ExpectedStartDate, task.ExpectedEndDate)</span>
+                                }
+                            </div>
+                        </div>
                     </div>
-                    <div class="knt-task-meta">
-                        <span><RadzenIcon Icon="person" />@(task.UserFullName ?? "-")</span>
-                        <span><RadzenIcon Icon="flag" />Priority @task.Priority</span>
+                }
+            </div>
+        </RadzenSplitterPane>
+        <RadzenSplitterPane Size="@paneSizes[1]" Min="240px">
+            @if (selected != null)
+            {
+                var task = selected;
+                <div class="knt-task-view">
+                    <div class="knt-task-view-head">
+                        <div class="knt-task-view-caption">
+                            <h2 class="knt-task-view-title">@Title(task)</h2>
+                            <span class="knt-task-status @(task.Resolved ? "knt-task-status-resolved" : null)">
+                                <RadzenIcon Icon="@(task.Resolved ? "check_circle" : "pending")" />@(task.Resolved ? "Resolved" : "Pending")
+                            </span>
+                        </div>
+                        <div class="knt-task-view-actions">
+                            <RadzenButton Icon="edit" Text="Edit" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="@(() => OnEdit.InvokeAsync(task))" />
+                            <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                          Click="@(() => OnDelete.InvokeAsync(task))" MouseEnter="@(args => tooltipService.Open(args, "Delete task"))" />
+                        </div>
+                    </div>
+                    <dl class="knt-task-facts">
+                        <dt>User</dt>
+                        <dd>@(task.UserFullName ?? "-")</dd>
+                        <dt>Priority</dt>
+                        <dd>@task.Priority@(task.DifficultyLevel != null ? $" · difficulty {task.DifficultyLevel}" : "")</dd>
                         @if (task.ExpectedStartDate != null || task.ExpectedEndDate != null)
                         {
-                            <span><RadzenIcon Icon="event" />@Dates(task.ExpectedStartDate, task.ExpectedEndDate)</span>
+                            <dt>Expected</dt>
+                            <dd>@DateTimes(task.ExpectedStartDate, task.ExpectedEndDate)</dd>
                         }
-                        @if (task.SpentTime != null)
+                        @if (task.StartDate != null || task.EndDate != null)
                         {
-                            <span><RadzenIcon Icon="timer" />@task.SpentTime h</span>
+                            <dt>Done</dt>
+                            <dd>@DateTimes(task.StartDate, task.EndDate)</dd>
                         }
+                        @if (task.EstimatedTime != null || task.SpentTime != null)
+                        {
+                            <dt>Time</dt>
+                            <dd>@Times(task.EstimatedTime, task.SpentTime)</dd>
+                        }
+                    </dl>
+                    <div class="knt-task-view-description">
+                        <ViewMarkdown MarkdownContent="@task.Description">
+                            <TemplateContent>
+                                <span class="knt-task-view-empty">No description.</span>
+                            </TemplateContent>
+                        </ViewMarkdown>
                     </div>
                 </div>
-                <div class="knt-task-actions">
-                    <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
-                                  Click="@(() => OnEdit.InvokeAsync(task))" MouseEnter="@(args => tooltipService.Open(args, "Edit task"))" />
-                    <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                  Click="@(() => OnDelete.InvokeAsync(task))" MouseEnter="@(args => tooltipService.Open(args, "Delete task"))" />
-                </div>
-            </div>
-        }
-    </div>
+            }
+        </RadzenSplitterPane>
+    </RadzenSplitter>
 }
 
 @code {
@@ -60,11 +102,46 @@ else
     [Parameter] public EventCallback<NoteTaskDto> OnDelete { get; set; }
     [Parameter] public EventCallback<NoteTaskDto> OnEdit { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
+    // Height of the list and the task beside it.
+    [Parameter] public string Height { get; set; } = "max(22rem, calc(100vh - 19rem))";
 
-    private static IEnumerable<string> Tags(NoteTaskDto task) =>
-        (task.Tags ?? "").Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    private KntPaneSizes paneSizes = null!;
+    private NoteTaskDto? selected;
+
+    // As ClientWin lists them: by priority, then by topic.
+    private IEnumerable<NoteTaskDto> Ordered => Tasks.OrderBy(t => t.Priority).ThenBy(t => Title(t));
+
+    protected override void OnInitialized()
+    {
+        paneSizes = new KntPaneSizes(js, "KNoteNoteTasksPanes", "40%", "60%");
+    }
+
+    // The tasks are loaded again after a change: the same task stays selected (if it is still there).
+    protected override void OnParametersSet()
+    {
+        selected = Tasks.FirstOrDefault(t => t.NoteTaskId == selected?.NoteTaskId) ?? Ordered.FirstOrDefault();
+    }
+
+    private async Task OnTaskKey(KeyboardEventArgs e, NoteTaskDto task)
+    {
+        if (e.Key == "Enter")
+            await OnEdit.InvokeAsync(task);
+    }
+
+    // The task's topic (Tags, "Topic / Tags" in ClientWin), or the first line of its description (as in ClientWin).
+    private static string Title(NoteTaskDto task)
+    {
+        var topic = task.GetTopic();
+        return topic.Length > 0 ? topic : "(No topic)";
+    }
 
     // Planned dates: "12/10/2026 → 15/10/2026", or the one there is.
     private static string Dates(DateTime? start, DateTime? end) =>
         start != null && end != null ? $"{start:d} → {end:d}" : start != null ? $"From {start:d}" : $"Until {end:d}";
+
+    private static string DateTimes(DateTime? start, DateTime? end) =>
+        start != null && end != null ? $"{start:g} → {end:g}" : start != null ? $"From {start:g}" : $"Until {end:g}";
+
+    private static string Times(double? estimated, double? spent) =>
+        string.Join(" · ", new[] { spent != null ? $"{spent} h spent" : null, estimated != null ? $"{estimated} h estimated" : null }.Where(t => t != null));
 }

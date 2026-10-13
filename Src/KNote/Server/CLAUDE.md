@@ -133,6 +133,13 @@ public class FoldersController : ControllerBase
   Markdown, conservando `navigation` (vista renderizada en `ClientWin`) o `markdown`; `scr` y `blk` se respetan.
   Los saltos de línea de la descripción se normalizan a un CR LF cada uno (`\r*\n|\r`), como los escribe
   `ClientWin`: un `Replace("\n", "\r\n")` anterior convertía los CR LF en CR CR LF.
+- **Descripción de las tareas** (`api/notes/{id}/tasks`, `POST/PUT api/notes/tasks`, y las del calendario): es
+  Markdown como la de una nota, así que pasa por `UtilUpdateResourceInDescriptionForRead`/`ForWrite` y al guardar
+  sus saltos de línea se normalizan a CR LF.
+- **Editar un recurso** (`PUT api/notes/resources`, `ResourceInfoDto`): un recurso que ya existe solo cambia su
+  descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
+  fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el
+  contenido guardado en la BD (`ResourceInfoDto` no dice si lo está).
 - **Ruta de una carpeta**: `GET api/folders/{id}/path` (`Folders.GetPathAsync` de `Service`, la misma que usa
   `ClientWin`), para el editor de notas.
 - **HTML de las notas para la Web**: `POST api/notes/html` (cualquier usuario autenticado; cuerpo: el Markdown

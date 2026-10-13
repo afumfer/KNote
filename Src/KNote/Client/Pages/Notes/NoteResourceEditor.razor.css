@@ -1,0 +1,50 @@
+/* The file of a resource being edited: its image (or its kind of file) and its name. Only theme variables. */
+
+.knt-resource-file {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    border-radius: var(--rz-border-radius);
+    min-width: 0;
+}
+
+.knt-resource-file-thumb {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 4rem;
+    border-radius: var(--rz-border-radius);
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--rz-text-color) 5%, transparent);
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+    .knt-resource-file-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .knt-resource-file-thumb ::deep .rzi {
+        font-size: 2rem;
+    }
+
+.knt-resource-file-text {
+    min-width: 0;
+}
+
+.knt-resource-file-name {
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+    overflow-wrap: anywhere;
+}
+
+.knt-resource-file-type {
+    margin-top: 0.125rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}

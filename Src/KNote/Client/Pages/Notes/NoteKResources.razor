@@ -2,7 +2,7 @@
 @inject DialogService dialogService
 
 @* The note's resources as a gallery: a card for each, with its image (any image type) or an icon of its kind of
-   file, its description and name, and its actions (view, open, insert in the description, delete). *@
+   file, its description and name, and its actions (view, edit, open, insert in the description, delete). *@
 
 <div class="knt-list-header">
     <span>@Resources.Count @(Resources.Count == 1 ? "resource" : "resources")</span>
@@ -25,14 +25,14 @@ else
             var image = ImageSource(resource);
             <div class="knt-resource">
                 <div class="knt-resource-thumb @(image == null ? "knt-resource-thumb-icon" : null)"
-                     @onclick="() => ViewAsync(resource)" title="@(image == null ? "Open" : "View")">
+                     @onclick="() => ViewAsync(resource)" title="@(CanView(resource) ? "View" : "Open")">
                     @if (image != null)
                     {
                         <img src="@image" alt="@resource.Description" loading="lazy" />
                     }
                     else
                     {
-                        <RadzenIcon Icon="@KntFileTypes.Icon(resource.FileType)" />
+                        <RadzenIcon Icon="@KntFileTypes.Icon(resource.FileType, resource.Name)" />
                         <span class="knt-resource-ext">@Extension(resource)</span>
                     }
                 </div>
@@ -44,6 +44,8 @@ else
                     </div>
                 </div>
                 <div class="knt-resource-actions">
+                    <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => OnEdit.InvokeAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
                     <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OpenAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Open in a new tab"))" />
                     <RadzenButton Icon="add_link" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
@@ -58,18 +60,22 @@ else
 
 @code {
     [Parameter] public List<ResourceInfoDto> Resources { get; set; } = new();
+    [Parameter] public EventCallback<ResourceInfoDto> OnEdit { get; set; }
     [Parameter] public EventCallback<ResourceInfoDto> OnDelete { get; set; }
     [Parameter] public EventCallback<ResourceInfoDto> OnInsertInDesription { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
 
     [Inject] private IJSRuntime js { get; set; } = null!;
 
-    // The image of a resource that is one: its content if it came with the resource, otherwise its URL.
+    // The image of a resource that is one (by its type or its name): its content if it came with the resource (and
+    // its type says which image it is), otherwise its URL.
     public static string? ImageSource(ResourceInfoDto resource)
     {
-        if (!KntFileTypes.IsImage(resource.FileType))
+        if (!KntFileTypes.IsImage(resource.FileType, resource.Name))
             return null;
-        return string.IsNullOrEmpty(resource.ContentBase64) ? resource.FullUrl : $"data:{resource.FileType};base64,{resource.ContentBase64}";
+        return string.IsNullOrEmpty(resource.ContentBase64) || !KntFileTypes.IsImage(resource.FileType)
+            ? resource.FullUrl
+            : $"data:{resource.FileType};base64,{resource.ContentBase64}";
     }
 
     private static string Extension(ResourceInfoDto resource)
@@ -79,22 +85,23 @@ else
         return dot >= 0 && dot < name.Length - 1 ? name[(dot + 1)..].ToUpperInvariant() : "";
     }
 
-    // An image is shown in a dialog; any other file opens in a new tab.
+    // What the browser can show (an image, a PDF, a video, an audio or a text) is shown in this window
+    // (NoteResourceViewer), over the note; any other file opens in a new tab.
+    private static bool CanView(ResourceInfoDto resource) =>
+        ImageSource(resource) != null
+        || (KntFileTypes.KindOf(resource.FileType, resource.Name) != KntFileTypes.Kind.Other && !string.IsNullOrEmpty(resource.FullUrl));
+
     private async Task ViewAsync(ResourceInfoDto resource)
     {
-        var image = ImageSource(resource);
-        if (image == null)
+        if (!CanView(resource))
         {
             await OpenAsync(resource);
             return;
         }
 
-        await dialogService.OpenAsync(string.IsNullOrWhiteSpace(resource.Description) ? resource.NameOut : resource.Description,
-            PreviewOf(image, resource.Description), KntDialogs.Large());
+        await dialogService.OpenAsync<NoteResourceViewer>("View resource",
+            new Dictionary<string, object?> { { "Resource", resource } }, NoteResourceViewer.Options());
     }
-
-    private RenderFragment<DialogService> PreviewOf(string image, string? description) =>
-        _ => @<div class="knt-resource-preview"><img src="@image" alt="@description" /></div>;
 
     private async Task OpenAsync(ResourceInfoDto resource) =>
         await js.InvokeVoidAsync("open", resource.FullUrl, "_blank", "noopener");

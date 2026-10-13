@@ -240,7 +240,28 @@ public class NoteTaskDto : SmartModelDtoBase
 
     public string UserFullName { get; set; }
 
-    #endregion 
+    #endregion
+
+    #region Public methods
+
+    /// <summary>
+    /// The task's topic as the lists of tasks show it: its Tags ("Topic / Tags"), or, without them, the first line
+    /// of its description (without the Markdown marks it starts with), cut to maxLength. Empty if it has neither.
+    /// </summary>
+    public string GetTopic(int maxLength = 100)
+    {
+        if (!string.IsNullOrWhiteSpace(Tags))
+            return Tags.Trim();
+
+        var line = (Description ?? "").Split('\n')
+            .Select(l => l.Trim().TrimStart('#', '>', '-', '*', '+', ' ').Trim())
+            .FirstOrDefault(l => l.Length > 0);
+        if (line == null)
+            return "";
+        return line.Length > maxLength ? line.Substring(0, maxLength) + "…" : line;
+    }
+
+    #endregion
 
     #region Validations
 
