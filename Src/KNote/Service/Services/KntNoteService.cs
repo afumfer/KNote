@@ -10,6 +10,7 @@ using KNote.Service.Interfaces;
 using KNote.Service.Core;
 using KNote.Service.ServicesCommands;
 using Markdig;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.Service.Services;
 
@@ -370,36 +371,35 @@ public class KntNoteService : KntServiceBase, IKntNoteService
             }
         }
         
+        // The URLs don't depend on the file: the web server may serve it even if this process can't read it.
+        if (forceUpdateDto)
+            (resource.RelativeUrl, resource.FullUrl) = UtilGetResourceUrls(resource);
+
+        var file = UtilGetResourceFilePath(resource);
+        if (string.IsNullOrEmpty(file))
+        {
+            Service.Logger?.LogError("Resource {name}: no file path (ResourcesContainerRootPath and Container must be set).", resource.Name);
+            return false;
+        }
+
         try
-        {        
-            var file = UtilGetResourceFilePath(resource);
-    
-            // TODO: anotate this meesage in log, and throw exception 
-            if (string.IsNullOrEmpty(file))
-                return false;
-
-            var dirPath = Path.GetDirectoryName(file);
-
+        {
             if (resource.ContentArrayBytes != null)
             {
+                var dirPath = Path.GetDirectoryName(file);
                 if (!Directory.Exists(dirPath))
                     Directory.CreateDirectory(dirPath);
                 if (!File.Exists(file))
                     File.WriteAllBytes(file, resource.ContentArrayBytes);
             }
 
-            if (forceUpdateDto)
-            {
-                if (!resource.ContentInDB)
-                    resource.ContentArrayBytes = File.ReadAllBytes(file);
-
-                (resource.RelativeUrl, resource.FullUrl) = UtilGetResourceUrls(resource);
-            }
+            if (forceUpdateDto && !resource.ContentInDB)
+                resource.ContentArrayBytes = File.ReadAllBytes(file);
         }
         catch (Exception ex)
         {
-            // TODO: anotate this meesage in log, and throw exception 
-            var errMsg = ex.ToString();
+            // E.g. the account of the process (an IIS application pool) without permissions on the folder.
+            Service.Logger?.LogError(ex, "Resource {name}: the file {file} couldn't be written or read.", resource.Name, file);
             return false;
         }
 
