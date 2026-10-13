@@ -1,30 +1,36 @@
 ﻿@inject NotificationService notificationService
 @inject DialogService dialogService
 
-@* Dialog of a note's task (NoteForm opens it framed): who it is for and what, its planning and its progress. The
-   result is the task edited, or null if cancelled. *@
+@* Dialog of a note's task (NoteForm opens it framed): who it is for and what (its topic, and its description in
+   Markdown), its planning and its progress. The result is the task edited, or null if cancelled. *@
 
 <EditForm Model="task" Context="formContextTask">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    <KntDialogFrame Icon="@(TaskEdit == null ? "add_task" : "task_alt")" Title="@(TaskEdit == null ? "New task" : "Edit task")"
+    <KntDialogFrame Icon="@(IsNew ? "add_task" : "task_alt")" Title="@(IsNew ? "New task" : "Edit task")"
                     Subtitle="@(string.IsNullOrEmpty(NoteTopic) ? "A task of the note." : NoteTopic)">
         <ChildContent>
 
             <KntFormSection Icon="person" Title="Assignment" Description="Who the task is for, and what it is.">
-                <KntField Label="User" Component="UserId" Required="true">
-                    <RadzenDropDown Name="UserId" TValue="Guid" @bind-Value="@task.UserId"
-                                    Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" Placeholder="Choose a user" />
-                    <ValidationMessage For="@(() => task.UserId)" />
-                </KntField>
-                <KntField Label="Description" Component="Description">
-                    <RadzenTextArea Name="Description" @bind-Value="@task.Description" Rows="2" />
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="7">
+                        <KntField Label="Topic / Tags" Component="Tags" Help="A short title, or the words to find the task by.">
+                            <RadzenTextBox Name="Tags" @bind-Value="@task.Tags" />
+                            <ValidationMessage For="@(() => task.Tags)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="5">
+                        <KntField Label="User" Component="UserId" Required="true">
+                            <RadzenDropDown Name="UserId" TValue="Guid" @bind-Value="@task.UserId"
+                                            Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" Placeholder="Choose a user" />
+                            <ValidationMessage For="@(() => task.UserId)" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+                <KntField Label="Description">
+                    <KntMarkdownEditor @bind-Value="@task.Description" Height="18rem" StorageKey="KNoteTaskEditorMode" />
                     <ValidationMessage For="@(() => task.Description)" />
-                </KntField>
-                <KntField Label="Tags" Component="Tags" Help="Words separated by spaces or commas.">
-                    <RadzenTextBox Name="Tags" @bind-Value="@task.Tags" />
-                    <ValidationMessage For="@(() => task.Tags)" />
                 </KntField>
             </KntFormSection>
 
@@ -88,8 +94,8 @@
                         </KntField>
                     </RadzenColumn>
                     <RadzenColumn Size="12" SizeSM="6">
-                        <KntField Label="Resolved" Component="Resolved" Help="The task is done.">
-                            <RadzenSwitch Name="Resolved" @bind-Value="@task.Resolved" />
+                        <KntField Label="Resolved" Component="Resolved" Help="The task is done (its end is now, if it has none).">
+                            <RadzenSwitch Name="Resolved" Value="@task.Resolved" ValueChanged="@((bool resolved) => SetResolved(resolved))" />
                         </KntField>
                     </RadzenColumn>
                 </RadzenRow>
@@ -106,11 +112,14 @@
 
 @code {
     [Parameter] public List<UserDto> Users { get; set; }
+    // The task to edit (a new one, with its default values, has no id); none for an empty new one.
     [Parameter] public  NoteTaskDto TaskEdit { get; set; }
     // The note the task belongs to (the dialog's subtitle).
     [Parameter] public string? NoteTopic { get; set; }
 
     private NoteTaskDto task;
+
+    private bool IsNew => TaskEdit == null || TaskEdit.NoteTaskId == Guid.Empty;
 
     protected override Task OnInitializedAsync()
     {
@@ -135,6 +144,14 @@
         task.UserFullName = Users.Where(u => u.UserId == task.UserId).Select(u => u.FullName).SingleOrDefault();
 
         dialogService.Close(task);
+    }
+
+    // As in ClientWin: a task resolved ends now, unless its end is already set.
+    private void SetResolved(bool resolved)
+    {
+        task.Resolved = resolved;
+        if (resolved && task.EndDate == null)
+            task.EndDate = DateTime.Now;
     }
 
     private void OnCancel()

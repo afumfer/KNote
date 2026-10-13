@@ -413,6 +413,11 @@ public class NotesController : ControllerBase
         {
             _logger.LogTrace("Tasks(post/put) {dateTime}.", DateTime.Now);
 
+            // As a note's description (Post): its resources as stored, and its lines as ClientWin writes them.
+            entity.Description = _service.Notes.UtilUpdateResourceInDescriptionForWrite(entity.Description);
+            if (entity.Description != null)
+                entity.Description = Regex.Replace(entity.Description, @"\r*\n|\r", "\r\n");
+
             var resApi = await _service.Notes.SaveNoteTaskAsync(entity);
             if (resApi.IsValid)
             {                    
@@ -441,6 +446,7 @@ public class NotesController : ControllerBase
             var resApi = await _service.Notes.GetNoteTasksAsync(id);
             if (resApi.IsValid)                
             {                    
+                TasksUpdateResourceInDescriptionForRead(resApi.Entity);
                 return Ok(resApi);
             }
             else
@@ -469,6 +475,7 @@ public class NotesController : ControllerBase
             var resApi = await _service.Notes.GetStartedTasksByDateTimeRageAsync(satartDateTime, endDateTime);
             if (resApi.IsValid)
             {
+                TasksUpdateResourceInDescriptionForRead(resApi.Entity);
                 return Ok(resApi);
             }
             else
@@ -514,6 +521,13 @@ public class NotesController : ControllerBase
         {
             n.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(n.Description);
         }
+    }
+
+    // A task's description is Markdown like a note's: its resources with their URLs.
+    private void TasksUpdateResourceInDescriptionForRead(List<NoteTaskDto> tasks)
+    {
+        foreach (var t in tasks)
+            t.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(t.Description);
     }
 
     #endregion

@@ -134,6 +134,34 @@
     flex: 1 1 0 !important;
 }
 
+/* The tasks of a note (Pages/Notes/NoteKTasks): the list and the task selected, framed. In a narrow window the task
+   goes below the list (Radzen sets the panes' size inline, hence !important). */
+.rz-splitter.knt-tasks-split {
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    border-radius: var(--rz-border-radius);
+    overflow: hidden;
+}
+
+@media (max-width: 767.98px) {
+    .rz-splitter.knt-tasks-split {
+        flex-direction: column;
+        height: auto !important;
+    }
+
+        .rz-splitter.knt-tasks-split > .rz-splitter-pane {
+            flex: none !important;
+        }
+
+            .rz-splitter.knt-tasks-split > .rz-splitter-pane:first-child {
+                max-height: 16rem;
+                border-bottom: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+            }
+
+        .rz-splitter.knt-tasks-split > .rz-splitter-bar {
+            display: none;
+        }
+}
+
 /* Dialogs drawn by Shared/KntDialogFrame (KntDialogs.Framed): its header and footer reach the dialog's edges. */
 .rz-dialog.knt-framed-dialog .rz-dialog-content {
     padding: 0;

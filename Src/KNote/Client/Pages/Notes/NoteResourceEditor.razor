@@ -1,0 +1,97 @@
+@inject DialogService dialogService
+
+@* Dialog of a note's resource (NoteForm opens it framed). A new one: the file to upload, its description and order.
+   An existing one (Resource): its description and order (its file is shown, but it can't be changed). The result is
+   the resource (a new one with its content), or null if cancelled. *@
+
+<KntDialogFrame Icon="@(IsNew ? "upload_file" : "edit_document")" Title="@(IsNew ? "Add resource" : "Edit resource")"
+                Subtitle="@(string.IsNullOrEmpty(NoteTopic) ? (IsNew ? "Upload a file to the note." : "A resource of the note.") : NoteTopic)">
+    <ChildContent>
+        <RadzenStack Gap="1rem">
+            @if (IsNew)
+            {
+                <InputFileUpload OnSelectedFile="OnFileSelected" />
+            }
+            else
+            {
+                var image = NoteKResources.ImageSource(resource);
+                <div class="knt-resource-file">
+                    <div class="knt-resource-file-thumb">
+                        @if (image != null)
+                        {
+                            <img src="@image" alt="@resource.NameOut" />
+                        }
+                        else
+                        {
+                            <RadzenIcon Icon="@KntFileTypes.Icon(resource.FileType, resource.Name)" />
+                        }
+                    </div>
+                    <div class="knt-resource-file-text">
+                        <div class="knt-resource-file-name">@resource.NameOut</div>
+                        <div class="knt-resource-file-type">@(string.IsNullOrEmpty(resource.FileType) ? "File" : resource.FileType)</div>
+                    </div>
+                </div>
+            }
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeSM="9">
+                    <KntField Label="Description" Component="Description" Help="How the resource is shown and inserted in the description.">
+                        <RadzenTextBox Name="Description" @bind-Value="@resource.Description" Disabled="@(!fileChosen)" />
+                    </KntField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeSM="3">
+                    <KntField Label="Order" Component="Order" Help="Position in the list.">
+                        <RadzenNumeric Name="Order" @bind-Value="@resource.Order" Disabled="@(!fileChosen)" />
+                    </KntField>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+        <RadzenButton Text="@(IsNew ? "Add" : "Save")" Icon="@(IsNew ? "upload" : "save")" Click="() => OnConfirm()"
+                      ButtonStyle="ButtonStyle.Primary" Disabled="@(!fileChosen)" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    // The note the resource is for (the dialog's subtitle).
+    [Parameter] public string? NoteTopic { get; set; }
+
+    // The resource to edit; none for a new one.
+    [Parameter] public ResourceInfoDto? Resource { get; set; }
+
+    private ResourceInfoDto resource = new ResourceInfoDto();
+    private bool fileChosen;
+
+    private bool IsNew => Resource == null;
+
+    protected override void OnInitialized()
+    {
+        // A copy: the resource shown in the note doesn't change until it is saved.
+        if (Resource != null)
+        {
+            resource = Resource.GetSimpleDto<ResourceInfoDto>();
+            fileChosen = true;
+        }
+    }
+
+    private void OnFileSelected(KntFileInfo file)
+    {
+        resource.ContentBase64 = file.ContentBase64;
+        resource.Name = file.Name;
+        resource.Description = file.Name;
+        resource.FileType = file.Type;
+        fileChosen = true;
+    }
+
+    private void OnConfirm()
+    {
+        if (fileChosen)
+            dialogService.Close(resource);
+    }
+
+    private void OnCancel()
+    {
+        dialogService.Close(null);
+    }
+}

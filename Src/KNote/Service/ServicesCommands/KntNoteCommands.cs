@@ -673,12 +673,28 @@ public class KntNotesSaveResourceInfoAsyncCommand : KntCommandSaveServiceBase<Re
 
         var res = new Result<ResourceInfoDto>();
 
-        var resource = Param.GetSimpleDto<ResourceDto>();
+        ResourceDto resource;
+        if (Param.ResourceId == Guid.Empty || forceNew)
+            resource = Param.GetSimpleDto<ResourceDto>();
+        else
+        {
+            // An existing resource: only its description and order change. Its file, and its content when it is kept
+            // in the database (ResourceInfoDto doesn't say so), stay as they are.
+            var resGetResource = await Service.Notes.GetResourceAsync(Param.ResourceId);
+            if (!resGetResource.IsValid)
+            {
+                res.AddListErrorMessage(resGetResource.ListErrorMessage);
+                return res;
+            }
+            resource = resGetResource.Entity;
+            resource.Description = Param.Description;
+            resource.Order = Param.Order;
+        }
 
         var resSaveResource = await Service.Notes.SaveResourceAsync(resource, forceNew);
 
         res.AddListErrorMessage(resSaveResource.ListErrorMessage);
-        res.Entity = resSaveResource.Entity.GetSimpleDto<ResourceInfoDto>();
+        res.Entity = resSaveResource.Entity?.GetSimpleDto<ResourceInfoDto>();
 
         return res;
     }

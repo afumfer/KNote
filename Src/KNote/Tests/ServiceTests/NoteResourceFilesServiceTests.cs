@@ -81,6 +81,49 @@ public class NoteResourceFilesServiceTests
         Assert.AreEqual($"{RootUrl}/{saved.Entity.Container}/image.png", resources.Entity[0].FullUrl);
     }
 
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task SaveResourceAsync_AnExistingResourceInfoWithoutItsFile_OnlyChangesItsDescriptionAndOrder(bool contentInDB)
+    {
+        // The web edits a resource's description and order, without sending its file back.
+        var noteId = await AddNoteAsync();
+        var newResource = NewResource(noteId, "image.png");
+        newResource.Container = $"{Container}/2026";
+        newResource.ContentInDB = contentInDB;
+        var saved = await service.Notes.SaveResourceAsync(newResource);
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+
+        var edited = new ResourceInfoDto
+        {
+            ResourceId = saved.Entity.ResourceId,
+            NoteId = noteId,
+            Name = saved.Entity.Name,
+            Container = saved.Entity.Container,
+            Description = "New description",
+            Order = 7
+        };
+        var result = await service.Notes.SaveResourceAsync(edited);
+
+        Assert.IsTrue(result.IsValid, result.ErrorMessage);
+        var stored = await service.Notes.GetResourceAsync(saved.Entity.ResourceId);
+        Assert.AreEqual("New description", stored.Entity.Description);
+        Assert.AreEqual(7, stored.Entity.Order);
+        Assert.AreEqual(contentInDB, stored.Entity.ContentInDB);
+        CollectionAssert.AreEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, stored.Entity.ContentArrayBytes);
+        Assert.IsTrue(File.Exists(service.Notes.UtilGetResourceFilePath(stored.Entity)));
+    }
+
+    [TestMethod]
+    public void ResourceInfoDto_Validate_OnlyANewResourceNeedsItsContent()
+    {
+        var newOne = new ResourceInfoDto { Name = "a.png", Container = Container };
+        var existing = new ResourceInfoDto { ResourceId = Guid.NewGuid(), Name = "a.png", Container = Container };
+
+        Assert.IsFalse(newOne.IsValid());
+        Assert.IsTrue(existing.IsValid(), existing.GetErrorMessage());
+    }
+
     private void SetRootPath(string path)
     {
         var repositoryRef = service.Repository.RepositoryRef;

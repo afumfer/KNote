@@ -197,7 +197,8 @@ public class ResourceInfoDto : SmartModelDtoBase
         // Specific validations
         //----
 
-        if (_contentBase64 == null)
+        // A new resource comes with its file. An existing one may come without it (only its data changes).
+        if (_contentBase64 == null && ResourceId == Guid.Empty)
         {
             results.Add(new ValidationResult
              ("If the content is in the database, you must enter its content in base 64  "
