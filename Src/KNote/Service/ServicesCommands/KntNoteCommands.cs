@@ -5,6 +5,7 @@ using System.IO;
 using KNote.Model.Dto;
 using KNote.Model;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.Service.ServicesCommands;
 
@@ -588,7 +589,16 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
     {
         Result<ResourceDto> result;
 
-        Service.Notes.UtilManageResourceContent(Param);
+        var hasNewContent = Param.ContentArrayBytes != null;
+        var fileManaged = Service.Notes.UtilManageResourceContent(Param);
+
+        // Without its file (and its content not in the database) the resource would be saved empty.
+        if (hasNewContent && !fileManaged && !Param.ContentInDB)
+        {
+            result = new Result<ResourceDto>();
+            result.AddErrorMessage("The resource file couldn't be saved on the server (see the server log: the folder of the resources may lack permissions).");
+            return result;
+        }
 
         var tmpContent = Param.ContentArrayBytes;
 
@@ -619,8 +629,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
                     }
                     catch (Exception ex)
                     {
-                        // TODO: anotate this meesage in log
-                        var errMsg = ex.ToString();
+                        Service.Logger?.LogError(ex, "Resource {name}: the old file {file} couldn't be deleted.", Param.Name, oldFile);
                     }
                 }
             }
@@ -703,8 +712,8 @@ public class KntNotesDeleteResourceAsyncCommand : KntCommandServiceBase<Guid, Re
                 }
                 catch (Exception ex)
                 {
-                    // TODO: anotate this meesage in log
-                    var errMsg = ex.ToString();
+                    // The resource is already deleted: its file is left behind.
+                    Service.Logger?.LogError(ex, "Resource {name}: its file couldn't be deleted.", result.Entity.Name);
                 }
             }
             else
