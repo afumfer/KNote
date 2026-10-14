@@ -5,7 +5,8 @@ namespace KNote.Client.AppStoreService.ClientDataServices;
 
 public interface INoteWebApiService
 {
-    Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync();
+    // The notes of Home, or of one of the folders directly inside it (folderId).
+    Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync(Guid? folderId = null);
     Task<Result<NoteDto>> GetAsync(Guid noteId);
     Task<Result<string>> HtmlAsync(string markdown);
     Task<Result<NoteDto>> NewAsync();

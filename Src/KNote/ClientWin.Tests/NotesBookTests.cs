@@ -16,7 +16,7 @@ public class NotesBookTests
         Source = NotesListSource.Folder,
         FolderPath = @"Notas personales\Libro KaNote",
         FolderNumber = 12,
-        RepositoryAlias = "Personal",
+        RepositoryName = "Personal",
         RepositoryProvider = "Microsoft.Data.Sqlite"
     };
 

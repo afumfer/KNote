@@ -50,9 +50,9 @@ public partial class FoldersSelectorForm : KntForm, IViewSelector<FolderWithServ
 
             foreach (var serviceRef in _ctrl.ServicesRef)
             {
-                _ctrl.NotifyMessage($"Loading folderes in {serviceRef.Alias} ...");
+                _ctrl.NotifyMessage($"Loading folderes in {serviceRef.Name} ...");
 
-                rootRepNode = new TreeNode("[" + serviceRef.Alias + "]", 2, 2);         
+                rootRepNode = new TreeNode("[" + serviceRef.Name + "]", 2, 2);         
                 rootRepNode.Tag = serviceRef;                
                 treeViewFolders.Nodes.Add(rootRepNode);
                

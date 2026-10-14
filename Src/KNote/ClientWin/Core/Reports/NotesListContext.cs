@@ -14,7 +14,7 @@ public class NotesListContext
 {
     public NotesListSource Source { get; set; }
 
-    public string RepositoryAlias { get; set; }
+    public string RepositoryName { get; set; }
 
     public string RepositoryProvider { get; set; }
 
@@ -37,7 +37,7 @@ public class NotesListContext
     public string TextFilter { get; set; }
 
     public string Repository
-        => string.IsNullOrEmpty(RepositoryProvider) ? RepositoryAlias ?? "" : $"{RepositoryAlias} ({RepositoryProvider})";
+        => string.IsNullOrEmpty(RepositoryProvider) ? RepositoryName ?? "" : $"{RepositoryName} ({RepositoryProvider})";
 
     public string Heading => Source switch
     {

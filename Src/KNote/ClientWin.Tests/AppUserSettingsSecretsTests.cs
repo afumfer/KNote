@@ -17,9 +17,9 @@ public class AppUserSettingsSecretsTests
         settings.Notifications.Email.Password = "smtp-pwd";
         settings.Ai.Providers.Add(new AiProviderRef { Alias = "OpenAI", Provider = "OpenAI", Model = "m", ApiKey = "key-1" });
         settings.Ai.Providers.Add(new AiProviderRef { Alias = "Ollama", Provider = "Ollama", Model = "m", Host = "http://localhost:11434" });
-        settings.Repositories.Items.Add(new RepositoryRef { Alias = "Sqlite", ConnectionString = @"Data Source=C:\KaNote\Data\a.db" });
-        settings.Repositories.Items.Add(new RepositoryRef { Alias = "Sql", ConnectionString = SqlAuthConnectionString });
-        settings.Repositories.Assistant = new RepositoryRef { Alias = "Assistant", ConnectionString = SqlAuthConnectionString };
+        settings.Repositories.Items.Add(new RepositoryRef { Name = "Sqlite", ConnectionString = @"Data Source=C:\KaNote\Data\a.db" });
+        settings.Repositories.Items.Add(new RepositoryRef { Name = "Sql", ConnectionString = SqlAuthConnectionString });
+        settings.Repositories.Assistant = new RepositoryRef { Name = "Assistant", ConnectionString = SqlAuthConnectionString };
         return settings;
     }
 
@@ -120,7 +120,7 @@ public class AppUserSettingsSecretsTests
     {
         // Empty secrets and connection strings without a password are not "plain-text secrets".
         var settings = new AppUserSettings();
-        settings.Repositories.Items.Add(new RepositoryRef { Alias = "Sqlite", ConnectionString = @"Data Source=C:.db" });
+        settings.Repositories.Items.Add(new RepositoryRef { Name = "Sqlite", ConnectionString = @"Data Source=C:.db" });
 
         var read = new AppUserSettingsSecrets(new FakeSecretProtector()).Unprotect(settings);
 

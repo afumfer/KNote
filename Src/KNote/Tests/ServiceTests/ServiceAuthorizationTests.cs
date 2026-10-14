@@ -32,7 +32,7 @@ public class ServiceAuthorizationTests
         using var db = new RepositoryTestDatabase();
         var repositoryRef = new RepositoryRef
         {
-            Alias = "ServiceRefTests",
+            Name = "ServiceRefTests",
             Orm = "Dapper",
             Provider = "Microsoft.Data.Sqlite",
             ConnectionString = $"Data Source={db.DatabaseFilePath}"

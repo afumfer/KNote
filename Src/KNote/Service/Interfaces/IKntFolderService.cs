@@ -11,6 +11,8 @@ public interface IKntFolderService
     Task<Result<List<FolderInfoDto>>> GetAllAsync();
     Task<Result<List<FolderDto>>> GetTreeAsync();
     Task<Result<FolderDto>> GetHomeAsync();
+    // The folders directly inside Home (by Order and Name), which the Web shows beside Home's notes.
+    Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync();
     Task<Result<FolderDto>> GetAsync(Guid folderId);
     Task<Result<FolderDto>> GetAsync(int folderNumber);
     // The folder's path in the folders tree, from the root (e.g. "Home\Projects\KNote").

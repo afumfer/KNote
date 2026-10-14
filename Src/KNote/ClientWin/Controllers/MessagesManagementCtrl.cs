@@ -134,7 +134,7 @@ public class MessagesManagementCtrl : CtrlBase
                 }
                 catch (Exception ex)
                 {
-                    Store.Logger?.LogError(ex, "Reopening the visible PostIts of repository {alias} failed.", serviceRef.Alias);
+                    Store.Logger?.LogError(ex, "Reopening the visible PostIts of repository {alias} failed.", serviceRef.Name);
                 }
             }
         }
@@ -176,7 +176,7 @@ public class MessagesManagementCtrl : CtrlBase
                 }
                 catch (Exception ex)
                 {
-                    Store.Logger?.LogError(ex, "Checking the alarms of repository {alias} failed.", serviceRef.Alias);
+                    Store.Logger?.LogError(ex, "Checking the alarms of repository {alias} failed.", serviceRef.Name);
                 }
             }
         }
@@ -194,7 +194,7 @@ public class MessagesManagementCtrl : CtrlBase
         if (res.Entity != null)
             return res.Entity;
 
-        Store.Logger?.LogWarning("Getting the {query} of repository {alias} failed: {error}", query, serviceRef.Alias, res.ErrorMessage);
+        Store.Logger?.LogWarning("Getting the {query} of repository {alias} failed: {error}", query, serviceRef.Name, res.ErrorMessage);
         return new List<Guid>();
     }
 

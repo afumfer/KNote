@@ -24,6 +24,12 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
         return await ProcessResultFromHttpResponse<List<FolderDto>>(httpRes, "Get folders");
     }
 
+    public async Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync()
+    {
+        var httpRes = await _httpClient.GetAsync("api/folders/homechildren");
+        return await ProcessResultFromHttpResponse<List<FolderInfoDto>>(httpRes, "Get Home folders");
+    }
+
     public async Task<Result<FolderDto>> GetAsync(Guid folderId)
     {        
         var httpRes = await _httpClient.GetAsync($"api/folders/{folderId}");

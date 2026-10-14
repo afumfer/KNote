@@ -171,7 +171,7 @@ protected override IViewNoteEditorEmbeddable<NoteExtendedDto> CreateView()
 
 `IViewNoteEditorEmbeddable<T>`/`IViewPostItEditor<T>` (`Core/IViews.cs`) son así: `IViewEditorEmbeddable<T>`/
 `IViewPostIt<T>` combinadas con `IFolderAndRepositoryDisplay` (un único método,
-`RefreshFolderAndRepositoryDisplayAsync()`, para repintar solo la ruta de carpeta/alias de repositorio sin
+`RefreshFolderAndRepositoryDisplayAsync()`, para repintar solo la ruta de carpeta/nombre de repositorio sin
 disparar un `RefreshView()` completo). Esa capacidad se mantiene fuera de `IViewEditorEmbeddable<T>`/
 `IViewPostIt<T>` a propósito — son contratos genéricos con más implementaciones (p. ej.
 `PostItPropertiesForm : IViewPostIt<WindowDto>`, que edita el estilo de la ventana, no una nota) que no
@@ -201,11 +201,22 @@ antes eran campos/lógica directos de `Store` vive en clases auxiliares propias,
 ellas y manteniendo su API pública sin cambios para el resto del código:
 
 - `ServiceRefRegistry` (`Core/ServiceRefRegistry.cs`) — posee la colección de `ServiceRef` y las consultas
-  básicas (`GetById`/`GetByAlias`/`GetFirst`/`GetAll`); `Store.AddServiceRef`/`RemoveServiceRef`/
-  `GetServiceRef(Guid|alias)`/`GetFirstServiceRef()`/`GetActiveOrDefaultService()` delegan en ella. Cada
-  `ServiceRef` (en `Service/Core/ServiceRef.cs`) construye de forma perezosa su `IKntService`, que a su vez
-  usa un `IKntRepository` (Dapper o EF, según `RepositoryRef.Orm`) — así es como `Store`/los controladores
-  llegan finalmente a la capa de persistencia.
+  básicas (`GetById`/`GetByRepositoryId`/`GetByName`/`GetFirst`/`GetAll`); `Store.AddServiceRef`/
+  `RemoveServiceRef`/`GetServiceRef(Guid)`/`GetServiceRefByRepositoryId`/`GetServiceRef(name)`/
+  `GetFirstServiceRef()`/`GetActiveOrDefaultService()` delegan en ella. Cada `ServiceRef` (en
+  `Service/Core/ServiceRef.cs`) construye su `IKntService`, que a su vez usa un `IKntRepository` (Dapper o EF,
+  según `RepositoryRef.Orm`) — así es como `Store`/los controladores llegan finalmente a la capa de persistencia.
+- **Identidad de un repositorio.** Construir un `ServiceRef` abre su base de datos y lee de ella
+  (`LoadRepositoryInfo`) su `RepositoryId` y su `Name` (`DB_REPOSITORYID`/`DB_REPOSITORYNAME`, ver el `CLAUDE.md`
+  raíz); no salen de la configuración. **`RepositoryId` es la clave** de un repositorio en todo lo que se guarda
+  o se busca (las filas de `AppInfoAlarmRow` en `KNoteState.config`, `Store.GetServiceRefByRepositoryId`); no lo
+  confundas con `IdServiceRef`, que solo identifica el `ServiceRef` mientras la app está abierta. El nombre es
+  lo que se muestra y puede cambiar (otro cliente puede renombrar una base de datos compartida): búscalo por
+  nombre solo donde lo escribe el usuario (las funciones de KntScript, `KNoteScriptLibrary`). Dos repositorios
+  enlazados no pueden tener el mismo `RepositoryId` (una copia de una base de datos lo comparte):
+  `RepositoryEditorCtrl` lo rechaza al enlazar o crear y `Program.LinkRepositoriesAsync` abre solo el primero.
+  El editor exige un nombre único entre los enlazados al crear y editar (al editar lo guarda en la base de datos
+  con `SystemValues.SaveRepositoryNameAsync`, Admin); al enlazar no lo pide.
 - `ControllerRegistry` (`Core/ControllerRegistry.cs`) — posee la colección de `CtrlBase` vivos;
   `Store.AddController`/`RemoveController` delegan el almacenamiento ahí, y operaciones transversales como
   `SaveActiveNotes()`, `SaveAndCloseActiveNotes()`, `HidePostIts()`/`ActivatePostIts()` iteran sobre
@@ -275,6 +286,15 @@ carga/guarda con `LoadConfig`/`SaveConfig` delegando en `Core/AppConfigStorage.c
 
 Ambos se leen/escriben con `Core/XmlConfigFile` (guardado atómico vía fichero temporal, deja el anterior como
 `.bak` y, si el fichero no se puede leer, carga ese `.bak`).
+
+**El nombre y el id de un repositorio no se guardan aquí**: viven en su base de datos (ver "Identidad de un
+repositorio" arriba), así que `RepositoryRef.Name` y `RepositoryId` son `[XmlIgnore]`. Los ficheros anteriores
+traían el nombre como `<Alias>`: `RepositoryRef.LegacyAlias` lo lee (da nombre a la base de datos la primera vez
+que se abre, ver `KntSchemaUpdater` revisión 5) y lo vuelve a escribir solo mientras el repositorio no se haya
+abierto. Igual con las filas del panel de alarmas (`AppInfoAlarmRow.RepositoryAlias`), que
+`AppInfoAlarmRowRepositoryMigration` pasa a `RepositoryId` al arrancar. Todo ese código de compatibilidad lleva
+el marcador `LEGACY(repository-alias)` (un `grep` lo encuentra entero) y se podrá quitar cuando todas las
+instalaciones hayan abierto sus repositorios con esta versión.
 
 **Secretos**: `SmtpPassword` (`Email.Password`), `AiProviderRef.ApiKey` y las `ConnectionString` que llevan
 `Password=`/`Pwd=` se guardan cifrados con DPAPI (usuario actual) como `dpapi:<base64>`. El cifrado ocurre solo

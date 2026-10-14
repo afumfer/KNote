@@ -24,7 +24,7 @@ internal static class KntAuthorizationBypass
             throw new ArgumentException("A reason is required to bypass the authorization.", nameof(reason));
 
         service.Logger?.LogInformation("Authorization bypass for '{reason}' (user '{user}', repository '{repository}').",
-            reason, service.UserIdentityName, service.RepositoryRef?.Alias);
+            reason, service.UserIdentityName, service.RepositoryRef?.Name);
 
         var previous = _reason.Value;
         _reason.Value = reason;

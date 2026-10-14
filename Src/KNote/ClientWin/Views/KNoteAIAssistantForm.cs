@@ -113,7 +113,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     public override void ShowView()
     {
-        toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Alias}";
+        toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Name}";
         PopulateProviders();
         UpdateOptionsMenu();
 

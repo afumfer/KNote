@@ -26,6 +26,19 @@ public class AppState
         set { _userName = value; NotifyStateChanged(); }
     }
 
+    // The repository's name (DB_REPOSITORYNAME), read once by MainLayout: null until then, empty if it could
+    // not be read. Home shows it as its title, and the header of the other pages after the application's name.
+    private string? _repositoryName;
+    public string? RepositoryName
+    {
+        get { return _repositoryName; }
+        set { _repositoryName = value; NotifyStateChanged(); }
+    }
+
+    // The folder whose notes Home shows (null: Home's own), kept while the app is open. No changes to notify:
+    // only Home reads it, when it is shown again.
+    public Guid? HomeFolderId { get; set; }
+
     private bool _defaultContentResourcesInDB = false;
     public bool DefaultContentResourcesInDB
     {

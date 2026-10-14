@@ -43,6 +43,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync() =>
         (GetAllMinimalAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAllMinimalAsync)} not configured for this test"))();
     public Task<Result<List<NoteInfoDto>>> HomeNotesAsync() => throw new NotSupportedException();
+    public Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid folderId) => throw new NotSupportedException();
     public Task<Result<NoteDto>> GetAsync(Guid noteId) =>
         (GetByIdAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAsync)}(Guid) not configured for this test"))(noteId);
     public Task<Result<NoteDto>> GetAsync(int noteNumber) =>

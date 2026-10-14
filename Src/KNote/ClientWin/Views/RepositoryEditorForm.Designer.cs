@@ -63,8 +63,8 @@ namespace KNote.ClientWin.Views
             groupRepositoryType = new GroupBox();
             radioMSSqlServer = new RadioButton();
             radioSqLite = new RadioButton();
-            labelAlias = new Label();
-            textAliasName = new TextBox();
+            labelName = new Label();
+            textName = new TextBox();
             tabControlMain.SuspendLayout();
             tabPageGeneral.SuspendLayout();
             tabPageUsers.SuspendLayout();
@@ -185,8 +185,8 @@ namespace KNote.ClientWin.Views
             panelForm.Controls.Add(panelMSSqlServer);
             panelForm.Controls.Add(panelSqLite);
             panelForm.Controls.Add(groupRepositoryType);
-            panelForm.Controls.Add(labelAlias);
-            panelForm.Controls.Add(textAliasName);
+            panelForm.Controls.Add(labelName);
+            panelForm.Controls.Add(textName);
             panelForm.Dock = DockStyle.Top;
             panelForm.Location = new Point(0, 0);
             panelForm.Margin = new Padding(3);
@@ -197,7 +197,7 @@ namespace KNote.ClientWin.Views
             // checkResourceContentInDB
             // 
             checkResourceContentInDB.AutoSize = true;
-            checkResourceContentInDB.Location = new Point(314, 150);
+            checkResourceContentInDB.Location = new Point(314, 230);
             checkResourceContentInDB.Margin = new Padding(3);
             checkResourceContentInDB.Name = "checkResourceContentInDB";
             checkResourceContentInDB.Size = new Size(293, 17);
@@ -208,7 +208,7 @@ namespace KNote.ClientWin.Views
             // buttonSelectDirectoryResources
             // 
             buttonSelectDirectoryResources.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonSelectDirectoryResources.Location = new Point(592, 196);
+            buttonSelectDirectoryResources.Location = new Point(592, 276);
             buttonSelectDirectoryResources.Margin = new Padding(3);
             buttonSelectDirectoryResources.Name = "buttonSelectDirectoryResources";
             buttonSelectDirectoryResources.Size = new Size(27, 23);
@@ -219,7 +219,7 @@ namespace KNote.ClientWin.Views
             // 
             // textResourcesContainer
             // 
-            textResourcesContainer.Location = new Point(10, 148);
+            textResourcesContainer.Location = new Point(10, 228);
             textResourcesContainer.Margin = new Padding(3);
             textResourcesContainer.Name = "textResourcesContainer";
             textResourcesContainer.Size = new Size(287, 19);
@@ -228,7 +228,7 @@ namespace KNote.ClientWin.Views
             // textResourcesContainerUrl
             // 
             textResourcesContainerUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textResourcesContainerUrl.Location = new Point(8, 248);
+            textResourcesContainerUrl.Location = new Point(8, 328);
             textResourcesContainerUrl.Margin = new Padding(3);
             textResourcesContainerUrl.Name = "textResourcesContainerUrl";
             textResourcesContainerUrl.Size = new Size(612, 19);
@@ -237,7 +237,7 @@ namespace KNote.ClientWin.Views
             // textResourcesContainerRoot
             // 
             textResourcesContainerRoot.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textResourcesContainerRoot.Location = new Point(8, 198);
+            textResourcesContainerRoot.Location = new Point(8, 278);
             textResourcesContainerRoot.Margin = new Padding(3);
             textResourcesContainerRoot.Name = "textResourcesContainerRoot";
             textResourcesContainerRoot.Size = new Size(579, 19);
@@ -246,7 +246,7 @@ namespace KNote.ClientWin.Views
             // labelContainerUrl
             // 
             labelContainerUrl.AutoSize = true;
-            labelContainerUrl.Location = new Point(8, 230);
+            labelContainerUrl.Location = new Point(8, 310);
             labelContainerUrl.Margin = new Padding(3, 0, 3, 0);
             labelContainerUrl.Name = "labelContainerUrl";
             labelContainerUrl.Size = new Size(193, 15);
@@ -256,7 +256,7 @@ namespace KNote.ClientWin.Views
             // labelContainerRoot
             // 
             labelContainerRoot.AutoSize = true;
-            labelContainerRoot.Location = new Point(8, 180);
+            labelContainerRoot.Location = new Point(8, 260);
             labelContainerRoot.Margin = new Padding(3, 0, 3, 0);
             labelContainerRoot.Name = "labelContainerRoot";
             labelContainerRoot.Size = new Size(185, 15);
@@ -266,7 +266,7 @@ namespace KNote.ClientWin.Views
             // labelContainer
             // 
             labelContainer.AutoSize = true;
-            labelContainer.Location = new Point(8, 130);
+            labelContainer.Location = new Point(8, 210);
             labelContainer.Margin = new Padding(3, 0, 3, 0);
             labelContainer.Name = "labelContainer";
             labelContainer.Size = new Size(155, 15);
@@ -281,11 +281,11 @@ namespace KNote.ClientWin.Views
             panelMSSqlServer.Controls.Add(label1);
             panelMSSqlServer.Controls.Add(textSQLServer);
             panelMSSqlServer.Controls.Add(label5);
-            panelMSSqlServer.Location = new Point(5, 403);
+            panelMSSqlServer.Location = new Point(5, 78);
             panelMSSqlServer.Margin = new Padding(3);
             panelMSSqlServer.Name = "panelMSSqlServer";
             panelMSSqlServer.Size = new Size(624, 116);
-            panelMSSqlServer.TabIndex = 12;
+            panelMSSqlServer.TabIndex = 2;
             // 
             // textSQLDataBase
             // 
@@ -335,11 +335,11 @@ namespace KNote.ClientWin.Views
             panelSqLite.Controls.Add(labelSqLiteDataBase);
             panelSqLite.Controls.Add(textSqLiteDirectory);
             panelSqLite.Controls.Add(labelDirectory);
-            panelSqLite.Location = new Point(5, 277);
+            panelSqLite.Location = new Point(5, 78);
             panelSqLite.Margin = new Padding(3);
             panelSqLite.Name = "panelSqLite";
             panelSqLite.Size = new Size(624, 120);
-            panelSqLite.TabIndex = 11;
+            panelSqLite.TabIndex = 1;
             // 
             // buttonSelectFile
             // 
@@ -411,7 +411,7 @@ namespace KNote.ClientWin.Views
             groupRepositoryType.Size = new Size(615, 61);
             groupRepositoryType.TabIndex = 0;
             groupRepositoryType.TabStop = false;
-            groupRepositoryType.Text = "Reposoty database type";
+            groupRepositoryType.Text = "Repository database type";
             // 
             // radioMSSqlServer
             // 
@@ -439,24 +439,24 @@ namespace KNote.ClientWin.Views
             radioSqLite.UseVisualStyleBackColor = true;
             radioSqLite.CheckedChanged += radioDataBase_CheckedChanged;
             // 
-            // labelAlias
+            // labelName
             // 
-            labelAlias.AutoSize = true;
-            labelAlias.Location = new Point(8, 80);
-            labelAlias.Margin = new Padding(3, 0, 3, 0);
-            labelAlias.Name = "labelAlias";
-            labelAlias.Size = new Size(71, 15);
-            labelAlias.TabIndex = 1;
-            labelAlias.Text = "Alias name:";
+            labelName.AutoSize = true;
+            labelName.Location = new Point(8, 360);
+            labelName.Margin = new Padding(3, 0, 3, 0);
+            labelName.Name = "labelName";
+            labelName.Size = new Size(41, 15);
+            labelName.TabIndex = 11;
+            labelName.Text = "Name:";
             // 
-            // textAliasName
+            // textName
             // 
-            textAliasName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textAliasName.Location = new Point(10, 98);
-            textAliasName.Margin = new Padding(3);
-            textAliasName.Name = "textAliasName";
-            textAliasName.Size = new Size(612, 19);
-            textAliasName.TabIndex = 2;
+            textName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textName.Location = new Point(10, 378);
+            textName.Margin = new Padding(3);
+            textName.Name = "textName";
+            textName.Size = new Size(612, 19);
+            textName.TabIndex = 12;
             // 
             // RepositoryEditorForm
             // 
@@ -508,8 +508,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TabPage tabPageAttributes;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Button buttonFolderSearch;
-        private System.Windows.Forms.Label labelAlias;
-        private System.Windows.Forms.TextBox textAliasName;
+        private System.Windows.Forms.Label labelName;
+        private System.Windows.Forms.TextBox textName;
         private System.Windows.Forms.GroupBox groupRepositoryType;
         private System.Windows.Forms.RadioButton radioMSSqlServer;
         private System.Windows.Forms.RadioButton radioSqLite;

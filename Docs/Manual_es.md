@@ -19,8 +19,8 @@ La aplicación de escritorio de Windows guarda su configuración en la carpeta `
 
 | Fichero | Qué contiene | Cuándo cambia |
 |---|---|---|
-| `KNoteData.config` | Lo que tú configuras: cómo entras, repositorios, proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat hub y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
-| `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), último repositorio y carpeta activos, posición y tamaño de las ventanas, disposición de las listas, paneles visibles, las filas del panel de alarmas, y el último proveedor de IA y las opciones de vista del asistente de IA. | Mientras usas la aplicación. |
+| `KNoteData.config` | Lo que tú configuras: cómo entras, repositorios (sus nombres se guardan en sus bases de datos, ver *Repositorios*), proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat hub y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
+| `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), última carpeta activa, posición y tamaño de las ventanas, disposición de las listas, paneles visibles, las filas del panel de alarmas, y el último proveedor de IA y las opciones de vista del asistente de IA. | Mientras usas la aplicación. |
 
 Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borrar `KNoteData.config` hace que KaNote arranque como si fuera la primera vez: tus bases de datos no se borran, pero se pierde la lista de repositorios y de proveedores de IA.
 
@@ -66,6 +66,16 @@ Las opciones que no pertenecen a un repositorio (opciones, IA, chat, scripts, cr
 **Actualización desde una versión anterior.** La primera vez que se abre una base de datos con esta versión se actualiza automáticamente: el rol *Public* pasa a llamarse **Guest** (así que los usuarios registrados como *Public* solo pueden leer hasta que un Admin los sube a Staff), la errata *ProjecManager* pasa a **ProjectManager** y el usuario de ejemplo `owner` se borra si nunca se usó. Las versiones anteriores no conocen los nombres nuevos de los roles; guarda una copia de una base de datos compartida antes de abrirla con esta versión.
 
 Estos permisos los aplica la aplicación. Quien se conecte a la base de datos directamente, con su cadena de conexión, no queda limitado por ellos: protege también las bases de datos compartidas con los permisos de la propia base de datos.
+
+### Repositorios (aplicación de escritorio)
+
+Un repositorio es una base de datos de KaNote, SQLite o SQL Server. El menú **Repository** vincula uno existente, crea uno nuevo o edita las propiedades del seleccionado. Su pestaña **General** pide, en este orden, el tipo de base de datos, dónde está (directorio y fichero en SQLite; servidor\instancia y base de datos en SQL Server), el contenedor de recursos (su nombre, si se guarda una copia de cada recurso en la base de datos, su carpeta raíz y su URL raíz) y el **Name** (nombre) del repositorio.
+
+**El nombre se guarda en la base de datos.** El nombre que ves en el árbol de carpetas, la barra de estado y los títulos de las ventanas se guarda en la propia base de datos del repositorio, así que todo el que la abre, en la aplicación de escritorio o en la Web, ve el mismo nombre. Lo das al crear el repositorio, y un Admin del repositorio puede cambiarlo en **Edit repository properties**. No puede ser el nombre de otro repositorio que tengas vinculado. Al vincular un repositorio existente no se pide el nombre: es el de su base de datos.
+
+**Un vínculo por base de datos.** Cada base de datos recibe además un identificador propio al crearse. Una base de datos ya vinculada no se puede volver a vincular, ni tampoco una copia suya (copiar una base de datos copia también su identificador): KaNote te dice qué repositorio es. Si dos repositorios de tu configuración resultan ser la misma base de datos, solo se abre el primero, y KaNote te avisa al arrancar.
+
+**Actualización desde una versión anterior.** Las versiones anteriores guardaban el nombre del repositorio (su *alias*) en `KNoteData.config`. La primera vez que esta versión abre un repositorio, su base de datos toma ese alias como nombre (o, si no lo hay, el nombre de la base de datos: el fichero SQLite o la base de datos de SQL Server), y el alias se quita del fichero. Un repositorio que no se puede abrir conserva su alias hasta que se pueda. Si otro usuario ya abrió una base de datos compartida con esta versión, ves el nombre que le dio su alias; un Admin puede cambiarlo.
 
 ### Lista de notas (aplicación de escritorio)
 
@@ -147,6 +157,16 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 **Privacidad.** Las sesiones son notas normales: cualquiera que pueda ver la carpeta **AI Assistant sessions** de un repositorio compartido puede abrirlas como cualquier otra nota. No escribas en una conversación nada que no escribirías en una nota de ese repositorio.
 
 **Aplicación de escritorio.** Las sesiones solo se guardan cuando abres el asistente desde el menú. Cuando un script de KntScript o el código en lenguaje natural de una nota (`ln`) usa el asistente, no se guarda nada (un script puede activarlo con `PersistSession = true`). Entonces el panel **Sessions** se oculta.
+
+### Home (aplicación Web)
+
+Home es la primera página de la aplicación Web, y se puede ver sin iniciar sesión. Su cabecera muestra el nombre del repositorio, el mismo que en la aplicación de escritorio; en las demás páginas la barra superior lo muestra después de *KNote* (en un móvil solo cabe *KNote*).
+
+Home muestra las notas de la carpeta **Home** del repositorio, por prioridad y tema, 25 como mucho. Cuando Home tiene carpetas dentro, un panel a la derecha de las notas las muestra después de **Home**: elige una para ver sus notas, con el mismo orden. Home recuerda tu elección mientras la aplicación está abierta. En un móvil el panel es una fila encima de las notas.
+
+Ahí solo aparecen las carpetas que están directamente dentro de Home, y cualquiera puede abrirlas, con sus notas, sin iniciar sesión, como la propia Home: deja ahí solo lo que pueda ser público.
+
+El servidor Web da nombre a una base de datos nueva con el ajuste `Name` de su sección `RepositoryRef` (en `appsettings.json` o en sus secretos); el ajuste antiguo `Alias` se sigue leyendo.
 
 ### Listas de notas (aplicación Web)
 

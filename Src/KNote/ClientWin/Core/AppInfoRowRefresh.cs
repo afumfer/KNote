@@ -38,8 +38,8 @@ public static class AppInfoRowRefresh
     /// the row repository's active user (see IsAddressedToActiveUser); otherwise its Topic/Comment are
     /// refreshed.
     /// </summary>
-    /// <param name="activeUserIdOf">Active user id for a repository alias (null when unknown).</param>
-    public static List<RowChange> ApplyNoteSaved(IEnumerable<AppInfoAlarmRow> rows, NoteExtendedDto note, Func<string, Guid?> activeUserIdOf)
+    /// <param name="activeUserIdOf">Active user id for a repository id (null when unknown).</param>
+    public static List<RowChange> ApplyNoteSaved(IEnumerable<AppInfoAlarmRow> rows, NoteExtendedDto note, Func<Guid, Guid?> activeUserIdOf)
     {
         var changes = new List<RowChange>();
 
@@ -47,7 +47,7 @@ public static class AppInfoRowRefresh
         {
             var message = note.Messages?.FirstOrDefault(m => m.KMessageId == row.KMessageId);
 
-            if (!IsAddressedToActiveUser(message, activeUserIdOf(row.RepositoryAlias)))
+            if (!IsAddressedToActiveUser(message, activeUserIdOf(row.RepositoryId)))
             {
                 changes.Add(new RowChange(row, ChangeKind.Removed));
                 continue;
@@ -68,11 +68,11 @@ public static class AppInfoRowRefresh
     /// A user was saved: refresh the User column of the rows addressed to them. A row only exists for
     /// messages addressed to its repository's active user, so that user is the row's recipient.
     /// </summary>
-    public static List<RowChange> ApplyUserSaved(IEnumerable<AppInfoAlarmRow> rows, UserDto user, Func<string, Guid?> activeUserIdOf)
+    public static List<RowChange> ApplyUserSaved(IEnumerable<AppInfoAlarmRow> rows, UserDto user, Func<Guid, Guid?> activeUserIdOf)
     {
         var changes = new List<RowChange>();
 
-        foreach (var row in rows.Where(r => r.UserFullName != user.FullName && activeUserIdOf(r.RepositoryAlias) == user.UserId).ToList())
+        foreach (var row in rows.Where(r => r.UserFullName != user.FullName && activeUserIdOf(r.RepositoryId) == user.UserId).ToList())
         {
             row.UserFullName = user.FullName;
             changes.Add(new RowChange(row, ChangeKind.Updated));

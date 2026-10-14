@@ -22,7 +22,7 @@ public class NotesListCsvExportCtrlTests
         var store = new Store(factoryViews);
         var notified = new List<string>();
         store.AccessDeniedNotifier = notified.Add;
-        var service = new FakeKntService { RepositoryRef = new RepositoryRef { Alias = "Shared" } };
+        var service = new FakeKntService { RepositoryRef = new RepositoryRef { Name = "Shared" } };
         store.Security.SetRepositoryRole(service, role);
 
         var snapshot = new NotesListSnapshot();
@@ -36,7 +36,7 @@ public class NotesListCsvExportCtrlTests
         {
             Service = service,
             Snapshot = snapshot,
-            GetContextAsync = _ => Task.FromResult(new NotesListContext { Source = NotesListSource.Folder, RepositoryAlias = "Shared" }),
+            GetContextAsync = _ => Task.FromResult(new NotesListContext { Source = NotesListSource.Folder, RepositoryName = "Shared" }),
             OpenFile = opened.Add
         };
 

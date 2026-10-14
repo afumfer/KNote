@@ -5,6 +5,7 @@
 @inject IStore store
 @inject NoteWindows noteWindows
 @inject NotificationService notificationService
+@inject NavigationManager navigationManager
 
 <RadzenComponents />
 
@@ -16,9 +17,15 @@
                 <RadzenColumn Size="5">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
                         <RadzenSidebarToggle Click="@(() => sidebar = !sidebar)" />
-                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="knt-app-brand">
                             <KntLogo Size="24" />
-                            <span class="knt-app-title">@KntConst.AppName</span>
+                            <span class="knt-app-title">
+                                @KntConst.AppName
+                                @if (ShowRepositoryName)
+                                {
+                                    <span class="knt-app-repository">&nbsp;- @store.AppState.RepositoryName</span>
+                                }
+                            </span>
                         </RadzenStack>
                     </RadzenStack>
                 </RadzenColumn>
@@ -58,6 +65,7 @@
         store.AppState.OnNotifyError += NotifyError;
         store.AppState.OnNotifySuccess += NotifySuccess;
 
+        await LoadRepositoryNameAsync();
         await noteWindows.StartAsync();
         await store.ChatStartAsync();
     }
@@ -67,6 +75,22 @@
         store.AppState.OnChange -= StateHasChanged;
         store.AppState.OnNotifyError -= NotifyError;
         store.AppState.OnNotifySuccess -= NotifySuccess;
+    }
+
+    // Home shows the repository's name as its title; the other pages, here, after the application's name. The
+    // layout is rendered again on every navigation (its Body changes), so the title follows the page shown.
+    private bool ShowRepositoryName => !string.IsNullOrEmpty(store.AppState.RepositoryName) && !IsHome();
+
+    private bool IsHome()
+    {
+        var path = navigationManager.ToBaseRelativePath(navigationManager.Uri).Split('?', '#')[0].Trim('/');
+        return path.Length == 0 || path.Equals("index", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task LoadRepositoryNameAsync()
+    {
+        var result = await store.SystemValues.GetRepositoryNameAsync();
+        store.AppState.RepositoryName = result.IsValid ? result.Entity ?? "" : "";
     }
 
     private void NotifyError(string summary, string details)

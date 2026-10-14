@@ -20,7 +20,7 @@ public class NoteEditorCtrlConsultModeTests
         var view = new FakeNoteEditorView();
         factoryViews.Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(c => view);
 
-        var service = new FakeKntService { RepositoryRef = new RepositoryRef { Alias = "Shared" } };
+        var service = new FakeKntService { RepositoryRef = new RepositoryRef { Name = "Shared" } };
         var store = new Store(factoryViews);
         store.Security.SetRepositoryRole(service, role);
 

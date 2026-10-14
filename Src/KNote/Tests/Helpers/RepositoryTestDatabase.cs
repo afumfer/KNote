@@ -34,11 +34,12 @@ public sealed class RepositoryTestDatabase : IDisposable
         using var ctx = new KntDbContext(options); // ensureCreated defaults to true
     }
 
-    public IKntRepository CreateRepository(string orm)
+    // name: what the repository is called if the database has no name yet (see KntSchemaUpdater).
+    public IKntRepository CreateRepository(string orm, string? name = "KNoteParityTests")
     {
         var repositoryRef = new RepositoryRef
         {
-            Alias = "KNoteParityTests",
+            Name = name,
             Orm = orm,
             Provider = "Microsoft.Data.Sqlite",
             ConnectionString = _connectionString

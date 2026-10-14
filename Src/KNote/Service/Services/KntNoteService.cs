@@ -45,6 +45,12 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid folderId)
+    {
+        var command = new KntNotesHomeFolderAsyncCommand(Service, folderId);
+        return await ExecuteCommand(command);
+    }
+
     public async Task <Result<NoteDto>> GetAsync(Guid noteId)
     {        
         var command = new KntNotesGetAsyncCommand(Service, noteId);

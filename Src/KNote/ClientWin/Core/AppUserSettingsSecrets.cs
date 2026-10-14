@@ -89,7 +89,7 @@ public sealed class AppUserSettingsSecrets
         foreach (var repository in settings.Repositories.Items)
         {
             var r = repository;
-            yield return new Secret($"connection string of repository '{r.Alias}'",
+            yield return new Secret($"connection string of repository '{r.Name}'",
                 () => r.ConnectionString, v => r.ConnectionString = v, OnlyWhenPasswordInside: true);
         }
 

@@ -28,6 +28,10 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
 - Configuración: secciones `AppSettings` (`Helpers/AppSettings`: `Secret` del JWT, `ActivateMessageBroker`,
   `MountResourceContainerOnStartup`), `RepositoryRef` (`Model/Config/RepositoryRef`: `Orm`, `Provider`,
   `ConnectionString`, contenedor de recursos...) y `ai` (proveedores del asistente de IA, ver "Asistente de IA").
+  `RepositoryRef:Name` solo da nombre a una base de datos que aún no lo tiene (una nueva o una de antes de la
+  revisión 5 de `KntSchemaUpdater`): el nombre del repositorio se guarda en la propia base de datos. Va vacío en
+  `appsettings.json` para que, si falta, `Program.cs` use el antiguo `RepositoryRef:Alias` (de los user-secrets de
+  un despliegue anterior; `LEGACY(repository-alias)`).
 - `KntAddAiAssistant` registra lo del asistente de IA: `AiConfig` enlazado a la sección `ai` **al usarse** (no
   leído al arrancar como `AppSettings`/`RepositoryRef`, así los tests en proceso pueden sobrescribirlo),
   `Ai/AiProvidersCatalog` e `Ai/IAiChatClientProvider` (singletons).
@@ -104,7 +108,11 @@ public class FoldersController : ControllerBase
 
 - Se hace **en los controladores** con `[Authorize]` a nivel de clase + `[Authorize(Roles = "...")]` por acción
   (lectura abierta a cualquier usuario autenticado; escritura con rol). `[AllowAnonymous]` solo en `Login`,
-  `Register` y `NotesController.HomeNotes`.
+  `Register` y lo que muestra la Home pública de `Client`: `NotesController.HomeNotes` (las notas de Home o, con
+  `?folderId=`, de una carpeta hija directa de Home; cualquier otra la rechaza `Service`,
+  `KntNotesHomeFolderAsyncCommand`), `FoldersController.HomeChildren` (las carpetas hijas directas de Home) y
+  `SystemValuesController.RepositoryName` (el nombre del repositorio, `DB_REPOSITORYNAME`). Lo que se ve ahí es
+  público: no amplíes esa zona sin decidirlo.
 - Nombres de rol de `EnumRoles` (`Model/KntRoles.cs`): `Guest`, `Staff`, `ProjectManager`, `Admin`. En ASP.NET
   **no son jerárquicos**: enumera todos los roles permitidos.
 - La autorización por comando de `Service` (`[KntAuthorize]`) **está apagada en `Server`**

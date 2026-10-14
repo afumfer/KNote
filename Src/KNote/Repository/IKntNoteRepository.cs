@@ -7,7 +7,8 @@ public interface IKntNoteRepository : IDisposable
 {
     Task<Result<List<NoteInfoDto>>> GetAllAsync();
     Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync();
-    Task<Result<List<NoteInfoDto>>> HomeNotesAsync();
+    // The notes Home shows (by priority and topic, 25 at most): those of the Home folder, or of folderId.
+    Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid? folderId = null);
     Task<Result<NoteDto>> GetAsync(Guid noteId);
     Task<Result<NoteDto>> GetAsync(int noteNumber);
     Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);

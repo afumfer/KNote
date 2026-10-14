@@ -40,11 +40,11 @@ public class AppConfigMigratorTests
         Assert.AreEqual(60, settings.General.AutoSaveSeconds);
 
         Assert.AreEqual(2, settings.Repositories.Items.Count);
-        Assert.AreEqual("Personal respository", settings.Repositories.Items[0].Alias);
+        Assert.AreEqual("Personal respository", settings.Repositories.Items[0].Name);
         Assert.AreEqual("EntityFramework", settings.Repositories.Items[0].Orm);
-        Assert.AreEqual("Sql Server repository", settings.Repositories.Items[1].Alias);
+        Assert.AreEqual("Sql Server repository", settings.Repositories.Items[1].Name);
         Assert.IsTrue(settings.Repositories.Items[1].ResourceContentInDB);
-        Assert.AreEqual("Mini Assistant", settings.Repositories.Assistant.Alias);
+        Assert.AreEqual("Mini Assistant", settings.Repositories.Assistant.Name);
         Assert.AreEqual(@"Data Source=C:\KaNote\Data\assistant.db", settings.Repositories.Assistant.ConnectionString);
 
         Assert.AreEqual(3, settings.Ai.Providers.Count);
@@ -83,7 +83,6 @@ public class AppConfigMigratorTests
         Assert.AreEqual(2, state.SchemaVersion);
         Assert.AreEqual(v1.LastDateTimeStart, state.Session.LastDateTimeStart);
         Assert.AreEqual(3929, state.Session.RunCounter);
-        Assert.AreEqual("Personal respository", state.Session.LastActiveRepositoryAlias);
         Assert.AreEqual(Guid.Parse("d577bc3e-64f8-417e-adeb-2b30b328b8d8"), state.Session.LastActiveFolderId);
         Assert.AreEqual("Anthropic test", state.Session.LastAiProviderAlias);
         Assert.IsFalse(state.Session.ChatHubAutoConnectDisabled);

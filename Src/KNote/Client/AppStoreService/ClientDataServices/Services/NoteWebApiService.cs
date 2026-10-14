@@ -12,9 +12,9 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync()
+    public async Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync(Guid? folderId = null)
     {
-        var httpRes = await _httpClient.GetAsync("api/notes/homenotes");        
+        var httpRes = await _httpClient.GetAsync(folderId == null ? "api/notes/homenotes" : $"api/notes/homenotes?folderId={folderId}");
         return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get home notes");
     }
 

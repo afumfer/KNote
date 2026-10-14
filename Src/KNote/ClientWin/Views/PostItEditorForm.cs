@@ -742,7 +742,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
             ? string.Empty
             : await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _ctrl.Model.FolderId);
 
-        labelStatus.Text = $"{_ctrl.ServiceRef?.Alias} >> [{folderPath}] {status}";
+        labelStatus.Text = $"{_ctrl.ServiceRef?.Name} >> [{folderPath}] {status}";
     }
 
     #endregion

@@ -40,6 +40,11 @@ try
 
     var appSettings = appSettingsSection.Get<AppSettings>();
     var repositoryRef = repositoryRefSection.Get<RepositoryRef>();
+    // LEGACY(repository-alias): remove once every Server configuration uses "Name".
+    // Before the name was kept in the database, this setting was called "Alias" (KntSchemaUpdater gives it
+    // to the database when it has no name yet).
+    if (string.IsNullOrWhiteSpace(repositoryRef.Name))
+        repositoryRef.Name = repositoryRefSection["Alias"];
 
     builder.Services.KntAddServices(appSettings, repositoryRef);
     builder.Services.KntAddAiAssistant(builder.Configuration);

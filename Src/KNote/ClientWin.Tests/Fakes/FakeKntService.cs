@@ -21,10 +21,11 @@ internal class FakeKntService : IKntService
     public FakeKntKAttributeService KAttributesFake { get; } = new();
     public FakeKntFolderService FoldersFake { get; } = new();
     public FakeKntAiSessionService AiSessionsFake { get; } = new();
+    public FakeKntSystemValuesService SystemValuesFake { get; } = new();
 
     public ILogger Logger { get; set; }
     public Guid IdServiceRef { get; } = Guid.NewGuid();
-    public RepositoryRef RepositoryRef { get; set; } = new RepositoryRef { Alias = "Fake repository" };
+    public RepositoryRef RepositoryRef { get; set; } = new RepositoryRef { Name = "Fake repository" };
     public string UserIdentityName { get; set; }
     public bool EnforceAuthorization { get; set; }
 
@@ -39,7 +40,7 @@ internal class FakeKntService : IKntService
     public IKntRepository Repository => throw new NotSupportedException();
     public IKntUserService Users => UsersFake;
     public IKntKAttributeService KAttributes => KAttributesFake;
-    public IKntSystemValuesService SystemValues => throw new NotSupportedException();
+    public IKntSystemValuesService SystemValues => SystemValuesFake;
     public IKntFolderService Folders => FoldersFake;
     public IKntNoteService Notes => NotesFake;
     public IKntNoteTypeService NoteTypes => NoteTypesFake;

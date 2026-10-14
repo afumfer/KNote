@@ -55,7 +55,7 @@ public class CtrlBaseAuthorizationTests
         return (store, notified);
     }
 
-    private static FakeKntService Repository(string alias) => new() { RepositoryRef = new RepositoryRef { Alias = alias } };
+    private static FakeKntService Repository(string alias) => new() { RepositoryRef = new RepositoryRef { Name = alias } };
 
     [TestMethod]
     public void ControllerWithoutRequirement_Runs()

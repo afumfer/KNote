@@ -1,0 +1,29 @@
+﻿@* Home's side panel: Home itself first, then the folders directly inside it. Choosing one shows its notes
+   (the page decides which, through SelectedFolderIdChanged); null stands for Home. *@
+<nav class="knt-home-folders" aria-label="Home folders">
+    <button type="button" class="@ItemClass(null)" aria-current="@AriaCurrent(null)" @onclick="@(() => SelectAsync(null))">
+        <RadzenIcon Icon="@KntSections.Home.Icon" />
+        <span class="knt-home-folder-name">@KntSections.Home.Text</span>
+    </button>
+    @foreach (var folder in Folders)
+    {
+        <button type="button" class="@ItemClass(folder.FolderId)" aria-current="@AriaCurrent(folder.FolderId)"
+                @onclick="@(() => SelectAsync(folder.FolderId))" @key="folder.FolderId">
+            <RadzenIcon Icon="@(folder.FolderId == SelectedFolderId ? "folder_open" : "folder")" />
+            <span class="knt-home-folder-name">@folder.Name</span>
+        </button>
+    }
+</nav>
+
+@code {
+    [Parameter][EditorRequired] public List<FolderInfoDto> Folders { get; set; } = null!;
+    [Parameter] public Guid? SelectedFolderId { get; set; }
+    [Parameter] public EventCallback<Guid?> SelectedFolderIdChanged { get; set; }
+
+    private string ItemClass(Guid? folderId) =>
+        folderId == SelectedFolderId ? "knt-home-folder knt-home-folder-selected" : "knt-home-folder";
+
+    private string? AriaCurrent(Guid? folderId) => folderId == SelectedFolderId ? "true" : null;
+
+    private Task SelectAsync(Guid? folderId) => SelectedFolderIdChanged.InvokeAsync(folderId);
+}

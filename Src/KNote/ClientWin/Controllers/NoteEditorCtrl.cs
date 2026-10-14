@@ -27,7 +27,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         => Service != null && !Store.Security.IsAuthorized(typeof(KNote.Service.ServicesCommands.KntNotesSaveExtendedAsyncCommand), Service);
 
     public string ConsultModeMessage
-        => $"You can read this note but not change it: your role in the repository '{Service?.RepositoryRef?.Alias}' is '{Store.Security.GetRepositoryRoleName(Service)}'.";
+        => $"You can read this note but not change it: your role in the repository '{Service?.RepositoryRef?.Name}' is '{Store.Security.GetRepositoryRoleName(Service)}'.";
 
     #endregion
 

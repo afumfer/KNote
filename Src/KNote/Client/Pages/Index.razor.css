@@ -81,6 +81,33 @@
     background-color: color-mix(in srgb, var(--rz-text-color) 10%, transparent);
 }
 
+/* The notes with Home's folders panel (HomeFolders) at their right, when Home has folders; on a phone, the
+   panel goes above them, where it is used to choose the folder. */
+.knt-home-with-folders {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(11rem, 15rem);
+    grid-template-areas: "notes folders";
+    gap: 1rem;
+    align-items: start;
+}
+
+.knt-home-notes {
+    grid-area: notes;
+    min-width: 0;
+}
+
+.knt-home-with-folders ::deep .knt-home-folders {
+    grid-area: folders;
+}
+
+@media (max-width: 768px) {
+    .knt-home-with-folders {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "folders" "notes";
+        gap: 0.75rem;
+    }
+}
+
 @media (max-width: 576px) {
     .knt-home-hero {
         padding: 0.75rem 1rem;

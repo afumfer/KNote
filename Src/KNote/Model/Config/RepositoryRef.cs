@@ -5,25 +5,65 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Xml.Serialization;
 
 namespace KNote.Model;
 
+// The repository's name and id are not configuration: they live in its own database (SystemValues
+// DB_REPOSITORYNAME/DB_REPOSITORYID, see KntSchemaUpdater) and are filled in here when it is opened
+// (ServiceRef), so they are never written to ClientWin's KNoteData.config.
 public class RepositoryRef : SmartModelDtoBase
 {
-    private string _alias;
-    [Required(ErrorMessage = KMSG)]
-    public string Alias
+    private string _name;
+    [XmlIgnore]
+    public string Name
     {
-        get { return _alias; }
+        get { return _name; }
         set
         {
-            if (_alias != value)
+            if (_name != value)
             {
-                _alias = value;
-                OnPropertyChanged("Alias");
+                _name = value;
+                OnPropertyChanged("Name");
             }
         }
     }
+
+    private Guid _repositoryId;
+    [XmlIgnore]
+    public Guid RepositoryId
+    {
+        get { return _repositoryId; }
+        set
+        {
+            if (_repositoryId != value)
+            {
+                _repositoryId = value;
+                OnPropertyChanged("RepositoryId");
+            }
+        }
+    }
+
+    // LEGACY(repository-alias): remove, with ShouldSerializeLegacyAlias, once every installation has opened
+    // its repositories with a version that keeps the name in the database (KntSchemaUpdater revision 5).
+    // The <Alias> of configuration files written before the name moved to the database. It is the name
+    // given to the database when it gets one (KntSchemaUpdater), and it is written back only while the
+    // repository hasn't been opened yet (ShouldSerializeLegacyAlias), so a repository that can't be opened
+    // for a while keeps it until it can.
+    private string _legacyAlias;
+    [XmlElement("Alias")]
+    public string LegacyAlias
+    {
+        get { return _legacyAlias; }
+        set
+        {
+            _legacyAlias = value;
+            if (string.IsNullOrEmpty(_name))
+                _name = value;
+        }
+    }
+
+    public bool ShouldSerializeLegacyAlias() => RepositoryId == Guid.Empty && !string.IsNullOrEmpty(_legacyAlias);
 
     private string _connectionString;
     [Required(ErrorMessage = KMSG)]
@@ -157,6 +197,31 @@ public class RepositoryRef : SmartModelDtoBase
         }
     }
 
+    // Name for a database that has none yet and no alias to take it from: the database's own name (the
+    // Sqlite file without its extension, or the SQL Server database).
+    public string GetDefaultName()
+    {
+        try
+        {
+            var properties = new Dictionary<string, string>(GetConnectionProperties(), StringComparer.OrdinalIgnoreCase);
+
+            string name = null;
+            if (Provider == "Microsoft.Data.Sqlite" && properties.TryGetValue("Data Source", out var dataSource))
+                name = Path.GetFileNameWithoutExtension(dataSource?.Trim());
+            else if (properties.TryGetValue("Initial Catalog", out var catalog) || properties.TryGetValue("Database", out catalog))
+                name = catalog?.Trim();
+
+            if (!string.IsNullOrEmpty(name))
+                return name;
+        }
+        catch (Exception)
+        {
+            // A connection string GetConnectionProperties can't split: fall back to the generic name.
+        }
+
+        return $"{KntConst.AppName} repository";
+    }
+
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         var results = new List<ValidationResult>();
@@ -165,10 +230,6 @@ public class RepositoryRef : SmartModelDtoBase
         // Capture the validations implemented with attributes.
         // TODO: (Esta sección se puede resolver por medio de reflexión).
         // ---
-
-        Validator.TryValidateProperty(this.Alias,
-           new ValidationContext(this, null, null) { MemberName = "Alias" },
-           results);
 
         Validator.TryValidateProperty(this.ConnectionString,
            new ValidationContext(this, null, null) { MemberName = "ConnectionString" },

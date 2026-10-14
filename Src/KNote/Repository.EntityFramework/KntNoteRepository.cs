@@ -48,7 +48,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         return await GetAllPrivateAsync<NoteMinimalDto>();
     }
 
-    public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
+    public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid? folderId = null)
     {
         try
         {
@@ -58,7 +58,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
             var folders = new KntFolderRepository(ctx, _repositoryRef);
 
-            var idFolderHome = (await folders.GetHomeAsync()).Entity?.FolderId;
+            var idFolderHome = folderId ?? (await folders.GetHomeAsync()).Entity?.FolderId;
 
             var resRep = await notes.DbSet
                 .Include(n => n.Folder)

@@ -1,4 +1,5 @@
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
 using KNote.Service.Core;
 
@@ -7,17 +8,17 @@ namespace KNote.ClientWin.Tests;
 [TestClass]
 public class ServiceRefRegistryTests
 {
-    // Building a real ServiceRef lazily creates its IKntRepository (Dapper), but that only stores
-    // the RepositoryRef - no connection is opened until a repository method is actually called.
-    private static ServiceRef CreateServiceRef(string alias) => new(
-        new RepositoryRef
-        {
-            Alias = alias,
-            Orm = "Dapper",
-            Provider = "Microsoft.Data.Sqlite",
-            ConnectionString = "Data Source=:memory:"
-        },
-        userIdentityName: "test-user");
+    // The registry only looks at each ServiceRef's identity, so they all open the same database (one per
+    // ServiceRef made the concurrency test below take seconds) and are then told apart by their own name and id.
+    private static readonly string SharedDatabase = TestServiceRefFactory.NewInMemoryDatabase();
+
+    private static ServiceRef CreateServiceRef(string name)
+    {
+        var serviceRef = TestServiceRefFactory.CreateInMemorySqlite(name, SharedDatabase);
+        serviceRef.RepositoryRef.Name = name;
+        serviceRef.RepositoryRef.RepositoryId = Guid.NewGuid();
+        return serviceRef;
+    }
 
     [TestMethod]
     public void GetAll_NoServiceRefsAdded_ReturnsEmpty()
@@ -25,6 +26,19 @@ public class ServiceRefRegistryTests
         var registry = new ServiceRefRegistry();
 
         Assert.IsEmpty(registry.GetAll());
+    }
+
+    [TestMethod]
+    public void GetByRepositoryId_ReturnsTheServiceRefOfThatRepository()
+    {
+        var registry = new ServiceRefRegistry();
+        var first = CreateServiceRef("first");
+        var second = CreateServiceRef("second");
+        registry.Add(first);
+        registry.Add(second);
+
+        Assert.AreSame(second, registry.GetByRepositoryId(second.RepositoryId));
+        Assert.IsNull(registry.GetByRepositoryId(Guid.NewGuid()));
     }
 
     [TestMethod]
@@ -51,7 +65,7 @@ public class ServiceRefRegistryTests
     }
 
     [TestMethod]
-    public void GetByAlias_ReturnsMatchingServiceRef()
+    public void GetByName_ReturnsMatchingServiceRef()
     {
         var registry = new ServiceRefRegistry();
         var main = CreateServiceRef("main");
@@ -59,16 +73,16 @@ public class ServiceRefRegistryTests
         registry.Add(main);
         registry.Add(secondary);
 
-        Assert.AreSame(secondary, registry.GetByAlias("secondary"));
+        Assert.AreSame(secondary, registry.GetByName("secondary"));
     }
 
     [TestMethod]
-    public void GetByAlias_NoMatch_ReturnsNull()
+    public void GetByName_NoMatch_ReturnsNull()
     {
         var registry = new ServiceRefRegistry();
         registry.Add(CreateServiceRef("main"));
 
-        Assert.IsNull(registry.GetByAlias("does-not-exist"));
+        Assert.IsNull(registry.GetByName("does-not-exist"));
     }
 
     [TestMethod]
@@ -105,7 +119,7 @@ public class ServiceRefRegistryTests
     // synchronized: Add/Remove normally run on the UI thread, but a KntScript running on its own
     // background Thread (Store.RunKntSCodeInNewThread) is not prevented from reaching a code path
     // that adds/removes a ServiceRef, while MessagesManagementCtrl's autosave/alarm timers (UI
-    // thread) call GetAll/GetById/GetByAlias/GetFirst - see the class-level comment in
+    // thread) call GetAll/GetById/GetByName/GetFirst - see the class-level comment in
     // ServiceRefRegistry.cs. This is a plain in-memory class with no Control/STA dependency, so this
     // genuinely exercises real OS thread parallelism (via Task.Run), not just async interleaving on
     // one thread - the same technique used for DomainEventBusTests/ControllerRegistryTests.
@@ -129,7 +143,7 @@ public class ServiceRefRegistryTests
                     registry.Add(serviceRef);
                     _ = registry.GetAll().Count;
                     _ = registry.GetById(serviceRef.IdServiceRef);
-                    _ = registry.GetByAlias(serviceRef.Alias);
+                    _ = registry.GetByName(serviceRef.Name);
                     _ = registry.GetFirst();
                     registry.Remove(serviceRef);
                 }

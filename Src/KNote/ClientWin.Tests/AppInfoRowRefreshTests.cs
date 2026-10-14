@@ -9,14 +9,14 @@ public class AppInfoRowRefreshTests
 {
     private static readonly Guid UserId = Guid.NewGuid();
     private static readonly Guid NoteId = Guid.NewGuid();
-    private const string Alias = "repo";
+    private static readonly Guid RepoId = Guid.NewGuid();
 
-    private static Guid? ActiveUserOf(string alias) => alias == Alias ? UserId : null;
+    private static Guid? ActiveUserOf(Guid repositoryId) => repositoryId == RepoId ? UserId : null;
 
     private static AppInfoAlarmRow NewRow(Guid? noteId = null) => new()
     {
         KMessageId = Guid.NewGuid(),
-        RepositoryAlias = Alias,
+        RepositoryId = RepoId,
         NoteId = noteId ?? NoteId,
         NoteTopic = "old topic",
         Comment = "old comment"
@@ -92,7 +92,7 @@ public class AppInfoRowRefreshTests
         var mine = NewRow();
         mine.UserFullName = "old name";
         var otherRepo = NewRow();
-        otherRepo.RepositoryAlias = "other";
+        otherRepo.RepositoryId = Guid.NewGuid();
         otherRepo.UserFullName = "old name";
 
         var changes = AppInfoRowRefresh.ApplyUserSaved([mine, otherRepo], new UserDto { UserId = UserId, FullName = "new name" }, ActiveUserOf);
@@ -213,7 +213,7 @@ public class AppInfoRowRefreshTests
     public void ApplyNoteSaved_UnknownActiveUserForRepository_RemovesRow()
     {
         var row = NewRow();
-        row.RepositoryAlias = "other";
+        row.RepositoryId = Guid.NewGuid();
 
         var changes = AppInfoRowRefresh.ApplyNoteSaved([row], NewNote("old topic", NewMessage(row)), ActiveUserOf);
 

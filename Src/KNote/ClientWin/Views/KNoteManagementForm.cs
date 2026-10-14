@@ -115,7 +115,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         // Updated even while the header panel is hidden, so it is current as soon as it is shown again.
         labelFolder.Text = msg1;
         labelFolderDetail.Text = msg2;
-        labelRepAliasCon.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Alias} ({_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Provider})";
+        labelRepAliasCon.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Name} ({_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.Provider})";
         labelReResources.Text = $"{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainerRootPath}\\{_ctrl.SelectedFolderWithServiceRef?.ServiceRef?.RepositoryRef?.ResourcesContainer}";
 
         // The user and its role in the active repository, which changes along with it.

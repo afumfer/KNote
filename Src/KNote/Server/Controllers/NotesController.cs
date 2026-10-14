@@ -140,15 +140,18 @@ public class NotesController : ControllerBase
         }
     }
 
+    // folderId: one of the folders directly inside Home (see FoldersController.HomeChildren) instead of Home.
     [AllowAnonymous]
     [HttpGet("[action]")]
-    public async Task<IActionResult> HomeNotes()
+    public async Task<IActionResult> HomeNotes([FromQuery] Guid? folderId)
     {
         try
         {
             _logger.LogTrace("HomeNotes {dateTime}.", DateTime.Now);
 
-            var resApi = await _service.Notes.HomeNotesAsync();
+            var resApi = folderId == null
+                ? await _service.Notes.HomeNotesAsync()
+                : await _service.Notes.HomeNotesAsync(folderId.Value);
             if (resApi.IsValid)
             {
                 // Hack, this is temporary to resolve resources in virtual directories in the WebAPI.

@@ -28,15 +28,16 @@ public class CommandAuthorizationMatrixTests
         }
 
         Add(Anonymous,
-            "KntUsersAuthenticateAsyncCommand", "KntUsersRegisterAsyncCommand");
+            "KntUsersAuthenticateAsyncCommand", "KntUsersRegisterAsyncCommand",
+            "KntSystemValueGetRepositoryInfoAsyncCommand");
 
         // Reading anything in the repository.
         Add(nameof(EnumRoles.Guest),
             "KntFoldersGetAllAsyncCommand", "KntFoldersGetAsyncCommand", "KntFoldersGetByNumAsyncCommand",
-            "KntFoldersGetTreeAsyncCommand", "KntFoldersGetHomeAsyncCommand",
+            "KntFoldersGetTreeAsyncCommand", "KntFoldersGetHomeAsyncCommand", "KntFoldersGetHomeChildrenAsyncCommand",
             "KntKAttributesGetAllAsyncCommand", "KntKAttributesGetAllByTypeAsyncCommand", "KntKAttributesGetAsyncCommand",
             "KntKAttributesTabulatedValuesAsyncCommand",
-            "KntNotesGetAllAsyncCommand", "KntNotesGetMinimalAllAsyncCommand", "KntNotesHomeAllAsyncCommand",
+            "KntNotesGetAllAsyncCommand", "KntNotesGetMinimalAllAsyncCommand", "KntNotesHomeAllAsyncCommand", "KntNotesHomeFolderAsyncCommand",
             "KntNotesGetAsyncCommand", "KntNotesGetByNumberAsyncCommand", "KntNotesGetExtendedAsyncCommand",
             "KntNotesGetByFolderAsyncCommand", "KntNotesGetMinimalByFolderAsyncCommand", "KntNotesGetFilterAsyncCommand",
             "KntNotesGetMinimalFilterAsyncCommand", "KntNotesGetSearchAsyncCommand", "KntNotesGetMinimalSearchAsyncCommand",
@@ -75,7 +76,7 @@ public class CommandAuthorizationMatrixTests
         Add(nameof(EnumRoles.Admin),
             "KntKAttributesSaveAsyncCommand", "KntKAttributesDeleteAsyncCommand",
             "KntNoteTypeSaveAsyncCommand", "KntNoteTypeDeleteAsyncCommand",
-            "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand",
+            "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand");

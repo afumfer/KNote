@@ -83,7 +83,8 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
             var repositoryForEdit = Store.GetServiceRef(id).RepositoryRef;
 
-            Model.Alias = repositoryForEdit.Alias;
+            Model.RepositoryId = repositoryForEdit.RepositoryId;
+            Model.Name = repositoryForEdit.Name;
             Model.ConnectionString = repositoryForEdit.ConnectionString;
             Model.Provider = repositoryForEdit.Provider;
             Model.Orm = repositoryForEdit.Orm;
@@ -129,7 +130,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
         if (!Model.IsDirty())
             return true;
 
-        var msgVal = Model.GetErrorMessage();
+        var msgVal = ValidateName() ?? Model.GetErrorMessage();
         if (!string.IsNullOrEmpty(msgVal))
         {
             View.ShowInfo(msgVal);
@@ -141,7 +142,19 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
             if (EditorMode == EnumRepositoryEditorMode.Management)
             {
                 var repositoryForEdit = Store.GetServiceRef(Service.IdServiceRef).RepositoryRef;
-                repositoryForEdit.Alias = Model.Alias;
+
+                // The name is kept in the repository's database, not in the configuration.
+                if (Model.Name != repositoryForEdit.Name)
+                {
+                    var resName = await Service.SystemValues.SaveRepositoryNameAsync(Model.Name);
+                    if (!resName.IsValid)
+                    {
+                        View.ShowInfo(resName.ErrorMessage);
+                        return false;
+                    }
+                    repositoryForEdit.Name = resName.Entity.Name;
+                }
+
                 repositoryForEdit.ConnectionString = Model.ConnectionString ;
                 repositoryForEdit.Provider = Model.Provider ;
                 repositoryForEdit.Orm = Model.Orm;
@@ -160,6 +173,13 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
                 if (await newService.Service.TestDbConnection())
                 {
+                    var msgLinked = ValidateNotLinkedYet(newService);
+                    if (msgLinked != null)
+                    {
+                        View.ShowInfo(msgLinked);
+                        return false;
+                    }
+
                     // Only linked if the session's user may use it (registered, or registering now; with
                     // the session's password, when signed in with a KNote user).
                     var authentication = await Store.AuthenticateRepositoryAsync(newService.Service);
@@ -188,6 +208,14 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 var newService = new ServiceRef(Model, Store.AppUserName, false, Store.Logger);
                 if (await newService.Service.CreateDataBase())
                 {
+                    // The database chosen may already exist (and so keeps its own name).
+                    var msgLinked = ValidateNotLinkedYet(newService);
+                    if (msgLinked != null)
+                    {
+                        View.ShowInfo(msgLinked);
+                        return false;
+                    }
+
                     // Same as for a linked repository. Being the first user registered in this new
                     // database, the current user becomes its Admin (see KntUsersRegisterAsyncCommand).
                     var authentication = await Store.AuthenticateRepositoryAsync(newService.Service);
@@ -231,7 +259,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
         Service = service;
         var serviceForDelete = Store.GetServiceRef(id);
 
-        var result = View.ShowInfo($"Are you sure you want remove {serviceForDelete?.RepositoryRef.Alias} repository link?", "Delete note", MessageBoxButtons.YesNo);
+        var result = View.ShowInfo($"Are you sure you want remove {serviceForDelete?.RepositoryRef.Name} repository link?", "Delete note", MessageBoxButtons.YesNo);
         if (result == DialogResult.Yes || result == DialogResult.Yes)
         {
             try
@@ -251,6 +279,35 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     }
 
     #endregion 
+
+    #region Private methods
+
+    // The name is typed when creating a repository and can be changed when editing it (it is kept in its
+    // database, see SaveModel); a linked repository brings its own. RepositoryId is what tells repositories
+    // apart, but the user does it by name, so two linked repositories can't be given the same one.
+    private string ValidateName()
+    {
+        if (EditorMode == EnumRepositoryEditorMode.AddLink)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(Model.Name))
+            return "The repository name is required.";
+
+        var sameName = Store.GetAllServiceRef().FirstOrDefault(s => s.RepositoryId != Model.RepositoryId
+            && string.Equals(s.Name?.Trim(), Model.Name.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        return sameName == null ? null : $"There is already a linked repository named '{sameName.Name}'.";
+    }
+
+    // Copying a database copies its DB_REPOSITORYID too, so the copy can't be linked next to the original.
+    private string ValidateNotLinkedYet(ServiceRef newService)
+    {
+        var linked = Store.GetServiceRefByRepositoryId(newService.RepositoryId);
+
+        return linked == null ? null : $"This database is already linked as '{linked.Name}' (or it is a copy of that one), so it can't be linked again.";
+    }
+
+    #endregion
 }
 
 #region Public enums 

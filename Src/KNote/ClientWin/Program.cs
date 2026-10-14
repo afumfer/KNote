@@ -205,7 +205,7 @@ static class Program
 
             var r0 = new RepositoryRef
             {
-                Alias = "Personal repository",                    
+                Name = "Personal repository",                    
                 ConnectionString = $"Data Source={dbFile}",
                 Provider = "Microsoft.Data.Sqlite",
                 Orm = "EntityFramework",
@@ -261,6 +261,10 @@ static class Program
 
         if (!await LinkRepositoriesAsync(store))
             return false;
+
+        // LEGACY(repository-alias): rows saved when repositories were known by their alias (saved below).
+        AppInfoAlarmRowRepositoryMigration.Apply(store.State.AppInfoAlarmsWindow.Rows,
+            store.GetAllServiceRef().Select(s => s.RepositoryRef));
 
         // No repository at all (the default one could not be created, or none of the configured ones
         // could be opened): stop before SaveConfig, which would overwrite the configuration with an
@@ -320,6 +324,17 @@ static class Program
                     continue;
                 anyOpened = true;
 
+                // Two entries of the configuration on the same database, or on a copy of one (which has the
+                // same DB_REPOSITORYID): only the first one is linked. The other stays in the configuration.
+                var alreadyLinked = store.GetServiceRefByRepositoryId(serviceRef.RepositoryId);
+                if (alreadyLinked != null)
+                {
+                    store.Logger?.LogWarning("Repository {database} not linked: same repository id as {alias}.", r.GetDefaultName(), alreadyLinked.Name);
+                    store.AddConfigNotice($"The database '{r.GetDefaultName()}' is the same as (or a copy of) the one of the repository "
+                        + $"'{alreadyLinked.Name}', which is already linked, so it is not linked again in this session.");
+                    continue;
+                }
+
                 Result authentication;
                 try
                 {
@@ -327,16 +342,16 @@ static class Program
                 }
                 catch (Exception ex)
                 {
-                    store.Logger?.LogError(ex, "Checking the current user in repository {alias} failed.", r.Alias);
+                    store.Logger?.LogError(ex, "Checking the current user in repository {alias} failed.", r.Name);
                     authentication = new Result();
-                    authentication.AddErrorMessage($"The user '{store.AppUserName}' could not be checked in the repository '{r.Alias}', so it is not available in this session.{Environment.NewLine}({ex.Message})");
+                    authentication.AddErrorMessage($"The user '{store.AppUserName}' could not be checked in the repository '{r.Name}', so it is not available in this session.{Environment.NewLine}({ex.Message})");
                 }
 
                 if (authentication.IsValid)
                     store.AddServiceRef(serviceRef);
                 else
                 {
-                    store.Logger?.LogWarning("Repository {alias} not linked: {reason}", r.Alias, authentication.ErrorMessage);
+                    store.Logger?.LogWarning("Repository {alias} not linked: {reason}", r.Name, authentication.ErrorMessage);
                     refusals.Add(authentication.ErrorMessage);
                 }
             }
@@ -396,8 +411,8 @@ static class Program
         }
         catch (Exception ex)
         {
-            store.Logger?.LogError(ex, "Repository {alias} could not be opened.", repositoryRef.Alias);
-            store.AddConfigNotice($"The repository '{repositoryRef.Alias}' could not be opened, so it is not available in this session. "
+            store.Logger?.LogError(ex, "Repository {alias} could not be opened.", repositoryRef.Name);
+            store.AddConfigNotice($"The repository '{repositoryRef.Name}' could not be opened, so it is not available in this session. "
                 + $"It will be tried again the next time {KntConst.AppName} starts.{Environment.NewLine}({ex.Message})");
             return null;
         }

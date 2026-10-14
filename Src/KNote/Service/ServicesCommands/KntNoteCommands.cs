@@ -52,6 +52,31 @@ public class KntNotesHomeAllAsyncCommand : KntCommandServiceBase<Result<List<Not
 }
 
 [KntAuthorize(EnumRoles.Guest)]
+public class KntNotesHomeFolderAsyncCommand : KntCommandServiceBase<Guid, Result<List<NoteInfoDto>>>
+{
+    public KntNotesHomeFolderAsyncCommand(IKntService service, Guid folderId) : base(service, folderId)
+    {
+
+    }
+
+    public override async Task<Result<List<NoteInfoDto>>> Execute()
+    {
+        // Home or one of the folders directly inside it: the Web shows them without signing in, so this must
+        // not read any other folder.
+        var resHome = await Repository.Folders.GetHomeAsync();
+        var homeId = resHome.Entity?.FolderId;
+        if (homeId == null || (Param != homeId && (await Repository.Folders.GetAsync(Param)).Entity?.ParentId != homeId))
+        {
+            var result = new Result<List<NoteInfoDto>>();
+            result.AddErrorMessage("The folder is not one of the folders of Home.");
+            return result;
+        }
+
+        return await Repository.Notes.HomeNotesAsync(Param);
+    }
+}
+
+[KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetAsyncCommand : KntCommandServiceBase<Guid, Result<NoteDto>>
 {
     public KntNotesGetAsyncCommand(IKntService service, Guid id) : base(service, id)
