@@ -56,7 +56,6 @@ public static class AppConfigMigrator
             {
                 LastDateTimeStart = v1.LastDateTimeStart,
                 RunCounter = v1.RunCounter,
-                LastActiveRepositoryAlias = v1.LastActiveRepositoryAlias,
                 LastActiveFolderId = v1.LastActiveFolderId,
                 LastAiProviderAlias = v1.LastAiProviderAlias,
                 ChatHubAutoConnectDisabled = v1.ChatHubAutoConnectDisabled

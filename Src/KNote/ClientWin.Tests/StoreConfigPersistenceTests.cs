@@ -99,7 +99,7 @@ public class StoreConfigPersistenceTests
     }
 
     [TestMethod]
-    public void ChangeActiveFolder_RemembersRepositoryAndFolderInTheState()
+    public void ChangeActiveFolder_RemembersTheFolderInTheState()
     {
         var store = new Store(factoryViews: null!);
         var folderId = Guid.NewGuid();
@@ -111,7 +111,6 @@ public class StoreConfigPersistenceTests
 
         store.ChangeActiveFolderWithServiceRef(folder);
 
-        Assert.AreEqual("Work", store.State.Session.LastActiveRepositoryAlias);
         Assert.AreEqual(folderId, store.State.Session.LastActiveFolderId);
     }
 }

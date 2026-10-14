@@ -63,14 +63,14 @@ public class UserRegisterCtrlTests
     }
 
     [TestMethod]
-    public async Task RepositoryAlias_ComesFromTheService_AsTheRepositoryIsNotLinkedYet()
+    public async Task RepositoryName_ComesFromTheService_AsTheRepositoryIsNotLinkedYet()
     {
         var (ctrl, _, service, _) = CreateCtrl();
         service.RepositoryRef = new RepositoryRef { Name = "Shared repository" };
 
         await ctrl.NewModel(service);
 
-        Assert.AreEqual("Shared repository", ctrl.RepositoryAlias);
+        Assert.AreEqual("Shared repository", ctrl.RepositoryName);
     }
 
     [TestMethod]

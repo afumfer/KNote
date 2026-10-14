@@ -17,18 +17,18 @@ namespace KNote.ClientWin.Tests;
 [TestClass]
 public class AppInfoAlarmRowMaintenanceTests
 {
-    private const string Alias = "repo";
-    private const string UnknownAlias = "not configured";
+    private static readonly Guid RepoId = Guid.NewGuid();
+    private static readonly Guid UnknownRepoId = Guid.NewGuid();
     private static readonly Guid UserId = Guid.NewGuid();
 
-    private static AppInfoAlarmRow NewRow(string alias = Alias) => new()
+    private static AppInfoAlarmRow NewRow(Guid? repositoryId = null) => new()
     {
         KMessageId = Guid.NewGuid(),
-        RepositoryAlias = alias,
+        RepositoryId = repositoryId ?? RepoId,
         NotifiedAt = DateTime.Now
     };
 
-    private static Func<string, IKntService> Resolve(FakeKntService service) => alias => alias == Alias ? service : null;
+    private static Func<Guid, IKntService> Resolve(FakeKntService service) => repositoryId => repositoryId == RepoId ? service : null;
 
     private static Func<IKntService, Task<Guid?>> ActiveUser(Guid? userId) => _ => Task.FromResult(userId);
 
@@ -91,12 +91,12 @@ public class AppInfoAlarmRowMaintenanceTests
         Assert.AreEqual(0, rows.Count);
     }
 
-    // The bug: a row for a repository alias that isn't currently configured must not make the panel
+    // The bug: a row for a repository that isn't currently configured must not make the panel
     // pop up empty, even though (by design) the row itself is left alone rather than removed.
     [TestMethod]
-    public async Task PruneAsync_UnknownRepositoryAlias_IsKeptButReturnsFalse()
+    public async Task PruneAsync_UnknownRepository_IsKeptButReturnsFalse()
     {
-        var rows = new List<AppInfoAlarmRow> { NewRow(UnknownAlias) };
+        var rows = new List<AppInfoAlarmRow> { NewRow(UnknownRepoId) };
 
         var hasAny = await AppInfoAlarmRowMaintenance.PruneAsync(rows, resolveService: _ => null, ActiveUser(null));
 
@@ -107,7 +107,7 @@ public class AppInfoAlarmRowMaintenanceTests
     [TestMethod]
     public async Task PruneAsync_OneUnknownRepositoryAndOneValidRow_ReturnsTrue()
     {
-        var unknown = NewRow(UnknownAlias);
+        var unknown = NewRow(UnknownRepoId);
         var valid = NewRow();
         var rows = new List<AppInfoAlarmRow> { unknown, valid };
         var service = NewFakeService(id => Task.FromResult(ValidAppInfoMessage(id, UserId)));
@@ -154,20 +154,18 @@ public class AppInfoAlarmRowMaintenanceTests
     [TestMethod]
     public async Task PruneAsync_OneRepositoryErrorsAndAnotherIsValid_TheValidOneStillShows()
     {
-        const string brokenAlias = "broken";
-        var broken = NewRow(brokenAlias);
+        var brokenRepoId = Guid.NewGuid();
+        var broken = NewRow(brokenRepoId);
         var valid = NewRow();
         var rows = new List<AppInfoAlarmRow> { broken, valid };
         var healthyService = NewFakeService(id => Task.FromResult(ValidAppInfoMessage(id, UserId)));
         var brokenService = new FakeKntService(); // configured, but its active-user lookup fails below
         var errors = new List<Exception>();
 
-        IKntService ResolveEither(string alias) => alias switch
-        {
-            Alias => healthyService,
-            brokenAlias => brokenService,
-            _ => null
-        };
+        IKntService ResolveEither(Guid repositoryId) =>
+            repositoryId == RepoId ? healthyService
+            : repositoryId == brokenRepoId ? brokenService
+            : null;
 
         Task<Guid?> GetActiveUserId(IKntService service) => service == healthyService
             ? Task.FromResult<Guid?>(UserId)

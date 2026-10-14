@@ -36,7 +36,7 @@ public class NotesListCsvExportCtrlTests
         {
             Service = service,
             Snapshot = snapshot,
-            GetContextAsync = _ => Task.FromResult(new NotesListContext { Source = NotesListSource.Folder, RepositoryAlias = "Shared" }),
+            GetContextAsync = _ => Task.FromResult(new NotesListContext { Source = NotesListSource.Folder, RepositoryName = "Shared" }),
             OpenFile = opened.Add
         };
 

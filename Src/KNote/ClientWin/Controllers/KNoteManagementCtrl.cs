@@ -734,7 +734,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
 
             var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
-            var repositoryAlias = Store.GetServiceRef(service.IdServiceRef)?.Name;
+            var serviceRef = Store.GetServiceRef(service.IdServiceRef);
 
             // Deleted note, a failed query, or the current user not registered in this repository.
             if (note == null || messages == null || currentUser == null)
@@ -752,7 +752,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 {
                     KMessageId = message.KMessageId,
                     NoteId = noteId,
-                    RepositoryAlias = repositoryAlias,
+                    RepositoryId = serviceRef?.RepositoryId ?? Guid.Empty,
+                    RepositoryName = serviceRef?.Name,
                     NoteTopic = note.Topic,
                     Comment = message.Comment,
                     UserFullName = currentUser.FullName,
@@ -1788,7 +1789,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         var serviceRef = SelectedServiceRef;
         var context = new NotesListContext
         {
-            RepositoryAlias = serviceRef?.RepositoryRef?.Name,
+            RepositoryName = serviceRef?.RepositoryRef?.Name,
             RepositoryProvider = serviceRef?.RepositoryRef?.Provider,
             TextFilter = textFilter
         };

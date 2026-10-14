@@ -262,6 +262,10 @@ static class Program
         if (!await LinkRepositoriesAsync(store))
             return false;
 
+        // LEGACY(repository-alias): rows saved when repositories were known by their alias (saved below).
+        AppInfoAlarmRowRepositoryMigration.Apply(store.State.AppInfoAlarmsWindow.Rows,
+            store.GetAllServiceRef().Select(s => s.RepositoryRef));
+
         // No repository at all (the default one could not be created, or none of the configured ones
         // could be opened): stop before SaveConfig, which would overwrite the configuration with an
         // empty repository list. Main reports this to the user.

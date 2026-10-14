@@ -202,14 +202,14 @@ public partial class AppInfoAlarmsForm : KntForm, IViewAppInfoAlarms
         if (addSubItems)
         {
             item.SubItems.Add(row.NoteTopic);
-            item.SubItems.Add(row.RepositoryAlias);
+            item.SubItems.Add(row.RepositoryName);
             item.SubItems.Add(row.UserFullName);
             item.SubItems.Add(row.Comment);
         }
         else
         {
             item.SubItems[1].Text = row.NoteTopic;
-            item.SubItems[2].Text = row.RepositoryAlias;
+            item.SubItems[2].Text = row.RepositoryName;
             item.SubItems[3].Text = row.UserFullName;
             item.SubItems[4].Text = row.Comment;
         }

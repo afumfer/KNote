@@ -15,7 +15,7 @@ namespace KNote.ClientWin.Core;
 /// A row for a repository that is not currently configured/reachable, or that errors out answering
 /// either question below, is left untouched - unreachable or erroring right now isn't evidence of
 /// orphaned - so a single run is not guaranteed to remove everything that eventually turns out invalid.
-/// Every such failure is isolated to its own alias/row (never aborts the rest of the pass) and reported
+/// Every such failure is isolated to its own repository/row (never aborts the rest of the pass) and reported
 /// through onError, since this runs unattended (fire-and-forget from KNoteManagementCtrl's startup) with
 /// nothing else to surface it.
 /// </summary>
@@ -27,7 +27,7 @@ public static class AppInfoAlarmRowMaintenance
         {
             var hasAnyConfirmedRow = await PruneAsync(
                 store.State.AppInfoAlarmsWindow.Rows,
-                alias => store.GetServiceRef(alias)?.Service,
+                repositoryId => store.GetServiceRefByRepositoryId(repositoryId)?.Service,
                 store.GetUserId,
                 ex => store.Logger?.LogError(ex, "AppInfoAlarmRowMaintenance: {message}", ex.Message));
 
@@ -36,7 +36,7 @@ public static class AppInfoAlarmRowMaintenance
         }
         catch (Exception ex)
         {
-            // Belt and braces: PruneAsync itself isolates every per-alias/per-row failure already, so
+            // Belt and braces: PruneAsync itself isolates every per-repository/per-row failure already, so
             // this is only reached by something outside that (e.g. SaveConfig failing to write the
             // file) - still must not let a startup-time, fire-and-forget task crash unobserved.
             store.Logger?.LogError(ex, "AppInfoAlarmRowMaintenance.PruneAndHasAnyRowAsync: {message}", ex.Message);
@@ -47,11 +47,11 @@ public static class AppInfoAlarmRowMaintenance
     // The testable core, kept free of Store/ServiceRef (ServiceRef always builds a real repository
     // connection as soon as it's constructed, with no seam left to inject a test double - see
     // ClientWin.Tests/AppInfoAlarmRowMaintenanceTests.cs) - a resolveService/getActiveUserId pair
-    // stands in for Store.GetServiceRef(alias)?.Service / Store.GetUserId, same idea as
+    // stands in for Store.GetServiceRefByRepositoryId(repositoryId)?.Service / Store.GetUserId, same idea as
     // AppInfoRowRefresh's own activeUserIdOf delegate.
     internal static async Task<bool> PruneAsync(
         IList<AppInfoAlarmRow> rows,
-        Func<string, IKntService> resolveService,
+        Func<Guid, IKntService> resolveService,
         Func<IKntService, Task<Guid?>> getActiveUserId,
         Action<Exception> onError = null)
     {
@@ -60,17 +60,17 @@ public static class AppInfoAlarmRowMaintenance
 
         // Absent from this dictionary covers both "not configured" (resolveService returned null) and
         // "configured but errored just now" (getActiveUserId threw) - deliberately the same outcome
-        // below: rows for that alias are left alone either way, not judged.
-        var activeUsers = new Dictionary<string, Guid?>();
-        foreach (var alias in rows.Select(r => r.RepositoryAlias).Distinct().ToList())
+        // below: rows for that repository are left alone either way, not judged.
+        var activeUsers = new Dictionary<Guid, Guid?>();
+        foreach (var repositoryId in rows.Select(r => r.RepositoryId).Distinct().ToList())
         {
-            var service = resolveService(alias);
+            var service = resolveService(repositoryId);
             if (service == null)
                 continue;
 
             try
             {
-                activeUsers[alias] = await getActiveUserId(service);
+                activeUsers[repositoryId] = await getActiveUserId(service);
             }
             catch (Exception ex)
             {
@@ -87,12 +87,12 @@ public static class AppInfoAlarmRowMaintenance
 
         foreach (var row in rows.ToList())
         {
-            if (!activeUsers.TryGetValue(row.RepositoryAlias, out var activeUserId))
+            if (!activeUsers.TryGetValue(row.RepositoryId, out var activeUserId))
                 continue;
 
             try
             {
-                if (await IsStillValidAsync(resolveService(row.RepositoryAlias), row, activeUserId))
+                if (await IsStillValidAsync(resolveService(row.RepositoryId), row, activeUserId))
                     hasAnyConfirmedRow = true;
                 else
                     rows.Remove(row);

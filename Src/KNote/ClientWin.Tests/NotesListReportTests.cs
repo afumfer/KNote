@@ -21,7 +21,7 @@ public class NotesListReportTests
         Source = NotesListSource.Folder,
         FolderPath = @"Notes\Projects",
         FolderNumber = 3,
-        RepositoryAlias = "Demo",
+        RepositoryName = "Demo",
         RepositoryProvider = "Microsoft.Data.Sqlite"
     };
 

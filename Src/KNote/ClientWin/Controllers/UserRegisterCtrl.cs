@@ -14,7 +14,7 @@ public class UserRegisterCtrl : CtrlEditorBase<IViewEditor<UserRegisterDto>, Use
     public bool PasswordFromSignIn { get; private set; }
 
     // Where the user is being registered. Taken from the service, as the repository isn't linked yet.
-    public string RepositoryAlias => Service?.RepositoryRef?.Name;
+    public string RepositoryName => Service?.RepositoryRef?.Name;
 
     #endregion
 

@@ -48,7 +48,7 @@ public partial class UserRegisterForm : KntForm, IViewEditor<UserRegisterDto>
 
     protected override void ModelToControls()
     {
-        var alias = _ctrl.RepositoryAlias ?? "this repository";
+        var alias = _ctrl.RepositoryName ?? "this repository";
         labelInfo.Text = $"The user '{_ctrl.Model.UserName}' is not registered in '{alias}'. " +
             "Please provide the following details to register it.";
 

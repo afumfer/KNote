@@ -140,13 +140,10 @@ public class Store
             _activeFolderWithServiceRef = activeFolderWithServiceRef;
             Logger?.LogTrace("ChangeActiveFolderWithServiceRef {message}", activeFolderWithServiceRef?.ToString());
 
-            // Remembered so the next startup can reactivate the same repository/folder (see
+            // Remembered so the next startup can reactivate the same folder (see
             // KNoteManagementCtrl.OnInitialized). Actually written to disk by the next SaveConfig().
             if (activeFolderWithServiceRef?.FolderInfo != null && activeFolderWithServiceRef.ServiceRef != null)
-            {
-                State.Session.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Name;
                 State.Session.LastActiveFolderId = activeFolderWithServiceRef.FolderInfo.FolderId;
-            }
 
             ChangedActiveFolderWithServiceRef?.Invoke(this, new ControllerEventArgs<FolderWithServiceRef>(activeFolderWithServiceRef));
         }
@@ -224,9 +221,10 @@ public class Store
         return _serviceRefRegistry.GetByRepositoryId(repositoryId);
     }
 
-    public ServiceRef GetServiceRef(string alias)
+    // By the name the user sees (KntScript functions take it), which, unlike RepositoryId, can change.
+    public ServiceRef GetServiceRef(string name)
     {
-        return _serviceRefRegistry.GetByAlias(alias);
+        return _serviceRefRegistry.GetByName(name);
     }
 
     public ServiceRef GetFirstServiceRef()

@@ -19,6 +19,7 @@ public class ConfigSerializationTests
     public void XmlSerializer_RoundTrip_PreservesAppInfoAlarmsPositionAndRowIdentifiers()
     {
         var kMessageId = Guid.NewGuid();
+        var repositoryId = Guid.NewGuid();
         var state = new AppUserState();
         state.AppInfoAlarmsWindow.Bounds.X = 123;
         state.AppInfoAlarmsWindow.Bounds.Y = 456;
@@ -27,10 +28,11 @@ public class ConfigSerializationTests
         state.AppInfoAlarmsWindow.Rows.Add(new AppInfoAlarmRow
         {
             KMessageId = kMessageId,
-            RepositoryAlias = "Personal repository",
+            RepositoryId = repositoryId,
             NotifiedAt = new DateTime(2026, 1, 1, 10, 0, 0),
             // Display-only fields, hydrated from the database at load time (see
             // AppInfoAlarmsCtrl.LoadPersistedRows) - must NOT round-trip through the state file.
+            RepositoryName = "Personal repository",
             NoteId = Guid.NewGuid(),
             NoteTopic = "Test note",
             Comment = "Test comment",
@@ -48,7 +50,9 @@ public class ConfigSerializationTests
 
         var row = roundTripped.AppInfoAlarmsWindow.Rows[0];
         Assert.AreEqual(kMessageId, row.KMessageId);
-        Assert.AreEqual("Personal repository", row.RepositoryAlias);
+        Assert.AreEqual(repositoryId, row.RepositoryId);
+        Assert.IsNull(row.RepositoryAlias);
+        Assert.IsNull(row.RepositoryName);
         Assert.AreEqual(new DateTime(2026, 1, 1, 10, 0, 0), row.NotifiedAt);
         Assert.AreEqual(Guid.Empty, row.NoteId);
         Assert.IsNull(row.NoteTopic);

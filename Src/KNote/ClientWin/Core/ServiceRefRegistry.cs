@@ -49,10 +49,10 @@ public class ServiceRefRegistry
             return _serviceRefs.FirstOrDefault(_ => _.RepositoryId == repositoryId);
     }
 
-    public ServiceRef GetByAlias(string alias)
+    public ServiceRef GetByName(string name)
     {
         lock (_lock)
-            return _serviceRefs.FirstOrDefault(_ => _.Name == alias);
+            return _serviceRefs.FirstOrDefault(_ => _.Name == name);
     }
 
     public ServiceRef GetFirst()

@@ -37,10 +37,9 @@ public class SessionState
     // SecurityConfig.AuthenticationMode), proposed again in the sign-in dialog. Never the password.
     public string LastUserName { get; set; }
 
-    // Repository/folder the user had active when the application was last closed, so KNoteManagementCtrl
-    // can reactivate it on the next startup instead of showing no selection.
-    public string LastActiveRepositoryAlias { get; set; }
-
+    // Folder the user had active when the application was last closed, so KNoteManagementCtrl can
+    // reactivate it on the next startup instead of showing no selection. Its id is enough to find it: two
+    // linked repositories can't be copies of each other (see RepositoryEditorCtrl), so folder ids don't repeat.
     public Guid? LastActiveFolderId { get; set; }
 
     // Alias of the AI provider/model the user picked last (shared by KNoteAIAssistantCtrl and

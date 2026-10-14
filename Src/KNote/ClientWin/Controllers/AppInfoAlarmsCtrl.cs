@@ -15,7 +15,7 @@ namespace KNote.ClientWin.Controllers;
 // and hand it back to the caller" (Accept/Cancel, a single IKntService), which isn't what happens
 // here - rows arrive pushed from the alarms timer (not loaded from one repository on demand), the
 // list aggregates across every configured repository at once (each row carries its own
-// RepositoryAlias), and double-click/"Remove from list" act immediately instead of closing the
+// RepositoryId), and double-click/"Remove from list" act immediately instead of closing the
 // controller with a selection. See CtrlViewEmbeddableBase's own doc comment for this same call on
 // NotesSearchParamCtrl/NotesFilterParamCtrl.
 [KntAuthorize(EnumRoles.Staff, AuthorizationScope.Application)]
@@ -67,7 +67,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 
     #region Controller methods
 
-    // Only KMessageId/RepositoryAlias/NotifiedAt actually come back from the state file
+    // Only KMessageId/RepositoryId/NotifiedAt actually come back from the state file
     // (see AppInfoAlarmRow) - the rest is looked up fresh from the owning repository so the
     // list never shows a stale note title/comment/user. A row whose message no longer exists, or no
     // longer qualifies (see AppInfoRowRefresh.IsAddressedToActiveUser - note/message deleted, alarm type
@@ -86,13 +86,13 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
 
             foreach (var saved in rows)
             {
-                var serviceRef = Store.GetServiceRef(saved.RepositoryAlias);
+                var serviceRef = Store.GetServiceRefByRepositoryId(saved.RepositoryId);
                 if (serviceRef == null)
                     continue;
 
                 try
                 {
-                    if (!await TryHydrateRowAsync(serviceRef.Service, saved, activeUsers.GetValueOrDefault(saved.RepositoryAlias)))
+                    if (!await TryHydrateRowAsync(serviceRef.Service, saved, activeUsers.GetValueOrDefault(saved.RepositoryId)))
                     {
                         Store.State.AppInfoAlarmsWindow.Rows.Remove(saved);
                         continue;
@@ -100,9 +100,11 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
                 }
                 catch (Exception ex)
                 {
-                    Store.Logger?.LogError(ex, "LoadPersistedRows, repository {alias}: {message}", saved.RepositoryAlias, ex.Message);
+                    Store.Logger?.LogError(ex, "LoadPersistedRows, repository {alias}: {message}", serviceRef.Name, ex.Message);
                     continue;
                 }
+
+                saved.RepositoryName = serviceRef.Name;
 
                 View.AddOrUpdateRow(saved);
             }
@@ -157,16 +159,16 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
         View.ActivateView();
     }
 
-    // The row only keeps its RepositoryAlias (it must stay a plain, serializable Model type to live
+    // The row only keeps its RepositoryId (it must stay a plain, serializable Model type to live
     // in the state file) - the live IKntService needed to actually reopen the note is resolved here, on
     // demand, instead of being cached on the row for the row's whole (persisted, cross-session)
     // lifetime, where it could go stale if the repository were removed/reconnected meanwhile.
     public void RequestOpenNote(AppInfoAlarmRow row)
     {
-        var serviceRef = Store.GetServiceRef(row.RepositoryAlias);
+        var serviceRef = Store.GetServiceRefByRepositoryId(row.RepositoryId);
         if (serviceRef == null)
         {
-            View.ShowInfo($"The repository \"{row.RepositoryAlias}\" is no longer configured, so this note cannot be opened from here.");
+            View.ShowInfo($"The repository \"{row.RepositoryName}\" is no longer configured, so this note cannot be opened from here.");
             return;
         }
 
@@ -195,7 +197,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
                 return;
 
             var activeUsers = await GetActiveUserIdsAsync(noteRows);
-            ApplyChanges(AppInfoRowRefresh.ApplyNoteSaved(rows, e.Entity, alias => activeUsers.GetValueOrDefault(alias)));
+            ApplyChanges(AppInfoRowRefresh.ApplyNoteSaved(rows, e.Entity, repositoryId => activeUsers.GetValueOrDefault(repositoryId)));
         }
         catch (Exception ex)
         {
@@ -212,7 +214,7 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
                 return;
 
             var activeUsers = await GetActiveUserIdsAsync(rows);
-            ApplyChanges(AppInfoRowRefresh.ApplyUserSaved(rows, e.Entity, alias => activeUsers.GetValueOrDefault(alias)));
+            ApplyChanges(AppInfoRowRefresh.ApplyUserSaved(rows, e.Entity, repositoryId => activeUsers.GetValueOrDefault(repositoryId)));
         }
         catch (Exception ex)
         {
@@ -221,13 +223,13 @@ public class AppInfoAlarmsCtrl : CtrlViewEmbeddableBase<IViewAppInfoAlarms>
     }
 
     // Which user is the "active" one is per repository; resolve it once per repository involved.
-    private async Task<Dictionary<string, Guid?>> GetActiveUserIdsAsync(IEnumerable<AppInfoAlarmRow> rows)
+    private async Task<Dictionary<Guid, Guid?>> GetActiveUserIdsAsync(IEnumerable<AppInfoAlarmRow> rows)
     {
-        var activeUsers = new Dictionary<string, Guid?>();
-        foreach (var alias in rows.Select(r => r.RepositoryAlias).Distinct())
+        var activeUsers = new Dictionary<Guid, Guid?>();
+        foreach (var repositoryId in rows.Select(r => r.RepositoryId).Distinct())
         {
-            var serviceRef = Store.GetServiceRef(alias);
-            activeUsers[alias] = serviceRef == null ? null : await Store.GetUserId(serviceRef.Service);
+            var serviceRef = Store.GetServiceRefByRepositoryId(repositoryId);
+            activeUsers[repositoryId] = serviceRef == null ? null : await Store.GetUserId(serviceRef.Service);
         }
         return activeUsers;
     }

@@ -67,8 +67,8 @@ public class NotesListContextTests
     [TestMethod]
     public void Repository_IncludesProviderWhenKnown()
     {
-        Assert.AreEqual("Demo (Microsoft.Data.Sqlite)", new NotesListContext { RepositoryAlias = "Demo", RepositoryProvider = "Microsoft.Data.Sqlite" }.Repository);
-        Assert.AreEqual("Demo", new NotesListContext { RepositoryAlias = "Demo" }.Repository);
+        Assert.AreEqual("Demo (Microsoft.Data.Sqlite)", new NotesListContext { RepositoryName = "Demo", RepositoryProvider = "Microsoft.Data.Sqlite" }.Repository);
+        Assert.AreEqual("Demo", new NotesListContext { RepositoryName = "Demo" }.Repository);
     }
 }
 

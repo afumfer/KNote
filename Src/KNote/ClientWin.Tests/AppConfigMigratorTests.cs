@@ -83,7 +83,6 @@ public class AppConfigMigratorTests
         Assert.AreEqual(2, state.SchemaVersion);
         Assert.AreEqual(v1.LastDateTimeStart, state.Session.LastDateTimeStart);
         Assert.AreEqual(3929, state.Session.RunCounter);
-        Assert.AreEqual("Personal respository", state.Session.LastActiveRepositoryAlias);
         Assert.AreEqual(Guid.Parse("d577bc3e-64f8-417e-adeb-2b30b328b8d8"), state.Session.LastActiveFolderId);
         Assert.AreEqual("Anthropic test", state.Session.LastAiProviderAlias);
         Assert.IsFalse(state.Session.ChatHubAutoConnectDisabled);
