@@ -15,6 +15,7 @@ public interface IStore
     IFolderWebApiService Folders { get; }
     INoteWebApiService Notes { get; }
     IAiAssistantWebApiService AiAssistant { get; }
+    ISystemValueWebApiService SystemValues { get; }
     
     Task ChatStartAsync();
     Task ChatSendMessageAsync(string messageType, string? userInput, string? messageInput);

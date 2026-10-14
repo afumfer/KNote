@@ -16,7 +16,7 @@
 <div class="knt-home-hero">
     <div class="knt-home-hero-brand">
         <KntLogo Size="48" Class="knt-home-hero-logo" />
-        <h1 class="knt-home-hero-title">@KntConst.AppName</h1>
+        <h1 class="knt-home-hero-title">@Title</h1>
     </div>
     <div class="knt-home-hero-info">
         <span class="knt-home-hero-subtitle">@KntConst.AppDescription</span>
@@ -30,6 +30,14 @@
 @code {    
 
     private List<NoteInfoDto>? notes;
+
+    // The repository's name (read by MainLayout): empty while it is read, the application's name if it can't be.
+    private string Title => store.AppState.RepositoryName switch
+    {
+        null => "",
+        "" => KntConst.AppName,
+        var name => name
+    };
 
 
     protected override async Task OnInitializedAsync()

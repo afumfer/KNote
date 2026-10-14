@@ -52,12 +52,29 @@
 }
 
 /* App name next to the logo in the top bar (MainLayout). */
+/* With the repository's name after it (MainLayout): a long name is cut at the end of its header column instead
+   of wrapping or running over the buttons (the logo and title stack must be able to shrink for that). */
+.knt-app-brand {
+    min-width: 0;
+}
+
 .knt-app-title {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     font-family: var(--knt-heading-font-family);
     font-size: 1.125rem;
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--rz-header-color);
+}
+
+/* On a phone there is only room for the application's name. */
+@media (max-width: 576px) {
+    .knt-app-repository {
+        display: none;
+    }
 }
 
 /* Dialogs in the dark themes (their stylesheet is <theme>-dark-base.css, or dark-base.css for Default's dark

@@ -26,6 +26,15 @@ public class AppState
         set { _userName = value; NotifyStateChanged(); }
     }
 
+    // The repository's name (DB_REPOSITORYNAME), read once by MainLayout: null until then, empty if it could
+    // not be read. Home shows it as its title, and the header of the other pages after the application's name.
+    private string? _repositoryName;
+    public string? RepositoryName
+    {
+        get { return _repositoryName; }
+        set { _repositoryName = value; NotifyStateChanged(); }
+    }
+
     private bool _defaultContentResourcesInDB = false;
     public bool DefaultContentResourcesInDB
     {

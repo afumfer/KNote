@@ -38,7 +38,7 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
             ["AppSettings__Secret"] = "KNoteTestsOnlySigningSecret_DoNotUseInProduction_1234567890",
             ["AppSettings__ActivateMessageBroker"] = "false",
             ["AppSettings__MountResourceContainerOnStartup"] = "false",
-            ["RepositoryRef__Alias"] = "KNoteInProcessTests",
+            ["RepositoryRef__Name"] = "KNoteInProcessTests",
             ["RepositoryRef__Orm"] = "EntityFramework",
             ["RepositoryRef__Provider"] = "Microsoft.Data.Sqlite",
             ["RepositoryRef__ConnectionString"] = $"Data Source={DatabaseFilePath}",

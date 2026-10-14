@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
+using KNote.Model;
 
 namespace KNote.Server.Controllers;
 
@@ -32,6 +34,28 @@ public class SystemValuesController : ControllerBase
     public IActionResult Get()
     {
         return null;
+    }
+
+    // The repository's name (DB_REPOSITORYNAME), shown in the header of the Web, also on its public Home.
+    [AllowAnonymous]
+    [HttpGet("[action]")]
+    public async Task<IActionResult> RepositoryName()
+    {
+        try
+        {
+            var resService = await _service.SystemValues.GetRepositoryInfoAsync();
+
+            var resApi = new Result<string>(resService.Entity?.Name);
+            resApi.AddListErrorMessage(resService.ListErrorMessage);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "RepositoryName at {dateTime}.", DateTime.Now);
+            var resApi = new Result<string>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
     }
 
     [HttpGet("GetAppSettings")]

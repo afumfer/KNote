@@ -126,6 +126,17 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private ISystemValueWebApiService? _systemValues;
+    public ISystemValueWebApiService SystemValues
+    {
+        get
+        {
+            if (_systemValues == null)
+                _systemValues = new SystemValueWebApiService(AppState, _httpClient);
+            return _systemValues;
+        }
+    }
+
     public async Task ChatSendMessageAsync(string messageType, string? userInput, string? messageInput)
     {
         await _hubConnection.SendAsync("SendMessage", userInput, messageInput);
