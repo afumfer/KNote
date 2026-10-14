@@ -19,8 +19,8 @@ The Windows desktop application keeps its configuration in the folder `%LocalApp
 
 | File | What it holds | When it changes |
 |---|---|---|
-| `KNoteData.config` | What you configure: how you sign in, repositories, AI providers, e-mail (SMTP) account, alarm and auto-save options, chat hub and ServerCOM settings. | Only when you change a setting. |
-| `KNoteState.config` | What KaNote remembers by itself: last user name you signed in with (never the password), last active repository and folder, window positions and sizes, list layout, visible panels, the rows of the alarms panel, and the last AI provider and view options of the AI assistant. | As you use the application. |
+| `KNoteData.config` | What you configure: how you sign in, repositories (their names are kept in their databases, see *Repositories*), AI providers, e-mail (SMTP) account, alarm and auto-save options, chat hub and ServerCOM settings. | Only when you change a setting. |
+| `KNoteState.config` | What KaNote remembers by itself: last user name you signed in with (never the password), last active folder, window positions and sizes, list layout, visible panels, the rows of the alarms panel, and the last AI provider and view options of the AI assistant. | As you use the application. |
 
 Deleting `KNoteState.config` only resets the window layout. Deleting `KNoteData.config` makes KaNote start as if it were the first run: your databases are not deleted, but the list of repositories and AI providers is lost.
 
@@ -66,6 +66,16 @@ The options that don't belong to one repository (options, AI, chat, scripts, cre
 **Upgrading from a previous version.** The first time a database is opened with this version it is updated automatically: the role *Public* is renamed **Guest** (so users registered as *Public* can only read until an Admin raises them to Staff), the typo *ProjecManager* becomes **ProjectManager**, and the demo user `owner` is deleted if it was never used. Older versions don't know the new role names; keep a copy of a shared database before opening it with this version.
 
 These permissions are enforced by the application. Somebody who connects to the database directly, with its connection string, is not restricted by them: protect shared databases with the database's own permissions too.
+
+### Repositories (desktop app)
+
+A repository is a KaNote database, SQLite or SQL Server. The **Repository** menu links an existing one, creates a new one or edits the properties of the selected one. Their **General** tab asks, in this order, for the type of database, where it is (directory and file for SQLite; server\instance and database for SQL Server), the resources container (its name, whether to save a copy of each resource in the database, its root folder and its root URL) and the repository's **Name**.
+
+**The name is kept in the database.** The name you see in the folders tree, the status bar and the window titles is stored in the repository's own database, so everybody who opens it, in the desktop app or in the web app, sees the same name. You give it when you create the repository, and an Admin of the repository can change it in **Edit repository properties**. It can't be the name of another repository you have linked. When you link an existing repository the name isn't asked: it is the one in its database.
+
+**One link per database.** Each database is also given an identifier of its own when it is created. A database that is already linked can't be linked again, nor can a copy of it (copying a database copies its identifier too): KaNote tells you which repository it is. If two repositories of your configuration turn out to be the same database, only the first one is opened, and KaNote tells you at startup.
+
+**Upgrading from a previous version.** Earlier versions kept the repository's name (its *alias*) in `KNoteData.config`. The first time this version opens a repository, its database takes that alias as its name (or, if there is none, the name of the database: the SQLite file or the SQL Server database), and the alias is removed from the file. A repository that can't be opened keeps its alias until it can. If another user already opened a shared database with this version, you see the name that user's alias gave it; an Admin can rename it.
 
 ### Notes list (desktop app)
 
@@ -147,6 +157,16 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 **Privacy.** Sessions are ordinary notes: anybody who can browse the **AI Assistant sessions** folder of a shared repository can open them as any other note. Don't write in a conversation anything you wouldn't write in a note of that repository.
 
 **Desktop app.** Sessions are kept only when you open the assistant from the menu. When a KntScript script or a note's natural-language code (`ln`) uses the assistant, nothing is saved (a script can turn it on with `PersistSession = true`). The **Sessions** panel is hidden then.
+
+### Home (web app)
+
+Home is the first page of the web app, and it can be seen without signing in. Its header shows the repository's name, the same one as in the desktop app; on the other pages the top bar shows it after *KNote* (on a phone there is only room for *KNote*).
+
+Home shows the notes of the repository's **Home** folder, by priority and topic, 25 at most. When Home has folders inside, a panel at the right of the notes lists them after **Home**: choose one to see its notes, with the same order. Home remembers your choice while the app is open. On a phone the panel is a row above the notes.
+
+Only the folders directly inside Home are listed there, and anybody can open them and their notes without signing in, like Home itself: keep there only what can be public.
+
+The web server names a new database with the `Name` setting of its `RepositoryRef` section (in `appsettings.json` or its secrets); the old `Alias` setting is still read.
 
 ### Notes lists (web app)
 

@@ -150,6 +150,17 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   decide el rol del usuario nuevo (Admin mientras haya como mucho un Admin, Guest después); `CreateAsync` es
   el alta que hace un Admin, con el rol que elija. ClientWin añade encima la autorización de sus casos de
   uso (ver "Autenticación y autorización" en `ClientWin/CLAUDE.md`).
+- **Identidad del repositorio**: dos filas de `SystemValues` (scope `SYSTEM`, claves en `KntConst`):
+  `DB_REPOSITORYID`, un `Guid` propio de cada base de datos, y `DB_REPOSITORYNAME`, el nombre que ven los
+  usuarios en las dos apps. Las añade `KntSchemaUpdater` si faltan (revisión 5 y en cada `EnsureUpToDate`, también
+  en una base de datos recién creada; no van en `Seed()`, cuyo `HasData` se construye una vez por proceso) con el
+  `RepositoryRef.Name` con que se abre o, sin él, `RepositoryRef.GetDefaultName()` (el fichero o la base de datos).
+  Se leen sin sesión (`IKntSystemValuesService.GetRepositoryInfoAsync`, `[KntAllowAnonymous]`) y el nombre solo
+  cambia con `SaveRepositoryNameAsync` (Admin); los comandos genéricos de `SystemValues` no tocan esas filas ni
+  `DB_VERSION`. No se guardan en `KNoteData.config` (`RepositoryRef.Name`/`RepositoryId` son `[XmlIgnore]`);
+  `ClientWin` usa `RepositoryId` como clave de un repositorio (ver `ClientWin/CLAUDE.md`). La compatibilidad con
+  el antiguo alias (`<Alias>` de la configuración, `RepositoryRef:Alias` del `Server`) lleva el marcador
+  `LEGACY(repository-alias)`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben

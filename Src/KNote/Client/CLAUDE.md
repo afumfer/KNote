@@ -68,8 +68,8 @@ Client/
 ## Acceso a datos: `IStore` y los `I*WebApiService`
 
 - `IStore` (registrado `Scoped`; en WASM equivale a una instancia por pestaña) expone `Users`, `NoteTypes`,
-  `KAttributes`, `Folders`, `Notes`, `AiAssistant` como propiedades perezosas, igual que `IKntService` en el
-  backend. Las páginas inyectan `@inject IStore store` y no usan `HttpClient` directamente.
+  `KAttributes`, `Folders`, `Notes`, `AiAssistant`, `SystemValues` como propiedades perezosas, igual que
+  `IKntService` en el backend. Las páginas inyectan `@inject IStore store` y no usan `HttpClient` directamente.
 - Cada `XxxWebApiService` hereda de `BaseService` y sigue la nomenclatura de `Service`
   (`GetAllAsync`, `GetAsync`, `NewAsync`, `SaveAsync`, `DeleteAsync`...). `SaveAsync` decide POST/PUT según
   el id del DTO (`Guid.Empty` → POST).
@@ -325,6 +325,17 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 
 ## Otros
 
+- **Home y nombre del repositorio**: Home (`Pages/Index`) es pública (sin `[Authorize]`), igual que los endpoints
+  anónimos que usa (ver `Server/CLAUDE.md`, "Autorización"). `MainLayout` lee una vez el nombre del repositorio
+  (`IStore.SystemValues.GetRepositoryNameAsync`, `DB_REPOSITORYNAME`) en `AppState.RepositoryName` (`null`
+  mientras se lee, vacío si no se pudo): Home lo muestra como título de su cabecera y las demás páginas en la
+  barra superior, "KNote - nombre" (`.knt-app-repository`, oculto en un móvil; el layout se redibuja en cada
+  navegación, así que el título sigue la página sin suscribirse a `LocationChanged`). A la derecha de las notas,
+  `Pages/HomeFolders` (presentación) lista Home y sus carpetas hijas directas (`Folders.GetHomeChildrenAsync`) y
+  al elegir una Home pide sus notas (`Notes.GetHomeNotesAsync(folderId)`, el mismo criterio que Home: prioridad y
+  tema, 25 como mucho). La elegida se recuerda en `AppState.HomeFolderId` mientras la app está abierta; sin
+  carpetas no hay panel, y en un móvil es una fila encima de las notas (`grid-template-areas` de
+  `Index.razor.css`, así el orden del código coincide con el visual en escritorio).
 - **Chat**: `Store` crea un `HubConnection` contra `chathub` (`Server/Hubs/ChatHub`); `MainLayout` lo arranca
   (`ChatStartAsync`) y los mensajes recibidos llegan a `AppState.ChatMessages`.
 - **Asistente de IA** (`Pages/AIAssistant`, ruta `aiassistant`, Staff+): `AIAssistant` es el caso de uso y
