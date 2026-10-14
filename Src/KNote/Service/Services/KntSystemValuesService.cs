@@ -52,5 +52,17 @@ public class KntSystemValuesService : KntServiceBase, IKntSystemValuesService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<RepositoryInfoDto>> GetRepositoryInfoAsync()
+    {
+        var command = new KntSystemValueGetRepositoryInfoAsyncCommand(Service);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<RepositoryInfoDto>> SaveRepositoryNameAsync(string name)
+    {
+        var command = new KntSystemValueSaveRepositoryNameAsyncCommand(Service, name);
+        return await ExecuteCommand(command);
+    }
+
     #endregion
 }

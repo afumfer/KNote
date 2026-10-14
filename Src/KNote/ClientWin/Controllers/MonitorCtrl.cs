@@ -94,26 +94,26 @@ public class MonitorCtrl : CtrlViewBase<IViewBase>
 
     private void Store_RemovedServiceRef(ServiceRefRemoved e)
     {
-        var info = $"{DateTime.Now} - [RemovedServiceRef] - {e.ServiceRef.Alias}";
+        var info = $"{DateTime.Now} - [RemovedServiceRef] - {e.ServiceRef.Name}";
         OnShowLog(info);
     }
 
     private void Store_AddedServiceRef(ServiceRefAdded e)
     {
-        var info = $"{DateTime.Now} - [AddedServiceRef] - {e.ServiceRef.Alias}";
+        var info = $"{DateTime.Now} - [AddedServiceRef] - {e.ServiceRef.Name}";
         OnShowLog(info);
     }
 
     private void Store_ServiceCommandExecuting(ServiceCommandExecuting e)
     {
-        var alias = Store.GetServiceRef(e.Args.Service.IdServiceRef)?.Alias;
+        var alias = Store.GetServiceRef(e.Args.Service.IdServiceRef)?.Name;
         var info = $"{DateTime.Now} - [CommandExecuting] - {e.Args.CommandName} - {alias}";
         OnShowLog(info);
     }
 
     private void Store_ServiceCommandExecuted(ServiceCommandExecuted e)
     {
-        var alias = Store.GetServiceRef(e.Args.Service.IdServiceRef)?.Alias;
+        var alias = Store.GetServiceRef(e.Args.Service.IdServiceRef)?.Name;
         var info = $"{DateTime.Now} - [CommandExecuted] - {e.Args.CommandName} - {alias} - {e.Args.Outcome} - {e.Args.Duration.TotalMilliseconds:N0}ms";
         OnShowLog(info);
     }

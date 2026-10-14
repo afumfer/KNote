@@ -1,4 +1,5 @@
 using KNote.ClientWin.Core;
+using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
 using KNote.Service.Core;
 
@@ -7,17 +8,17 @@ namespace KNote.ClientWin.Tests;
 [TestClass]
 public class ServiceRefRegistryTests
 {
-    // Building a real ServiceRef lazily creates its IKntRepository (Dapper), but that only stores
-    // the RepositoryRef - no connection is opened until a repository method is actually called.
-    private static ServiceRef CreateServiceRef(string alias) => new(
-        new RepositoryRef
-        {
-            Alias = alias,
-            Orm = "Dapper",
-            Provider = "Microsoft.Data.Sqlite",
-            ConnectionString = "Data Source=:memory:"
-        },
-        userIdentityName: "test-user");
+    // The registry only looks at each ServiceRef's identity, so they all open the same database (one per
+    // ServiceRef made the concurrency test below take seconds) and are then told apart by their own name and id.
+    private static readonly string SharedDatabase = TestServiceRefFactory.NewInMemoryDatabase();
+
+    private static ServiceRef CreateServiceRef(string name)
+    {
+        var serviceRef = TestServiceRefFactory.CreateInMemorySqlite(name, SharedDatabase);
+        serviceRef.RepositoryRef.Name = name;
+        serviceRef.RepositoryRef.RepositoryId = Guid.NewGuid();
+        return serviceRef;
+    }
 
     [TestMethod]
     public void GetAll_NoServiceRefsAdded_ReturnsEmpty()
@@ -25,6 +26,19 @@ public class ServiceRefRegistryTests
         var registry = new ServiceRefRegistry();
 
         Assert.IsEmpty(registry.GetAll());
+    }
+
+    [TestMethod]
+    public void GetByRepositoryId_ReturnsTheServiceRefOfThatRepository()
+    {
+        var registry = new ServiceRefRegistry();
+        var first = CreateServiceRef("first");
+        var second = CreateServiceRef("second");
+        registry.Add(first);
+        registry.Add(second);
+
+        Assert.AreSame(second, registry.GetByRepositoryId(second.RepositoryId));
+        Assert.IsNull(registry.GetByRepositoryId(Guid.NewGuid()));
     }
 
     [TestMethod]
@@ -129,7 +143,7 @@ public class ServiceRefRegistryTests
                     registry.Add(serviceRef);
                     _ = registry.GetAll().Count;
                     _ = registry.GetById(serviceRef.IdServiceRef);
-                    _ = registry.GetByAlias(serviceRef.Alias);
+                    _ = registry.GetByAlias(serviceRef.Name);
                     _ = registry.GetFirst();
                     registry.Remove(serviceRef);
                 }

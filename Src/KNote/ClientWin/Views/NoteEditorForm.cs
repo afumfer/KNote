@@ -234,7 +234,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     public async Task RefreshFolderAndRepositoryDisplayAsync()
     {
-        Text = $"Note editor [{_ctrl.ServiceRef?.Alias}]";
+        Text = $"Note editor [{_ctrl.ServiceRef?.Name}]";
 
         // No note is loaded yet (e.g. KNoteManagementCtrl.NoteEditorCtrl - the embedded main-window
         // editor - runs its first RefreshView() before any note has been selected into it) or the

@@ -175,7 +175,7 @@ public class AppConfigStorageTests
         settings.Notifications.Email.Host = "smtp.example.com";
         settings.Notifications.Email.Password = "smtp-pwd";
         settings.Ai.Providers.Add(new AiProviderRef { Alias = "OpenAI", Provider = "OpenAI", Model = "m", ApiKey = "key-1" });
-        settings.Repositories.Items.Add(new RepositoryRef { Alias = "Sql", ConnectionString = "Server=db;User Id=sa;Password=s3cr3t" });
+        settings.Repositories.Items.Add(new RepositoryRef { Name = "Sql", ConnectionString = "Server=db;User Id=sa;Password=s3cr3t" });
         var state = new AppUserState();
         state.Session.RunCounter = 7;
         state.ManagementWindow.Bounds.X = 100;

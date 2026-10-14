@@ -192,7 +192,7 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         foreach (var serviceRef in _ctrl.Store.GetAllServiceRef())
             comboRepositories.Items.Add(serviceRef);
         comboRepositories.ValueMember = "IdServiceRef";
-        comboRepositories.DisplayMember = "Alias";
+        comboRepositories.DisplayMember = "Name";
         comboRepositories.SelectedIndex = comboRepositories.Items.Count > 0 ? 0 : -1;
 
         ListViewColumnResizer.Resize(listViewAttributes, PrimaryColumnIndex);

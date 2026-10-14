@@ -144,7 +144,7 @@ public class XmlConfigFileTests
         Assert.AreEqual("http://chat.example.com/KNote/chathub", config.ChatHubUrl);
         Assert.AreEqual(2, config.RespositoryRefs.Count);
         Assert.IsTrue(config.RespositoryRefs[1].ResourceContentInDB);
-        Assert.AreEqual("Mini Assistant", config.AssistantRespositoryRef.Alias);
+        Assert.AreEqual("Mini Assistant", config.AssistantRespositoryRef.Name);
         Assert.AreEqual("Personal respository", config.LastActiveRepositoryAlias);
         Assert.AreEqual(Guid.Parse("d577bc3e-64f8-417e-adeb-2b30b328b8d8"), config.LastActiveFolderId);
         Assert.AreEqual(3, config.AiProviderRefs.Count);

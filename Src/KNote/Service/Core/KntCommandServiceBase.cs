@@ -80,7 +80,7 @@ public abstract class KntCommandServiceBase<TResult>
             return result;
         }
 
-        var repositoryAlias = Service.RepositoryRef?.Alias;
+        var repositoryAlias = Service.RepositoryRef?.Name;
         var role = await Service.GetCurrentUserRoleAsync();
         if (role == null)
             result.AddErrorMessage($"The user '{UserIdentityName}' is not registered in the repository '{repositoryAlias}'.");

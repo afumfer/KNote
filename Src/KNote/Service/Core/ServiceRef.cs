@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Repository;
 using Microsoft.Extensions.Logging;
@@ -17,11 +18,21 @@ public class ServiceRef
         }
     }
 
-    public string Alias
+    // Not to be confused with IdServiceRef, which identifies this ServiceRef while the application runs:
+    // RepositoryId identifies the database itself and never changes (see LoadRepositoryInfo).
+    public Guid RepositoryId
     {
         get
         {
-            return RepositoryRef?.Alias;
+            return RepositoryRef?.RepositoryId ?? Guid.Empty;
+        }
+    }
+
+    public string Name
+    {
+        get
+        {
+            return RepositoryRef?.Name;
         }
     }
 
@@ -73,6 +84,24 @@ public class ServiceRef
         ActivateMessageBroker = activateMessageBroker;
         EnforceAuthorization = enforceAuthorization;
         Service.Logger = logger;
+        LoadRepositoryInfo();
+    }
+
+    #endregion
+
+    #region Public methods
+
+    // The repository's id and name come from its database (opened, and given them if it had none, by
+    // KntRepositoryFactory when Service was built above), not from the configuration. A repository that
+    // can't tell them can't be told apart from the others, so it is not opened.
+    public void LoadRepositoryInfo()
+    {
+        var result = Task.Run(() => Service.SystemValues.GetRepositoryInfoAsync()).GetAwaiter().GetResult();
+        if (!result.IsValid)
+            throw new KntServiceException($"The identity of the repository '{RepositoryRef?.Name}' could not be read: {result.ErrorMessage}");
+
+        RepositoryRef.RepositoryId = result.Entity.RepositoryId;
+        RepositoryRef.Name = result.Entity.Name;
     }
 
     #endregion 

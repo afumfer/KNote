@@ -25,13 +25,14 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 4;
+    public const int CurrentSchemaRevision = 5;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
         (2, AddTraceNotes),
         (3, UpdateSchemaV3),
-        (4, UpdateSchemaV4)
+        (4, UpdateSchemaV4),
+        (5, AddRepositoryIdentity)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -67,6 +68,10 @@ public static class KntSchemaUpdater
             WriteStoredRevision(ctx, step.Revision);
             stored = step.Revision;
         }
+
+        // Also for a database that is already at the current revision without having gone through step 5:
+        // one created just above by EnsureCreated (seeded at CurrentSchemaRevision), or created elsewhere.
+        AddRepositoryIdentity(ctx, repositoryRef);
 
         VerifiedConnectionStrings[repositoryRef.ConnectionString] = true;
     }
@@ -338,4 +343,48 @@ WHERE UserName = 'owner' AND EMail = 'owner@mydomain.com'
     AND NOT EXISTS (SELECT 1 FROM NoteTasks WHERE NoteTasks.UserId = Users.UserId)
     AND NOT EXISTS (SELECT 1 FROM KMessages WHERE KMessages.UserId = Users.UserId);
 ";
+
+    // Revision 5 - the repository's identity, kept in the database instead of in each client's
+    // configuration: DB_REPOSITORYID, a Guid given to the database once (ClientWin's key for it), and
+    // DB_REPOSITORYNAME, the name the users see. The name is the one the RepositoryRef brings (the alias
+    // of a ClientWin configuration written before this revision, the name typed when creating the
+    // database, or Server's appsettings), or else the database's own name. Each row is only added if
+    // missing, so this never changes an existing identity. Not seeded by ModelBuilderExtensions.Seed():
+    // HasData is part of the EF model, built once per process, so every database created by the same
+    // process would get the same Guid - and the name is not known there.
+    private static void AddRepositoryIdentity(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        var name = string.IsNullOrWhiteSpace(repositoryRef.Name) ? repositoryRef.GetDefaultName() : repositoryRef.Name.Trim();
+
+        AddSystemValueIfMissing(ctx, KntConst.RepositoryIdKey, Guid.NewGuid().ToString());
+        AddSystemValueIfMissing(ctx, KntConst.RepositoryNameKey, name);
+    }
+
+    private static void AddSystemValueIfMissing(KntDbContext ctx, string key, string value)
+    {
+        var scope = KntConst.SystemScope;
+        if (ctx.SystemValues.Any(v => v.Scope == scope && v.Key == key))
+            return;
+
+        ctx.SystemValues.Add(new Entities.SystemValue
+        {
+            SystemValueId = Guid.NewGuid(),
+            Scope = scope,
+            Key = key,
+            Value = value
+        });
+
+        try
+        {
+            ctx.SaveChanges();
+        }
+        catch (DbUpdateException)
+        {
+            // Another process (or request) added it first, rejected by the unique index on Scope+Key:
+            // the value already there is the one that counts.
+            ctx.ChangeTracker.Clear();
+            if (!ctx.SystemValues.Any(v => v.Scope == scope && v.Key == key))
+                throw;
+        }
+    }
 }

@@ -22,7 +22,7 @@ public class NotesListCsvExportCtrlTests
         var store = new Store(factoryViews);
         var notified = new List<string>();
         store.AccessDeniedNotifier = notified.Add;
-        var service = new FakeKntService { RepositoryRef = new RepositoryRef { Alias = "Shared" } };
+        var service = new FakeKntService { RepositoryRef = new RepositoryRef { Name = "Shared" } };
         store.Security.SetRepositoryRole(service, role);
 
         var snapshot = new NotesListSnapshot();

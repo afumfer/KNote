@@ -28,7 +28,8 @@ public class CommandAuthorizationMatrixTests
         }
 
         Add(Anonymous,
-            "KntUsersAuthenticateAsyncCommand", "KntUsersRegisterAsyncCommand");
+            "KntUsersAuthenticateAsyncCommand", "KntUsersRegisterAsyncCommand",
+            "KntSystemValueGetRepositoryInfoAsyncCommand");
 
         // Reading anything in the repository.
         Add(nameof(EnumRoles.Guest),
@@ -75,7 +76,7 @@ public class CommandAuthorizationMatrixTests
         Add(nameof(EnumRoles.Admin),
             "KntKAttributesSaveAsyncCommand", "KntKAttributesDeleteAsyncCommand",
             "KntNoteTypeSaveAsyncCommand", "KntNoteTypeDeleteAsyncCommand",
-            "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand",
+            "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand");

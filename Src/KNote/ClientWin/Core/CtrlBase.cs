@@ -119,7 +119,7 @@ abstract public class CtrlBase : IDisposable
     {
         var roleName = KntConst.Roles[requirement.MinimumRole];
         var useCase = string.IsNullOrEmpty(ControllerName) ? "This option" : $"'{ControllerName}'";
-        var repositoryAlias = AuthorizationResource?.RepositoryRef?.Alias;
+        var repositoryAlias = AuthorizationResource?.RepositoryRef?.Name;
 
         return requirement.Scope == AuthorizationScope.Repository && repositoryAlias != null
             ? $"{useCase} requires the role '{roleName}' in the repository '{repositoryAlias}'."

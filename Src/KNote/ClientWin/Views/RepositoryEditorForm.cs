@@ -68,7 +68,11 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         // (both it and panelForm were scaled by the same factor during InitializeComponent).
         int footerHeight = ClientSize.Height - tabControlMain.Height;
         int tabStripOverhead = tabControlMain.Height - panelForm.Height;
-        int contentBottom = Math.Max(panelSqLite.Bottom, panelMSSqlServer.Bottom);
+        // The last row is Name, which is not shown when linking a repository (see ModelToControls; asked
+        // through the mode because Visible is still false for every control until the form is shown). The
+        // space left below it is the same as between the other rows.
+        var lastRow = _ctrl.EditorMode == EnumRepositoryEditorMode.AddLink ? textResourcesContainerUrl : textName;
+        int contentBottom = lastRow.Bottom + (panelSqLite.Top - groupRepositoryType.Bottom);
         int targetTabControlHeight = contentBottom + tabStripOverhead;
 
         // Deliberately NOT "tabControlMain.Height = targetTabControlHeight;" here: tabControlMain is
@@ -194,7 +198,10 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         toolTipAdminTabs.SetToolTip(tabPageTraceNoteTypes, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageAttributes, adminTabsHint);
 
-        textAliasName.Text = _ctrl.Model.Alias;
+        // A linked repository is named in its own database.
+        labelName.Visible = _ctrl.EditorMode != EnumRepositoryEditorMode.AddLink;
+        textName.Visible = _ctrl.EditorMode != EnumRepositoryEditorMode.AddLink;
+        textName.Text = _ctrl.Model.Name;
         textResourcesContainer.Text = _ctrl.Model.ResourcesContainer;
         checkResourceContentInDB.Checked = _ctrl.Model.ResourceContentInDB;
         textResourcesContainerRoot.Text = _ctrl.Model.ResourcesContainerRootPath;
@@ -223,7 +230,8 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
 
     protected override void ControlsToModel()
     {
-        _ctrl.Model.Alias = textAliasName.Text;
+        if (_ctrl.EditorMode != EnumRepositoryEditorMode.AddLink)
+            _ctrl.Model.Name = textName.Text?.Trim();
         _ctrl.Model.ResourcesContainer = textResourcesContainer.Text;
         _ctrl.Model.ResourceContentInDB = checkResourceContentInDB.Checked;
         _ctrl.Model.ResourcesContainerRootPath = textResourcesContainerRoot.Text;

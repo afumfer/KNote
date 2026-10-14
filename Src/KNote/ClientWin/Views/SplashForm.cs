@@ -40,7 +40,7 @@ public partial class SplashForm : Form
 
     private void AppContext_AddedServiceRef(ServiceRefAdded e)
     {
-        labelMessage.Text = "Loading " + e.ServiceRef.Alias + "...";
+        labelMessage.Text = "Loading " + e.ServiceRef.Name + "...";
         labelMessage.Refresh();
         Application.DoEvents();
     }

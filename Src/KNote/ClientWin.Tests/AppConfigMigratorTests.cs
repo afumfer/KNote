@@ -40,11 +40,11 @@ public class AppConfigMigratorTests
         Assert.AreEqual(60, settings.General.AutoSaveSeconds);
 
         Assert.AreEqual(2, settings.Repositories.Items.Count);
-        Assert.AreEqual("Personal respository", settings.Repositories.Items[0].Alias);
+        Assert.AreEqual("Personal respository", settings.Repositories.Items[0].Name);
         Assert.AreEqual("EntityFramework", settings.Repositories.Items[0].Orm);
-        Assert.AreEqual("Sql Server repository", settings.Repositories.Items[1].Alias);
+        Assert.AreEqual("Sql Server repository", settings.Repositories.Items[1].Name);
         Assert.IsTrue(settings.Repositories.Items[1].ResourceContentInDB);
-        Assert.AreEqual("Mini Assistant", settings.Repositories.Assistant.Alias);
+        Assert.AreEqual("Mini Assistant", settings.Repositories.Assistant.Name);
         Assert.AreEqual(@"Data Source=C:\KaNote\Data\assistant.db", settings.Repositories.Assistant.ConnectionString);
 
         Assert.AreEqual(3, settings.Ai.Providers.Count);

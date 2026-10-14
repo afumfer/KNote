@@ -50,7 +50,7 @@ public class NoteDetailReportData
         var data = new NoteDetailReportData
         {
             Note = note,
-            Repository = string.IsNullOrEmpty(repositoryRef?.Provider) ? repositoryRef?.Alias : $"{repositoryRef.Alias} ({repositoryRef.Provider})",
+            Repository = string.IsNullOrEmpty(repositoryRef?.Provider) ? repositoryRef?.Name : $"{repositoryRef.Name} ({repositoryRef.Provider})",
             UnsavedChanges = unsavedChanges,
             FolderPath = note.FolderId == Guid.Empty ? "" : await store.GetKNoteFolerPath(serviceRef, note.FolderId)
         };

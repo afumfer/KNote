@@ -66,7 +66,7 @@ public class UserRegisterCtrlTests
     public async Task RepositoryAlias_ComesFromTheService_AsTheRepositoryIsNotLinkedYet()
     {
         var (ctrl, _, service, _) = CreateCtrl();
-        service.RepositoryRef = new RepositoryRef { Alias = "Shared repository" };
+        service.RepositoryRef = new RepositoryRef { Name = "Shared repository" };
 
         await ctrl.NewModel(service);
 

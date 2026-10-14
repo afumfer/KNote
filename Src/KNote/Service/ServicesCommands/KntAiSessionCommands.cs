@@ -245,7 +245,7 @@ internal static class AiSessions
     {
         var user = await service.GetCurrentUserAsync();
         if (user == null)
-            result.AddErrorMessage($"The user '{service.UserIdentityName}' is not registered in the repository '{service.RepositoryRef?.Alias}'.");
+            result.AddErrorMessage($"The user '{service.UserIdentityName}' is not registered in the repository '{service.RepositoryRef?.Name}'.");
         return user;
     }
 

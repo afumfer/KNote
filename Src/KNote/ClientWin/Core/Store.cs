@@ -144,7 +144,7 @@ public class Store
             // KNoteManagementCtrl.OnInitialized). Actually written to disk by the next SaveConfig().
             if (activeFolderWithServiceRef?.FolderInfo != null && activeFolderWithServiceRef.ServiceRef != null)
             {
-                State.Session.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Alias;
+                State.Session.LastActiveRepositoryAlias = activeFolderWithServiceRef.ServiceRef.Name;
                 State.Session.LastActiveFolderId = activeFolderWithServiceRef.FolderInfo.FolderId;
             }
 
@@ -216,6 +216,12 @@ public class Store
     public ServiceRef GetServiceRef(Guid id)
     {
         return _serviceRefRegistry.GetById(id);
+    }
+
+    // The repository's own id (RepositoryRef.RepositoryId), not ServiceRef.IdServiceRef.
+    public ServiceRef GetServiceRefByRepositoryId(Guid repositoryId)
+    {
+        return _serviceRefRegistry.GetByRepositoryId(repositoryId);
     }
 
     public ServiceRef GetServiceRef(string alias)
@@ -497,7 +503,7 @@ public class Store
     public async Task<Result> AuthenticateRepositoryAsync(IKntService service)
     {
         var result = new Result();
-        var alias = service.RepositoryRef?.Alias;
+        var alias = service.RepositoryRef?.Name;
 
         var user = await service.GetCurrentUserAsync();
         if (user == null)
@@ -538,7 +544,7 @@ public class Store
         {
             // A user created from the users management screen may have no password at all yet: checking
             // it throws instead of just failing.
-            Logger?.LogWarning(ex, "Authenticating {user} in repository {alias} failed.", AppUserName, service.RepositoryRef?.Alias);
+            Logger?.LogWarning(ex, "Authenticating {user} in repository {alias} failed.", AppUserName, service.RepositoryRef?.Name);
             return false;
         }
     }

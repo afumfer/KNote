@@ -70,7 +70,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             if (serviceRef == null)
                 return $"{Store.AppUserName} · {applicationRole}";
 
-            return $"{Store.AppUserName} · {serviceRef.Alias}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)} · {applicationRole}";
+            return $"{Store.AppUserName} · {serviceRef.Name}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)} · {applicationRole}";
         }
     }
 
@@ -88,7 +88,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 "Role in each repository (for its notes and folders):"
             };
             foreach (var serviceRef in Store.GetAllServiceRef())
-                lines.Add($"   {serviceRef.Alias}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)}");
+                lines.Add($"   {serviceRef.Name}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)}");
 
             return string.Join(Environment.NewLine, lines);
         }
@@ -185,7 +185,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     private bool ConfirmLoadAllNotes(ServiceRef serviceRef)
     {
-        var message = $"You are going to load all the notes of the repository '{serviceRef?.Alias}'. " +
+        var message = $"You are going to load all the notes of the repository '{serviceRef?.Name}'. " +
             $"It may take a long time if the database contains a large number of notes.{Environment.NewLine}{Environment.NewLine}" +
             "Do you want to continue?";
 
@@ -734,7 +734,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             var messages = (await service.Notes.GetMessagesAsync(noteId)).Entity;
 
             var currentUser = (await service.Users.GetByUserNameAsync(Store.AppUserName)).Entity;
-            var repositoryAlias = Store.GetServiceRef(service.IdServiceRef)?.Alias;
+            var repositoryAlias = Store.GetServiceRef(service.IdServiceRef)?.Name;
 
             // Deleted note, a failed query, or the current user not registered in this repository.
             if (note == null || messages == null || currentUser == null)
@@ -1788,7 +1788,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         var serviceRef = SelectedServiceRef;
         var context = new NotesListContext
         {
-            RepositoryAlias = serviceRef?.RepositoryRef?.Alias,
+            RepositoryAlias = serviceRef?.RepositoryRef?.Name,
             RepositoryProvider = serviceRef?.RepositoryRef?.Provider,
             TextFilter = textFilter
         };

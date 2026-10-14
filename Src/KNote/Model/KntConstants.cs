@@ -38,6 +38,13 @@ public static class KntConst
     public static string AiProviderAttributeName { get; private set; } = "AiProvider";
     public static string AiModelAttributeName { get; private set; } = "AiModel";
 
+    // SystemValues rows (scope SYSTEM) kept by KntSchemaUpdater: the schema revision, and the repository's
+    // name and id. The id is a Guid given to each database once, which ClientWin uses as its key.
+    public static string SystemScope { get; private set; } = "SYSTEM";
+    public static string DbVersionKey { get; private set; } = "DB_VERSION";
+    public static string RepositoryNameKey { get; private set; } = "DB_REPOSITORYNAME";
+    public static string RepositoryIdKey { get; private set; } = "DB_REPOSITORYID";
+
     static KntConst()
     {
         KAttributes = new Dictionary<EnumKAttributeDataType, string>

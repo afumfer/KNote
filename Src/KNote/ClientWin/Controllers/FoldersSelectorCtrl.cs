@@ -72,7 +72,7 @@ public class FoldersSelectorCtrl : CtrlSyncableSelectorBase<IViewSelector<Folder
             // node empty. Rethrowing aborted the whole tree load instead, and escaped from
             // FoldersSelectorForm.RefreshView (async void) as an unhandled exception - e.g. at startup
             // with a SQL Server repository not reachable yet.
-            Store.Logger?.LogError(ex, "Loading the folders of repository {alias} failed.", serviceRef.Alias);
+            Store.Logger?.LogError(ex, "Loading the folders of repository {alias} failed.", serviceRef.Name);
             View.ShowInfo(ex.Message);
             return null;
         }
