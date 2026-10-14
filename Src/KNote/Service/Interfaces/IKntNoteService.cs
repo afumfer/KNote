@@ -12,6 +12,9 @@ public interface IKntNoteService
     Task<Result<List<NoteInfoDto>>> GetAllAsync();
     Task<Result<List<NoteMinimalDto>>> GetAllMinimalAsync();
     Task<Result<List<NoteInfoDto>>> HomeNotesAsync();
+    // The same for one of the folders inside Home (only its direct children: the Web shows them without
+    // signing in, so no other folder can be read this way).
+    Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid folderId);
     Task<Result<NoteDto>> GetAsync(Guid noteId);
     Task<Result<NoteDto>> GetAsync(int noteNumber);
     Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId);

@@ -29,7 +29,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
     #region IKntNoteRepository
 
-    public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync()
+    public async Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid? folderId = null)
     {
         try
         {
@@ -38,7 +38,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             var db = GetOpenConnection();
             var folders = new KntFolderRepository(db, _repositoryRef);
 
-            var idHomeFolder = (await folders.GetHomeAsync()).Entity?.FolderId;
+            var idHomeFolder = folderId ?? (await folders.GetHomeAsync()).Entity?.FolderId;
 
             if (idHomeFolder == null)
             {

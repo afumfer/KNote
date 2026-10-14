@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
@@ -75,6 +76,37 @@ public class KntFoldersGetHomeAsyncCommand : KntCommandServiceBase<Result<Folder
     public override async Task<Result<FolderDto>> Execute()
     {
         return await Repository.Folders.GetHomeAsync();
+    }
+}
+
+[KntAuthorize(EnumRoles.Guest)]
+public class KntFoldersGetHomeChildrenAsyncCommand : KntCommandServiceBase<Result<List<FolderInfoDto>>>
+{
+    public KntFoldersGetHomeChildrenAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<List<FolderInfoDto>>> Execute()
+    {
+        var result = new Result<List<FolderInfoDto>>();
+
+        var resHome = await Repository.Folders.GetHomeAsync();
+        var resFolders = await Repository.Folders.GetAllAsync();
+        if (!resHome.IsValid || resHome.Entity == null || !resFolders.IsValid)
+        {
+            result.AddErrorMessage("The folders of Home could not be read.");
+            result.AddListErrorMessage(resHome.ListErrorMessage);
+            result.AddListErrorMessage(resFolders.ListErrorMessage);
+            return result;
+        }
+
+        result.Entity = resFolders.Entity
+            .Where(f => f.ParentId == resHome.Entity.FolderId)
+            .OrderBy(f => f.Order).ThenBy(f => f.Name)
+            .ToList();
+
+        return result;
     }
 }
 

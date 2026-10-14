@@ -78,6 +78,12 @@ public class KntFolderService : KntServiceBase, IKntFolderService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync()
+    {
+        var command = new KntFoldersGetHomeChildrenAsyncCommand(Service);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<FolderDto>> SaveAsync(FolderDto entity)
     {
         var command = new KntFoldersSaveAsyncCommand(Service, entity);

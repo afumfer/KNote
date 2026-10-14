@@ -1,0 +1,91 @@
+﻿/* Home's side panel: a card like Home's header and its note cards, with Home and its folders as a list; on a
+   phone, a row above the notes that scrolls sideways. Only theme variables, so it follows every theme. */
+
+/* The same margin as the note cards beside it (NoteItem, rz-m-1), so both start at the same height. */
+.knt-home-folders {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin: 0.25rem;
+    padding: 0.5rem;
+    border-radius: calc(var(--rz-border-radius) * 2);
+    background-color: var(--rz-base-background-color);
+    box-shadow: var(--rz-shadow-1);
+}
+
+.knt-home-folder {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: var(--rz-border-radius);
+    background: transparent;
+    color: var(--rz-text-color);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+    .knt-home-folder:hover {
+        background-color: color-mix(in srgb, var(--rz-text-color) 6%, transparent);
+    }
+
+    .knt-home-folder:focus-visible {
+        outline: 2px solid var(--rz-primary);
+        outline-offset: -2px;
+    }
+
+    .knt-home-folder ::deep .rzi {
+        color: var(--rz-text-secondary-color);
+    }
+
+/* Marked with a tint and a bar of the primary color, with the text in the titles' color: the primary color on
+   its lighter tone is hard to read in the dark themes. */
+.knt-home-folder-selected,
+.knt-home-folder-selected:hover {
+    background-color: color-mix(in srgb, var(--rz-primary) 14%, transparent);
+    box-shadow: inset 3px 0 0 var(--rz-primary);
+    color: var(--rz-text-title-color);
+    font-weight: 600;
+}
+
+    .knt-home-folder-selected ::deep .rzi {
+        color: var(--rz-primary);
+    }
+
+/* A long name takes two lines rather than being cut; in the phone's row it is shown whole (the row scrolls). */
+.knt-home-folder-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+    .knt-home-folders {
+        position: static;
+        flex-direction: row;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in srgb, var(--rz-text-color) 30%, transparent) transparent;
+        padding: 0.375rem;
+    }
+
+    .knt-home-folder-selected,
+    .knt-home-folder-selected:hover {
+        box-shadow: inset 0 -3px 0 var(--rz-primary);
+    }
+
+    .knt-home-folder {
+        flex: 0 0 auto;
+        width: auto;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .knt-home-folder-name {
+        white-space: nowrap;
+    }
+}

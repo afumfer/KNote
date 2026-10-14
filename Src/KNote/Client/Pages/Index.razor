@@ -24,12 +24,27 @@
     </div>
 </div>
 
-<NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
+@* At the right of the notes, Home and the folders directly inside it (only when it has any). *@
+<div class="@(HasFolders ? "knt-home-content knt-home-with-folders" : "knt-home-content")">
+    <div class="knt-home-notes">
+        <NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
+    </div>
+    @if (HasFolders)
+    {
+        <HomeFolders Folders="folders!" SelectedFolderId="selectedFolderId" SelectedFolderIdChanged="SelectFolderAsync" />
+    }
+</div>
 
 
 @code {    
 
     private List<NoteInfoDto>? notes;
+
+    // The folders directly inside Home, and the one whose notes are shown (null: Home's own).
+    private List<FolderInfoDto>? folders;
+    private Guid? selectedFolderId;
+
+    private bool HasFolders => folders?.Count > 0;
 
     // The repository's name (read by MainLayout): empty while it is read, the application's name if it can't be.
     private string Title => store.AppState.RepositoryName switch
@@ -45,6 +60,8 @@
         store.AppState.OnChange += StateHasChanged;
         noteWindows.NoteSaved += OnNoteSaved;
 
+        selectedFolderId = store.AppState.HomeFolderId;
+        await LoadFolders();
         await LoadNotes();
     }
 
@@ -54,12 +71,37 @@
         noteWindows.NoteSaved -= OnNoteSaved;
     }
 
+    private async Task LoadFolders()
+    {
+        var result = await store.Folders.GetHomeChildrenAsync();
+        folders = result.IsValid ? result.Entity : null;
+
+        // The folder shown last time may have been deleted or moved meanwhile.
+        if (selectedFolderId != null && folders?.Any(f => f.FolderId == selectedFolderId) != true)
+            selectedFolderId = store.AppState.HomeFolderId = null;
+    }
+
     private async Task LoadNotes()
     {
+        var folderId = selectedFolderId;
         notes = null;
-        var result = await store.Notes.GetHomeNotesAsync();
-        if (result.IsValid)                    
+        var result = await store.Notes.GetHomeNotesAsync(folderId);
+
+        // Another folder was chosen while these notes were read: its own notes are on their way.
+        if (folderId != selectedFolderId)
+            return;
+
+        if (result.IsValid)
             notes = result.Entity;
+    }
+
+    private async Task SelectFolderAsync(Guid? folderId)
+    {
+        if (folderId == selectedFolderId)
+            return;
+
+        selectedFolderId = store.AppState.HomeFolderId = folderId;
+        await LoadNotes();
     }
 
     private Task OnNoteView(NoteInfoDto note) => noteWindows.OpenViewAsync(note.NoteId);

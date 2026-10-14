@@ -17,6 +17,7 @@ internal class FakeKntFolderService : IKntFolderService
     public Task<Result<List<FolderInfoDto>>> GetAllAsync() => throw new NotSupportedException();
     public Task<Result<List<FolderDto>>> GetTreeAsync() => throw new NotSupportedException();
     public Task<Result<FolderDto>> GetHomeAsync() => throw new NotSupportedException();
+    public Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync() => throw new NotSupportedException();
     public Task<Result<FolderDto>> GetAsync(Guid folderId) =>
         (GetByIdAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAsync)}(Guid) not configured for this test"))(folderId);
     public Task<Result<FolderDto>> GetAsync(int folderNumber) => throw new NotSupportedException();

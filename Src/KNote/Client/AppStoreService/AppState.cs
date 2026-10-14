@@ -35,6 +35,10 @@ public class AppState
         set { _repositoryName = value; NotifyStateChanged(); }
     }
 
+    // The folder whose notes Home shows (null: Home's own), kept while the app is open. No changes to notify:
+    // only Home reads it, when it is shown again.
+    public Guid? HomeFolderId { get; set; }
+
     private bool _defaultContentResourcesInDB = false;
     public bool DefaultContentResourcesInDB
     {
