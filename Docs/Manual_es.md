@@ -204,7 +204,7 @@ El botón de la paleta de la barra superior de la aplicación Web abre el panel 
 
 ### Asistente de IA (aplicación Web)
 
-**AI Assistant**, en el menú lateral (rol Staff o superior), abre la versión Web del asistente. Su cabecera muestra los tokens de la conversación, la lista de modelos de IA (configurados en el servidor, ver más abajo) y el botón **New conversation**; el panel **Sessions** de la derecha muestra tus sesiones, como en la aplicación de escritorio (ver *Sesiones del asistente de IA*).
+**AI Assistant**, en el menú lateral (rol Staff o superior), abre la versión Web del asistente. Su cabecera muestra la lista de modelos de IA (configurados en el servidor, ver más abajo) y el botón **New conversation**; el panel **Sessions** de la derecha muestra tus sesiones, como en la aplicación de escritorio (ver *Sesiones del asistente de IA*), y la sesión en la que estás muestra los tokens de su conversación. Arrastra la barra entre la conversación y la caja de la pregunta para hacer la caja más alta o más baja.
 
 Escribe una pregunta en el cuadro de abajo y pulsa el botón de enviar (o `Ctrl+Enter`). La respuesta aparece a medida que se escribe; mientras llega puedes detenerla con el botón de parar, y entonces la pregunta vuelve al cuadro. Una respuesta que falla o que detienes no forma parte de la conversación y no se guarda.
 

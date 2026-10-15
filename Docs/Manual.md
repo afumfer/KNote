@@ -204,7 +204,7 @@ The palette button in the top bar of the web app opens the **Appearance** panel,
 
 ### AI Assistant (web app)
 
-**AI Assistant** in the side menu (Staff role or higher) opens the web version of the assistant. Its header shows the tokens of the conversation, the list of AI models (configured in the server, see below) and the **New conversation** button; the **Sessions** panel on the right lists your sessions, as in the desktop app (see *AI assistant sessions*).
+**AI Assistant** in the side menu (Staff role or higher) opens the web version of the assistant. Its header shows the list of AI models (configured in the server, see below) and the **New conversation** button; the **Sessions** panel on the right lists your sessions, as in the desktop app (see *AI assistant sessions*), and the session you are in shows the tokens of its conversation. Drag the bar between the conversation and the question box to make the box taller or shorter.
 
 Write a question in the box at the bottom and click the send button (or press `Ctrl+Enter`). The answer appears as it is written; while it arrives you can stop it with the stop button, and then the question goes back to the box. An answer that fails or that you stop is not part of the conversation and is not saved.
 

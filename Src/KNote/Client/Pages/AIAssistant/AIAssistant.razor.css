@@ -1,0 +1,19 @@
+/* Only theme variables, so the assistant follows the light/dark theme. */
+
+/* Chat over the prompt, with a bar between them (the prompt pane starts with room for two lines). */
+.ai-assistant ::deep .ai-chat-split {
+    height: 100%;
+    border: none;
+}
+
+/* The prompt fills its pane: taller or shorter with the bar. */
+.ai-assistant ::deep .ai-prompt {
+    height: 100%;
+    padding: 0.375rem 0.5rem 0 0;
+}
+
+.ai-assistant ::deep .ai-prompt-input {
+    flex: 1;
+    height: 100%;
+    resize: none;
+}
