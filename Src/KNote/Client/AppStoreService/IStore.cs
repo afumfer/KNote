@@ -16,9 +16,7 @@ public interface IStore
     INoteWebApiService Notes { get; }
     IAiAssistantWebApiService AiAssistant { get; }
     ISystemValueWebApiService SystemValues { get; }
-    
-    Task ChatStartAsync();
-    Task ChatSendMessageAsync(string messageType, string? userInput, string? messageInput);
-    bool ChatIsConnected { get; }
+
+    ChatRoomHub ChatRoom { get; }
 }
 

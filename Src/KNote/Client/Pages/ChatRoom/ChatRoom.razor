@@ -1,0 +1,224 @@
+@page "/chat"
+
+@inject IStore store
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+@inject IJSRuntime js
+
+@implements IDisposable
+
+@attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
+
+@* The chat room: its threads on the right, the one shown on the left. The connection, the threads and their messages
+   are kept by store.ChatRoom (ChatRoomHub) while the app is open; this page shows them and writes in them. *@
+
+<KntIndexHeader Section="KntSections.ChatRoom">
+    <IndexMenu>
+        <div class="chat-room-menu">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenBadge BadgeStyle="@StateBadgeStyle" Shade="Shade.Lighter" IsPill="true" class="chat-room-state">
+                <RadzenIcon Icon="@StateIcon" />@StateText
+            </RadzenBadge>
+            @if (chat.State == ChatRoomConnectionState.Disconnected)
+            {
+                <RadzenButton Icon="sync" ButtonStyle="ButtonStyle.Secondary" Click="Reconnect"
+                              MouseEnter="@(args => tooltipService.Open(args, "Connect again", new TooltipOptions { Position = TooltipPosition.Left }))" />
+            }
+            @if (chat.CurrentThread != null)
+            {
+                <RadzenButton Icon="notifications_off" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="Unfollow" Disabled="@(!Connected)"
+                              MouseEnter="@(args => tooltipService.Open(args, "Stop following this thread", new TooltipOptions { Position = TooltipPosition.Left }))" />
+            }
+            <RadzenButton Icon="add_comment" ButtonStyle="ButtonStyle.Secondary" Click="NewThread" Disabled="@(!Connected)"
+                          MouseEnter="@(args => tooltipService.Open(args, "New thread", new TooltipOptions { Position = TooltipPosition.Left }))" />
+        </RadzenStack>
+        </div>
+    </IndexMenu>
+</KntIndexHeader>
+
+<div class="chat-room">
+<RadzenSplitter Style="height: calc(100vh - 10rem)" class="rz-mt-2" Resize="paneSizes.Resized">
+    <RadzenSplitterPane Size="@paneSizes[0]" Min="40%">
+        <div class="chat-room-conversation">
+            @if (!string.IsNullOrEmpty(chat.ConnectionError) && !Connected)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" class="rz-m-2">
+                    @chat.ConnectionError
+                </RadzenAlert>
+            }
+
+            @if (thread == null)
+            {
+                <div class="chat-room-empty">
+                    <span class="chat-room-empty-icon"><RadzenIcon Icon="forum" /></span>
+                    <RadzenText TextStyle="TextStyle.H6" class="rz-my-0">Choose a thread</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">
+                        Pick a thread on the right to read it and write in it, or start a new one.
+                    </RadzenText>
+                    <RadzenButton Text="New thread" Icon="add_comment" ButtonStyle="ButtonStyle.Primary" Click="NewThread"
+                                  Disabled="@(!Connected)" class="rz-mt-2" />
+                </div>
+            }
+            else
+            {
+                <RadzenChat @key="thread.ThreadId" @ref="chatView" Messages="@ChatMessages" Users="@ChatUsers" CurrentUserId="@chat.UserName"
+                            MessageSent="OnMessageSent" Disabled="@(!Connected)" ShowUsers="true" MaxVisibleUsers="8"
+                            ShowUserNames="true" ShowDateSeparator="true" ShowClearButton="false" TimestampFormat="HH:mm"
+                            Placeholder="Write a message (Markdown) ... Enter to send, Shift+Enter for a new line"
+                            EmptyMessage="No messages yet: write the first one." class="chat-room-chat">
+                    <TitleContent>
+                        <span class="chat-room-title">
+                            <span class="chat-room-topic">@thread.Topic</span>
+                            <span class="chat-room-number">#@thread.NoteNumber</span>
+                            <span class="chat-room-online"><span class="chat-room-online-dot"></span>@thread.OnlineUserNames.Count online</span>
+                        </span>
+                    </TitleContent>
+                    <MessageTemplate>
+                        @{ var own = context.UserId == chat.UserName; }
+                        <div class="rz-chat-message @(own ? "rz-chat-message-user" : "rz-chat-message-participant")">
+                            <div class="rz-chat-message-avatar">
+                                <span class="rz-chat-avatar-initials">@Initials(context.UserId)</span>
+                            </div>
+                            <div class="rz-chat-message-content chat-room-message-content">
+                                <div class="rz-chat-message-info chat-room-message-info">
+                                    @if (!own)
+                                    {
+                                        <div class="rz-chat-message-participant-name">@context.UserId</div>
+                                    }
+                                    <div class="rz-chat-message-time">@context.Timestamp.ToString("HH:mm")</div>
+                                </div>
+                                <div class="rz-chat-message-text chat-room-message-text">
+                                    <ViewMarkdown MarkdownContent="@context.Content" DisableHtml="true" />
+                                </div>
+                            </div>
+                        </div>
+                    </MessageTemplate>
+                </RadzenChat>
+            }
+        </div>
+    </RadzenSplitterPane>
+    <RadzenSplitterPane Size="@paneSizes[1]" Min="200px" Max="45%" Collapsible="true">
+        <ChatRoomThreadsList Threads="@chat.Threads" SelectedThreadId="@chat.CurrentThreadId" UnreadCount="@chat.UnreadCount"
+                             IsFollowed="@chat.IsFollowed" Disabled="@(!Connected)" OnSelect="SelectThread" />
+    </RadzenSplitterPane>
+</RadzenSplitter>
+</div>
+
+@code {
+    private ChatRoomHub chat = null!;
+    private KntPaneSizes paneSizes = null!;
+    private RadzenChat? chatView;
+    // The thread and the number of its messages when the conversation was last scrolled to its end.
+    private Guid? scrolledThreadId;
+    private int scrolledCount;
+
+    private ChatRoomThreadDto? thread => chat.CurrentThread;
+
+    private bool Connected => chat.State == ChatRoomConnectionState.Connected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        chat = store.ChatRoom;
+        chat.Changed += OnChatChanged;
+        chat.PageVisible = true;
+        paneSizes = new KntPaneSizes(js, "KNoteChatRoomPanes", "75%", "25%");
+
+        // Back on the page: the thread shown is seen again.
+        if (chat.CurrentThreadId != null && Connected)
+            await chat.SelectThreadAsync(chat.CurrentThreadId.Value);
+        else if (chat.State == ChatRoomConnectionState.Disconnected)
+            await chat.ReconnectAsync();
+    }
+
+    // A thread opened, or a message arrived: the conversation goes to its end, so what comes in is always seen.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var shown = thread;
+        if (shown == null || chatView == null)
+            return;
+        if (shown.ThreadId == scrolledThreadId && shown.Messages.Count == scrolledCount)
+            return;
+
+        scrolledThreadId = shown.ThreadId;
+        scrolledCount = shown.Messages.Count;
+        await chatView.ScrollToBottom();
+    }
+
+    public void Dispose()
+    {
+        chat.PageVisible = false;
+        chat.Changed -= OnChatChanged;
+    }
+
+    private void OnChatChanged() => InvokeAsync(StateHasChanged);
+
+    private IEnumerable<ChatMessage> ChatMessages =>
+        thread!.Messages.Select(m => new ChatMessage
+        {
+            Id = m.MessageId.ToString(),
+            UserId = m.UserName,
+            Content = m.Text,
+            Timestamp = m.SentDateTime
+        });
+
+    private IEnumerable<ChatUser> ChatUsers =>
+        thread!.Participants
+            .Union(thread.OnlineUserNames)
+            .OrderBy(u => u, StringComparer.OrdinalIgnoreCase)
+            .Select(u => new ChatUser { Id = u, Name = u, IsOnline = thread.OnlineUserNames.Contains(u) });
+
+    private async Task SelectThread(Guid threadId) => await chat.SelectThreadAsync(threadId);
+
+    // RadzenChat has already shown nothing: its Messages are this page's, and the message comes back from the Server.
+    private async Task OnMessageSent(ChatMessage message) => await chat.SendAsync(message.Content);
+
+    private async Task NewThread()
+    {
+        var topic = await dialogService.OpenAsync<ChatRoomThreadNew>("New thread", new Dictionary<string, object?>(),
+            KntDialogs.Framed(KntDialogs.Small()));
+        if (topic is string text && !string.IsNullOrWhiteSpace(text))
+            await chat.CreateThreadAsync(text);
+    }
+
+    private async Task Unfollow()
+    {
+        if (chat.CurrentThreadId != null)
+            await chat.UnfollowAsync(chat.CurrentThreadId.Value);
+    }
+
+    private async Task Reconnect() => await chat.ReconnectAsync();
+
+    private static string Initials(string? userName)
+    {
+        var parts = (userName ?? "?").Split(new[] { ' ', '.', '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant(),
+            _ => $"{parts[0][0]}{parts[1][0]}".ToUpperInvariant()
+        };
+    }
+
+    private BadgeStyle StateBadgeStyle => chat.State switch
+    {
+        ChatRoomConnectionState.Connected => BadgeStyle.Success,
+        ChatRoomConnectionState.Connecting or ChatRoomConnectionState.Reconnecting => BadgeStyle.Warning,
+        _ => BadgeStyle.Danger
+    };
+
+    private string StateIcon => chat.State switch
+    {
+        ChatRoomConnectionState.Connected => "wifi",
+        ChatRoomConnectionState.Connecting or ChatRoomConnectionState.Reconnecting => "sync",
+        _ => "wifi_off"
+    };
+
+    private string StateText => chat.State switch
+    {
+        ChatRoomConnectionState.Connected => "Connected",
+        ChatRoomConnectionState.Connecting => "Connecting",
+        ChatRoomConnectionState.Reconnecting => "Reconnecting",
+        ChatRoomConnectionState.NotAuthorized => "Not allowed",
+        _ => "Disconnected"
+    };
+}

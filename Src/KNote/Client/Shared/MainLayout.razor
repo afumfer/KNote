@@ -6,6 +6,7 @@
 @inject NoteWindows noteWindows
 @inject NotificationService notificationService
 @inject NavigationManager navigationManager
+@inject AuthenticationStateProvider authenticationStateProvider
 
 <RadzenComponents />
 
@@ -67,7 +68,9 @@
 
         await LoadRepositoryNameAsync();
         await noteWindows.StartAsync();
-        await store.ChatStartAsync();
+
+        authenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        await UpdateChatRoomAsync(await authenticationStateProvider.GetAuthenticationStateAsync());
     }
 
     public void Dispose()
@@ -75,6 +78,24 @@
         store.AppState.OnChange -= StateHasChanged;
         store.AppState.OnNotifyError -= NotifyError;
         store.AppState.OnNotifySuccess -= NotifySuccess;
+        authenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> state)
+    {
+        await UpdateChatRoomAsync(await state);
+    }
+
+    // The chat room is open for a Staff user while they are signed in (see ChatRoomHub): its threads are followed
+    // while the app is open, wherever the user is.
+    private async Task UpdateChatRoomAsync(AuthenticationState state)
+    {
+        var user = state.User;
+        if (user.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(user.Identity.Name)
+            && (user.IsInRole("Staff") || user.IsInRole("ProjectManager") || user.IsInRole("Admin")))
+            await store.ChatRoom.StartAsync(user.Identity.Name);
+        else
+            await store.ChatRoom.StopAsync();
     }
 
     // Home shows the repository's name as its title; the other pages, here, after the application's name. The
