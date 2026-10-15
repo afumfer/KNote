@@ -144,9 +144,18 @@ public class Store : IStore, IDisposable
 
     public bool ChatIsConnected => _hubConnection.State == HubConnectionState.Connected;
 
+    // TODO: chat room threads (phase 3). The hub now requires the user's token: until the chat room page uses it,
+    // a refused connection must not break the application's start.
     public async Task ChatStartAsync()
     {
-        await _hubConnection.StartAsync();
+        try
+        {
+            await _hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Chat room connection: {ex.Message}");
+        }
     }
 
     #endregion

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using NLog.Web;
 using NLog;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Server.Helpers;
 using KNote.Server.Hubs;
 using KNote.MessageBroker.RabbitMQ;
@@ -50,15 +52,29 @@ try
     builder.Services.KntAddAiAssistant(builder.Configuration);
 
     builder.Services.AddAuthentication().AddJwtBearer(options =>
-         options.TokenValidationParameters = new TokenValidationParameters
-         {
-             ValidateIssuer = false,
-             ValidateAudience = false,
-             ValidateLifetime = true,
-             ValidateIssuerSigningKey = true,
-             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
-             ClockSkew = TimeSpan.Zero
-         });
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
+            ClockSkew = TimeSpan.Zero
+        };
+        // The chat room hub's connections can't send the Authorization header (WebSockets, server-sent events):
+        // SignalR clients send the token in the access_token query string instead.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments(ChatRoomHubContract.Path))
+                    context.Token = accessToken;
+                return Task.CompletedTask;
+            }
+        };
+    });
     builder.Services.AddAuthorization();
 
     builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
@@ -73,6 +89,7 @@ try
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
     builder.Services.AddRazorPages();
     builder.Services.AddSignalR();
+    builder.Services.AddSingleton<ChatRoomManager>();
     builder.Services.AddResponseCompression(opts =>
     {
         opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
@@ -128,7 +145,7 @@ try
 
     app.MapRazorPages();
     app.MapControllers();
-    app.MapHub<ChatHub>("/chathub");
+    app.MapHub<ChatHub>(ChatRoomHubContract.Path);
     app.MapFallbackToFile("index.html", clientStaticFileOptions);
 
     await app.KntConfigureMessageBroker(appSettings, repositoryRef);

@@ -50,4 +50,7 @@ public class ChatRoomThreadDto : ChatRoomThreadInfoDto
     public List<string> Participants { get; set; } = new();
 
     public List<ChatRoomMessageDto> Messages { get; set; } = new();
+
+    // Who is subscribed to the thread now (filled by the Server's chat hub, see ChatRoomHubContract).
+    public List<string> OnlineUserNames { get; set; } = new();
 }
