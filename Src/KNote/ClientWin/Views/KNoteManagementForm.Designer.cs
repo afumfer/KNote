@@ -549,7 +549,7 @@
             // 
             menuChat.Name = "menuChat";
             menuChat.Size = new Size(185, 22);
-            menuChat.Text = "Chat ...";
+            menuChat.Text = "Chat room ...";
             menuChat.Click += menu_Click;
             //
             // menuAIAssistant

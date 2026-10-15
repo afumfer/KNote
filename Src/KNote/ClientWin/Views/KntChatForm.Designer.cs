@@ -121,7 +121,7 @@
             Controls.Add(buttonSend);
             Name = "KntChatForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Simple chat";
+            Text = "Chat room";
             Load += ChatForm_Load;
             ResumeLayout(false);
             PerformLayout();
