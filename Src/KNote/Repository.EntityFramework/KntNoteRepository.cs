@@ -1503,8 +1503,11 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 }
             }
 
-            if (notesSearch.ExcludeNoteTypeId != null)
-                query = query.Where(n => n.NoteTypeId == null || n.NoteTypeId != notesSearch.ExcludeNoteTypeId);
+            if (notesSearch.ExcludeNoteTypeIds?.Count > 0)
+            {
+                var excludeNoteTypeIds = notesSearch.ExcludeNoteTypeIds;
+                query = query.Where(n => n.NoteTypeId == null || !excludeNoteTypeIds.Contains(n.NoteTypeId.Value));
+            }
 
             result.TotalCount = await query.CountAsync();
 

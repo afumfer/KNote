@@ -227,15 +227,18 @@ public class NotesQueryParityTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
-    public async Task GetSearchMinimalAsync_ExcludeNoteTypeId_LeavesOutOnlyThatType(string orm)
+    public async Task GetSearchMinimalAsync_ExcludeNoteTypeIds_LeavesOutOnlyThoseTypes(string orm)
     {
         using var db = new RepositoryTestDatabase();
         using var repo = db.CreateRepository(orm);
 
         var excludedType = await repo.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = $"Excluded {Guid.NewGuid():N}" });
+        var alsoExcludedType = await repo.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = $"Also excluded {Guid.NewGuid():N}" });
         var otherType = await repo.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = $"Other {Guid.NewGuid():N}" });
         Assert.IsTrue(excludedType.IsValid, excludedType.ErrorMessage);
+        Assert.IsTrue(alsoExcludedType.IsValid, alsoExcludedType.ErrorMessage);
         Assert.IsTrue(otherType.IsValid, otherType.ErrorMessage);
+        var excludedTypeIds = new List<Guid> { excludedType.Entity.NoteTypeId, alsoExcludedType.Entity.NoteTypeId };
 
         var folderRes = await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Exclude Type Parity Folder" });
         Assert.IsTrue(folderRes.IsValid, folderRes.ErrorMessage);
@@ -243,13 +246,14 @@ public class NotesQueryParityTests
 
         string uniqueToken = $"PARITYEXCLUDE{Guid.NewGuid():N}";
         var excluded = await AddNoteAsync(repo, folderId, $"{uniqueToken} excluded", excludedType.Entity.NoteTypeId);
+        await AddNoteAsync(repo, folderId, $"{uniqueToken} also excluded", alsoExcludedType.Entity.NoteTypeId);
         var ofOtherType = await AddNoteAsync(repo, folderId, $"{uniqueToken} other type", otherType.Entity.NoteTypeId);
         var withoutType = await AddNoteAsync(repo, folderId, $"{uniqueToken} without type");
 
         var searchRes = await repo.Notes.GetSearchMinimalAsync(new NotesSearchDto
         {
             TextSearch = uniqueToken,
-            ExcludeNoteTypeId = excludedType.Entity.NoteTypeId
+            ExcludeNoteTypeIds = excludedTypeIds
         });
 
         Assert.IsTrue(searchRes.IsValid, searchRes.ErrorMessage);
@@ -260,7 +264,7 @@ public class NotesQueryParityTests
         var byNumberRes = await repo.Notes.GetSearchMinimalAsync(new NotesSearchDto
         {
             TextSearch = $"#{excludedNumber}",
-            ExcludeNoteTypeId = excludedType.Entity.NoteTypeId
+            ExcludeNoteTypeIds = excludedTypeIds
         });
         Assert.IsTrue(byNumberRes.IsValid, byNumberRes.ErrorMessage);
         Assert.AreEqual(0, byNumberRes.Entity.Count);

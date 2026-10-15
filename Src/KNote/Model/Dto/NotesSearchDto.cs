@@ -15,8 +15,9 @@ public class NotesSearchDto : SmartModelDtoBase
     // NoteTasks (1-to-n), not just the note's own Topic/Tags/Description.
     public bool SearchInNoteTasks { get; set; }
 
-    // Leaves out the notes of this NoteType (e.g. the AI assistant's own sessions, see KntConst.ChatSessionsTag).
-    public Guid? ExcludeNoteTypeId { get; set; }
+    // Leaves out the notes of these NoteTypes (e.g. the AI assistant's own sessions and the chat room threads, see
+    // KntConst.ChatSessionsTag and KntConst.ChatRoomTag).
+    public List<Guid> ExcludeNoteTypeIds { get; set; }
 
     // Order of the notes: one of NoteOrderCriteria.SortableColumns (the note number breaks ties). Null, or
     // any other value, keeps the query's own order.

@@ -20,8 +20,8 @@ public class KNoteAiToolsTests
         return result;
     }
 
-    // search_notes first looks up the note types (to leave out the AI sessions, see
-    // SearchNotes_LeavesOutTheAiSessionsNoteType); a repository with no such type unless given.
+    // search_notes first looks up the note types (to leave out the AI sessions and the chat room threads, see
+    // SearchNotes_LeavesOutTheAiSessionsAndChatRoomNoteTypes); a repository with no such types unless given.
     private static FakeKntService ServiceForSearch(params NoteTypeDto[] noteTypes)
     {
         var service = new FakeKntService();
@@ -57,15 +57,16 @@ public class KNoteAiToolsTests
 
         Assert.AreEqual("invoice !draft", capturedSearch.TextSearch);
         Assert.IsTrue(capturedSearch.SearchInDescription);
-        Assert.IsNull(capturedSearch.ExcludeNoteTypeId, "No AI sessions note type in this repository: nothing to leave out.");
+        Assert.IsNull(capturedSearch.ExcludeNoteTypeIds, "No AI sessions or chat room note type in this repository: nothing to leave out.");
     }
 
     [TestMethod]
-    public async Task SearchNotes_LeavesOutTheAiSessionsNoteType()
+    public async Task SearchNotes_LeavesOutTheAiSessionsAndChatRoomNoteTypes()
     {
         var sessionsType = new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.ChatSessionsTag };
+        var chatRoomType = new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.ChatRoomTag };
         NotesSearchDto capturedSearch = null;
-        var service = ServiceForSearch(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.CodeTag }, sessionsType);
+        var service = ServiceForSearch(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = KntConst.CodeTag }, sessionsType, chatRoomType);
         service.NotesFake.GetSearchMinimalAsyncImpl = search =>
         {
             capturedSearch = search;
@@ -75,7 +76,7 @@ public class KNoteAiToolsTests
 
         await GetSearchNotesTool(tools)("invoice", false);
 
-        Assert.AreEqual(sessionsType.NoteTypeId, capturedSearch.ExcludeNoteTypeId);
+        CollectionAssert.AreEquivalent(new[] { sessionsType.NoteTypeId, chatRoomType.NoteTypeId }, capturedSearch.ExcludeNoteTypeIds);
     }
 
     [TestMethod]

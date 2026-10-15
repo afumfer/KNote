@@ -1913,11 +1913,11 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 }
             }
 
-            if (notesSearch.ExcludeNoteTypeId != null)
+            if (notesSearch.ExcludeNoteTypeIds?.Count > 0)
             {
                 sqlWhere = AddAndToStringSQL(sqlWhere);
-                sqlWhere += "(Notes.NoteTypeId IS NULL OR Notes.NoteTypeId <> @excludeNoteTypeId) ";
-                parameters.Add("excludeNoteTypeId", notesSearch.ExcludeNoteTypeId.Value);
+                sqlWhere += "(Notes.NoteTypeId IS NULL OR Notes.NoteTypeId NOT IN @excludeNoteTypeIds) ";
+                parameters.Add("excludeNoteTypeIds", notesSearch.ExcludeNoteTypeIds);
             }
 
             if (sqlWhere != "")
