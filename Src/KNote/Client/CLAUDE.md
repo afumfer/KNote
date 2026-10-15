@@ -339,7 +339,11 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Chat**: `Store` crea un `HubConnection` contra `chathub` (`Server/Hubs/ChatHub`); `MainLayout` lo arranca
   (`ChatStartAsync`) y los mensajes recibidos llegan a `AppState.ChatMessages`.
 - **Asistente de IA** (`Pages/AIAssistant`, ruta `aiassistant`, Staff+): `AIAssistant` es el caso de uso y
-  `AiChatView`/`AiSessionsList` la presentación. Usa `IStore.AiAssistant` (`api/aiassistant`, ver
+  `AiChatView`/`AiSessionsList` la presentación. La conversación y la caja de la pregunta van en un `RadzenSplitter`
+  vertical (el panel de la pregunta empieza con la altura que tenía la caja, `Rows="3"`, y no se recuerda; el del chat lleva
+  `Size="calc(100% - 90px)"`: sin tamaño, Radzen le da el 100 % y la pregunta queda fuera de la vista); los tokens
+  de la conversación se ven en la entrada de la sesión abierta en `AiSessionsList` (la lista no trae los de las demás:
+  `GetFilterMinimalAsync` no lee la descripción). Usa `IStore.AiAssistant` (`api/aiassistant`, ver
   `Server/CLAUDE.md`). La respuesta llega en streaming: `ChatAsync` lee los server-sent events con
   `SetBrowserResponseStreamingEnabled(true)` + `ResponseHeadersRead` y devuelve un `IAsyncEnumerable` de
   `AiChatStreamEventDto`; un error (antes o durante la respuesta) acaba en un evento `error` ya notificado. El
