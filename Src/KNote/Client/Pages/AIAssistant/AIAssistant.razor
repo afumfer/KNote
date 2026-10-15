@@ -17,7 +17,8 @@
 <KntIndexHeader Section="KntSections.AiAssistant">
     <IndexMenu>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-            <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">@TotalTokens tokens</RadzenText>
+            <RadzenIcon Icon="psychology" Style="color: var(--rz-text-secondary-color)"
+                        MouseEnter="@(args => tooltipService.Open(args, "AI model", new TooltipOptions { Position = TooltipPosition.Left }))" />
             <RadzenDropDown TValue="string" Data="@providers" TextProperty="Alias" ValueProperty="Alias"
                             Value="@providerAlias" Change="@OnProviderChange" Disabled="@(streaming || providers.Count == 0)"
                             Placeholder="No AI providers" Style="width: 16rem" />
@@ -28,36 +29,42 @@
 </KntIndexHeader>
 
 @* Both panes sized in %: a pane without a size, or sized in px, left the sessions out of view. *@
+<div class="ai-assistant">
 <RadzenSplitter Style="height: calc(100vh - 10rem)" class="rz-mt-2">
     <RadzenSplitterPane Size="75%">
-        <RadzenStack Gap="0.5rem" Style="height: 100%" class="rz-pe-2">
-            <div style="flex: 1; min-height: 0">
+        @* The prompt pane starts as tall as the box had (Rows="3"), 82px; its bar makes it taller or shorter. The chat
+           pane needs a size: without one Radzen gives it 100% and the prompt is left out of view. *@
+        <RadzenSplitter Orientation="Orientation.Vertical" class="ai-chat-split">
+            <RadzenSplitterPane Size="calc(100% - 90px)" Min="40%">
                 <AiChatView Turns="@session.Turns" PendingPrompt="@pendingPrompt" PendingAnswer="@pendingAnswer.ToString()"
                             ToolInUse="@toolInUse" CreatedNotes="@createdNotes" ContainerId="@ChatContainerId" />
-            </div>
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.5rem">
-                <RadzenTextArea @bind-Value="promptInput" Immediate="true" Rows="3" Style="flex: 1; resize: none"
-                                Placeholder="Ask the assistant ... (Ctrl+Enter to send)" Disabled="@(streaming || currentProvider == null)"
-                                @onkeydown="OnPromptKeyDown" />
-                @if (streaming)
-                {
-                    <RadzenButton Icon="stop" ButtonStyle="ButtonStyle.Danger" Click="StopAnswer"
-                                  MouseEnter="@(args => tooltipService.Open(args, "Stop the answer", new TooltipOptions { Position = TooltipPosition.Left }))" />
-                }
-                else
-                {
-                    <RadzenButton Icon="send" ButtonStyle="ButtonStyle.Primary" Click="Send"
-                                  Disabled="@(string.IsNullOrWhiteSpace(promptInput) || currentProvider == null)"
-                                  MouseEnter="@(args => tooltipService.Open(args, "Send (Ctrl+Enter)", new TooltipOptions { Position = TooltipPosition.Left }))" />
-                }
-            </RadzenStack>
-        </RadzenStack>
+            </RadzenSplitterPane>
+            <RadzenSplitterPane Size="82px" Min="62px">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Gap="0.5rem" class="ai-prompt">
+                    <RadzenTextArea @bind-Value="promptInput" Immediate="true" class="ai-prompt-input"
+                                    Placeholder="Ask the assistant ... (Ctrl+Enter to send)" Disabled="@(streaming || currentProvider == null)"
+                                    @onkeydown="OnPromptKeyDown" />
+                    @if (streaming)
+                    {
+                        <RadzenButton Icon="stop" ButtonStyle="ButtonStyle.Danger" Click="StopAnswer"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Stop the answer", new TooltipOptions { Position = TooltipPosition.Left }))" />
+                    }
+                    else
+                    {
+                        <RadzenButton Icon="send" ButtonStyle="ButtonStyle.Primary" Click="Send"
+                                      Disabled="@(string.IsNullOrWhiteSpace(promptInput) || currentProvider == null)"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Send (Ctrl+Enter)", new TooltipOptions { Position = TooltipPosition.Left }))" />
+                    }
+                </RadzenStack>
+            </RadzenSplitterPane>
+        </RadzenSplitter>
     </RadzenSplitterPane>
     <RadzenSplitterPane Size="25%" Min="200px" Max="45%" Collapsible="true">
-        <AiSessionsList Sessions="@sessions" SelectedNoteId="@session.NoteId" Disabled="@streaming"
-                        OnSelect="OpenSession" />
+        <AiSessionsList Sessions="@sessions" SelectedNoteId="@session.NoteId" SelectedTokens="@TotalTokens"
+                        Disabled="@streaming" OnSelect="OpenSession" />
     </RadzenSplitterPane>
 </RadzenSplitter>
+</div>
 
 @code {
     private const string ChatContainerId = "aichatcontainer";
