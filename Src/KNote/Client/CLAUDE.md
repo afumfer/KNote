@@ -50,19 +50,21 @@ Client/
 ├── App.razor               – Router + AuthorizeRouteView (layout por defecto: MainLayout)
 ├── _Imports.razor          – usings globales de los .razor (Radzen, Radzen.Blazor, KNote.Model.Dto, ...)
 ├── AppStoreService/
-│     IStore.cs, Store.cs   – estado global + acceso a los servicios Web API + conexión SignalR (chat)
-│     AppState.cs           – estado de la app (usuario, carpeta seleccionada, árbol de carpetas, chat) y eventos
+│     IStore.cs, Store.cs   – estado global + acceso a los servicios Web API + el chat room (ChatRoomHub)
+│     AppState.cs           – estado de la app (usuario, carpeta seleccionada, árbol de carpetas) y eventos
+│     ChatRoomHub.cs        – conexión SignalR del chat room, hilos seguidos y sus mensajes, no leídos
 │     NoteWindows.cs        – ventanas de vista/edición de notas y aviso entre ventanas de las notas guardadas
 │     ClientDataServices/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
-├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, AIAssistant/
+├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, AIAssistant/,
+│                             ChatRoom/
 ├── Shared/                 – layouts (MainLayout*, KntWindowLayout) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntSections, KntDialogs, KntLogo, KntFolderSelector,
 │                             KntFoldersTreeView, KntDialogFrame, KntFormSection, KntField, KntMarkdownEditor, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
-└── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/filePaste.js, favicon.ico
+└── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/ (filePaste.js, chatRoom.js...), favicon.ico
 ```
 
 ## Acceso a datos: `IStore` y los `I*WebApiService`
@@ -336,8 +338,20 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   tema, 25 como mucho). La elegida se recuerda en `AppState.HomeFolderId` mientras la app está abierta; sin
   carpetas no hay panel, y en un móvil es una fila encima de las notas (`grid-template-areas` de
   `Index.razor.css`, así el orden del código coincide con el visual en escritorio).
-- **Chat**: `Store` crea un `HubConnection` contra `chathub` (`Server/Hubs/ChatHub`); `MainLayout` lo arranca
-  (`ChatStartAsync`) y los mensajes recibidos llegan a `AppState.ChatMessages`.
+- **Chat room** (`Pages/ChatRoom`, ruta `chat`, Staff+): `ChatRoom` es el caso de uso y `ChatRoomThreadsList`/
+  `ChatRoomThreadNew` la presentación; el estado vive en `store.ChatRoom` (`AppStoreService/ChatRoomHub`), no en la
+  página. `MainLayout` lo conecta al iniciar sesión un usuario Staff+ y lo desconecta al cerrarla
+  (`AuthenticationStateChanged`); el token es el de `HttpClient` (`AccessTokenProvider`), con reconexión automática
+  que vuelve a suscribir los hilos seguidos (los grupos de SignalR son de la conexión). Sigue los hilos en los que
+  participa el usuario y los que abre; los mensajes de un hilo que no está en pantalla se notifican y cuentan como
+  no leídos. Contrato del hub: `Model/Dto/ChatRoomHubContract` (ver `Server/CLAUDE.md`). La conversación es un
+  `RadzenChat` cuyos `Messages` son los de la página (sin `MessagesChanged`: lo que escribe el usuario solo aparece
+  cuando lo devuelve el servidor) y con `MessageTemplate`, para pintar el Markdown con `ViewMarkdown
+  DisableHtml="true"` (no con el `RadzenMarkdown` de su plantilla); su `pre-wrap` se anula en
+  `ChatRoom.razor.css`. Tras cada mensaje nuevo baja al final (`ScrollToBottom` en `OnAfterRenderAsync`) y otra vez
+  al cargarse sus imágenes (`js/chatRoom.js`). Las imágenes se pegan o se sueltan (`js/chatRoom.js` →
+  `[JSInvokable] OnImage`), se suben con `ChatRoomHub.SendImageAsync` (REST, `ChatRoomHubContract.ImagesPath`) y se
+  envían como un mensaje con su Markdown.
 - **Asistente de IA** (`Pages/AIAssistant`, ruta `aiassistant`, Staff+): `AIAssistant` es el caso de uso y
   `AiChatView`/`AiSessionsList` la presentación. La conversación y la caja de la pregunta van en un `RadzenSplitter`
   vertical (el panel de la pregunta empieza con la altura que tenía la caja, `Rows="3"`, y no se recuerda; el del chat lleva
