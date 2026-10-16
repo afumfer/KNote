@@ -20,6 +20,9 @@ public class AppUserSettingsSecretsTests
         settings.Repositories.Items.Add(new RepositoryRef { Name = "Sqlite", ConnectionString = @"Data Source=C:\KaNote\Data\a.db" });
         settings.Repositories.Items.Add(new RepositoryRef { Name = "Sql", ConnectionString = SqlAuthConnectionString });
         settings.Repositories.Assistant = new RepositoryRef { Name = "Assistant", ConnectionString = SqlAuthConnectionString };
+        settings.Connectivity.ChatHub.Url = "https://server/KNote/chathub";
+        settings.Connectivity.ChatHub.UserName = "jdoe";
+        settings.Connectivity.ChatHub.Token = "tok-1";
         return settings;
     }
 
@@ -42,7 +45,9 @@ public class AppUserSettingsSecretsTests
         Assert.AreEqual("fake:1-yek", protectedSettings.Ai.Providers[0].ApiKey);
         Assert.IsTrue(protectedSettings.Repositories.Items[1].ConnectionString.StartsWith("fake:"));
         Assert.IsTrue(protectedSettings.Repositories.Assistant.ConnectionString.StartsWith("fake:"));
+        Assert.AreEqual("fake:1-kot", protectedSettings.Connectivity.ChatHub.Token);
         Assert.AreEqual("smtp-pwd", settings.Notifications.Email.Password);
+        Assert.AreEqual("tok-1", settings.Connectivity.ChatHub.Token);
         Assert.AreEqual("key-1", settings.Ai.Providers[0].ApiKey);
         Assert.AreEqual(SqlAuthConnectionString, settings.Repositories.Items[1].ConnectionString);
     }
@@ -53,6 +58,8 @@ public class AppUserSettingsSecretsTests
         var protectedSettings = new AppUserSettingsSecrets(new FakeSecretProtector()).Protect(NewSettings());
 
         Assert.AreEqual("smtp.example.com", protectedSettings.Notifications.Email.Host);
+        Assert.AreEqual("https://server/KNote/chathub", protectedSettings.Connectivity.ChatHub.Url);
+        Assert.AreEqual("jdoe", protectedSettings.Connectivity.ChatHub.UserName);
         Assert.AreEqual("http://localhost:11434", protectedSettings.Ai.Providers[1].Host);
         Assert.IsTrue(string.IsNullOrEmpty(protectedSettings.Ai.Providers[1].ApiKey));
         // No credentials inside: stays readable (SQLite / Trusted_Connection strings are not secrets).

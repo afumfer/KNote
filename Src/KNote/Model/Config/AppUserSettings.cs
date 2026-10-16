@@ -127,10 +127,17 @@ public class ConnectivityConfig
     public ServerCOMConfig ServerCOM { get; set; } = new();
 }
 
+// The chat room of a KNote Server (its hub, ChatRoomHubContract). The user signs in to that Server once, from Options:
+// only the user name and the token the Server gives (a JWT, valid for a year) are kept, the token encrypted on disk
+// (see AppUserSettingsSecrets in ClientWin); the password is not kept. The token belongs to the Server of Url.
 [Serializable]
 public class ChatHubConfig
 {
     public string Url { get; set; }
+
+    public string UserName { get; set; }
+
+    public string Token { get; set; }
 }
 
 [Serializable]

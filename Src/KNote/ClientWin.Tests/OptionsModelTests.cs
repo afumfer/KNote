@@ -16,6 +16,8 @@ public class OptionsModelTests
         settings.General.ColorMode = AppColorMode.Dark;
         settings.Security.AuthenticationMode = AppAuthenticationMode.Credentials;
         settings.Connectivity.ChatHub.Url = "http://chat.example.com/hub";
+        settings.Connectivity.ChatHub.UserName = "jdoe";
+        settings.Connectivity.ChatHub.Token = "token-1";
         settings.Notifications.Email.Host = "smtp.example.com";
         settings.Notifications.Email.Port = 465;
         settings.Notifications.Email.EnableSsl = false;
@@ -42,6 +44,8 @@ public class OptionsModelTests
         Assert.AreEqual(AppColorMode.Dark, model.ColorMode);
         Assert.AreEqual(AppAuthenticationMode.Credentials, model.AuthenticationMode);
         Assert.AreEqual("http://chat.example.com/hub", model.ChatHubUrl);
+        Assert.AreEqual("jdoe", model.ChatHubUserName);
+        Assert.AreEqual("token-1", model.ChatHubToken);
         Assert.IsTrue(model.ChatHubAutoConnectDisabled);
         Assert.AreEqual("smtp.example.com", model.SmtpHost);
         Assert.AreEqual(465, model.SmtpPort);
@@ -65,6 +69,8 @@ public class OptionsModelTests
         model.ColorMode = AppColorMode.System;
         model.AuthenticationMode = AppAuthenticationMode.Windows;
         model.ChatHubUrl = "http://other/hub";
+        model.ChatHubUserName = "ana";
+        model.ChatHubToken = "token-2";
         model.ChatHubAutoConnectDisabled = false;
         model.SmtpHost = "smtp.other.com";
         model.SmtpPort = 25;
@@ -84,6 +90,8 @@ public class OptionsModelTests
         Assert.AreEqual(AppColorMode.System, settings.General.ColorMode);
         Assert.AreEqual(AppAuthenticationMode.Windows, settings.Security.AuthenticationMode);
         Assert.AreEqual("http://other/hub", settings.Connectivity.ChatHub.Url);
+        Assert.AreEqual("ana", settings.Connectivity.ChatHub.UserName);
+        Assert.AreEqual("token-2", settings.Connectivity.ChatHub.Token);
         Assert.IsFalse(state.Session.ChatHubAutoConnectDisabled);
         var email = settings.Notifications.Email;
         Assert.AreEqual("smtp.other.com", email.Host);

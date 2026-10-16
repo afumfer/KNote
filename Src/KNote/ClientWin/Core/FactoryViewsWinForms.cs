@@ -49,7 +49,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<KNoteAIAssistantCtrl, IViewBase>(c => new KNoteAIAssistantForm(c));
         Registry.Register<AiProviderEditorCtrl, IViewEditor<AiProviderRef>>(c => new AiProviderEditorForm(c));
         Registry.Register<AiProvidersManageCtrl, IViewManageList<AiProviderRef>>(c => new AiProvidersManageForm(c));
-        Registry.Register<KntChatCtrl, IViewChat>(c => new KntChatForm(c));
+        Registry.Register<KntChatCtrl, IViewChatRoom>(c => new KntChatForm(c));
         Registry.Register<KntServerCOMCtrl, IViewServerCOM>(c => new KntServerCOMForm(c));
         Registry.Register<KntLabCtrl, IViewBase>(c => new KntLabForm(c));
         Registry.Register<HeavyProcessCtrl, IViewHeavyProcess>(c => new HeavyProcessForm(c));

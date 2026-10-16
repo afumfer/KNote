@@ -10,6 +10,10 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
 
     private readonly OptionsEditorCtrl _ctrl;
 
+    // The chat hub url the token in the model was given for: the token belongs to that Server, so changing the url
+    // forgets it (see ControlsToModel).
+    private string _chatSignedInUrl;
+
     // Items of comboColorMode, in the same order.
     private static readonly (AppColorMode Mode, string Text)[] ColorModes =
     {
@@ -59,35 +63,62 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
     protected override void CancelEdition()
         => _ctrl.CancelEdition();
 
-    private async void buttonTestChatHubUrl_Click(object sender, EventArgs e)
+    // Signs in to the chat room's Server (its api/users/login, next to the hub) and checks the hub takes the token.
+    // Only the user name and the token are kept (the token encrypted on disk, see ChatHubConfig): the password is
+    // cleared. Kept when the dialog is accepted, as every other option.
+    private async void buttonChatSignIn_Click(object sender, EventArgs e)
     {
         var url = textChatHubUrl.Text?.Trim();
-        if (string.IsNullOrEmpty(url))
-        {
-            ShowInfo("Enter a chat hub url first.");
-            return;
-        }
+        var userName = textChatUserName.Text?.Trim();
 
-        buttonTestChatHubUrl.Enabled = false;
+        buttonChatSignIn.Enabled = false;
         this.Cursor = Cursors.WaitCursor;
         try
         {
-            var testResult = await KntChatCtrl.TestConnectionAsync(url);
-            if (testResult.IsValid)
+            var signIn = await ChatRoomServer.SignInAsync(url, userName, textChatPassword.Text);
+            if (!signIn.IsValid)
             {
-                _ctrl.Model.ChatHubAutoConnectDisabled = false;
-                ShowInfo("Connection successful.");
+                ShowInfo($"Could not sign in to the chat room server. {signIn.ErrorMessage}");
+                return;
             }
-            else
+
+            var test = await ChatRoomServer.TestConnectionAsync(url, signIn.Entity);
+            if (!test.IsValid)
             {
-                ShowInfo($"The connection could not be established. Error: {testResult.ErrorMessage}");
+                ShowInfo($"Signed in, but the chat room could not be reached. {test.ErrorMessage}");
+                return;
             }
+
+            textChatHubUrl.Text = url;
+            _ctrl.Model.ChatHubUserName = userName;
+            _ctrl.Model.ChatHubToken = signIn.Entity;
+            _ctrl.Model.ChatHubAutoConnectDisabled = false;
+            _chatSignedInUrl = url;
+            textChatPassword.Text = "";
+            RefreshChatStatus();
+            ShowInfo($"Signed in to the chat room as {userName}. Accept the options to keep it.");
         }
         finally
         {
             this.Cursor = Cursors.Default;
-            buttonTestChatHubUrl.Enabled = true;
+            buttonChatSignIn.Enabled = true;
         }
+    }
+
+    private void buttonChatSignOut_Click(object sender, EventArgs e)
+    {
+        _ctrl.Model.ChatHubToken = null;
+        _chatSignedInUrl = null;
+        RefreshChatStatus();
+    }
+
+    private void RefreshChatStatus()
+    {
+        var signedIn = !string.IsNullOrEmpty(_ctrl.Model.ChatHubToken);
+        labelChatStatus.Text = signedIn
+            ? $"Signed in as {_ctrl.Model.ChatHubUserName}. Only the sign-in token is kept (encrypted), not the password. Sign in again if the server refuses it (it expires after a year)."
+            : "Not signed in. Enter the user name and the password of your user in the KNote Server (Staff or higher) and sign in. The password is not kept.";
+        buttonChatSignOut.Enabled = signedIn;
     }
 
     private async void buttonTestSmtp_Click(object sender, EventArgs e)
@@ -146,6 +177,10 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         checkAutoSaveActivated.Checked = _ctrl.Model.AutoSaveActivated;
         textAutosaveSeconds.Text = _ctrl.Model.AutoSaveSeconds.ToString();
         textChatHubUrl.Text = _ctrl.Model.ChatHubUrl;
+        textChatUserName.Text = _ctrl.Model.ChatHubUserName;
+        textChatPassword.Text = "";
+        _chatSignedInUrl = string.IsNullOrEmpty(_ctrl.Model.ChatHubToken) ? null : _ctrl.Model.ChatHubUrl;
+        RefreshChatStatus();
         comboColorMode.SelectedIndex = Math.Max(0, Array.FindIndex(ColorModes, c => c.Mode == _ctrl.Model.ColorMode));
         comboAuthenticationMode.SelectedIndex = Math.Max(0, Array.FindIndex(AuthenticationModes, a => a.Mode == _ctrl.Model.AuthenticationMode));
         textSmtpHost.Text = _ctrl.Model.SmtpHost;
@@ -166,7 +201,10 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         _ctrl.Model.AlarmSeconds = int.Parse(textAlarmSeconds.Text);
         _ctrl.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
         _ctrl.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
-        _ctrl.Model.ChatHubUrl = textChatHubUrl.Text;
+        _ctrl.Model.ChatHubUrl = textChatHubUrl.Text?.Trim();
+        // The token belongs to the Server it was given by: another url needs signing in again.
+        if (_ctrl.Model.ChatHubUrl != _chatSignedInUrl)
+            _ctrl.Model.ChatHubToken = null;
         _ctrl.Model.ColorMode = ColorModes[comboColorMode.SelectedIndex].Mode;
         _ctrl.Model.AuthenticationMode = AuthenticationModes[comboAuthenticationMode.SelectedIndex].Mode;
         _ctrl.Model.SmtpHost = textSmtpHost.Text;

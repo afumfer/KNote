@@ -23,6 +23,8 @@ public class AppUserState
 
     public AiAssistantWindowState AiAssistantWindow { get; set; } = new();
 
+    public ChatRoomWindowState ChatRoomWindow { get; set; } = new();
+
     public ReportsState Reports { get; set; } = new();
 }
 
@@ -53,7 +55,7 @@ public class SessionState
     public bool AiAssistantShowModelInfo { get; set; } = true;
 
     // Set automatically when a connection attempt to the chat hub fails, so the app stops retrying (and
-    // freezing) on every startup until the user fixes the URL or retests it from Options.
+    // freezing) on every startup until the user fixes the chat room settings or signs in again from Options.
     public bool ChatHubAutoConnectDisabled { get; set; }
 }
 
@@ -132,6 +134,18 @@ public class AiAssistantWindowState
     public int SessionsPanelWidth { get; set; }
 
     public int PromptPanelHeight { get; set; }
+}
+
+// The chat room window (KntChatForm): its bounds, the width of its threads panel and the height of the message box.
+// 0: never changed by the user (the window lays them out by itself).
+[Serializable]
+public class ChatRoomWindowState
+{
+    public WindowBoundsState Bounds { get; set; } = new();
+
+    public int ThreadsPanelWidth { get; set; }
+
+    public int MessagePanelHeight { get; set; }
 }
 
 [Serializable]
