@@ -70,10 +70,11 @@ public class CommandAuthorizationMatrixTests
             "KntAiSessionsGetUserSessionsAsyncCommand", "KntAiSessionsGetAsyncCommand", "KntAiSessionsSaveAsyncCommand");
 
         // The chat room threads: public to every Staff user (the chat room requires Staff), who reads them, creates
-        // them, joins them and writes in them (notes and tasks).
+        // them, joins them and writes in them (notes, tasks and the resources of its images).
         Add(nameof(EnumRoles.Staff),
             "KntChatRoomsGetThreadsAsyncCommand", "KntChatRoomsGetAsyncCommand", "KntChatRoomsCreateAsyncCommand",
-            "KntChatRoomsGetGeneralAsyncCommand", "KntChatRoomsJoinAsyncCommand", "KntChatRoomsAddMessageAsyncCommand");
+            "KntChatRoomsGetGeneralAsyncCommand", "KntChatRoomsJoinAsyncCommand", "KntChatRoomsAddMessageAsyncCommand",
+            "KntChatRoomsAddImageAsyncCommand");
 
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand");

@@ -289,6 +289,117 @@ public class KntChatRoomsAddMessageAsyncCommand : KntCommandServiceBase<ChatRoom
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
+public class KntChatRoomsAddImageAsyncCommand : KntCommandServiceBase<ChatRoomImageDto, Result<ChatRoomImageDto>>
+{
+    private const string ImageDescription = "Chat room image";
+
+    public KntChatRoomsAddImageAsyncCommand(IKntService service, ChatRoomImageDto image) : base(service, image)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null)
+        {
+            result.AddErrorMessage("The image is required.");
+            return result;
+        }
+
+        if (Param.ThreadId == Guid.Empty)
+            result.AddErrorMessage("The thread of the image is required.");
+        if (!ChatRoomImageDto.SupportedContentTypes.Contains(Param.ContentType))
+            result.AddErrorMessage($"Only images can be sent ({string.Join(", ", ChatRoomImageDto.SupportedContentTypes)}).");
+        var content = Content();
+        if (content == null || content.Length == 0)
+            result.AddErrorMessage("The image is empty.");
+        else if (content.Length > KntConst.MaxLenResourceFile)
+            result.AddErrorMessage($"The image is too big: {KntConst.MaxLenResourceFile / 1_000_000.0:0.#} MB at most.");
+        return result;
+    }
+
+    public override async Task<Result<ChatRoomImageDto>> Execute()
+    {
+        var result = new Result<ChatRoomImageDto>();
+
+        var user = await KntSystemNotes.GetCurrentUserAsync(Service, result);
+        var infrastructure = await ChatRooms.EnsureInfrastructureAsync(Service, result);
+        if (!result.IsValid)
+            return result;
+
+        var note = await ChatRooms.GetThreadNoteAsync(Service, Param.ThreadId, infrastructure, result);
+        if (!result.IsValid)
+            return result;
+
+        await ChatRooms.EnsureParticipantAsync(Service, note.NoteId, user, result);
+        if (!result.IsValid)
+            return result;
+
+        // A guid before the name, as the other resources of a note have it (ResourceInfoDto.NameOut leaves it out):
+        // two images with the same name don't share a file.
+        var fileName = FileName();
+        var resSave = await Service.Notes.SaveResourceAsync(new ResourceDto
+        {
+            NoteId = note.NoteId,
+            Name = $"{Guid.NewGuid()}_{fileName}",
+            Description = ImageDescription,
+            FileType = Param.ContentType,
+            ContentArrayBytes = Content()
+        });
+        if (!resSave.IsValid)
+        {
+            result.AddListErrorMessage(resSave.ListErrorMessage);
+            return result;
+        }
+
+        var url = $"{resSave.Entity.Container}/{resSave.Entity.Name}".Replace('\\', '/');
+        result.Entity = new ChatRoomImageDto
+        {
+            ThreadId = note.NoteId,
+            FileName = fileName,
+            ContentType = Param.ContentType,
+            ResourceId = resSave.Entity.ResourceId,
+            Url = url,
+            Markdown = $"![{fileName}]({url.Replace(" ", "%20")})"
+        };
+        return result;
+    }
+
+    private byte[] _content;
+
+    private byte[] Content()
+    {
+        if (_content == null && !string.IsNullOrEmpty(Param?.ContentBase64))
+        {
+            try
+            {
+                _content = Convert.FromBase64String(Param.ContentBase64);
+            }
+            catch (FormatException)
+            {
+                _content = Array.Empty<byte>();
+            }
+        }
+        return _content;
+    }
+
+    // The name without folders, with only letters, digits, spaces, '.', '_' and '-' (anything else could break the
+    // file name or the Markdown link), and the extension of its type.
+    private string FileName()
+    {
+        var name = new string(System.IO.Path.GetFileName((Param.FileName ?? "").Replace('\\', '/'))
+            .Select(c => char.IsLetterOrDigit(c) || c is ' ' or '.' or '_' or '-' ? c : '_')
+            .ToArray()).Trim();
+        if (string.IsNullOrWhiteSpace(System.IO.Path.GetFileNameWithoutExtension(name)))
+            name = "image";
+        if (ChatRoomImageDto.ContentTypeOf(name) != Param.ContentType)
+            name = System.IO.Path.GetFileNameWithoutExtension(name) + "." + Param.ContentType.Split('/')[1].Replace("jpeg", "jpg");
+        return name.Length <= 120 ? name : name[^120..];
+    }
+}
+
 internal sealed record ChatRoomsInfrastructure(Guid NoteTypeId, FolderInfoDto Folder);
 
 // What the chat room commands share. Errors are added to the command's result instead of thrown, as every command

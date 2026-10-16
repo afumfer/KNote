@@ -39,7 +39,8 @@ internal sealed class ChatRoomWebRenderer : IDisposable
     public event EventHandler<string> ShortcutPressed;
 
     // Shows the messages, replacing whatever the view had. userName: the app's user (their messages on the right).
-    public async Task LoadAsync(IReadOnlyList<ChatRoomMessageDto> messages, string userName, string emptyText)
+    // serverBaseUrl: the chat room's Server, which the urls of the images may be relative to.
+    public async Task LoadAsync(IReadOnlyList<ChatRoomMessageDto> messages, string userName, string emptyText, Uri serverBaseUrl)
     {
         _userName = userName;
         _lastSent = messages.Count > 0 ? messages[^1].SentDateTime : null;
@@ -47,7 +48,7 @@ internal sealed class ChatRoomWebRenderer : IDisposable
         // Completed from the NavigationCompleted callback of WebView2: what follows must not run inside it.
         var pageLoaded = _pageLoaded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        await _editView.ShowNavigationContent(ChatRoomHtml.Page(messages, userName, _markdownStyle, emptyText, _shortcuts));
+        await _editView.ShowNavigationContent(ChatRoomHtml.Page(messages, userName, _markdownStyle, emptyText, _shortcuts, serverBaseUrl));
 
         // Out of a possible WebView2 callback before going on: the caller may show a message box.
         await Task.Yield();

@@ -222,3 +222,20 @@
 .chat-room-conversation ::deep .rz-chat-participant-more {
     border-radius: 50%;
 }
+
+/* Images of the messages: within the bubble, rounded; a click opens them in another tab (js/chatRoom.js). */
+.chat-room-conversation ::deep .chat-room-message-text img {
+    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    margin: 0.25rem 0;
+    border-radius: 0.75rem;
+    cursor: zoom-in;
+}
+
+/* An image dragged over the conversation: it can be dropped there. */
+.chat-room-dropping {
+    outline: 2px dashed var(--rz-primary);
+    outline-offset: -6px;
+    border-radius: var(--rz-border-radius);
+}

@@ -24,7 +24,8 @@ public static class ChatRoomHtml
     private static string _style;
 
     // append(html): adds a message at the end and scrolls to it, so what comes in is always seen. Links other than
-    // web, mail and in-page ones do nothing; the host opens web and mail links outside the view. The host's
+    // web, mail and in-page ones do nothing; the host opens web and mail links outside the view, and an image of a
+    // message clicked (going to its url, which the host opens in the browser too). The host's
     // shortcuts (window.kntChatShortcuts, written as AiChatHtml.ShortcutText does) are posted to it: while the page
     // has the focus, the keys reach the browser, not the window's menu.
     private const string Script = """
@@ -44,10 +45,17 @@ public static class ChatRoomHtml
             window.chrome.webview.postMessage(shortcut);
           });
           document.addEventListener('click', e => {
+            const image = e.target.closest('.bubble img');
+            if (image && /^https?:$/.test(new URL(image.src).protocol)) {
+              window.location.href = image.src;
+              return;
+            }
             const a = e.target.closest('a[href]');
             if (a && !a.getAttribute('href').startsWith('#') && !/^(https?|mailto):$/.test(a.protocol))
               e.preventDefault();
           });
+          // An image loaded after the message was added makes it taller: still at the end.
+          chat.addEventListener('load', e => { if (e.target.tagName === 'IMG') toBottom(); }, true);
           toBottom();
           return {
             append(html) {
@@ -61,12 +69,15 @@ public static class ChatRoomHtml
     // messages: the thread's, in order. userName: the user of the app (their messages go on the right).
     // markdownStyle: the <style> element of the app's Markdown viewer (Store.KNoteWebViewStyle), for the messages'
     // text; the chat layout goes on top of it. emptyText: what the page says when there are no messages.
-    // hostShortcuts: the keys the page passes on to the host.
+    // hostShortcuts: the keys the page passes on to the host. serverBaseUrl: the base of the chat room's Server, which
+    // the urls of its resources (the images of the messages) may be relative to.
     public static string Page(IEnumerable<ChatRoomMessageDto> messages, string userName, string markdownStyle,
-        string emptyText, IEnumerable<string> hostShortcuts = null)
+        string emptyText, IEnumerable<string> hostShortcuts = null, Uri serverBaseUrl = null)
     {
         var html = new StringBuilder();
         html.Append("<!DOCTYPE html><html><head><meta charset=\"utf-8\">");
+        if (serverBaseUrl != null)
+            html.Append("<base href=\"").Append(WebUtility.HtmlEncode(serverBaseUrl.AbsoluteUri)).Append("\">");
         html.Append(markdownStyle);
         html.Append("<style>").Append(Style).Append("</style></head><body>");
         html.Append("<main id=\"chat\" data-empty=\"").Append(WebUtility.HtmlEncode(emptyText ?? "")).Append("\">");

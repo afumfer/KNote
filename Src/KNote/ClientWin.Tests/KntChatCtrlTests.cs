@@ -11,8 +11,9 @@ namespace KNote.ClientWin.Tests;
 /// <summary>
 /// Tests for KntChatCtrl, the chat room: feedback when the chat hub url or the sign-in are missing, the threads
 /// followed when it connects (and again when it reconnects), new messages (shown, counted as unread, announced),
-/// writing in the general thread from a script, a sign-in refused by the server, and the hub's callbacks handled on
-/// the UI thread. The hub is a FakeChatRoomConnection: no real one is contacted.
+/// writing in the general thread from a script, images (sent to the Server, then their Markdown as a message), a
+/// sign-in refused by the server, and the hub's callbacks handled on the UI thread. The hub is a FakeChatRoomConnection
+/// and the image upload a fake: no real server is contacted.
 /// </summary>
 [TestClass]
 public class KntChatCtrlTests
@@ -276,6 +277,72 @@ public class KntChatCtrlTests
 
         Assert.AreEqual(ChatRoomConnectionState.NotAuthorized, setup.Ctrl.ConnectionState);
         StringAssert.Contains(setup.View.LastShownInfo, "Sign in again from Options");
+    }
+
+    [TestMethod]
+    public async Task SendImage_UploadsIt_ThenSendsItsMarkdownToTheThreadShown()
+    {
+        var setup = CreateCtrl();
+        Start(setup);
+        await setup.Ctrl.SelectThreadAsync(ThreadA.ThreadId);
+        ChatRoomImageDto? uploaded = null;
+        setup.Ctrl.ImageUploader = image =>
+        {
+            uploaded = image;
+            return Task.FromResult(new Result<ChatRoomImageDto>(new ChatRoomImageDto { Markdown = "![a.png](http://server/KNote/res/a.png)" }));
+        };
+
+        var sent = await setup.Ctrl.SendImageAsync(@"C:\pictures\a.PNG", new byte[] { 1, 2, 3 });
+
+        Assert.IsTrue(sent);
+        Assert.AreEqual(ThreadA.ThreadId, uploaded!.ThreadId);
+        Assert.AreEqual("a.PNG", uploaded.FileName);
+        Assert.AreEqual("image/png", uploaded.ContentType);
+        Assert.AreEqual(Convert.ToBase64String(new byte[] { 1, 2, 3 }), uploaded.ContentBase64);
+        var send = setup.Connection.Invocations.Single(i => i.Method == ChatRoomHubContract.SendMessage);
+        Assert.AreEqual(ThreadA.ThreadId, send.Args[0]);
+        Assert.AreEqual("![a.png](http://server/KNote/res/a.png)", send.Args[1]);
+    }
+
+    [TestMethod]
+    public async Task SendImage_NotAnImage_TooBig_OrWithNoThreadShown_IsRefusedWithoutUploading()
+    {
+        var setup = CreateCtrl();
+        Start(setup);
+        var uploads = 0;
+        setup.Ctrl.ImageUploader = image =>
+        {
+            uploads++;
+            return Task.FromResult(new Result<ChatRoomImageDto>(new ChatRoomImageDto { Markdown = "x" }));
+        };
+
+        Assert.IsFalse(await setup.Ctrl.SendImageAsync("a.png", new byte[] { 1 }), "No thread shown.");
+        await setup.Ctrl.SelectThreadAsync(ThreadA.ThreadId);
+        Assert.IsFalse(await setup.Ctrl.SendImageAsync("a.pdf", new byte[] { 1 }));
+        Assert.IsFalse(await setup.Ctrl.SendImageAsync("a.png", new byte[KntConst.MaxLenResourceFile + 1]));
+        Assert.IsFalse(await setup.Ctrl.SendImageAsync("a.png", Array.Empty<byte>()));
+
+        Assert.AreEqual(0, uploads);
+        Assert.AreEqual(4, setup.View.ShowInfoCallCount);
+    }
+
+    [TestMethod]
+    public async Task SendImage_RefusedByTheServer_IsReported_AndNothingIsSent()
+    {
+        var setup = CreateCtrl();
+        Start(setup);
+        await setup.Ctrl.SelectThreadAsync(ThreadA.ThreadId);
+        setup.Ctrl.ImageUploader = image =>
+        {
+            var refused = new Result<ChatRoomImageDto>();
+            refused.AddErrorMessage("The image is too big.");
+            return Task.FromResult(refused);
+        };
+
+        Assert.IsFalse(await setup.Ctrl.SendImageAsync("a.png", new byte[] { 1 }));
+
+        StringAssert.Contains(setup.View.LastShownInfo, "The image is too big.");
+        Assert.IsFalse(setup.Connection.Invocations.Any(i => i.Method == ChatRoomHubContract.SendMessage));
     }
 
     /// <summary>Queues posted callbacks so a test decides when (and on which thread) they run.</summary>

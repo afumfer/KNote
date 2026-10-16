@@ -36,4 +36,12 @@ public interface IKntChatRoomService
     /// they join if they hadn't. Returns the message as saved, with its MessageId, UserName and SentDateTime.
     /// </summary>
     Task<Result<ChatRoomMessageDto>> AddMessageAsync(ChatRoomMessageDto message);
+
+    /// <summary>
+    /// Keeps an image of the current user (image.ThreadId, FileName, ContentType, ContentBase64) as a resource of the
+    /// thread's note, which they join if they hadn't. Returns its ResourceId, its Url relative to the resources (as
+    /// note descriptions keep them, see IKntNoteService.UtilUpdateResourceInDescriptionForRead) and the Markdown to
+    /// send it in a message; not the content. The image is not a message by itself.
+    /// </summary>
+    Task<Result<ChatRoomImageDto>> AddImageAsync(ChatRoomImageDto image);
 }

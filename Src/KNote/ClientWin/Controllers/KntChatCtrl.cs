@@ -34,6 +34,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
     internal Func<string, Func<string>, IChatRoomConnection> ConnectionFactory { get; set; } =
         (url, token) => new ChatRoomConnection(url, token);
 
+    // Sends an image to the Server (REST, not the hub): the real one, or a fake in the tests.
+    internal Func<ChatRoomImageDto, Task<Result<ChatRoomImageDto>>> ImageUploader { get; set; }
+
     #endregion
 
     #region Properties
@@ -49,6 +52,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     public string ServerUrl => Store.Settings.Connectivity.ChatHub.Url;
 
+    // The base of the Server's application: the urls of its resources (the images of the messages) may be relative to it.
+    public Uri ServerBaseUrl => ChatRoomServer.BaseUrl(ServerUrl);
+
     // The user in the chat room: the one signed in to its Server (not necessarily the app's one).
     public string UserName => Store.Settings.Connectivity.ChatHub.UserName;
 
@@ -56,6 +62,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
     public List<ChatRoomThreadInfoDto> Threads { get; private set; } = new();
 
     public Guid? CurrentThreadId { get; private set; }
+
+    // ChatRoomImageDto.SupportedContentTypes, by the extensions of their files (for a file dialog).
+    public const string ImageFilesFilter = "Images (*.png;*.jpg;*.jpeg;*.gif;*.webp)|*.png;*.jpg;*.jpeg;*.gif;*.webp";
 
     public ChatRoomThreadDto CurrentThread =>
         CurrentThreadId != null && _followed.TryGetValue(CurrentThreadId.Value, out var thread) ? thread : null;
@@ -170,6 +179,48 @@ public class KntChatCtrl : CtrlBase, IDisposable
         if (info != null)
             info.IsParticipant = true;
         return true;
+    }
+
+    /// <summary>
+    /// Sends an image to the thread shown: kept by the Server as a resource of the thread (ChatRoomServer.UploadImageAsync)
+    /// and then sent as a message with its Markdown. Only images (ChatRoomImageDto.SupportedContentTypes, by the file's
+    /// extension) of KntConst.MaxLenResourceFile bytes at most. False if it couldn't be sent (already reported).
+    /// </summary>
+    public async Task<bool> SendImageAsync(string fileName, byte[] content)
+    {
+        var contentType = ChatRoomImageDto.ContentTypeOf(fileName);
+        if (contentType == null)
+        {
+            ShowError($"{Path.GetFileName(fileName)}: only images (png, jpg, gif, webp) can be sent to the chat room.");
+            return false;
+        }
+        if (content == null || content.Length == 0 || content.Length > KntConst.MaxLenResourceFile)
+        {
+            ShowError($"{Path.GetFileName(fileName)}: the image is empty or too big ({KntConst.MaxLenResourceFile / 1_000_000.0:0.#} MB at most).");
+            return false;
+        }
+        if (CurrentThreadId is not Guid threadId || ConnectionState != ChatRoomConnectionState.Connected)
+        {
+            ShowError("Choose a thread first: the image is sent to the thread shown.");
+            return false;
+        }
+
+        var image = new ChatRoomImageDto
+        {
+            ThreadId = threadId,
+            FileName = Path.GetFileName(fileName),
+            ContentType = contentType,
+            ContentBase64 = Convert.ToBase64String(content)
+        };
+        var uploader = ImageUploader ?? (dto => ChatRoomServer.UploadImageAsync(ServerUrl, Store.Settings.Connectivity.ChatHub.Token, dto));
+        var res = await uploader(image);
+        if (!res.IsValid)
+        {
+            ShowError($"The image could not be sent. {res.ErrorMessage}");
+            return false;
+        }
+
+        return await SendMessageAsync(res.Entity.Markdown);
     }
 
     // --------------------------------------------------------------------------

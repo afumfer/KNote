@@ -54,3 +54,38 @@ public class ChatRoomThreadDto : ChatRoomThreadInfoDto
     // Who is subscribed to the thread now (filled by the Server's chat hub, see ChatRoomHubContract).
     public List<string> OnlineUserNames { get; set; } = new();
 }
+
+// An image sent to a thread: kept as a resource of the thread's note (as the images of any note), and shown in a message
+// with its Markdown. The client sends ThreadId, FileName, ContentType and ContentBase64 (POST ChatRoomHubContract
+// .ImagesPath); the answer has the resource's ResourceId, its Url and the Markdown to send, without the content.
+public class ChatRoomImageDto
+{
+    public Guid ThreadId { get; set; }
+
+    public string FileName { get; set; }
+
+    // One of SupportedContentTypes.
+    public string ContentType { get; set; }
+
+    public string ContentBase64 { get; set; }
+
+    public Guid ResourceId { get; set; }
+
+    // Relative to the Server's resources (as note descriptions keep them) in the Service; absolute in the Server's answer.
+    public string Url { get; set; }
+
+    public string Markdown { get; set; }
+
+    public static readonly string[] SupportedContentTypes = { "image/png", "image/jpeg", "image/gif", "image/webp" };
+
+    // The content type of an image file by its extension, or null when it is not one of SupportedContentTypes.
+    public static string ContentTypeOf(string fileName) =>
+        System.IO.Path.GetExtension(fileName ?? "").ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            _ => null
+        };
+}

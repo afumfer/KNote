@@ -58,5 +58,11 @@ public class KntChatRoomService : KntServiceBase, IKntChatRoomService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<ChatRoomImageDto>> AddImageAsync(ChatRoomImageDto image)
+    {
+        var command = new KntChatRoomsAddImageAsyncCommand(Service, image);
+        return await ExecuteCommand(command);
+    }
+
     #endregion
 }

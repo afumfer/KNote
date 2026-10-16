@@ -169,6 +169,16 @@ body {
   padding-inline-start: 22px;
 }
 
+/* Images of the messages: within the bubble, rounded; a click opens them in the browser. */
+.bubble img {
+  display: block;
+  max-width: 100%;
+  max-height: 320px;
+  margin: 4px 0;
+  border-radius: 12px;
+  cursor: zoom-in;
+}
+
 .bubble pre {
   max-width: 100%;
   margin: 4px 0 8px;

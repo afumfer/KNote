@@ -45,6 +45,7 @@
             panelMessageHeader = new Panel();
             labelMessage = new Label();
             buttonSend = new Button();
+            buttonSendImage = new Button();
             listViewThreads = new ListView();
             panelThreadsHeader = new Panel();
             labelThreads = new Label();
@@ -52,6 +53,7 @@
             menuChatRoom = new MenuStrip();
             menuActions = new ToolStripMenuItem();
             menuSend = new ToolStripMenuItem();
+            menuSendImage = new ToolStripMenuItem();
             menuNewThread = new ToolStripMenuItem();
             menuUnfollow = new ToolStripMenuItem();
             menuActionsSeparator1 = new ToolStripSeparator();
@@ -222,11 +224,15 @@
             textMessage.ScrollBars = ScrollBars.Vertical;
             textMessage.Size = new Size(812, 82);
             textMessage.TabIndex = 0;
+            textMessage.AllowDrop = true;
             textMessage.KeyDown += textMessage_KeyDown;
+            textMessage.DragEnter += textMessage_DragEnter;
+            textMessage.DragDrop += textMessage_DragDrop;
             //
             // panelMessageHeader
             //
             panelMessageHeader.Controls.Add(labelMessage);
+            panelMessageHeader.Controls.Add(buttonSendImage);
             panelMessageHeader.Controls.Add(buttonSend);
             panelMessageHeader.Dock = DockStyle.Top;
             panelMessageHeader.Location = new Point(4, 4);
@@ -242,7 +248,7 @@
             labelMessage.Name = "labelMessage";
             labelMessage.Size = new Size(320, 17);
             labelMessage.TabIndex = 0;
-            labelMessage.Text = "Message (Markdown; Enter sends, Shift+Enter new line):";
+            labelMessage.Text = "Message (Markdown; Enter sends, Shift+Enter new line; paste or drop an image):";
             //
             // buttonSend
             //
@@ -255,6 +261,18 @@
             buttonSend.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
+            //
+            // buttonSendImage
+            //
+            buttonSendImage.Font = new Font("Segoe UI", 8.25F);
+            buttonSendImage.Location = new Point(632, 4);
+            buttonSendImage.Name = "buttonSendImage";
+            buttonSendImage.Size = new Size(90, 26);
+            buttonSendImage.TabIndex = 2;
+            buttonSendImage.Text = "&Image ...";
+            buttonSendImage.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonSendImage.UseVisualStyleBackColor = true;
+            buttonSendImage.Click += buttonSendImage_Click;
             //
             // listViewThreads
             //
@@ -312,7 +330,7 @@
             //
             // menuActions
             //
-            menuActions.DropDownItems.AddRange(new ToolStripItem[] { menuSend, menuNewThread, menuUnfollow, menuActionsSeparator1, menuReconnect });
+            menuActions.DropDownItems.AddRange(new ToolStripItem[] { menuSend, menuSendImage, menuNewThread, menuUnfollow, menuActionsSeparator1, menuReconnect });
             menuActions.Name = "menuActions";
             menuActions.Size = new Size(59, 20);
             menuActions.Text = "&Actions";
@@ -324,6 +342,13 @@
             menuSend.Size = new Size(220, 22);
             menuSend.Text = "&Send";
             menuSend.Click += buttonSend_Click;
+            //
+            // menuSendImage
+            //
+            menuSendImage.Name = "menuSendImage";
+            menuSendImage.Size = new Size(220, 22);
+            menuSendImage.Text = "Send &image ...";
+            menuSendImage.Click += buttonSendImage_Click;
             //
             // menuNewThread
             //
@@ -407,6 +432,7 @@
         private Panel panelMessageHeader;
         private Label labelMessage;
         private Button buttonSend;
+        private Button buttonSendImage;
         private ListView listViewThreads;
         private Panel panelThreadsHeader;
         private Label labelThreads;
@@ -414,6 +440,7 @@
         private MenuStrip menuChatRoom;
         private ToolStripMenuItem menuActions;
         private ToolStripMenuItem menuSend;
+        private ToolStripMenuItem menuSendImage;
         private ToolStripMenuItem menuNewThread;
         private ToolStripMenuItem menuUnfollow;
         private ToolStripSeparator menuActionsSeparator1;

@@ -32,6 +32,16 @@ public class ChatRoomHtmlTests
     }
 
     [TestMethod]
+    public void Page_ResolvesRelativeUrls_AgainstTheServer_AndShowsImages()
+    {
+        var page = ChatRoomHtml.Page(new[] { Message("maria", "![shot.png](/KNoteResources/2026/a_shot.png)", DateTime.Now) },
+            "jdoe", Style, "Empty", serverBaseUrl: new Uri("https://server/KNote/"));
+
+        StringAssert.Contains(page, "<base href=\"https://server/KNote/\">");
+        StringAssert.Contains(page, "<img src=\"/KNoteResources/2026/a_shot.png\" alt=\"shot.png\"");
+    }
+
+    [TestMethod]
     public void Message_HtmlOfTheUser_IsShownAsText_AndMarkdownIsRendered()
     {
         var html = ChatRoomHtml.Message(Message("<b>maria</b>", "**bold** <script>alert(1)</script>", DateTime.Now), "jdoe", null);

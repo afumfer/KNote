@@ -8,8 +8,9 @@ using KntIcons;
 namespace KNote.ClientWin.Views;
 
 // The chat room (KntChatCtrl), laid out as the AI assistant: the conversation of the thread shown (WebView2, see
-// ChatRoomWebRenderer) over the message box, and the threads on the right. Closing it only hides it: the ctrl keeps
-// receiving messages while the app is open, and shows it again when one arrives.
+// ChatRoomWebRenderer) over the message box, and the threads on the right. Images are sent with the Image button,
+// pasted into the message box (Ctrl+V) or dropped on it. Closing it only hides it: the ctrl keeps receiving messages
+// while the app is open, and shows it again when one arrives.
 public partial class KntChatForm : KntForm, IViewChatRoom
 {
     #region Private fields
@@ -38,6 +39,7 @@ public partial class KntChatForm : KntForm, IViewChatRoom
         InitializeComponent();
 
         buttonSend.SetKntIcon(KntIcon.Send);
+        buttonSendImage.SetKntIcon(KntIcon.Image);
         buttonNewThread.SetKntIcon(KntIcon.Add);
         buttonUnfollow.SetKntIcon(KntIcon.Close);
 
@@ -57,19 +59,22 @@ public partial class KntChatForm : KntForm, IViewChatRoom
         _conversation = new ChatRoomWebRenderer(kntEditViewConversation, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys);
         _conversation.ShortcutPressed += Conversation_ShortcutPressed;
         kntEditViewConversation.NavigationBorder = true;
+        // A file dropped on the conversation would replace it with the file: images are dropped on the message box.
+        kntEditViewConversation.WebViewControl.AllowExternalDrop = false;
 
         // The Actions menu repeats the buttons, running the same handlers: its items follow their enabled state.
         LinkMenuToControl(menuSend, buttonSend);
+        LinkMenuToControl(menuSendImage, buttonSendImage);
         LinkMenuToControl(menuNewThread, buttonNewThread);
         LinkMenuToControl(menuUnfollow, buttonUnfollow);
 
         // Anchor=Right is not reliable for controls nested inside a SplitContainer panel when AutoScaleMode rescales
         // the form (see KNoteAIAssistantForm): the header's own Resize places them.
         panelConversationHeader.Resize += (s, e) => AlignConversationHeader();
-        panelMessageHeader.Resize += (s, e) => AlignControlsRight(panelMessageHeader, 6, 6, buttonSend);
+        panelMessageHeader.Resize += (s, e) => AlignControlsRight(panelMessageHeader, 6, 6, buttonSendImage, buttonSend);
         panelThreadsHeader.Resize += (s, e) => AlignControlsRight(panelThreadsHeader, 6, 6, buttonNewThread);
         AlignConversationHeader();
-        AlignControlsRight(panelMessageHeader, 6, 6, buttonSend);
+        AlignControlsRight(panelMessageHeader, 6, 6, buttonSendImage, buttonSend);
         AlignControlsRight(panelThreadsHeader, 6, 6, buttonNewThread);
     }
 
@@ -254,14 +259,52 @@ public partial class KntChatForm : KntForm, IViewChatRoom
         }
     }
 
-    // Enter sends, Shift+Enter is a new line (as in the Web chat room).
-    private void textMessage_KeyDown(object sender, KeyEventArgs e)
+    // Enter sends, Shift+Enter is a new line (as in the Web chat room). Ctrl+V with an image (or image files) in the
+    // clipboard sends it; with text, pastes it as always.
+    private async void textMessage_KeyDown(object sender, KeyEventArgs e)
     {
+        if (e.KeyCode == Keys.V && e.Control && !e.Alt && buttonSendImage.Enabled)
+        {
+            var images = ClipboardImages();
+            if (images.Count == 0)
+                return;
+            e.SuppressKeyPress = true;
+            await SendImagesAsync(images);
+            return;
+        }
+
         if (e.KeyCode != Keys.Enter || e.Shift || e.Control || e.Alt)
             return;
 
         e.SuppressKeyPress = true;
         buttonSend_Click(sender, e);
+    }
+
+    private void textMessage_DragEnter(object sender, DragEventArgs e)
+    {
+        e.Effect = buttonSendImage.Enabled && e.Data?.GetDataPresent(DataFormats.FileDrop) == true
+            ? DragDropEffects.Copy
+            : DragDropEffects.None;
+    }
+
+    private async void textMessage_DragDrop(object sender, DragEventArgs e)
+    {
+        if (e.Data?.GetData(DataFormats.FileDrop) is not string[] files)
+            return;
+        await SendImagesAsync(files.Select(f => (Path.GetFileName(f), (Func<byte[]>)(() => File.ReadAllBytes(f)))).ToList());
+    }
+
+    private async void buttonSendImage_Click(object sender, EventArgs e)
+    {
+        using var dialog = new OpenFileDialog
+        {
+            Title = "Send an image to the thread",
+            Filter = KntChatCtrl.ImageFilesFilter,
+            Multiselect = true
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+            return;
+        await SendImagesAsync(dialog.FileNames.Select(f => (Path.GetFileName(f), (Func<byte[]>)(() => File.ReadAllBytes(f)))).ToList());
     }
 
     private async void buttonNewThread_Click(object sender, EventArgs e)
@@ -377,11 +420,69 @@ public partial class KntChatForm : KntForm, IViewChatRoom
         var connected = _ctrl.ConnectionState == ChatRoomConnectionState.Connected;
         var thread = _ctrl.CurrentThread != null;
         buttonSend.Enabled = connected && thread;
+        buttonSendImage.Enabled = connected && thread;
         textMessage.Enabled = connected && thread;
         buttonNewThread.Enabled = connected;
         buttonUnfollow.Enabled = connected && thread;
         buttonUnfollow.Visible = thread;
         menuReconnect.Enabled = _ctrl.ConnectionState is ChatRoomConnectionState.Disconnected or ChatRoomConnectionState.NotAuthorized;
+    }
+
+    // The images in the clipboard: a picture (a screenshot, as PNG) or image files copied in the file explorer.
+    private static List<(string Name, Func<byte[]> Content)> ClipboardImages()
+    {
+        var images = new List<(string, Func<byte[]>)>();
+        if (Clipboard.ContainsImage())
+        {
+            using var picture = Clipboard.GetImage();
+            if (picture != null)
+            {
+                using var png = new MemoryStream();
+                picture.Save(png, System.Drawing.Imaging.ImageFormat.Png);
+                var content = png.ToArray();
+                images.Add(($"image-{DateTime.Now:yyyyMMdd-HHmmss}.png", () => content));
+            }
+        }
+        else if (Clipboard.ContainsFileDropList())
+        {
+            foreach (var file in Clipboard.GetFileDropList().Cast<string>().Where(f => ChatRoomImageDto.ContentTypeOf(f) != null))
+                images.Add((Path.GetFileName(file), () => File.ReadAllBytes(file)));
+        }
+        return images;
+    }
+
+    // One after the other, in the thread shown (KntChatCtrl.SendImageAsync reports what can't be sent).
+    private async Task SendImagesAsync(IReadOnlyList<(string Name, Func<byte[]> Content)> images)
+    {
+        if (images.Count == 0)
+            return;
+
+        buttonSendImage.Enabled = false;
+        UseWaitCursor = true;
+        try
+        {
+            foreach (var (name, content) in images)
+            {
+                byte[] bytes;
+                try
+                {
+                    bytes = content();
+                }
+                catch (Exception ex)
+                {
+                    ShowInfo($"{name} could not be read: {ex.Message}");
+                    continue;
+                }
+                if (!await _ctrl.SendImageAsync(name, bytes))
+                    break;
+            }
+        }
+        finally
+        {
+            UseWaitCursor = false;
+            UpdateActions();
+            ActiveControl = textMessage;
+        }
     }
 
     // For the synchronous refreshes.
@@ -391,7 +492,7 @@ public partial class KntChatForm : KntForm, IViewChatRoom
         {
             var thread = _ctrl.CurrentThread;
             await _conversation.LoadAsync(thread?.Messages ?? new List<ChatRoomMessageDto>(), _ctrl.UserName,
-                thread == null ? NoThreadText : "No messages yet: write the first one.");
+                thread == null ? NoThreadText : "No messages yet: write the first one.", _ctrl.ServerBaseUrl);
             // Loading the page moves the focus into WebView2: back to the message box, to type in it right away.
             if (textMessage.Enabled && ContainsFocus)
                 ActiveControl = textMessage;

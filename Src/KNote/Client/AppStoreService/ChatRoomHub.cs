@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using KNote.Model;
 using KNote.Model.Dto;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -240,6 +241,59 @@ public class ChatRoomHub : IAsyncDisposable
             info.IsParticipant = true;
         NotifyChanged();
         return true;
+    }
+
+    /// <summary>
+    /// Sends an image to the thread shown: kept by the Server as a resource of the thread (REST, not the hub) and then
+    /// sent as a message with its Markdown. False if it couldn't be sent (already notified).
+    /// </summary>
+    public async Task<bool> SendImageAsync(string fileName, string contentType, string contentBase64)
+    {
+        if (CurrentThreadId is not Guid threadId)
+            return false;
+
+        Result<ChatRoomImageDto>? res;
+        try
+        {
+            var httpRes = await _httpClient.PostAsJsonAsync(ChatRoomHubContract.ImagesPath(threadId), new ChatRoomImageDto
+            {
+                FileName = fileName,
+                ContentType = contentType,
+                ContentBase64 = contentBase64
+            });
+            // The Server answers with a Result, also when it refuses the image; not when the request is refused (403).
+            res = await ReadResultAsync(httpRes);
+            if (res == null)
+            {
+                _appState.NotifyError("Chat room", $"The image could not be sent ({(int)httpRes.StatusCode} {httpRes.ReasonPhrase}).");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _appState.NotifyError("Chat room", $"The image could not be sent: {ex.Message}");
+            return false;
+        }
+
+        if (res?.IsValid != true)
+        {
+            _appState.NotifyError("Chat room", res?.ErrorMessage ?? "The image could not be sent.");
+            return false;
+        }
+
+        return await SendAsync(res.Entity.Markdown);
+    }
+
+    private static async Task<Result<ChatRoomImageDto>?> ReadResultAsync(HttpResponseMessage httpRes)
+    {
+        try
+        {
+            return await httpRes.Content.ReadFromJsonAsync<Result<ChatRoomImageDto>>();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private async Task<bool> FollowAsync(Guid threadId)

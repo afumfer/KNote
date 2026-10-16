@@ -1,8 +1,10 @@
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Service.Core;
 using KNote.Tests.Helpers;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -12,7 +14,9 @@ namespace KNote.Tests.InProcessIntegrationTests;
 /// <summary>
 /// The chat room hub (ChatHub, ChatRoomHubContract): only for the Server's Staff users (token of the connection),
 /// threads kept apart (a message only reaches the subscribers of its thread), messages saved in the thread's note in
-/// the order they are sent, the online users of each thread, and the general thread created once.
+/// the order they are sent, the online users of each thread, the general thread created once, and images (sent by
+/// ChatRoomController, kept as resources of the thread's note, their urls relative in the note and absolute for the
+/// clients).
 /// </summary>
 [TestClass]
 public class ChatRoomHubInProcessTests
@@ -196,7 +200,89 @@ public class ChatRoomHubInProcessTests
         Assert.AreEqual(1, threads.Entity.Count(t => t.Topic == KntConst.ChatRoomGeneralThreadTopic));
     }
 
+    // A 1x1 PNG.
+    private const string PngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+
+    [TestMethod]
+    public async Task AnImage_IsKeptAsAResourceOfTheThread_AndSentWithItsMarkdown_RelativeInTheNoteAndAbsoluteForTheClients()
+    {
+        await using var a = await StartAsync(_staffAToken);
+        await using var b = await StartAsync(_staffBToken);
+        var thread = await CreateThreadAsync(a, "With images");
+        await SubscribeAsync(b, thread.ThreadId);
+        var receivedByB = Collect<ChatRoomMessageDto>(b, ChatRoomHubContract.MessageReceived);
+        using var http = HttpClientFor(_staffAToken);
+
+        var httpRes = await http.PostAsJsonAsync(ChatRoomHubContract.ImagesPath(thread.ThreadId),
+            new ChatRoomImageDto { FileName = "screen.png", ContentType = "image/png", ContentBase64 = PngBase64 });
+        var image = await httpRes.Content.ReadFromJsonAsync<Result<ChatRoomImageDto>>();
+
+        Assert.IsTrue(httpRes.IsSuccessStatusCode, image?.ErrorMessage);
+        var absolutePrefix = $"{KNoteWebApplicationFactory.ResourcesRootUrl}/{KNoteWebApplicationFactory.ResourcesContainer}/";
+        StringAssert.StartsWith(image!.Entity.Url, absolutePrefix);
+        StringAssert.Contains(image.Entity.Markdown, $"]({absolutePrefix}");
+        var relativePath = image.Entity.Url[(KNoteWebApplicationFactory.ResourcesRootUrl.Length + 1)..];
+        Assert.IsTrue(File.Exists(Path.Combine(_factory.ResourcesFolder, relativePath)), "The file is in the host's resources.");
+
+        var sent = await a.InvokeAsync<Result<ChatRoomMessageDto>>(ChatRoomHubContract.SendMessage, thread.ThreadId,
+            $"Look:\n\n{image.Entity.Markdown}");
+
+        Assert.IsTrue(sent.IsValid, sent.ErrorMessage);
+        StringAssert.Contains(sent.Entity.Text, image.Entity.Url);
+        await WaitUntilAsync(() => receivedByB.Count == 1);
+        StringAssert.Contains(receivedByB.Single().Text, image.Entity.Url, "The subscribers get the absolute url.");
+
+        await using var reader = await StartAsync(_staffBToken);
+        var saved = await SubscribeAsync(reader, thread.ThreadId);
+        StringAssert.Contains(saved.Messages.Single().Text, image.Entity.Url, "Also when the thread is read again.");
+
+        var note = await ReadThreadNoteAsync(thread.ThreadId);
+        StringAssert.Contains(note.Description, $"]({KNoteWebApplicationFactory.ResourcesContainer}/");
+        Assert.IsFalse(note.Description.Contains(KNoteWebApplicationFactory.ResourcesRootUrl), "The note keeps the relative path, as note descriptions do.");
+    }
+
+    [TestMethod]
+    public async Task SendingAnImage_AsAGuest_OrNotAnImage_IsRefused()
+    {
+        await using var a = await StartAsync(_staffAToken);
+        var thread = await CreateThreadAsync(a, "Refused images");
+        using var asGuest = HttpClientFor(_guestToken);
+        using var asStaff = HttpClientFor(_staffAToken);
+
+        var guestRes = await asGuest.PostAsJsonAsync(ChatRoomHubContract.ImagesPath(thread.ThreadId),
+            new ChatRoomImageDto { FileName = "a.png", ContentType = "image/png", ContentBase64 = PngBase64 });
+        var pdfRes = await asStaff.PostAsJsonAsync(ChatRoomHubContract.ImagesPath(thread.ThreadId),
+            new ChatRoomImageDto { FileName = "a.pdf", ContentType = "application/pdf", ContentBase64 = PngBase64 });
+        var pdf = await pdfRes.Content.ReadFromJsonAsync<Result<ChatRoomImageDto>>();
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, guestRes.StatusCode);
+        Assert.AreEqual(HttpStatusCode.BadRequest, pdfRes.StatusCode);
+        Assert.IsFalse(pdf!.IsValid);
+        StringAssert.Contains(pdf.ErrorMessage, "Only images");
+    }
+
     #region Helpers
+
+    private static HttpClient HttpClientFor(string token)
+    {
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+        return client;
+    }
+
+    // The thread's note as the host's database keeps it (the Server rewrites the urls when it gives it).
+    private static async Task<NoteDto> ReadThreadNoteAsync(Guid threadId)
+    {
+        using var repository = KntRepositoryFactory.Create(new RepositoryRef
+        {
+            Orm = "EntityFramework",
+            Provider = "Microsoft.Data.Sqlite",
+            ConnectionString = $"Data Source={_factory.DatabaseFilePath}"
+        });
+        var res = await repository.Notes.GetAsync(threadId);
+        Assert.IsTrue(res.IsValid, res.ErrorMessage);
+        return res.Entity;
+    }
 
     // A user registered and given the role by the class' Admin, signed in again for a token with that role.
     private static async Task<(string UserName, string Token)> NewUserAsync(string prefix, string role)

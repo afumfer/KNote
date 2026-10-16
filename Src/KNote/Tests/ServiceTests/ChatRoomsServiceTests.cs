@@ -183,7 +183,8 @@ public class ChatRoomsServiceTests
         Assert.IsFalse(get.IsValid);
         StringAssert.Contains(get.ErrorMessage, "does not exist");
         Assert.IsFalse((await service.ChatRooms.JoinAsync(anyNote.NoteId)).IsValid);
-        Assert.IsFalse((await service.ChatRooms.AddMessageAsync(new ChatRoomMessageDto { ThreadId = anyNote.NoteId, Text = "x" })).IsValid);    }
+        Assert.IsFalse((await service.ChatRooms.AddMessageAsync(new ChatRoomMessageDto { ThreadId = anyNote.NoteId, Text = "x" })).IsValid);
+    }
 
     [TestMethod]
     public async Task AddMessage_EmptyOrTooLong_IsRefused()
@@ -199,6 +200,90 @@ public class ChatRoomsServiceTests
             Text = new string('x', ChatRoomMessageDto.MaxTextLength + 1)
         })).IsValid);
         Assert.IsFalse((await service.ChatRooms.AddMessageAsync(new ChatRoomMessageDto { Text = "No thread" })).IsValid);
+    }
+
+    // A 1x1 PNG.
+    private const string PngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AddImage_KeepsItAsAResourceOfTheThread_AndGivesItsMarkdown(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        var serviceA = await StaffServiceAsync(db, orm, "staffA");
+        var serviceB = await StaffServiceAsync(db, orm, "staffB");
+        var resourcesRoot = UseTemporaryResourcesFolder(serviceB);
+        var thread = (await serviceA.ChatRooms.CreateAsync("Thread")).Entity;
+
+        try
+        {
+            var res = await serviceB.ChatRooms.AddImageAsync(new ChatRoomImageDto
+            {
+                ThreadId = thread.ThreadId,
+                FileName = @"C:\captures\my [screen].PNG",
+                ContentType = "image/png",
+                ContentBase64 = PngBase64
+            });
+
+            Assert.IsTrue(res.IsValid, res.ErrorMessage);
+            var image = res.Entity;
+            Assert.AreNotEqual(Guid.Empty, image.ResourceId);
+            Assert.IsNull(image.ContentBase64, "The answer doesn't carry the content back.");
+            Assert.AreEqual("my _screen_.PNG", image.FileName, "Only the name, without what could break the Markdown link.");
+            StringAssert.StartsWith(image.Url, $"ChatTestResources/{DateTime.Now.Year}/");
+            StringAssert.EndsWith(image.Url, "_my _screen_.PNG");
+            Assert.AreEqual($"![my _screen_.PNG]({image.Url.Replace(" ", "%20")})", image.Markdown);
+            Assert.IsTrue(File.Exists(Path.Combine(resourcesRoot, image.Url)), "The file is in the resources folder.");
+
+            var resources = (await serviceA.Notes.GetResourcesInfoAsync(thread.ThreadId)).Entity;
+            Assert.AreEqual(image.ResourceId, resources.Single().ResourceId);
+            Assert.AreEqual("image/png", resources.Single().FileType);
+            CollectionAssert.Contains((await serviceB.ChatRooms.GetAsync(thread.ThreadId)).Entity.Participants, "staffB",
+                "Sending an image joins the thread.");
+        }
+        finally
+        {
+            Directory.Delete(resourcesRoot, true);
+        }
+    }
+
+    [TestMethod]
+    public async Task AddImage_NotAnImage_TooBig_Empty_OrNotInAThread_IsRefused()
+    {
+        using var db = new RepositoryTestDatabase();
+        var service = await StaffServiceAsync(db, "Dapper", "staff1");
+        var resourcesRoot = UseTemporaryResourcesFolder(service);
+        var thread = (await service.ChatRooms.CreateAsync("Thread")).Entity;
+        var anyNote = (await service.Repository.Notes.GetAllMinimalAsync()).Entity.First(n => n.NoteId != thread.ThreadId);
+
+        ChatRoomImageDto Image(Guid threadId, string type, string content) =>
+            new() { ThreadId = threadId, FileName = "a.png", ContentType = type, ContentBase64 = content };
+
+        try
+        {
+            Assert.IsFalse((await service.ChatRooms.AddImageAsync(Image(thread.ThreadId, "application/pdf", PngBase64))).IsValid);
+            Assert.IsFalse((await service.ChatRooms.AddImageAsync(Image(thread.ThreadId, "image/png", ""))).IsValid);
+            Assert.IsFalse((await service.ChatRooms.AddImageAsync(Image(thread.ThreadId, "image/png", "not base64!"))).IsValid);
+            var tooBig = Convert.ToBase64String(new byte[KntConst.MaxLenResourceFile + 1]);
+            Assert.IsFalse((await service.ChatRooms.AddImageAsync(Image(thread.ThreadId, "image/png", tooBig))).IsValid);
+            Assert.IsFalse((await service.ChatRooms.AddImageAsync(Image(anyNote.NoteId, "image/png", PngBase64))).IsValid);
+            Assert.AreEqual(0, (await service.Notes.GetResourcesInfoAsync(thread.ThreadId)).Entity.Count);
+        }
+        finally
+        {
+            Directory.Delete(resourcesRoot, true);
+        }
+    }
+
+    // The resources of the test repository in a folder of their own (the Server gives its own ones).
+    private static string UseTemporaryResourcesFolder(KntService service)
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"knote-chat-resources-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        service.Repository.RepositoryRef.ResourcesContainer = "ChatTestResources";
+        service.Repository.RepositoryRef.ResourcesContainerRootPath = root;
+        return root;
     }
 
     [TestMethod]

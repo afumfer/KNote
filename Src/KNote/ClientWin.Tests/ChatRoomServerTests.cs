@@ -21,6 +21,24 @@ public class ChatRoomServerTests
     }
 
     [TestMethod]
+    [DataRow("https://server/KNote/chathub", "https://server/KNote/")]
+    [DataRow("https://chat.example.com/chathub", "https://chat.example.com/")]
+    [DataRow("http://localhost:5199/KNote/chathub/", "http://localhost:5199/KNote/")]
+    public void BaseUrl_IsTheServersApplication_WhereItsHubIs(string hubUrl, string expected)
+    {
+        Assert.AreEqual(expected, ChatRoomServer.BaseUrl(hubUrl)?.ToString());
+    }
+
+    [TestMethod]
+    public async Task UploadImage_WithAWrongUrl_IsRefusedWithoutContactingTheServer()
+    {
+        var res = await ChatRoomServer.UploadImageAsync("https://server/KNote/hub", "token", new KNote.Model.Dto.ChatRoomImageDto());
+
+        Assert.IsFalse(res.IsValid);
+        StringAssert.Contains(res.ErrorMessage, "/chathub");
+    }
+
+    [TestMethod]
     [DataRow(null)]
     [DataRow("")]
     [DataRow("server/KNote/chathub")]

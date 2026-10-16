@@ -15,6 +15,10 @@ public static class ChatRoomHubContract
     // Relative to the application's base (/KNote).
     public const string Path = "/chathub";
 
+    // The REST endpoint images are sent to (ChatRoomImageDto), relative to the application's base: an image doesn't go
+    // through the hub (SignalR messages are small). Then its Markdown is sent as a message.
+    public static string ImagesPath(Guid threadId) => $"api/chatroom/threads/{threadId}/images";
+
     // Client -> Server. Each one returns a Result (Result<T>), invalid with the reason when it fails.
 
     /// <summary>() -> Result&lt;List&lt;ChatRoomThreadInfoDto&gt;&gt;: every thread, most recent activity first.</summary>

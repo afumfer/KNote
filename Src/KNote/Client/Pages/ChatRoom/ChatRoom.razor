@@ -4,13 +4,15 @@
 @inject DialogService dialogService
 @inject TooltipService tooltipService
 @inject IJSRuntime js
+@inject NotificationService notificationService
 
-@implements IDisposable
+@implements IAsyncDisposable
 
 @attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
 
 @* The chat room: its threads on the right, the one shown on the left. The connection, the threads and their messages
-   are kept by store.ChatRoom (ChatRoomHub) while the app is open; this page shows them and writes in them. *@
+   are kept by store.ChatRoom (ChatRoomHub) while the app is open; this page shows them and writes in them. Images
+   pasted into the message box or dropped on the conversation are sent too (js/chatRoom.js). *@
 
 <KntIndexHeader Section="KntSections.ChatRoom">
     <IndexMenu>
@@ -39,7 +41,7 @@
 <div class="chat-room">
 <RadzenSplitter Style="height: calc(100vh - 10rem)" class="rz-mt-2" Resize="paneSizes.Resized">
     <RadzenSplitterPane Size="@paneSizes[0]" Min="40%">
-        <div class="chat-room-conversation">
+        <div class="chat-room-conversation" @ref="conversationElement">
             @if (!string.IsNullOrEmpty(chat.ConnectionError) && !Connected)
             {
                 <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" class="rz-m-2">
@@ -64,7 +66,7 @@
                 <RadzenChat @key="thread.ThreadId" @ref="chatView" Messages="@ChatMessages" Users="@ChatUsers" CurrentUserId="@chat.UserName"
                             MessageSent="OnMessageSent" Disabled="@(!Connected)" ShowUsers="true" MaxVisibleUsers="8"
                             ShowUserNames="true" ShowDateSeparator="true" ShowClearButton="false" TimestampFormat="HH:mm"
-                            Placeholder="Write a message (Markdown) ... Enter to send, Shift+Enter for a new line"
+                            Placeholder="Write a message (Markdown), or paste or drop an image ... Enter to send, Shift+Enter for a new line"
                             EmptyMessage="No messages yet: write the first one." class="chat-room-chat">
                     <TitleContent>
                         <span class="chat-room-title">
@@ -108,6 +110,10 @@
     private ChatRoomHub chat = null!;
     private KntPaneSizes paneSizes = null!;
     private RadzenChat? chatView;
+    private ElementReference conversationElement;
+    private IJSObjectReference? imagesModule;
+    private IJSObjectReference? images;
+    private DotNetObjectReference<ChatRoom>? selfReference;
     // The thread and the number of its messages when the conversation was last scrolled to its end.
     private Guid? scrolledThreadId;
     private int scrolledCount;
@@ -133,6 +139,13 @@
     // A thread opened, or a message arrived: the conversation goes to its end, so what comes in is always seen.
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            selfReference = DotNetObjectReference.Create(this);
+            imagesModule = await js.InvokeAsync<IJSObjectReference>("import", "./js/chatRoom.js");
+            images = await imagesModule.InvokeAsync<IJSObjectReference>("init", conversationElement, selfReference, KntConst.MaxLenResourceFile);
+        }
+
         var shown = thread;
         if (shown == null || chatView == null)
             return;
@@ -144,11 +157,53 @@
         await chatView.ScrollToBottom();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         chat.PageVisible = false;
         chat.Changed -= OnChatChanged;
+
+        try
+        {
+            if (images != null)
+            {
+                await images.InvokeVoidAsync("dispose");
+                await images.DisposeAsync();
+            }
+            if (imagesModule != null)
+                await imagesModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is being closed: nothing left to clean up in the browser.
+        }
+        selfReference?.Dispose();
     }
+
+    // An image pasted or dropped (js/chatRoom.js): sent to the thread shown. A pasted screenshot comes without a name.
+    [JSInvokable]
+    public async Task OnImage(string fileName, string contentType, string contentBase64)
+    {
+        if (thread == null || !Connected)
+        {
+            Notify(NotificationSeverity.Warning, "Choose a thread first", "The image is sent to the thread shown.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+            fileName = $"image-{DateTime.Now:yyyyMMdd-HHmmss}.{contentType.Split('/')[^1].Replace("jpeg", "jpg")}";
+        await chat.SendImageAsync(fileName, contentType, contentBase64);
+    }
+
+    [JSInvokable]
+    public void OnImageTooBig(string fileName) =>
+        Notify(NotificationSeverity.Warning, "Image too big", $"{fileName}: {KntConst.MaxLenResourceFile / 1_000_000.0:0.#} MB at most.");
+
+    [JSInvokable]
+    public void OnNotAnImage() =>
+        Notify(NotificationSeverity.Warning, "Only images", "Only images (png, jpg, gif, webp) can be sent to the chat room.");
+
+    private void Notify(NotificationSeverity severity, string summary, string detail) =>
+        notificationService.Notify(new NotificationMessage { Severity = severity, Summary = summary, Detail = detail, Duration = 6000 });
 
     private void OnChatChanged() => InvokeAsync(StateHasChanged);
 
