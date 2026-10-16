@@ -1,0 +1,137 @@
+/* Only theme variables, so the panel follows the light/dark theme. Same look as the AI assistant's sessions. */
+
+.chat-threads {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5rem;
+}
+
+.chat-threads-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.25rem 0.625rem;
+    margin-bottom: 0.5rem;
+    border-bottom: var(--rz-border-normal);
+}
+
+.chat-threads-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--rz-primary-lighter);
+    color: var(--rz-primary);
+}
+
+    .chat-threads-icon ::deep .rzi {
+        font-size: 1.125rem;
+    }
+
+.chat-threads-title {
+    flex: 1;
+    font-family: var(--knt-heading-font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+}
+
+.chat-threads-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 2rem;
+    text-align: center;
+    color: var(--rz-text-secondary-color);
+}
+
+    .chat-threads-empty ::deep .rzi {
+        font-size: 2.5rem;
+        opacity: 0.5;
+    }
+
+/* The list blends into the panel: no box of its own, rounded items. */
+.chat-threads ::deep .chat-threads-list {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    border: none;
+    background-color: transparent;
+}
+
+    .chat-threads ::deep .chat-threads-list .rz-listbox-item {
+        margin-bottom: 0.125rem;
+        padding: 0.5rem;
+        border-radius: var(--rz-border-radius);
+    }
+
+.chat-thread {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+    .chat-thread ::deep .rzi {
+        flex: none;
+        margin-top: 0.125rem;
+        font-size: 1.125rem;
+        color: var(--rz-primary);
+    }
+
+.chat-thread-text {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Up to two lines of the topic. */
+.chat-thread-topic {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-weight: 500;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+/* A thread with unread messages stands out. */
+.chat-thread-unread .chat-thread-topic {
+    font-weight: 700;
+}
+
+.chat-thread-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.chat-thread-followed {
+    display: inline-flex;
+}
+
+    .chat-thread-followed ::deep .rzi {
+        margin: 0;
+        font-size: 0.875rem;
+        color: inherit;
+    }
+
+.chat-thread ::deep .chat-thread-badge {
+    flex: none;
+    align-self: center;
+}
+
+/* The selected thread: the theme's highlight colors for everything in it. */
+.chat-threads ::deep .rz-state-highlight .chat-thread .rzi,
+.chat-threads ::deep .rz-state-highlight .chat-thread-info {
+    color: inherit;
+}

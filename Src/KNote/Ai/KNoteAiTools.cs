@@ -87,7 +87,7 @@ public class KNoteAiTools
         {
             TextSearch = textSearch,
             SearchInDescription = includeContent,
-            ExcludeNoteTypeId = await GetChatSessionsNoteTypeIdAsync()
+            ExcludeNoteTypeIds = await GetExcludedNoteTypeIdsAsync()
         };
 
         var response = await _service.Notes.GetSearchMinimalAsync(search);
@@ -111,15 +111,20 @@ public class KNoteAiTools
         return sb.ToString();
     }
 
-    // The assistant's own sessions (KntConst.ChatSessionsTag notes, of every user) are left out of search_notes:
-    // they are conversations, not the user's notes, and other users' ones must not reach the model.
-    private async Task<Guid?> GetChatSessionsNoteTypeIdAsync()
+    // The assistant's own sessions (KntConst.ChatSessionsTag notes, of every user) and the chat room threads
+    // (KntConst.ChatRoomTag) are left out of search_notes: they are conversations, not the user's notes, and other
+    // users' AI sessions must not reach the model.
+    private async Task<List<Guid>> GetExcludedNoteTypeIdsAsync()
     {
         var response = await _service.NoteTypes.GetAllAsync();
         if (!response.IsValid)
             return null;
 
-        return response.Entity?.FirstOrDefault(t => t.Name == KntConst.ChatSessionsTag)?.NoteTypeId;
+        var excluded = response.Entity?
+            .Where(t => t.Name == KntConst.ChatSessionsTag || t.Name == KntConst.ChatRoomTag)
+            .Select(t => t.NoteTypeId)
+            .ToList();
+        return excluded?.Count > 0 ? excluded : null;
     }
 
     [Description("Gets the full detail of a single note (including its Description/content) by NoteId or NoteNumber.")]

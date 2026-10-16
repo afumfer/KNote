@@ -140,7 +140,8 @@ public interface IViewSelector<TItem> : IViewEmbeddable { ... }
 ```
 
 Más interfaces específicas de un caso de uso concreto: `IViewKNoteManagement`, `IViewPostIt<T>`,
-`IViewChat`, `IViewServerCOM`, `IViewHeavyProcess`, `IViewNotesSelector` (`IViewSelector<NoteMinimalDto>` +
+`IViewChat`, `IViewChatRoom` (`IViewChat` + los refrescos del chat room), `IViewServerCOM`, `IViewHeavyProcess`,
+`IViewNotesSelector` (`IViewSelector<NoteMinimalDto>` +
 `INotesListSnapshotProvider`, ver "Informes imprimibles").
 
 `IFactoryViews` (`Core/IFactoryViews.cs`) históricamente declaraba **una sobrecarga de `View(...)` por cada
@@ -296,7 +297,8 @@ abierto. Igual con las filas del panel de alarmas (`AppInfoAlarmRow.RepositoryAl
 el marcador `LEGACY(repository-alias)` (un `grep` lo encuentra entero) y se podrá quitar cuando todas las
 instalaciones hayan abierto sus repositorios con esta versión.
 
-**Secretos**: `SmtpPassword` (`Email.Password`), `AiProviderRef.ApiKey` y las `ConnectionString` que llevan
+**Secretos**: `SmtpPassword` (`Email.Password`), `AiProviderRef.ApiKey`, el token del chat room (`ChatHubConfig.Token`)
+y las `ConnectionString` que llevan
 `Password=`/`Pwd=` se guardan cifrados con DPAPI (usuario actual) como `dpapi:<base64>`. El cifrado ocurre solo
 en la capa de fichero (`AppUserSettingsSecrets` + `ISecretProtector`/`DpapiSecretProtector`); en memoria y en la
 UI son texto plano. `Model` no conoce el cifrado (lo comparten `Server` y `Client`). Un valor sin prefijo se lee
@@ -442,7 +444,8 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   (`HtmlEditorControl`, motor de Internet Explorer en modo IE7: sin `rgba()`, por eso el saneador escribe los
   colores como `#rrggbb`) recibe `Service.Notes.UtilSanitizeHtml(...)`. Además esas vistas no ejecutan scripts
   (`KntEditView.ContentScriptsEnabled = false`, solo para el HTML mostrado con `ShowNavigationContent`; una URL
-  navegada sí los ejecuta). El chat de IA (`AiChatHtml`) tiene su propia página con scripts y escapa el HTML.
+  navegada sí los ejecuta). El chat de IA (`AiChatHtml`) y el chat room (`ChatRoomHtml`) tienen su propia página
+  con scripts y escapan el HTML.
   Al pasar una nota HTML a Markdown (`Service.Notes.UtilHtmlToMarkdown`, ReverseMarkdown) los colores y fuentes
   dados con `style` (`span`, `p`, `div`..., típicos del texto pegado) se pasan antes a un `<font style>`
   (`Service/Core/KntHtmlStylesForMarkdown`), que el conversor conserva tal cual; si no, se perderían.
@@ -555,6 +558,43 @@ Particularidades de WebView2/Chromium que motivan el diseño de `ReportPreviewFo
   interno (`<a href="#id">` → elemento con ese `id`) y `ReportHtml.FillPageReferences` rellena los
   marcadores `ReportHtml.PageReference(id)` antes de mostrar la versión final. Los marcadores tienen ancho
   fijo para que rellenarlos no cambie la paginación.
+
+## Chat room (`KntChatCtrl`, `KntChatForm`)
+
+El chat room es el del `Server` (hub SignalR, ver `Server/CLAUDE.md` y `Model/Dto/ChatRoomHubContract`), no el de
+un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
+
+- **Identidad en el servidor**: `ClientWin` no tiene cuenta en el `Server`. En Opciones, pestaña **Chat room**, el
+  usuario se identifica una vez (`ChatRoomServer.SignInAsync`: `api/users/login` junto al hub, que se deduce de la
+  URL del hub con `ChatRoomServer.BaseUrl`) y se comprueba la conexión (`TestConnectionAsync`). Solo se guardan
+  `ChatHubConfig.UserName` y `Token` (secreto DPAPI); la contraseña no. El token pertenece al servidor de la URL:
+  cambiarla lo olvida (`OptionsEditorForm.ControlsToModel`). `ChatHubConfig.UserName` es el usuario del chat
+  (no `Store.AppUserName`): decide qué mensajes son "propios".
+- **`KntChatCtrl`** (Staff, de aplicación) habla con el hub a través de `Core/IChatRoomConnection`
+  (`ChatRoomConnection` = `HubConnection` con `AccessTokenProvider` y `WithAutomaticReconnect`; `ConnectionFactory`
+  es `internal` para los tests). Mismo comportamiento que la Web (`Client/AppStoreService/ChatRoomHub`): sigue los
+  hilos en los que participa el usuario y los que abre, los vuelve a suscribir al reconectar, cuenta los no leídos
+  y reordena la lista por actividad. Los callbacks del hub llegan en hilos del pool y se pasan al hilo de UI
+  (`UiContext`). Llama a la vista solo si ya existe (`IViewChatRoom`: `RefreshThreads`, `RefreshConversation`,
+  `AppendMessage`, `RefreshOnlineUsers`, `RefreshConnectionState`): un script no la tiene. `KNoteManagementCtrl` lo
+  arranca oculto al iniciar la app y muestra la vista con `ReceiveMessage` (mensaje de otro usuario). KntScript:
+  `SendMessage` sin hilo mostrado escribe en el hilo `General`. Fallos de conexión como antes: al arrancar,
+  `ChatHubAutoConnectDisabled` y aviso no bloqueante; un 401/403 es `NotAuthorized` ("sign in again from Options").
+- **Imágenes**: `SendImageAsync(nombre, bytes)` valida tipo y tamaño, las sube con
+  `ChatRoomServer.UploadImageAsync` (REST, no el hub; `ImageUploader` es `internal` para los tests) y envía su
+  Markdown como mensaje. La vista las acepta con Ctrl+V (imagen del portapapeles o ficheros copiados), soltadas
+  sobre la caja del mensaje o con **Image ...**; en la conversación el soltar está desactivado
+  (`WebViewControl.AllowExternalDrop = false`), porque WebView2 la sustituiría por el fichero.
+- **`KntChatForm`**, maquetada como `KNoteAIAssistantForm`: conversación (WebView2, `Views/ChatRoomWebRenderer` +
+  `Core/ChatRoomHtml`, pura y testeada: carga la página del hilo una vez y añade cada mensaje por script; baja al
+  final con cada mensaje y al cargarse sus imágenes) sobre la caja del mensaje (Enter envía, Mayús+Enter nueva
+  línea), hilos a la derecha (25 % la primera vez) y barra de estado. La página lleva un `<base href>` del servidor:
+  con `MountResourceContainerOnStartup` las URLs de las imágenes pueden ser relativas. Enlaces e imágenes pulsadas
+  se abren en el navegador. Ventana y paneles en `AppUserState.ChatRoomWindow`.
+- **Comprobar la ventana sin la app**: un WinExe de pruebas que referencie `ClientWin.csproj` puede abrir
+  `KntChatCtrl`/`KntChatForm` contra un `Server` de pruebas y capturarla con `PrintWindow(..., PW_RENDERFULLCONTENT)`
+  (WebView2 incluido). Termínalo con `Environment.Exit`: `Store.SaveConfig()` escribe siempre en
+  `%LocalAppData%\KNote`, así que cerrar la ventana como un usuario sobrescribiría la configuración real.
 
 ## Tests (`ClientWin.Tests`)
 

@@ -1,7 +1,7 @@
 ﻿using KNote.Client.AppStoreService.ClientDataServices;
 using KNote.Client.Helpers;
+using KNote.Model.Dto;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.SignalR.Client;
 
 namespace KNote.Client.AppStoreService;
 
@@ -11,7 +11,6 @@ public class Store : IStore, IDisposable
 
     private readonly HttpClient _httpClient;
     private readonly NavigationManager _navigationManager;
-    private HubConnection _hubConnection;
     private AppState _appState;
 
     #endregion
@@ -24,16 +23,8 @@ public class Store : IStore, IDisposable
         _navigationManager = navigationManager;
         
         _appState = new AppState();
-        
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(navigationManager.ToAbsoluteUri("chathub"))
-            .Build();
 
-        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-        {
-            var encodeMessage = $"{user}: {message}";
-            AppState.AddChatMessage(encodeMessage);
-        });                
+        ChatRoom = new ChatRoomHub(_appState, httpClient, navigationManager.ToAbsoluteUri(ChatRoomHubContract.Path.TrimStart('/')));
     }
 
     #endregion 
@@ -137,17 +128,7 @@ public class Store : IStore, IDisposable
         }
     }
 
-    public async Task ChatSendMessageAsync(string messageType, string? userInput, string? messageInput)
-    {
-        await _hubConnection.SendAsync("SendMessage", userInput, messageInput);
-    }
-
-    public bool ChatIsConnected => _hubConnection.State == HubConnectionState.Connected;
-
-    public async Task ChatStartAsync()
-    {
-        await _hubConnection.StartAsync();
-    }
+    public ChatRoomHub ChatRoom { get; }
 
     #endregion
 
@@ -155,7 +136,7 @@ public class Store : IStore, IDisposable
 
     public void Dispose()
     {
-        _ = _hubConnection.DisposeAsync();
+        _ = ChatRoom.DisposeAsync();
     }
 
     #endregion

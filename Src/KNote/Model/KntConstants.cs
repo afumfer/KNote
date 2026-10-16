@@ -38,6 +38,12 @@ public static class KntConst
     public static string AiProviderAttributeName { get; private set; } = "AiProvider";
     public static string AiModelAttributeName { get; private set; } = "AiModel";
 
+    // Chat room threads are persisted as notes of this NoteType, kept in this folder (see IKntChatRoomService).
+    // The general thread is the one KntScript writes to when no other thread is given.
+    public static string ChatRoomTag { get; private set; } = "@KNoteChatRoom";
+    public static string ChatRoomFolderName { get; private set; } = "KNote Chat Room";
+    public static string ChatRoomGeneralThreadTopic { get; private set; } = "General";
+
     // SystemValues rows (scope SYSTEM) kept by KntSchemaUpdater: the schema revision, and the repository's
     // name and id. The id is a Guid given to each database once, which ClientWin uses as its key.
     public static string SystemScope { get; private set; } = "SYSTEM";

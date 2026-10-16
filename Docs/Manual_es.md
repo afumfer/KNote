@@ -19,12 +19,12 @@ La aplicación de escritorio de Windows guarda su configuración en la carpeta `
 
 | Fichero | Qué contiene | Cuándo cambia |
 |---|---|---|
-| `KNoteData.config` | Lo que tú configuras: cómo entras, repositorios (sus nombres se guardan en sus bases de datos, ver *Repositorios*), proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat hub y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
+| `KNoteData.config` | Lo que tú configuras: cómo entras, repositorios (sus nombres se guardan en sus bases de datos, ver *Repositorios*), proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat room (su servidor y tu token de acceso) y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
 | `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), última carpeta activa, posición y tamaño de las ventanas, disposición de las listas, paneles visibles, las filas del panel de alarmas, y el último proveedor de IA y las opciones de vista del asistente de IA. | Mientras usas la aplicación. |
 
 Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borrar `KNoteData.config` hace que KaNote arranque como si fuera la primera vez: tus bases de datos no se borran, pero se pierde la lista de repositorios y de proveedores de IA.
 
-**Contraseñas y API keys.** La contraseña de la cuenta de correo, las API keys de los proveedores de IA y la contraseña incluida en la cadena de conexión de un repositorio (autenticación SQL) se guardan cifradas con la protección de datos de Windows, ligadas a tu usuario de Windows y a este equipo. Las cadenas de conexión sin contraseña (SQLite, autenticación de Windows) siguen siendo legibles. Si copias `KNoteData.config` a otro equipo o usuario, esos secretos no se pueden descifrar: KaNote te indica al arrancar cuáles debes volver a introducir, y el resto se carga con normalidad. Un secreto escrito en texto plano a mano en el fichero se acepta y se cifra la siguiente vez que se guarde.
+**Contraseñas y API keys.** La contraseña de la cuenta de correo, las API keys de los proveedores de IA, el token de acceso del chat room y la contraseña incluida en la cadena de conexión de un repositorio (autenticación SQL) se guardan cifradas con la protección de datos de Windows, ligadas a tu usuario de Windows y a este equipo. Las cadenas de conexión sin contraseña (SQLite, autenticación de Windows) siguen siendo legibles. Si copias `KNoteData.config` a otro equipo o usuario, esos secretos no se pueden descifrar: KaNote te indica al arrancar cuáles debes volver a introducir, y el resto se carga con normalidad. Un secreto escrito en texto plano a mano en el fichero se acepta y se cifra la siguiente vez que se guarde.
 
 **Copias de seguridad.** Cada vez que se guarda un fichero, la versión anterior se conserva a su lado como `KNoteData.config.bak` / `KNoteState.config.bak`. Si un fichero no se puede leer, KaNote carga su `.bak` y te avisa.
 
@@ -121,7 +121,7 @@ Si el código tiene cambios sin guardar, **New**, **Open** y cerrar la ventana p
 
 La ventana del asistente de IA muestra la conversación completa en su zona superior. Escribe una pregunta debajo y pulsa **Send**. La lista que hay junto a **New session** elige el modelo de IA que responde. A la derecha, el panel **Sessions** muestra tus conversaciones anteriores (ver *Sesiones del asistente de IA* más abajo).
 
-El asistente también puede trabajar con tus notas: pídele que busque notas sobre algo, que te diga qué contiene una nota o que apunte una tarea, y usará las notas del repositorio en el que estás trabajando. Una tarea que crea se guarda en tu carpeta por defecto y se abre en el editor de notas, donde puedes cambiarla, dejarla o borrarla. Las propias sesiones del asistente quedan fuera cuando busca en tus notas.
+El asistente también puede trabajar con tus notas: pídele que busque notas sobre algo, que te diga qué contiene una nota o que apunte una tarea, y usará las notas del repositorio en el que estás trabajando. Una tarea que crea se guarda en tu carpeta por defecto y se abre en el editor de notas, donde puedes cambiarla, dejarla o borrarla. Las propias sesiones del asistente y los hilos del chat room quedan fuera cuando busca en tus notas.
 
 La conversación puede verse de dos formas, que se eligen con los botones que hay encima:
 
@@ -157,6 +157,38 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 **Privacidad.** Las sesiones son notas normales: cualquiera que pueda ver la carpeta **AI Assistant sessions** de un repositorio compartido puede abrirlas como cualquier otra nota. No escribas en una conversación nada que no escribirías en una nota de ese repositorio.
 
 **Aplicación de escritorio.** Las sesiones solo se guardan cuando abres el asistente desde el menú. Cuando un script de KntScript o el código en lenguaje natural de una nota (`ln`) usa el asistente, no se guarda nada (un script puede activarlo con `PersistSession = true`). Entonces el panel **Sessions** se oculta.
+
+### Chat room
+
+El chat room permite a los usuarios de un servidor Web de KaNote hablar en **hilos**: cada hilo es una conversación sobre un tema, y cualquier usuario con rol Staff o superior en ese servidor puede leerlo, unirse y escribir en él. La aplicación Web y la de escritorio comparten el mismo chat room, el del servidor Web: un mensaje escrito en una aparece al momento en la otra.
+
+**Dónde se guardan los hilos.** Cada hilo es una nota del repositorio del servidor Web, del tipo de nota **`@KNoteChatRoom`**, en la carpeta **KNote Chat Room**; el tipo de nota y la carpeta se crean la primera vez que se usa el chat room. El tema de la nota es el del hilo y su descripción es la conversación, en Markdown, con una marca oculta antes de cada mensaje (`<!-- knt-chat:message {...} -->`) que guarda quién lo escribió y cuándo. Quien crea un hilo, escribe en él o le envía una imagen tiene una tarea en su nota que lo vincula a él: son sus participantes. Cada mensaje se guarda en cuanto se envía.
+
+**Seguir hilos.** Mientras estás conectado *sigues* los hilos en los que participas y los que abres: sus mensajes nuevos llegan al momento, y los de un hilo que no estás viendo se cuentan como nuevos en la lista de hilos (el hilo aparece en negrita). También se cuentan los mensajes nuevos de los hilos que no sigues. **Stop following** deja de recibir los mensajes del hilo mostrado hasta que vuelvas a abrirlo. La cabecera de un hilo muestra quién está en él ahora.
+
+**Mensajes.** Se escriben en Markdown (negrita, listas, código, enlaces...): **Enter** envía el mensaje y **Mayús+Enter** empieza una línea nueva. Por tu seguridad, el HTML que contenga un mensaje se muestra como texto. Los enlaces se abren en tu navegador.
+
+**Imágenes.** Pega una imagen en la caja del mensaje o suéltala (png, jpg, gif o webp, hasta 5 MB) y se envía al hilo mostrado. Cada imagen se guarda como un recurso de la nota del hilo, en la carpeta de recursos del servidor Web (la misma que las imágenes de las notas, así que el servidor necesita su configuración de recursos: `ResourcesContainer` y su carpeta y URL), y se envía como un mensaje. Pulsa una imagen para verla a su tamaño.
+
+**El hilo General.** Un script de KntScript que envía un mensaje (`SendChatMessage`, o `SendMessage` del controlador del chat) sin un hilo mostrado escribe en el hilo **General**, que se crea si no existe.
+
+**Privacidad.** Los hilos son notas normales: cualquiera que pueda ver la carpeta **KNote Chat Room** del repositorio del servidor puede abrirlos, y sus imágenes se sirven como ficheros del servidor, como las imágenes de las notas. Los hilos del chat room quedan fuera cuando el asistente de IA busca en tus notas.
+
+### Chat room (aplicación de escritorio)
+
+**Identificarse en el servidor del chat room.** La aplicación de escritorio trabaja con sus propios repositorios, así que se identifica una vez en el servidor Web del chat room: en **Options**, pestaña **Chat room**, escribe la **chat hub url** (la dirección del servidor Web terminada en `/chathub`, p. ej. `https://servidor/KNote/chathub`), tu **usuario** y tu **contraseña** en ese servidor, y pulsa **Sign in**. KaNote los comprueba y se conecta para probarlos; después guarda solo el token de acceso que da el servidor (cifrado, como los demás secretos de `KNoteData.config`) y olvida la contraseña. **Acepta** las opciones para conservarlo. El token dura un año: si el servidor lo rechaza (caducó, cambió tu rol allí...), vuelve a identificarte. **Sign out** lo olvida, igual que cambiar la URL.
+
+**La ventana.** **Chat room ...** en el menú la abre. Al arrancar, la aplicación se conecta en segundo plano con la ventana oculta, y muestra la ventana cuando otro usuario escribe en un hilo que sigues; cerrar la ventana solo la oculta. A la izquierda, la conversación del hilo mostrado y, debajo, la caja del mensaje; a la derecha, la lista **Threads** (**New**: los mensajes que han llegado desde la última vez que lo viste; **Activity**: su último mensaje). **New thread** pide su tema; **Stop following**, encima de la conversación, muestra también quién está ahora en el hilo; **Image ...** elige una imagen para enviarla. La barra de estado muestra la conexión, tu usuario y el servidor. El menú **Actions** los repite: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** y **Reconnect**. KaNote recuerda la posición y el tamaño de la ventana, el ancho del panel de hilos y la altura de la caja del mensaje.
+
+**Imágenes.** `Ctrl+V` en la caja del mensaje envía la imagen del portapapeles (una captura de pantalla, por ejemplo) o los ficheros de imagen copiados en el explorador de archivos; los ficheros de imagen también se pueden soltar sobre la caja del mensaje, o elegir con **Image ...**.
+
+Si la conexión falla al arrancar, KaNote te lo indica sin interrumpir y deja de conectarse al arrancar hasta que vuelvas a identificarte desde **Options**.
+
+### Chat room (aplicación Web)
+
+**Chat room**, en el menú lateral (rol Staff o superior), abre la página del chat room: la conversación del hilo mostrado a la izquierda, con sus participantes y quién está conectado ahora, y la lista **Threads** a la derecha, con los mensajes nuevos de cada uno. Arrastra la barra entre ambos para cambiar su tamaño (el navegador lo recuerda). La cabecera muestra el estado de la conexión, **Stop following** y **New thread**.
+
+La aplicación Web se conecta al chat room al iniciar sesión y lo deja al cerrarla, así que mientras está abierta te avisa de los mensajes nuevos de los hilos que sigues, aunque estés en otra página. Las imágenes se pegan en la caja del mensaje o se sueltan sobre la conversación; al pulsar una se abre en una pestaña nueva.
 
 ### Home (aplicación Web)
 

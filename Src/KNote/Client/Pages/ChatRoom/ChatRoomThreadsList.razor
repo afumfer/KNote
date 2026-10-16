@@ -1,0 +1,76 @@
+@* The chat room threads, most recent activity first: choosing one shows it. Each one tells whether it is followed
+   in this session and how many messages arrived since it was last seen. Presentation only (see ChatRoom). *@
+
+@inject TooltipService tooltipService
+
+<div class="chat-threads">
+    <div class="chat-threads-header">
+        <span class="chat-threads-icon"><RadzenIcon Icon="forum" /></span>
+        <span class="chat-threads-title">Threads</span>
+        @if (Threads.Count > 0)
+        {
+            <RadzenBadge BadgeStyle="BadgeStyle.Primary" Shade="Shade.Lighter" IsPill="true" Text="@Threads.Count.ToString()" />
+        }
+    </div>
+
+    @if (Threads.Count == 0)
+    {
+        <div class="chat-threads-empty">
+            <RadzenIcon Icon="forum" />
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">No threads yet.</RadzenText>
+            <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">Start the first one with New thread.</RadzenText>
+        </div>
+    }
+    else
+    {
+        <RadzenListBox TValue="Guid" Data="@Threads" ValueProperty="ThreadId" Value="@(SelectedThreadId ?? Guid.Empty)"
+                       Change="@OnChange" Disabled="@Disabled" class="chat-threads-list">
+            <Template>
+                @{
+                    var thread = (ChatRoomThreadInfoDto)context;
+                    var unread = UnreadCount(thread.ThreadId);
+                }
+                <div class="chat-thread @(unread > 0 ? "chat-thread-unread" : "")">
+                    <RadzenIcon Icon="@(thread.Topic == KntConst.ChatRoomGeneralThreadTopic ? "campaign" : "tag")" />
+                    <div class="chat-thread-text">
+                        <div class="chat-thread-topic" title="@thread.Topic">@thread.Topic</div>
+                        <div class="chat-thread-info">
+                            <span>#@thread.NoteNumber</span>
+                            <span>@thread.ModificationDateTime.ToString("g")</span>
+                            @if (IsFollowed(thread.ThreadId))
+                            {
+                                <span class="chat-thread-followed"><RadzenIcon Icon="notifications_active"
+                                    MouseEnter="@(args => tooltipService.Open(args, "Followed: its new messages are notified", new TooltipOptions { Position = TooltipPosition.Left }))" /></span>
+                            }
+                        </div>
+                    </div>
+                    @if (unread > 0)
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="true" Text="@(unread > 99 ? "99+" : unread.ToString())" class="chat-thread-badge" />
+                    }
+                </div>
+            </Template>
+        </RadzenListBox>
+    }
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public List<ChatRoomThreadInfoDto> Threads { get; set; } = null!;
+
+    // The thread shown (null: none).
+    [Parameter] public Guid? SelectedThreadId { get; set; }
+
+    [Parameter] [EditorRequired] public Func<Guid, int> UnreadCount { get; set; } = null!;
+
+    [Parameter] [EditorRequired] public Func<Guid, bool> IsFollowed { get; set; } = null!;
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public EventCallback<Guid> OnSelect { get; set; }
+
+    private async Task OnChange(object value)
+    {
+        if (value is Guid threadId && threadId != Guid.Empty && threadId != SelectedThreadId)
+            await OnSelect.InvokeAsync(threadId);
+    }
+}

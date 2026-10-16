@@ -10,7 +10,7 @@ para el frontend Blazor que consume esta API.
 Un único proceso ASP.NET Core que:
 
 - expone la **API REST** (`Controllers/`, rutas `api/[controller]`) que usa `Client`;
-- expone el **hub SignalR** del chat (`Hubs/ChatHub`, en `/chathub`);
+- expone el **hub SignalR** del chat room (`Hubs/ChatHub`, en `/chathub`; ver «Chat room»);
 - **hospeda la app Blazor WebAssembly** `Client` (`UseBlazorFrameworkFiles` + `MapFallbackToFile("index.html")`),
   todo bajo la base `/KNote` (`app.UsePathBase("/KNote")`, a juego con `<base href="/KNote/">` de `Client`).
 
@@ -41,7 +41,9 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
   Una sola base de datos por instancia de `Server` (a diferencia de `ClientWin`, que puede tener varias).
 - Autenticación JWT bearer (clave simétrica `AppSettings.Secret`, sin validar issuer/audience,
   `ClockSkew = 0`), `AddAuthorization`, CORS `KntPolicy` abierto (`*`), SignalR, compresión de respuesta,
-  NLog (`nlog.config`, logs en `Log/`).
+  NLog (`nlog.config`, logs en `Log/`). Para el hub (`ChatRoomHubContract.Path`) el token también se lee del
+  parámetro `access_token` (`JwtBearerEvents.OnMessageReceived`): WebSockets y SSE no envían la cabecera
+  `Authorization`. `ChatRoomManager` se registra como singleton.
 - Los estáticos de `Client` (`UseStaticFiles` y `MapFallbackToFile("index.html")`) se sirven con
   `Cache-Control: no-cache`: sus URLs no cambian entre versiones (`index.html`, `css/*.css`,
   `KNote.Client.styles.css`) y sin esa cabecera el navegador sigue usando los antiguos tras un despliegue (HTML
@@ -182,6 +184,31 @@ si están vacías, las variables `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (`AiChatCl
 `Ai/IAiChatClientProvider` construye el `IChatClient` (`AiChatClientFactory` de `KNote.Ai`); existe para que los
 tests lo sustituyan.
 
+## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
+
+El contrato (rutas, métodos y eventos) está en `Model/Dto/ChatRoomHubContract`, compartido con `Client` y `ClientWin`.
+Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
+
+- **`ChatHub`** (`/chathub`, `[Authorize(Roles = "Staff, ProjectManager, Admin")]`): capa fina sobre
+  `IKntService.ChatRooms`. Métodos `GetThreads`, `CreateThread`, `GetGeneralThread`, `Subscribe`, `Unsubscribe` y
+  `SendMessage`, que devuelven `Result<T>` (un error es un `Result` inválido, nunca una excepción al cliente).
+  Eventos: `MessageReceived` (al grupo del hilo), `ThreadCreated` y `ThreadActivity` (a todos) y
+  `OnlineUsersChanged` (al grupo). **Un grupo de SignalR por hilo** (`chatroom:{id}`): un cliente recibe los mensajes
+  de los hilos a los que se suscribe en su conexión, y se suscribe de nuevo al reconectar (los grupos son de la
+  conexión). Escribir no exige suscripción.
+- **`ChatRoomManager`** (singleton; un `Hub` vive una llamada): qué hilos sigue cada conexión (los usuarios
+  conectados de cada hilo, `OnDisconnectedAsync` los limpia), **un bloqueo por hilo** para guardar y difundir los
+  mensajes en orden (el servicio no serializa: añadir un mensaje reescribe la nota) y otro para no crear dos veces
+  el hilo `General`.
+- **Imágenes**: no van por el hub (los mensajes de SignalR son pequeños). `POST api/chatroom/threads/{id}/images`
+  (`ChatRoomController`, Staff+, cuerpo `ChatRoomImageDto` en base64) las guarda como recursos de la nota del hilo
+  (`ChatRooms.AddImageAsync`) y devuelve su URL y su Markdown con la URL absoluta; el cliente envía ese Markdown
+  como un mensaje. En la nota se guarda la ruta relativa a los recursos, como en las descripciones: el hub aplica
+  `UtilUpdateResourceInDescriptionForWrite` al guardar y `ForRead` al dar los mensajes (`SendMessage`,
+  `Subscribe`), y fija `ResourcesContainerRootPath`/`RootUrl` del host si están vacíos, como `NotesController` (la
+  URL, de la petición de la conexión). Con `MountResourceContainerOnStartup` la URL de los recursos puede ser
+  relativa (`/Ruta`): la Web la resuelve sola y ClientWin con un `<base href>` del servidor.
+
 ## Otros endpoints
 
 - `SystemValuesController`: solo Admin. `WeatherForecastController`: restos de la plantilla.
@@ -215,6 +242,10 @@ En `Tests/` (`KNoteTest.slnx`), ver `CLAUDE.md` raíz:
   (ver `InProcessTestHost.CreateAuthenticatedClientAsync(configure)`). `AiAssistantInProcessTests` usa
   `Helpers/ScriptedAiChatClientProvider`: un modelo con respuestas guionizadas (texto, uso, llamadas a tools)
   envuelto con las tools y la invocación de funciones reales, sin llamar a ningún proveedor.
+  `ChatRoomHubInProcessTests` usa el cliente de SignalR contra el host (`HttpMessageHandlerFactory` del
+  `TestServer`, LongPolling) con usuarios Staff y Guest creados por la API. La fábrica guarda los recursos de las
+  notas en una carpeta temporal propia (`ResourcesFolder`, `ResourcesContainer`, `ResourcesRootUrl`): sin ella se
+  escribirían en el `wwwroot` del proyecto `Server`.
 - `Tests/WebApiIntegrationTests` — contra un `Server` real ya en ejecución.
 
 ## Añadir un endpoint

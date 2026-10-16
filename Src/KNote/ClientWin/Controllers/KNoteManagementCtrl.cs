@@ -413,7 +413,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                     }
                     else
                     {
-                        NotifyMessage($"Chat auto-connect is disabled because the last connection to '{Store.Settings.Connectivity.ChatHub.Url}' failed. Fix the url and test it from Options to re-enable it.");
+                        NotifyMessage($"Chat auto-connect is disabled because the last connection to '{Store.Settings.Connectivity.ChatHub.Url}' failed. Fix the chat room settings and sign in again from Options to re-enable it.");
                     }
                 }
                 //-----------------------------------------------------

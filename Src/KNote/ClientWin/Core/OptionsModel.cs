@@ -110,8 +110,38 @@ public class OptionsModel : SmartModelDtoBase
         }
     }
 
+    // The user signed in to the chat room's Server, and the token it gave (see ChatHubConfig). Set by signing in
+    // from the dialog (the password is not kept), cleared by signing out.
+    private string _chatHubUserName;
+    public string ChatHubUserName
+    {
+        get { return _chatHubUserName; }
+        set
+        {
+            if (_chatHubUserName != value)
+            {
+                _chatHubUserName = value;
+                OnPropertyChanged("ChatHubUserName");
+            }
+        }
+    }
+
+    private string _chatHubToken;
+    public string ChatHubToken
+    {
+        get { return _chatHubToken; }
+        set
+        {
+            if (_chatHubToken != value)
+            {
+                _chatHubToken = value;
+                OnPropertyChanged("ChatHubToken");
+            }
+        }
+    }
+
     // Lives in the application state (set automatically when a connection fails); the dialog can clear
-    // it after a successful connection test.
+    // it after signing in again.
     private bool _chatHubAutoConnectDisabled;
     public bool ChatHubAutoConnectDisabled
     {
@@ -237,6 +267,8 @@ public class OptionsModel : SmartModelDtoBase
             ColorMode = settings.General.ColorMode,
             AuthenticationMode = settings.Security.AuthenticationMode,
             ChatHubUrl = settings.Connectivity.ChatHub.Url,
+            ChatHubUserName = settings.Connectivity.ChatHub.UserName,
+            ChatHubToken = settings.Connectivity.ChatHub.Token,
             ChatHubAutoConnectDisabled = state.Session.ChatHubAutoConnectDisabled,
             SmtpHost = email.Host,
             SmtpPort = email.Port,
@@ -261,6 +293,8 @@ public class OptionsModel : SmartModelDtoBase
         settings.General.ColorMode = ColorMode;
         settings.Security.AuthenticationMode = AuthenticationMode;
         settings.Connectivity.ChatHub.Url = ChatHubUrl;
+        settings.Connectivity.ChatHub.UserName = ChatHubUserName;
+        settings.Connectivity.ChatHub.Token = ChatHubToken;
         state.Session.ChatHubAutoConnectDisabled = ChatHubAutoConnectDisabled;
         email.Host = SmtpHost;
         email.Port = SmtpPort;

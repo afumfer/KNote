@@ -1,0 +1,42 @@
+@using System.ComponentModel.DataAnnotations
+
+@inject DialogService dialogService
+
+@* New chat room thread dialog (ChatRoom opens it framed): the result is the thread's topic, or null. Enter creates it
+   (the form's submit). *@
+
+<EditForm Model="@model" OnValidSubmit="OnCreate">
+
+    <DataAnnotationsValidator />
+
+    <KntDialogFrame Icon="add_comment" Title="New thread" Subtitle="A new conversation of the chat room, open to every Staff user.">
+        <ChildContent>
+            <KntField Label="Topic" Component="Topic" Required="true" Help="What the thread is about. It can't be changed later.">
+                <RadzenTextBox Name="Topic" @bind-Value="@model.Topic" MaxLength="@ChatRoomThreadInfoDto.MaxTopicLength" />
+                <ValidationMessage For="@(() => model.Topic)" />
+            </KntField>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => dialogService.Close(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Create" Icon="add_comment" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
+
+</EditForm>
+
+@code {
+    private readonly ThreadModel model = new();
+
+    private void OnCreate()
+    {
+        dialogService.Close(model.Topic!.Trim());
+    }
+
+    private class ThreadModel
+    {
+        [Required(ErrorMessage = "The topic is required.")]
+        [RegularExpression(@".*\S.*", ErrorMessage = "The topic is required.")]
+        [MaxLength(ChatRoomThreadInfoDto.MaxTopicLength)]
+        public string? Topic { get; set; }
+    }
+}

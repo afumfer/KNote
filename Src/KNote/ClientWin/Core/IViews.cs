@@ -165,6 +165,25 @@ public interface IViewChat : IViewBase
     void VisibleView(bool visible);
 }
 
+// KntChatCtrl's view: the chat room. RefreshView shows everything again; the others, only what changed.
+public interface IViewChatRoom : IViewChat
+{
+    // The threads list (order, unread counts, followed ones).
+    void RefreshThreads();
+
+    // The thread shown (another one, or none), with its messages.
+    void RefreshConversation();
+
+    // A new message of the thread shown, added at the end of its conversation.
+    void AppendMessage(ChatRoomMessageDto message);
+
+    // Who is online in the thread shown.
+    void RefreshOnlineUsers();
+
+    // The state of the connection (and whether the user can write).
+    void RefreshConnectionState();
+}
+
 public interface IViewServerCOM : IViewChat
 {
     void RefreshStatus();

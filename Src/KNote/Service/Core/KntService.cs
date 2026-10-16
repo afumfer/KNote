@@ -143,6 +143,17 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntChatRoomService _chatRooms;
+    public IKntChatRoomService ChatRooms
+    {
+        get
+        {
+            if (_chatRooms == null)
+                _chatRooms = new KntChatRoomService(this);
+            return _chatRooms;
+        }
+    }
+
     public RepositoryRef RepositoryRef
     {
         get { return _repository.RepositoryRef; }

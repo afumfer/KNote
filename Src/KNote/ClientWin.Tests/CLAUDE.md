@@ -19,6 +19,9 @@ public Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId) =>
     (GetExtendedAsyncImpl ?? throw new NotSupportedException($"{nameof(GetExtendedAsync)} not configured for this test"))(noteId);
 ```
 
+`Fakes/FakeChatRoomConnection.cs` sustituye la conexión al hub del chat room de `KntChatCtrl` (sus llamadas
+responden con `InvokeImpl` y el test lanza los callbacks del hub con `Raise`; ver `KntChatCtrlTests`).
+
 `Fakes/FakeKntService.cs` compone los fakes por dominio (`NotesFake`, `UsersFake`, ...) tras las
 propiedades de `IKntService`; `Fakes/TestFactoryViews.cs` es un `IFactoryViews` vacío que cada test rellena
 con los `IView*` fake que necesite. Para instanciar un `*Ctrl` bajo test: `Store` real + `TestFactoryViews`

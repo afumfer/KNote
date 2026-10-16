@@ -131,7 +131,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
 - `Service/Core` — clases base `KntService`/`IKntService` más `ServiceRef` (selección de repo/ORM, ver
   arriba).
 - `Service/Interfaces` + `Service/Services` — un par interfaz/implementación por objeto de dominio (Note,
-  Folder, KAttribute, NoteType, SystemValues, User, AiSession).
+  Folder, KAttribute, NoteType, SystemValues, User, AiSession, ChatRoom).
 - `Service/ServicesCommands` — clases de comando (`KntNoteCommands`, `KntFolderCommands`, etc.) construidas
   sobre `IPluginCommand`/`KntCommandServiceBase`. Exponen las operaciones de servicio a `KntScript`, el
   "lenguaje minimalista de automatización" mencionado en el README, invocado desde la consola de scripts de
@@ -176,14 +176,29 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   Admin/ProjectManager: para que el asistente funcione con Staff, esa creación se hace dentro de un ámbito
   `KntAuthorizationBypass` (`Service/Core`, `internal`, `AsyncLocal`, con motivo en el log), que solo omite la
   comprobación de rol (no la validación, las reglas ni los eventos de los comandos) y solo mientras dura el
-  `using`. Úsalo solo así: dentro de un comando ya autorizado y para operaciones concretas. Solo el usuario de
+  `using`. Úsalo solo así: dentro de un comando ya autorizado y para operaciones concretas. Esa creación (y el
+  usuario actual) la comparten las funciones que guardan sus datos en notas de un tipo del sistema:
+  `Service/Core/KntSystemNotes` (`internal`), que usan las sesiones y los hilos del chat room. Solo el usuario de
   la sesión puede leerla o guardarla. La conversación se guarda en `Description`
   con `Model/Dto/AiChatSessionTranscript`: Markdown legible con un comentario HTML oculto por mensaje (el del
   asistente lleva el uso en JSON), del que se recuperan los turnos (`AiChatTurnDto`) exactamente; es el
   formato común de `ClientWin` y la Web, que se retoman las sesiones la una a la otra (con su proveedor y
-  modelo si siguen configurados: `AiProviderSelection.ForSession`). `search_notes` deja fuera estas notas
-  (`NotesSearchDto.ExcludeNoteTypeId`). Usos: `KNoteAIAssistantCtrl` (ver `ClientWin/CLAUDE.md`) y
-  `AiAssistantController` + página `AIAssistant` (ver `Server/CLAUDE.md` y `Client/CLAUDE.md`).
+  modelo si siguen configurados: `AiProviderSelection.ForSession`). `search_notes` deja fuera estas notas y los
+  hilos del chat room (`NotesSearchDto.ExcludeNoteTypeIds`). Usos: `KNoteAIAssistantCtrl` (ver
+  `ClientWin/CLAUDE.md`) y `AiAssistantController` + página `AIAssistant` (ver `Server/CLAUDE.md` y
+  `Client/CLAUDE.md`).
+- **Hilos del chat room** (`IKntService.ChatRooms`, comandos en `KntChatRoomCommands.cs`, Staff). Cada hilo es una
+  nota del tipo `@KNoteChatRoom` (`KntConst.ChatRoomTag`) en la carpeta `KNote Chat Room`, creados la primera vez
+  como los de las sesiones (`KntSystemNotes`). Los hilos son públicos para Staff+; quien crea un hilo, escribe en
+  él o le envía una imagen tiene una `NoteTask` que lo hace participante (`IsParticipant`, `TaskUserId`). La
+  conversación va en `Description` con `Model/Dto/ChatRoomTranscript` (Markdown con un comentario
+  `<!-- knt-chat:message {...} -->` por mensaje: id, usuario, fecha), y el usuario de cada mensaje lo pone el
+  servicio. Las imágenes son recursos de la nota (`AddImageAsync`: png/jpg/gif/webp, `KntConst.MaxLenResourceFile`)
+  y se envían como un mensaje con su Markdown, con la ruta relativa a los recursos como las descripciones. El hilo
+  `General` (`GetGeneralAsync`) es el de KntScript. **El servicio no ordena las escrituras**: añadir un mensaje lee
+  y reescribe la nota, así que el que llama las serializa por hilo (el hub del Server, ver `Server/CLAUDE.md`).
+  Los clientes son `KntChatCtrl` (ClientWin, a través del hub) y la página `ChatRoom` (Web); el contrato del hub
+  está en `Model/Dto/ChatRoomHubContract`.
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 
@@ -204,10 +219,12 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
   `NoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
-  proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), además del scaffold
+  proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatRoomController` (imágenes del chat
+  room), además del scaffold
   `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
-- `Server/Hubs/ChatHub.cs` — hub de SignalR, mapeado en `/chathub`.
+- `Server/Hubs/ChatHub.cs` — hub de SignalR del chat room, mapeado en `/chathub`: exige el JWT del usuario (Staff+),
+  un grupo por hilo y `ChatRoomManager` (presencia y escrituras en orden por hilo). Ver `Server/CLAUDE.md`.
 - `Server` también sirve la app `Client` Blazor compilada
   (`Microsoft.AspNetCore.Components.WebAssembly.Server`), todo bajo la base `/KNote`.
 - Plantilla de controlador, JWT, configuración y tests: `Server/CLAUDE.md`.

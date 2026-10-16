@@ -59,9 +59,17 @@ namespace KNote.ClientWin.Views
             this.checkAutoSaveActivated = new System.Windows.Forms.CheckBox();
             this.checkAlarmActivated = new System.Windows.Forms.CheckBox();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label1 = new System.Windows.Forms.Label();
+            this.tabChatRoomOptions = new System.Windows.Forms.TabPage();
+            this.labelChatHubUrl = new System.Windows.Forms.Label();
             this.textChatHubUrl = new System.Windows.Forms.TextBox();
-            this.buttonTestChatHubUrl = new System.Windows.Forms.Button();
+            this.labelChatHubUrlHelp = new System.Windows.Forms.Label();
+            this.labelChatUserName = new System.Windows.Forms.Label();
+            this.textChatUserName = new System.Windows.Forms.TextBox();
+            this.labelChatPassword = new System.Windows.Forms.Label();
+            this.textChatPassword = new System.Windows.Forms.TextBox();
+            this.buttonChatSignIn = new System.Windows.Forms.Button();
+            this.buttonChatSignOut = new System.Windows.Forms.Button();
+            this.labelChatStatus = new System.Windows.Forms.Label();
             this.labelColorMode = new System.Windows.Forms.Label();
             this.comboColorMode = new System.Windows.Forms.ComboBox();
             this.labelAuthenticationMode = new System.Windows.Forms.Label();
@@ -70,6 +78,7 @@ namespace KNote.ClientWin.Views
             this.tabOptions.SuspendLayout();
             this.tabGlobalOptions.SuspendLayout();
             this.tabEmailOptions.SuspendLayout();
+            this.tabChatRoomOptions.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonCancel
@@ -105,6 +114,7 @@ namespace KNote.ClientWin.Views
             // 
             this.tabOptions.Controls.Add(this.tabGlobalOptions);
             this.tabOptions.Controls.Add(this.tabEmailOptions);
+            this.tabOptions.Controls.Add(this.tabChatRoomOptions);
             this.tabOptions.Location = new System.Drawing.Point(6, 6);
             this.tabOptions.Name = "tabOptions";
             this.tabOptions.SelectedIndex = 0;
@@ -117,9 +127,6 @@ namespace KNote.ClientWin.Views
             this.tabGlobalOptions.Controls.Add(this.labelAuthenticationMode);
             this.tabGlobalOptions.Controls.Add(this.comboColorMode);
             this.tabGlobalOptions.Controls.Add(this.labelColorMode);
-            this.tabGlobalOptions.Controls.Add(this.textChatHubUrl);
-            this.tabGlobalOptions.Controls.Add(this.buttonTestChatHubUrl);
-            this.tabGlobalOptions.Controls.Add(this.label1);
             this.tabGlobalOptions.Controls.Add(this.textAutosaveSeconds);
             this.tabGlobalOptions.Controls.Add(this.textAlarmSeconds);
             this.tabGlobalOptions.Controls.Add(this.label2);
@@ -347,37 +354,10 @@ namespace KNote.ClientWin.Views
             this.checkAlarmActivated.Text = "Alarm activated";
             this.checkAlarmActivated.UseVisualStyleBackColor = true;
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 88);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(76, 15);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Chat hub url:";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // textChatHubUrl
-            //
-            this.textChatHubUrl.Location = new System.Drawing.Point(95, 85);
-            this.textChatHubUrl.Name = "textChatHubUrl";
-            this.textChatHubUrl.Size = new System.Drawing.Size(295, 23);
-            this.textChatHubUrl.TabIndex = 8;
-            //
-            // buttonTestChatHubUrl
-            //
-            this.buttonTestChatHubUrl.Location = new System.Drawing.Point(396, 84);
-            this.buttonTestChatHubUrl.Name = "buttonTestChatHubUrl";
-            this.buttonTestChatHubUrl.Size = new System.Drawing.Size(66, 25);
-            this.buttonTestChatHubUrl.TabIndex = 9;
-            this.buttonTestChatHubUrl.Text = "&Test";
-            this.buttonTestChatHubUrl.UseVisualStyleBackColor = true;
-            this.buttonTestChatHubUrl.Click += new System.EventHandler(this.buttonTestChatHubUrl_Click);
-            //
             // labelColorMode
             //
             this.labelColorMode.AutoSize = true;
-            this.labelColorMode.Location = new System.Drawing.Point(13, 128);
+            this.labelColorMode.Location = new System.Drawing.Point(13, 88);
             this.labelColorMode.Name = "labelColorMode";
             this.labelColorMode.Size = new System.Drawing.Size(71, 15);
             this.labelColorMode.TabIndex = 10;
@@ -387,7 +367,7 @@ namespace KNote.ClientWin.Views
             // comboColorMode
             //
             this.comboColorMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboColorMode.Location = new System.Drawing.Point(95, 124);
+            this.comboColorMode.Location = new System.Drawing.Point(95, 85);
             this.comboColorMode.Name = "comboColorMode";
             this.comboColorMode.Size = new System.Drawing.Size(180, 23);
             this.comboColorMode.TabIndex = 11;
@@ -395,7 +375,7 @@ namespace KNote.ClientWin.Views
             // labelAuthenticationMode
             //
             this.labelAuthenticationMode.AutoSize = true;
-            this.labelAuthenticationMode.Location = new System.Drawing.Point(13, 167);
+            this.labelAuthenticationMode.Location = new System.Drawing.Point(13, 128);
             this.labelAuthenticationMode.Name = "labelAuthenticationMode";
             this.labelAuthenticationMode.Size = new System.Drawing.Size(51, 15);
             this.labelAuthenticationMode.TabIndex = 12;
@@ -405,10 +385,117 @@ namespace KNote.ClientWin.Views
             // comboAuthenticationMode
             //
             this.comboAuthenticationMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboAuthenticationMode.Location = new System.Drawing.Point(95, 163);
+            this.comboAuthenticationMode.Location = new System.Drawing.Point(95, 124);
             this.comboAuthenticationMode.Name = "comboAuthenticationMode";
             this.comboAuthenticationMode.Size = new System.Drawing.Size(295, 23);
             this.comboAuthenticationMode.TabIndex = 13;
+            //
+            // tabChatRoomOptions
+            //
+            this.tabChatRoomOptions.Controls.Add(this.labelChatHubUrl);
+            this.tabChatRoomOptions.Controls.Add(this.textChatHubUrl);
+            this.tabChatRoomOptions.Controls.Add(this.labelChatHubUrlHelp);
+            this.tabChatRoomOptions.Controls.Add(this.labelChatUserName);
+            this.tabChatRoomOptions.Controls.Add(this.textChatUserName);
+            this.tabChatRoomOptions.Controls.Add(this.labelChatPassword);
+            this.tabChatRoomOptions.Controls.Add(this.textChatPassword);
+            this.tabChatRoomOptions.Controls.Add(this.buttonChatSignIn);
+            this.tabChatRoomOptions.Controls.Add(this.buttonChatSignOut);
+            this.tabChatRoomOptions.Controls.Add(this.labelChatStatus);
+            this.tabChatRoomOptions.Location = new System.Drawing.Point(4, 24);
+            this.tabChatRoomOptions.Name = "tabChatRoomOptions";
+            this.tabChatRoomOptions.Padding = new System.Windows.Forms.Padding(3);
+            this.tabChatRoomOptions.Size = new System.Drawing.Size(477, 240);
+            this.tabChatRoomOptions.TabIndex = 2;
+            this.tabChatRoomOptions.Text = "Chat room";
+            this.tabChatRoomOptions.UseVisualStyleBackColor = true;
+            //
+            // labelChatHubUrl
+            //
+            this.labelChatHubUrl.AutoSize = true;
+            this.labelChatHubUrl.Location = new System.Drawing.Point(9, 16);
+            this.labelChatHubUrl.Name = "labelChatHubUrl";
+            this.labelChatHubUrl.Size = new System.Drawing.Size(76, 15);
+            this.labelChatHubUrl.TabIndex = 0;
+            this.labelChatHubUrl.Text = "Chat hub url:";
+            //
+            // textChatHubUrl
+            //
+            this.textChatHubUrl.Location = new System.Drawing.Point(127, 12);
+            this.textChatHubUrl.Name = "textChatHubUrl";
+            this.textChatHubUrl.Size = new System.Drawing.Size(313, 23);
+            this.textChatHubUrl.TabIndex = 1;
+            //
+            // labelChatHubUrlHelp
+            //
+            this.labelChatHubUrlHelp.AutoSize = true;
+            this.labelChatHubUrlHelp.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.labelChatHubUrlHelp.Location = new System.Drawing.Point(127, 38);
+            this.labelChatHubUrlHelp.Name = "labelChatHubUrlHelp";
+            this.labelChatHubUrlHelp.Size = new System.Drawing.Size(270, 15);
+            this.labelChatHubUrlHelp.TabIndex = 2;
+            this.labelChatHubUrlHelp.Text = "A KNote Server, e.g. https://server/KNote/chathub";
+            //
+            // labelChatUserName
+            //
+            this.labelChatUserName.AutoSize = true;
+            this.labelChatUserName.Location = new System.Drawing.Point(9, 70);
+            this.labelChatUserName.Name = "labelChatUserName";
+            this.labelChatUserName.Size = new System.Drawing.Size(66, 15);
+            this.labelChatUserName.TabIndex = 3;
+            this.labelChatUserName.Text = "User name:";
+            //
+            // textChatUserName
+            //
+            this.textChatUserName.Location = new System.Drawing.Point(127, 66);
+            this.textChatUserName.Name = "textChatUserName";
+            this.textChatUserName.Size = new System.Drawing.Size(313, 23);
+            this.textChatUserName.TabIndex = 4;
+            //
+            // labelChatPassword
+            //
+            this.labelChatPassword.AutoSize = true;
+            this.labelChatPassword.Location = new System.Drawing.Point(9, 99);
+            this.labelChatPassword.Name = "labelChatPassword";
+            this.labelChatPassword.Size = new System.Drawing.Size(60, 15);
+            this.labelChatPassword.TabIndex = 5;
+            this.labelChatPassword.Text = "Password:";
+            //
+            // textChatPassword
+            //
+            this.textChatPassword.Location = new System.Drawing.Point(127, 95);
+            this.textChatPassword.Name = "textChatPassword";
+            this.textChatPassword.Size = new System.Drawing.Size(313, 23);
+            this.textChatPassword.TabIndex = 6;
+            this.textChatPassword.UseSystemPasswordChar = true;
+            //
+            // buttonChatSignIn
+            //
+            this.buttonChatSignIn.Location = new System.Drawing.Point(127, 128);
+            this.buttonChatSignIn.Name = "buttonChatSignIn";
+            this.buttonChatSignIn.Size = new System.Drawing.Size(85, 25);
+            this.buttonChatSignIn.TabIndex = 7;
+            this.buttonChatSignIn.Text = "Sign &in";
+            this.buttonChatSignIn.UseVisualStyleBackColor = true;
+            this.buttonChatSignIn.Click += new System.EventHandler(this.buttonChatSignIn_Click);
+            //
+            // buttonChatSignOut
+            //
+            this.buttonChatSignOut.Location = new System.Drawing.Point(218, 128);
+            this.buttonChatSignOut.Name = "buttonChatSignOut";
+            this.buttonChatSignOut.Size = new System.Drawing.Size(85, 25);
+            this.buttonChatSignOut.TabIndex = 8;
+            this.buttonChatSignOut.Text = "Sign &out";
+            this.buttonChatSignOut.UseVisualStyleBackColor = true;
+            this.buttonChatSignOut.Click += new System.EventHandler(this.buttonChatSignOut_Click);
+            //
+            // labelChatStatus
+            //
+            this.labelChatStatus.Location = new System.Drawing.Point(9, 166);
+            this.labelChatStatus.Name = "labelChatStatus";
+            this.labelChatStatus.Size = new System.Drawing.Size(431, 60);
+            this.labelChatStatus.TabIndex = 9;
+            this.labelChatStatus.Text = "Not signed in.";
             //
             // OptionsEditorForm
             // 
@@ -431,6 +518,8 @@ namespace KNote.ClientWin.Views
             this.tabGlobalOptions.PerformLayout();
             this.tabEmailOptions.ResumeLayout(false);
             this.tabEmailOptions.PerformLayout();
+            this.tabChatRoomOptions.ResumeLayout(false);
+            this.tabChatRoomOptions.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -449,9 +538,17 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.CheckBox checkAutoSaveActivated;
         private System.Windows.Forms.CheckBox checkAlarmActivated;
         private OpenFileDialog openFileDialog;
+        private System.Windows.Forms.TabPage tabChatRoomOptions;
+        private Label labelChatHubUrl;
         private TextBox textChatHubUrl;
-        private Label label1;
-        private Button buttonTestChatHubUrl;
+        private Label labelChatHubUrlHelp;
+        private Label labelChatUserName;
+        private TextBox textChatUserName;
+        private Label labelChatPassword;
+        private TextBox textChatPassword;
+        private Button buttonChatSignIn;
+        private Button buttonChatSignOut;
+        private Label labelChatStatus;
         private Label labelColorMode;
         private ComboBox comboColorMode;
         private Label labelAuthenticationMode;

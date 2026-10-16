@@ -235,31 +235,28 @@ public class KntAiSessionsSaveAsyncCommand : KntCommandServiceBase<AiChatSession
 
 internal sealed record AiSessionsInfrastructure(Guid NoteTypeId, Guid ProviderAttributeId, Guid ModelAttributeId, FolderInfoDto Folder);
 
-// What the AI session commands share. Errors are added to the command's result instead of thrown, as every
-// command reports them.
+// What the AI session commands share (the infrastructure, with KntSystemNotes). Errors are added to the command's
+// result instead of thrown, as every command reports them.
 internal static class AiSessions
 {
     private const string InfrastructureBypassReason = "AI assistant sessions: note type, attributes and folder";
 
-    public static async Task<UserDto> GetCurrentUserAsync(IKntService service, ResultBase result)
-    {
-        var user = await service.GetCurrentUserAsync();
-        if (user == null)
-            result.AddErrorMessage($"The user '{service.UserIdentityName}' is not registered in the repository '{service.RepositoryRef?.Name}'.");
-        return user;
-    }
+    public static Task<UserDto> GetCurrentUserAsync(IKntService service, ResultBase result) =>
+        KntSystemNotes.GetCurrentUserAsync(service, result);
 
-    // The note type, its two attributes and the folder of the sessions, created when missing (found by name, so
-    // a folder moved elsewhere in the tree is still found). Only their creation runs in the bypass scope.
+    // The note type, its two attributes and the folder of the sessions, created when missing.
     public static async Task<AiSessionsInfrastructure> EnsureInfrastructureAsync(IKntService service, ResultBase result)
     {
-        var noteTypeId = await EnsureNoteTypeAsync(service, result);
+        var noteTypeId = await KntSystemNotes.EnsureNoteTypeAsync(service, KntConst.ChatSessionsTag, "AI Assistant sessions",
+            InfrastructureBypassReason, result);
         if (!result.IsValid)
             return null;
 
-        var providerAttributeId = await EnsureAttributeAsync(service, noteTypeId, KntConst.AiProviderAttributeName, "AI provider of the session", 1, result);
-        var modelAttributeId = await EnsureAttributeAsync(service, noteTypeId, KntConst.AiModelAttributeName, "AI model of the session", 2, result);
-        var folder = await EnsureFolderAsync(service, result);
+        var providerAttributeId = await KntSystemNotes.EnsureAttributeAsync(service, noteTypeId, KntConst.AiProviderAttributeName,
+            "AI provider of the session", 1, InfrastructureBypassReason, result);
+        var modelAttributeId = await KntSystemNotes.EnsureAttributeAsync(service, noteTypeId, KntConst.AiModelAttributeName,
+            "AI model of the session", 2, InfrastructureBypassReason, result);
+        var folder = await KntSystemNotes.EnsureFolderAsync(service, KntConst.AiSessionsFolderName, InfrastructureBypassReason, result);
         if (!result.IsValid)
             return null;
 
@@ -270,19 +267,10 @@ internal static class AiSessions
     public static async Task<NoteDto> GetUserSessionNoteAsync(IKntService service, Guid noteId,
         AiSessionsInfrastructure infrastructure, UserDto user, ResultBase result)
     {
-        var resNote = await service.Notes.GetAsync(noteId);
-        if (!resNote.IsValid)
-        {
-            result.AddListErrorMessage(resNote.ListErrorMessage);
+        var note = await KntSystemNotes.GetNoteOfTypeAsync(service, noteId, infrastructure.NoteTypeId,
+            "The AI session does not exist.", result);
+        if (note == null)
             return null;
-        }
-
-        var note = resNote.Entity;
-        if (note == null || note.NoteTypeId != infrastructure.NoteTypeId)
-        {
-            result.AddErrorMessage("The AI session does not exist.");
-            return null;
-        }
 
         var resTasks = await service.Notes.GetNoteTasksAsync(noteId);
         if (!resTasks.IsValid)
@@ -307,86 +295,5 @@ internal static class AiSessions
         var attribute = note.KAttributesDto?.FirstOrDefault(a => a.KAttributeId == kattributeId);
         if (attribute != null)
             attribute.Value = value;
-    }
-
-    private static async Task<Guid> EnsureNoteTypeAsync(IKntService service, ResultBase result)
-    {
-        var resTypes = await service.NoteTypes.GetAllAsync();
-        if (!resTypes.IsValid)
-        {
-            result.AddListErrorMessage(resTypes.ListErrorMessage);
-            return Guid.Empty;
-        }
-
-        var noteType = resTypes.Entity?.FirstOrDefault(t => t.Name == KntConst.ChatSessionsTag);
-        if (noteType != null)
-            return noteType.NoteTypeId;
-
-        Result<NoteTypeDto> resSave;
-        using (KntAuthorizationBypass.Begin(service, InfrastructureBypassReason))
-        {
-            resSave = await service.NoteTypes.SaveAsync(new NoteTypeDto
-            {
-                Name = KntConst.ChatSessionsTag,
-                Description = "AI Assistant sessions"
-            });
-        }
-        if (!resSave.IsValid)
-            result.AddListErrorMessage(resSave.ListErrorMessage);
-        return resSave.Entity?.NoteTypeId ?? Guid.Empty;
-    }
-
-    private static async Task<Guid> EnsureAttributeAsync(IKntService service, Guid noteTypeId, string name,
-        string description, int order, ResultBase result)
-    {
-        var resAttributes = await service.KAttributes.GetAllAsync(noteTypeId);
-        if (!resAttributes.IsValid)
-        {
-            result.AddListErrorMessage(resAttributes.ListErrorMessage);
-            return Guid.Empty;
-        }
-
-        var attribute = resAttributes.Entity?.FirstOrDefault(a => a.NoteTypeId == noteTypeId && a.Name == name);
-        if (attribute != null)
-            return attribute.KAttributeId;
-
-        Result<KAttributeDto> resSave;
-        using (KntAuthorizationBypass.Begin(service, InfrastructureBypassReason))
-        {
-            resSave = await service.KAttributes.SaveAsync(new KAttributeDto
-            {
-                Name = name,
-                Description = description,
-                KAttributeDataType = EnumKAttributeDataType.String,
-                NoteTypeId = noteTypeId,
-                Order = order
-            });
-        }
-        if (!resSave.IsValid)
-            result.AddListErrorMessage(resSave.ListErrorMessage);
-        return resSave.Entity?.KAttributeId ?? Guid.Empty;
-    }
-
-    private static async Task<FolderInfoDto> EnsureFolderAsync(IKntService service, ResultBase result)
-    {
-        var resFolders = await service.Folders.GetAllAsync();
-        if (!resFolders.IsValid)
-        {
-            result.AddListErrorMessage(resFolders.ListErrorMessage);
-            return null;
-        }
-
-        var folder = resFolders.Entity?.FirstOrDefault(f => f.Name == KntConst.AiSessionsFolderName);
-        if (folder != null)
-            return folder;
-
-        Result<FolderDto> resSave;
-        using (KntAuthorizationBypass.Begin(service, InfrastructureBypassReason))
-        {
-            resSave = await service.Folders.SaveAsync(new FolderDto { Name = KntConst.AiSessionsFolderName });
-        }
-        if (!resSave.IsValid)
-            result.AddListErrorMessage(resSave.ListErrorMessage);
-        return resSave.Entity;
     }
 }

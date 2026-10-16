@@ -113,16 +113,6 @@ public class AppState
     // Preview of the selected note beside the notes lists (NotesPreviewToggle); null until read from the browser.
     public bool? NotesPreviewVisible { get; set; }
 
-    public List<string> ChatMessages { get; } = new List<string>();
-
-    public void AddChatMessage(string message)
-    {
-        ChatMessages.Add(message);
-        NotifyStateChanged();
-        if(!message.StartsWith(UserName!))
-            NotifySuccess("Chat message input", message);
-    }
-
     #endregion 
 
     #region App event

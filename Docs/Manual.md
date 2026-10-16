@@ -19,12 +19,12 @@ The Windows desktop application keeps its configuration in the folder `%LocalApp
 
 | File | What it holds | When it changes |
 |---|---|---|
-| `KNoteData.config` | What you configure: how you sign in, repositories (their names are kept in their databases, see *Repositories*), AI providers, e-mail (SMTP) account, alarm and auto-save options, chat hub and ServerCOM settings. | Only when you change a setting. |
+| `KNoteData.config` | What you configure: how you sign in, repositories (their names are kept in their databases, see *Repositories*), AI providers, e-mail (SMTP) account, alarm and auto-save options, chat room (its server and your sign-in token) and ServerCOM settings. | Only when you change a setting. |
 | `KNoteState.config` | What KaNote remembers by itself: last user name you signed in with (never the password), last active folder, window positions and sizes, list layout, visible panels, the rows of the alarms panel, and the last AI provider and view options of the AI assistant. | As you use the application. |
 
 Deleting `KNoteState.config` only resets the window layout. Deleting `KNoteData.config` makes KaNote start as if it were the first run: your databases are not deleted, but the list of repositories and AI providers is lost.
 
-**Passwords and API keys.** The e-mail account password, the API keys of the AI providers and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KaNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
+**Passwords and API keys.** The e-mail account password, the API keys of the AI providers, the sign-in token of the chat room and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KaNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
 
 **Backups.** Every time a file is saved, the previous version is kept next to it as `KNoteData.config.bak` / `KNoteState.config.bak`. If a file cannot be read, KaNote loads its `.bak` and tells you.
 
@@ -121,7 +121,7 @@ If the code has changes that haven't been saved, **New**, **Open** and closing t
 
 The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. The list next to **New session** chooses the AI model that answers. On the right, the **Sessions** panel lists your previous conversations (see *AI assistant sessions* below).
 
-The assistant can also work with your notes: ask it to look for notes about something, to tell you what a note says, or to note down a task, and it uses the notes of the repository you are working in. A task it creates is saved in your default folder and opened in the note editor, where you can change it, keep it or delete it. The assistant's own sessions are left out when it searches your notes.
+The assistant can also work with your notes: ask it to look for notes about something, to tell you what a note says, or to note down a task, and it uses the notes of the repository you are working in. A task it creates is saved in your default folder and opened in the note editor, where you can change it, keep it or delete it. The assistant's own sessions and the chat room threads are left out when it searches your notes.
 
 The conversation can be seen in two ways, chosen with the buttons above it:
 
@@ -157,6 +157,38 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 **Privacy.** Sessions are ordinary notes: anybody who can browse the **AI Assistant sessions** folder of a shared repository can open them as any other note. Don't write in a conversation anything you wouldn't write in a note of that repository.
 
 **Desktop app.** Sessions are kept only when you open the assistant from the menu. When a KntScript script or a note's natural-language code (`ln`) uses the assistant, nothing is saved (a script can turn it on with `PersistSession = true`). The **Sessions** panel is hidden then.
+
+### Chat room
+
+The chat room lets the users of a KaNote web server talk in **threads**: each thread is a conversation about one topic, and every user with the Staff role or a higher one in that server can read it, join it and write in it. The web app and the desktop app share the same chat room, the one of the web server: a message written in one appears at once in the other.
+
+**Where threads are kept.** Each thread is a note of the web server's repository, of the note type **`@KNoteChatRoom`**, in the folder **KNote Chat Room**; the note type and the folder are created the first time the chat room is used. The note's topic is the thread's topic and its description is the conversation, in Markdown, with a hidden marker before each message (`<!-- knt-chat:message {...} -->`) that holds who wrote it and when. Whoever creates a thread, writes in it or sends an image to it gets a task in its note that links them to it: they are its participants. Each message is saved as soon as it is sent.
+
+**Following threads.** While you are connected you *follow* the threads you take part in and the ones you open: their new messages arrive at once, and the ones of a thread you aren't looking at are counted as new in the threads list (the thread is shown in bold). The new messages of the threads you don't follow are counted too. **Stop following** stops receiving the messages of the thread shown until you open it again. The header of a thread shows who is in it now.
+
+**Messages.** They are written in Markdown (bold, lists, code, links...): **Enter** sends the message and **Shift+Enter** starts a new line. For your safety, any HTML that a message contains is shown as text. Links open in your web browser.
+
+**Images.** Paste an image into the message box or drop it (png, jpg, gif or webp, up to 5 MB) and it is sent to the thread shown. Each image is kept as a resource of the thread's note, in the resources folder of the web server (the same as the images of the notes, so the server needs its resources settings: `ResourcesContainer` and their folder and url), and is sent as a message. Click an image to see it at its size.
+
+**The General thread.** A KntScript script that sends a message (`SendChatMessage`, or `SendMessage` of the chat controller) with no thread shown writes in the thread **General**, which is created when it doesn't exist.
+
+**Privacy.** Threads are ordinary notes: anybody who can browse the **KNote Chat Room** folder of the server's repository can open them, and their images are served as files of the server, like the images of the notes. The chat room threads are left out when the AI assistant searches your notes.
+
+### Chat room (desktop app)
+
+**Signing in to the chat room's server.** The desktop app works with its own repositories, so it signs in once to the web server of the chat room: in **Options**, tab **Chat room**, enter the **chat hub url** (the address of the web server ending in `/chathub`, e.g. `https://server/KNote/chathub`), your **user name** and **password** in that server, and click **Sign in**. KaNote checks them and connects to test them; then it keeps only the sign-in token the server gives (encrypted, like the other secrets of `KNoteData.config`) and forgets the password. **Accept** the options to keep it. The token lasts a year: if the server refuses it (it expired, your role there changed...), sign in again. **Sign out** forgets it, and so does changing the url.
+
+**The window.** **Chat room ...** in the menu opens it. When the app starts, it connects in the background with the window hidden, and shows the window when somebody else writes in a thread you follow; closing the window only hides it. On the left, the conversation of the thread shown and, below it, the message box; on the right, the **Threads** list (**New**: the messages that arrived since you last saw it; **Activity**: its last message). **New thread** asks for its topic; **Stop following**, above the conversation, also shows who is in the thread now; **Image ...** chooses an image to send. The status bar shows the connection, your user and the server. The **Actions** menu repeats them: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** and **Reconnect**. KaNote remembers the window's position and size, the width of the threads panel and the height of the message box.
+
+**Images.** `Ctrl+V` in the message box sends the image of the clipboard (a screenshot, for example) or the image files copied in the file explorer; image files can also be dropped on the message box, or chosen with **Image ...**.
+
+If the connection fails when the app starts, KaNote tells you without interrupting and stops connecting at startup until you sign in again from **Options**.
+
+### Chat room (web app)
+
+**Chat room** in the side menu (Staff role or higher) opens the chat room page: the conversation of the thread shown on the left, with its participants and who is online now, and the **Threads** list on the right, with the new messages of each one. Drag the bar between them to resize them (the browser remembers it). The header shows the connection's state, **Stop following** and **New thread**.
+
+The web app connects to the chat room when you sign in and leaves it when you sign out, so while it is open you are told about the new messages of the threads you follow, even on other pages. Images are pasted into the message box or dropped on the conversation; clicking one opens it in a new tab.
 
 ### Home (web app)
 

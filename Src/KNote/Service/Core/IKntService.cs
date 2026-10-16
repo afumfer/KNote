@@ -55,6 +55,7 @@ public interface IKntService : IDisposable
     IKntNoteTypeService NoteTypes { get; }
     IKntTraceNoteTypeService TraceNoteTypes { get; }
     IKntAiSessionService AiSessions { get; }
+    IKntChatRoomService ChatRooms { get; }
     IKntMessageBroker MessageBroker { get; }
 
     string GetSystemVariable(string scope, string variable);

@@ -31,6 +31,12 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
 {
     public string DatabaseFilePath { get; } = Path.Combine(Path.GetTempPath(), $"knote-tests-{Guid.NewGuid():N}.db");
 
+    // Where the host keeps the files of the notes' resources (otherwise, in the Server project's wwwroot), in
+    // ResourcesContainer, served from ResourcesRootUrl.
+    public string ResourcesFolder { get; } = Path.Combine(Path.GetTempPath(), $"knote-tests-resources-{Guid.NewGuid():N}");
+    public const string ResourcesContainer = "KNoteTestResources";
+    public const string ResourcesRootUrl = "http://localhost";
+
     public KNoteWebApplicationFactory()
     {
         var overrides = new Dictionary<string, string>
@@ -42,7 +48,10 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
             ["RepositoryRef__Orm"] = "EntityFramework",
             ["RepositoryRef__Provider"] = "Microsoft.Data.Sqlite",
             ["RepositoryRef__ConnectionString"] = $"Data Source={DatabaseFilePath}",
-            ["RepositoryRef__ResourcesContentInDB"] = "false"
+            ["RepositoryRef__ResourcesContentInDB"] = "false",
+            ["RepositoryRef__ResourcesContainer"] = ResourcesContainer,
+            ["RepositoryRef__ResourcesContainerRootPath"] = ResourcesFolder,
+            ["RepositoryRef__ResourcesContainerRootUrl"] = ResourcesRootUrl
         };
 
         foreach (var (key, value) in overrides)
@@ -83,6 +92,8 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
         {
             if (File.Exists(DatabaseFilePath))
                 File.Delete(DatabaseFilePath);
+            if (Directory.Exists(ResourcesFolder))
+                Directory.Delete(ResourcesFolder, true);
         }
         catch (IOException)
         {
