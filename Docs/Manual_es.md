@@ -186,9 +186,11 @@ Si la conexión falla al arrancar, KaNote te lo indica sin interrumpir y deja de
 
 ### Chat room (aplicación Web)
 
-**Chat room**, en el menú lateral (rol Staff o superior), abre la página del chat room: la conversación del hilo mostrado a la izquierda, con sus participantes y quién está conectado ahora, y la lista **Threads** a la derecha, con los mensajes nuevos de cada uno. Arrastra la barra entre ambos para cambiar su tamaño (el navegador lo recuerda). La cabecera muestra el estado de la conexión, **Stop following** y **New thread**.
+**Chat room**, en el menú lateral (rol Staff o superior), abre la página del chat room: la conversación del hilo mostrado a la izquierda, con sus participantes y quién está conectado ahora, y la lista **Threads** a la derecha, con los mensajes nuevos de cada uno. Arrastra la barra entre ambos para cambiar su tamaño (el navegador lo recuerda). La cabecera muestra el estado de la conexión, **Stop following**, **New thread** y el botón que abre el chat room en una ventana nueva.
 
 La aplicación Web se conecta al chat room al iniciar sesión y lo deja al cerrarla, así que mientras está abierta te avisa de los mensajes nuevos de los hilos que sigues, aunque estés en otra página. Las imágenes se pegan en la caja del mensaje o se sueltan sobre la conversación; al pulsar una se abre en una pestaña nueva.
+
+**En su propia ventana.** El botón que lo abre en una ventana nueva traslada el chat room, con el hilo mostrado, a una ventana propia, sin los menús de la aplicación, para tenerlo junto a tu trabajo; la ventana principal vuelve a Home. Solo hay una ventana del chat room: volver a abrirla la trae al frente. La ventana principal sigue los mismos hilos, así que te sigue avisando de sus mensajes nuevos. Si el navegador bloquea la ventana, permite las ventanas emergentes para el sitio de la aplicación.
 
 ### Home (aplicación Web)
 
@@ -210,7 +212,7 @@ Las páginas **Tree panel**, **Notes filter** y **Quick search** muestran sus no
 
 **Vista previa.** **Show preview** / **Hide preview**, en el menú **View options**, muestra, a la derecha de la lista, la nota seleccionada; cambia al seleccionar otra, y muestra los cambios de la nota cuando se guarda en su ventana. El panel se puede redimensionar con la barra que lo separa de la lista. La elección vale para las tres páginas y el navegador la recuerda, igual que los tamaños que des a los paneles de cada página.
 
-**Ventanas de nota.** Ver, editar o crear una nota (**New note**) la abre en una ventana propia, sin los menús de la aplicación, para tenerla junto a la lista; las ventanas nuevas se abren en cascada desde la principal. Cada nota tiene una ventana de vista y otra de edición: volver a abrirla trae esa ventana al frente. Cada **New note** abre una ventana nueva, en la carpeta seleccionada en el panel del árbol; una vez guardada, es la ventana de edición de esa nota. Cuando una nota se guarda en su ventana de edición, las listas, Home y la ventana de vista de la nota la muestran cambiada. El botón de salida de la ventana de edición la cierra, preguntando antes si hay cambios sin guardar (igual que al cerrar la ventana). Si el navegador bloquea la ventana, permite las ventanas emergentes para el sitio de la aplicación.
+**Ventanas de nota.** Ver, editar o crear una nota (**New note**) la abre en una ventana propia, sin los menús de la aplicación, para tenerla junto a la lista; las ventanas nuevas se abren en cascada desde la principal. Cada nota tiene una ventana de vista y otra de edición: volver a abrirla trae esa ventana al frente. Cada **New note** abre una ventana nueva, en la carpeta seleccionada en el panel del árbol; una vez guardada, es la ventana de edición de esa nota. Cuando una nota se guarda en su ventana de edición, las listas, Home y la ventana de vista de la nota la muestran cambiada. El botón de salida de la ventana de edición la cierra, preguntando antes si hay cambios sin guardar (igual que al cerrar la ventana). Si el navegador bloquea la ventana, permite las ventanas emergentes para el sitio de la aplicación. El chat room y el asistente de IA también se pueden abrir en una ventana propia (ver sus apartados).
 
 **Admin panel.** Las listas de usuarios, tipos de nota, tipos de traza y atributos funcionan igual: un clic selecciona una fila, los botones **Edit** y **Delete** de la cabecera actúan sobre ella, un clic derecho muestra las mismas acciones y un doble clic edita el elemento. Esas listas se ordenan pulsando sus cabeceras y tienen su propio desplazamiento. En **Folders management**, los botones de la cabecera editan o borran la carpeta seleccionada; un clic derecho sobre una carpeta muestra las mismas acciones y un doble clic la edita.
 
@@ -253,13 +255,15 @@ El botón de la paleta de la barra superior de la aplicación Web abre el panel 
 
 ### Asistente de IA (aplicación Web)
 
-**AI Assistant**, en el menú lateral (rol Staff o superior), abre la versión Web del asistente. Su cabecera muestra la lista de modelos de IA (configurados en el servidor, ver más abajo) y el botón **New conversation**; el panel **Sessions** de la derecha muestra tus sesiones, como en la aplicación de escritorio (ver *Sesiones del asistente de IA*), y la sesión en la que estás muestra los tokens de su conversación. Arrastra la barra entre la conversación y la caja de la pregunta para hacer la caja más alta o más baja.
+**AI Assistant**, en el menú lateral (rol Staff o superior), abre la versión Web del asistente. Su cabecera muestra la lista de modelos de IA (configurados en el servidor, ver más abajo), el botón **New conversation** y el que abre el asistente en una ventana nueva; el panel **Sessions** de la derecha muestra tus sesiones, como en la aplicación de escritorio (ver *Sesiones del asistente de IA*), y la sesión en la que estás muestra los tokens de su conversación. Arrastra la barra entre la conversación y la caja de la pregunta para hacer la caja más alta o más baja.
 
 Escribe una pregunta en el cuadro de abajo y pulsa el botón de enviar (o `Ctrl+Enter`). La respuesta aparece a medida que se escribe; mientras llega puedes detenerla con el botón de parar, y entonces la pregunta vuelve al cuadro. Una respuesta que falla o que detienes no forma parte de la conversación y no se guarda.
 
 El asistente puede buscar en tus notas y crear tareas, como en la aplicación de escritorio. Una nota que crea se guarda en la carpeta raíz (Home) del repositorio: KaNote te lo indica, y el chat muestra un enlace que la abre en su ventana de edición.
 
 Cambiar el modelo de IA de una conversación ya empezada inicia una conversación nueva (KaNote lo pregunta antes). Por tu seguridad, el HTML que contenga una respuesta se muestra como texto, nunca como parte de la página.
+
+**En su propia ventana.** El botón que lo abre en una ventana nueva traslada el asistente, con la sesión en la que estás, a una ventana propia, sin los menús de la aplicación; la ventana principal vuelve a Home. No se puede usar mientras llega una respuesta. Solo hay una ventana del asistente: volver a abrirla la trae al frente. Cerrar esa ventana mientras llega una respuesta, o cuando la conversación no se pudo guardar, pregunta antes.
 
 ### Proveedores de IA de la aplicación Web (configuración del servidor)
 
