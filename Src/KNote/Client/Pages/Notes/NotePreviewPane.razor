@@ -1,7 +1,7 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 
 @* Preview of the note selected in a notes list (NotesPreviewToggle), at its right. The note is loaded once the
    selection stops for a moment (moving with the arrows doesn't load every note on the way), and again when it is
@@ -32,12 +32,12 @@
 
     protected override void OnInitialized()
     {
-        noteWindows.NoteSaved += OnNoteSaved;
+        kntWindows.NoteSaved += OnNoteSaved;
     }
 
     public void Dispose()
     {
-        noteWindows.NoteSaved -= OnNoteSaved;
+        kntWindows.NoteSaved -= OnNoteSaved;
     }
 
     protected override async Task OnParametersSetAsync()

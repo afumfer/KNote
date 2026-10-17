@@ -6,7 +6,7 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 
@@ -58,7 +58,7 @@
     protected override async Task OnInitializedAsync()
     {        
         store.AppState.OnChange += StateHasChanged;
-        noteWindows.NoteSaved += OnNoteSaved;
+        kntWindows.NoteSaved += OnNoteSaved;
 
         selectedFolderId = store.AppState.HomeFolderId;
         await LoadFolders();
@@ -68,7 +68,7 @@
     public void Dispose()
     {
         store.AppState.OnChange -= StateHasChanged;
-        noteWindows.NoteSaved -= OnNoteSaved;
+        kntWindows.NoteSaved -= OnNoteSaved;
     }
 
     private async Task LoadFolders()
@@ -104,9 +104,9 @@
         await LoadNotes();
     }
 
-    private Task OnNoteView(NoteInfoDto note) => noteWindows.OpenViewAsync(note.NoteId);
+    private Task OnNoteView(NoteInfoDto note) => kntWindows.OpenViewAsync(note.NoteId);
 
-    private Task OnNoteEdit(NoteInfoDto note) => noteWindows.OpenEditAsync(note.NoteId);
+    private Task OnNoteEdit(NoteInfoDto note) => kntWindows.OpenEditAsync(note.NoteId);
 
     // A note saved in its window: Home shows it changed.
     private void OnNoteSaved(Guid noteId)

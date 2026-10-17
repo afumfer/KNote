@@ -5,12 +5,12 @@
 @implements IAsyncDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject DialogService dialogService
 
 @attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
 
-@* The window where a note is edited (NoteWindows.OpenEditAsync) or created (NoteWindows.OpenNewAsync, in the
+@* The window where a note is edited (KntWindows.OpenEditAsync) or created (KntWindows.OpenNewAsync, in the
    folder of the query string), apart from the main window: exit closes it, and each note saved is told to the
    other windows (their lists show it changed). Closing it with unsaved changes asks first. *@
 
@@ -71,7 +71,7 @@ else
         if (firstRender)
         {
             dotNetRef = DotNetObjectReference.Create(this);
-            unsavedChangesWatch = await noteWindows.WatchUnsavedChangesAsync(dotNetRef);
+            unsavedChangesWatch = await kntWindows.WatchUnsavedChangesAsync(dotNetRef);
         }
     }
 
@@ -114,8 +114,8 @@ else
         note.SetIsNew(false);
         note.SetIsDirty(false);
         if (isNew)
-            await noteWindows.BecomeEditWindowAsync(note.NoteId);
-        await noteWindows.NotifyNoteSavedAsync(note.NoteId);
+            await kntWindows.BecomeEditWindowAsync(note.NoteId);
+        await kntWindows.NotifyNoteSavedAsync(note.NoteId);
         return true;
     }
 
@@ -177,7 +177,7 @@ else
         }
 
         closing = true;
-        await noteWindows.CloseAsync();
+        await kntWindows.CloseAsync();
     }
 
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
@@ -194,7 +194,7 @@ else
             context.PreventNavigation();
     }
 
-    /// <summary>Asked by the browser before the window is closed or reloaded (NoteWindows.WatchUnsavedChangesAsync).</summary>
+    /// <summary>Asked by the browser before the window is closed or reloaded (KntWindows.WatchUnsavedChangesAsync).</summary>
     [JSInvokable]
     public bool HasUnsavedChanges() => !closing && (note?.IsDirty() ?? false);
 

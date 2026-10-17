@@ -3,7 +3,7 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject NotificationService notificationService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider authenticationStateProvider
@@ -67,7 +67,7 @@
         store.AppState.OnNotifySuccess += NotifySuccess;
 
         await LoadRepositoryNameAsync();
-        await noteWindows.StartAsync();
+        await kntWindows.StartAsync();
 
         authenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await UpdateChatRoomAsync(await authenticationStateProvider.GetAuthenticationStateAsync());

@@ -4,21 +4,22 @@ using Microsoft.JSInterop;
 namespace KNote.Client.AppStoreService;
 
 /// <summary>
-/// The windows where a note is viewed (notes/view/{id}), edited (notes/edit/{id}) or created (notes/new), without
-/// the app's menus (KntWindowLayout): one per note and use, brought to the front if it is already open (a new note
-/// gets a new window, which becomes the note's edit window once saved). The windows of the app tell each other
-/// when a note is saved (NoteSaved), so that the lists show it changed.
+/// The windows of the app, without its menus (KntWindowLayout), each one brought to the front if it is already open:
+/// - where a note is viewed (notes/view/{id}), edited (notes/edit/{id}) or created (notes/new): one per note and use
+///   (a new note gets a new window, which becomes the note's edit window once saved);
+/// - the AI assistant (aiassistant/window) and the chat room (chat/window): one for each.
+/// The windows of the app tell each other when a note is saved (NoteSaved), so that the lists show it changed.
 /// </summary>
-public class NoteWindows : IAsyncDisposable
+public class KntWindows : IAsyncDisposable
 {
     private readonly IJSRuntime _js;
     private readonly NavigationManager _navigationManager;
     private readonly IStore _store;
     private IJSObjectReference? _module;
     private IJSObjectReference? _listener;
-    private DotNetObjectReference<NoteWindows>? _dotNetRef;
+    private DotNetObjectReference<KntWindows>? _dotNetRef;
 
-    public NoteWindows(IJSRuntime js, NavigationManager navigationManager, IStore store)
+    public KntWindows(IJSRuntime js, NavigationManager navigationManager, IStore store)
     {
         _js = js;
         _navigationManager = navigationManager;
@@ -54,6 +55,14 @@ public class NoteWindows : IAsyncDisposable
         return OpenAsync(path, $"knt-note-new-{Guid.NewGuid():N}", 1200, 900);
     }
 
+    /// <summary>The AI assistant, resuming the session given (a saved one), if any.</summary>
+    public Task<bool> OpenAiAssistantAsync(Guid? sessionId) =>
+        OpenAsync(WithId("aiassistant/window", "sessionId", sessionId), "knt-aiassistant", 1100, 850, "AI Assistant");
+
+    /// <summary>The chat room, showing the thread given, if any.</summary>
+    public Task<bool> OpenChatRoomAsync(Guid? threadId) =>
+        OpenAsync(WithId("chat/window", "threadId", threadId), "knt-chatroom", 1100, 800, "Chat room");
+
     /// <summary>A new note was saved in this window: it becomes the note's edit window (OpenEditAsync brings it to the
     /// front, and reloading it loads the note).</summary>
     public async Task BecomeEditWindowAsync(Guid noteId) =>
@@ -84,12 +93,16 @@ public class NoteWindows : IAsyncDisposable
 
     private static string EditWindowName(Guid noteId) => $"knt-note-edit-{noteId}";
 
-    private async Task<bool> OpenAsync(string path, string name, int width, int height)
+    private static string WithId(string path, string name, Guid? id) =>
+        id is Guid value && value != Guid.Empty ? $"{path}?{name}={value}" : path;
+
+    // title: what the window shows, for the notice when the browser blocks it.
+    private async Task<bool> OpenAsync(string path, string name, int width, int height, string title = "Note")
     {
         var url = _navigationManager.ToAbsoluteUri(path).ToString();
         var opened = await (await GetModuleAsync()).InvokeAsync<bool>("openWindow", url, name, width, height);
         if (!opened)
-            _store.AppState.NotifyError("Note window", "The browser blocked the window of the note: allow pop-ups for this site.");
+            _store.AppState.NotifyError($"{title} window", "The browser blocked the window: allow pop-ups for this site.");
         return opened;
     }
 

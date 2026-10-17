@@ -6,7 +6,7 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject IJSRuntime js
@@ -75,7 +75,7 @@
 
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
-        noteWindows.NoteSaved += OnNoteSaved;
+        kntWindows.NoteSaved += OnNoteSaved;
         await Load();
     }
 
@@ -115,7 +115,7 @@
     public void Dispose()
     {
         appState.OnChange -= StateHasChanged;
-        noteWindows.NoteSaved -= OnNoteSaved;
+        kntWindows.NoteSaved -= OnNoteSaved;
     }
 
     private void FolderSelected(FolderDto f)
@@ -182,11 +182,11 @@
             folder.OrderNotes = orderNotes;
     }
 
-    Task OnNew() => noteWindows.OpenNewAsync();
+    Task OnNew() => kntWindows.OpenNewAsync();
 
-    Task OnView(NoteMinimalDto note) => noteWindows.OpenViewAsync(note.NoteId);
+    Task OnView(NoteMinimalDto note) => kntWindows.OpenViewAsync(note.NoteId);
 
-    Task OnEdit(NoteMinimalDto note) => noteWindows.OpenEditAsync(note.NoteId);
+    Task OnEdit(NoteMinimalDto note) => kntWindows.OpenEditAsync(note.NoteId);
 
     // A note saved in its window: the list shows it changed (or moved, or gone from it).
     void OnNoteSaved(Guid noteId)

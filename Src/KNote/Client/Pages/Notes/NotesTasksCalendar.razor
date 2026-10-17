@@ -2,7 +2,7 @@
 @page "/taskscalendar"
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 
@@ -135,7 +135,7 @@
         }
     }
 
-    Task OnNew() => noteWindows.OpenNewAsync();
+    Task OnNew() => kntWindows.OpenNewAsync();
 
     public class Appointment
     {

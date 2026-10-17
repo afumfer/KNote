@@ -1,5 +1,6 @@
-// Windows of the notes (AppStoreService/NoteWindows): a note is viewed or edited in a window of its own, one per
-// note and use, and the windows of the app tell each other when a note is saved (BroadcastChannel, same origin).
+// Windows of the app (AppStoreService/KntWindows): a note is viewed or edited in a window of its own, one per note
+// and use (the AI assistant and the chat room, one each), and the windows of the app tell each other when a note is
+// saved (BroadcastChannel, same origin).
 
 const channel = new BroadcastChannel('knote-notes');
 

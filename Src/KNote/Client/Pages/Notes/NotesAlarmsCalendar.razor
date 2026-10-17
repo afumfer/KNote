@@ -3,7 +3,7 @@
 
 @inject IStore webApiService
 @inject NavigationManager navigationManager
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject NotificationService notificationService
@@ -116,7 +116,7 @@
         }
     }
 
-    Task OnNew() => noteWindows.OpenNewAsync();
+    Task OnNew() => kntWindows.OpenNewAsync();
 
     public class Appointment
     {

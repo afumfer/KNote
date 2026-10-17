@@ -53,7 +53,7 @@ Client/
 │     IStore.cs, Store.cs   – estado global + acceso a los servicios Web API + el chat room (ChatRoomHub)
 │     AppState.cs           – estado de la app (usuario, carpeta seleccionada, árbol de carpetas) y eventos
 │     ChatRoomHub.cs        – conexión SignalR del chat room, hilos seguidos y sus mensajes, no leídos
-│     NoteWindows.cs        – ventanas de vista/edición de notas y aviso entre ventanas de las notas guardadas
+│     KntWindows.cs        – ventanas de vista/edición de notas y aviso entre ventanas de las notas guardadas
 │     ClientDataServices/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
@@ -91,7 +91,7 @@ validación que ambas UIs usan directamente:
 
 - `IsDirty()`/`SetIsDirty(...)`, `IsNew()`/`SetIsNew(...)` (recorren también los hijos). Patrón habitual:
   tras cargar o guardar, `SetIsDirty(false)`; antes de guardar, `if (!dto.IsDirty()) return;`; y al salir se
-  pide confirmación si `IsDirty()` (en una ventana de nota, con `NoteWindows.WatchUnsavedChangesAsync`, ver
+  pide confirmación si `IsDirty()` (en una ventana de nota, con `KntWindows.WatchUnsavedChangesAsync`, ver
   `NoteEdit.razor`).
 - Validación: DataAnnotations en las propiedades + `Validate(...)`/`IsValid()`/`GetErrorMessage()` de
   `ModelBase`. Los formularios usan `<DataAnnotationsValidator />`, así que las reglas viven en el DTO, no en
@@ -289,7 +289,7 @@ Patrones ya establecidos que hay que seguir:
   nota). La otra nota se elige con `Shared/KntNotePicker` → `Shared/KntNoteSelector` (diálogo `Large`: búsqueda de
   texto o árbol de carpetas, un `RadzenDataGrid` paginado en el servidor con `LoadData`, no `NotesGrid`, cuya
   virtualización no va bien en un diálogo; `ExcludedNoteIds` atenúa las notas que no se pueden elegir) y se abre en
-  su ventana de edición (`NoteWindows.OpenEditAsync`, sin esperas delante). Los tipos se mantienen en la pestaña
+  su ventana de edición (`KntWindows.OpenEditAsync`, sin esperas delante). Los tipos se mantienen en la pestaña
   "Trace note types" de `Admin` (`Pages/TraceNoteTypes`, como `Types`; `IStore.TraceNoteTypes`); su icono,
   `KntSections.TraceNoteTypes`, es también el de la pestaña del editor.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
@@ -317,21 +317,21 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   `Path="index"`), o se saldrá de la base.
 - **Ventanas de nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`), editarla
   (`notes/edit/{id}`, `NoteEdit`) y crearla (`notes/new?folderId=...`, la misma `NoteEdit`) se hace en una
-  ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/NoteWindows`
+  ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/KntWindows`
   (`OpenViewAsync`/`OpenEditAsync`/`OpenNewAsync`, `wwwroot/js/kntWindows.js`): una por nota y uso, que se trae al
   frente si ya está abierta (sin recargarla ni moverla: no pierde una edición en curso); las nuevas se abren en
   cascada desde la ventana que las abre (`openWindow`, dentro de la pantalla). Cada "New note" abre una ventana
   nueva, en la carpeta de `AppState.SelectedFolder`; al guardarla por primera vez pasa a ser la ventana de edición
   de esa nota (`BecomeEditWindowAsync`: cambia su nombre y su URL). El navegador
   solo deja abrirla justo tras un clic o una tecla: no pongas otra espera delante (el script se carga de antemano
-  en `NoteWindows.StartAsync`, que llaman los dos layouts); si la bloquea, se avisa. Cada ventana es otra
+  en `KntWindows.StartAsync`, que llaman los dos layouts); si la bloquea, se avisa. Cada ventana es otra
   instancia de la app (su propio `AppState`; la sesión sí se comparte, el JWT está en `localStorage`). Al guardar,
   `NoteEdit` avisa a las demás ventanas (`NotifyNoteSavedAsync`, `BroadcastChannel`) y quien muestre notas se
-  suscribe a `NoteWindows.NoteSaved` para refrescarse (las listas, Home, `NoteView`). La salida de `NoteEdit`
+  suscribe a `KntWindows.NoteSaved` para refrescarse (las listas, Home, `NoteView`). La salida de `NoteEdit`
   cierra la ventana (`CloseAsync`; si no la abrió un script, va a Home) y cerrarla con cambios sin guardar
   pregunta (`WatchUnsavedChangesAsync`, `beforeunload`), sin `NavigationLock`, que preguntaría siempre.
 - Estado compartido entre páginas en `store.AppState` (p. ej. `SelectedFolder`, la carpeta de una nota nueva,
-  que `NoteWindows.OpenNewAsync` pasa en la URL: `AppState` no llega a las ventanas de nota, que son otra
+  que `KntWindows.OpenNewAsync` pasa en la URL: `AppState` no llega a las ventanas de nota, que son otra
   instancia de la app). Un componente que se suscriba a `AppState.OnChange` implementa `IDisposable` y se
   desuscribe en `Dispose()`.
 - `Nullable` está activado en este proyecto: `[Parameter] [EditorRequired] public NoteDto Note { get; set; }
