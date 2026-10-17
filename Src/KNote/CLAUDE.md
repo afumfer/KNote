@@ -14,7 +14,7 @@ detrás de dos implementaciones de repositorio intercambiables (Dapper, Entity F
 No hay un único `.sln` en la raíz; hay varios `.slnx` ("VS solution XML"), cada uno cubriendo una parte
 distinta del código:
 
-- `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `KNote.Ai`, `Repository*`, `ClientWin`, `Client`,
+- `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `KNote.Ai`, `KNote.Reports`, `Repository*`, `ClientWin`, `Client`,
   `KntScript`, `MessageBroker*`, `HtmlEditorControl`, `KntEditViewControl`, `KntIcons`. Úsalo para la mayoría del
   trabajo.
 - `KNoteTest.slnx` — solo `Model` + `Tests`, para ejecutar la suite de tests de integración de forma aislada.
@@ -83,7 +83,8 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   │    └─ MessageBroker.RabbitMQ
   ├─ Service                          (→ Repository, Repository.Dapper, Repository.EntityFramework, MessageBroker*)
   │    ├─ KNote.Ai (carpeta Ai/)      (IChatClient por proveedor de IA, turno con streaming + tools sobre IKntService; todos los paquetes NuGet de IA)
-  │    └─ ClientWin                   (→ también KNote.Ai, HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
+  │    ├─ KNote.Reports (carpeta Reports/) (informes imprimibles en HTML y exportación CSV de las notas, comunes a las dos apps)
+  │    └─ ClientWin                   (→ también KNote.Ai, KNote.Reports, HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
 
 Server → Client, Model, Service, KNote.Ai

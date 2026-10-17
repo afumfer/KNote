@@ -4,6 +4,7 @@ using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
 using KNote.Model;
+using KNote.Reports;
 using KntIcons;
 using Microsoft.Web.WebView2.Core;
 

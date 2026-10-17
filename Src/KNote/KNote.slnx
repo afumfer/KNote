@@ -3,6 +3,7 @@
   <Project Path="Model/KNote.Model.csproj" />
   <Project Path="Service/KNote.Service.csproj" />
   <Project Path="Ai/KNote.Ai.csproj" />
+  <Project Path="Reports/KNote.Reports.csproj" />
   <Project Path="Repository/KNote.Repository.csproj" />
   <Project Path="Repository.EntityFramework/KNote.Repository.EntityFramework.csproj" />
   <Project Path="Repository.Dapper/KNote.Repository.Dapper.csproj" />

@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using KNote.Model.Dto;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // Printable report with everything about one note (NoteDetailReportData): properties, description,
 // extended attributes, resources (with image thumbnails), tasks and trace notes. Portrait. Never shows

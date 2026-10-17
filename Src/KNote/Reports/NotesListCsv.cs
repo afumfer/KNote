@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // CSV export of the management window's notes list: the same columns, order and cell texts as the printed
 // list (NotesListSnapshot), header row first. RFC 4180 quoting, CRLF line ends; the separator is the

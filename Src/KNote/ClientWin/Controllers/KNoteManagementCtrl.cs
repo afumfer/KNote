@@ -7,6 +7,7 @@ using KNote.ClientWin.Utils;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Reports;
 using KNote.Service.Core;
 using KntScript;
 using Microsoft.Extensions.Logging;
@@ -247,46 +248,9 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         return criteria.Count > 0 ? string.Join(", ", criteria.Select(c => $"{c.Label}={c.Value}")) : "(no criteria)";
     }
 
-    // The criteria actually set in a structured filter, with names instead of ids (note type, folder path).
-    // A name that can't be resolved (e.g. deleted meanwhile) shows as "?" rather than failing the caller.
-    private async Task<List<ReportMetaItem>> DescribeFilterCriteriaAsync(ServiceRef serviceRef, NotesFilterDto notesFilter)
-    {
-        var criteria = new List<ReportMetaItem>();
-
-        if (!string.IsNullOrWhiteSpace(notesFilter.Topic))
-            criteria.Add(new ReportMetaItem("Topic", notesFilter.Topic.Trim()));
-        if (!string.IsNullOrWhiteSpace(notesFilter.Description))
-            criteria.Add(new ReportMetaItem("Description", notesFilter.Description.Trim()));
-        if (!string.IsNullOrWhiteSpace(notesFilter.Tags))
-            criteria.Add(new ReportMetaItem("Tags", notesFilter.Tags.Trim()));
-
-        if (notesFilter.NoteTypeId != null)
-        {
-            string noteType = null;
-            try
-            {
-                noteType = serviceRef == null ? null : (await serviceRef.Service.NoteTypes.GetAsync(notesFilter.NoteTypeId.Value)).Entity?.Name;
-            }
-            catch (Exception ex)
-            {
-                Store.Logger?.LogError(ex, "DescribeFilterCriteriaAsync, note type: {message}", ex.Message);
-            }
-            criteria.Add(new ReportMetaItem("Note type", noteType ?? "?"));
-        }
-
-        if (notesFilter.FolderId != null)
-        {
-            var folderPath = await Store.GetKNoteFolerPath(serviceRef, notesFilter.FolderId.Value);
-            if (string.IsNullOrEmpty(folderPath))
-                folderPath = "?";
-            criteria.Add(new ReportMetaItem("Folder", notesFilter.IncludeChildFolders ? $"{folderPath} (and subfolders)" : folderPath));
-        }
-
-        foreach (var atr in notesFilter.AttributesFilter ?? new List<AtrFilterDto>())
-            criteria.Add(new ReportMetaItem(string.IsNullOrWhiteSpace(atr.AtrName) ? "Attribute" : atr.AtrName, atr.Value ?? ""));
-
-        return criteria;
-    }
+    // The criteria actually set in a structured filter, with names instead of ids (shared with the web app).
+    private Task<List<ReportMetaItem>> DescribeFilterCriteriaAsync(ServiceRef serviceRef, NotesFilterDto notesFilter)
+        => NotesListContext.DescribeFilterCriteriaAsync(serviceRef?.Service, notesFilter, Store.Logger);
 
     // The renamed folder may be an ancestor of the active folder (the displayed path includes every
     // ancestor's name), so there's no cheap way to tell in advance whether it's actually relevant to
@@ -1719,7 +1683,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 using (new WaitCursor())
                 {
                     var context = await GetNotesListContextAsync(snapshot.TextFilter);
-                    var chapters = await NotesBook.LoadChaptersAsync(Store, serviceRef, snapshot.NoteIds);
+                    var chapters = await NotesBook.LoadChaptersAsync(serviceRef?.Service, new ClientWinReportResources(serviceRef), snapshot.NoteIds);
                     return NotesBook.Build(context, chapters, DateTime.Now, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
                 }
             }, serviceRef?.RepositoryRef?.ResourcesContainerRootPath);
@@ -1755,7 +1719,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                     if (!response.IsValid)
                         throw new InvalidOperationException(response.ErrorMessage);
 
-                    var data = await NoteDetailReportData.CreateAsync(Store, serviceRef, response.Entity, unsavedChanges: false);
+                    var data = await NoteDetailReportData.CreateAsync(serviceRef.Service, serviceRef.RepositoryRef,
+                        new ClientWinReportResources(serviceRef), response.Entity, unsavedChanges: false, Store.Logger);
                     return NoteDetailReport.Build(data, DateTime.Now);
                 }
             }, serviceRef.RepositoryRef?.ResourcesContainerRootPath);

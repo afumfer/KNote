@@ -1,9 +1,9 @@
-using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Reports;
 
 namespace KNote.ClientWin.Tests;
 
@@ -167,9 +167,8 @@ public class NoteDetailReportTests
 [TestClass]
 public class NoteDetailReportDataTests
 {
-    private static (Store store, FakeKntService service, KNote.Service.Core.ServiceRef serviceRef) Setup()
+    private static (FakeKntService service, KNote.Service.Core.ServiceRef serviceRef) Setup()
     {
-        var store = new Store(new TestFactoryViews()) { AppUserName = "jdoe" };
         var service = new FakeKntService();
         var serviceRef = TestServiceRefFactory.CreateWithFakeService(service);
 
@@ -182,8 +181,12 @@ public class NoteDetailReportDataTests
         service.NotesFake.UtilGetResourceFilePathImpl = r => "";
         service.TraceNoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<TraceNoteTypeDto>> { Entity = new() });
 
-        return (store, service, serviceRef);
+        return (service, serviceRef);
     }
+
+    // As ClientWin's print use cases call it: resources through the preview's virtual host.
+    private static Task<NoteDetailReportData> CreateAsync(KNote.Service.Core.ServiceRef serviceRef, NoteExtendedDto note, bool unsavedChanges)
+        => NoteDetailReportData.CreateAsync(serviceRef.Service, serviceRef.RepositoryRef, new ClientWinReportResources(serviceRef), note, unsavedChanges);
 
     private static NoteExtendedDto Note(string description, string contentType = "markdown")
     {
@@ -195,9 +198,9 @@ public class NoteDetailReportDataTests
     [TestMethod]
     public async Task CreateAsync_ResolvesFolderPathAndRendersMarkdown()
     {
-        var (store, _, serviceRef) = Setup();
+        var (_, serviceRef) = Setup();
 
-        var data = await NoteDetailReportData.CreateAsync(store, serviceRef, Note("Body"), unsavedChanges: true);
+        var data = await CreateAsync(serviceRef, Note("Body"), unsavedChanges: true);
 
         Assert.AreEqual(@"Root\Web", data.FolderPath);
         Assert.AreEqual("<p>Body</p>", data.DescriptionHtml);
@@ -207,11 +210,11 @@ public class NoteDetailReportDataTests
     [TestMethod]
     public async Task CreateAsync_HtmlIsKeptAndWebPagesBecomeALink()
     {
-        var (store, _, serviceRef) = Setup();
+        var (_, serviceRef) = Setup();
 
-        var html = await NoteDetailReportData.CreateAsync(store, serviceRef, Note("<b>x</b>", "html"), false);
-        var web = await NoteDetailReportData.CreateAsync(store, serviceRef, Note("https://example.org", "navigation"), false);
-        var empty = await NoteDetailReportData.CreateAsync(store, serviceRef, Note("  "), false);
+        var html = await CreateAsync(serviceRef, Note("<b>x</b>", "html"), false);
+        var web = await CreateAsync(serviceRef, Note("https://example.org", "navigation"), false);
+        var empty = await CreateAsync(serviceRef, Note("  "), false);
 
         Assert.AreEqual("<b>x</b>", html.DescriptionHtml);
         Assert.AreEqual("https://example.org", web.DescriptionUrl);
@@ -222,7 +225,7 @@ public class NoteDetailReportDataTests
     [TestMethod]
     public async Task CreateAsync_ResourcesInTheRepositoryFolder_AreServedThroughTheVirtualHost()
     {
-        var (store, service, serviceRef) = Setup();
+        var (service, serviceRef) = Setup();
         var root = Path.Combine(Path.GetTempPath(), "knt-report-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Path.Combine(root, "R", "2026"));
         var file = Path.Combine(root, "R", "2026", "my photo.png");
@@ -238,7 +241,7 @@ public class NoteDetailReportDataTests
             note.Resources.Add(new ResourceDto { Name = "mem.png", FileType = "image/png", Order = 1, ContentArrayBytes = new byte[] { 9 } });
             note.Resources.Add(new ResourceDto { Name = "doc.pdf", FileType = "application/pdf", Order = 3 });
 
-            var data = await NoteDetailReportData.CreateAsync(store, serviceRef, note, false);
+            var data = await CreateAsync(serviceRef, note, false);
 
             CollectionAssert.AreEqual(new[] { "mem.png", "my photo.png", "doc.pdf" }, data.Resources.Select(r => r.Name).ToArray());
             Assert.AreEqual("data:image/png;base64,CQ==", data.Resources[0].ThumbnailSrc);
@@ -255,7 +258,7 @@ public class NoteDetailReportDataTests
     [TestMethod]
     public async Task CreateAsync_TasksAndTraceNotes_AreResolved()
     {
-        var (store, service, serviceRef) = Setup();
+        var (service, serviceRef) = Setup();
         var typeId = Guid.NewGuid();
         var related = Guid.NewGuid();
         service.TraceNoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<TraceNoteTypeDto>>
@@ -272,7 +275,7 @@ public class NoteDetailReportDataTests
         note.TraceNotesFrom = new() { new TraceNoteDto { FromId = related, ToId = note.NoteId, TraceNoteTypeId = typeId } };
         note.TraceNotesTo = new() { new TraceNoteDto { FromId = note.NoteId, ToId = Guid.NewGuid() } };
 
-        var data = await NoteDetailReportData.CreateAsync(store, serviceRef, note, false);
+        var data = await CreateAsync(serviceRef, note, false);
 
         Assert.AreEqual("<p>do it</p>", data.Tasks.Single().DescriptionHtml);
         Assert.AreEqual("#42", data.TraceNotesFrom.Single().Number);

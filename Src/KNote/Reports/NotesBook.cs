@@ -1,7 +1,7 @@
 using System.Text;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // A chapter of the notes book: one note of the list. ContentHtml is its description rendered as HTML;
 // Url is set instead for notes whose description is a web page. Both null when it has no description.
@@ -18,11 +18,11 @@ public static class NotesBook
     public static string ChapterId(int number) => $"knt-ch-{number}";
 
     // Loads the listed notes, in order, as chapters. A note deleted meanwhile is left out.
-    public static async Task<List<BookChapter>> LoadChaptersAsync(Store store, ServiceRef serviceRef, IEnumerable<Guid> noteIds)
+    public static async Task<List<BookChapter>> LoadChaptersAsync(IKntService service, IReportResources resources, IEnumerable<Guid> noteIds)
     {
-        ArgumentNullException.ThrowIfNull(serviceRef);
+        ArgumentNullException.ThrowIfNull(service);
+        ArgumentNullException.ThrowIfNull(resources);
 
-        var service = serviceRef.Service;
         var chapters = new List<BookChapter>();
         foreach (var noteId in noteIds)
         {
@@ -30,7 +30,7 @@ public static class NotesBook
             if (note == null)
                 continue;
 
-            var (html, url) = NoteDetailReportData.RenderDescription(store, service, serviceRef.RepositoryRef, note);
+            var (html, url) = NoteDetailReportData.RenderDescription(service, resources, note);
             chapters.Add(new BookChapter(chapters.Count + 1, note.Topic, html, url));
         }
         return chapters;

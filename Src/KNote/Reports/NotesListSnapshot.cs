@@ -1,4 +1,4 @@
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // A visible column of the notes list, in the order it is shown. Name is the bound property
 // (NoteNumber, Topic, Tags...), Header the caption the user sees, Width its on-screen width (only its

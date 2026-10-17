@@ -3,6 +3,7 @@ using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Reports;
 using KNote.Service.Core;
 using KntScript;
 using Microsoft.Extensions.Logging;
@@ -824,7 +825,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
             {
                 using (new WaitCursor())
                 {
-                    var data = await NoteDetailReportData.CreateAsync(Store, ServiceRef, Model, unsavedChanges: Model.IsDirty());
+                    var data = await NoteDetailReportData.CreateAsync(ServiceRef?.Service, ServiceRef?.RepositoryRef,
+                        new ClientWinReportResources(ServiceRef), Model, unsavedChanges: Model.IsDirty(), Store.Logger);
                     return NoteDetailReport.Build(data, DateTime.Now);
                 }
             }, ServiceRef?.RepositoryRef?.ResourcesContainerRootPath);

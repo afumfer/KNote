@@ -1,10 +1,10 @@
 using System.Text;
-using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Reports;
 
 namespace KNote.ClientWin.Tests;
 
@@ -113,7 +113,6 @@ public class NotesBookTests
     [TestMethod]
     public async Task LoadChaptersAsync_KeepsTheListOrderAndSkipsMissingNotes()
     {
-        var store = new Store(new TestFactoryViews()) { AppUserName = "jdoe" };
         var service = new FakeKntService();
         var serviceRef = TestServiceRefFactory.CreateWithFakeService(service);
         service.NotesFake.UtilMarkdownToHtmlImpl = md => $"<p>{md}</p>";
@@ -128,7 +127,7 @@ public class NotesBookTests
         };
         service.NotesFake.GetByIdAsyncImpl = id => Task.FromResult(new Result<NoteDto> { Entity = notes.GetValueOrDefault(id) });
 
-        var chapters = await NotesBook.LoadChaptersAsync(store, serviceRef, new[] { b, deleted, a });
+        var chapters = await NotesBook.LoadChaptersAsync(serviceRef.Service, new ClientWinReportResources(serviceRef), new[] { b, deleted, a });
 
         CollectionAssert.AreEqual(new[] { "B", "A" }, chapters.Select(c => c.Title).ToArray());
         CollectionAssert.AreEqual(new[] { 1, 2 }, chapters.Select(c => c.Number).ToArray());

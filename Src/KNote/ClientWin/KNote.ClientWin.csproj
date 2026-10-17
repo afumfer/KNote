@@ -35,6 +35,7 @@
     <ProjectReference Include="..\KntIcons\KntIcons.csproj" />
     <ProjectReference Include="..\KntScript\KntScript.csproj" />
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
+    <ProjectReference Include="..\Reports\KNote.Reports.csproj" />
     <ProjectReference Include="..\Service\KNote.Service.csproj" />
   </ItemGroup>
   <ItemGroup>
@@ -63,10 +64,6 @@
     <EmbeddedResource Include="Resources\Icons\KNote.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Resources\KNoteReport.css" />
-    <EmbeddedResource Include="Resources\KNoteReport.css" LogicalName="KNote.ClientWin.Resources.KNoteReport.css" />
-    <None Remove="Resources\KNoteBook.css" />
-    <EmbeddedResource Include="Resources\KNoteBook.css" LogicalName="KNote.ClientWin.Resources.KNoteBook.css" />
     <None Remove="Resources\KNoteAIChat.css" />
     <EmbeddedResource Include="Resources\KNoteAIChat.css" LogicalName="KNote.ClientWin.Resources.KNoteAIChat.css" />
     <None Remove="Resources\KNoteChatRoom.css" />

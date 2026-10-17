@@ -1,4 +1,8 @@
-namespace KNote.ClientWin.Core.Reports;
+using KNote.Model.Dto;
+using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
+
+namespace KNote.Reports;
 
 public enum NotesListSource
 {
@@ -78,6 +82,47 @@ public class NotesListContext
             what += $" ({TextFilter.Trim()})";
 
         return $"{prefix} - {what} - {date:yyyy-MM-dd}";
+    }
+
+    // The criteria actually set in a structured filter, with names instead of ids (note type, folder path).
+    // A name that can't be resolved (e.g. deleted meanwhile) shows as "?" rather than failing the caller.
+    public static async Task<List<ReportMetaItem>> DescribeFilterCriteriaAsync(IKntService service, NotesFilterDto notesFilter, ILogger logger = null)
+    {
+        var criteria = new List<ReportMetaItem>();
+
+        if (!string.IsNullOrWhiteSpace(notesFilter.Topic))
+            criteria.Add(new ReportMetaItem("Topic", notesFilter.Topic.Trim()));
+        if (!string.IsNullOrWhiteSpace(notesFilter.Description))
+            criteria.Add(new ReportMetaItem("Description", notesFilter.Description.Trim()));
+        if (!string.IsNullOrWhiteSpace(notesFilter.Tags))
+            criteria.Add(new ReportMetaItem("Tags", notesFilter.Tags.Trim()));
+
+        if (notesFilter.NoteTypeId != null)
+        {
+            string noteType = null;
+            try
+            {
+                noteType = service == null ? null : (await service.NoteTypes.GetAsync(notesFilter.NoteTypeId.Value)).Entity?.Name;
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "DescribeFilterCriteriaAsync, note type: {message}", ex.Message);
+            }
+            criteria.Add(new ReportMetaItem("Note type", noteType ?? "?"));
+        }
+
+        if (notesFilter.FolderId != null)
+        {
+            var folderPath = service == null ? "" : await NoteDetailReportData.GetFolderPathAsync(service, notesFilter.FolderId.Value, logger);
+            if (string.IsNullOrEmpty(folderPath))
+                folderPath = "?";
+            criteria.Add(new ReportMetaItem("Folder", notesFilter.IncludeChildFolders ? $"{folderPath} (and subfolders)" : folderPath));
+        }
+
+        foreach (var atr in notesFilter.AttributesFilter ?? new List<AtrFilterDto>())
+            criteria.Add(new ReportMetaItem(string.IsNullOrWhiteSpace(atr.AtrName) ? "Attribute" : atr.AtrName, atr.Value ?? ""));
+
+        return criteria;
     }
 
     private string SearchScope

@@ -1,8 +1,8 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
-using KNote.ClientWin.Core.Reports;
 using KNote.Model.Core;
 using KNote.Model.Dto;
+using KNote.Reports;
 using System.Data;
 using KNote.ClientWin.Utils;
 using KntIcons;
