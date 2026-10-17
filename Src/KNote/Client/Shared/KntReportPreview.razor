@@ -1,0 +1,122 @@
+@* Preview of a printable report (api/reports), as ClientWin's report preview window: the report's pages in a
+   sandboxed iframe (js/kntReports.js) and the Print button, which opens the browser's print dialog (printer or
+   "Save as PDF") for the report only. Opened with KntReportPreview.OpenAsync; the report is generated meanwhile,
+   and closing the dialog before it is ready cancels it (e.g. a long book). *@
+
+@implements IAsyncDisposable
+
+@inject IJSRuntime js
+@inject DialogService dialogService
+
+<KntDialogFrame Icon="print" Title="@Title" Subtitle="@Subtitle">
+    <ChildContent>
+        <div class="knt-report-preview">
+            @if (failed)
+            {
+                <div class="knt-empty-state">
+                    <RadzenIcon Icon="error" />
+                    <div class="knt-empty-state-title">The report could not be generated</div>
+                </div>
+            }
+            else if (report == null)
+            {
+                <div class="knt-report-loading">
+                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+                    <span>@LoadingText</span>
+                </div>
+            }
+            @* Always there (the report is loaded into it as soon as it arrives), shown once it has one. *@
+            <iframe @ref="frame" class="knt-report-frame" title="@Title" hidden="@(report == null)"
+                    sandbox="allow-same-origin allow-modals allow-popups allow-popups-to-escape-sandbox"></iframe>
+        </div>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="@(() => dialogService.Close(null))" />
+        <RadzenButton Text="Print ..." Icon="print" ButtonStyle="ButtonStyle.Primary" Disabled="@(report == null)" Click="PrintAsync" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public string LoadingText { get; set; } = "Generating the report ...";
+    // Generates the report (a call to IStore.Reports); its errors are already notified.
+    [Parameter][EditorRequired] public Func<CancellationToken, Task<Result<ReportDto>>> Load { get; set; } = null!;
+
+    private readonly CancellationTokenSource cancellation = new();
+    private ElementReference frame;
+    private IJSObjectReference? module;
+    private ReportDto? report;
+    private string? reportUrl;
+    private bool failed;
+
+    public static Task OpenAsync(DialogService dialogService, string title, string? subtitle,
+        Func<CancellationToken, Task<Result<ReportDto>>> load, string? loadingText = null)
+    {
+        var parameters = new Dictionary<string, object?>
+        {
+            [nameof(Title)] = title,
+            [nameof(Subtitle)] = subtitle,
+            [nameof(Load)] = load
+        };
+        if (loadingText != null)
+            parameters[nameof(LoadingText)] = loadingText;
+
+        return dialogService.OpenAsync<KntReportPreview>(title, parameters, KntDialogs.Framed(KntDialogs.Document()));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        Result<ReportDto> result;
+        try
+        {
+            result = await Load(cancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;     // closed before the report was ready
+        }
+
+        if (cancellation.IsCancellationRequested)
+            return;
+
+        if (result.IsValid && result.Entity != null)
+        {
+            module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/kntReports.js");
+            reportUrl = await module.InvokeAsync<string>("showReport", frame, result.Entity.Html, result.Entity.FileName);
+            report = result.Entity;
+        }
+        else
+        {
+            failed = true;
+        }
+        StateHasChanged();
+    }
+
+    private async Task PrintAsync()
+    {
+        if (module != null && report != null)
+            await module.InvokeAsync<bool>("printReport", frame);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        cancellation.Cancel();
+        cancellation.Dispose();
+
+        if (module != null)
+        {
+            try
+            {
+                await module.InvokeVoidAsync("releaseReport", reportUrl);
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
+    }
+}

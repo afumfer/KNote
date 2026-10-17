@@ -95,6 +95,7 @@ public class ReportsInProcessTests
         StringAssert.Contains(report.Html, $"Search: {Word}");
         StringAssert.Contains(report.Html, "<strong>world</strong>", "The description as HTML");
         StringAssert.Contains(report.Html, "href=\"#knt-ch-1\"", "Contents with links");
+        Assert.IsFalse(report.Html.Contains("class=\"knt-pageref\""), "Without page numbers: a browser can't tell them");
         AssertInOrder(report.Html, "Chapter 1", $"{Word} C", "Chapter 2", $"{Word} B", "Chapter 3", $"{Word} A");
     }
 

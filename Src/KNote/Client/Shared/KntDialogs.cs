@@ -18,6 +18,9 @@ public static class KntDialogs
     /// <summary>Fields side by side, or a grid.</summary>
     public static DialogOptions Large(bool showClose = true) => Create("860px", showClose);
 
+    /// <summary>A document to read (a printable report, Shared/KntReportPreview): an A4 page wide, at most the window's.</summary>
+    public static DialogOptions Document(bool showClose = true) => Create("min(1240px, 96vw)", showClose);
+
     /// <summary>
     /// A dialog drawn by Shared/KntDialogFrame (an entity's editor): without Radzen's title bar, since the frame has
     /// its own header (icon, title, subtitle, close button) and footer. E.g. KntDialogs.Framed(KntDialogs.Medium()).

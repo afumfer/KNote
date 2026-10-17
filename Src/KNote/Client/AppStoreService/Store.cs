@@ -128,6 +128,17 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private IReportWebApiService? _reports;
+    public IReportWebApiService Reports
+    {
+        get
+        {
+            if (_reports == null)
+                _reports = new ReportWebApiService(AppState, _httpClient);
+            return _reports;
+        }
+    }
+
     public ChatRoomHub ChatRoom { get; }
 
     #endregion

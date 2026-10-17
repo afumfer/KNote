@@ -48,7 +48,10 @@ public static class NotesBook
         return chapters;
     }
 
-    public static ReportDocument Build(NotesListContext context, IReadOnlyList<BookChapter> chapters, DateTime generatedAt, string language = "en")
+    // pageNumbers: the contents have a page reference per chapter, filled in once paginated (ClientWin's
+    // preview); without them (a browser can't tell the pages), only the chapters' links.
+    public static ReportDocument Build(NotesListContext context, IReadOnlyList<BookChapter> chapters, DateTime generatedAt, string language = "en",
+        bool pageNumbers = true)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(chapters);
@@ -57,7 +60,7 @@ public static class NotesBook
 
         var body = new StringBuilder();
         AppendCover(body, bookTitle, subtitle, context, chapters.Count, generatedAt);
-        AppendContents(body, chapters);
+        AppendContents(body, chapters, pageNumbers);
         foreach (var chapter in chapters)
             AppendChapter(body, chapter);
 
@@ -69,7 +72,7 @@ public static class NotesBook
             Layout = ReportLayout.Book,
             Orientation = ReportOrientation.Portrait,
             Language = string.IsNullOrWhiteSpace(language) ? "en" : language,
-            ResolvePageReferences = chapters.Count > 0,
+            ResolvePageReferences = pageNumbers && chapters.Count > 0,
             GeneratedAt = generatedAt,
             FileNameBase = context.FileNameBase(generatedAt, prefix: "Book"),
             BodyHtml = body.ToString()
@@ -120,7 +123,7 @@ public static class NotesBook
         body.AppendLine("</section>");
     }
 
-    private static void AppendContents(StringBuilder body, IReadOnlyList<BookChapter> chapters)
+    private static void AppendContents(StringBuilder body, IReadOnlyList<BookChapter> chapters, bool pageNumbers)
     {
         body.AppendLine("<nav class=\"knt-contents\">");
         body.AppendLine("<h2>Contents</h2>");
@@ -130,8 +133,8 @@ public static class NotesBook
             body.AppendLine($"<a class=\"knt-toc-entry\" href=\"#{id}\">" +
                 $"<span class=\"knt-toc-number\">{chapter.Number}</span>" +
                 $"<span class=\"knt-toc-title\">{ReportHtml.Encode(ChapterTitle(chapter))}</span>" +
-                "<span class=\"knt-toc-leader\"></span>" +
-                $"{ReportHtml.PageReference(id)}</a>");
+                (pageNumbers ? $"<span class=\"knt-toc-leader\"></span>{ReportHtml.PageReference(id)}" : "") +
+                "</a>");
         }
         if (chapters.Count == 0)
             body.AppendLine("<p class=\"knt-chapter-empty\">There are no notes in this list.</p>");

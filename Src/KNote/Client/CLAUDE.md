@@ -383,6 +383,15 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   (`MarkupString`), tampoco el tema de una nota. Para contenido sin HTML que cambia a menudo (el chat del
   asistente, que se repinta mientras llega la respuesta) `DisableHtml="true"` lo genera en el navegador, con su
   HTML como texto y solo enlaces `http`, `https`, `mailto` o relativos, igual que `AiChatHtml` en `ClientWin`.
+- **Informes imprimibles**: los genera `Server` (`IStore.Reports` → `api/reports`, ver `Server/CLAUDE.md`) como una
+  página HTML completa (A4, con sus estilos), con la cultura del navegador. `Shared/KntReportPreview`
+  (`KntReportPreview.OpenAsync(dialogService, título, subtítulo, load)`, `KntDialogs.Document()`) la muestra mientras
+  se genera y después en un `iframe` con `sandbox="allow-same-origin allow-modals allow-popups
+  allow-popups-to-escape-sandbox"`: sin scripts (el HTML viene de las notas), `allow-same-origin` para que
+  `js/kntReports.js` la imprima y abra sus enlaces externos en otra pestaña, y `allow-modals` para `print()` (sin
+  él el navegador lo ignora). Se carga desde una URL `blob:`, no con `srcdoc`: en `srcdoc` los enlaces `#id` (el
+  índice de un libro) se resuelven contra la URL de la app y el iframe saldría del informe. Cerrar el diálogo antes
+  de que llegue cancela la petición (un libro largo). `kntReports.downloadFile` guarda un fichero exportado (CSV).
 
 ## Compilar, ejecutar y depurar
 

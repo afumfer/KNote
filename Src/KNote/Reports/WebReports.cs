@@ -46,9 +46,8 @@ public class WebReports
 
         var context = await GetContextAsync(request);
         var chapters = await NotesBook.LoadChaptersAsync(_service, _resources, notes.Entity.Select(n => n.NoteId), cancellationToken);
-        var report = NotesBook.Build(context, chapters, DateTime.Now, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
         // A browser can't tell the pages the chapters land on: the contents keep their links, without numbers.
-        report.ResolvePageReferences = false;
+        var report = NotesBook.Build(context, chapters, DateTime.Now, CultureInfo.CurrentCulture.TwoLetterISOLanguageName, pageNumbers: false);
 
         return Report(report, chapters.Count);
     }
