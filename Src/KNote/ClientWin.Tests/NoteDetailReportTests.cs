@@ -10,6 +10,8 @@ namespace KNote.ClientWin.Tests;
 [TestClass]
 public class NoteDetailReportTests
 {
+    private static readonly Guid MeetingTypeId = Guid.NewGuid();
+
     private static NoteExtendedDto Note()
     {
         var note = new NoteExtendedDto
@@ -24,7 +26,8 @@ public class NoteDetailReportTests
             Script = "SECRET_NOTE_SCRIPT",
             FolderId = Guid.NewGuid(),
             FolderDto = new FolderDto { FolderNumber = 88, Name = "Accesos" },
-            NoteTypeDto = new NoteTypeDto { Name = "Meeting" },
+            NoteTypeId = MeetingTypeId,
+            NoteTypeDto = new NoteTypeDto { NoteTypeId = MeetingTypeId, Name = "Meeting" },
             CreationDateTime = new DateTime(2016, 5, 26, 9, 48, 0),
             ModificationDateTime = new DateTime(2025, 2, 5, 13, 3, 0),
             KAttributesDto = new List<NoteKAttributeDto>
@@ -84,6 +87,19 @@ public class NoteDetailReportTests
             "Attributes follow their defined Order");
         StringAssert.Contains(body, "No resources.");
         StringAssert.Contains(body, "No tasks.");
+    }
+
+    [TestMethod]
+    public void Build_ANoteWithoutType_ShowsNoTypeInsteadOfTheDtoPlaceholder()
+    {
+        var note = Note();
+        note.NoteTypeId = null;
+        note.NoteTypeDto = null!;      // as read from the repository: the getter makes its placeholder
+
+        var body = NoteDetailReport.Build(Data(note), DateTime.Now).BodyHtml;
+
+        Assert.IsFalse(body.Contains("Enter new type"), body);
+        StringAssert.Contains(body, "<dt>Note type</dt><dd><span class=\"knt-empty\">—</span></dd>");
     }
 
     [TestMethod]

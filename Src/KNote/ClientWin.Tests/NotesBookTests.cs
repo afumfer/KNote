@@ -136,11 +136,11 @@ public class NotesBookTests
     }
 
     [TestMethod]
-    public void IsLargeBook_OnlyAboveOneHundredNotes()
+    public void LargeNotesBook_OnlyAboveOneHundredNotes()
     {
-        Assert.IsFalse(NotesBook.IsLargeBook(100));
-        Assert.IsTrue(NotesBook.IsLargeBook(101));
-        StringAssert.Contains(NotesBook.LargeBookWarning(250), "250 notes");
+        Assert.IsFalse(LargeNotesBook.Is(100));
+        Assert.IsTrue(LargeNotesBook.Is(101));
+        StringAssert.Contains(LargeNotesBook.Warning(250), "250 notes");
     }
 }
 

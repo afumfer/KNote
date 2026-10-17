@@ -37,7 +37,7 @@ public class WebReports
     }
 
     // One chapter per note: it reads every note of the list (the user is warned of a large one, see
-    // NotesBook.IsLargeBook).
+    // LargeNotesBook).
     public async Task<Result<ReportDto>> NotesBookAsync(NotesListReportRequestDto request, CancellationToken cancellationToken = default)
     {
         var notes = await LoadNotesAsync(request);

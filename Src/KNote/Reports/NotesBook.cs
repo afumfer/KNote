@@ -16,14 +16,6 @@ public static class NotesBook
 {
     public const string Title = "Notes book";
 
-    // A book of more notes than this loads and renders each one of them: the user is asked first.
-    public const int LargeBookNotes = 100;
-
-    public static bool IsLargeBook(int notesCount) => notesCount > LargeBookNotes;
-
-    public static string LargeBookWarning(int notesCount)
-        => $"The book will have {notesCount} notes (one chapter each). Generating it may take a long time.\r\n\r\nDo you want to continue?";
-
     public static string ChapterId(int number) => $"knt-ch-{number}";
 
     // Loads the listed notes, in order, as chapters. A note deleted meanwhile is left out.

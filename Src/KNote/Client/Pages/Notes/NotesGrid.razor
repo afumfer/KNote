@@ -83,6 +83,12 @@
     /// <summary>The note of the selected (current) row, if any.</summary>
     public NoteMinimalDto? Current { get; private set; }
 
+    /// <summary>The order the list is shown in (null: the list's own order), e.g. to print it in the same one.</summary>
+    public NotesOrder? CurrentOrder => order;
+
+    /// <summary>How many notes the list has (all of them, not only the ones loaded); 0 until they are known.</summary>
+    public int TotalCount => count;
+
     /// <summary>Whether there is a selected note to view.</summary>
     public bool CanViewCurrent => Current != null;
 

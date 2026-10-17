@@ -7,6 +7,14 @@
     max-height: calc(100vh - 6rem);
 }
 
+.knt-dialog-fill {
+    height: calc(100vh - 6rem);
+}
+
+    .knt-dialog-fill .knt-dialog-body {
+        overflow: hidden;
+    }
+
 .knt-dialog-header {
     display: flex;
     align-items: center;

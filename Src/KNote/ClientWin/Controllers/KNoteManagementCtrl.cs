@@ -1677,8 +1677,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 return;
             }
 
-            if (NotesBook.IsLargeBook(snapshot.NoteIds.Count) &&
-                View.ShowInfo(NotesBook.LargeBookWarning(snapshot.NoteIds.Count), NotesBook.Title,
+            if (LargeNotesBook.Is(snapshot.NoteIds.Count) &&
+                View.ShowInfo($"{LargeNotesBook.Warning(snapshot.NoteIds.Count)}\r\n\r\nDo you want to continue?", NotesBook.Title,
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                 return;
 

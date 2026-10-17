@@ -2,6 +2,17 @@ using System;
 
 namespace KNote.Model.Dto;
 
+// A notes book reads and renders every note of the list: above this many notes, both apps ask the user first.
+public static class LargeNotesBook
+{
+    public const int Notes = 100;
+
+    public static bool Is(int notesCount) => notesCount > Notes;
+
+    public static string Warning(int notesCount)
+        => $"The book will have {notesCount} notes (one chapter each): generating it may take a long time.";
+}
+
 public enum NotesListReportSource
 {
     Folder,

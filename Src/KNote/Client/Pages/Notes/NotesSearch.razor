@@ -17,9 +17,8 @@
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
-            <RadzenMenuItem Text="View note" Icon="launch" class="knt-menu-separator" Disabled="@(!(notesGrid?.CanViewCurrent ?? false))" Click="@(() => notesGrid!.ViewCurrentAsync())"></RadzenMenuItem>
-            <NotesPreviewToggle Changed="StateHasChanged" />
-            <NotesListViewToggle Changed="StateHasChanged" />
+            <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
+            <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" ListName="@($"Search: {SearchedText()}")" />
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -110,6 +109,16 @@
             queryString += $"&orderColumn={order.Column}&orderAscending={order.Ascending}";
         return await store.Notes.GetSearch(queryString);
     }
+
+    // The text of the search shown in the list (the box may have been changed without searching it).
+    private string SearchedText() => appState.NotesSearchPosition?.ListKey ?? "";
+
+    // The notes found, to print or export them (NotesPrintExportMenu adds the list's order and view).
+    private NotesListReportRequestDto ReportRequest() => new()
+    {
+        Source = NotesListReportSource.Search,
+        TextSearch = SearchedText()
+    };
 
     Task OnNew() => noteWindows.OpenNewAsync();
 

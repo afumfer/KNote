@@ -1,10 +1,10 @@
-/* The report takes the height left in the window by the dialog's header and footer. It brings its own look (white
-   pages on a grey background, the same in the light and dark themes), as printed. */
+/* The report takes the dialog's body (KntDialogFrame Fill: the window's height less its header and footer) and
+   scrolls itself. It brings its own look (white pages on a grey background, the same in the light and dark
+   themes), as printed. */
 
 .knt-report-preview {
     position: relative;
-    height: calc(100vh - 15rem);
-    min-height: 18rem;
+    height: 100%;
 }
 
 .knt-report-frame {
