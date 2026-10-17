@@ -1,0 +1,35 @@
+@page "/chat/window"
+@layout KntWindowLayout
+
+@inject IStore store
+@inject AuthenticationStateProvider authenticationStateProvider
+
+@implements IAsyncDisposable
+
+@attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
+
+@* The chat room in a window of its own (KntWindows.OpenChatRoomAsync), apart from the main window, showing the thread
+   of the query string. The window layout doesn't connect to the chat room (the note windows don't use it): this page
+   does, before the chat room is shown. *@
+
+<PageTitle>@KntSections.ChatRoom.Text - @KntConst.AppName</PageTitle>
+
+@if (started)
+{
+    <ChatRoom InWindow="true" ThreadId="ThreadId" />
+}
+
+@code {
+    [SupplyParameterFromQuery] public Guid? ThreadId { get; set; }
+
+    private bool started;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await authenticationStateProvider.GetAuthenticationStateAsync();
+        await store.ChatRoom.StartForUserAsync(state.User);
+        started = true;
+    }
+
+    public async ValueTask DisposeAsync() => await store.ChatRoom.StopAsync();
+}

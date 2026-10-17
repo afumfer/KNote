@@ -5,6 +5,7 @@
 @inject TooltipService tooltipService
 @inject IJSRuntime js
 @inject NotificationService notificationService
+@inject KntWindows kntWindows
 
 @implements IAsyncDisposable
 
@@ -12,7 +13,8 @@
 
 @* The chat room: its threads on the right, the one shown on the left. The connection, the threads and their messages
    are kept by store.ChatRoom (ChatRoomHub) while the app is open; this page shows them and writes in them. Images
-   pasted into the message box or dropped on the conversation are sent too (js/chatRoom.js). *@
+   pasted into the message box or dropped on the conversation are sent too (js/chatRoom.js). It can go on in a window
+   of its own (ChatRoomWindow, InWindow). *@
 
 <KntIndexHeader Section="KntSections.ChatRoom">
     <IndexMenu>
@@ -33,13 +35,18 @@
             }
             <RadzenButton Icon="add_comment" ButtonStyle="ButtonStyle.Secondary" Click="NewThread" Disabled="@(!Connected)"
                           MouseEnter="@(args => tooltipService.Open(args, "New thread", new TooltipOptions { Position = TooltipPosition.Left }))" />
+            @if (!InWindow)
+            {
+                <RadzenButton Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="OpenInWindow"
+                              MouseEnter="@(args => tooltipService.Open(args, "Open in a new window", new TooltipOptions { Position = TooltipPosition.Left }))" />
+            }
         </RadzenStack>
         </div>
     </IndexMenu>
 </KntIndexHeader>
 
 <div class="chat-room">
-<RadzenSplitter Style="height: calc(100vh - 10rem)" class="rz-mt-2" Resize="paneSizes.Resized">
+<RadzenSplitter Style="@($"height: {Height}")" class="rz-mt-2" Resize="paneSizes.Resized">
     <RadzenSplitterPane Size="@paneSizes[0]" Min="40%">
         <div class="chat-room-conversation" @ref="conversationElement">
             @if (!string.IsNullOrEmpty(chat.ConnectionError) && !Connected)
@@ -107,6 +114,13 @@
 </div>
 
 @code {
+    // In the chat room's own window (ChatRoomWindow): no button to open it in another one, and as tall as the window,
+    // which has no app header and footer.
+    [Parameter] public bool InWindow { get; set; }
+
+    // The thread to show first (in a window, the one the main window showed).
+    [Parameter] public Guid? ThreadId { get; set; }
+
     private ChatRoomHub chat = null!;
     private KntPaneSizes paneSizes = null!;
     private RadzenChat? chatView;
@@ -122,6 +136,8 @@
 
     private bool Connected => chat.State == ChatRoomConnectionState.Connected;
 
+    private string Height => InWindow ? "calc(100vh - 5rem)" : "calc(100vh - 10rem)";
+
     protected override async Task OnInitializedAsync()
     {
         chat = store.ChatRoom;
@@ -129,9 +145,10 @@
         chat.PageVisible = true;
         paneSizes = new KntPaneSizes(js, "KNoteChatRoomPanes", "75%", "25%");
 
-        // Back on the page: the thread shown is seen again.
-        if (chat.CurrentThreadId != null && Connected)
-            await chat.SelectThreadAsync(chat.CurrentThreadId.Value);
+        // The thread asked for, or, back on the page, the thread shown: seen again.
+        var threadId = ThreadId ?? chat.CurrentThreadId;
+        if (threadId != null && Connected)
+            await chat.SelectThreadAsync(threadId.Value);
         else if (chat.State == ChatRoomConnectionState.Disconnected)
             await chat.ReconnectAsync();
     }
@@ -242,6 +259,14 @@
     }
 
     private async Task Reconnect() => await chat.ReconnectAsync();
+
+    // The chat room goes on in its own window, with the thread shown, and this one goes Home. The window is opened
+    // first thing: the browser only allows it right after the click.
+    private async Task OpenInWindow()
+    {
+        if (await kntWindows.OpenChatRoomAsync(chat.CurrentThreadId))
+            store.NavigateTo("index");
+    }
 
     private static string Initials(string? userName)
     {

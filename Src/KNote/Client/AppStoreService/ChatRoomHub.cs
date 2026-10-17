@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using KNote.Model;
 using KNote.Model.Dto;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -21,7 +22,7 @@ public enum ChatRoomConnectionState
 /// token, the threads, the ones followed in this connection (subscribed, with their messages) and the one shown.
 /// Started by MainLayout for a Staff user once signed in (and stopped when signing out), so the threads the user takes
 /// part in are followed while the app is open: their new messages are notified (unless that thread is on screen)
-/// and counted as unread. Subscriptions are lost with the connection: they are made again after reconnecting. Its
+/// and counted as unread. The chat room's own window (ChatRoomWindow) starts it too: the window layout doesn't. Subscriptions are lost with the connection: they are made again after reconnecting. Its
 /// changes are told with Changed; the hub's callbacks run on the browser's only thread.
 /// </summary>
 public class ChatRoomHub : IAsyncDisposable
@@ -72,6 +73,17 @@ public class ChatRoomHub : IAsyncDisposable
     #endregion
 
     #region Connection
+
+    /// <summary>Connects as the user, if they are signed in and a Staff user (the chat room is theirs); otherwise
+    /// disconnects.</summary>
+    public async Task StartForUserAsync(ClaimsPrincipal user)
+    {
+        if (user.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(user.Identity.Name)
+            && (user.IsInRole("Staff") || user.IsInRole("ProjectManager") || user.IsInRole("Admin")))
+            await StartAsync(user.Identity.Name);
+        else
+            await StopAsync();
+    }
 
     /// <summary>Connects as the signed-in user (again, if it was connected as another one).</summary>
     public async Task StartAsync(string userName)

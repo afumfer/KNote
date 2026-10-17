@@ -88,15 +88,8 @@
 
     // The chat room is open for a Staff user while they are signed in (see ChatRoomHub): its threads are followed
     // while the app is open, wherever the user is.
-    private async Task UpdateChatRoomAsync(AuthenticationState state)
-    {
-        var user = state.User;
-        if (user.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(user.Identity.Name)
-            && (user.IsInRole("Staff") || user.IsInRole("ProjectManager") || user.IsInRole("Admin")))
-            await store.ChatRoom.StartAsync(user.Identity.Name);
-        else
-            await store.ChatRoom.StopAsync();
-    }
+    private async Task UpdateChatRoomAsync(AuthenticationState state) =>
+        await store.ChatRoom.StartForUserAsync(state.User);
 
     // Home shows the repository's name as its title; the other pages, here, after the application's name. The
     // layout is rendered again on every navigation (its Body changes), so the title follows the page shown.
