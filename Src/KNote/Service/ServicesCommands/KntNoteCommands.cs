@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
 using KNote.Model.Dto;
@@ -1055,6 +1056,13 @@ public class KntNotesSaveTraceNoteAsyncCommand : KntCommandSaveServiceBase<Trace
 
     public override async Task<Result<TraceNoteDto>> Execute()
     {
+        // The same two notes, in the same direction, can only be traced once per type. The database unique index
+        // (FromId, ToId, TraceNoteTypeId) does not block the untyped relations (NULL type), so it is checked here,
+        // for every caller (ClientWin's note editor, the web, KntScript) and both ORMs.
+        var resDuplicate = await CheckNotDuplicatedAsync();
+        if (!resDuplicate.IsValid)
+            return resDuplicate;
+
         if (Param.TraceNoteId == Guid.Empty)
         {
             Param.TraceNoteId = Guid.NewGuid();
@@ -1075,6 +1083,23 @@ public class KntNotesSaveTraceNoteAsyncCommand : KntCommandSaveServiceBase<Trace
                     return await Repository.TraceNotes.AddAsync(Param);
             }
         }
+    }
+
+    private async Task<Result<TraceNoteDto>> CheckNotDuplicatedAsync()
+    {
+        var result = new Result<TraceNoteDto>();
+
+        var resExisting = await Repository.TraceNotes.GetAllByFromIdAsync(Param.FromId);
+        if (!resExisting.IsValid)
+        {
+            result.AddListErrorMessage(resExisting.ListErrorMessage);
+            return result;
+        }
+
+        if (resExisting.Entity.Any(t => t.ToId == Param.ToId && t.TraceNoteTypeId == Param.TraceNoteTypeId && t.TraceNoteId != Param.TraceNoteId))
+            result.AddErrorMessage("These notes are already traced with the same type (a relation can only be added once).");
+
+        return result;
     }
 }
 

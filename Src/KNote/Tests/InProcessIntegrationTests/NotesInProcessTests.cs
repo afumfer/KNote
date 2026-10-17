@@ -275,6 +275,104 @@ public class NotesInProcessTests
         Assert.AreEqual(note.NoteId, res!.Entity!.NoteId);
     }
 
+    // The web note editor's "Trace notes" tab: api/notes/{id}/tracenotes (both directions, resolved), and
+    // api/notes/tracenotes to save (at once) and delete.
+    [TestMethod]
+    public async Task Execute_TraceNotesCRUD()
+    {
+        var noteA = await CreateNoteAsync("__TEST TRACE NOTE A__");
+        var noteB = await CreateNoteAsync("__TEST TRACE NOTE B__");
+        var typeRes = await (await _httpClient.PostAsJsonAsync("api/tracenotetypes", new TraceNoteTypeDto { Name = "__TEST_TRACE_TYPE__" }))
+            .Content.ReadFromJsonAsync<Result<TraceNoteTypeDto>>();
+        var type = typeRes!.Entity!;
+
+        try
+        {
+            // Create A -> B
+            var httpRes = await _httpClient.PostAsJsonAsync("api/notes/tracenotes",
+                new TraceNoteDto { FromId = noteA.NoteId, ToId = noteB.NoteId, TraceNoteTypeId = type.TraceNoteTypeId, Order = 2, Weight = 1.5 });
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<TraceNoteDto>>();
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, res?.ErrorMessage);
+            Assert.AreNotEqual(Guid.Empty, res!.Entity!.TraceNoteId);
+            var traceNoteId = res.Entity.TraceNoteId;
+
+            // Outgoing from A, resolved with B and the type
+            var fromA = await GetTraceNotesAsync(noteA.NoteId);
+            Assert.IsEmpty(fromA.TraceNotesFrom);
+            Assert.HasCount(1, fromA.TraceNotesTo);
+            var outgoing = fromA.TraceNotesTo[0];
+            Assert.AreEqual(traceNoteId, outgoing.TraceNoteId);
+            Assert.AreEqual(noteB.NoteId, outgoing.RelatedNoteId);
+            Assert.AreEqual($"#{noteB.NoteNumber}", outgoing.RelatedNoteNumber);
+            Assert.AreEqual(noteB.Topic, outgoing.RelatedNoteTopic);
+            Assert.AreEqual(type.Name, outgoing.TraceNoteTypeName);
+            Assert.AreEqual(2, outgoing.Order);
+            Assert.AreEqual(1.5, outgoing.Weight);
+
+            // Incoming to B, resolved with A
+            var fromB = await GetTraceNotesAsync(noteB.NoteId);
+            Assert.IsEmpty(fromB.TraceNotesTo);
+            Assert.HasCount(1, fromB.TraceNotesFrom);
+            Assert.AreEqual(noteA.NoteId, fromB.TraceNotesFrom[0].RelatedNoteId);
+            Assert.AreEqual(noteA.Topic, fromB.TraceNotesFrom[0].RelatedNoteTopic);
+
+            // Update (sent back as the TraceNoteInfoDto it was read as)
+            outgoing.Order = 7;
+            outgoing.TraceNoteTypeId = null;
+            httpRes = await _httpClient.PutAsJsonAsync("api/notes/tracenotes", outgoing);
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, await httpRes.Content.ReadAsStringAsync());
+            fromA = await GetTraceNotesAsync(noteA.NoteId);
+            Assert.AreEqual(7, fromA.TraceNotesTo[0].Order);
+            Assert.AreEqual("", fromA.TraceNotesTo[0].TraceNoteTypeName);
+
+            // A duplicate (untyped, as it is now) and a note traced to itself are rejected
+            httpRes = await _httpClient.PostAsJsonAsync("api/notes/tracenotes", new TraceNoteDto { FromId = noteA.NoteId, ToId = noteB.NoteId, Weight = 1 });
+            res = await httpRes.Content.ReadFromJsonAsync<Result<TraceNoteDto>>();
+            Assert.IsFalse(httpRes.IsSuccessStatusCode);
+            StringAssert.Contains(res!.ErrorMessage, "already traced");
+
+            httpRes = await _httpClient.PostAsJsonAsync("api/notes/tracenotes", new TraceNoteDto { FromId = noteA.NoteId, ToId = noteA.NoteId, Weight = 1 });
+            Assert.IsFalse(httpRes.IsSuccessStatusCode);
+
+            // A type in use is not deleted
+            outgoing.TraceNoteTypeId = type.TraceNoteTypeId;
+            httpRes = await _httpClient.PutAsJsonAsync("api/notes/tracenotes", outgoing);
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, await httpRes.Content.ReadAsStringAsync());
+            httpRes = await _httpClient.DeleteAsync($"api/tracenotetypes/{type.TraceNoteTypeId}");
+            var typeDelete = await httpRes.Content.ReadFromJsonAsync<Result<TraceNoteTypeDto>>();
+            Assert.IsFalse(httpRes.IsSuccessStatusCode);
+            Assert.IsFalse(typeDelete!.IsValid);
+
+            // Delete
+            httpRes = await _httpClient.DeleteAsync($"api/notes/tracenotes/{traceNoteId}");
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, await httpRes.Content.ReadAsStringAsync());
+            fromA = await GetTraceNotesAsync(noteA.NoteId);
+            Assert.IsEmpty(fromA.TraceNotesTo);
+
+            // Deleting a note deletes its trace notes
+            httpRes = await _httpClient.PostAsJsonAsync("api/notes/tracenotes", new TraceNoteDto { FromId = noteB.NoteId, ToId = noteA.NoteId, Weight = 1 });
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, await httpRes.Content.ReadAsStringAsync());
+            httpRes = await _httpClient.DeleteAsync($"api/notes/{noteA.NoteId}");
+            Assert.IsTrue(httpRes.IsSuccessStatusCode, await httpRes.Content.ReadAsStringAsync());
+            fromB = await GetTraceNotesAsync(noteB.NoteId);
+            Assert.IsEmpty(fromB.TraceNotesTo);
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/notes/{noteA.NoteId}");
+            await _httpClient.DeleteAsync($"api/notes/{noteB.NoteId}");
+            await _httpClient.DeleteAsync($"api/tracenotetypes/{type.TraceNoteTypeId}");
+        }
+    }
+
+    private static async Task<NoteTraceNotesDto> GetTraceNotesAsync(Guid noteId)
+    {
+        var httpRes = await _httpClient.GetAsync($"api/notes/{noteId}/tracenotes");
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<NoteTraceNotesDto>>();
+        Assert.IsTrue(httpRes.IsSuccessStatusCode, res?.ErrorMessage);
+        return res!.Entity!;
+    }
+
     private static async Task<NoteDto> CreateNoteAsync(string topic, string description = "Created by NotesInProcessTests.", FolderInfoDto? folder = null)
     {
         NoteDto note = new()

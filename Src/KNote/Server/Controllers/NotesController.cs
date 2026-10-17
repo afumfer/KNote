@@ -10,6 +10,7 @@ using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KNote.Reports;
 using Microsoft.Extensions.Logging;
 using KNote.Repository.EntityFramework.Entities;
 
@@ -516,7 +517,121 @@ public class NotesController : ControllerBase
         }
     }
 
+    // The note's trace notes in both directions, each one with the other note of the relation and its type
+    // resolved as ClientWin's note editor shows them (TraceNoteRows).
+    [HttpGet("{id}/[action]")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> TraceNotes(Guid id)
+    {
+        try
+        {
+            _logger.LogTrace("TraceNotes {id} {dateTime}.", id, DateTime.Now);
+
+            var resApi = new Result<NoteTraceNotesDto>();
+
+            var resFrom = await _service.Notes.GetTraceNotesFromAsync(id);
+            var resTo = await _service.Notes.GetTraceNotesToAsync(id);
+            if (!resFrom.IsValid || !resTo.IsValid)
+            {
+                resApi.AddListErrorMessage(resFrom.ListErrorMessage);
+                resApi.AddListErrorMessage(resTo.ListErrorMessage);
+                return BadRequest(resApi);
+            }
+
+            var typeNames = await TraceNoteRows.GetTypeNamesAsync(_service);
+            resApi.Entity = new NoteTraceNotesDto
+            {
+                TraceNotesFrom = await ToTraceNoteInfoAsync(resFrom.Entity, fromSide: true, typeNames),
+                TraceNotesTo = await ToTraceNoteInfoAsync(resTo.Entity, fromSide: false, typeNames)
+            };
+            return Ok(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "TraceNotes {id} at {dateTime}.", id, DateTime.Now);
+            var kresApi = new Result<NoteTraceNotesDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    // Saved at once (the web app does not keep them with the note, as ClientWin does). A new one has an empty
+    // TraceNoteId. Service rejects a note traced to itself and a relation that already exists.
+    [HttpPost("[action]")]
+    [HttpPut("[action]")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> TraceNotes([FromBody] TraceNoteDto entity)
+    {
+        try
+        {
+            _logger.LogTrace("TraceNotes(post/put) {dateTime}.", DateTime.Now);
+
+            var resApi = await _service.Notes.SaveTraceNoteAsync(entity);
+            if (resApi.IsValid)
+                return Ok(resApi);
+            else
+                return BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "TraceNotes at {dateTime}.", DateTime.Now);
+            var kresApi = new Result<TraceNoteDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    [HttpDelete("tracenotes/{id}")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> DeleteTraceNote(Guid id)
+    {
+        try
+        {
+            _logger.LogTrace("DeleteTraceNote {id} {dateTime}.", id, DateTime.Now);
+
+            var resApi = await _service.Notes.DeleteTraceNoteAsync(id);
+            if (resApi.IsValid)
+                return Ok(resApi);
+            else
+                return BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "DeleteTraceNote {id} at {dateTime}.", id, DateTime.Now);
+            var kresApi = new Result<TraceNoteDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
     #region Private methods
+
+    // fromSide: the related note is FromId (the note's incoming relations), otherwise ToId.
+    private async Task<List<TraceNoteInfoDto>> ToTraceNoteInfoAsync(List<TraceNoteDto> traceNotes, bool fromSide, Dictionary<Guid, string> typeNames)
+    {
+        var infos = new List<TraceNoteInfoDto>();
+        foreach (var traceNote in traceNotes)
+        {
+            var relatedNoteId = fromSide ? traceNote.FromId : traceNote.ToId;
+            var row = await TraceNoteRows.ResolveAsync(_service, traceNote, relatedNoteId, typeNames);
+
+            infos.Add(new TraceNoteInfoDto
+            {
+                TraceNoteId = traceNote.TraceNoteId,
+                FromId = traceNote.FromId,
+                ToId = traceNote.ToId,
+                Order = traceNote.Order,
+                Weight = traceNote.Weight,
+                TraceNoteTypeId = traceNote.TraceNoteTypeId,
+                RelatedNoteId = relatedNoteId,
+                RelatedNoteNumber = row.Number,
+                RelatedNoteTopic = row.Topic,
+                RelatedNoteTags = row.Tags,
+                TraceNoteTypeName = row.Type
+            });
+        }
+        return infos;
+    }
 
     private void ListNotesUpdateResourceInDescriptionForRead(List<NoteInfoDto>notes, RepositoryRef repositoryRef)
     {
