@@ -4,6 +4,7 @@
 @using KNote.Client.Pages.Folders
 @using KNote.Client.Pages.Attributes
 @using KNote.Client.Pages.Types
+@using KNote.Client.Pages.TraceNoteTypes
 
 @inject NavigationManager navigationManager
 
@@ -30,6 +31,10 @@
 
                 <RadzenTabsItem Text="@TabText(KntSections.NoteTypes)" Icon="@KntSections.NoteTypes.Icon">
                     <TypesIndex></TypesIndex>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="@TabText(KntSections.TraceNoteTypes)" Icon="@KntSections.TraceNoteTypes.Icon">
+                    <TraceNoteTypesIndex></TraceNoteTypesIndex>
                 </RadzenTabsItem>
 
                 <RadzenTabsItem Text="@TabText(KntSections.Attributes)" Icon="@KntSections.Attributes.Icon">

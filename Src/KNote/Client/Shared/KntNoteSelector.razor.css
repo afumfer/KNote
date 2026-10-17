@@ -1,0 +1,32 @@
+/* The tree and the list in boxes of the same height that scroll on their own. Only theme variables. */
+
+.knt-note-selector-tree {
+    height: 24rem;
+    overflow: auto;
+    padding: 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 14%, transparent);
+    border-radius: var(--rz-border-radius);
+}
+
+.knt-note-selector ::deep .rz-selectbar .rz-button-icon-left {
+    margin-inline-end: 0.25rem;
+}
+
+.knt-note-selector ::deep .knt-note-selector-search {
+    flex: 1;
+}
+
+.knt-note-selector ::deep .knt-note-selector-list {
+    height: 24rem;
+}
+
+/* A note that can't be chosen (e.g. the note being edited). */
+.knt-note-selector ::deep .knt-note-selector-excluded {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.knt-note-selector .knt-empty-state {
+    min-height: 24rem;
+    justify-content: center;
+}

@@ -1,0 +1,43 @@
+/* The direction of the relation: the two notes with an arrow between them, this note marked. Only theme variables. */
+
+.knt-trace-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.knt-trace-flow-note {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    border: 1px dashed color-mix(in srgb, var(--rz-text-color) 25%, transparent);
+    border-radius: var(--rz-border-radius);
+}
+
+.knt-trace-flow-current {
+    border: 1px solid color-mix(in srgb, var(--rz-primary) 45%, transparent);
+    background-color: color-mix(in srgb, var(--rz-primary) 8%, transparent);
+}
+
+.knt-trace-flow-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-trace-flow-text {
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.knt-trace-flow-arrow {
+    display: inline-flex;
+    align-items: center;
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}

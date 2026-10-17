@@ -11,6 +11,7 @@ public interface IStore
 
     IUserWebApiService Users { get; }
     INoteTypeWebApiService NoteTypes { get; }
+    ITraceNoteTypeWebApiService TraceNoteTypes { get; }
     IKAttributeWebApiService KAttributes { get; }
     IFolderWebApiService Folders { get; }
     INoteWebApiService Notes { get; }

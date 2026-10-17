@@ -1,0 +1,42 @@
+@page "/tracenotetypes/new"
+
+@inject IStore store
+@inject DialogService dialogService
+
+@attribute [Authorize(Roles = "Admin")]
+
+
+<NavigationLock ConfirmExternalNavigation=true />
+
+<TraceNoteTypeForm Title="New trace note type" OnValidSubmit="OnNew" OnExit="OnExit" TraceNoteType="traceNoteType" />
+
+@code {
+    TraceNoteTypeDto traceNoteType = new TraceNoteTypeDto();
+
+    private async Task OnNew()
+    {
+        if (traceNoteType.IsValid())
+        {
+            var result = await store.TraceNoteTypes.SaveAsync(traceNoteType);
+            if (result.IsValid)
+                dialogService.Close(result.Entity);
+        }
+    }
+
+    private async Task OnExit()
+    {
+        if (!traceNoteType.IsDirty())
+        {
+            dialogService.Close(null);
+            return;
+        }
+
+        var resultDialog = await dialogService.Confirm(
+            @"Do you want to leave the page and lose your changes?",
+            $"{KntConst.AppName}",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (resultDialog == true)
+            dialogService.Close(null);
+    }
+}

@@ -1,0 +1,103 @@
+@inject TooltipService tooltipService
+
+@* The note's trace notes, as in ClientWin: the relations that come from other notes ("Trace notes from", this note is
+   ToId) and the ones that go to other notes ("Trace notes to", this note is FromId), each one shown by the other note
+   in it and the relation's type, order and weight. Double click (or Enter) opens the other note. *@
+
+<div class="knt-traces">
+    <RadzenRow Gap="1.25rem">
+        <RadzenColumn Size="12" SizeLG="6">
+            @Panel(outgoing: false)
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeLG="6">
+            @Panel(outgoing: true)
+        </RadzenColumn>
+    </RadzenRow>
+</div>
+
+@code {
+    [Parameter] public NoteTraceNotesDto TraceNotes { get; set; } = new();
+    // true: a relation to another note (this note is FromId); false: from another note (this note is ToId).
+    [Parameter] public EventCallback<bool> OnNew { get; set; }
+    [Parameter] public EventCallback<TraceNoteInfoDto> OnEdit { get; set; }
+    [Parameter] public EventCallback<TraceNoteInfoDto> OnDelete { get; set; }
+    // Opens the other note of the relation.
+    [Parameter] public EventCallback<TraceNoteInfoDto> OnOpenNote { get; set; }
+
+    private RenderFragment Panel(bool outgoing) => __builder =>
+    {
+        var list = Ordered(outgoing ? TraceNotes.TraceNotesTo : TraceNotes.TraceNotesFrom);
+
+        <section class="knt-trace-panel" aria-label="@(outgoing ? "Trace notes to" : "Trace notes from")">
+            <div class="knt-trace-panel-head">
+                <span class="knt-trace-panel-icon"><RadzenIcon Icon="@(outgoing ? "call_made" : "call_received")" /></span>
+                <div class="knt-trace-panel-caption">
+                    <h3 class="knt-trace-panel-title">@(outgoing ? "Trace notes to" : "Trace notes from")</h3>
+                    <div class="knt-trace-panel-description">@(outgoing ? "Other notes this note leads to." : "Other notes that lead to this note.")</div>
+                </div>
+            </div>
+
+            <div class="knt-list-header">
+                <span>@list.Count @(list.Count == 1 ? "relation" : "relations")</span>
+                <RadzenButton Text="Add" Icon="add_link" Click="() => OnNew.InvokeAsync(outgoing)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+            </div>
+
+            @if (list.Count == 0)
+            {
+                <div class="knt-empty-state">
+                    <RadzenIcon Icon="@(outgoing ? "call_made" : "call_received")" />
+                    <div class="knt-empty-state-title">@(outgoing ? "Not traced to other notes" : "Not traced from other notes")</div>
+                    <div class="knt-empty-state-text">
+                        @(outgoing ? "Add the notes this one leads to (it follows from them, depends on them...)."
+                                   : "Add the notes that lead to this one.")
+                        A new note has to be saved first.
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="knt-trace-list" role="list">
+                    @foreach (var traceNote in list)
+                    {
+                        <div class="knt-trace" role="listitem" tabindex="0"
+                             @ondblclick="() => OnOpenNote.InvokeAsync(traceNote)" @onkeydown="@(e => OnTraceKey(e, traceNote))">
+                            <span class="knt-trace-number">@traceNote.RelatedNoteNumber</span>
+                            <div class="knt-trace-body">
+                                <div class="knt-trace-title">@(string.IsNullOrEmpty(traceNote.RelatedNoteTopic) ? "(note not found)" : traceNote.RelatedNoteTopic)</div>
+                                <div class="knt-trace-meta">
+                                    @if (!string.IsNullOrEmpty(traceNote.TraceNoteTypeName))
+                                    {
+                                        <span class="knt-trace-type"><RadzenIcon Icon="@KntSections.TraceNoteTypes.Icon" />@traceNote.TraceNoteTypeName</span>
+                                    }
+                                    <span><RadzenIcon Icon="format_list_numbered" />Order @traceNote.Order</span>
+                                    <span><RadzenIcon Icon="scale" />Weight @traceNote.Weight</span>
+                                    @if (!string.IsNullOrEmpty(traceNote.RelatedNoteTags))
+                                    {
+                                        <span><RadzenIcon Icon="sell" />@traceNote.RelatedNoteTags</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="knt-trace-actions">
+                                <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                              Click="() => OnOpenNote.InvokeAsync(traceNote)" MouseEnter="@(args => tooltipService.Open(args, "Open note"))" />
+                                <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                              Click="() => OnEdit.InvokeAsync(traceNote)" MouseEnter="@(args => tooltipService.Open(args, "Edit relation"))" />
+                                <RadzenButton Icon="link_off" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                              Click="() => OnDelete.InvokeAsync(traceNote)" MouseEnter="@(args => tooltipService.Open(args, "Remove relation"))" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    };
+
+    private static List<TraceNoteInfoDto> Ordered(List<TraceNoteInfoDto> list) =>
+        list.OrderBy(t => t.Order).ThenBy(t => t.RelatedNoteTopic).ToList();
+
+    private async Task OnTraceKey(KeyboardEventArgs e, TraceNoteInfoDto traceNote)
+    {
+        if (e.Key == "Enter")
+            await OnOpenNote.InvokeAsync(traceNote);
+    }
+}

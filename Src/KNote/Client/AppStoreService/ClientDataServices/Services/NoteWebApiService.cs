@@ -127,5 +127,29 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         var httpRes = await _httpClient.DeleteAsync($"api/notes/tasks/{noteTaskId}");
         return await ProcessResultFromHttpResponse<NoteTaskDto>(httpRes, "Delete note task", true);
     }
+
+    public async Task<Result<NoteTraceNotesDto>> GetTraceNotesAsync(Guid noteId)
+    {
+        var httpRes = await _httpClient.GetAsync($"api/notes/{noteId}/tracenotes");
+        return await ProcessResultFromHttpResponse<NoteTraceNotesDto>(httpRes, "Get trace notes");
+    }
+
+    public async Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto traceNote)
+    {
+        HttpResponseMessage httpRes;
+
+        if (traceNote.TraceNoteId == Guid.Empty)
+            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/tracenotes", traceNote);
+        else
+            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/tracenotes", traceNote);
+
+        return await ProcessResultFromHttpResponse<TraceNoteDto>(httpRes, "Save trace note", true);
+    }
+
+    public async Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId)
+    {
+        var httpRes = await _httpClient.DeleteAsync($"api/notes/tracenotes/{traceNoteId}");
+        return await ProcessResultFromHttpResponse<TraceNoteDto>(httpRes, "Delete trace note", true);
+    }
 }
 

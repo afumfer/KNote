@@ -219,7 +219,7 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 ### Server
 
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
-  `NoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
+  `NoteTypesController`, `TraceNoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
   proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatRoomController` (imágenes del chat
   room), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), además del scaffold
   `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre

@@ -188,4 +188,72 @@ public class TraceNotesServiceTests
         var afterDelete = await service.Repository.TraceNotes.GetAsync(aToB.Entity.TraceNoteId);
         Assert.IsFalse(afterDelete.IsValid);
     }
+
+    // KntNotesSaveTraceNoteAsyncCommand: the same notes, in the same direction, once per type - also the
+    // untyped relations, which the database unique index does not block.
+    [TestMethod]
+    [DataRow("Dapper", false)]
+    [DataRow("EntityFramework", false)]
+    [DataRow("Dapper", true)]
+    [DataRow("EntityFramework", true)]
+    public async Task SaveTraceNoteAsync_RejectsADuplicatedRelation(string orm, bool typed)
+    {
+        using var db = new RepositoryTestDatabase();
+        var repo = db.CreateRepository(orm);
+        var service = new KntService(repo, activateMessageBroker: false);
+
+        var noteA = await AddNoteAsync(service, "Note A");
+        var noteB = await AddNoteAsync(service, "Note B");
+        Guid? typeId = typed ? (await AddTraceNoteTypeAsync(service, "Depends on")) : null;
+
+        var first = await service.Notes.SaveTraceNoteAsync(new TraceNoteDto { FromId = noteA, ToId = noteB, TraceNoteTypeId = typeId, Weight = 1.0 });
+        Assert.IsTrue(first.IsValid, first.ErrorMessage);
+
+        var duplicate = await service.Notes.SaveTraceNoteAsync(new TraceNoteDto { FromId = noteA, ToId = noteB, TraceNoteTypeId = typeId, Weight = 2.0 });
+        Assert.IsFalse(duplicate.IsValid);
+        StringAssert.Contains(duplicate.ErrorMessage, "already traced");
+
+        var stored = await service.Notes.GetTraceNotesToAsync(noteA);
+        Assert.HasCount(1, stored.Entity);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task SaveTraceNoteAsync_AllowsOtherTypesTheOtherDirectionAndUpdates(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        var repo = db.CreateRepository(orm);
+        var service = new KntService(repo, activateMessageBroker: false);
+
+        var noteA = await AddNoteAsync(service, "Note A");
+        var noteB = await AddNoteAsync(service, "Note B");
+        var typeId = await AddTraceNoteTypeAsync(service, "Depends on");
+
+        var untyped = await service.Notes.SaveTraceNoteAsync(new TraceNoteDto { FromId = noteA, ToId = noteB, Weight = 1.0 });
+        Assert.IsTrue(untyped.IsValid, untyped.ErrorMessage);
+        var otherType = await service.Notes.SaveTraceNoteAsync(new TraceNoteDto { FromId = noteA, ToId = noteB, TraceNoteTypeId = typeId, Weight = 1.0 });
+        Assert.IsTrue(otherType.IsValid, otherType.ErrorMessage);
+        var reverse = await service.Notes.SaveTraceNoteAsync(new TraceNoteDto { FromId = noteB, ToId = noteA, Weight = 1.0 });
+        Assert.IsTrue(reverse.IsValid, reverse.ErrorMessage);
+
+        // Saving a relation again (an update) is not a duplicate of itself.
+        var edited = untyped.Entity;
+        edited.Order = 5;
+        var update = await service.Notes.SaveTraceNoteAsync(edited);
+        Assert.IsTrue(update.IsValid, update.ErrorMessage);
+        Assert.AreEqual(5, update.Entity.Order);
+
+        // ... but changing it into a copy of another one is.
+        edited.TraceNoteTypeId = typeId;
+        var collision = await service.Notes.SaveTraceNoteAsync(edited);
+        Assert.IsFalse(collision.IsValid);
+    }
+
+    private static async Task<Guid> AddTraceNoteTypeAsync(KntService service, string name)
+    {
+        var res = await service.TraceNoteTypes.SaveAsync(new TraceNoteTypeDto { Name = name });
+        Assert.IsTrue(res.IsValid, res.ErrorMessage);
+        return res.Entity.TraceNoteTypeId;
+    }
 }

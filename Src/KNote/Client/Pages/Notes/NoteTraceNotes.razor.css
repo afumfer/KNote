@@ -1,0 +1,130 @@
+/* The note's trace notes: two panels (from / to) with their relations. Only theme variables, so it follows any theme. */
+
+.knt-trace-panel {
+    height: 100%;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    border-radius: var(--rz-border-radius);
+}
+
+.knt-trace-panel-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.knt-trace-panel-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    background-color: var(--rz-primary-lighter);
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+.knt-trace-panel-title {
+    margin: 0;
+    font-family: var(--knt-heading-font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--rz-text-title-color);
+}
+
+.knt-trace-panel-description {
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-trace-list {
+    max-height: max(18rem, calc(100vh - 26rem));
+    overflow: auto;
+}
+
+.knt-trace {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+    border-left: 3px solid transparent;
+    border-radius: var(--rz-border-radius);
+    cursor: default;
+    outline: none;
+}
+
+    .knt-trace + .knt-trace {
+        margin-top: 0.25rem;
+    }
+
+    .knt-trace:hover {
+        border-left-color: var(--rz-primary);
+        background-color: color-mix(in srgb, var(--rz-primary) 6%, transparent);
+    }
+
+    .knt-trace:focus-visible {
+        box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rz-primary) 50%, transparent);
+    }
+
+.knt-trace-number {
+    flex: none;
+    min-width: 3rem;
+    padding: 0 0.375rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+    text-align: center;
+    background-color: color-mix(in srgb, var(--rz-text-color) 8%, transparent);
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-trace-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.knt-trace-title {
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.knt-trace-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.125rem 0.875rem;
+    margin-top: 0.125rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+    .knt-trace-meta > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .knt-trace-meta ::deep .rzi {
+        font-size: 1rem;
+    }
+
+/* The relation's type, the first thing to read after the note: a chip with the theme's color. */
+.knt-trace-meta > .knt-trace-type {
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    background-color: var(--rz-primary-lighter);
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+.knt-trace-actions {
+    display: flex;
+    flex: none;
+    gap: 0.125rem;
+}
