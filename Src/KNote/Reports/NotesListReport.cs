@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // Printable report of the management window's notes list: landscape, the same columns, order and cell
 // texts the user is seeing (NotesListSnapshot), headed by where the notes come from (NotesListContext).

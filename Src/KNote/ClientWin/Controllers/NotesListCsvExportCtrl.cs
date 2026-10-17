@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using KNote.ClientWin.Core;
-using KNote.ClientWin.Core.Reports;
 using KNote.Model;
+using KNote.Reports;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
 

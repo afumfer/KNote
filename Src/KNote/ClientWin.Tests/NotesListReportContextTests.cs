@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
-using KNote.ClientWin.Core.Reports;
+using KNote.Reports;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Views;
 using KNote.Model;

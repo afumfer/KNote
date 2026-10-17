@@ -63,14 +63,27 @@
         /* The theme's hover text is faint: with the soft background it read as a disabled item. */
         --rz-menu-top-item-hover-color: var(--rz-text-title-color);
         --rz-menu-top-item-icon-hover-color: var(--rz-text-title-color);
-        /* Radzen keeps the item clicked "selected" (it is meant for submenus, which these menus don't have): it
-           looked disabled, e.g. Edit note after opening the note's window. */
+        /* Radzen keeps the item clicked "selected" (it is meant for submenus): it looked disabled, e.g. Edit note
+           after opening the note's window. */
         --rz-menu-top-item-selected-background-color: transparent;
         --rz-menu-top-item-selected-color: var(--rz-menu-top-item-color);
         --rz-menu-item-selected-background-color: transparent;
         --rz-menu-item-selected-color: var(--rz-menu-top-item-color);
         background-color: transparent;
         border: none;
+    }
+
+    /* The dropdown of an item with options (e.g. Print/Export of the notes pages): a box of its own, not
+       transparent as the bar. */
+    .knt-section-header-tools ::deep .rz-menu .rz-navigation-menu {
+        --rz-menu-background-color: var(--rz-base-background-color);
+        background-color: var(--rz-base-background-color);
+    }
+
+    /* An item at the end of the bar opens its dropdown to the left, inside the window. */
+    .knt-section-header-tools ::deep .rz-menu .rz-navigation-item.knt-menu-end > .rz-navigation-menu {
+        left: auto;
+        right: 0;
     }
 
 /* Compact: a section inside another one (admin panel tabs). */
@@ -98,21 +111,33 @@
         font-size: 1rem;
     }
 
-/* Section buttons: icon with its text below. Only on wide screens: on small ones the menu folds into a list. */
+/* Section buttons: icon with its text below. Only on wide screens: on small ones the menu folds into a list. Only
+   the bar's buttons, not the options of a dropdown (icon and text in a row, as a menu). */
 @media (min-width: 769px) {
-    .knt-section-header-tools ::deep .rz-menu .rz-navigation-item-wrapper .rz-navigation-item-link {
+    .knt-section-header-tools ::deep .rz-menu > .rz-navigation-item > .rz-navigation-item-wrapper > .rz-navigation-item-link {
+        position: relative;
         flex-direction: column;
         gap: 0.125rem;
         padding-block: 0.25rem;
         padding-inline: 0.625rem;
     }
 
-    .knt-section-header-tools ::deep .rz-menu .rz-navigation-item-link .rz-navigation-item-icon {
+    .knt-section-header-tools ::deep .rz-menu > .rz-navigation-item > .rz-navigation-item-wrapper > .rz-navigation-item-link .rz-navigation-item-icon {
         margin: 0;
     }
 
-    .knt-section-header-tools ::deep .rz-menu .rz-navigation-item-link .rz-navigation-item-text {
+    .knt-section-header-tools ::deep .rz-menu > .rz-navigation-item > .rz-navigation-item-wrapper > .rz-navigation-item-link .rz-navigation-item-text {
         font-size: 0.75rem;
         line-height: 1.1;
+    }
+
+    /* The arrow of a button with a dropdown goes beside its icon: as a row of its own, the button would be taller
+       than the others. */
+    .knt-section-header-tools ::deep .rz-menu > .rz-navigation-item > .rz-navigation-item-wrapper > .rz-navigation-item-link .rz-navigation-item-icon-children {
+        position: absolute;
+        top: 0.25rem;
+        inset-inline-end: 0.125rem;
+        margin: 0;
+        font-size: 1rem;
     }
 }

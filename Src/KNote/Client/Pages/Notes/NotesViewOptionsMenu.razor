@@ -1,0 +1,17 @@
+@* Menu item of the notes pages (tree, search, filter) that groups how the notes are looked at, so that the bar keeps
+   room for other actions: view the selected note in its window, the preview pane (NotesPreviewToggle) and the
+   compact or extended list (NotesListViewToggle). Radzen draws a dropdown's options even while it is closed, so
+   the toggles read the choices kept in the browser as soon as the page opens. *@
+
+<RadzenMenuItem Text="View options" Icon="visibility" class="knt-menu-separator">
+    <RadzenMenuItem Text="View note" Icon="launch" Disabled="@(!(Grid?.CanViewCurrent ?? false))" Click="@(() => Grid!.ViewCurrentAsync())" />
+    <NotesPreviewToggle Changed="Changed" />
+    <NotesListViewToggle Changed="Changed" />
+</RadzenMenuItem>
+
+@code {
+    // The page's notes list: its selected note.
+    [Parameter][EditorRequired] public NotesGrid? Grid { get; set; }
+    // The page shows the list again with the preview or the view chosen.
+    [Parameter] public EventCallback Changed { get; set; }
+}

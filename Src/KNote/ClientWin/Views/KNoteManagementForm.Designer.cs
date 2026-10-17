@@ -46,6 +46,7 @@
             menuEditFolder = new ToolStripMenuItem();
             menuDeleteFolder = new ToolStripMenuItem();
             menuFileS1 = new ToolStripSeparator();
+            menuPrint = new ToolStripMenuItem();
             menuPrintNotesList = new ToolStripMenuItem();
             menuPrintNotesBook = new ToolStripMenuItem();
             menuExportNotesListCsv = new ToolStripMenuItem();
@@ -156,7 +157,7 @@
             // 
             // menuFile
             // 
-            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuPrintNotesList, menuPrintNotesBook, menuPrintSelectedNote, menuExportNotesListCsv, menuFileS3, menuHide, menuFilesS2, menuExit });
+            menuFile.DropDownItems.AddRange(new ToolStripItem[] { menuRepositories, menuFolders, menuFileS1, menuPrint, menuExportNotesListCsv, menuFileS3, menuHide, menuFilesS2, menuExit });
             menuFile.Name = "menuFile";
             menuFile.Size = new Size(37, 20);
             menuFile.Text = "&File";
@@ -254,19 +255,26 @@
             // 
             menuFileS1.Name = "menuFileS1";
             menuFileS1.Size = new Size(200, 6);
-            // 
+            //
+            // menuPrint
+            //
+            menuPrint.DropDownItems.AddRange(new ToolStripItem[] { menuPrintNotesList, menuPrintNotesBook, menuPrintSelectedNote });
+            menuPrint.Name = "menuPrint";
+            menuPrint.Size = new Size(203, 22);
+            menuPrint.Text = "&Print";
+            //
             // menuPrintNotesList
-            // 
+            //
             menuPrintNotesList.Name = "menuPrintNotesList";
             menuPrintNotesList.Size = new Size(203, 22);
-            menuPrintNotesList.Text = "&Print notes list ...";
+            menuPrintNotesList.Text = "Notes &list ...";
             menuPrintNotesList.Click += menu_Click;
-            // 
+            //
             // menuPrintNotesBook
-            // 
+            //
             menuPrintNotesBook.Name = "menuPrintNotesBook";
             menuPrintNotesBook.Size = new Size(203, 22);
-            menuPrintNotesBook.Text = "Print notes list as &book ...";
+            menuPrintNotesBook.Text = "Notes list as &book ...";
             menuPrintNotesBook.Click += menu_Click;
             // 
             // menuExportNotesListCsv
@@ -280,7 +288,7 @@
             // 
             menuPrintSelectedNote.Name = "menuPrintSelectedNote";
             menuPrintSelectedNote.Size = new Size(203, 22);
-            menuPrintSelectedNote.Text = "Print &selected note details ...";
+            menuPrintSelectedNote.Text = "&Selected note details ...";
             menuPrintSelectedNote.Click += menu_Click;
             // 
             // menuFileS3
@@ -1003,6 +1011,7 @@
         private ToolStripMenuItem menuEditFolder;
         private ToolStripMenuItem menuDeleteFolder;
         private ToolStripSeparator menuFileS1;
+        private ToolStripMenuItem menuPrint;
         private ToolStripMenuItem menuPrintNotesList;
         private ToolStripMenuItem menuPrintNotesBook;
         private ToolStripMenuItem menuExportNotesListCsv;

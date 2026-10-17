@@ -157,6 +157,15 @@ public class FoldersController : ControllerBase
   `KntHtmlSanitizer` de `Service`, las mismas reglas que `ClientWin`); `Client` no genera HTML de notas.
   `HomeNotes`, que es anónimo, devuelve las descripciones ya convertidas así (no hay un endpoint anónimo que
   convierta Markdown arbitrario).
+- **Informes y exportación** (`ReportsController`, `api/reports`, Staff+ como en `ClientWin`): `POST noteslist`
+  (lista apaisada), `POST notesbook` (libro, un capítulo por nota) y `POST noteslistcsv` (CSV) reciben un
+  `NotesListReportRequestDto` (carpeta, búsqueda o filtro, el orden de la lista, vista compacta y la cultura del
+  usuario) y `GET notes/{id}?culture=` da el detalle de una nota. Devuelven `ReportDto` (la página HTML completa,
+  que `Client` muestra e imprime) o `ReportFileDto` (el CSV, con BOM). La lógica está en `KNote.Reports`
+  (`WebReports`, los mismos generadores que `ClientWin`): el servidor recarga la lista entera con el orden pedido,
+  las imágenes se cargan de la URL de los recursos de este host (`WebReportResources`) y el HTML de las notas
+  sale saneado. La cultura solo vale para esa petición (`UseCulture`). El índice del libro no lleva números de
+  página (el navegador no los puede calcular). Tests en `Tests/InProcessIntegrationTests/ReportsInProcessTests`.
 
 ## Asistente de IA (`AiAssistantController`, `api/aiassistant`)
 

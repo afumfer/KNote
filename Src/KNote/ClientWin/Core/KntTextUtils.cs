@@ -1,5 +1,6 @@
 using System.Globalization;
 using KNote.Model;
+using KNote.Reports;
 
 namespace KNote.ClientWin.Core;
 
@@ -11,8 +12,6 @@ namespace KNote.ClientWin.Core;
 /// </summary>
 public class KntTextUtils
 {
-    private static readonly char[] NewLine = { '\r', '\n' };
-
     public DateTime? TextToDateTime(string text)
     {
         DateTime output;
@@ -49,23 +48,9 @@ public class KntTextUtils
             return null;
     }
 
+    // Shared with the printed reports (KNote.Reports), which show these notes as a link.
     public string ExtractUrlFromText(string text)
-    {
-        if (string.IsNullOrEmpty(text))
-            return null;
-
-        int indexJump = text.IndexOfAny(NewLine);
-        var urlFistLine = (indexJump >= 0) ? text.Substring(0, indexJump) : text;
-
-        Uri resultUri;
-        var validResult = Uri.TryCreate(urlFistLine, UriKind.Absolute, out resultUri) &&
-               (resultUri.Scheme == Uri.UriSchemeHttp || resultUri.Scheme == Uri.UriSchemeHttps || resultUri.Scheme == Uri.UriSchemeFile);
-
-        if (validResult)
-            return urlFistLine;
-        else
-            return null;
-    }
+        => NoteDescriptions.ExtractUrl(text);
 
     public string ExtensionFileToFileType(string extension)
     {

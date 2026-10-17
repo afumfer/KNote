@@ -5,7 +5,7 @@
 @inject DialogService dialogService
 @inject TooltipService tooltipService
 
-<div class="knt-dialog">
+<div class="@(Fill ? "knt-dialog knt-dialog-fill" : "knt-dialog")">
     <div class="knt-dialog-header">
         <span class="knt-dialog-icon"><RadzenIcon Icon="@Icon" /></span>
         <div class="knt-dialog-caption">
@@ -37,6 +37,9 @@
     [Parameter] public RenderFragment? ChildContent { get; set; }
     // The buttons (Cancel, Save...), at the right.
     [Parameter] public RenderFragment? Footer { get; set; }
+    // The dialog takes the window's height and its body the room left by the header and the footer, without a
+    // scroll of its own (e.g. a report preview, whose content scrolls itself).
+    [Parameter] public bool Fill { get; set; }
     // The header's close button: by default the dialog closes with no result (cancelled).
     [Parameter] public EventCallback OnClose { get; set; }
 

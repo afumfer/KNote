@@ -1,4 +1,4 @@
-using KNote.ClientWin.Core.Reports;
+using KNote.Reports;
 
 namespace KNote.ClientWin.Tests;
 

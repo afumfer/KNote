@@ -1,6 +1,6 @@
 ﻿using KNote.Model;
 using KNote.Model.Dto;
-using KNote.ClientWin.Core.Reports;
+using KNote.Reports;
 
 namespace KNote.ClientWin.Core;
 

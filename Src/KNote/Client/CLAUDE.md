@@ -187,13 +187,15 @@ Patrones ya establecidos que hay que seguir:
   el orden en el servidor (`OrderColumn`/`OrderAscending` de `NotesFilterDto`/`NotesSearchDto`, columnas de
   `NoteOrderCriteria.SortableColumns`, el número de nota desempata); el `SortOrder` de las columnas solo da el orden
   inicial (cambiarlo mientras el grid recarga deja las filas viejas). Las mismas columnas que ClientWin; vista compacta (#, Topic, Priority, Tags) o extendida con
-  `NotesListViewToggle` (botón de la cabecera, `AppState.NotesListCompact` + `localStorage`), y Topic con
+  `NotesListViewToggle` (opción de "View options", `AppState.NotesListCompact` + `localStorage`), y Topic con
   `MinWidth`. Clic
   (también el derecho) selecciona; doble clic/Enter edita (ve, quien no puede editar); menú de acciones con clic
   derecho, tecla de menú o Mayús+F10; la cabecera de la página tiene Edit/Delete y, tras un separador (clase
-  `knt-menu-separator` de `knt-theme.css`), View de la nota seleccionada (`NotesGrid.Current`, `CurrentChanged`,
+  `knt-menu-separator` de `knt-theme.css`), el desplegable "View options" (`NotesViewOptionsMenu`: View de la nota
+  seleccionada, la vista previa y la vista compacta o extendida; agrupadas para dejar sitio en la barra a otros
+  casos de uso) (`NotesGrid.Current`, `CurrentChanged`,
   `ViewCurrentAsync`/`EditCurrentAsync`/`DeleteCurrentAsync`). Ver y editar abren la nota en su ventana (ver
-  "Ventanas de nota"). **Vista previa**: `NotesPreviewToggle` (botón de la cabecera, `AppState.NotesPreviewVisible`
+  "Ventanas de nota"). **Vista previa**: `NotesPreviewToggle` (opción de "View options", `AppState.NotesPreviewVisible`
   + `localStorage`, común a las tres páginas) muestra a la derecha de la lista `NotePreviewPane`, que carga la nota
   seleccionada cuando la selección se para 250 ms (con las flechas no carga cada nota del camino) y la recarga si
   se guarda en su ventana. Su `RadzenSplitterPane` está siempre, con el tamaño de todos los paneles fijado desde el
@@ -211,14 +213,24 @@ Patrones ya establecidos que hay que seguir:
   `notesGrid.js`, porque entonces sus filas ya pueden no estar) el desplazamiento, el orden y la nota
   seleccionada, y al volver se restauran (con el filtro o el texto buscado). Una nota guardada en otra ventana recarga las filas a la vista sin perder la
   selección (`RefreshAsync`; la virtualización de Radzen recarga sin redibujar, de ahí su `StateHasChanged`). Una
-  lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`).
+  lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`). **Imprimir y exportar** la
+  lista: `NotesPrintExportMenu`, el último elemento de la botonera de las tres páginas (Staff+, como en
+  `ClientWin`), un desplegable "Print/Export" con la lista, el libro (pide confirmación con más de
+  `LargeNotesBook.Notes` notas), el detalle de la nota seleccionada y el CSV. Cada página le da de dónde salen sus
+  notas (`Request`: carpeta, texto buscado o `AppState.NotesFilter`) y, en el árbol, el orden de la carpeta
+  (`DefaultOrder`); el componente añade el orden y la vista de la lista (`NotesGrid.CurrentOrder`, `Compact`) y
+  `Server` vuelve a cargar la lista entera (`TotalCount` solo decide si hay notas y el aviso del libro).
 - **Cabeceras**: la de una página de sección es `KntIndexHeader` con `Section="KntSections.Xxx"` (título e
   icono de su entrada del menú; `TextHead`/`Icon` los sustituyen, como en `NotesTree`, que muestra la carpeta) y
   la botonera en `IndexMenu` (normalmente un `RadzenMenu`, que la cabecera deja sin fondo). `Shared/KntSections`
   es la única fuente de texto, ruta e icono de cada sección: la usan el menú lateral, las pestañas de `Admin` y
   las cabeceras. Dentro de otra sección (las pestañas de `Admin` pasan el `CascadingValue`
   `KntCompactHeader = true`) la cabecera sale compacta. La de un formulario de página completa es
-  `ToolingHeader` (`Title`, `Icon` opcional y `Buttons`), una versión más ligera de la misma familia.
+  `ToolingHeader` (`Title`, `Icon` opcional y `Buttons`), una versión más ligera de la misma familia. Un botón de
+  la botonera puede tener opciones (`RadzenMenuItem` con hijos, como Print/Export): `KntIndexHeader` les da el
+  fondo del tema (la barra es transparente), las muestra como un menú (icono y texto en fila; solo los botones de
+  la barra llevan el icono encima) y pone su flecha junto al icono; el último de la barra lleva la clase
+  `knt-menu-end` para que el desplegable se abra hacia la izquierda, dentro de la ventana.
 - **Tooltips**: siempre con `tooltipService.Open(...)` (en `MouseEnter`), no con el atributo `title`, que
   muestra el tooltip del navegador con otro estilo.
 - **Diálogos** (alta/edición de entidades, selectores, login): `dialogService.OpenAsync<Componente>(título,
@@ -233,7 +245,9 @@ Patrones ya establecidos que hay que seguir:
   `dialogService.Confirm(...)`. Ejemplos: `TypesIndex` → `TypeEdit`/`TypeNew`, `NoteForm` →
   `NoteTaskEditor`/`NoteResourceEditor`, `KntFolderPicker` → `KntFolderSelector`. `KntDialogs` no fija la altura:
   el diálogo mide lo que su contenido; si tiene una lista o un árbol que puede crecer, limita esa zona
-  (`max-height`), no el diálogo.
+  (`max-height`), no el diálogo. Un contenido que se desplaza solo (la vista previa de un informe) usa
+  `KntDialogFrame Fill="true"`: el diálogo ocupa el alto de la ventana y el cuerpo, sin scroll propio, el espacio
+  que le dejan la cabecera y el pie (el contenido, `height: 100%`).
 - **Listas dentro de un editor** (los valores de un atributo, los recursos y las tareas de una nota): una cabecera
   con cuántos hay y el botón de añadir (`.knt-list-header` de `knt-theme.css`), filas o tarjetas con sus botones
   (`Variant.Text`) y un estado vacío que dice cómo llenarla (`.knt-empty-state`). Son pequeñas y no siguen la
@@ -383,6 +397,15 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   (`MarkupString`), tampoco el tema de una nota. Para contenido sin HTML que cambia a menudo (el chat del
   asistente, que se repinta mientras llega la respuesta) `DisableHtml="true"` lo genera en el navegador, con su
   HTML como texto y solo enlaces `http`, `https`, `mailto` o relativos, igual que `AiChatHtml` en `ClientWin`.
+- **Informes imprimibles**: los genera `Server` (`IStore.Reports` → `api/reports`, ver `Server/CLAUDE.md`) como una
+  página HTML completa (A4, con sus estilos), con la cultura del navegador. `Shared/KntReportPreview`
+  (`KntReportPreview.OpenAsync(dialogService, título, subtítulo, load)`, `KntDialogs.Document()`) la muestra mientras
+  se genera y después en un `iframe` con `sandbox="allow-same-origin allow-modals allow-popups
+  allow-popups-to-escape-sandbox"`: sin scripts (el HTML viene de las notas), `allow-same-origin` para que
+  `js/kntReports.js` la imprima y abra sus enlaces externos en otra pestaña, y `allow-modals` para `print()` (sin
+  él el navegador lo ignora). Se carga desde una URL `blob:`, no con `srcdoc`: en `srcdoc` los enlaces `#id` (el
+  índice de un libro) se resuelven contra la URL de la app y el iframe saldría del informe. Cerrar el diálogo antes
+  de que llegue cancela la petición (un libro largo). `kntReports.downloadFile` guarda un fichero exportado (CSV).
 
 ## Compilar, ejecutar y depurar
 

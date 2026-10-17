@@ -1,16 +1,17 @@
 using System.Text;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // A chapter of the notes book: one note of the list. ContentHtml is its description rendered as HTML;
 // Url is set instead for notes whose description is a web page. Both null when it has no description.
 public record BookChapter(int Number, string Title, string ContentHtml, string Url);
 
-// "Book" print of the management window's notes list: the notes in the order they are listed, one
-// chapter each (title = Topic, text = Description), after a cover and a table of contents with page
-// numbers. Sober, serif layout (Resources/KNoteBook.css); the page numbers of the contents are filled in
-// by the report preview once paginated (ReportDocument.ResolvePageReferences).
+// "Book" print of a notes list: the notes in the order they are listed, one chapter each (title = Topic,
+// text = Description), after a cover and a table of contents with page numbers. Sober, serif layout
+// (Resources/KNoteBook.css); the page numbers of the contents are filled in by ClientWin's report preview
+// once paginated (ReportDocument.ResolvePageReferences). A browser can't do that: the web app's book keeps
+// the contents' links, without page numbers.
 public static class NotesBook
 {
     public const string Title = "Notes book";
@@ -18,25 +19,31 @@ public static class NotesBook
     public static string ChapterId(int number) => $"knt-ch-{number}";
 
     // Loads the listed notes, in order, as chapters. A note deleted meanwhile is left out.
-    public static async Task<List<BookChapter>> LoadChaptersAsync(Store store, ServiceRef serviceRef, IEnumerable<Guid> noteIds)
+    public static async Task<List<BookChapter>> LoadChaptersAsync(IKntService service, IReportResources resources, IEnumerable<Guid> noteIds,
+        CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(serviceRef);
+        ArgumentNullException.ThrowIfNull(service);
+        ArgumentNullException.ThrowIfNull(resources);
 
-        var service = serviceRef.Service;
         var chapters = new List<BookChapter>();
         foreach (var noteId in noteIds)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var note = (await service.Notes.GetAsync(noteId)).Entity;
             if (note == null)
                 continue;
 
-            var (html, url) = NoteDetailReportData.RenderDescription(store, service, serviceRef.RepositoryRef, note);
+            var (html, url) = NoteDetailReportData.RenderDescription(service, resources, note);
             chapters.Add(new BookChapter(chapters.Count + 1, note.Topic, html, url));
         }
         return chapters;
     }
 
-    public static ReportDocument Build(NotesListContext context, IReadOnlyList<BookChapter> chapters, DateTime generatedAt, string language = "en")
+    // pageNumbers: the contents have a page reference per chapter, filled in once paginated (ClientWin's
+    // preview); without them (a browser can't tell the pages), only the chapters' links.
+    public static ReportDocument Build(NotesListContext context, IReadOnlyList<BookChapter> chapters, DateTime generatedAt, string language = "en",
+        bool pageNumbers = true)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(chapters);
@@ -45,7 +52,7 @@ public static class NotesBook
 
         var body = new StringBuilder();
         AppendCover(body, bookTitle, subtitle, context, chapters.Count, generatedAt);
-        AppendContents(body, chapters);
+        AppendContents(body, chapters, pageNumbers);
         foreach (var chapter in chapters)
             AppendChapter(body, chapter);
 
@@ -57,7 +64,7 @@ public static class NotesBook
             Layout = ReportLayout.Book,
             Orientation = ReportOrientation.Portrait,
             Language = string.IsNullOrWhiteSpace(language) ? "en" : language,
-            ResolvePageReferences = chapters.Count > 0,
+            ResolvePageReferences = pageNumbers && chapters.Count > 0,
             GeneratedAt = generatedAt,
             FileNameBase = context.FileNameBase(generatedAt, prefix: "Book"),
             BodyHtml = body.ToString()
@@ -108,7 +115,7 @@ public static class NotesBook
         body.AppendLine("</section>");
     }
 
-    private static void AppendContents(StringBuilder body, IReadOnlyList<BookChapter> chapters)
+    private static void AppendContents(StringBuilder body, IReadOnlyList<BookChapter> chapters, bool pageNumbers)
     {
         body.AppendLine("<nav class=\"knt-contents\">");
         body.AppendLine("<h2>Contents</h2>");
@@ -118,8 +125,8 @@ public static class NotesBook
             body.AppendLine($"<a class=\"knt-toc-entry\" href=\"#{id}\">" +
                 $"<span class=\"knt-toc-number\">{chapter.Number}</span>" +
                 $"<span class=\"knt-toc-title\">{ReportHtml.Encode(ChapterTitle(chapter))}</span>" +
-                "<span class=\"knt-toc-leader\"></span>" +
-                $"{ReportHtml.PageReference(id)}</a>");
+                (pageNumbers ? $"<span class=\"knt-toc-leader\"></span>{ReportHtml.PageReference(id)}" : "") +
+                "</a>");
         }
         if (chapters.Count == 0)
             body.AppendLine("<p class=\"knt-chapter-empty\">There are no notes in this list.</p>");

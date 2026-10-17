@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using KNote.Model;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // Turns a ReportDocument into a standalone HTML page: the layout's stylesheet (Resources/KNoteReport.css
 // or KNoteBook.css, embedded in the assembly), the page setup (A4, orientation, running header and page
@@ -12,8 +12,8 @@ namespace KNote.ClientWin.Core.Reports;
 // no WinForms/WebView2 - so it can be unit tested.
 public static class ReportHtml
 {
-    private const string ReportStyleResourceName = "KNote.ClientWin.Resources.KNoteReport.css";
-    private const string BookStyleResourceName = "KNote.ClientWin.Resources.KNoteBook.css";
+    private const string ReportStyleResourceName = "KNote.Reports.Resources.KNoteReport.css";
+    private const string BookStyleResourceName = "KNote.Reports.Resources.KNoteBook.css";
     private const int MaxRunningHeaderLength = 90;
 
     private static readonly Dictionary<string, string> Styles = new();

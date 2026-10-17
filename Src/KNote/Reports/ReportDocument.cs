@@ -1,4 +1,4 @@
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 public enum ReportOrientation
 {

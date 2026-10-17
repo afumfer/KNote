@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // Proposed file names for what is saved from a report (PDF, CSV): readable, valid on Windows and short
 // enough to leave room for the folder path.

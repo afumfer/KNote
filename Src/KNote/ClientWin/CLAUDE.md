@@ -35,7 +35,8 @@ ClientWin/
 │     FactoryViewsWinForms.cs – implementación WinForms de la factory
 │     Store.cs              – estado global, mediador entre controladores, acceso a Service
 │     KNoteScriptLibrary.cs – funciones expuestas al motor de scripting KntScript
-│     Reports/              – informes imprimibles y exportación CSV (ver "Informes imprimibles")
+│     Reports/              – lo propio de ClientWin de los informes (ver "Informes imprimibles"; los generadores
+│                             están en el proyecto compartido `Reports/`, `KNote.Reports`)
 ├── Views/                  – Forms de WinForms (uno o varios `IView*` implementados por Form)
 ├── Utils/, Resources/, AutoKntScripts/, Properties/, Log/
 ```
@@ -504,17 +505,24 @@ mano en los métodos:
 Esta autorización la aplica la aplicación: quien tenga la cadena de conexión de una BD no queda limitado por
 ella.
 
-## Informes imprimibles y exportación (`Core/Reports`)
+## Informes imprimibles y exportación (`KNote.Reports` + `Core/Reports`)
 
 Los informes son **HTML + CSS** que se muestran en una ventana de previsualización con WebView2, desde la que
 se imprimen (diálogo de impresión de Chromium, con su propia vista previa y "Guardar como PDF") o se guardan
 como PDF (`PrintToPdfAsync`). No hay `PrintDocument`/GDI+ ni librerías de PDF.
 
+Los generadores y su carga de datos son **comunes con la Web** y viven en el proyecto `Reports/`
+(`KNote.Reports`, → `Service`, `Model`): `ReportDocument`, `ReportHtml` y sus CSS, `NotesListReport`,
+`NoteDetailReport`/`NoteDetailReportData`, `NotesBook`, `NotesListCsv`, `NotesListSnapshot`, `NotesListContext`,
+`ReportFileName` y `TraceNoteRows`. En `ClientWin/Core/Reports` queda solo lo de ClientWin:
+`ClientWinReportResources` (`IReportResources`: recursos e imágenes a través del host virtual de WebView2) y
+`PdfNamedDestinations`. Sus tests siguen en `ClientWin.Tests`.
+
 - **Modelo y renderizado (lógica pura, testeada en `ClientWin.Tests`)**: un generador construye un
   `ReportDocument` (título, cabecera, metadatos, cuerpo HTML, `Orientation`, `Layout` `Report`/`Book`,
   `ResolvePageReferences`) y `ReportHtml.Render` lo convierte en la página completa: hoja de estilo
-  incrustada (`Resources/KNoteReport.css` o `KNoteBook.css`, `EmbeddedResource` con `LogicalName` en el
-  csproj), `@page` (A4, orientación, cabecera de página y numeración con cajas de margen) y, en los
+  incrustada (`Reports/Resources/KNoteReport.css` o `KNoteBook.css`, `EmbeddedResource` con `LogicalName` en
+  el csproj de `KNote.Reports`), `@page` (A4, orientación, cabecera de página y numeración con cajas de margen) y, en los
   informes, la banda de cabecera. Generadores existentes: `NotesListReport` (lista, horizontal),
   `NoteDetailReport` + `NoteDetailReportData` (detalle de nota, vertical), `NotesBook` (lista como libro),
   y `NotesListCsv` (exportación CSV, sin previsualización). `ReportFileName` propone nombres de fichero y la
@@ -524,13 +532,14 @@ como PDF (`PrintToPdfAsync`). No hay `PrintDocument`/GDI+ ni librerías de PDF.
   `NotesSelectorForm` los entrega como `NotesListSnapshot` (`INotesListSnapshotProvider`, combinada en
   `IViewNotesSelector`; textos de celda tal como los formatea el grid y `NoteIds` en orden). El origen de la
   lista (carpeta, búsqueda o filtro, con nombres resueltos) es `NotesListContext`, construido por
-  `KNoteManagementCtrl.GetNotesListContextAsync`. Las descripciones se convierten a HTML con
+  `KNoteManagementCtrl.GetNotesListContextAsync` (los criterios de un filtro, con
+  `NotesListContext.DescribeFilterCriteriaAsync`). Las descripciones se convierten a HTML con
   `NoteDetailReportData.RenderDescription` (mismas reglas que el editor; los recursos se apuntan al host
-  virtual `KntConst.VirtualHostNameToFolderMapping`). Las trazas se resuelven con `Core/TraceNoteRows`
-  (compartido con `NoteEditorForm`).
+  virtual `KntConst.VirtualHostNameToFolderMapping` con `ClientWinReportResources`). Las trazas se resuelven
+  con `TraceNoteRows` (compartido con `NoteEditorForm`).
 - **Previsualización**: `ReportPreviewCtrl.ShowAsync(Store, service, buildReport, resourcesRootPath)` abre
   `ReportPreviewForm`: comprueba primero el rol (Staff en el repositorio `service`) y solo después llama a
-  `buildReport`. **Un informe nuevo no necesita vista ni Ctrl nuevos**: generador puro en `Core/Reports`
+  `buildReport`. **Un informe nuevo no necesita vista ni Ctrl nuevos**: generador puro en `KNote.Reports`
   (con tests) + llamada a `ReportPreviewCtrl.ShowAsync` desde el Ctrl del caso de uso. La exportación CSV
   es su propio caso de uso, `NotesListCsvExportCtrl` (sin ventana: `IViewFileExport`/`FileExportForm` solo
   aportan el diálogo de guardar). Todo texto del usuario va por

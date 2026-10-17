@@ -87,13 +87,13 @@ Un repositorio es una base de datos de KaNote, SQLite o SQL Server. El menú **R
 
 ### Impresión y exportación (aplicación de escritorio)
 
-El menú **File** de la ventana de gestión tiene estas opciones, todas sobre la lista de notas tal como la ves: las notas de la carpeta seleccionada, o el resultado de una búsqueda o de un filtro, en el orden y con las columnas que se muestran en pantalla (incluidas la vista compacta y el filtro de la lista).
+El menú **File** de la ventana de gestión tiene estas opciones (las tres impresiones, agrupadas en su submenú **Print**), todas sobre la lista de notas tal como la ves: las notas de la carpeta seleccionada, o el resultado de una búsqueda o de un filtro, en el orden y con las columnas que se muestran en pantalla (incluidas la vista compacta y el filtro de la lista).
 
 | Opción | Resultado |
 |---|---|
-| **Print notes list ...** | La lista como una tabla, en horizontal, encabezada por la ruta de la carpeta o por un resumen de la búsqueda o el filtro. Todas las columnas visibles caben en el ancho de la página. El botón **Print** de la barra de herramientas hace lo mismo. |
-| **Print notes list as book ...** | Un libro: portada, índice con números de página y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. |
-| **Print selected note details ...** | Toda la información de la nota seleccionada, tal como está guardada: propiedades, descripción, atributos, recursos (con una miniatura de las imágenes), tareas y notas trazadas. No se imprimen ni el script de la nota ni sus alarmas. |
+| **Print > Notes list ...** | La lista como una tabla, en horizontal, encabezada por la ruta de la carpeta o por un resumen de la búsqueda o el filtro. Todas las columnas visibles caben en el ancho de la página. El botón **Print** de la barra de herramientas hace lo mismo. |
+| **Print > Notes list as book ...** | Un libro: portada, índice con números de página y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. Un libro de más de 100 notas puede tardar mucho en generarse, así que KaNote pregunta antes. |
+| **Print > Selected note details ...** | Toda la información de la nota seleccionada, tal como está guardada: propiedades, descripción, atributos, recursos (con una miniatura de las imágenes), tareas y notas trazadas. No se imprimen ni el script de la nota ni sus alarmas. |
 | **Export notes list to CSV ...** | El mismo contenido que la lista impresa, como fichero CSV. |
 
 El editor de notas tiene su propio botón **Print**, que imprime el detalle de la nota que se está editando tal como la ves. Si tiene cambios aún sin guardar, el informe lo indica.
@@ -202,13 +202,13 @@ El servidor Web da nombre a una base de datos nueva con el ajuste `Name` de su s
 
 ### Listas de notas (aplicación Web)
 
-Las páginas **Tree panel**, **Notes filter** y **Quick search** muestran sus notas en la misma lista, con las columnas de la lista de notas de la aplicación de escritorio. Ocupa la ventana y va cargando más notas a medida que te desplazas; encima se muestra el total. El botón **Extended list** / **Compact list** de la página cambia entre todas las columnas y la vista compacta (número, tema, prioridad y etiquetas), que es la predeterminada; la elección vale para las tres páginas y el navegador la recuerda. La columna del tema mantiene un ancho mínimo: en una ventana estrecha la lista se desplaza en horizontal. En el panel del árbol, el árbol de carpetas tiene su propio desplazamiento.
+Las páginas **Tree panel**, **Notes filter** y **Quick search** muestran sus notas en la misma lista, con las columnas de la lista de notas de la aplicación de escritorio. Ocupa la ventana y va cargando más notas a medida que te desplazas; encima se muestra el total. El menú **View options** de la cabecera de la página agrupa las formas de ver las notas: **View note**, **Show preview** / **Hide preview** y **Extended list** / **Compact list**. **Extended list** / **Compact list** cambia entre todas las columnas y la vista compacta (número, tema, prioridad y etiquetas), que es la predeterminada; la elección vale para las tres páginas y el navegador la recuerda. La columna del tema mantiene un ancho mínimo: en una ventana estrecha la lista se desplaza en horizontal. En el panel del árbol, el árbol de carpetas tiene su propio desplazamiento.
 
 **Seleccionar y abrir.** Un clic (también el derecho) selecciona una nota, que queda resaltada; un doble clic o **Enter** la edita (los usuarios que no pueden editar la ven). Las flechas, **RePág**, **AvPág**, **Inicio** y **Fin** mueven la selección. Al volver a la página (p. ej. desde el menú lateral), la lista está donde la dejaste, con la misma nota seleccionada.
 
-**Acciones.** Los botones **Edit note**, **Delete note** y **View note** de la cabecera de la página actúan sobre la nota seleccionada. Un clic derecho sobre una nota, la tecla de menú contextual o **Mayús+F10** muestran sus acciones (**View**, **Edit**, **Delete**), y **Supr** borra la nota seleccionada tras confirmarlo. Editar y borrar requieren el rol Staff o uno superior. Las notas de **Home** muestran sus acciones en un menú **⋮**.
+**Acciones.** Los botones **Edit note** y **Delete note** de la cabecera de la página, y **View note** de su menú **View options**, actúan sobre la nota seleccionada. Un clic derecho sobre una nota, la tecla de menú contextual o **Mayús+F10** muestran sus acciones (**View**, **Edit**, **Delete**), y **Supr** borra la nota seleccionada tras confirmarlo. Editar y borrar requieren el rol Staff o uno superior. Las notas de **Home** muestran sus acciones en un menú **⋮**.
 
-**Vista previa.** El botón **Show preview** / **Hide preview** de la página muestra, a la derecha de la lista, la nota seleccionada; cambia al seleccionar otra, y muestra los cambios de la nota cuando se guarda en su ventana. El panel se puede redimensionar con la barra que lo separa de la lista. La elección vale para las tres páginas y el navegador la recuerda, igual que los tamaños que des a los paneles de cada página.
+**Vista previa.** **Show preview** / **Hide preview**, en el menú **View options**, muestra, a la derecha de la lista, la nota seleccionada; cambia al seleccionar otra, y muestra los cambios de la nota cuando se guarda en su ventana. El panel se puede redimensionar con la barra que lo separa de la lista. La elección vale para las tres páginas y el navegador la recuerda, igual que los tamaños que des a los paneles de cada página.
 
 **Ventanas de nota.** Ver, editar o crear una nota (**New note**) la abre en una ventana propia, sin los menús de la aplicación, para tenerla junto a la lista; las ventanas nuevas se abren en cascada desde la principal. Cada nota tiene una ventana de vista y otra de edición: volver a abrirla trae esa ventana al frente. Cada **New note** abre una ventana nueva, en la carpeta seleccionada en el panel del árbol; una vez guardada, es la ventana de edición de esa nota. Cuando una nota se guarda en su ventana de edición, las listas, Home y la ventana de vista de la nota la muestran cambiada. El botón de salida de la ventana de edición la cierra, preguntando antes si hay cambios sin guardar (igual que al cerrar la ventana). Si el navegador bloquea la ventana, permite las ventanas emergentes para el sitio de la aplicación.
 
@@ -217,6 +217,21 @@ Las páginas **Tree panel**, **Notes filter** y **Quick search** muestran sus no
 **Ordenar.** Al pulsar la cabecera de una columna la lista se ordena por ella; un segundo clic invierte el orden y un tercero vuelve al orden propio de la lista. En el panel del árbol cada carpeta se abre con su orden de notas, como en la aplicación de escritorio: por número de nota, un orden fijo o, si la carpeta sigue el último orden usado, el último elegido en cualquiera de las dos aplicaciones (ordenar las notas de la carpeta lo guarda). El orden de notas de una carpeta se define en su formulario de edición (**Folders**), con las mismas opciones que en la aplicación de escritorio.
 
 **Volver a la lista.** Después de abrir una nota, la lista se muestra como estaba: la misma carpeta, filtro o búsqueda, el mismo orden y la misma posición, con una marca a la izquierda de la nota que abriste.
+
+### Impresión y exportación (aplicación Web)
+
+El menú **Print/Export** de las páginas **Tree panel**, **Notes filter** y **Quick search** tiene los mismos informes que la aplicación de escritorio. Trabajan sobre la lista entera de la página (todas sus notas, no solo las cargadas en pantalla), en el orden y con las columnas que muestra (vista compacta o extendida). Requieren el rol Staff o uno superior.
+
+| Opción | Resultado |
+|---|---|
+| **Print list ...** | La lista como una tabla, en horizontal, encabezada por la ruta de la carpeta o por un resumen de la búsqueda o el filtro. |
+| **Print as book ...** | Un libro: portada, índice y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. El índice enlaza con los capítulos pero no lleva números de página: el navegador no los puede conocer antes de imprimir. Un libro de más de 100 notas puede tardar mucho en generarse, así que KaNote pregunta antes. |
+| **Print note details ...** | Toda la información de la nota seleccionada, tal como está guardada: propiedades, descripción, atributos, recursos (con una miniatura de las imágenes), tareas y notas trazadas. Disponible cuando hay una nota seleccionada. |
+| **Export to CSV ...** | El mismo contenido que la lista impresa, como fichero CSV que descarga el navegador. |
+
+**Previsualización, impresora y PDF.** Cada impresión abre una previsualización en la aplicación, que muestra el informe en cuanto se genera; cerrarla antes lo cancela (útil con un libro grande). **Print ...** abre el diálogo de impresión del navegador solo para el informe: elige la impresora o *Guardar como PDF*. La cabecera de página y la numeración las dibujan Edge y Chrome; otros navegadores pueden omitirlas. Los enlaces de un informe se abren en otra pestaña.
+
+**Idioma y ficheros CSV.** Las fechas y los números se escriben como los escribe el idioma de tu navegador, y el fichero CSV usa su separador de listas (`;` en español, por ejemplo) y la codificación UTF-8, de modo que Excel lo abre directamente. Como en la aplicación de escritorio, el nombre de fichero propuesto describe la carpeta, búsqueda o filtro de la lista, y un texto que empieza por `=`, `+`, `-` o `@` se escribe con un apóstrofo delante.
 
 ### Editor de notas (aplicación Web)
 

@@ -1,7 +1,7 @@
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
-namespace KNote.ClientWin.Core;
+namespace KNote.Reports;
 
 // One relation of a note's "Trace notes", described by the OTHER note in it (Number/Topic/Tags) plus the
 // relation's own Type/Order/Weight. Type is empty for untyped relations (a valid, common case).

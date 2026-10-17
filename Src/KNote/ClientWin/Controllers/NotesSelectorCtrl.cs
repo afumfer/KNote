@@ -1,7 +1,7 @@
 ﻿using KNote.ClientWin.Core;
-using KNote.ClientWin.Core.Reports;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Reports;
 using KNote.Service.Core;
 
 namespace KNote.ClientWin.Controllers;

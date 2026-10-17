@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>0.0.10</Version>
+    <AssemblyVersion>0.0.10.40</AssemblyVersion>
+    <FileVersion>0.0.10.40</FileVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resources\KNoteReport.css" />
+    <EmbeddedResource Include="Resources\KNoteReport.css" LogicalName="KNote.Reports.Resources.KNoteReport.css" />
+    <None Remove="Resources\KNoteBook.css" />
+    <EmbeddedResource Include="Resources\KNoteBook.css" LogicalName="KNote.Reports.Resources.KNoteBook.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model\KNote.Model.csproj" />
+    <ProjectReference Include="..\Service\KNote.Service.csproj" />
+  </ItemGroup>
+</Project>

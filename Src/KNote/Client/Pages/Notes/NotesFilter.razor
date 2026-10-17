@@ -18,9 +18,8 @@
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
-            <RadzenMenuItem Text="View note" Icon="launch" class="knt-menu-separator" Disabled="@(!(notesGrid?.CanViewCurrent ?? false))" Click="@(() => notesGrid!.ViewCurrentAsync())"></RadzenMenuItem>
-            <NotesPreviewToggle Changed="StateHasChanged" />
-            <NotesListViewToggle Changed="StateHasChanged" />
+            <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
+            <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" ListName="Filtered notes" />
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -92,6 +91,14 @@
         filter.OrderAscending = order?.Ascending ?? true;
         return await store.Notes.GetFilter(filter);
     }
+
+    // The notes of the filter applied (not of criteria changed and not applied yet), to print or export them
+    // (NotesPrintExportMenu adds the list's order and view).
+    private NotesListReportRequestDto ReportRequest() => new()
+    {
+        Source = NotesListReportSource.Filter,
+        NotesFilter = appState.NotesFilter
+    };
 
     Task OnNew() => noteWindows.OpenNewAsync();
 

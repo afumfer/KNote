@@ -87,13 +87,13 @@ A repository is a KaNote database, SQLite or SQL Server. The **Repository** menu
 
 ### Printing and exporting (desktop app)
 
-The **File** menu of the management window has these options, all working on the notes list exactly as you see it: the notes of the selected folder, or the result of a search or a filter, in the order and with the columns shown on screen (including the compact view and the list filter).
+The **File** menu of the management window has these options (the three prints grouped in its **Print** submenu), all working on the notes list exactly as you see it: the notes of the selected folder, or the result of a search or a filter, in the order and with the columns shown on screen (including the compact view and the list filter).
 
 | Option | Result |
 |---|---|
-| **Print notes list ...** | The list as a table, in landscape, headed by the folder path or a summary of the search/filter. All the visible columns fit the page width. The **Print** button of the toolbar does the same. |
-| **Print notes list as book ...** | A book: a cover, a table of contents with page numbers and one chapter per note, in the order of the list. The chapter title is the note's topic and its text the note's description. |
-| **Print selected note details ...** | Everything about the selected note, as saved: properties, description, attributes, resources (with a thumbnail of the images), tasks and trace notes. The note's script and its alarms are not printed. |
+| **Print > Notes list ...** | The list as a table, in landscape, headed by the folder path or a summary of the search/filter. All the visible columns fit the page width. The **Print** button of the toolbar does the same. |
+| **Print > Notes list as book ...** | A book: a cover, a table of contents with page numbers and one chapter per note, in the order of the list. The chapter title is the note's topic and its text the note's description. A book of more than 100 notes can take a long time to generate, so KaNote asks first. |
+| **Print > Selected note details ...** | Everything about the selected note, as saved: properties, description, attributes, resources (with a thumbnail of the images), tasks and trace notes. The note's script and its alarms are not printed. |
 | **Export notes list to CSV ...** | The same content as the printed list, as a CSV file. |
 
 The note editor has its own **Print** button, which prints the details of the note being edited as you are seeing it. If it has changes not saved yet, the report says so.
@@ -202,13 +202,13 @@ The web server names a new database with the `Name` setting of its `RepositoryRe
 
 ### Notes lists (web app)
 
-The **Tree panel**, **Notes filter** and **Quick search** pages show their notes in the same list, with the columns of the desktop app's notes list. It fills the window and loads more notes as you scroll; the total is shown above it. The **Extended list** / **Compact list** button of the page switches between all the columns and the compact view (number, topic, priority and tags), which is the default; the choice applies to the three pages and the browser remembers it. The topic column keeps a minimum width: in a narrow window the list scrolls sideways. In the tree panel, the folders tree has its own scroll.
+The **Tree panel**, **Notes filter** and **Quick search** pages show their notes in the same list, with the columns of the desktop app's notes list. It fills the window and loads more notes as you scroll; the total is shown above it. The **View options** menu of the page header groups the ways of looking at the notes: **View note**, **Show preview** / **Hide preview** and **Extended list** / **Compact list**. **Extended list** / **Compact list** switches between all the columns and the compact view (number, topic, priority and tags), which is the default; the choice applies to the three pages and the browser remembers it. The topic column keeps a minimum width: in a narrow window the list scrolls sideways. In the tree panel, the folders tree has its own scroll.
 
 **Selecting and opening.** A click (also a right click) selects a note, which is highlighted; a double click or **Enter** edits it (users who can't edit view it). The arrows, **Page Up**, **Page Down**, **Home** and **End** move the selection. Coming back to the page (e.g. from the side menu), the list is where you left it, with the same note selected.
 
-**Actions.** The **Edit note**, **Delete note** and **View note** buttons of the page header act on the selected note. A right click on a note, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one. The notes of **Home** show their actions in a **⋮** menu.
+**Actions.** The **Edit note** and **Delete note** buttons of the page header, and **View note** in its **View options** menu, act on the selected note. A right click on a note, the context menu key or **Shift+F10** show its actions (**View**, **Edit**, **Delete**), and **Delete** deletes the selected note after confirming it. Editing and deleting need the Staff role or a higher one. The notes of **Home** show their actions in a **⋮** menu.
 
-**Preview.** The **Show preview** / **Hide preview** button of the page shows, at the right of the list, the note that is selected; it changes as you select another one, and shows the note's changes when it is saved in its window. The pane can be resized with the bar between it and the list. The choice applies to the three pages and the browser remembers it, as well as the sizes you give to the panes of each page.
+**Preview.** **Show preview** / **Hide preview**, in the **View options** menu, shows, at the right of the list, the note that is selected; it changes as you select another one, and shows the note's changes when it is saved in its window. The pane can be resized with the bar between it and the list. The choice applies to the three pages and the browser remembers it, as well as the sizes you give to the panes of each page.
 
 **Note windows.** Viewing, editing or creating a note (**New note**) opens it in a window of its own, without the app's menus, so you can keep it next to the list; new windows open in cascade from the main one. Each note has one view window and one edit window: opening it again brings that window to the front. Each **New note** opens a new window, in the folder selected in the tree panel; once saved, it is that note's edit window. When a note is saved in its edit window, the lists, Home and the note's view window show it changed. The exit button of the edit window closes it, asking first if there are unsaved changes (as does closing the window). If the browser blocks the window, allow pop-ups for the app's site.
 
@@ -217,6 +217,21 @@ The **Tree panel**, **Notes filter** and **Quick search** pages show their notes
 **Sorting.** Clicking a column header sorts the list by that column; a second click reverses the order and a third one goes back to the list's own order. In the tree panel each folder opens in its notes order, as in the desktop app: by note number, a fixed order, or, when the folder follows the last order used, the last one chosen in either app (sorting the folder's notes saves it). The notes order of a folder is set in its edit form (**Folders**), with the same options as in the desktop app.
 
 **Coming back to the list.** After opening a note, the list is shown again as it was: the same folder, filter or search, the same order and position, with a mark on the left of the note you opened.
+
+### Printing and exporting (web app)
+
+The **Print/Export** menu of the **Tree panel**, **Notes filter** and **Quick search** pages has the same reports as the desktop app. They work on the whole list of the page (all its notes, not only the ones loaded on screen), in the order and with the columns it shows (compact or extended view). They need the Staff role or a higher one.
+
+| Option | Result |
+|---|---|
+| **Print list ...** | The list as a table, in landscape, headed by the folder path or a summary of the search/filter. |
+| **Print as book ...** | A book: a cover, a table of contents and one chapter per note, in the order of the list. The chapter title is the note's topic and its text the note's description. The table of contents links to the chapters but has no page numbers: the browser can't know them before printing. A book of more than 100 notes can take a long time to generate, so KaNote asks first. |
+| **Print note details ...** | Everything about the selected note, as saved: properties, description, attributes, resources (with a thumbnail of the images), tasks and trace notes. Available when a note is selected. |
+| **Export to CSV ...** | The same content as the printed list, as a CSV file that the browser downloads. |
+
+**Preview, printer and PDF.** Every print opens a preview in the app, which shows the report as soon as it is generated; closing it before cancels it (useful with a large book). **Print ...** opens the browser's print dialog for the report only: choose the printer, or *Save as PDF*. The running header and the page numbers are drawn by Edge and Chrome; other browsers may leave them out. The links of a report open in a new tab.
+
+**Language and CSV files.** Dates and numbers are written as your browser's language writes them, and the CSV file uses its list separator (`;` in Spanish, for instance) and UTF-8 encoding, so Excel opens it directly. As in the desktop app, the proposed file name describes the folder, search or filter of the list, and a text that starts with `=`, `+`, `-` or `@` is written with a leading apostrophe.
 
 ### Note editor (web app)
 

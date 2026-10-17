@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Reports;
 using KntScript;
 using KntIcons;
 using System;

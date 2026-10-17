@@ -16,6 +16,7 @@ public interface IStore
     INoteWebApiService Notes { get; }
     IAiAssistantWebApiService AiAssistant { get; }
     ISystemValueWebApiService SystemValues { get; }
+    IReportWebApiService Reports { get; }
 
     ChatRoomHub ChatRoom { get; }
 }

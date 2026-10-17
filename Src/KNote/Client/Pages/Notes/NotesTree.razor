@@ -19,10 +19,9 @@
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
             <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
-            <RadzenMenuItem Text="View note" Icon="launch" class="knt-menu-separator" Disabled="@(!(notesGrid?.CanViewCurrent ?? false))" Click="@(() => notesGrid!.ViewCurrentAsync())"></RadzenMenuItem>
-            <NotesPreviewToggle Changed="StateHasChanged" />
-            <NotesListViewToggle Changed="StateHasChanged" />
+            <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
             <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
+            <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" DefaultOrder="FolderOrder()" ListName="@folder?.Name" />
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -160,6 +159,13 @@
             OrderAscending = order.Ascending
         });
     }
+
+    // The folder's notes, to print or export them (NotesPrintExportMenu adds the list's order and view).
+    private NotesListReportRequestDto ReportRequest() => new()
+    {
+        Source = NotesListReportSource.Folder,
+        FolderId = folder?.FolderId
+    };
 
     // Sorted with a header: a folder in Auto mode remembers it (NoteOrderCriteria.FormatUserOrder), as in ClientWin.
     private async Task OnOrderChanged(NotesOrder? order)

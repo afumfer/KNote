@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using KNote.Model.Dto;
 
-namespace KNote.ClientWin.Core.Reports;
+namespace KNote.Reports;
 
 // Printable report with everything about one note (NoteDetailReportData): properties, description,
 // extended attributes, resources (with image thumbnails), tasks and trace notes. Portrait. Never shows
@@ -61,7 +61,8 @@ public static class NoteDetailReport
         body.AppendLine("<section class=\"knt-section\"><h2>Properties</h2><dl class=\"knt-fields\">");
         // Two label/value pairs per line (see .knt-fields): kept in related pairs.
         Field(body, "Folder", string.IsNullOrWhiteSpace(data.FolderPath) ? None : data.FolderPath);
-        Field(body, "Note type", note.NoteTypeDto?.Name);
+        // Without a type, NoteTypeDto is the DTO's own placeholder ("(Enter new type note name)").
+        Field(body, "Note type", note.NoteTypeId == null ? null : note.NoteTypeDto?.Name);
         Field(body, "Tags", note.Tags);
         Field(body, "Status", note.InternalTags);
         Field(body, "Created", isNew ? None : note.CreationDateTime.ToString("g"));
