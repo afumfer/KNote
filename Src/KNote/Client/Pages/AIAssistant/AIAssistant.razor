@@ -7,10 +7,14 @@
 @inject NotificationService notificationService
 @inject TooltipService tooltipService
 @inject IJSRuntime jsRuntime
+@inject KntWindows kntWindows
 
-@implements IDisposable
+@implements IAsyncDisposable
 
 @attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
+
+@* The AI assistant: the conversation and the prompt on the left, the user's sessions on the right. It can go on in a
+   window of its own (AIAssistantWindow, InWindow), resuming the session shown. *@
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 
@@ -24,13 +28,19 @@
                             Placeholder="No AI providers" Style="width: 16rem" />
             <RadzenButton Icon="add_comment" ButtonStyle="ButtonStyle.Secondary" Click="NewConversation" Disabled="@streaming"
                           MouseEnter="@(args => tooltipService.Open(args, "New conversation", new TooltipOptions { Position = TooltipPosition.Left }))" />
+            @if (!InWindow)
+            {
+                <RadzenButton Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="OpenInWindow"
+                              Disabled="@(streaming || pendingSave)"
+                              MouseEnter="@(args => tooltipService.Open(args, "Open in a new window", new TooltipOptions { Position = TooltipPosition.Left }))" />
+            }
         </RadzenStack>
     </IndexMenu>
 </KntIndexHeader>
 
 @* Both panes sized in %: a pane without a size, or sized in px, left the sessions out of view. *@
 <div class="ai-assistant">
-<RadzenSplitter Style="height: calc(100vh - 10rem)" class="rz-mt-2">
+<RadzenSplitter Style="@($"height: {Height}")" class="rz-mt-2">
     <RadzenSplitterPane Size="75%">
         @* The prompt pane starts as tall as the box had (Rows="3"), 82px; its bar makes it taller or shorter. The chat
            pane needs a size: without one Radzen gives it 100% and the prompt is left out of view. *@
@@ -67,6 +77,13 @@
 </div>
 
 @code {
+    // In the assistant's own window (AIAssistantWindow): no button to open it in another one, as tall as the window
+    // (no app header and footer), and closing the window asks first while there is something to lose.
+    [Parameter] public bool InWindow { get; set; }
+
+    // The session to resume first (in a window, the one the main window showed).
+    [Parameter] public Guid? SessionId { get; set; }
+
     private const string ChatContainerId = "aichatcontainer";
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromMilliseconds(100);
 
@@ -91,7 +108,12 @@
     // The notes created by the assistant in this session, by turn (shown only while the page is open).
     private readonly Dictionary<int, List<AiChatStreamEventDto>> createdNotes = new();
 
+    private DotNetObjectReference<AIAssistant>? selfReference;
+    private IJSObjectReference? unsavedChangesWatch;
+
     private long TotalTokens => session.Turns.Sum(t => t.TotalTokens);
+
+    private string Height => InWindow ? "calc(100vh - 5rem)" : "calc(100vh - 10rem)";
 
     #region Life cycle
 
@@ -113,10 +135,19 @@
 
         // Also creates, the first time, the note type and folder where the sessions are kept.
         await LoadSessionsAsync();
+
+        if (SessionId is Guid sessionId && sessionId != Guid.Empty)
+            await OpenSession(sessionId);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender && InWindow)
+        {
+            selfReference = DotNetObjectReference.Create(this);
+            unsavedChangesWatch = await kntWindows.WatchUnsavedChangesAsync(selfReference);
+        }
+
         if (!scrollToBottom)
             return;
         scrollToBottom = false;
@@ -130,10 +161,37 @@
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         answerCancellation?.Cancel();
         answerCancellation?.Dispose();
+
+        try
+        {
+            if (unsavedChangesWatch != null)
+            {
+                await unsavedChangesWatch.InvokeVoidAsync("dispose");
+                await unsavedChangesWatch.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The window is being closed: nothing left to clean up in the browser.
+        }
+        selfReference?.Dispose();
+    }
+
+    /// <summary>Asked by the browser before the assistant's window is closed or reloaded
+    /// (KntWindows.WatchUnsavedChangesAsync): the answer being written, or a conversation not saved, would be lost.</summary>
+    [JSInvokable]
+    public bool HasUnsavedChanges() => streaming || pendingSave;
+
+    // The assistant goes on in its own window, with the session shown (saved: the button waits for it), and this one
+    // goes Home. The window is opened first thing: the browser only allows it right after the click.
+    private async Task OpenInWindow()
+    {
+        if (await kntWindows.OpenAiAssistantAsync(session.NoteId))
+            store.NavigateTo("index");
     }
 
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
