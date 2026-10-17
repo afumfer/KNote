@@ -6,6 +6,7 @@
 @implements IAsyncDisposable
 
 @inject IJSRuntime js
+@inject IStore store
 @inject DialogService dialogService
 
 <KntDialogFrame Icon="print" Title="@Title" Subtitle="@Subtitle" Fill="true">
@@ -78,6 +79,12 @@
         catch (OperationCanceledException)
         {
             return;     // closed before the report was ready
+        }
+        catch (HttpRequestException ex)
+        {
+            // No answer from the server (e.g. it stopped waiting for a long book): no Result to tell it.
+            store.AppState.NotifyError(Title, $"The report could not be generated: {ex.Message}");
+            result = new Result<ReportDto>();
         }
 
         if (cancellation.IsCancellationRequested)

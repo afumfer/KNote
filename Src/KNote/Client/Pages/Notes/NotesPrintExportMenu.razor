@@ -78,7 +78,16 @@
         if (!HasNotes("export"))
             return;
 
-        var result = await store.Reports.GetNotesListCsvAsync(BuildRequest());
+        Result<ReportFileDto> result;
+        try
+        {
+            result = await store.Reports.GetNotesListCsvAsync(BuildRequest());
+        }
+        catch (HttpRequestException ex)
+        {
+            store.AppState.NotifyError("Export to CSV", $"The notes list could not be exported: {ex.Message}");
+            return;
+        }
         if (!result.IsValid || result.Entity == null)
             return;     // already notified
 

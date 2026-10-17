@@ -91,7 +91,9 @@ Los informes se muestran en la previsualización (`ReportPreviewCtrl`/`ReportPre
       Con más de 100 notas pregunta antes de generarlo, y "No" no abre la previsualización.
 - [ ] File → Print → "Selected note details ..." imprime la nota seleccionada (o avisa si no hay ninguna):
       propiedades, descripción con sus imágenes, atributos, recursos con miniatura de las imágenes,
-      tareas y notas trazadas; nunca el script de la nota ni de sus atributos, ni sus alarmas.
+      tareas y notas trazadas; nunca el script de la nota ni de sus atributos, ni sus alarmas. Una nota sin
+      tipo muestra "—" como tipo, y una descripción HTML (editor HTML) se imprime como la muestra el editor:
+      con su formato e imágenes, sin scripts.
 - [ ] El botón Print del editor de notas (ventana flotante) imprime la nota tal como se ve; tras
       modificarla sin guardar, el informe muestra el aviso "Unsaved changes".
 - [ ] En la previsualización: **Print ...** abre el diálogo de impresión, **Save as PDF ...** guarda el
