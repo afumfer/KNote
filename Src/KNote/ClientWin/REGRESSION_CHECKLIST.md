@@ -28,6 +28,10 @@ buena.
       mensaje (`MessageEditorCtrl`) y un atributo (`NoteAttributeEditorCtrl`) desde dentro del editor
       de notas.
 - [ ] Cambiar el tipo de una nota (`NoteTypesSelectorCtrl`) se refleja correctamente.
+- [ ] Tab "Trace notes": añadir, editar y quitar una relación en cada lista y guardar la nota. Añadir otra vez la
+      misma relación (mismas notas, sentido y tipo, también sin tipo) y guardar: se avisa de que la relación ya existe
+      (`KntNotesSaveTraceNoteAsyncCommand`) y el editor sigue abierto, como con una nota trazada consigo misma; al
+      quitar la repetida se guarda, y al reabrir la nota la relación está una sola vez.
 
 ## Carpetas y selección
 

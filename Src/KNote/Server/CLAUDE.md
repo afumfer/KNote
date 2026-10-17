@@ -150,6 +150,17 @@ public class FoldersController : ControllerBase
   descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
   fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el
   contenido guardado en la BD (`ResourceInfoDto` no dice si lo está).
+- **Notas trazadas** (pestaña "Trace notes" del editor de la Web, Staff+ como los comandos): `GET
+  api/notes/{id}/tracenotes` da las dos direcciones (`NoteTraceNotesDto`: `TraceNotesFrom`, la nota es `ToId`;
+  `TraceNotesTo`, es `FromId`), cada relación como `TraceNoteInfoDto` (el `TraceNoteDto` más la otra nota, número,
+  tema y etiquetas, y el nombre del tipo), resueltas con `TraceNoteRows` de `KNote.Reports`, las mismas filas que el
+  editor de `ClientWin`. `POST/PUT api/notes/tracenotes` guarda una relación **al momento** (`Guid.Empty` = nueva;
+  en `ClientWin` se guardan con la nota) y `DELETE api/notes/tracenotes/{id}` la borra. `Service` rechaza una nota
+  trazada consigo misma (validación del DTO, un 400 de `[ApiController]`) y una relación repetida (mismas notas,
+  sentido y tipo, también sin tipo: `KntNotesSaveTraceNoteAsyncCommand`). Los tipos: `TraceNoteTypesController`
+  (`api/tracenotetypes`, lectura para cualquier usuario autenticado, escritura Admin); un tipo en uso no se borra
+  (la clave ajena de la BD, el error vuelve en el `Result`). Tests en `NotesInProcessTests.Execute_TraceNotesCRUD`
+  y `TraceNoteTypesInProcessTests`.
 - **Ruta de una carpeta**: `GET api/folders/{id}/path` (`Folders.GetPathAsync` de `Service`, la misma que usa
   `ClientWin`), para el editor de notas.
 - **HTML de las notas para la Web**: `POST api/notes/html` (cualquier usuario autenticado; cuerpo: el Markdown

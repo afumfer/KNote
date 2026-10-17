@@ -58,11 +58,12 @@ Client/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
-├── Pages/                  – páginas por área: Notes/, Folders/, Types/, Attributes/, Users/, Auth/, AIAssistant/,
-│                             ChatRoom/
+├── Pages/                  – páginas por área: Notes/, Folders/, Types/, TraceNoteTypes/, Attributes/, Users/, Auth/,
+│                             AIAssistant/, ChatRoom/
 ├── Shared/                 – layouts (MainLayout*, KntWindowLayout) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntSections, KntDialogs, KntLogo, KntFolderSelector,
-│                             KntFoldersTreeView, KntDialogFrame, KntFormSection, KntField, KntMarkdownEditor, ...)
+│                             KntFoldersTreeView, KntNoteSelector, KntNotePicker, KntDialogFrame, KntFormSection,
+│                             KntField, KntMarkdownEditor, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
 └── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/ (filePaste.js, chatRoom.js...), favicon.ico
 ```
@@ -279,6 +280,18 @@ Patrones ya establecidos que hay que seguir:
   marca y su estado (sin tachar). `NoteTaskEditor` edita la descripción con `KntMarkdownEditor` (su modo se guarda
   aparte: `StorageKey`), y como `ClientWin` una tarea nueva es del usuario conectado, con prioridad n+1 y empezada
   ahora, y al resolverla sin fecha de fin se le pone la actual.
+- **Notas trazadas** (`NoteTraceNotes`, presentación; `NoteTraceNoteEditor`, diálogo), como en `ClientWin`: dos paneles,
+  "Trace notes from" (la nota es `ToId`) y "Trace notes to" (es `FromId`), cada relación descrita por la otra nota y
+  su tipo, orden y peso (`IStore.Notes.GetTraceNotesAsync` → `NoteTraceNotesDto`, resuelto en `Server`). A diferencia
+  de `ClientWin`, una relación **se guarda al momento** (como las tareas; la nota tiene que estar guardada): el
+  diálogo recibe `Save` y solo se cierra si `Server` la acepta, así que una relación repetida (la rechaza `Service`)
+  no pierde lo escrito. La pestaña se vuelve a leer cada vez que se abre (una relación también cambia desde la otra
+  nota). La otra nota se elige con `Shared/KntNotePicker` → `Shared/KntNoteSelector` (diálogo `Large`: búsqueda de
+  texto o árbol de carpetas, un `RadzenDataGrid` paginado en el servidor con `LoadData`, no `NotesGrid`, cuya
+  virtualización no va bien en un diálogo; `ExcludedNoteIds` atenúa las notas que no se pueden elegir) y se abre en
+  su ventana de edición (`NoteWindows.OpenEditAsync`, sin esperas delante). Los tipos se mantienen en la pestaña
+  "Trace note types" de `Admin` (`Pages/TraceNoteTypes`, como `Types`; `IStore.TraceNoteTypes`); su icono,
+  `KntSections.TraceNoteTypes`, es también el de la pestaña del editor.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y
