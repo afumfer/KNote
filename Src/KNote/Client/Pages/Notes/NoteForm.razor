@@ -2,6 +2,7 @@
 @inject NotificationService notificationService
 @inject DialogService dialogService
 @inject TooltipService tooltipService
+@inject NoteWindows noteWindows
 
 <EditForm Model="Note" Context="formContext">
 
@@ -171,6 +172,31 @@
                 </ChildContent>
             </RadzenTabsItem>
 
+            <RadzenTabsItem Icon="@KntSections.TraceNoteTypes.Icon">
+                <Template Context="tab">
+                    <span class="knt-tab-text">Trace notes</span>
+                    @if (traceNotes != null)
+                    {
+                        <span class="knt-tab-count">@(traceNotes.TraceNotesFrom.Count + traceNotes.TraceNotesTo.Count)</span>
+                    }
+                </Template>
+                <ChildContent>
+                    @if (traceNotes == null && !Note.IsNew())
+                    {
+                        <p>Loading trace notes ...</p>
+                    }
+                    else
+                    {
+                        <NoteTraceNotes TraceNotes="traceNotes ?? new()"
+                                        OnNew="OnNewTraceNote"
+                                        OnEdit="OnEditTraceNote"
+                                        OnDelete="OnDeleteTraceNote"
+                                        OnOpenNote="OnOpenTraceNote">
+                        </NoteTraceNotes>
+                    }
+                </ChildContent>
+            </RadzenTabsItem>
+
         </Tabs>
     </RadzenTabs>
 
@@ -187,9 +213,12 @@
     [Parameter] public EventCallback OnExit { get; set; }
 
     private List<ResourceInfoDto>? resources;
-    private List<NoteTaskDto>? tasks; 
-    private NoteTaskDto? taskEdit; 
+    private List<NoteTaskDto>? tasks;
+    private NoteTaskDto? taskEdit;
     private List<UserDto>? users;
+    private NoteTraceNotesDto? traceNotes;
+    // Read the first time a trace note is added or edited.
+    private List<TraceNoteTypeDto>? traceNoteTypes;
 
     private Guid? oldNoteType = null;
 
@@ -223,8 +252,8 @@
         await base.OnInitializedAsync();
     }
 
-    // A note shown for the first time, or another one (after "Save and new"): its folder's path, and its resources
-    // and tasks (the tabs show how many there are).
+    // A note shown for the first time, or another one (after "Save and new"): its folder's path, and its resources,
+    // tasks and trace notes (the tabs show how many there are).
     protected override async Task OnParametersSetAsync()
     {
         if (Note.NoteId == loadedNoteId)
@@ -234,10 +263,11 @@
         oldNoteType = Note.NoteTypeId;
         resources = null;
         tasks = null;
+        traceNotes = null;
 
         await LoadFolderPathAsync();
         if (!Note.IsNew())
-            await Task.WhenAll(LoadResourcesAsync(), LoadTasksAsync());
+            await Task.WhenAll(LoadResourcesAsync(), LoadTasksAsync(), LoadTraceNotesAsync());
     }
 
     // The path of the note's folder, as ClientWin shows it (Service: Folders.GetPathAsync).
@@ -263,6 +293,13 @@
         var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
         if (result.IsValid)
             tasks = result.Entity;
+    }
+
+    private async Task LoadTraceNotesAsync()
+    {
+        var result = await webApiService.Notes.GetTraceNotesAsync(Note.NoteId);
+        if (result.IsValid)
+            traceNotes = result.Entity;
     }
 
     #endregion
@@ -340,6 +377,10 @@
 
         if (panel == 3 && tasks == null && !Note.IsNew())
             await LoadTasksAsync();
+
+        // Read again each time: a relation is also changed from the other note's window.
+        if (panel == 4 && !Note.IsNew())
+            await LoadTraceNotesAsync();
 
         StateHasChanged();
     }
@@ -517,6 +558,70 @@
             await ShowPanel(3);
         }
     }
+
+    #endregion
+
+    #region Trace notes management
+
+    // Saved at once, as the tasks and the resources (not with the note, as ClientWin does).
+    private async Task OnNewTraceNote(bool outgoing)
+    {
+        if (Note.IsNew())
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New trace note for this note.", Detail = "You must save the note before tracing it to other notes.", Duration = 12000 });
+            return;
+        }
+
+        await OpenTraceNoteEditor(new TraceNoteInfoDto { Weight = 1 }, outgoing);
+    }
+
+    private Task OnEditTraceNote(TraceNoteInfoDto traceNote) =>
+        OpenTraceNoteEditor(traceNote, outgoing: traceNote.FromId == Note.NoteId);
+
+    private async Task OpenTraceNoteEditor(TraceNoteInfoDto traceNote, bool outgoing)
+    {
+        if (traceNoteTypes == null)
+        {
+            var resTypes = await webApiService.TraceNoteTypes.GetAllAsync();
+            traceNoteTypes = resTypes.IsValid ? resTypes.Entity.OrderBy(t => t.Name).ToList() : new();
+        }
+
+        var result = await dialogService.OpenAsync<NoteTraceNoteEditor>(traceNote.TraceNoteId == Guid.Empty ? "New trace note" : "Edit trace note",
+               new Dictionary<string, object?>()
+               {
+                   { "TraceNote", traceNote }, { "Outgoing", outgoing }, { "NoteId", Note.NoteId },
+                   { "NoteDisplay", $"#{Note.NoteNumber} · {Note.Topic}" }, { "TraceNoteTypes", traceNoteTypes },
+                   { "Save", (Func<TraceNoteDto, Task<bool>>)SaveTraceNote }
+               },
+               KntDialogs.Framed(KntDialogs.Medium()));
+
+        if (result != null)
+            await ShowPanel(4);
+    }
+
+    private async Task<bool> SaveTraceNote(TraceNoteDto traceNote)
+    {
+        var result = await webApiService.Notes.SaveTraceNoteAsync(traceNote);
+        return result.IsValid;
+    }
+
+    private async Task OnDeleteTraceNote(TraceNoteInfoDto traceNote)
+    {
+        var confirmed = await dialogService.Confirm(
+            $"Are you sure you want to remove the relation with the note {traceNote.RelatedNoteNumber} - {traceNote.RelatedNoteTopic} -? The note itself is not deleted.",
+            "Remove trace note",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (confirmed != true)
+            return;
+
+        var result = await webApiService.Notes.DeleteTraceNoteAsync(traceNote.TraceNoteId);
+        if (result.IsValid)
+            await ShowPanel(4);
+    }
+
+    // The other note of the relation, in its own window (as ClientWin opens it in its note editor). Nothing is awaited
+    // before it: the browser only opens a window right after a click or a key.
+    private Task OnOpenTraceNote(TraceNoteInfoDto traceNote) => noteWindows.OpenEditAsync(traceNote.RelatedNoteId);
 
     #endregion
 

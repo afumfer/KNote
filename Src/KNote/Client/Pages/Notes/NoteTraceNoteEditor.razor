@@ -1,0 +1,130 @@
+@inject NotificationService notificationService
+@inject DialogService dialogService
+
+@* Dialog of one of the note's trace notes (NoteForm opens it framed), as ClientWin's trace note editor: the other note
+   of the relation and the relation's type, order and weight. Its direction is the one of the list it was opened from,
+   and it is shown. The relation is saved by Save, which keeps the dialog open if the server rejects it (e.g. a relation
+   that already exists); the result is the relation saved, or null if cancelled. *@
+
+<EditForm Model="traceNote" Context="formContextTrace">
+
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <KntDialogFrame Icon="@KntSections.TraceNoteTypes.Icon" Title="@(IsNew ? "New trace note" : "Edit trace note")"
+                    Subtitle="@(Outgoing ? "A relation from this note to another one." : "A relation from another note to this one.")">
+        <ChildContent>
+
+            <div class="knt-trace-flow" aria-label="Direction of the relation">
+                @FlowNote(Outgoing ? NoteDisplay : relatedDisplay, "From", current: Outgoing)
+                <span class="knt-trace-flow-arrow"><RadzenIcon Icon="arrow_forward" /></span>
+                @FlowNote(Outgoing ? relatedDisplay : NoteDisplay, "To", current: !Outgoing)
+            </div>
+
+            <KntFormSection Icon="description" Title="Related note" Description="@(Outgoing ? "The note this note leads to." : "The note that leads to this note.")">
+                <KntField Label="Note" Required="true">
+                    <KntNotePicker NoteDisplay="@relatedDisplay" ExcludedNoteIds="@(new[] { NoteId })" NoteSelected="OnRelatedSelected" />
+                </KntField>
+            </KntFormSection>
+
+            <KntFormSection Icon="tune" Title="Relation" Description="What the relation means and where it goes among the others.">
+                <KntField Label="Type" Component="TraceNoteTypeId" Help="The types are kept in the admin panel (Trace note types).">
+                    <RadzenDropDown Name="TraceNoteTypeId" TValue="Guid?" @bind-Value="@traceNote.TraceNoteTypeId"
+                                    Data="@TraceNoteTypes" TextProperty="Name" ValueProperty="TraceNoteTypeId"
+                                    AllowClear="true" Placeholder="No type" />
+                </KntField>
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Order" Component="Order">
+                            <RadzenNumeric Name="Order" TValue="int" @bind-Value="@traceNote.Order" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Weight" Component="Weight">
+                            <RadzenNumeric Name="Weight" TValue="double" @bind-Value="@traceNote.Weight" Step="0.1" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </KntFormSection>
+
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="OnCancel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Save" Icon="save" Click="OnConfirm" ButtonStyle="ButtonStyle.Primary" IsBusy="@saving" />
+        </Footer>
+    </KntDialogFrame>
+
+</EditForm>
+
+@code {
+    // The relation to edit (a new one has no id).
+    [Parameter][EditorRequired] public TraceNoteInfoDto TraceNote { get; set; } = null!;
+    // true: from this note to the related one (this note is FromId); false: from the related note to this one.
+    [Parameter] public bool Outgoing { get; set; }
+    // The note being edited, and its text ("#123 · Topic").
+    [Parameter] public Guid NoteId { get; set; }
+    [Parameter] public string NoteDisplay { get; set; } = "";
+    [Parameter] public List<TraceNoteTypeDto> TraceNoteTypes { get; set; } = new();
+    // Saves the relation: false keeps the dialog open (the error has already been notified).
+    [Parameter][EditorRequired] public Func<TraceNoteDto, Task<bool>> Save { get; set; } = null!;
+
+    private TraceNoteInfoDto traceNote = null!;
+    private Guid relatedNoteId;
+    private string relatedDisplay = "";
+    private bool saving;
+
+    private bool IsNew => TraceNote.TraceNoteId == Guid.Empty;
+
+    protected override void OnInitialized()
+    {
+        traceNote = TraceNote.GetSimpleDto<TraceNoteInfoDto>();
+        relatedNoteId = TraceNote.RelatedNoteId;
+        if (!IsNew)
+            relatedDisplay = $"{TraceNote.RelatedNoteNumber} · {TraceNote.RelatedNoteTopic}";
+    }
+
+    private RenderFragment FlowNote(string display, string label, bool current) => __builder =>
+    {
+        <div class="@(current ? "knt-trace-flow-note knt-trace-flow-current" : "knt-trace-flow-note")">
+            <div class="knt-trace-flow-label">@label@(current ? " · this note" : "")</div>
+            <div class="knt-trace-flow-text">@(string.IsNullOrEmpty(display) ? "Select the note" : display)</div>
+        </div>
+    };
+
+    private void OnRelatedSelected(NoteMinimalDto note)
+    {
+        relatedNoteId = note.NoteId;
+        relatedDisplay = KntNotePicker.Display(note);
+    }
+
+    private async Task OnConfirm()
+    {
+        if (relatedNoteId == Guid.Empty)
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save trace note.", Detail = "Select the related note.", Duration = 12000 });
+            return;
+        }
+
+        traceNote.FromId = Outgoing ? NoteId : relatedNoteId;
+        traceNote.ToId = Outgoing ? relatedNoteId : NoteId;
+
+        var msgVal = traceNote.GetErrorMessage();
+        if (!string.IsNullOrEmpty(msgVal))
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save trace note.", Detail = msgVal, Duration = 12000 });
+            return;
+        }
+
+        saving = true;
+        try
+        {
+            if (await Save(traceNote))
+                dialogService.Close(traceNote);
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void OnCancel() => dialogService.Close(null);
+}

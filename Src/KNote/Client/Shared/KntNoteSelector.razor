@@ -1,0 +1,219 @@
+@implements IDisposable
+
+@inject IStore store
+@inject DialogService dialogService
+
+@* Dialog to choose a note (KntNotePicker opens it framed), as ClientWin's notes selector: found with a text search or
+   browsed in the folders tree. The result is the note chosen (NoteMinimalDto), or null if cancelled. Double click
+   chooses a note at once. The notes in ExcludedNoteIds (e.g. the note being edited) are shown but can't be chosen. *@
+
+<KntDialogFrame Icon="note_stack" Title="@Title" Subtitle="@Subtitle">
+    <ChildContent>
+        <div class="knt-note-selector">
+        <RadzenStack Gap="0.75rem">
+            <RadzenSelectBar @bind-Value="mode" TValue="SelectorMode" Size="ButtonSize.Small" Change="@((SelectorMode _) => OnModeChanged())">
+                <Items>
+                    <RadzenSelectBarItem Text="Search" Icon="search" Value="SelectorMode.Search" />
+                    <RadzenSelectBarItem Text="Folders" Icon="folder" Value="SelectorMode.Folders" />
+                </Items>
+            </RadzenSelectBar>
+
+            @if (mode == SelectorMode.Search)
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                    <RadzenFormField Variant="Variant.Outlined" AllowFloatingLabel="false" class="knt-note-selector-search">
+                        <Start>
+                            <RadzenIcon Icon="search" />
+                        </Start>
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="searchText" Immediate="true" Placeholder="Text in the topic, the description or the tags" @onkeydown="OnSearchKey" autofocus />
+                        </ChildContent>
+                    </RadzenFormField>
+                    <RadzenButton Text="Search" Click="OnSearch" ButtonStyle="ButtonStyle.Base" />
+                </RadzenStack>
+
+                @if (string.IsNullOrWhiteSpace(searchedText))
+                {
+                    <div class="knt-empty-state">
+                        <RadzenIcon Icon="manage_search" />
+                        <div class="knt-empty-state-title">Find the note</div>
+                        <div class="knt-empty-state-text">Write a text and press Enter, or browse the folders tree.</div>
+                    </div>
+                }
+                else
+                {
+                    @NotesList
+                }
+            }
+            else
+            {
+                <RadzenRow Gap="0.75rem">
+                    <RadzenColumn Size="12" SizeMD="5">
+                        <div class="knt-note-selector-tree">
+                            <KntFoldersTreeView FoldersInfo="@foldersTree" FolderSelected="OnFolderSelected" />
+                        </div>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="7">
+                        @if (folder == null)
+                        {
+                            <div class="knt-empty-state">
+                                <RadzenIcon Icon="folder_open" />
+                                <div class="knt-empty-state-title">Choose a folder</div>
+                                <div class="knt-empty-state-text">Its notes are shown here.</div>
+                            </div>
+                        }
+                        else
+                        {
+                            @NotesList
+                        }
+                    </RadzenColumn>
+                </RadzenRow>
+            }
+        </RadzenStack>
+        </div>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="OnCancel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+        <RadzenButton Text="Select" Icon="check" Click="OnConfirm" ButtonStyle="ButtonStyle.Primary" Disabled="@(Selected == null)" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Select note";
+    // Notes that can't be chosen (shown dimmed).
+    [Parameter] public IEnumerable<Guid>? ExcludedNoteIds { get; set; }
+
+    private enum SelectorMode { Search, Folders }
+
+    private const int PageSize = 20;
+
+    private SelectorMode mode = SelectorMode.Search;
+    private string searchText = "";
+    private string searchedText = "";
+    private List<FolderDto>? foldersTree;
+    private FolderDto? folder;
+
+    private List<NoteMinimalDto>? notes;
+    private int count;
+    private bool loading;
+    // A new list (another search or folder) is a new grid, which loads its first page.
+    private int listVersion;
+
+    private IList<NoteMinimalDto> selection = new List<NoteMinimalDto>();
+    private NoteMinimalDto? Selected => selection.FirstOrDefault();
+
+    private AppState appState = null!;
+
+    private string Subtitle => Selected != null
+        ? $"Selected: #{Selected.NoteNumber} · {Selected.Topic}"
+        : "Search the note, or browse a folder.";
+
+    protected override void OnInitialized()
+    {
+        appState = store.AppState;
+        appState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        appState.OnChange -= StateHasChanged;
+    }
+
+    private RenderFragment NotesList => __builder =>
+    {
+        <RadzenDataGrid @key="listVersion" TItem="NoteMinimalDto" Data="@notes" Count="@count" LoadData="LoadData" IsLoading="@loading"
+                        AllowPaging="true" PageSize="PageSize" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                        Density="Density.Compact" AllowColumnResize="true" class="knt-list knt-note-selector-list" AllowAlternatingRows="false"
+                        SelectionMode="DataGridSelectionMode.Single" Value="@selection" ValueChanged="@((IList<NoteMinimalDto> s) => OnSelectionChanged(s))"
+                        RowRender="OnRowRender" RowDoubleClick="@(args => OnRowDoubleClick(args.Data!))"
+                        EmptyText="No notes found.">
+            <Columns>
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Property="NoteNumber" Title="#" Width="70px">
+                    <Template Context="note">#@note.NoteNumber</Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Topic" Title="Topic" MinWidth="12rem" />
+                <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Tags" Title="Tags" Width="25%" />
+            </Columns>
+        </RadzenDataGrid>
+    };
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        loading = true;
+
+        var page = new PageIdentifier { PageNumber = (args.Skip ?? 0) / PageSize + 1, PageSize = PageSize };
+        Result<List<NoteMinimalDto>> result;
+        if (mode == SelectorMode.Search)
+            result = await store.Notes.GetSearch($"textSearch={Uri.EscapeDataString(searchedText)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}");
+        else
+            result = await store.Notes.GetFilter(new NotesFilterDto { FolderId = folder?.FolderId, PageIdentifier = page });
+
+        notes = result.IsValid ? result.Entity : new List<NoteMinimalDto>();
+        count = result.IsValid ? (int)Math.Max(result.TotalCount, notes.Count) : 0;
+        loading = false;
+    }
+
+    private async Task OnModeChanged()
+    {
+        selection = new List<NoteMinimalDto>();
+        notes = null;
+        listVersion++;
+
+        if (mode == SelectorMode.Folders && foldersTree == null)
+        {
+            if (appState.FoldersTree == null)
+            {
+                var res = await store.Folders.GetTreeAsync();
+                appState.FoldersTree = res.Entity;
+            }
+            foldersTree = appState.FoldersTree;
+        }
+    }
+
+    private void OnSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            OnSearch();
+    }
+
+    private void OnSearch()
+    {
+        searchedText = searchText?.Trim() ?? "";
+        selection = new List<NoteMinimalDto>();
+        listVersion++;
+    }
+
+    private void OnFolderSelected(FolderDto f)
+    {
+        folder = f;
+        selection = new List<NoteMinimalDto>();
+        listVersion++;
+    }
+
+    private bool IsExcluded(NoteMinimalDto note) => ExcludedNoteIds?.Contains(note.NoteId) == true;
+
+    private void OnRowRender(RowRenderEventArgs<NoteMinimalDto> args)
+    {
+        if (IsExcluded(args.Data!))
+            args.Attributes.Add("class", "knt-note-selector-excluded");
+    }
+
+    private void OnSelectionChanged(IList<NoteMinimalDto> newSelection)
+    {
+        selection = newSelection.Where(n => !IsExcluded(n)).ToList();
+    }
+
+    private void OnRowDoubleClick(NoteMinimalDto note)
+    {
+        if (!IsExcluded(note))
+            dialogService.Close(note);
+    }
+
+    private void OnConfirm()
+    {
+        if (Selected != null)
+            dialogService.Close(Selected);
+    }
+
+    private void OnCancel() => dialogService.Close(null);
+}

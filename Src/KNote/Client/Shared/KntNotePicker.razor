@@ -1,0 +1,43 @@
+@* Read-only note ("#123 · Topic") in a field with a note icon and a button that opens KntNoteSelector, as
+   KntFolderPicker does for a folder. Without the button (ReadOnly) it only shows the note. *@
+
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+
+<RadzenFormField Variant="Variant.Outlined" AllowFloatingLabel="false" class="knt-note-picker">
+    <Start>
+        <RadzenIcon Icon="description" />
+    </Start>
+    <ChildContent>
+        <RadzenTextBox Value="@NoteDisplay" ReadOnly="true" Placeholder="No note selected" />
+    </ChildContent>
+    <End>
+        @if (!ReadOnly)
+        {
+            <RadzenButton Text="@(string.IsNullOrEmpty(NoteDisplay) ? "Select" : "Change")" Icon="note_stack" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                          MouseEnter="@(args => tooltipService.Open(args, "Select note"))" Click="SelectNote" />
+        }
+    </End>
+</RadzenFormField>
+
+@code {
+    [Parameter] public string? NoteDisplay { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    // Notes that can't be chosen in the selector (e.g. the note being edited).
+    [Parameter] public IEnumerable<Guid>? ExcludedNoteIds { get; set; }
+    [Parameter] public EventCallback<NoteMinimalDto> NoteSelected { get; set; }
+
+    // The text of a note in the field, as ClientWin shows a related note.
+    public static string Display(NoteMinimalDto note) => $"#{note.NoteNumber} · {note.Topic}";
+
+    private async Task SelectNote()
+    {
+        tooltipService.Close();
+        var res = await dialogService.OpenAsync<KntNoteSelector>("Note selector",
+               new Dictionary<string, object?>() { { "ExcludedNoteIds", ExcludedNoteIds } },
+               KntDialogs.Framed(KntDialogs.Large()));
+
+        if (res is NoteMinimalDto note)
+            await NoteSelected.InvokeAsync(note);
+    }
+}
