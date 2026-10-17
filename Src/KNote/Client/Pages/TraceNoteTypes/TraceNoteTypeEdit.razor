@@ -1,0 +1,74 @@
+@page "/tracenotetypes/edit/{TypeId}"
+
+@inject IStore store
+@inject DialogService dialogService
+
+@attribute [Authorize(Roles = "Admin")]
+
+
+<NavigationLock ConfirmExternalNavigation=true />
+
+@if (traceNoteType != null)
+{
+    <TraceNoteTypeForm Title="Edit trace note type" OnValidSubmit="OnSave" OnExit="OnExit" TraceNoteType="traceNoteType" />
+}
+else
+{
+    <text>Loading trace note type ... </text>
+}
+
+@code {
+    [Parameter] public string TypeId { get; set; } = string.Empty;
+
+    private TraceNoteTypeDto? traceNoteType;
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (!Guid.TryParse(TypeId, out var id))
+        {
+            await dialogService.Alert("Invalid trace note type identifier.");
+            dialogService.Close(null);
+            return;
+        }
+
+        var result = await store.TraceNoteTypes.GetAsync(id);
+        if (!result.IsValid)
+            dialogService.Close(null);
+        else
+        {
+            traceNoteType = result.Entity;
+            traceNoteType.SetIsDirty(false);
+        }
+    }
+
+    private async Task OnSave()
+    {
+        if (!traceNoteType!.IsDirty())
+        {
+            dialogService.Close(traceNoteType);
+        }
+        else if (traceNoteType.IsValid())
+        {
+            var result = await store.TraceNoteTypes.SaveAsync(traceNoteType);
+            if (result.IsValid)
+                dialogService.Close(result.Entity);
+        }
+    }
+
+    private async Task OnExit()
+    {
+        if (traceNoteType == null || !traceNoteType.IsDirty())
+        {
+            dialogService.Close(null);
+            return;
+        }
+
+        var resultDialog = await dialogService.Confirm(
+            @"Do you want to leave the page and lose your changes?",
+            $"{KntConst.AppName}",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (resultDialog == true)
+            dialogService.Close(null);
+    }
+}

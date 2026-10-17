@@ -1,0 +1,47 @@
+@inject NotificationService notificationService
+
+<EditForm Model="TraceNoteType" Context="formContext">
+
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+
+    <KntDialogFrame Icon="@KntSections.TraceNoteTypes.Icon" Title="@Title" Subtitle="@Subtitle" OnClose="() => OnExit.InvokeAsync(null)">
+        <ChildContent>
+            <KntFormSection Icon="badge" Title="General" Description="A type says what a trace between two notes means (depends on, follows, duplicates...).">
+                <KntField Label="Name" Component="Name" Required="true">
+                    <RadzenTextBox Name="Name" @bind-Value="@TraceNoteType.Name" />
+                    <ValidationMessage For="@(() => TraceNoteType.Name)" />
+                </KntField>
+                <KntField Label="Description" Component="Description">
+                    <RadzenTextArea Name="Description" @bind-Value="@TraceNoteType.Description" Rows="3" />
+                    <ValidationMessage For="@(() => TraceNoteType.Description)" />
+                </KntField>
+            </KntFormSection>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+        </Footer>
+    </KntDialogFrame>
+
+</EditForm>
+
+@code {
+    [Parameter] [EditorRequired] public TraceNoteTypeDto TraceNoteType { get; set; } = null!;
+    [Parameter] public string Title { get; set; } = "...";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnExit { get; set; }
+
+    private string Subtitle => TraceNoteType.TraceNoteTypeId == Guid.Empty ? "A new type of trace between notes." : TraceNoteType.Name;
+
+    protected async Task Save(EditContext formContext)
+    {
+        if (!formContext.Validate())
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save trace note type.", Detail = "Incorrect data, check the required attributes.", Duration = 12000 });
+            return;
+        }
+
+        await OnValidSubmit.InvokeAsync(formContext);
+    }
+
+}

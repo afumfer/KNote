@@ -23,5 +23,7 @@ public static class KntSections
     public static readonly KntSection Users = new("Users management", "users", "person");
     public static readonly KntSection Folders = new("Folders management", "folders", "folder");
     public static readonly KntSection NoteTypes = new("Notes types", "types", "edit_attributes");
+    // Also the icon of the note editor's "Trace notes" tab.
+    public static readonly KntSection TraceNoteTypes = new("Trace note types", "tracenotetypes", "conversion_path");
     public static readonly KntSection Attributes = new("Attributes management", "attributes", "format_list_bulleted");
 }

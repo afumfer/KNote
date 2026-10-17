@@ -22,6 +22,12 @@ public interface INoteWebApiService
     Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo);
     Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId);
 
+    // Both directions, each one with the other note of the relation and its type resolved by the server.
+    Task<Result<NoteTraceNotesDto>> GetTraceNotesAsync(Guid noteId);
+    // Saved at once; a new one has an empty TraceNoteId.
+    Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto traceNote);
+    Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId);
+
     Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString);
     Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter);
 

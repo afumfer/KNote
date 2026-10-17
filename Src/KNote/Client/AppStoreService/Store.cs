@@ -73,6 +73,17 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private ITraceNoteTypeWebApiService? _traceNoteTypes;
+    public ITraceNoteTypeWebApiService TraceNoteTypes
+    {
+        get
+        {
+            if (_traceNoteTypes == null)
+                _traceNoteTypes = new TraceNoteTypeWebApiService(AppState, _httpClient);
+            return _traceNoteTypes;
+        }
+    }
+
     private IKAttributeWebApiService? _kAttributes;
     public IKAttributeWebApiService KAttributes
     {

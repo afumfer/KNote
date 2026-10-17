@@ -1,0 +1,113 @@
+@page "/tracenotetypes"
+
+@inject IStore store
+@inject DialogService dialogService
+@inject ContextMenuService contextMenuService
+
+@attribute [Authorize(Roles = "Admin")]
+
+<KntIndexHeader Section="KntSections.TraceNoteTypes">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="New type ..." Icon="post_add" Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Edit type ..." Icon="edit" Disabled="@(Selected == null)" Click="@(() => OnEdit(Selected!))"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete type ..." Icon="delete" Disabled="@(Selected == null)" Click="@(() => OnDelete(Selected!))"></RadzenMenuItem>
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
+
+<div class="rz-pt-2">
+    <EntityList List="traceNoteTypes">
+        <AllItems>
+            <RadzenDataGrid Data="@traceNoteTypes" TItem="TraceNoteTypeDto" AllowColumnResize="true" AllowSorting="true" Density="@Density.Compact"
+                            class="knt-admin-list knt-list" AllowAlternatingRows="false"
+                            SelectionMode="DataGridSelectionMode.Single" @bind-Value="selection"
+                            CellContextMenu="OnCellContextMenu"
+                            RowDoubleClick="@(args => OnEdit(args.Data!))">
+                <Columns>
+                    <RadzenDataGridColumn TItem="TraceNoteTypeDto" Property="Name" Title="Name" />
+                    <RadzenDataGridColumn TItem="TraceNoteTypeDto" Property="Description" Title="Description" />
+                </Columns>
+            </RadzenDataGrid>
+        </AllItems>
+    </EntityList>
+</div>
+
+@code {
+
+    private List<TraceNoteTypeDto>? traceNoteTypes { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var result = await store.TraceNoteTypes.GetAllAsync();
+        if (result.IsValid)
+        {
+            traceNoteTypes = result.Entity;
+            selection = traceNoteTypes!.Where(x => selection.Any(s => s.TraceNoteTypeId == x.TraceNoteTypeId)).ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    async Task OnNew()
+    {
+        var res = await dialogService.OpenAsync<TraceNoteTypeNew>($"New trace note type",
+               new Dictionary<string, object?>() { },
+               KntDialogs.Framed(KntDialogs.Small()));
+
+        if (res != null)
+            await Load();
+    }
+
+    // The selected row: what the header's Edit and Delete act on.
+    private IList<TraceNoteTypeDto> selection = new List<TraceNoteTypeDto>();
+    private TraceNoteTypeDto? Selected => selection.FirstOrDefault();
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<TraceNoteTypeDto> args)
+    {
+        selection = [args.Data!];
+        KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!));
+    }
+
+    private List<KntAction> ActionsOf(TraceNoteTypeDto traceNoteType) =>
+    [
+        new("Edit", "edit", () => OnEdit(traceNoteType)),
+        new("Delete", "delete", () => OnDelete(traceNoteType), Danger: true)
+    ];
+
+    async Task OnEdit(TraceNoteTypeDto traceNoteType)
+    {
+        var res = await dialogService.OpenAsync<TraceNoteTypeEdit>($"Edit trace note type",
+               new Dictionary<string, object?>() { { "TypeId", traceNoteType.TraceNoteTypeId.ToString() } },
+               KntDialogs.Framed(KntDialogs.Small()));
+
+        if (res != null)
+            await Load();
+    }
+
+    async Task OnDelete(TraceNoteTypeDto item)
+    {
+        var resultDialog = await dialogService.Confirm(
+            $"Are you sure you want delete trace note type - {item.Name} -?",
+            "Delete trace note type",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (resultDialog == true)
+        {
+            // A type still used by trace notes is not deleted: the error is shown by
+            // BaseService.ProcessResultFromHttpResponse (AppState.NotifyError), not here.
+            var result = await store.TraceNoteTypes.DeleteAsync(item.TraceNoteTypeId);
+            if (result.IsValid)
+            {
+                traceNoteTypes = null;
+                await Load();
+            }
+        }
+    }
+
+}
