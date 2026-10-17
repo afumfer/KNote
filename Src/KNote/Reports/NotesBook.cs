@@ -7,18 +7,28 @@ namespace KNote.Reports;
 // Url is set instead for notes whose description is a web page. Both null when it has no description.
 public record BookChapter(int Number, string Title, string ContentHtml, string Url);
 
-// "Book" print of the management window's notes list: the notes in the order they are listed, one
-// chapter each (title = Topic, text = Description), after a cover and a table of contents with page
-// numbers. Sober, serif layout (Resources/KNoteBook.css); the page numbers of the contents are filled in
-// by the report preview once paginated (ReportDocument.ResolvePageReferences).
+// "Book" print of a notes list: the notes in the order they are listed, one chapter each (title = Topic,
+// text = Description), after a cover and a table of contents with page numbers. Sober, serif layout
+// (Resources/KNoteBook.css); the page numbers of the contents are filled in by ClientWin's report preview
+// once paginated (ReportDocument.ResolvePageReferences). A browser can't do that: the web app's book keeps
+// the contents' links, without page numbers.
 public static class NotesBook
 {
     public const string Title = "Notes book";
 
+    // A book of more notes than this loads and renders each one of them: the user is asked first.
+    public const int LargeBookNotes = 100;
+
+    public static bool IsLargeBook(int notesCount) => notesCount > LargeBookNotes;
+
+    public static string LargeBookWarning(int notesCount)
+        => $"The book will have {notesCount} notes (one chapter each). Generating it may take a long time.\r\n\r\nDo you want to continue?";
+
     public static string ChapterId(int number) => $"knt-ch-{number}";
 
     // Loads the listed notes, in order, as chapters. A note deleted meanwhile is left out.
-    public static async Task<List<BookChapter>> LoadChaptersAsync(IKntService service, IReportResources resources, IEnumerable<Guid> noteIds)
+    public static async Task<List<BookChapter>> LoadChaptersAsync(IKntService service, IReportResources resources, IEnumerable<Guid> noteIds,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(service);
         ArgumentNullException.ThrowIfNull(resources);
@@ -26,6 +36,8 @@ public static class NotesBook
         var chapters = new List<BookChapter>();
         foreach (var noteId in noteIds)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var note = (await service.Notes.GetAsync(noteId)).Entity;
             if (note == null)
                 continue;

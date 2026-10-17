@@ -134,6 +134,14 @@ public class NotesBookTests
         Assert.IsNull(chapters[0].ContentHtml);
         Assert.AreEqual("<p>text a</p>", chapters[1].ContentHtml);
     }
+
+    [TestMethod]
+    public void IsLargeBook_OnlyAboveOneHundredNotes()
+    {
+        Assert.IsFalse(NotesBook.IsLargeBook(100));
+        Assert.IsTrue(NotesBook.IsLargeBook(101));
+        StringAssert.Contains(NotesBook.LargeBookWarning(250), "250 notes");
+    }
 }
 
 [TestClass]

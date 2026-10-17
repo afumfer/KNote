@@ -87,13 +87,13 @@ Un repositorio es una base de datos de KaNote, SQLite o SQL Server. El menú **R
 
 ### Impresión y exportación (aplicación de escritorio)
 
-El menú **File** de la ventana de gestión tiene estas opciones, todas sobre la lista de notas tal como la ves: las notas de la carpeta seleccionada, o el resultado de una búsqueda o de un filtro, en el orden y con las columnas que se muestran en pantalla (incluidas la vista compacta y el filtro de la lista).
+El menú **File** de la ventana de gestión tiene estas opciones (las tres impresiones, agrupadas en su submenú **Print**), todas sobre la lista de notas tal como la ves: las notas de la carpeta seleccionada, o el resultado de una búsqueda o de un filtro, en el orden y con las columnas que se muestran en pantalla (incluidas la vista compacta y el filtro de la lista).
 
 | Opción | Resultado |
 |---|---|
-| **Print notes list ...** | La lista como una tabla, en horizontal, encabezada por la ruta de la carpeta o por un resumen de la búsqueda o el filtro. Todas las columnas visibles caben en el ancho de la página. El botón **Print** de la barra de herramientas hace lo mismo. |
-| **Print notes list as book ...** | Un libro: portada, índice con números de página y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. |
-| **Print selected note details ...** | Toda la información de la nota seleccionada, tal como está guardada: propiedades, descripción, atributos, recursos (con una miniatura de las imágenes), tareas y notas trazadas. No se imprimen ni el script de la nota ni sus alarmas. |
+| **Print > Notes list ...** | La lista como una tabla, en horizontal, encabezada por la ruta de la carpeta o por un resumen de la búsqueda o el filtro. Todas las columnas visibles caben en el ancho de la página. El botón **Print** de la barra de herramientas hace lo mismo. |
+| **Print > Notes list as book ...** | Un libro: portada, índice con números de página y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. Un libro de más de 100 notas puede tardar mucho en generarse, así que KaNote pregunta antes. |
+| **Print > Selected note details ...** | Toda la información de la nota seleccionada, tal como está guardada: propiedades, descripción, atributos, recursos (con una miniatura de las imágenes), tareas y notas trazadas. No se imprimen ni el script de la nota ni sus alarmas. |
 | **Export notes list to CSV ...** | El mismo contenido que la lista impresa, como fichero CSV. |
 
 El editor de notas tiene su propio botón **Print**, que imprime el detalle de la nota que se está editando tal como la ves. Si tiene cambios aún sin guardar, el informe lo indica.

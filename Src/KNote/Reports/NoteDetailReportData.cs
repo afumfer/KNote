@@ -71,9 +71,10 @@ public class NoteDetailReportData
     }
 
     // A note's description as printable HTML, with the same rules as ClientWin's note editor view of it
-    // (NoteEditorForm.ModelToControls): html is shown as is, "navigation" is either a web page (only its
-    // URL is returned, not rendered) or markdown, anything else is markdown. Both null when it is empty.
-    // Resource references point where the report loads them (IReportResources.MapResources).
+    // (NoteEditorForm.ModelToControls): html is made safe (UtilSanitizeHtml), "navigation" is either a web page
+    // (only its URL is returned, not rendered) or markdown, anything else is markdown (UtilMarkdownToHtml, also
+    // made safe). Both null when it is empty. Resource references point where the report loads them
+    // (IReportResources.MapResources).
     public static (string Html, string Url) RenderDescription(IKntService service, IReportResources resources, NoteInfoDto note)
     {
         var description = note?.Description;
@@ -84,7 +85,7 @@ public class NoteDetailReportData
         var url = contentType == "navigation" ? NoteDescriptions.ExtractUrl(description) : null;
 
         if (contentType == "html")
-            return (resources.MapResources(description), null);
+            return (service.Notes.UtilSanitizeHtml(resources.MapResources(description)), null);
         if (!string.IsNullOrEmpty(url))
             return (null, url);
         return (MarkdownToHtml(service, resources, description), null);

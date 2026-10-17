@@ -1677,6 +1677,11 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 return;
             }
 
+            if (NotesBook.IsLargeBook(snapshot.NoteIds.Count) &&
+                View.ShowInfo(NotesBook.LargeBookWarning(snapshot.NoteIds.Count), NotesBook.Title,
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                return;
+
             var serviceRef = SelectedServiceRef;
             var result = await ReportPreviewCtrl.ShowAsync(Store, serviceRef?.Service, async () =>
             {

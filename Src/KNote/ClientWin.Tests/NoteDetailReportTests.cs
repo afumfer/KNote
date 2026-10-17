@@ -178,6 +178,7 @@ public class NoteDetailReportDataTests
             Entity = id == rootId ? new FolderDto { Name = "Root" } : new FolderDto { Name = "Web", ParentId = rootId }
         });
         service.NotesFake.UtilMarkdownToHtmlImpl = md => $"<p>{md}</p>";
+        service.NotesFake.UtilSanitizeHtmlImpl = html => $"<!-- safe -->{html}";
         service.NotesFake.UtilGetResourceFilePathImpl = r => "";
         service.TraceNoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<TraceNoteTypeDto>> { Entity = new() });
 
@@ -208,7 +209,7 @@ public class NoteDetailReportDataTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_HtmlIsKeptAndWebPagesBecomeALink()
+    public async Task CreateAsync_HtmlIsSanitizedAndWebPagesBecomeALink()
     {
         var (_, serviceRef) = Setup();
 
@@ -216,7 +217,7 @@ public class NoteDetailReportDataTests
         var web = await CreateAsync(serviceRef, Note("https://example.org", "navigation"), false);
         var empty = await CreateAsync(serviceRef, Note("  "), false);
 
-        Assert.AreEqual("<b>x</b>", html.DescriptionHtml);
+        Assert.AreEqual("<!-- safe --><b>x</b>", html.DescriptionHtml, "Made safe, as the note editor shows it");
         Assert.AreEqual("https://example.org", web.DescriptionUrl);
         Assert.IsNull(web.DescriptionHtml);
         Assert.IsNull(empty.DescriptionHtml);

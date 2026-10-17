@@ -19,6 +19,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Func<NotesSearchDto, Task<Result<List<NoteMinimalDto>>>>? GetSearchMinimalAsyncImpl { get; set; }
     public Func<Task<Result<List<NoteMinimalDto>>>>? GetAllMinimalAsyncImpl { get; set; }
     public Func<string, string>? UtilMarkdownToHtmlImpl { get; set; }
+    public Func<string, string>? UtilSanitizeHtmlImpl { get; set; }
     public Func<ResourceDto, string>? UtilGetResourceFilePathImpl { get; set; }
     public Func<Guid, Task<Result<NoteDto>>>? GetByIdAsyncImpl { get; set; }
     public Func<int, Task<Result<NoteDto>>>? GetByNumberAsyncImpl { get; set; }
@@ -107,5 +108,6 @@ internal class FakeKntNoteService : IKntNoteService
     public string UtilHtmlToMarkdown(string html) => throw new NotSupportedException();
     public string UtilMarkdownToHtml(string markdown) =>
         (UtilMarkdownToHtmlImpl ?? throw new NotSupportedException($"{nameof(UtilMarkdownToHtml)} not configured for this test"))(markdown);
-    public string UtilSanitizeHtml(string html) => throw new NotSupportedException();
+    public string UtilSanitizeHtml(string html) =>
+        (UtilSanitizeHtmlImpl ?? throw new NotSupportedException($"{nameof(UtilSanitizeHtml)} not configured for this test"))(html);
 }

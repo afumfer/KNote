@@ -87,7 +87,7 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   │    └─ ClientWin                   (→ también KNote.Ai, KNote.Reports, HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
 
-Server → Client, Model, Service, KNote.Ai
+Server → Client, Model, Service, KNote.Ai, KNote.Reports
 KntEditViewControl → HtmlEditorControl, KntIcons
 HtmlEditorControl → KntIcons
 ```
@@ -221,7 +221,7 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
   `NoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
   proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatRoomController` (imágenes del chat
-  room), además del scaffold
+  room), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), además del scaffold
   `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Hubs/ChatHub.cs` — hub de SignalR del chat room, mapeado en `/chathub`: exige el JWT del usuario (Staff+),
