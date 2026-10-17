@@ -186,9 +186,11 @@ If the connection fails when the app starts, KaNote tells you without interrupti
 
 ### Chat room (web app)
 
-**Chat room** in the side menu (Staff role or higher) opens the chat room page: the conversation of the thread shown on the left, with its participants and who is online now, and the **Threads** list on the right, with the new messages of each one. Drag the bar between them to resize them (the browser remembers it). The header shows the connection's state, **Stop following** and **New thread**.
+**Chat room** in the side menu (Staff role or higher) opens the chat room page: the conversation of the thread shown on the left, with its participants and who is online now, and the **Threads** list on the right, with the new messages of each one. Drag the bar between them to resize them (the browser remembers it). The header shows the connection's state, **Stop following**, **New thread** and the button that opens the chat room in a new window.
 
 The web app connects to the chat room when you sign in and leaves it when you sign out, so while it is open you are told about the new messages of the threads you follow, even on other pages. Images are pasted into the message box or dropped on the conversation; clicking one opens it in a new tab.
+
+**In its own window.** The button that opens it in a new window moves the chat room, with the thread shown, to a window of its own, without the app's menus, so you can keep it next to your work; the main window goes back to Home. There is only one chat room window: opening it again brings it to the front. The main window keeps following your threads, so it still tells you about their new messages. If the browser blocks the window, allow pop-ups for the app's site.
 
 ### Home (web app)
 
@@ -210,7 +212,7 @@ The **Tree panel**, **Notes filter** and **Quick search** pages show their notes
 
 **Preview.** **Show preview** / **Hide preview**, in the **View options** menu, shows, at the right of the list, the note that is selected; it changes as you select another one, and shows the note's changes when it is saved in its window. The pane can be resized with the bar between it and the list. The choice applies to the three pages and the browser remembers it, as well as the sizes you give to the panes of each page.
 
-**Note windows.** Viewing, editing or creating a note (**New note**) opens it in a window of its own, without the app's menus, so you can keep it next to the list; new windows open in cascade from the main one. Each note has one view window and one edit window: opening it again brings that window to the front. Each **New note** opens a new window, in the folder selected in the tree panel; once saved, it is that note's edit window. When a note is saved in its edit window, the lists, Home and the note's view window show it changed. The exit button of the edit window closes it, asking first if there are unsaved changes (as does closing the window). If the browser blocks the window, allow pop-ups for the app's site.
+**Note windows.** Viewing, editing or creating a note (**New note**) opens it in a window of its own, without the app's menus, so you can keep it next to the list; new windows open in cascade from the main one. Each note has one view window and one edit window: opening it again brings that window to the front. Each **New note** opens a new window, in the folder selected in the tree panel; once saved, it is that note's edit window. When a note is saved in its edit window, the lists, Home and the note's view window show it changed. The exit button of the edit window closes it, asking first if there are unsaved changes (as does closing the window). If the browser blocks the window, allow pop-ups for the app's site. The chat room and the AI assistant can also be opened in a window of their own (see their sections).
 
 **Admin panel.** The lists of users, note types, trace note types and attributes work the same way: a click selects a row, the **Edit** and **Delete** buttons of the header act on it, a right click shows the same actions and a double click edits the item. Those lists sort by clicking their headers and scroll on their own. In **Folders management**, the header buttons edit or delete the selected folder; a right click on a folder shows the same actions and a double click edits it.
 
@@ -253,13 +255,15 @@ The palette button in the top bar of the web app opens the **Appearance** panel,
 
 ### AI Assistant (web app)
 
-**AI Assistant** in the side menu (Staff role or higher) opens the web version of the assistant. Its header shows the list of AI models (configured in the server, see below) and the **New conversation** button; the **Sessions** panel on the right lists your sessions, as in the desktop app (see *AI assistant sessions*), and the session you are in shows the tokens of its conversation. Drag the bar between the conversation and the question box to make the box taller or shorter.
+**AI Assistant** in the side menu (Staff role or higher) opens the web version of the assistant. Its header shows the list of AI models (configured in the server, see below), the **New conversation** button and the one that opens the assistant in a new window; the **Sessions** panel on the right lists your sessions, as in the desktop app (see *AI assistant sessions*), and the session you are in shows the tokens of its conversation. Drag the bar between the conversation and the question box to make the box taller or shorter.
 
 Write a question in the box at the bottom and click the send button (or press `Ctrl+Enter`). The answer appears as it is written; while it arrives you can stop it with the stop button, and then the question goes back to the box. An answer that fails or that you stop is not part of the conversation and is not saved.
 
 The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KaNote tells you, and the chat shows a link that opens it in its edit window.
 
 Changing the AI model of a conversation that has already started begins a new conversation (KaNote asks first). For your safety, any HTML that an answer contains is shown as text, never as part of the page.
+
+**In its own window.** The button that opens it in a new window moves the assistant, with the session you are in, to a window of its own, without the app's menus; the main window goes back to Home. It can't be used while an answer is arriving. There is only one assistant window: opening it again brings it to the front. Closing that window while an answer is arriving, or when the conversation could not be saved, asks first.
 
 ### AI providers of the web app (server configuration)
 

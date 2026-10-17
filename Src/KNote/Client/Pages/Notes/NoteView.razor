@@ -4,19 +4,19 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject TooltipService tooltipService
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-@* The window where a note is read (NoteWindows.OpenViewAsync), apart from the main window. It shows the note
+@* The window where a note is read (KntWindows.OpenViewAsync), apart from the main window. It shows the note
    again when it is saved in another window. *@
 
 <PageTitle>@(note?.Topic ?? KntConst.AppName)</PageTitle>
 
 <ToolingHeader Title="Note view" Icon="article">
     <Buttons>
-        <RadzenButton Icon="close" Click="noteWindows.CloseAsync" ButtonStyle="ButtonStyle.Secondary"
+        <RadzenButton Icon="close" Click="kntWindows.CloseAsync" ButtonStyle="ButtonStyle.Secondary"
                       MouseEnter="@(args => tooltipService.Open(args, "Close", new TooltipOptions { Position = TooltipPosition.Left }))" />
     </Buttons>
 </ToolingHeader>
@@ -43,13 +43,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        noteWindows.NoteSaved += OnNoteSaved;
+        kntWindows.NoteSaved += OnNoteSaved;
         await LoadNote();
     }
 
     public void Dispose()
     {
-        noteWindows.NoteSaved -= OnNoteSaved;
+        kntWindows.NoteSaved -= OnNoteSaved;
     }
 
     private async Task LoadNote()

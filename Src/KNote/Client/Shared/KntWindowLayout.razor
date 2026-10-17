@@ -3,11 +3,11 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject NotificationService notificationService
 
-@* Layout of the windows where a note is viewed or edited (AppStoreService/NoteWindows): the page alone, without
-   the app's header, side menu and footer, so there is nowhere else to go from it. *@
+@* Layout of the windows of the app (AppStoreService/KntWindows: a note viewed or edited, the AI assistant, the chat
+   room): the page alone, without the app's header, side menu and footer, so there is nowhere else to go from it. *@
 
 <RadzenComponents />
 
@@ -24,7 +24,7 @@
         store.AppState.OnNotifyError += NotifyError;
         store.AppState.OnNotifySuccess += NotifySuccess;
 
-        await noteWindows.StartAsync();
+        await kntWindows.StartAsync();
     }
 
     public void Dispose()

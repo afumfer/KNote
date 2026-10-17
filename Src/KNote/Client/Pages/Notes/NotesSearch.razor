@@ -4,7 +4,7 @@
 @implements IDisposable
 
 @inject IStore store
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject IJSRuntime js
@@ -80,12 +80,12 @@
         if (appState.NotesSearchPosition?.ListKey != textSearch)
             appState.NotesSearchPosition = new NotesListPosition { ListKey = textSearch };
 
-        noteWindows.NoteSaved += OnNoteSaved;
+        kntWindows.NoteSaved += OnNoteSaved;
     }
 
     public void Dispose()
     {
-        noteWindows.NoteSaved -= OnNoteSaved;
+        kntWindows.NoteSaved -= OnNoteSaved;
     }
 
     private void OnSearch()
@@ -120,11 +120,11 @@
         TextSearch = SearchedText()
     };
 
-    Task OnNew() => noteWindows.OpenNewAsync();
+    Task OnNew() => kntWindows.OpenNewAsync();
 
-    private Task OnView(NoteMinimalDto note) => noteWindows.OpenViewAsync(note.NoteId);
+    private Task OnView(NoteMinimalDto note) => kntWindows.OpenViewAsync(note.NoteId);
 
-    private Task OnEdit(NoteMinimalDto note) => noteWindows.OpenEditAsync(note.NoteId);
+    private Task OnEdit(NoteMinimalDto note) => kntWindows.OpenEditAsync(note.NoteId);
 
     // A note saved in its window: the list shows it changed (or moved, or gone from it).
     private void OnNoteSaved(Guid noteId)

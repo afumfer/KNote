@@ -2,7 +2,7 @@
 @inject NotificationService notificationService
 @inject DialogService dialogService
 @inject TooltipService tooltipService
-@inject NoteWindows noteWindows
+@inject KntWindows kntWindows
 
 <EditForm Model="Note" Context="formContext">
 
@@ -621,7 +621,7 @@
 
     // The other note of the relation, in its own window (as ClientWin opens it in its note editor). Nothing is awaited
     // before it: the browser only opens a window right after a click or a key.
-    private Task OnOpenTraceNote(TraceNoteInfoDto traceNote) => noteWindows.OpenEditAsync(traceNote.RelatedNoteId);
+    private Task OnOpenTraceNote(TraceNoteInfoDto traceNote) => kntWindows.OpenEditAsync(traceNote.RelatedNoteId);
 
     #endregion
 

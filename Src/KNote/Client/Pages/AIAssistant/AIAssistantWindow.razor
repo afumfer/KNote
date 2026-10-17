@@ -1,0 +1,15 @@
+@page "/aiassistant/window"
+@layout KntWindowLayout
+
+@attribute [Authorize(Roles = "Staff, ProjectManager, Admin")]
+
+@* The AI assistant in a window of its own (KntWindows.OpenAiAssistantAsync), apart from the main window, resuming the
+   session of the query string. *@
+
+<PageTitle>@KntSections.AiAssistant.Text - @KntConst.AppName</PageTitle>
+
+<AIAssistant InWindow="true" SessionId="SessionId" />
+
+@code {
+    [SupplyParameterFromQuery] public Guid? SessionId { get; set; }
+}

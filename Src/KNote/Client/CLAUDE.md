@@ -53,7 +53,7 @@ Client/
 │     IStore.cs, Store.cs   – estado global + acceso a los servicios Web API + el chat room (ChatRoomHub)
 │     AppState.cs           – estado de la app (usuario, carpeta seleccionada, árbol de carpetas) y eventos
 │     ChatRoomHub.cs        – conexión SignalR del chat room, hilos seguidos y sus mensajes, no leídos
-│     NoteWindows.cs        – ventanas de vista/edición de notas y aviso entre ventanas de las notas guardadas
+│     KntWindows.cs         – ventanas de la app (notas, asistente de IA, chat room) y aviso entre ventanas de las notas guardadas
 │     ClientDataServices/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
@@ -91,7 +91,7 @@ validación que ambas UIs usan directamente:
 
 - `IsDirty()`/`SetIsDirty(...)`, `IsNew()`/`SetIsNew(...)` (recorren también los hijos). Patrón habitual:
   tras cargar o guardar, `SetIsDirty(false)`; antes de guardar, `if (!dto.IsDirty()) return;`; y al salir se
-  pide confirmación si `IsDirty()` (en una ventana de nota, con `NoteWindows.WatchUnsavedChangesAsync`, ver
+  pide confirmación si `IsDirty()` (en una ventana de nota, con `KntWindows.WatchUnsavedChangesAsync`, ver
   `NoteEdit.razor`).
 - Validación: DataAnnotations en las propiedades + `Validate(...)`/`IsValid()`/`GetErrorMessage()` de
   `ModelBase`. Los formularios usan `<DataAnnotationsValidator />`, así que las reglas viven en el DTO, no en
@@ -112,7 +112,8 @@ Cómo está integrada:
 - `<RadzenComponents />` en `Shared/MainLayout.razor` (anfitrión de diálogos, notificaciones, menús
   contextuales y tooltips). Sin él los servicios anteriores no muestran nada.
 - Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`. Las
-  ventanas de nota usan `Shared/KntWindowLayout` (solo `RadzenBody`, con su propio `<RadzenComponents />`).
+  ventanas de la app (notas, asistente de IA, chat room) usan `Shared/KntWindowLayout` (solo `RadzenBody`, con su
+  propio `<RadzenComponents />`).
 - Tema: `<RadzenTheme Theme="@KntThemes.Default" />` en el `<HeadContent>` de `App.razor` (no un `<link>` fijo
   en `index.html`), seguido de `css/knt-theme.css`. El usuario elige tema (los 5 gratuitos de Radzen,
   `Shared/KntThemes`), modo claro/oscuro y alto contraste (WCAG) en el panel `Shared/KntThemeSelector` (botón
@@ -196,7 +197,7 @@ Patrones ya establecidos que hay que seguir:
   seleccionada, la vista previa y la vista compacta o extendida; agrupadas para dejar sitio en la barra a otros
   casos de uso) (`NotesGrid.Current`, `CurrentChanged`,
   `ViewCurrentAsync`/`EditCurrentAsync`/`DeleteCurrentAsync`). Ver y editar abren la nota en su ventana (ver
-  "Ventanas de nota"). **Vista previa**: `NotesPreviewToggle` (opción de "View options", `AppState.NotesPreviewVisible`
+  "Ventanas de la app"). **Vista previa**: `NotesPreviewToggle` (opción de "View options", `AppState.NotesPreviewVisible`
   + `localStorage`, común a las tres páginas) muestra a la derecha de la lista `NotePreviewPane`, que carga la nota
   seleccionada cuando la selección se para 250 ms (con las flechas no carga cada nota del camino) y la recarga si
   se guarda en su ventana. Su `RadzenSplitterPane` está siempre, con el tamaño de todos los paneles fijado desde el
@@ -289,7 +290,7 @@ Patrones ya establecidos que hay que seguir:
   nota). La otra nota se elige con `Shared/KntNotePicker` → `Shared/KntNoteSelector` (diálogo `Large`: búsqueda de
   texto o árbol de carpetas, un `RadzenDataGrid` paginado en el servidor con `LoadData`, no `NotesGrid`, cuya
   virtualización no va bien en un diálogo; `ExcludedNoteIds` atenúa las notas que no se pueden elegir) y se abre en
-  su ventana de edición (`NoteWindows.OpenEditAsync`, sin esperas delante). Los tipos se mantienen en la pestaña
+  su ventana de edición (`KntWindows.OpenEditAsync`, sin esperas delante). Los tipos se mantienen en la pestaña
   "Trace note types" de `Admin` (`Pages/TraceNoteTypes`, como `Types`; `IStore.TraceNoteTypes`); su icono,
   `KntSections.TraceNoteTypes`, es también el de la pestaña del editor.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
@@ -315,23 +316,31 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Rutas relativas**: la app se sirve bajo `/KNote/` (`<base href="/KNote/" />` en `index.html`, a juego con
   `app.UsePathBase("/KNote")` en `Server`). Navega con rutas sin `/` inicial (`store.NavigateTo("notes/tree")`,
   `Path="index"`), o se saldrá de la base.
-- **Ventanas de nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`), editarla
+- **Ventanas de la app** (`AppStoreService/KntWindows`). **De nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`), editarla
   (`notes/edit/{id}`, `NoteEdit`) y crearla (`notes/new?folderId=...`, la misma `NoteEdit`) se hace en una
-  ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/NoteWindows`
+  ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/KntWindows`
   (`OpenViewAsync`/`OpenEditAsync`/`OpenNewAsync`, `wwwroot/js/kntWindows.js`): una por nota y uso, que se trae al
   frente si ya está abierta (sin recargarla ni moverla: no pierde una edición en curso); las nuevas se abren en
   cascada desde la ventana que las abre (`openWindow`, dentro de la pantalla). Cada "New note" abre una ventana
   nueva, en la carpeta de `AppState.SelectedFolder`; al guardarla por primera vez pasa a ser la ventana de edición
   de esa nota (`BecomeEditWindowAsync`: cambia su nombre y su URL). El navegador
   solo deja abrirla justo tras un clic o una tecla: no pongas otra espera delante (el script se carga de antemano
-  en `NoteWindows.StartAsync`, que llaman los dos layouts); si la bloquea, se avisa. Cada ventana es otra
+  en `KntWindows.StartAsync`, que llaman los dos layouts); si la bloquea, se avisa. Cada ventana es otra
   instancia de la app (su propio `AppState`; la sesión sí se comparte, el JWT está en `localStorage`). Al guardar,
   `NoteEdit` avisa a las demás ventanas (`NotifyNoteSavedAsync`, `BroadcastChannel`) y quien muestre notas se
-  suscribe a `NoteWindows.NoteSaved` para refrescarse (las listas, Home, `NoteView`). La salida de `NoteEdit`
+  suscribe a `KntWindows.NoteSaved` para refrescarse (las listas, Home, `NoteView`). La salida de `NoteEdit`
   cierra la ventana (`CloseAsync`; si no la abrió un script, va a Home) y cerrarla con cambios sin guardar
   pregunta (`WatchUnsavedChangesAsync`, `beforeunload`), sin `NavigationLock`, que preguntaría siempre.
+  **De caso de uso**: el asistente de IA y el chat room también se abren en su ventana (`OpenAiAssistantAsync`,
+  `OpenChatRoomAsync`), con el botón `open_in_new` ("Open in a new window") de su cabecera. Hay una de cada una (se
+  trae al frente si ya está abierta) y la ventana principal vuelve a Home al abrirla: el caso de uso "se traslada", lo
+  que evita dos instancias escribiendo la misma sesión de IA. La página de la ventana (`AIAssistantWindow`,
+  `ChatRoomWindow`) es una página fina con `KntWindowLayout` que dibuja la página de siempre con `InWindow="true"`
+  (sin el botón, con la altura de una ventana sin cabecera ni pie) y lo que se le pase en la URL: la sesión o el hilo
+  mostrados (`AppState` no llega a la otra instancia). Un componente enrutable usado así no aplica su `[Authorize]`:
+  la página de la ventana lleva el suyo.
 - Estado compartido entre páginas en `store.AppState` (p. ej. `SelectedFolder`, la carpeta de una nota nueva,
-  que `NoteWindows.OpenNewAsync` pasa en la URL: `AppState` no llega a las ventanas de nota, que son otra
+  que `KntWindows.OpenNewAsync` pasa en la URL: `AppState` no llega a las ventanas de nota, que son otra
   instancia de la app). Un componente que se suscriba a `AppState.OnChange` implementa `IDisposable` y se
   desuscribe en `Dispose()`.
 - `Nullable` está activado en este proyecto: `[Parameter] [EditorRequired] public NoteDto Note { get; set; }
@@ -378,7 +387,11 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   `ChatRoom.razor.css`. Tras cada mensaje nuevo baja al final (`ScrollToBottom` en `OnAfterRenderAsync`) y otra vez
   al cargarse sus imágenes (`js/chatRoom.js`). Las imágenes se pegan o se sueltan (`js/chatRoom.js` →
   `[JSInvokable] OnImage`), se suben con `ChatRoomHub.SendImageAsync` (REST, `ChatRoomHubContract.ImagesPath`) y se
-  envían como un mensaje con su Markdown.
+  envían como un mensaje con su Markdown. **En su ventana** (`ChatRoomWindow`, `chat/window?threadId=`, ver "Ventanas
+  de la app"): `KntWindowLayout` no conecta el hub (las ventanas de nota no lo usan), así que lo conecta la propia
+  página antes de dibujar `ChatRoom` (`ChatRoomHub.StartForUserAsync`, la misma comprobación de rol que `MainLayout`)
+  y lo desconecta al cerrarse. Cada ventana tiene su conexión: la principal sigue siguiendo los hilos y avisando de
+  sus mensajes, y `Server` cuenta una sola vez a un usuario conectado varias veces.
 - **Asistente de IA** (`Pages/AIAssistant`, ruta `aiassistant`, Staff+): `AIAssistant` es el caso de uso y
   `AiChatView`/`AiSessionsList` la presentación. La conversación y la caja de la pregunta van en un `RadzenSplitter`
   vertical (el panel de la pregunta empieza con la altura que tenía la caja, `Rows="3"`, y no se recuerda; el del chat lleva
@@ -394,7 +407,11 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   Cambiar de proveedor empieza una conversación nueva; al retomar una sesión se usa su proveedor y modelo
   (`AiProviderSelection.ForSession`, en `Model`) o, si ya no están configurados, el predefinido. Las notas que
   crea la tool `create_task` se enlazan en el chat (se abren en su ventana de edición) mientras la página está
-  abierta.
+  abierta. **En su ventana** (`AIAssistantWindow`, `aiassistant/window?sessionId=`, ver "Ventanas de la app") retoma
+  la sesión de la URL (`OpenSession`). El botón que la abre está desactivado mientras responde o queda un guardado
+  pendiente, para que la sesión que se pasa sea la guardada. En la ventana no hay `NavigationLock` que valga para
+  salir: cerrarla mientras responde o sin haber podido guardar pregunta (`WatchUnsavedChangesAsync`,
+  `HasUnsavedChanges`).
 - **Markdown**: las descripciones de nota se editan con `Shared/KntMarkdownEditor` y se muestran con
   `Shared/ViewMarkdown` (Markdig). `KntMarkdownEditor` es el `RadzenMarkdownEditor` en modo `Source` (el Markdown,
   con su barra; la barra se le da explícita, sin `RadzenMarkdownEditorSource`) más una vista "Preview"
