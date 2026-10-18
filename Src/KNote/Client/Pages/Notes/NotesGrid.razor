@@ -3,6 +3,7 @@
 @inject TooltipService tooltipService
 @inject ContextMenuService contextMenuService
 @inject IJSRuntime js
+@inject IStore store
 
 @*
     Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
@@ -65,8 +66,9 @@
 </div>
 
 @code {
-    // Loads a page of the list in an order (null: the list's own order).
-    [Parameter][EditorRequired] public Func<PageIdentifier, NotesOrder?, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
+    // Loads a page of the list in an order (null: the list's own order); cancelled when its rows are no longer wanted
+    // (the list loaded again or sorted, or left).
+    [Parameter][EditorRequired] public Func<PageIdentifier, NotesOrder?, CancellationToken, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
     [Parameter] public NotesListPosition? Position { get; set; }
     // Compact view: number, topic, priority and tags (NotesListViewToggle).
     [Parameter] public bool Compact { get; set; } = true;
@@ -125,6 +127,8 @@
     // aria-rowindex can't be trusted, it goes wrong when the grid is drawn again by its parent).
     private readonly Dictionary<Guid, int> noteIndexes = new();
     private int dataVersion;
+    // The requests of the blocks of this dataVersion: cancelled with it (their rows would be ignored anyway).
+    private CancellationTokenSource blocksCancellation = new();
     private NotesOrder? order;
     private NotesOrder? initialOrder;
     private NotesOrder? gridSort;
@@ -169,7 +173,9 @@
         if (firstRender)
         {
             dotNetRef = DotNetObjectReference.Create(this);
-            keyboardHelper = await (await GetModuleAsync()).InvokeAsync<IJSObjectReference>("initialize", host, dotNetRef);
+            // Without its script (the server not reachable, already notified) the list still shows its notes.
+            if (await GetModuleAsync() is { } gridModule)
+                keyboardHelper = await gridModule.InvokeAsync<IJSObjectReference>("initialize", host, dotNetRef);
 
             // A new list has no selected note yet: the page updates its header buttons (it may have shown those of
             // the previous list).
@@ -181,7 +187,8 @@
         if (restoreScroll && notes != null && count > 0)
         {
             restoreScroll = false;
-            await (await GetModuleAsync()).InvokeVoidAsync("restoreScrollTop", host, Position!.ScrollTop);
+            if (await GetModuleAsync() is { } gridModule)
+                await gridModule.InvokeVoidAsync("restoreScrollTop", host, Position!.ScrollTop);
         }
     }
 
@@ -199,9 +206,7 @@
     /// window).</summary>
     public async Task RefreshAsync()
     {
-        blocks.Clear();
-        noteIndexes.Clear();
-        dataVersion++;
+        NewDataVersion();
 
         if (grid != null)
         {
@@ -263,9 +268,19 @@
         return blockTask;
     }
 
+    // The notes loaded are no longer valid (reloaded, or another order): the blocks still being read are cancelled.
+    private void NewDataVersion()
+    {
+        blocks.Clear();
+        noteIndexes.Clear();
+        dataVersion++;
+        blocksCancellation.Cancel();
+        blocksCancellation = new CancellationTokenSource();
+    }
+
     private async Task<List<NoteMinimalDto>?> FetchBlockAsync(int block, int version)
     {
-        var result = await LoadPage(new PageIdentifier { PageNumber = block + 1, PageSize = FetchSize }, order);
+        var result = await LoadPage(new PageIdentifier { PageNumber = block + 1, PageSize = FetchSize }, order, blocksCancellation.Token);
         if (version != dataVersion)
             return null;
 
@@ -290,10 +305,9 @@
         if (Position != null)
             Position.Order = newOrder;
 
-        blocks.Clear();
-        noteIndexes.Clear();
-        dataVersion++;
-        await (await GetModuleAsync()).InvokeVoidAsync("setScrollTop", host, 0);
+        NewDataVersion();
+        if (await GetModuleAsync() is { } gridModule)
+            await gridModule.InvokeVoidAsync("setScrollTop", host, 0);
         await OrderChanged.InvokeAsync(newOrder);
     }
 
@@ -377,7 +391,9 @@
 
         if (args == null)
         {
-            var anchor = await (await GetModuleAsync()).InvokeAsync<Point?>("getActionsAnchor", host, note.NoteId);
+            var anchor = await GetModuleAsync() is { } gridModule
+                ? await gridModule.InvokeAsync<Point?>("getActionsAnchor", host, note.NoteId)
+                : null;
             args = new MouseEventArgs { ClientX = anchor?.X ?? 0, ClientY = anchor?.Y ?? 0 };
         }
 
@@ -391,13 +407,14 @@
         _ => OnNoteDelete.InvokeAsync(note)
     };
 
-    private async Task<IJSObjectReference> GetModuleAsync() =>
-        module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/notesGrid.js");
+    private async Task<IJSObjectReference?> GetModuleAsync() =>
+        module ??= await js.ImportModuleAsync("./js/notesGrid.js", store.AppState);
 
     private record Point(double X, double Y);
 
     public async ValueTask DisposeAsync()
     {
+        blocksCancellation.Cancel();
         if (keyboardHelper != null)
         {
             // The page is left (or the list replaced by another one): Position remembers where the list was

@@ -6,7 +6,7 @@
 
 <div class="knt-list-header">
     <span>@Resources.Count @(Resources.Count == 1 ? "resource" : "resources")</span>
-    <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+    <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
 </div>
 
 @if (Resources.Count == 0)
@@ -45,13 +45,13 @@ else
                 </div>
                 <div class="knt-resource-actions">
                     <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
-                                  Click="@(() => OnEdit.InvokeAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
+                                  Click="@(() => OnEdit.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
                     <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OpenAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Open in a new tab"))" />
                     <RadzenButton Icon="add_link" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OnInsertInDesription.InvokeAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Insert in the description"))" />
                     <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                  Click="@(() => OnDelete.InvokeAsync(resource))" MouseEnter="@(args => tooltipService.Open(args, "Delete resource"))" />
+                                  Click="@(() => OnDelete.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Delete resource"))" />
                 </div>
             </div>
         }
@@ -64,6 +64,8 @@ else
     [Parameter] public EventCallback<ResourceInfoDto> OnDelete { get; set; }
     [Parameter] public EventCallback<ResourceInfoDto> OnInsertInDesription { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
+    // A change being saved (NoteForm): adding, editing and deleting wait for it.
+    [Parameter] public bool Busy { get; set; }
 
     [Inject] private IJSRuntime js { get; set; } = null!;
 

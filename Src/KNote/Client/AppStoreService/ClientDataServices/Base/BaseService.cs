@@ -15,7 +15,39 @@ public class BaseService
         _appState = appState;
     }
 
-    protected async Task<Result<T>> ProcessResultFromHttpResponse<T>(HttpResponseMessage httpRes, string action, bool emitNotifySucess = false)
+    /// <summary>
+    /// Sends a request (send) and reads its Result&lt;T&gt; (see ProcessResultFromHttpResponse). Never throws for the
+    /// request itself:
+    /// - no answer from the server (no network, the server down, its timeout): a Result with the error, notified as
+    ///   the others;
+    /// - cancelled with cancellationToken (by its caller, who no longer wants it: another one replaced it, the
+    ///   component was left): a Result not valid, but not notified, as it isn't an error for the user. The caller
+    ///   tells it apart with its own token (KntLatestRequest does it).
+    /// </summary>
+    protected async Task<Result<T>> SendAsync<T>(Func<CancellationToken, Task<HttpResponseMessage>> send, string action,
+        bool emitNotifySucess = false, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var httpRes = await send(cancellationToken);
+            return await ProcessResultFromHttpResponse<T>(httpRes, action, emitNotifySucess, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return CancelledResult<T>();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException)
+        {
+            // OperationCanceledException not asked for: HttpClient's timeout.
+            var res = new Result<T>();
+            res.AddErrorMessage($"Error. The web server could not be reached: {ex.Message}");
+            _appState.NotifyError(action, res.ErrorMessage);
+            return res;
+        }
+    }
+
+    protected async Task<Result<T>> ProcessResultFromHttpResponse<T>(HttpResponseMessage httpRes, string action, bool emitNotifySucess = false,
+        CancellationToken cancellationToken = default)
     {
         Result<T>? res;
 
@@ -28,7 +60,11 @@ public class BaseService
         // parseable body (a raw framework/network failure, or a 401/403 with no JSON at all).
         try
         {
-            res = await httpRes.Content.ReadFromJsonAsync<Result<T>>();
+            res = await httpRes.Content.ReadFromJsonAsync<Result<T>>(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch
         {
@@ -48,16 +84,24 @@ public class BaseService
         }
         else
             _appState.NotifyError(action, res.ErrorMessage);
-        
+
         return res;
     }
 
     protected async Task<Result<T>?> GetResultFromHttpResponse<T>(HttpResponseMessage httpRes, bool throwsEx = true)
-    {                
+    {
         if(throwsEx)
-            httpRes.EnsureSuccessStatusCode();  
+            httpRes.EnsureSuccessStatusCode();
 
-        return await httpRes.Content.ReadFromJsonAsync<Result<T>>();        
+        return await httpRes.Content.ReadFromJsonAsync<Result<T>>();
+    }
+
+    // Not valid (its data must not be used), with no notification.
+    private static Result<T> CancelledResult<T>()
+    {
+        var res = new Result<T>();
+        res.AddErrorMessage("The request was cancelled.");
+        return res;
     }
 
 }

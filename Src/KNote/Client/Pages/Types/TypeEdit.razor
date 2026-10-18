@@ -1,5 +1,7 @@
 ﻿@page "/types/edit/{TypeId}"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 
@@ -10,7 +12,7 @@
 
 @if (noteType != null)
 {
-    <TypeForm Title="Edit note type" OnValidSubmit="OnSave" OnExit="OnExit" NoteType="noteType" />
+    <TypeForm Title="Edit note type" OnValidSubmit="OnSave" OnExit="OnExit" Saving="saving.IsBusy" NoteType="noteType" />
 }
 else
 {
@@ -18,6 +20,11 @@ else
 }
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
     [Parameter] public string TypeId { get; set; } = string.Empty;
 
     private NoteTypeDto? noteType;
@@ -31,13 +38,13 @@ else
         if (!parseOk)
         {            
             await dialogService.Alert("Invalid note type identifier.");
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
         var result = await store.NoteTypes.GetAsync(id);
         if (!result.IsValid)                    
-            dialogService.Close(null);
+            CloseDialog(null);
         else
         {            
             noteType = result.Entity;
@@ -45,11 +52,13 @@ else
         }
     }
 
-    private async Task OnSave()
+    private Task OnSave() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         if (!noteType!.IsDirty())
         {
-            dialogService.Close(noteType);
+            CloseDialog(noteType);
         }
         else
         {
@@ -58,7 +67,7 @@ else
                 var result = await store.NoteTypes.SaveAsync(noteType);
                 if (result.IsValid)                                    
                 {                    
-                    dialogService.Close(result.Entity);
+                    CloseDialog(result.Entity);
                 }
             }
         }
@@ -66,9 +75,12 @@ else
 
     private async Task OnExit()
     {        
+        if (saving.IsBusy)
+            return;
+
         if (noteType == null)
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -81,12 +93,20 @@ else
 
             if (resultDialog == true)
             {
-                dialogService.Close(null);
+                CloseDialog(null);
             }
         }
         else
         {
-            dialogService.Close(null);
+            CloseDialog(null);
         }
+    }
+
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
     }
 }

@@ -4,6 +4,8 @@
 @inject TooltipService tooltipService
 @inject KntWindows kntWindows
 
+@implements IDisposable
+
 <EditForm Model="Note" Context="formContext">
 
     <DataAnnotationsValidator></DataAnnotationsValidator>
@@ -32,9 +34,11 @@
             </div>
         </div>
         <div class="knt-note-header-actions">
-            <RadzenButton Text="Save and new" Icon="library_add" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Base" />
-            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Click="() => OnExit.InvokeAsync(null)"
+            <RadzenButton Text="Save and new" Icon="library_add" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Base"
+                          IsBusy="@(Saving && savingAndNew)" Disabled="@Saving" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary"
+                          IsBusy="@(Saving && !savingAndNew)" Disabled="@Saving" />
+            <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Click="() => OnExit.InvokeAsync(null)" Disabled="@Saving"
                           MouseEnter="@(args => tooltipService.Open(args, "Close", new TooltipOptions { Position = TooltipPosition.Left }))" />
         </div>
     </div>
@@ -138,11 +142,11 @@
                     }
                     else
                     {
-                        <NoteKResources Resources="resources ?? new()"
-                                        OnEdit="OnEditResource"
-                                        OnDelete="OnDeleteResource"
+                        <NoteKResources Resources="resources ?? new()" Busy="tabsSaving.IsBusy"
+                                        OnEdit="r => tabsSaving.RunAsync(() => OnEditResource(r))"
+                                        OnDelete="r => tabsSaving.RunAsync(() => OnDeleteResource(r))"
                                         OnInsertInDesription="InsertInDescription"
-                                        OnNew="OnNewResource">
+                                        OnNew="() => tabsSaving.RunAsync(OnNewResource)">
                         </NoteKResources>
                     }
                 </ChildContent>
@@ -163,10 +167,10 @@
                     }
                     else
                     {
-                        <NoteKTasks Tasks="tasks ?? new()"
-                                    OnDelete="OnDeleteTask"
-                                    OnNew="OnNewTask"
-                                    OnEdit="OnEditTask">
+                        <NoteKTasks Tasks="tasks ?? new()" Busy="tabsSaving.IsBusy"
+                                    OnDelete="t => tabsSaving.RunAsync(() => OnDeleteTask(t))"
+                                    OnNew="() => tabsSaving.RunAsync(OnNewTask)"
+                                    OnEdit="t => tabsSaving.RunAsync(() => OnEditTask(t))">
                         </NoteKTasks>
                     }
                 </ChildContent>
@@ -187,10 +191,10 @@
                     }
                     else
                     {
-                        <NoteTraceNotes TraceNotes="traceNotes ?? new()"
-                                        OnNew="OnNewTraceNote"
-                                        OnEdit="OnEditTraceNote"
-                                        OnDelete="OnDeleteTraceNote"
+                        <NoteTraceNotes TraceNotes="traceNotes ?? new()" Busy="tabsSaving.IsBusy"
+                                        OnNew="outgoing => tabsSaving.RunAsync(() => OnNewTraceNote(outgoing))"
+                                        OnEdit="t => tabsSaving.RunAsync(() => OnEditTraceNote(t))"
+                                        OnDelete="t => tabsSaving.RunAsync(() => OnDeleteTraceNote(t))"
                                         OnOpenNote="OnOpenTraceNote">
                         </NoteTraceNotes>
                     }
@@ -211,6 +215,14 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
+    // Being saved (NoteEdit): the buttons wait for it.
+    [Parameter] public bool Saving { get; set; }
+
+    // The button that saved: the one that shows it is busy.
+    private bool savingAndNew;
+    // One change at a time in the tabs (a resource, a task or a trace note added, edited or deleted): a double click
+    // saves or deletes once.
+    private readonly KntSingleFlight tabsSaving = new();
 
     private List<ResourceInfoDto>? resources;
     private List<NoteTaskDto>? tasks;
@@ -221,6 +233,13 @@
     private List<TraceNoteTypeDto>? traceNoteTypes;
 
     private Guid? oldNoteType = null;
+
+    // The window is closed (or the form replaced): what is still being read is no longer needed.
+    private readonly CancellationTokenSource disposal = new();
+    // The path of the folder chosen last, and the attributes of the type chosen last: choosing again meanwhile cancels
+    // the one being read (its answer would be out of date).
+    private readonly KntLatestRequest folderPathRequest = new();
+    private readonly KntLatestRequest noteTypeAttributesRequest = new();
 
     // The note's content (its description) is locked: shown, not edited (ContentType's DescriptionBlocked, saved with
     // the note).
@@ -243,13 +262,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await webApiService.Users.GetAllAsync();
+        var result = await webApiService.Users.GetAllAsync(cancellationToken: disposal.Token);
         if (result.IsValid)
         {
             users = result.Entity;
         }
 
         await base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        folderPathRequest.Dispose();
+        noteTypeAttributesRequest.Dispose();
     }
 
     // A note shown for the first time, or another one (after "Save and new"): its folder's path, and its resources,
@@ -277,28 +303,35 @@
         if (Note.FolderId == Guid.Empty)
             return;
 
-        var result = await webApiService.Folders.GetPathAsync(Note.FolderId);
-        folderPath = result.IsValid ? result.Entity : Note.FolderDto?.Name ?? "";
+        var folderId = Note.FolderId;
+        var result = await folderPathRequest.RunAsync(ct => webApiService.Folders.GetPathAsync(folderId, ct));
+        if (result.Canceled)
+            return;
+        folderPath = result.Value.IsValid ? result.Value.Entity : Note.FolderDto?.Name ?? "";
     }
 
+    // The tabs of the note asked for: another note shown meanwhile (after "Save and new") doesn't get them.
     private async Task LoadResourcesAsync()
     {
-        var result = await webApiService.Notes.GetResourcesAsync(Note.NoteId);
-        if (result.IsValid)
+        var noteId = Note.NoteId;
+        var result = await webApiService.Notes.GetResourcesAsync(noteId, disposal.Token);
+        if (result.IsValid && noteId == Note.NoteId)
             resources = result.Entity;
     }
 
     private async Task LoadTasksAsync()
     {
-        var result = await webApiService.Notes.GetNoteTasksAsync(Note.NoteId);
-        if (result.IsValid)
+        var noteId = Note.NoteId;
+        var result = await webApiService.Notes.GetNoteTasksAsync(noteId, disposal.Token);
+        if (result.IsValid && noteId == Note.NoteId)
             tasks = result.Entity;
     }
 
     private async Task LoadTraceNotesAsync()
     {
-        var result = await webApiService.Notes.GetTraceNotesAsync(Note.NoteId);
-        if (result.IsValid)
+        var noteId = Note.NoteId;
+        var result = await webApiService.Notes.GetTraceNotesAsync(noteId, disposal.Token);
+        if (result.IsValid && noteId == Note.NoteId)
             traceNotes = result.Entity;
     }
 
@@ -308,6 +341,9 @@
 
     protected async Task Save(EditContext formContext, bool saveAndNew)
     {
+        if (Saving)
+            return;
+
         string addMessage = "";
 
         bool formIsValid = formContext.Validate();
@@ -360,6 +396,7 @@
 
         var xx = Note.KAttributesDto;
 
+        savingAndNew = saveAndNew;
         if (saveAndNew)
             await OnValidSubmitWithNew.InvokeAsync(formContext);
         else
@@ -582,7 +619,9 @@
     {
         if (traceNoteTypes == null)
         {
-            var resTypes = await webApiService.TraceNoteTypes.GetAllAsync();
+            var resTypes = await webApiService.TraceNoteTypes.GetAllAsync(disposal.Token);
+            if (disposal.IsCancellationRequested)
+                return;
             traceNoteTypes = resTypes.IsValid ? resTypes.Entity.OrderBy(t => t.Name).ToList() : new();
         }
 
@@ -633,6 +672,8 @@
 
         if (Note.NoteTypeId == null)
         {
+            // The attributes of a type chosen before are no longer wanted.
+            noteTypeAttributesRequest.Cancel();
             Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
 
             oldNoteType = null;
@@ -641,37 +682,49 @@
         }
 
         if (Note.NoteTypeId == oldNoteType)
+        {
+            noteTypeAttributesRequest.Cancel();
+            return;
+        }
+
+        // Read apart and then put in the note at once: the attributes of two types chosen one after the other don't
+        // get mixed (the first one's are cancelled).
+        var noteTypeId = Note.NoteTypeId;
+        var result = await noteTypeAttributesRequest.RunAsync(ct => LoadNoteTypeAttributesAsync(noteTypeId, ct));
+        if (result.Canceled || result.Value == null)
             return;
 
-        var result = await webApiService.KAttributes.GetAllAsync(Note.NoteTypeId);
-        if (result.IsValid)
+        Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
+        Note.KAttributesDto.AddRange(result.Value);
+
+        if (NoteTypes != null)
         {
-            var listA = result.Entity;
-
-            Note.KAttributesDto.RemoveAll(_ => _.KAttributeNoteTypeId != null);
-
-            foreach (var a in listA)
-            {
-                var newA = a.GetSimpleDto<NoteKAttributeDto>();
-                newA.NoteId = Note.NoteId;
-                newA.KAttributeNoteTypeId = Note.NoteTypeId;
-                Note.KAttributesDto.Add(newA);
-            }
-
-            foreach (var a in Note.KAttributesDto)
-            {
-                if (a.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
-                    a.TabulatedValues = await NoteKAttributes.GetTabulatedValues(webApiService, a.KAttributeId);
-                if (a.KAttributeDataType == EnumKAttributeDataType.TagsValue)
-                    a.TagsValues = await NoteKAttributes.GetTagsValues(webApiService, a.KAttributeId, "");
-            }
-
-            if (NoteTypes != null)
-            {
-                Note.NoteTypeDto = NoteTypes.Where(_ => _.NoteTypeId == Note.NoteTypeId).FirstOrDefault();
-                oldNoteType = Note.NoteTypeId;                
-            }
+            Note.NoteTypeDto = NoteTypes.Where(_ => _.NoteTypeId == noteTypeId).FirstOrDefault();
+            oldNoteType = noteTypeId;
         }
+    }
+
+    // The attributes of a note type, for this note, with the values to choose from. Null if they couldn't be read
+    // (already notified).
+    private async Task<List<NoteKAttributeDto>?> LoadNoteTypeAttributesAsync(Guid? noteTypeId, CancellationToken cancellationToken)
+    {
+        var result = await webApiService.KAttributes.GetAllAsync(noteTypeId, cancellationToken);
+        if (!result.IsValid)
+            return null;
+
+        var attributes = new List<NoteKAttributeDto>();
+        foreach (var a in result.Entity)
+        {
+            var newA = a.GetSimpleDto<NoteKAttributeDto>();
+            newA.NoteId = Note.NoteId;
+            newA.KAttributeNoteTypeId = noteTypeId;
+            if (newA.KAttributeDataType == EnumKAttributeDataType.TabulatedValue)
+                newA.TabulatedValues = await NoteKAttributes.GetTabulatedValues(webApiService, newA.KAttributeId, cancellationToken);
+            if (newA.KAttributeDataType == EnumKAttributeDataType.TagsValue)
+                newA.TagsValues = await NoteKAttributes.GetTagsValues(webApiService, newA.KAttributeId, "", cancellationToken);
+            attributes.Add(newA);
+        }
+        return attributes;
     }
 
     #endregion

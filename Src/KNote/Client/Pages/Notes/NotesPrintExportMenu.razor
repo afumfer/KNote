@@ -17,7 +17,7 @@
         <RadzenMenuItem Text="Print list ..." Icon="table_rows" Click="PrintListAsync" />
         <RadzenMenuItem Text="Print as book ..." Icon="menu_book" Click="PrintBookAsync" />
         <RadzenMenuItem Text="Print note details ..." Icon="description" Disabled="@(Grid?.Current == null)" Click="PrintNoteAsync" />
-        <RadzenMenuItem Text="Export to CSV ..." Icon="download" Click="ExportCsvAsync" />
+        <RadzenMenuItem Text="Export to CSV ..." Icon="download" Click="ExportCsv" />
     </RadzenMenuItem>
 </AuthorizeView>
 
@@ -73,25 +73,23 @@
             _ => store.Reports.GetNoteDetailAsync(note.NoteId));
     }
 
+    // One export at a time: a click repeated downloads the file once.
+    private readonly KntSingleFlight exporting = new();
+
+    private Task ExportCsv() => exporting.RunAsync(ExportCsvAsync);
+
     private async Task ExportCsvAsync()
     {
         if (!HasNotes("export"))
             return;
 
-        Result<ReportFileDto> result;
-        try
-        {
-            result = await store.Reports.GetNotesListCsvAsync(BuildRequest());
-        }
-        catch (HttpRequestException ex)
-        {
-            store.AppState.NotifyError("Export to CSV", $"The notes list could not be exported: {ex.Message}");
-            return;
-        }
+        var result = await store.Reports.GetNotesListCsvAsync(BuildRequest());
         if (!result.IsValid || result.Entity == null)
             return;     // already notified
 
-        module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/kntReports.js");
+        module ??= await js.ImportModuleAsync("./js/kntReports.js", store.AppState);
+        if (module == null)
+            return;     // already notified
         await module.InvokeVoidAsync("downloadFile", result.Entity.FileName, result.Entity.ContentType, result.Entity.Content);
 
         var notesCount = Grid!.TotalCount;

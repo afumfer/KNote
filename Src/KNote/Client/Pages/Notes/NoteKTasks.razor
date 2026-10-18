@@ -7,7 +7,7 @@
 
 <div class="knt-list-header">
     <span>@Tasks.Count @(Tasks.Count == 1 ? "task" : "tasks")@(Tasks.Count > 0 ? $" · {Tasks.Count(t => t.Resolved)} resolved" : "")</span>
-    <RadzenButton Text="Add task" Icon="add_task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+    <RadzenButton Text="Add task" Icon="add_task" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
 </div>
 
 @if (Tasks.Count == 0)
@@ -58,9 +58,9 @@ else
                             </span>
                         </div>
                         <div class="knt-task-view-actions">
-                            <RadzenButton Icon="edit" Text="Edit" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="@(() => OnEdit.InvokeAsync(task))" />
+                            <RadzenButton Icon="edit" Text="Edit" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="@(() => OnEdit.InvokeAsync(task))" Disabled="@Busy" />
                             <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                          Click="@(() => OnDelete.InvokeAsync(task))" MouseEnter="@(args => tooltipService.Open(args, "Delete task"))" />
+                                          Click="@(() => OnDelete.InvokeAsync(task))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Delete task"))" />
                         </div>
                     </div>
                     <dl class="knt-task-facts">
@@ -102,6 +102,8 @@ else
     [Parameter] public EventCallback<NoteTaskDto> OnDelete { get; set; }
     [Parameter] public EventCallback<NoteTaskDto> OnEdit { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
+    // A change being saved (NoteForm): adding, editing and deleting wait for it.
+    [Parameter] public bool Busy { get; set; }
     // Height of the list and the task beside it.
     [Parameter] public string Height { get; set; } = "max(22rem, calc(100vh - 19rem))";
 

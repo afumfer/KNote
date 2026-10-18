@@ -65,15 +65,25 @@
         await LoadNotes();
     }
 
+    // Leaving Home: what is being read is no longer needed.
+    private readonly CancellationTokenSource disposal = new();
+    // The notes of the folder chosen last: choosing another one (or a note saved) meanwhile cancels the ones being read.
+    private readonly KntLatestRequest notesRequest = new();
+
     public void Dispose()
     {
         store.AppState.OnChange -= StateHasChanged;
         kntWindows.NoteSaved -= OnNoteSaved;
+        disposal.Cancel();
+        notesRequest.Dispose();
     }
 
     private async Task LoadFolders()
     {
-        var result = await store.Folders.GetHomeChildrenAsync();
+        var result = await store.Folders.GetHomeChildrenAsync(disposal.Token);
+        // Left: the folder shown is kept for the next time.
+        if (disposal.IsCancellationRequested)
+            return;
         folders = result.IsValid ? result.Entity : null;
 
         // The folder shown last time may have been deleted or moved meanwhile.
@@ -85,14 +95,14 @@
     {
         var folderId = selectedFolderId;
         notes = null;
-        var result = await store.Notes.GetHomeNotesAsync(folderId);
+        var request = await notesRequest.RunAsync(ct => store.Notes.GetHomeNotesAsync(folderId, ct));
 
         // Another folder was chosen while these notes were read: its own notes are on their way.
-        if (folderId != selectedFolderId)
+        if (request.Canceled)
             return;
 
-        if (result.IsValid)
-            notes = result.Entity;
+        if (request.Value.IsValid)
+            notes = request.Value.Entity;
     }
 
     private async Task SelectFolderAsync(Guid? folderId)
@@ -114,7 +124,12 @@
         _ = InvokeAsync(async () => { await LoadNotes(); StateHasChanged(); });
     }
 
-    async Task OnNoteDelete(NoteInfoDto item)
+    // One delete at a time: a click or the Delete key repeated asks and deletes once.
+    private readonly KntSingleFlight deleting = new();
+
+    Task OnNoteDelete(NoteInfoDto item) => deleting.RunAsync(() => DeleteAsync(item));
+
+    async Task DeleteAsync(NoteInfoDto item)
     {
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?",

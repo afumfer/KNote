@@ -1,5 +1,7 @@
 ﻿@page "/attributes/edit/{AttributeId}"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 
@@ -10,7 +12,7 @@
 
 @if (kattribute != null && showForm)
 {
-    <AttributeForm OnValidSubmit="OnSave" OnExit="OnExit" KAttribute="kattribute" NoteTypes="noteTypes" />
+    <AttributeForm OnValidSubmit="OnSave" OnExit="OnExit" Saving="saving.IsBusy" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {
@@ -18,6 +20,11 @@ else
 }
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
     [Parameter] public string AttributeId { get; set; } = string.Empty;
 
     private KAttributeDto? kattribute;
@@ -33,14 +40,15 @@ else
         if (!parseOk)
         {
             await dialogService.Alert("Invalid attribute identifier.");
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
         var result = await store.KAttributes.GetAsync(id);
         if (!result.IsValid)
         {            
-            dialogService.Close(null);
+            CloseDialog(null);
+            return;
         }
         else
         {
@@ -51,7 +59,7 @@ else
         var result2 = await store.NoteTypes.GetAllAsync();
         if (!result2.IsValid)
         {                        
-            dialogService.Close(null);
+            CloseDialog(null);
         }
         else
         {
@@ -60,12 +68,14 @@ else
         }        
     }
 
-    private async Task OnSave()
+    private Task OnSave() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
 
         if (!kattribute!.IsDirty())
         {            
-            dialogService.Close(kattribute);
+            CloseDialog(kattribute);
         }
         else
         {
@@ -74,7 +84,7 @@ else
                 var result = await store.KAttributes.SaveAsync(kattribute);
                 if (result.IsValid)                                    
                 {                    
-                    dialogService.Close(result.Entity);
+                    CloseDialog(result.Entity);
                 }
             }
         }
@@ -82,9 +92,12 @@ else
 
     private async Task OnExit()
     {
+        if (saving.IsBusy)
+            return;
+
         if (kattribute == null)
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -97,13 +110,20 @@ else
 
             if (resultDialog == true)
             {
-                dialogService.Close(null);
+                CloseDialog(null);
             }
         }
         else
         {
-            dialogService.Close(null);
+            CloseDialog(null);
         }
     }
 
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
 }

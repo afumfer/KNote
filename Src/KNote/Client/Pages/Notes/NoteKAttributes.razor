@@ -1,5 +1,7 @@
 ﻿@inject IStore store
 
+@implements IDisposable
+
 
 @* The note's attributes (those of its type and the general ones): a field for each, with its label above, a mark
    if it is required and its description as help. *@
@@ -69,6 +71,12 @@ else
 @code {
     [Parameter] public List<NoteKAttributeDto> Attributes { get; set; }
 
+    // Another tab shown (RadzenTabs only renders the selected one) or the window closed: the values being read are no
+    // longer needed.
+    private readonly CancellationTokenSource disposal = new();
+
+    public void Dispose() => disposal.Cancel();
+
     protected override async Task OnInitializedAsync()
     {
         foreach (var KAttribute in Attributes)
@@ -102,11 +110,11 @@ else
                         KAttribute.ValueBool = valB;
                     break;
                 case EnumKAttributeDataType.TabulatedValue:
-                    KAttribute.TabulatedValues = await GetTabulatedValues(store, KAttribute.KAttributeId);
+                    KAttribute.TabulatedValues = await GetTabulatedValues(store, KAttribute.KAttributeId, disposal.Token);
                     KAttribute.ValueTabulate = KAttribute.Value;
                     break;
                 case EnumKAttributeDataType.TagsValue:
-                    KAttribute.TagsValues = await GetTagsValues(store, KAttribute.KAttributeId, KAttribute.Value);
+                    KAttribute.TagsValues = await GetTagsValues(store, KAttribute.KAttributeId, KAttribute.Value, disposal.Token);
                     KAttribute.ValueTags = KAttribute.Value;
                     break;
                 default:
@@ -120,20 +128,22 @@ else
     // Static so NoteForm can load the values of a new note type's attributes even when this component
     // doesn't exist (RadzenTabs only renders the selected tab). A failed call is already notified by
     // BaseService (AppState.NotifyError).
-    public static async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(IStore store, Guid idAttribute)
+    public static async Task<List<KAttributeTabulatedValueDto>> GetTabulatedValues(IStore store, Guid idAttribute,
+        CancellationToken cancellationToken = default)
     {
-        var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+        var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute, cancellationToken);
         if (!result.IsValid)
             return new List<KAttributeTabulatedValueDto>();
         else
             return result.Entity.ToList();
     }
 
-    public static async Task<List<MultiSelectListDto>> GetTagsValues(IStore store, Guid idAttribute, string tags)
+    public static async Task<List<MultiSelectListDto>> GetTagsValues(IStore store, Guid idAttribute, string tags,
+        CancellationToken cancellationToken = default)
     {
         List<MultiSelectListDto> tagsSel;
 
-        var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute);
+        var result = await store.KAttributes.GetKAttributeTabulatedValuesAsync(idAttribute, cancellationToken);
         if (!result.IsValid)
         {
             tagsSel = new List<MultiSelectListDto>();

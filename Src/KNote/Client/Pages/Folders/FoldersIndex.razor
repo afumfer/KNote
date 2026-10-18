@@ -14,7 +14,7 @@
         <RadzenMenu>
             <RadzenMenuItem Text="New folder ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit folder ..." Icon="edit" Disabled="@(selectedFolder == null)" Click="@(() => OnEdit(selectedFolder!))"></RadzenMenuItem>
-            <RadzenMenuItem Text="Delete folder ..." Icon="delete" Disabled="@(selectedFolder == null)" Click="@(() => OnDelete(selectedFolder!))"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete folder ..." Icon="delete" Disabled="@(selectedFolder == null || deleting.IsBusy)" Click="@(() => OnDelete(selectedFolder!))"></RadzenMenuItem>
             <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="OnRefreshTree" ></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
@@ -49,16 +49,24 @@
         await Load();
     }
 
+    // The tree asked for last: reading it again (after a change) or leaving the page cancels the one being read.
+    private readonly KntLatestRequest treeRequest = new();
+
     public void Dispose()
     {
         appState.OnChange -= StateHasChanged;
+        treeRequest.Dispose();
     }
 
     async Task Load()
     {
         selectedFolder = null;
 
-        var result = await store.Folders.GetTreeAsync();
+        var request = await treeRequest.RunAsync(ct => store.Folders.GetTreeAsync(ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
             foldersTree = result.Entity;
         else
@@ -117,7 +125,12 @@
     }
 
 
-    async Task OnDelete(FolderDto folder)
+    // One delete at a time: a click or the Delete key repeated asks and deletes once.
+    private readonly KntSingleFlight deleting = new();
+
+    Task OnDelete(FolderDto folder) => deleting.RunAsync(() => DeleteAsync(folder));
+
+    async Task DeleteAsync(FolderDto folder)
     {
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete folder - {@folder.Name})?", 

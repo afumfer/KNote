@@ -196,10 +196,19 @@ public class ChatRoomHub : IAsyncDisposable
 
     #region Threads and messages
 
-    /// <summary>Shows the thread (following it, with its messages, if it wasn't). False if it can't be read.</summary>
+    // The thread chosen last: the answer for a thread chosen before, if slower, doesn't take its place.
+    private int _selection;
+    // The threads being followed (their Subscribe on its way): a thread chosen twice meanwhile is followed once.
+    private readonly Dictionary<Guid, Task<bool>> _following = new();
+
+    /// <summary>Shows the thread (following it, with its messages, if it wasn't). False if it can't be read, or if
+    /// another thread was chosen meanwhile (that one is shown; this one stays followed).</summary>
     public async Task<bool> SelectThreadAsync(Guid threadId)
     {
-        if (!_followed.ContainsKey(threadId) && !await FollowAsync(threadId))
+        var selection = ++_selection;
+        if (!_followed.ContainsKey(threadId) && !await FollowOnceAsync(threadId))
+            return false;
+        if (selection != _selection)
             return false;
 
         CurrentThreadId = threadId;
@@ -305,6 +314,24 @@ public class ChatRoomHub : IAsyncDisposable
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    private async Task<bool> FollowOnceAsync(Guid threadId)
+    {
+        if (!_following.TryGetValue(threadId, out var following))
+        {
+            following = FollowAsync(threadId);
+            _following[threadId] = following;
+        }
+
+        try
+        {
+            return await following;
+        }
+        finally
+        {
+            _following.Remove(threadId);
         }
     }
 

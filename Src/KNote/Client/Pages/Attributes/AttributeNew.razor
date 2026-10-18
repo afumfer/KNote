@@ -1,5 +1,7 @@
 ﻿@page "/attributes/new"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 
@@ -10,7 +12,7 @@
 
 @if (showForm)
 {
-    <AttributeForm OnValidSubmit="OnNew" OnExit="OnExit" KAttribute="kattribute" NoteTypes="noteTypes" />
+    <AttributeForm OnValidSubmit="OnNew" OnExit="OnExit" Saving="saving.IsBusy" KAttribute="kattribute" NoteTypes="noteTypes" />
 }
 else
 {
@@ -18,6 +20,11 @@ else
 }
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
     private KAttributeDto kattribute = new KAttributeDto();
     private bool showForm = false;
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
@@ -36,23 +43,28 @@ else
         base.OnInitialized();
     }
 
-    private async Task OnNew()
+    private Task OnNew() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         if (kattribute.IsValid())
         {
             var result = await store.KAttributes.SaveAsync(kattribute);
             if (result.IsValid)
             {
-                dialogService.Close(result.Entity);
+                CloseDialog(result.Entity);
             }
         }
     }
 
     private async Task OnExit()
     {
+        if (saving.IsBusy)
+            return;
+
         if (kattribute == null)
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -65,12 +77,20 @@ else
 
             if (resultDialog == true)
             {
-                dialogService.Close(null);
+                CloseDialog(null);
             }
         }
         else
         {
-            dialogService.Close(null);
+            CloseDialog(null);
         }
+    }
+
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
     }
 }

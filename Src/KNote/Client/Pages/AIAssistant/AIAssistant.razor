@@ -349,8 +349,22 @@
             sessions = res.Entity ?? new();
     }
 
+    // The save running, if any.
+    private Task<bool>? savingSession;
+
     // Saved after each answer; again before leaving the session when that failed. False if it could not be saved.
+    // Once at a time: who asks meanwhile (e.g. leaving the page while it is saved after an answer) waits for that save.
     private async Task<bool> SaveSessionAsync()
+    {
+        savingSession ??= SaveSessionOnceAsync();
+        var saving = savingSession;
+        var saved = await saving;
+        if (savingSession == saving)
+            savingSession = null;
+        return saved;
+    }
+
+    private async Task<bool> SaveSessionOnceAsync()
     {
         if (!pendingSave || session.Turns.Count == 0)
             return true;

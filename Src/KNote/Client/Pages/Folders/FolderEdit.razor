@@ -11,7 +11,7 @@
 
 @if (folder != null)
 {
-    <FolderForm Title="Edit folder" OnValidSubmit="OnSave" OnExit="OnExit" Folder="folder" />
+    <FolderForm Title="Edit folder" OnValidSubmit="OnSave" OnExit="OnExit" Saving="saving.IsBusy" Folder="folder" />
 }
 else
 {
@@ -19,6 +19,10 @@ else
 }
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
 
     [Parameter] public string FolderId { get; set; } = string.Empty;
 
@@ -35,13 +39,13 @@ else
         if (!parseOk)
         {
             await dialogService.Alert("Invalid folder identifier.");
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
         var result = await store.Folders.GetAsync(id);
         if (!result.IsValid)                    
-            dialogService.Close(null);
+            CloseDialog(null);
         else
         {            
             folder = result.Entity;
@@ -51,14 +55,17 @@ else
 
     public void Dispose()
     {
+        closed = true;
         store.AppState.OnChange -= StateHasChanged;
     }
 
-    private async Task OnSave()
+    private Task OnSave() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         if (!folder!.IsDirty())
         {
-            dialogService.Close(folder);
+            CloseDialog(folder);
         }
         else
         {
@@ -81,16 +88,19 @@ else
                         store.AppState.FoldersTree = null;
                     }
                 }            
-                dialogService.Close(result.Entity);
+                CloseDialog(result.Entity);
             }            
         }
     }
 
     private async Task OnExit()
     {        
+        if (saving.IsBusy)
+            return;
+
         if (folder == null)
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -103,13 +113,18 @@ else
 
             if (resultDialog == true)
             {
-                dialogService.Close(null);
+                CloseDialog(null);
             }
         }
         else
         {
-            dialogService.Close(null);
+            CloseDialog(null);
         }
     }
 
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
 }

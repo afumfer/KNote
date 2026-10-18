@@ -16,7 +16,7 @@
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
-            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
             <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
             <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" ListName="@($"Search: {SearchedText()}")" />
         </RadzenMenu>
@@ -101,13 +101,13 @@
             OnSearch();
     }
 
-    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order, CancellationToken cancellationToken)
     {
         var search = appState.NotesSearchPosition?.ListKey ?? "";
         var queryString = $"textSearch={Uri.EscapeDataString(search)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}";
         if (order != null)
             queryString += $"&orderColumn={order.Column}&orderAscending={order.Ascending}";
-        return await store.Notes.GetSearch(queryString);
+        return await store.Notes.GetSearch(queryString, cancellationToken);
     }
 
     // The text of the search shown in the list (the box may have been changed without searching it).
@@ -132,7 +132,12 @@
         _ = InvokeAsync(() => notesGrid?.RefreshAsync() ?? Task.CompletedTask);
     }
 
-    async Task OnDelete(NoteMinimalDto item)
+    // One delete at a time: a click or the Delete key repeated asks and deletes once.
+    private readonly KntSingleFlight deleting = new();
+
+    Task OnDelete(NoteMinimalDto item) => deleting.RunAsync(() => DeleteAsync(item));
+
+    async Task DeleteAsync(NoteMinimalDto item)
     {
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete note - {@item.Topic} - ({@item.NoteNumber})?",

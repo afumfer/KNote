@@ -159,8 +159,10 @@
         if (firstRender)
         {
             selfReference = DotNetObjectReference.Create(this);
-            imagesModule = await js.InvokeAsync<IJSObjectReference>("import", "./js/chatRoom.js");
-            images = await imagesModule.InvokeAsync<IJSObjectReference>("init", conversationElement, selfReference, KntConst.MaxLenResourceFile);
+            // Without its script (the server not reachable, already notified) images can't be pasted or dropped.
+            imagesModule = await js.ImportModuleAsync("./js/chatRoom.js", store.AppState);
+            if (imagesModule != null)
+                images = await imagesModule.InvokeAsync<IJSObjectReference>("init", conversationElement, selfReference, KntConst.MaxLenResourceFile);
         }
 
         var shown = thread;

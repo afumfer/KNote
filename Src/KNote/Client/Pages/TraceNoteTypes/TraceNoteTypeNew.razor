@@ -1,5 +1,7 @@
 @page "/tracenotetypes/new"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 
@@ -8,26 +10,36 @@
 
 <NavigationLock ConfirmExternalNavigation=true />
 
-<TraceNoteTypeForm Title="New trace note type" OnValidSubmit="OnNew" OnExit="OnExit" TraceNoteType="traceNoteType" />
+<TraceNoteTypeForm Title="New trace note type" OnValidSubmit="OnNew" OnExit="OnExit" Saving="saving.IsBusy" TraceNoteType="traceNoteType" />
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
     TraceNoteTypeDto traceNoteType = new TraceNoteTypeDto();
 
-    private async Task OnNew()
+    private Task OnNew() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         if (traceNoteType.IsValid())
         {
             var result = await store.TraceNoteTypes.SaveAsync(traceNoteType);
             if (result.IsValid)
-                dialogService.Close(result.Entity);
+                CloseDialog(result.Entity);
         }
     }
 
     private async Task OnExit()
     {
+        if (saving.IsBusy)
+            return;
+
         if (!traceNoteType.IsDirty())
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -37,6 +49,14 @@
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
-            dialogService.Close(null);
+            CloseDialog(null);
+    }
+
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
     }
 }

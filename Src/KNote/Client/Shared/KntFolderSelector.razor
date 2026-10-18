@@ -24,6 +24,8 @@
     private List<FolderDto> foldersTree;
     private FolderDto folderSelected;
     private AppState appState;
+    // Closed before the tree is read: it is no longer needed.
+    private readonly CancellationTokenSource disposal = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -33,7 +35,9 @@
         {
             if (appState.FoldersTree == null)
             {
-                var res = await store.Folders.GetTreeAsync();
+                var res = await store.Folders.GetTreeAsync(disposal.Token);
+                if (disposal.IsCancellationRequested)
+                    return;
                 foldersTree = res.Entity;
                 appState.FoldersTree = foldersTree;
 
@@ -54,6 +58,8 @@
 
     public void Dispose()
     {
+        closed = true;
+        disposal.Cancel();
         appState.OnChange -= StateHasChanged;
     }
 
@@ -65,11 +71,23 @@
     void OnConfirm()
     {
         if (folderSelected != null)
-            dialogService.Close(folderSelected);
+            CloseDialog(folderSelected);
     }
 
     void OnCancel()
     {
-        dialogService.Close(null);
+        CloseDialog(null);
+    }
+
+    // Closed once: it is opened from another dialog, and a second Close (a click repeated, or after Esc) would close
+    // that one (Radzen closes the dialog on top).
+    private bool closed;
+
+    private void CloseDialog(object? result)
+    {
+        if (closed)
+            return;
+        closed = true;
+        dialogService.Close(result);
     }
 }

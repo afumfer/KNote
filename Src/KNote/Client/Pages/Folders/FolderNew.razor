@@ -10,9 +10,13 @@
 
 <NavigationLock ConfirmExternalNavigation=true />
 
-<FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Folder="folder" />
+<FolderForm Title="New folder" OnValidSubmit="OnNew" OnExit="OnExit" Saving="saving.IsBusy" Folder="folder" />
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
 
     private FolderDto folder = new FolderDto();
     private AppState appState = null!;
@@ -42,10 +46,13 @@
 
     public void Dispose()
     {
+        closed = true;
         appState.OnChange -= StateHasChanged;
     }
 
-    private async Task OnNew()
+    private Task OnNew() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         var result = await store.Folders.SaveAsync(folder);
         if (result.IsValid)
@@ -86,15 +93,18 @@
                     }                                            
                 }
             }            
-            dialogService.Close(result.Entity);
+            CloseDialog(result.Entity);
         }
     }
 
     private async Task OnExit()
     {
+        if (saving.IsBusy)
+            return;
+
         if (folder == null)
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -107,13 +117,18 @@
 
             if (resultDialog == true)
             {
-                dialogService.Close(null);
+                CloseDialog(null);
             }
         }
         else
         {
-            dialogService.Close(null);
+            CloseDialog(null);
         }
     }
 
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
 }

@@ -7,6 +7,7 @@
 @inject ContextMenuService contextMenuService
 @inject TooltipService tooltipService
 @inject IJSRuntime js
+@inject IStore store
 
 <span @ref="anchor" class="knt-actions-menu" @onclick:stopPropagation="true" @ondblclick:stopPropagation="true">
     <RadzenButton Icon="more_vert" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="@Size" TabIndex="@TabIndex"
@@ -47,11 +48,12 @@
     {
         tooltipService.Close();
 
-        // Pressed with the keyboard: the click has no position.
+        // Pressed with the keyboard: the click has no position (without the script, the server not reachable, the
+        // menu goes to a corner).
         if (args.Detail == 0)
         {
-            module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/kntElements.js");
-            var point = await module.InvokeAsync<Point>("bottomLeft", anchor);
+            module ??= await js.ImportModuleAsync("./js/kntElements.js", store.AppState);
+            var point = module != null ? await module.InvokeAsync<Point>("bottomLeft", anchor) : new Point(0, 0);
             args = new MouseEventArgs { ClientX = point.X, ClientY = point.Y };
         }
 

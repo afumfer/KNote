@@ -1,3 +1,4 @@
+using KNote.Client.Helpers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -9,6 +10,8 @@ namespace KNote.Client.AppStoreService;
 ///   (a new note gets a new window, which becomes the note's edit window once saved);
 /// - the AI assistant (aiassistant/window) and the chat room (chat/window): one for each.
 /// The windows of the app tell each other when a note is saved (NoteSaved), so that the lists show it changed.
+/// Without its script (js/kntWindows.js, not loaded when the server can't be reached: already notified) the windows
+/// aren't opened, and this window goes on as it can (closing it goes to Home).
 /// </summary>
 public class KntWindows : IAsyncDisposable
 {
@@ -34,7 +37,7 @@ public class KntWindows : IAsyncDisposable
     public async Task StartAsync()
     {
         var module = await GetModuleAsync();
-        if (_listener != null)
+        if (module == null || _listener != null)
             return;
 
         _dotNetRef = DotNetObjectReference.Create(this);
@@ -65,22 +68,33 @@ public class KntWindows : IAsyncDisposable
 
     /// <summary>A new note was saved in this window: it becomes the note's edit window (OpenEditAsync brings it to the
     /// front, and reloading it loads the note).</summary>
-    public async Task BecomeEditWindowAsync(Guid noteId) =>
-        await (await GetModuleAsync()).InvokeVoidAsync("renameWindow", EditWindowName(noteId),
-            _navigationManager.ToAbsoluteUri(EditPath(noteId)).ToString());
+    public async Task BecomeEditWindowAsync(Guid noteId)
+    {
+        if (await GetModuleAsync() is { } module)
+            await module.InvokeVoidAsync("renameWindow", EditWindowName(noteId),
+                _navigationManager.ToAbsoluteUri(EditPath(noteId)).ToString());
+    }
 
     /// <summary>Closes this window (or, if the browser doesn't let it, goes to Home).</summary>
-    public async Task CloseAsync() =>
-        await (await GetModuleAsync()).InvokeVoidAsync("closeWindow", _navigationManager.ToAbsoluteUri("index").ToString());
+    public async Task CloseAsync()
+    {
+        if (await GetModuleAsync() is { } module)
+            await module.InvokeVoidAsync("closeWindow", _navigationManager.ToAbsoluteUri("index").ToString());
+        else
+            _navigationManager.NavigateTo("index");
+    }
 
     /// <summary>Asks before the window is closed while the page's HasUnsavedChanges() says so. Dispose the
-    /// result (InvokeVoidAsync("dispose")) when the page is disposed.</summary>
-    public async Task<IJSObjectReference> WatchUnsavedChangesAsync<TPage>(DotNetObjectReference<TPage> page) where TPage : class =>
-        await (await GetModuleAsync()).InvokeAsync<IJSObjectReference>("watchUnsavedChanges", page);
+    /// result (InvokeVoidAsync("dispose")) when the page is disposed. Null without the script.</summary>
+    public async Task<IJSObjectReference?> WatchUnsavedChangesAsync<TPage>(DotNetObjectReference<TPage> page) where TPage : class =>
+        await GetModuleAsync() is { } module ? await module.InvokeAsync<IJSObjectReference>("watchUnsavedChanges", page) : null;
 
     /// <summary>Tells the other windows of the app that a note was saved.</summary>
-    public async Task NotifyNoteSavedAsync(Guid noteId) =>
-        await (await GetModuleAsync()).InvokeVoidAsync("notifyNoteSaved", noteId.ToString());
+    public async Task NotifyNoteSavedAsync(Guid noteId)
+    {
+        if (await GetModuleAsync() is { } module)
+            await module.InvokeVoidAsync("notifyNoteSaved", noteId.ToString());
+    }
 
     [JSInvokable]
     public void OnNoteSaved(string noteId)
@@ -99,15 +113,19 @@ public class KntWindows : IAsyncDisposable
     // title: what the window shows, for the notice when the browser blocks it.
     private async Task<bool> OpenAsync(string path, string name, int width, int height, string title = "Note")
     {
+        var module = await GetModuleAsync();
+        if (module == null)
+            return false;
+
         var url = _navigationManager.ToAbsoluteUri(path).ToString();
-        var opened = await (await GetModuleAsync()).InvokeAsync<bool>("openWindow", url, name, width, height);
+        var opened = await module.InvokeAsync<bool>("openWindow", url, name, width, height);
         if (!opened)
             _store.AppState.NotifyError($"{title} window", "The browser blocked the window: allow pop-ups for this site.");
         return opened;
     }
 
-    private async Task<IJSObjectReference> GetModuleAsync() =>
-        _module ??= await _js.InvokeAsync<IJSObjectReference>("import", "./js/kntWindows.js");
+    private async Task<IJSObjectReference?> GetModuleAsync() =>
+        _module ??= await _js.ImportModuleAsync("./js/kntWindows.js", _store.AppState);
 
     public async ValueTask DisposeAsync()
     {

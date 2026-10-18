@@ -1,5 +1,7 @@
 ﻿@page "/users/new"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 
@@ -7,28 +9,38 @@
 
 <NavigationLock ConfirmExternalNavigation=true />
 
-<UserForm Title="New user" OnValidSubmit="OnNew" OnExit="OnExit" User="user"></UserForm>
+<UserForm Title="New user" OnValidSubmit="OnNew" OnExit="OnExit" Saving="saving.IsBusy" User="user"></UserForm>
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
     private UserDto user = new UserDto();
 
-    private async Task OnNew()
+    private Task OnNew() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         if (user.IsValid())
         {
             var result = await store.Users.SaveAsync(user);
             if (result.IsValid)                            
             {                
-                dialogService.Close(result.Entity);
+                CloseDialog(result.Entity);
             }
         }
     }
 
     private async Task OnExit()
     {                
+        if (saving.IsBusy)
+            return;
+
         if (user == null)
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -41,13 +53,20 @@
 
             if (resultDialog == true)
             {
-                dialogService.Close(null);
+                CloseDialog(null);
             }
         }
         else
         {
-            dialogService.Close(null);
+            CloseDialog(null);
         }
     }
 
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
 }

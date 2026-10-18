@@ -12,7 +12,7 @@ public class UserWebApiService : BaseService, IUserWebApiService
 
     }
 
-    public async Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier? pagination = null)
+    public Task<Result<List<UserDto>>> GetAllAsync(PageIdentifier? pagination = null, CancellationToken cancellationToken = default)
     {
         string urlApi;
         if (pagination == null)
@@ -20,44 +20,48 @@ public class UserWebApiService : BaseService, IUserWebApiService
         else
             urlApi = $"api/users?pageNumber={pagination.PageNumber}&pageSize={pagination.PageSize}";
 
-        var httpRes = await _httpClient.GetAsync(urlApi);
-        return await ProcessResultFromHttpResponse<List<UserDto>>(httpRes, "Get users");
+        return SendAsync<List<UserDto>>(ct => _httpClient.GetAsync(urlApi, ct), "Get users", cancellationToken: cancellationToken);
     }
 
-    public async Task<Result<UserDto>> DeleteAsync(Guid userId)
+    public Task<Result<UserDto>> DeleteAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        SendAsync<UserDto>(ct => _httpClient.DeleteAsync($"api/users/{userId}", ct), "Delete user", true, cancellationToken);
+
+    public Task<Result<UserDto>> GetAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        SendAsync<UserDto>(ct => _httpClient.GetAsync($"api/users/{userId}", ct), "Get user", cancellationToken: cancellationToken);
+
+    public Task<Result<UserDto>> SaveAsync(UserDto user, CancellationToken cancellationToken = default) =>
+        SendAsync<UserDto>(ct => user.UserId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/users", user, ct)
+                : _httpClient.PutAsJsonAsync($"api/users", user, ct),
+            "Save user", true, cancellationToken);
+
+    public Task<UserTokenDto?> RegisterAsync(UserRegisterDto user, CancellationToken cancellationToken = default) =>
+        SendForTokenAsync(ct => _httpClient.PostAsJsonAsync($"api/users/register", user, ct), cancellationToken);
+
+    public Task<UserTokenDto?> LoginAsync(UserCredentialsDto user, CancellationToken cancellationToken = default) =>
+        SendForTokenAsync(ct => _httpClient.PostAsJsonAsync($"api/users/login", user, ct), cancellationToken);
+
+    // Login and register answer with a UserTokenDto, not a Result: a failure without that answer (no network, the
+    // server down, an answer that isn't one) is a UserTokenDto not successful with its reason, as the server's own.
+    private static async Task<UserTokenDto?> SendForTokenAsync(Func<CancellationToken, Task<HttpResponseMessage>> send,
+        CancellationToken cancellationToken)
     {
-        var httpRes = await _httpClient.DeleteAsync($"api/users/{userId}");
-        return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Delete user", true);
-    }
-
-    public async Task<Result<UserDto>> GetAsync(Guid userId)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/users/{userId}");
-        return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Get user");
-    }
-
-    public async Task<Result<UserDto>> SaveAsync(UserDto user)
-    {
-        HttpResponseMessage httpRes;
-
-        if (user.UserId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/users", user);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/users", user);
-
-        return await ProcessResultFromHttpResponse<UserDto>(httpRes, "Save user", true);
-    }
-
-    public async Task<UserTokenDto?> RegisterAsync(UserRegisterDto user)
-    {
-        var httpRes = await _httpClient.PostAsJsonAsync($"api/users/register", user);
-        return await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();        
-    }
-
-    public async Task<UserTokenDto?> LoginAsync(UserCredentialsDto user)
-    {
-        var httpRes = await _httpClient.PostAsJsonAsync($"api/users/login", user);
-        return await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();         
+        try
+        {
+            using var httpRes = await send(cancellationToken);
+            return await httpRes.Content.ReadFromJsonAsync<UserTokenDto>(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return new UserTokenDto { success = false, error = "The request was cancelled." };
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException)
+        {
+            return new UserTokenDto { success = false, error = $"Error. The web server could not be reached: {ex.Message}" };
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
+            return new UserTokenDto { success = false, error = $"Error. The web server's answer could not be read: {ex.Message}" };
+        }
     }
 }
-

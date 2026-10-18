@@ -13,30 +13,22 @@ public class ReportWebApiService : BaseService, IReportWebApiService
 
     }
 
-    public async Task<Result<ReportDto>> GetNotesListAsync(NotesListReportRequestDto request)
-    {
-        var httpRes = await _httpClient.PostAsJsonAsync("api/reports/noteslist", WithCulture(request));
-        return await ProcessResultFromHttpResponse<ReportDto>(httpRes, "Print notes list");
-    }
+    public Task<Result<ReportDto>> GetNotesListAsync(NotesListReportRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<ReportDto>(ct => _httpClient.PostAsJsonAsync("api/reports/noteslist", WithCulture(request), ct), "Print notes list",
+            cancellationToken: cancellationToken);
 
     // It can take long (one chapter per note): cancelled when the user closes its preview.
-    public async Task<Result<ReportDto>> GetNotesBookAsync(NotesListReportRequestDto request, CancellationToken cancellationToken = default)
-    {
-        var httpRes = await _httpClient.PostAsJsonAsync("api/reports/notesbook", WithCulture(request), cancellationToken);
-        return await ProcessResultFromHttpResponse<ReportDto>(httpRes, "Print notes list as book");
-    }
+    public Task<Result<ReportDto>> GetNotesBookAsync(NotesListReportRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<ReportDto>(ct => _httpClient.PostAsJsonAsync("api/reports/notesbook", WithCulture(request), ct), "Print notes list as book",
+            cancellationToken: cancellationToken);
 
-    public async Task<Result<ReportFileDto>> GetNotesListCsvAsync(NotesListReportRequestDto request)
-    {
-        var httpRes = await _httpClient.PostAsJsonAsync("api/reports/noteslistcsv", WithCulture(request));
-        return await ProcessResultFromHttpResponse<ReportFileDto>(httpRes, "Export notes list to CSV");
-    }
+    public Task<Result<ReportFileDto>> GetNotesListCsvAsync(NotesListReportRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<ReportFileDto>(ct => _httpClient.PostAsJsonAsync("api/reports/noteslistcsv", WithCulture(request), ct), "Export notes list to CSV",
+            cancellationToken: cancellationToken);
 
-    public async Task<Result<ReportDto>> GetNoteDetailAsync(Guid noteId)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/reports/notes/{noteId}?culture={Uri.EscapeDataString(CultureInfo.CurrentCulture.Name)}");
-        return await ProcessResultFromHttpResponse<ReportDto>(httpRes, "Print note details");
-    }
+    public Task<Result<ReportDto>> GetNoteDetailAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<ReportDto>(ct => _httpClient.GetAsync($"api/reports/notes/{noteId}?culture={Uri.EscapeDataString(CultureInfo.CurrentCulture.Name)}", ct),
+            "Print note details", cancellationToken: cancellationToken);
 
     // The browser's culture (Blazor WebAssembly starts with it).
     private static NotesListReportRequestDto WithCulture(NotesListReportRequestDto request)

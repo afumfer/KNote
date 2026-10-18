@@ -12,144 +12,89 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     }
 
-    public async Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync(Guid? folderId = null)
-    {
-        var httpRes = await _httpClient.GetAsync(folderId == null ? "api/notes/homenotes" : $"api/notes/homenotes?folderId={folderId}");
-        return await ProcessResultFromHttpResponse<List<NoteInfoDto>>(httpRes, "Get home notes");
-    }
+    public Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync(Guid? folderId = null, CancellationToken cancellationToken = default) =>
+        SendAsync<List<NoteInfoDto>>(ct => _httpClient.GetAsync(folderId == null ? "api/notes/homenotes" : $"api/notes/homenotes?folderId={folderId}", ct),
+            "Get home notes", cancellationToken: cancellationToken);
 
-    public async Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/notes/search?{queryString}");
-        return await ProcessResultFromHttpResponse<List<NoteMinimalDto>>(httpRes, "Get notes from search string");
-    }
+    public Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString, CancellationToken cancellationToken = default) =>
+        SendAsync<List<NoteMinimalDto>>(ct => _httpClient.GetAsync($"api/notes/search?{queryString}", ct),
+            "Get notes from search string", cancellationToken: cancellationToken);
 
-    public async Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter)
-    {
-        var httpRes = await _httpClient.PostAsJsonAsync($"api/notes/filter", notesFilter);
-        return await ProcessResultFromHttpResponse<List<NoteMinimalDto>>(httpRes, "Get notes from filter");
-    }
+    public Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter, CancellationToken cancellationToken = default) =>
+        SendAsync<List<NoteMinimalDto>>(ct => _httpClient.PostAsJsonAsync($"api/notes/filter", notesFilter, ct),
+            "Get notes from filter", cancellationToken: cancellationToken);
 
-    public async Task<Result<NoteDto>> GetAsync(Guid noteId)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/notes/{noteId}");
-        return await ProcessResultFromHttpResponse<NoteDto>(httpRes, "Get note");
-    }
+    public Task<Result<NoteDto>> GetAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteDto>(ct => _httpClient.GetAsync($"api/notes/{noteId}", ct), "Get note", cancellationToken: cancellationToken);
 
     // The HTML of a note's description made safe to show (by Server, the same rules as ClientWin).
-    public async Task<Result<string>> HtmlAsync(string markdown)
-    {
-        var httpRes = await _httpClient.PostAsJsonAsync("api/notes/html", markdown);
-        return await ProcessResultFromHttpResponse<string>(httpRes, "Show note");
-    }
+    public Task<Result<string>> HtmlAsync(string markdown, CancellationToken cancellationToken = default) =>
+        SendAsync<string>(ct => _httpClient.PostAsJsonAsync("api/notes/html", markdown, ct), "Show note", cancellationToken: cancellationToken);
 
-    public async Task<Result<NoteDto>> NewAsync()
-    {        
-        var httpRes = await _httpClient.GetAsync($"api/notes/new");
-        return await ProcessResultFromHttpResponse<NoteDto>(httpRes, "New note");
-    }
+    public Task<Result<NoteDto>> NewAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<NoteDto>(ct => _httpClient.GetAsync($"api/notes/new", ct), "New note", cancellationToken: cancellationToken);
 
-    public async Task<Result<NoteDto>> SaveAsync(NoteDto note, bool updateStatus = true)
-    {
-        HttpResponseMessage httpRes;
+    public Task<Result<NoteDto>> SaveAsync(NoteDto note, bool updateStatus = true, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteDto>(ct => note.NoteId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/notes", note, ct)
+                : _httpClient.PutAsJsonAsync($"api/notes", note, ct),
+            "Save note", true, cancellationToken);
 
-        if (note.NoteId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes", note);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notes", note);
+    public Task<Result<NoteDto>> DeleteAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteDto>(ct => _httpClient.DeleteAsync($"api/notes/{noteId}", ct), "Delete note", true, cancellationToken);
 
-        return await ProcessResultFromHttpResponse<NoteDto>(httpRes, "Save note", true);
+    public Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<List<ResourceInfoDto>>(ct => _httpClient.GetAsync($"api/notes/{noteId}/resources", ct),
+            "Get note resources", cancellationToken: cancellationToken);
 
-    }
+    public Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resource, CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceInfoDto>(ct => resource.ResourceId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/notes/resources", resource, ct)
+                : _httpClient.PutAsJsonAsync($"api/notes/resources", resource, ct),
+            "Save resouce", true, cancellationToken);
 
-    public async Task<Result<NoteDto>> DeleteAsync(Guid noteId)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/notes/{noteId}");
-        return await ProcessResultFromHttpResponse<NoteDto>(httpRes, "Delete note", true);
-    }
+    public Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceInfoDto>(ct => _httpClient.DeleteAsync($"api/notes/resources/{resourceId}", ct),
+            "Delete resource", true, cancellationToken);
 
-    public async Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/notes/{noteId}/resources");
-        return await ProcessResultFromHttpResponse<List<ResourceInfoDto>>(httpRes, "New note");
-    }
+    public Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<List<NoteTaskDto>>(ct => _httpClient.GetAsync($"api/notes/{noteId}/tasks", ct),
+            "Get note tasks", cancellationToken: cancellationToken);
 
-    public async Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resource)
-    {
-        HttpResponseMessage httpRes;
-
-        if (resource.ResourceId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/resources", resource);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/resources", resource);
-
-        return await ProcessResultFromHttpResponse<ResourceInfoDto>(httpRes, "Save resouce", true);
-    }
-
-    public async Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/notes/resources/{resourceId}");
-        return await ProcessResultFromHttpResponse<ResourceInfoDto>(httpRes, "Delete resource", true);
-    }
-
-    public async Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/notes/{noteId}/tasks");
-        return await ProcessResultFromHttpResponse<List<NoteTaskDto>>(httpRes, "Get note tasks");
-    }
-
-    public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
+    public Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime,
+        CancellationToken cancellationToken = default)
     {
         var url = $"api/notes/GetStartedTasksByDateTimeRage?start={startDateTime.ToString("yyyyMMddHHmmss")}&end={endDateTime.ToString("yyyyMMddHHmmss")}";
-        var httpRes = await _httpClient.GetAsync(url);
-        return await ProcessResultFromHttpResponse<List<NoteTaskDto>>(httpRes, "Get note tasks by datetime.");
+        return SendAsync<List<NoteTaskDto>>(ct => _httpClient.GetAsync(url, ct), "Get note tasks by datetime.", cancellationToken: cancellationToken);
     }
 
-    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime)
+    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime,
+        CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto noteTask)
-    {
-        HttpResponseMessage httpRes;
+    public Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto noteTask, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteTaskDto>(ct => noteTask.NoteTaskId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/notes/tasks", noteTask, ct)
+                : _httpClient.PutAsJsonAsync($"api/notes/tasks", noteTask, ct),
+            "Save note task", true, cancellationToken);
 
-        if (noteTask.NoteTaskId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/tasks", noteTask);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/tasks", noteTask);
+    public Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteTaskDto>(ct => _httpClient.DeleteAsync($"api/notes/tasks/{noteTaskId}", ct),
+            "Delete note task", true, cancellationToken);
 
-        return await ProcessResultFromHttpResponse<NoteTaskDto>(httpRes, "Save note task", true);
-    }
+    public Task<Result<NoteTraceNotesDto>> GetTraceNotesAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteTraceNotesDto>(ct => _httpClient.GetAsync($"api/notes/{noteId}/tracenotes", ct),
+            "Get trace notes", cancellationToken: cancellationToken);
 
-    public async Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/notes/tasks/{noteTaskId}");
-        return await ProcessResultFromHttpResponse<NoteTaskDto>(httpRes, "Delete note task", true);
-    }
+    public Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto traceNote, CancellationToken cancellationToken = default) =>
+        SendAsync<TraceNoteDto>(ct => traceNote.TraceNoteId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/notes/tracenotes", traceNote, ct)
+                : _httpClient.PutAsJsonAsync($"api/notes/tracenotes", traceNote, ct),
+            "Save trace note", true, cancellationToken);
 
-    public async Task<Result<NoteTraceNotesDto>> GetTraceNotesAsync(Guid noteId)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/notes/{noteId}/tracenotes");
-        return await ProcessResultFromHttpResponse<NoteTraceNotesDto>(httpRes, "Get trace notes");
-    }
-
-    public async Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto traceNote)
-    {
-        HttpResponseMessage httpRes;
-
-        if (traceNote.TraceNoteId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notes/tracenotes", traceNote);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notes/tracenotes", traceNote);
-
-        return await ProcessResultFromHttpResponse<TraceNoteDto>(httpRes, "Save trace note", true);
-    }
-
-    public async Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/notes/tracenotes/{traceNoteId}");
-        return await ProcessResultFromHttpResponse<TraceNoteDto>(httpRes, "Delete trace note", true);
-    }
+    public Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId, CancellationToken cancellationToken = default) =>
+        SendAsync<TraceNoteDto>(ct => _httpClient.DeleteAsync($"api/notes/tracenotes/{traceNoteId}", ct),
+            "Delete trace note", true, cancellationToken);
 }
-

@@ -18,8 +18,8 @@
             </KntFormSection>
         </ChildContent>
         <Footer>
-            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
-            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Disabled="@Saving" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" IsBusy="@Saving" />
         </Footer>
     </KntDialogFrame>
 
@@ -30,6 +30,8 @@
     [Parameter] public string Title { get; set; } = "...";    
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
+    // Being saved: the buttons wait for it (the page ignores another save or leaving meanwhile).
+    [Parameter] public bool Saving { get; set; }
 
     private string Subtitle => NoteType.NoteTypeId == Guid.Empty ? "A new type of note." : NoteType.Name;
 

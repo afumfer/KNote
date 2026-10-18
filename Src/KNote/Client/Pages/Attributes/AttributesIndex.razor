@@ -1,5 +1,7 @@
 ﻿@page "/attributes"
 
+@implements IDisposable
+
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
@@ -12,7 +14,7 @@
         <RadzenMenu>
             <RadzenMenuItem Text="New attribute ..." Icon="post_add"  Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit attribute ..." Icon="edit" Disabled="@(Selected == null)" Click="@(() => OnEdit(Selected!))"></RadzenMenuItem>
-            <RadzenMenuItem Text="Delete attribute ..." Icon="delete" Disabled="@(Selected == null)" Click="@(() => OnDelete(Selected!))"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete attribute ..." Icon="delete" Disabled="@(Selected == null || deleting.IsBusy)" Click="@(() => OnDelete(Selected!))"></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -45,12 +47,23 @@
         await Load();
     }
 
+    // The list asked for last: reading it again (after a change) or leaving the page cancels the one being read.
+    private readonly KntLatestRequest listRequest = new();
+
+    public void Dispose() => listRequest.Dispose();
+
     private async Task Load()
     {
-        var result = await store.KAttributes.GetAllAsync();
+        var request = await listRequest.RunAsync(ct => store.KAttributes.GetAllAsync(ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
+        {
             attributes = result.Entity;
-            selection = attributes!.Where(x => selection.Any(s => s.KAttributeId == x.KAttributeId)).ToList();
+            selection = attributes.Where(x => selection.Any(s => s.KAttributeId == x.KAttributeId)).ToList();
+        }
     }
 
     async Task OnNew()
@@ -89,7 +102,12 @@
             await Load(); 
     }
 
-    async Task OnDelete(KAttributeInfoDto item)
+    // One delete at a time: a click or the Delete key repeated asks and deletes once.
+    private readonly KntSingleFlight deleting = new();
+
+    Task OnDelete(KAttributeInfoDto item) => deleting.RunAsync(() => DeleteAsync(item));
+
+    async Task DeleteAsync(KAttributeInfoDto item)
     {
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete attribute - {@item.Name})?", 

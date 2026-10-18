@@ -1,5 +1,7 @@
 @page "/tracenotetypes/edit/{TypeId}"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 
@@ -10,7 +12,7 @@
 
 @if (traceNoteType != null)
 {
-    <TraceNoteTypeForm Title="Edit trace note type" OnValidSubmit="OnSave" OnExit="OnExit" TraceNoteType="traceNoteType" />
+    <TraceNoteTypeForm Title="Edit trace note type" OnValidSubmit="OnSave" OnExit="OnExit" Saving="saving.IsBusy" TraceNoteType="traceNoteType" />
 }
 else
 {
@@ -18,6 +20,11 @@ else
 }
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
     [Parameter] public string TypeId { get; set; } = string.Empty;
 
     private TraceNoteTypeDto? traceNoteType;
@@ -27,13 +34,13 @@ else
         if (!Guid.TryParse(TypeId, out var id))
         {
             await dialogService.Alert("Invalid trace note type identifier.");
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
         var result = await store.TraceNoteTypes.GetAsync(id);
         if (!result.IsValid)
-            dialogService.Close(null);
+            CloseDialog(null);
         else
         {
             traceNoteType = result.Entity;
@@ -41,25 +48,30 @@ else
         }
     }
 
-    private async Task OnSave()
+    private Task OnSave() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         if (!traceNoteType!.IsDirty())
         {
-            dialogService.Close(traceNoteType);
+            CloseDialog(traceNoteType);
         }
         else if (traceNoteType.IsValid())
         {
             var result = await store.TraceNoteTypes.SaveAsync(traceNoteType);
             if (result.IsValid)
-                dialogService.Close(result.Entity);
+                CloseDialog(result.Entity);
         }
     }
 
     private async Task OnExit()
     {
+        if (saving.IsBusy)
+            return;
+
         if (traceNoteType == null || !traceNoteType.IsDirty())
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
@@ -69,6 +81,14 @@ else
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (resultDialog == true)
-            dialogService.Close(null);
+            CloseDialog(null);
+    }
+
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
     }
 }
