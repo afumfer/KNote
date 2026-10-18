@@ -75,6 +75,8 @@ Un repositorio es una base de datos de KaNote, SQLite o SQL Server. El menú **R
 
 **Un vínculo por base de datos.** Cada base de datos recibe además un identificador propio al crearse. Una base de datos ya vinculada no se puede volver a vincular, ni tampoco una copia suya (copiar una base de datos copia también su identificador): KaNote te dice qué repositorio es. Si dos repositorios de tu configuración resultan ser la misma base de datos, solo se abre el primero, y KaNote te avisa al arrancar.
 
+**Ficheros SQLite.** KaNote abre las bases de datos SQLite en modo WAL, para que varios usuarios de la aplicación Web, o varias ventanas, puedan guardar a la vez. Junto al fichero de la base de datos (p. ej. `knote.db`) verás otros dos mientras está en uso, `knote.db-wal` y `knote.db-shm`: son parte de la base de datos, no los borres. Para copiar la base de datos (una copia de seguridad, otro equipo), cierra antes KaNote y el servidor Web, así todo queda en el fichero `.db`. Guarda las bases de datos SQLite en un disco del equipo que las usa, no en una carpeta de red.
+
 **Actualización desde una versión anterior.** Las versiones anteriores guardaban el nombre del repositorio (su *alias*) en `KNoteData.config`. La primera vez que esta versión abre un repositorio, su base de datos toma ese alias como nombre (o, si no lo hay, el nombre de la base de datos: el fichero SQLite o la base de datos de SQL Server), y el alias se quita del fichero. Un repositorio que no se puede abrir conserva su alias hasta que se pueda. Si otro usuario ya abrió una base de datos compartida con esta versión, ves el nombre que le dio su alias; un Admin puede cambiarlo.
 
 ### Lista de notas (aplicación de escritorio)

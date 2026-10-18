@@ -114,7 +114,9 @@ interfaces. Cuál está activa se decide en tiempo de ejecución mediante `Repos
 
 La bifurcación vive en un único punto, `Service/Core/KntRepositoryFactory.Create(repositoryRef)`, que antes
 pasa por `KntSchemaUpdater.EnsureUpToDate` de EF (EF es el único que crea/actualiza el esquema, sea cual sea
-el ORM que sirva las consultas después):
+el ORM que sirva las consultas después; en Sqlite también pone la base de datos en modo WAL, que queda guardado en
+el fichero: en el modo por defecto las escrituras concurrentes del Server fallaban al momento con "database is
+locked"):
 
 - En `Server`: `Server/Program.cs` llama a `builder.Services.KntAddServices(appSettings, repositoryRef)`
   (`Server/Helpers/KntExtensions.cs`), que registra `IKntRepository` (vía la factoría) e `IKntService` en DI.
@@ -179,7 +181,12 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   comprobación de rol (no la validación, las reglas ni los eventos de los comandos) y solo mientras dura el
   `using`. Úsalo solo así: dentro de un comando ya autorizado y para operaciones concretas. Esa creación (y el
   usuario actual) la comparten las funciones que guardan sus datos en notas de un tipo del sistema:
-  `Service/Core/KntSystemNotes` (`internal`), que usan las sesiones y los hilos del chat room. Solo el usuario de
+  `Service/Core/KntSystemNotes` (`internal`), que usan las sesiones y los hilos del chat room. Esa creación se
+  serializa por base de datos (`FindOrCreateAsync`: un `SemaphoreSlim` por cadena de conexión y una segunda búsqueda
+  dentro): sin ello, varias peticiones a la vez en el primer uso creaban cada una el tipo y la carpeta (el tipo y los
+  atributos fallaban por sus índices únicos y la carpeta se duplicaba, ver `Tests/ServiceTests/SystemNotesConcurrencyTests`).
+  El candado es del proceso: si otro proceso crea antes el elemento, la creación fallida lo vuelve a buscar. Con
+  varias carpetas del mismo nombre se usa la más antigua (menor `FolderNumber`). Solo el usuario de
   la sesión puede leerla o guardarla. La conversación se guarda en `Description`
   con `Model/Dto/AiChatSessionTranscript`: Markdown legible con un comentario HTML oculto por mensaje (el del
   asistente lleva el uso en JSON), del que se recuperan los turnos (`AiChatTurnDto`) exactamente; es el
