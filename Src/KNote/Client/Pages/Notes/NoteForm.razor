@@ -32,9 +32,11 @@
             </div>
         </div>
         <div class="knt-note-header-actions">
-            <RadzenButton Text="Save and new" Icon="library_add" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Base" />
-            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Click="() => OnExit.InvokeAsync(null)"
+            <RadzenButton Text="Save and new" Icon="library_add" Click="() => Save(formContext, true)" ButtonStyle="ButtonStyle.Base"
+                          IsBusy="@(Saving && savingAndNew)" Disabled="@Saving" />
+            <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext, false)" ButtonStyle="ButtonStyle.Primary"
+                          IsBusy="@(Saving && !savingAndNew)" Disabled="@Saving" />
+            <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Click="() => OnExit.InvokeAsync(null)" Disabled="@Saving"
                           MouseEnter="@(args => tooltipService.Open(args, "Close", new TooltipOptions { Position = TooltipPosition.Left }))" />
         </div>
     </div>
@@ -138,11 +140,11 @@
                     }
                     else
                     {
-                        <NoteKResources Resources="resources ?? new()"
-                                        OnEdit="OnEditResource"
-                                        OnDelete="OnDeleteResource"
+                        <NoteKResources Resources="resources ?? new()" Busy="tabsSaving.IsBusy"
+                                        OnEdit="r => tabsSaving.RunAsync(() => OnEditResource(r))"
+                                        OnDelete="r => tabsSaving.RunAsync(() => OnDeleteResource(r))"
                                         OnInsertInDesription="InsertInDescription"
-                                        OnNew="OnNewResource">
+                                        OnNew="() => tabsSaving.RunAsync(OnNewResource)">
                         </NoteKResources>
                     }
                 </ChildContent>
@@ -163,10 +165,10 @@
                     }
                     else
                     {
-                        <NoteKTasks Tasks="tasks ?? new()"
-                                    OnDelete="OnDeleteTask"
-                                    OnNew="OnNewTask"
-                                    OnEdit="OnEditTask">
+                        <NoteKTasks Tasks="tasks ?? new()" Busy="tabsSaving.IsBusy"
+                                    OnDelete="t => tabsSaving.RunAsync(() => OnDeleteTask(t))"
+                                    OnNew="() => tabsSaving.RunAsync(OnNewTask)"
+                                    OnEdit="t => tabsSaving.RunAsync(() => OnEditTask(t))">
                         </NoteKTasks>
                     }
                 </ChildContent>
@@ -187,10 +189,10 @@
                     }
                     else
                     {
-                        <NoteTraceNotes TraceNotes="traceNotes ?? new()"
-                                        OnNew="OnNewTraceNote"
-                                        OnEdit="OnEditTraceNote"
-                                        OnDelete="OnDeleteTraceNote"
+                        <NoteTraceNotes TraceNotes="traceNotes ?? new()" Busy="tabsSaving.IsBusy"
+                                        OnNew="outgoing => tabsSaving.RunAsync(() => OnNewTraceNote(outgoing))"
+                                        OnEdit="t => tabsSaving.RunAsync(() => OnEditTraceNote(t))"
+                                        OnDelete="t => tabsSaving.RunAsync(() => OnDeleteTraceNote(t))"
                                         OnOpenNote="OnOpenTraceNote">
                         </NoteTraceNotes>
                     }
@@ -211,6 +213,14 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
+    // Being saved (NoteEdit): the buttons wait for it.
+    [Parameter] public bool Saving { get; set; }
+
+    // The button that saved: the one that shows it is busy.
+    private bool savingAndNew;
+    // One change at a time in the tabs (a resource, a task or a trace note added, edited or deleted): a double click
+    // saves or deletes once.
+    private readonly KntSingleFlight tabsSaving = new();
 
     private List<ResourceInfoDto>? resources;
     private List<NoteTaskDto>? tasks;
@@ -308,6 +318,9 @@
 
     protected async Task Save(EditContext formContext, bool saveAndNew)
     {
+        if (Saving)
+            return;
+
         string addMessage = "";
 
         bool formIsValid = formContext.Validate();
@@ -360,6 +373,7 @@
 
         var xx = Note.KAttributesDto;
 
+        savingAndNew = saveAndNew;
         if (saveAndNew)
             await OnValidSubmitWithNew.InvokeAsync(formContext);
         else

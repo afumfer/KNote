@@ -22,7 +22,7 @@
 
 @if (showForm)
 {
-    <NoteForm Title="@(note!.IsNew() ? "New note" : "Edit note")" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Title="@(note!.IsNew() ? "New note" : "Edit note")" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" Saving="saving.IsBusy" NoteTypes="noteTypes"></NoteForm>
 }
 else if (loadFailed)
 {
@@ -46,6 +46,8 @@ else
     private bool showForm = false;
     private bool loadFailed;
     private bool closing;
+    // One save at a time: a double click (or Save and then Save and new) saves once; a new note isn't created twice.
+    private readonly KntSingleFlight saving = new();
     private DotNetObjectReference<NoteEdit>? dotNetRef;
     private IJSObjectReference? unsavedChangesWatch;
 
@@ -151,20 +153,20 @@ else
 
     #region Events management
 
-    private async Task OnSave()
-    {
-        await SaveNote();
-    }
+    private Task OnSave() => saving.RunAsync(SaveNote);
 
-    private async Task OnSaveAndNew()
+    private Task OnSaveAndNew() => saving.RunAsync(async () =>
     {
         // In the folder of the note saved.
         if (await SaveNote())
             await GetNewNote(note!.FolderDto);
-    }
+    });
 
     private async Task OnExit()
     {
+        if (saving.IsBusy)
+            return;
+
         if (note != null && note.IsDirty())
         {
             var resultDialog = await dialogService.Confirm(

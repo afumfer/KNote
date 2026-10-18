@@ -23,6 +23,8 @@
     [Parameter] public EventCallback<TraceNoteInfoDto> OnDelete { get; set; }
     // Opens the other note of the relation.
     [Parameter] public EventCallback<TraceNoteInfoDto> OnOpenNote { get; set; }
+    // A change being saved (NoteForm): adding, editing and deleting wait for it.
+    [Parameter] public bool Busy { get; set; }
 
     private RenderFragment Panel(bool outgoing) => __builder =>
     {
@@ -39,7 +41,7 @@
 
             <div class="knt-list-header">
                 <span>@list.Count @(list.Count == 1 ? "relation" : "relations")</span>
-                <RadzenButton Text="Add" Icon="add_link" Click="() => OnNew.InvokeAsync(outgoing)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                <RadzenButton Text="Add" Icon="add_link" Click="() => OnNew.InvokeAsync(outgoing)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
             </div>
 
             @if (list.Count == 0)
@@ -81,9 +83,9 @@
                                 <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                               Click="() => OnOpenNote.InvokeAsync(traceNote)" MouseEnter="@(args => tooltipService.Open(args, "Open note"))" />
                                 <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
-                                              Click="() => OnEdit.InvokeAsync(traceNote)" MouseEnter="@(args => tooltipService.Open(args, "Edit relation"))" />
+                                              Click="() => OnEdit.InvokeAsync(traceNote)" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit relation"))" />
                                 <RadzenButton Icon="link_off" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                              Click="() => OnDelete.InvokeAsync(traceNote)" MouseEnter="@(args => tooltipService.Open(args, "Remove relation"))" />
+                                              Click="() => OnDelete.InvokeAsync(traceNote)" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Remove relation"))" />
                             </div>
                         </div>
                     }

@@ -17,7 +17,7 @@
         <RadzenMenuItem Text="Print list ..." Icon="table_rows" Click="PrintListAsync" />
         <RadzenMenuItem Text="Print as book ..." Icon="menu_book" Click="PrintBookAsync" />
         <RadzenMenuItem Text="Print note details ..." Icon="description" Disabled="@(Grid?.Current == null)" Click="PrintNoteAsync" />
-        <RadzenMenuItem Text="Export to CSV ..." Icon="download" Click="ExportCsvAsync" />
+        <RadzenMenuItem Text="Export to CSV ..." Icon="download" Click="ExportCsv" />
     </RadzenMenuItem>
 </AuthorizeView>
 
@@ -72,6 +72,11 @@
         return KntReportPreview.OpenAsync(dialogService, "Note details", $"#{note.NoteNumber} {note.Topic}",
             _ => store.Reports.GetNoteDetailAsync(note.NoteId));
     }
+
+    // One export at a time: a click repeated downloads the file once.
+    private readonly KntSingleFlight exporting = new();
+
+    private Task ExportCsv() => exporting.RunAsync(ExportCsvAsync);
 
     private async Task ExportCsvAsync()
     {

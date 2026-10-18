@@ -1,5 +1,7 @@
 ﻿@page "/users/edit/{UserId}"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 
@@ -10,7 +12,7 @@
 
 @if (user != null)
 {
-    <UserForm Title="Edit user" OnValidSubmit="OnSave" OnExit="OnExit" User="user"></UserForm>
+    <UserForm Title="Edit user" OnValidSubmit="OnSave" OnExit="OnExit" Saving="saving.IsBusy" User="user"></UserForm>
 }
 else
 {
@@ -18,6 +20,11 @@ else
 }
 
 @code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
     [Parameter] public string UserId { get; set; } = string.Empty;
 
     private UserDto? user;
@@ -31,13 +38,13 @@ else
         if (!parseOk)
         {
             await dialogService.Alert("Invalid user identifier.");
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
 
         var result = await store.Users.GetAsync(id);
         if (!result.IsValid)                    
-            dialogService.Close(null);
+            CloseDialog(null);
         else
         {
             user = result.Entity;
@@ -45,11 +52,13 @@ else
         }
     }
 
-    private async Task OnSave()
+    private Task OnSave() => saving.RunAsync(SaveAsync);
+
+    private async Task SaveAsync()
     {
         if (!user!.IsDirty())
         {            
-            dialogService.Close(user);
+            CloseDialog(user);
         }
         else
         {
@@ -58,7 +67,7 @@ else
                 var result = await store.Users.SaveAsync(user);
                 if (result.IsValid)                                    
                 {                    
-                    dialogService.Close(result.Entity);
+                    CloseDialog(result.Entity);
                 }
             }
         }
@@ -66,9 +75,12 @@ else
 
     private async Task OnExit()
     {                
+        if (saving.IsBusy)
+            return;
+
         if (user == null)
         {
-            dialogService.Close(null);
+            CloseDialog(null);
             return;
         }
                   
@@ -81,13 +93,20 @@ else
 
             if (resultDialog == true)
             {
-                dialogService.Close(null);
+                CloseDialog(null);
             }
         }
         else
         {
-            dialogService.Close(null);
+            CloseDialog(null);
         }
     }
 
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
 }

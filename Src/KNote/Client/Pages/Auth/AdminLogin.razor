@@ -27,7 +27,14 @@
 
 @code {
 
-    private async Task GoRegister()
+    // One sign in or registration at a time: a click repeated opens one dialog and signs in once.
+    private readonly KntSingleFlight signing = new();
+
+    private Task GoRegister() => signing.RunAsync(RegisterAsync);
+
+    private Task GoLogin() => signing.RunAsync(LoginAsync);
+
+    private async Task RegisterAsync()
     {
         var resDialog = await dialogService.OpenAsync<Register>($"Register",
                new Dictionary<string, object?>() {  },
@@ -48,7 +55,7 @@
         }
     }
 
-    private async Task GoLogin()
+    private async Task LoginAsync()
     {
         var resDialog = await dialogService.OpenAsync<Login>($"{KntConst.AppName} login",
                new Dictionary<string, object?>() {  },

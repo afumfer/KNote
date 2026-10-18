@@ -11,7 +11,7 @@
         <RadzenMenu>
             <RadzenMenuItem Text="New type ..." Icon="post_add" Click="OnNew"></RadzenMenuItem>
             <RadzenMenuItem Text="Edit type ..." Icon="edit" Disabled="@(Selected == null)" Click="@(() => OnEdit(Selected!))"></RadzenMenuItem>
-            <RadzenMenuItem Text="Delete type ..." Icon="delete" Disabled="@(Selected == null)" Click="@(() => OnDelete(Selected!))"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete type ..." Icon="delete" Disabled="@(Selected == null || deleting.IsBusy)" Click="@(() => OnDelete(Selected!))"></RadzenMenuItem>
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -90,7 +90,12 @@
             await Load();
     }
 
-    async Task OnDelete(TraceNoteTypeDto item)
+    // One delete at a time: a click or the Delete key repeated asks and deletes once.
+    private readonly KntSingleFlight deleting = new();
+
+    Task OnDelete(TraceNoteTypeDto item) => deleting.RunAsync(() => DeleteAsync(item));
+
+    async Task DeleteAsync(TraceNoteTypeDto item)
     {
         var resultDialog = await dialogService.Confirm(
             $"Are you sure you want delete trace note type - {item.Name} -?",
