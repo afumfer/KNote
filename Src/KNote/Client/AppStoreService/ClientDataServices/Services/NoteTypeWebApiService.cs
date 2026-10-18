@@ -12,34 +12,18 @@ public class NoteTypeWebApiService : BaseService, INoteTypeWebApiService
 
     }
 
-    public async Task<Result<List<NoteTypeDto>>> GetAllAsync()
-    {        
-        var httpRes = await _httpClient.GetAsync($"api/notetypes");
-        return await ProcessResultFromHttpResponse<List<NoteTypeDto>>(httpRes, "Get note types");
-    }
+    public Task<Result<List<NoteTypeDto>>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<NoteTypeDto>>(ct => _httpClient.GetAsync($"api/notetypes", ct), "Get note types", cancellationToken: cancellationToken);
 
-    public async Task<Result<NoteTypeDto>> GetAsync(Guid id)
-    {        
-        var httpRes = await _httpClient.GetAsync($"api/notetypes/{id}");
-        return await ProcessResultFromHttpResponse<NoteTypeDto>(httpRes, "Get note type");
-    }
+    public Task<Result<NoteTypeDto>> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteTypeDto>(ct => _httpClient.GetAsync($"api/notetypes/{id}", ct), "Get note type", cancellationToken: cancellationToken);
 
-    public async Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto noteType)
-    {
-        HttpResponseMessage httpRes;
+    public Task<Result<NoteTypeDto>> SaveAsync(NoteTypeDto noteType, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteTypeDto>(ct => noteType.NoteTypeId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/notetypes", noteType, ct)
+                : _httpClient.PutAsJsonAsync($"api/notetypes", noteType, ct),
+            "Save note type", true, cancellationToken);
 
-        if (noteType.NoteTypeId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/notetypes", noteType);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/notetypes", noteType);
-
-        return await ProcessResultFromHttpResponse<NoteTypeDto>(httpRes, "Save note type", true);
-    }
-
-    public async Task<Result<NoteTypeDto>> DeleteAsync(Guid id)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/notetypes/{id}");
-        return await ProcessResultFromHttpResponse<NoteTypeDto>(httpRes, "Delete note type", true);
-    }
+    public Task<Result<NoteTypeDto>> DeleteAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteTypeDto>(ct => _httpClient.DeleteAsync($"api/notetypes/{id}", ct), "Delete note type", true, cancellationToken);
 }
-

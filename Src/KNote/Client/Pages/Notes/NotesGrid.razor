@@ -3,6 +3,7 @@
 @inject TooltipService tooltipService
 @inject ContextMenuService contextMenuService
 @inject IJSRuntime js
+@inject IStore store
 
 @*
     Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
@@ -169,7 +170,9 @@
         if (firstRender)
         {
             dotNetRef = DotNetObjectReference.Create(this);
-            keyboardHelper = await (await GetModuleAsync()).InvokeAsync<IJSObjectReference>("initialize", host, dotNetRef);
+            // Without its script (the server not reachable, already notified) the list still shows its notes.
+            if (await GetModuleAsync() is { } gridModule)
+                keyboardHelper = await gridModule.InvokeAsync<IJSObjectReference>("initialize", host, dotNetRef);
 
             // A new list has no selected note yet: the page updates its header buttons (it may have shown those of
             // the previous list).
@@ -181,7 +184,8 @@
         if (restoreScroll && notes != null && count > 0)
         {
             restoreScroll = false;
-            await (await GetModuleAsync()).InvokeVoidAsync("restoreScrollTop", host, Position!.ScrollTop);
+            if (await GetModuleAsync() is { } gridModule)
+                await gridModule.InvokeVoidAsync("restoreScrollTop", host, Position!.ScrollTop);
         }
     }
 
@@ -293,7 +297,8 @@
         blocks.Clear();
         noteIndexes.Clear();
         dataVersion++;
-        await (await GetModuleAsync()).InvokeVoidAsync("setScrollTop", host, 0);
+        if (await GetModuleAsync() is { } gridModule)
+            await gridModule.InvokeVoidAsync("setScrollTop", host, 0);
         await OrderChanged.InvokeAsync(newOrder);
     }
 
@@ -377,7 +382,9 @@
 
         if (args == null)
         {
-            var anchor = await (await GetModuleAsync()).InvokeAsync<Point?>("getActionsAnchor", host, note.NoteId);
+            var anchor = await GetModuleAsync() is { } gridModule
+                ? await gridModule.InvokeAsync<Point?>("getActionsAnchor", host, note.NoteId)
+                : null;
             args = new MouseEventArgs { ClientX = anchor?.X ?? 0, ClientY = anchor?.Y ?? 0 };
         }
 
@@ -391,8 +398,8 @@
         _ => OnNoteDelete.InvokeAsync(note)
     };
 
-    private async Task<IJSObjectReference> GetModuleAsync() =>
-        module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/notesGrid.js");
+    private async Task<IJSObjectReference?> GetModuleAsync() =>
+        module ??= await js.ImportModuleAsync("./js/notesGrid.js", store.AppState);
 
     private record Point(double X, double Y);
 

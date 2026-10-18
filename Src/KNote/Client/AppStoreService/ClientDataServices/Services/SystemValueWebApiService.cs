@@ -10,9 +10,7 @@ public class SystemValueWebApiService : BaseService, ISystemValueWebApiService
 
     }
 
-    public async Task<Result<string>> GetRepositoryNameAsync()
-    {
-        var httpRes = await _httpClient.GetAsync($"api/systemvalues/repositoryname");
-        return await ProcessResultFromHttpResponse<string>(httpRes, "Get repository name");
-    }
+    public Task<Result<string>> GetRepositoryNameAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<string>(ct => _httpClient.GetAsync($"api/systemvalues/repositoryname", ct), "Get repository name",
+            cancellationToken: cancellationToken);
 }

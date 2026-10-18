@@ -71,28 +71,19 @@
         if (!firstRender)
             return;
 
-        Result<ReportDto> result;
-        try
-        {
-            result = await Load(cancellation.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            return;     // closed before the report was ready
-        }
-        catch (HttpRequestException ex)
-        {
-            // No answer from the server (e.g. it stopped waiting for a long book): no Result to tell it.
-            store.AppState.NotifyError(Title, $"The report could not be generated: {ex.Message}");
-            result = new Result<ReportDto>();
-        }
+        // No answer from the server (e.g. it stopped waiting for a long book) is a Result with the error, already
+        // notified (BaseService.SendAsync).
+        var result = await Load(cancellation.Token);
 
+        // Closed before the report was ready.
         if (cancellation.IsCancellationRequested)
             return;
 
         if (result.IsValid && result.Entity != null)
+            module ??= await js.ImportModuleAsync("./js/kntReports.js", store.AppState);
+
+        if (module != null && result.IsValid && result.Entity != null)
         {
-            module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/kntReports.js");
             reportUrl = await module.InvokeAsync<string>("showReport", frame, result.Entity.Html, result.Entity.FileName);
             report = result.Entity;
         }

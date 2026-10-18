@@ -12,62 +12,34 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
 
     }
 
-    public async Task<Result<List<FolderInfoDto>>> GetAllAsync()
-    {        
-        var httpRes = await _httpClient.GetAsync("api/folders");
-        return await ProcessResultFromHttpResponse<List<FolderInfoDto>>(httpRes, "Get folders");
-    }
+    public Task<Result<List<FolderInfoDto>>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<FolderInfoDto>>(ct => _httpClient.GetAsync("api/folders", ct), "Get folders", cancellationToken: cancellationToken);
 
-    public async Task<Result<List<FolderDto>>> GetTreeAsync()
-    {                
-        var httpRes = await _httpClient.GetAsync("api/folders/tree");
-        return await ProcessResultFromHttpResponse<List<FolderDto>>(httpRes, "Get folders");
-    }
+    public Task<Result<List<FolderDto>>> GetTreeAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<FolderDto>>(ct => _httpClient.GetAsync("api/folders/tree", ct), "Get folders", cancellationToken: cancellationToken);
 
-    public async Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync()
-    {
-        var httpRes = await _httpClient.GetAsync("api/folders/homechildren");
-        return await ProcessResultFromHttpResponse<List<FolderInfoDto>>(httpRes, "Get Home folders");
-    }
+    public Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<FolderInfoDto>>(ct => _httpClient.GetAsync("api/folders/homechildren", ct), "Get Home folders",
+            cancellationToken: cancellationToken);
 
-    public async Task<Result<FolderDto>> GetAsync(Guid folderId)
-    {        
-        var httpRes = await _httpClient.GetAsync($"api/folders/{folderId}");
-        return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Get folder");
-    }
+    public Task<Result<FolderDto>> GetAsync(Guid folderId, CancellationToken cancellationToken = default) =>
+        SendAsync<FolderDto>(ct => _httpClient.GetAsync($"api/folders/{folderId}", ct), "Get folder", cancellationToken: cancellationToken);
 
     // The folder's path in the folders tree, from the root (Service: Folders.GetPathAsync, as ClientWin shows it).
-    public async Task<Result<string>> GetPathAsync(Guid folderId)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/folders/{folderId}/path");
-        return await ProcessResultFromHttpResponse<string>(httpRes, "Get folder path");
-    }
+    public Task<Result<string>> GetPathAsync(Guid folderId, CancellationToken cancellationToken = default) =>
+        SendAsync<string>(ct => _httpClient.GetAsync($"api/folders/{folderId}/path", ct), "Get folder path", cancellationToken: cancellationToken);
 
-    public async Task<Result<FolderDto>> SaveAsync(FolderDto folder)
-    {
-        HttpResponseMessage httpRes;
+    public Task<Result<FolderDto>> SaveAsync(FolderDto folder, CancellationToken cancellationToken = default) =>
+        SendAsync<FolderDto>(ct => folder.FolderId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/folders", folder, ct)
+                : _httpClient.PutAsJsonAsync($"api/folders", folder, ct),
+            "Save folder", true, cancellationToken);
 
-        if (folder.FolderId == Guid.Empty)
-        {
-            httpRes = await _httpClient.PostAsJsonAsync($"api/folders", folder);
-        }
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/folders", folder);
-        
-        return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Save folder", true);
-    }
-
-    public async Task<Result<FolderDto>> DeleteAsync(Guid id)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/folders/{id}");
-        return await ProcessResultFromHttpResponse<FolderDto>(httpRes, "Delete folder", true);
-    }
+    public Task<Result<FolderDto>> DeleteAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<FolderDto>(ct => _httpClient.DeleteAsync($"api/folders/{id}", ct), "Delete folder", true, cancellationToken);
 
     // The order of the notes the folder remembers (Folder.OrderNotes, in NoteOrderCriteria's format).
-    public async Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes)
-    {
-        var httpRes = await _httpClient.PutAsJsonAsync($"api/folders/{folderId}/ordernotes", orderNotes);
-        return await ProcessResultFromHttpResponse<object>(httpRes, "Save order of notes");
-    }
+    public async Task<Result> UpdateOrderNotesAsync(Guid folderId, string orderNotes, CancellationToken cancellationToken = default) =>
+        await SendAsync<object>(ct => _httpClient.PutAsJsonAsync($"api/folders/{folderId}/ordernotes", orderNotes, ct),
+            "Save order of notes", cancellationToken: cancellationToken);
 }
-

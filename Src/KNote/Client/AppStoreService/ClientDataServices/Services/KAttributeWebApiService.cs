@@ -13,46 +13,26 @@ public class KAttributeWebApiService : BaseService, IKAttributeWebApiService
 
     }
 
-    public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync()
-    {        
-        var httpRes = await _httpClient.GetAsync("api/kattributes");
-        return await ProcessResultFromHttpResponse<List<KAttributeInfoDto>>(httpRes, "Get attributes");
-    }
+    public Task<Result<List<KAttributeInfoDto>>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<KAttributeInfoDto>>(ct => _httpClient.GetAsync("api/kattributes", ct), "Get attributes", cancellationToken: cancellationToken);
 
-    public async Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId)
-    {        
-        var httpRes = await _httpClient.GetAsync($"api/kattributes/getfornotetype/{typeId}");
-        return await ProcessResultFromHttpResponse<List<KAttributeInfoDto>>(httpRes, "Get attributes for note type");
-    }
+    public Task<Result<List<KAttributeInfoDto>>> GetAllAsync(Guid? typeId, CancellationToken cancellationToken = default) =>
+        SendAsync<List<KAttributeInfoDto>>(ct => _httpClient.GetAsync($"api/kattributes/getfornotetype/{typeId}", ct),
+            "Get attributes for note type", cancellationToken: cancellationToken);
 
-    public async Task<Result<KAttributeDto>> GetAsync(Guid id)
-    {     
-        var httpRes = await _httpClient.GetAsync($"api/kattributes/{id}");
-        return await ProcessResultFromHttpResponse<KAttributeDto>(httpRes, "Get attribute");
-    }
+    public Task<Result<KAttributeDto>> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<KAttributeDto>(ct => _httpClient.GetAsync($"api/kattributes/{id}", ct), "Get attribute", cancellationToken: cancellationToken);
 
-    public async Task<Result<KAttributeDto>> SaveAsync(KAttributeDto kattribute)
-    {
-        HttpResponseMessage httpRes;
+    public Task<Result<KAttributeDto>> SaveAsync(KAttributeDto kattribute, CancellationToken cancellationToken = default) =>
+        SendAsync<KAttributeDto>(ct => kattribute.KAttributeId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync("api/kattributes", kattribute, ct)
+                : _httpClient.PutAsJsonAsync("api/kattributes", kattribute, ct),
+            "Save attribute", true, cancellationToken);
 
-        if (kattribute.KAttributeId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync("api/kattributes", kattribute);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync("api/kattributes", kattribute);
+    public Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<KAttributeInfoDto>(ct => _httpClient.DeleteAsync($"api/kattributes/{id}", ct), "Delete attribute", true, cancellationToken);
 
-        return await ProcessResultFromHttpResponse<KAttributeDto>(httpRes, "Save attribute", true);
-    }
-
-    public async Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/kattributes/{id}");
-        return await ProcessResultFromHttpResponse<KAttributeInfoDto>(httpRes, "Delete attribute", true);
-    }
-
-    public async Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/kattributes/{id}/gettabulatedvalues");
-        return await ProcessResultFromHttpResponse<List<KAttributeTabulatedValueDto>>(httpRes, "Get attributes tabulated values");
-    }
+    public Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<List<KAttributeTabulatedValueDto>>(ct => _httpClient.GetAsync($"api/kattributes/{id}/gettabulatedvalues", ct),
+            "Get attributes tabulated values", cancellationToken: cancellationToken);
 }
-

@@ -18,14 +18,13 @@ public class AiAssistantWebApiService : BaseService, IAiAssistantWebApiService
 
     }
 
-    public async Task<Result<List<AiProviderInfoDto>>> GetProvidersAsync()
-    {
-        var httpRes = await _httpClient.GetAsync("api/aiassistant/providers");
-        return await ProcessResultFromHttpResponse<List<AiProviderInfoDto>>(httpRes, "Get AI providers");
-    }
+    public Task<Result<List<AiProviderInfoDto>>> GetProvidersAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<AiProviderInfoDto>>(ct => _httpClient.GetAsync("api/aiassistant/providers", ct), "Get AI providers",
+            cancellationToken: cancellationToken);
 
     // api/aiassistant/chat answers with server-sent events: an "event:" and a "data:" line (AiChatStreamEventDto
-    // as JSON) per event, and a blank line after each one.
+    // as JSON) per event, and a blank line after each one. The server not reached, or the answer cut (no network),
+    // ends it with an Error event as the server's own; cancelled (cancellationToken), OperationCanceledException.
     public async IAsyncEnumerable<AiChatStreamEventDto> ChatAsync(AiChatRequestDto request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -36,10 +35,17 @@ public class AiAssistantWebApiService : BaseService, IAiAssistantWebApiService
         // Read the answer as it arrives, not once it is complete.
         httpRequest.SetBrowserResponseStreamingEnabled(true);
 
-        using var httpRes = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        var (response, sendError) = await SendChatAsync(httpRequest, cancellationToken);
+        if (response == null)
+        {
+            yield return ErrorEvent(sendError!);
+            yield break;
+        }
+
+        using var httpRes = response;
         if (!httpRes.IsSuccessStatusCode)
         {
-            var res = await ProcessResultFromHttpResponse<AiChatTurnDto>(httpRes, ChatAction);
+            var res = await ProcessResultFromHttpResponse<AiChatTurnDto>(httpRes, ChatAction, cancellationToken: cancellationToken);
             yield return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Error, Text = res.ErrorMessage };
             yield break;
         }
@@ -48,8 +54,17 @@ public class AiAssistantWebApiService : BaseService, IAiAssistantWebApiService
         using var reader = new StreamReader(stream);
         var data = new StringBuilder();
 
-        while (await reader.ReadLineAsync(cancellationToken) is { } line)
+        while (true)
         {
+            var (line, readError) = await ReadLineAsync(reader, cancellationToken);
+            if (readError != null)
+            {
+                yield return ErrorEvent(readError);
+                yield break;
+            }
+            if (line == null)
+                break;
+
             if (line.StartsWith("data:"))
             {
                 if (data.Length > 0)
@@ -69,22 +84,48 @@ public class AiAssistantWebApiService : BaseService, IAiAssistantWebApiService
             yield return last;
     }
 
-    public async Task<Result<List<AiChatSessionInfoDto>>> GetSessionsAsync()
+    public Task<Result<List<AiChatSessionInfoDto>>> GetSessionsAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<AiChatSessionInfoDto>>(ct => _httpClient.GetAsync("api/aiassistant/sessions", ct), "Get AI sessions",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<AiChatSessionDto>> GetSessionAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<AiChatSessionDto>(ct => _httpClient.GetAsync($"api/aiassistant/sessions/{noteId}", ct), "Get AI session",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<AiChatSessionDto>> SaveSessionAsync(AiChatSessionDto session, CancellationToken cancellationToken = default) =>
+        SendAsync<AiChatSessionDto>(ct => _httpClient.PostAsJsonAsync("api/aiassistant/sessions", session, ct), "Save AI session",
+            cancellationToken: cancellationToken);
+
+    // An iterator can't yield from a catch: these return the failure, and ChatAsync turns it into an Error event.
+    private async Task<(HttpResponseMessage? Response, string? Error)> SendChatAsync(HttpRequestMessage httpRequest,
+        CancellationToken cancellationToken)
     {
-        var httpRes = await _httpClient.GetAsync("api/aiassistant/sessions");
-        return await ProcessResultFromHttpResponse<List<AiChatSessionInfoDto>>(httpRes, "Get AI sessions");
+        try
+        {
+            return (await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken), null);
+        }
+        catch (Exception ex) when (ex is HttpRequestException || (ex is OperationCanceledException && !cancellationToken.IsCancellationRequested))
+        {
+            return (null, $"Error. The web server could not be reached: {ex.Message}");
+        }
     }
 
-    public async Task<Result<AiChatSessionDto>> GetSessionAsync(Guid noteId)
+    private static async Task<(string? Line, string? Error)> ReadLineAsync(StreamReader reader, CancellationToken cancellationToken)
     {
-        var httpRes = await _httpClient.GetAsync($"api/aiassistant/sessions/{noteId}");
-        return await ProcessResultFromHttpResponse<AiChatSessionDto>(httpRes, "Get AI session");
+        try
+        {
+            return (await reader.ReadLineAsync(cancellationToken), null);
+        }
+        catch (Exception ex) when ((ex is HttpRequestException or IOException) && !cancellationToken.IsCancellationRequested)
+        {
+            return (null, $"Error. The answer was interrupted: {ex.Message}");
+        }
     }
 
-    public async Task<Result<AiChatSessionDto>> SaveSessionAsync(AiChatSessionDto session)
+    private AiChatStreamEventDto ErrorEvent(string error)
     {
-        var httpRes = await _httpClient.PostAsJsonAsync("api/aiassistant/sessions", session);
-        return await ProcessResultFromHttpResponse<AiChatSessionDto>(httpRes, "Save AI session");
+        _appState.NotifyError(ChatAction, error);
+        return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Error, Text = error };
     }
 
     private AiChatStreamEventDto? ReadEvent(string json)

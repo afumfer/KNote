@@ -1,6 +1,7 @@
 ﻿@using System.IO
 
 @inject IJSRuntime JSRuntime
+@inject IStore store
 
 @implements IAsyncDisposable
 
@@ -47,16 +48,17 @@
     private string? HoverClass;
     private string? imgSrc;
 
-    private IJSObjectReference _filePasteModule = null!;
-    private IJSObjectReference _filePasteFunctionReference = null!;
+    private IJSObjectReference? _filePasteModule;
+    private IJSObjectReference? _filePasteFunctionReference;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _filePasteModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/filePaste.js");
-
-            _filePasteFunctionReference = await _filePasteModule.InvokeAsync<IJSObjectReference>("initializeFilePaste", fileDropContainer, inputFile.Element);
+            // Without its script (the server not reachable, already notified) a file can still be chosen, not pasted.
+            _filePasteModule = await JSRuntime.ImportModuleAsync("./js/filePaste.js", store.AppState);
+            if (_filePasteModule != null)
+                _filePasteFunctionReference = await _filePasteModule.InvokeAsync<IJSObjectReference>("initializeFilePaste", fileDropContainer, inputFile.Element);
         }
     }
 

@@ -78,20 +78,13 @@
         if (!HasNotes("export"))
             return;
 
-        Result<ReportFileDto> result;
-        try
-        {
-            result = await store.Reports.GetNotesListCsvAsync(BuildRequest());
-        }
-        catch (HttpRequestException ex)
-        {
-            store.AppState.NotifyError("Export to CSV", $"The notes list could not be exported: {ex.Message}");
-            return;
-        }
+        var result = await store.Reports.GetNotesListCsvAsync(BuildRequest());
         if (!result.IsValid || result.Entity == null)
             return;     // already notified
 
-        module ??= await js.InvokeAsync<IJSObjectReference>("import", "./js/kntReports.js");
+        module ??= await js.ImportModuleAsync("./js/kntReports.js", store.AppState);
+        if (module == null)
+            return;     // already notified
         await module.InvokeVoidAsync("downloadFile", result.Entity.FileName, result.Entity.ContentType, result.Entity.Content);
 
         var notesCount = Grid!.TotalCount;

@@ -12,33 +12,21 @@ public class TraceNoteTypeWebApiService : BaseService, ITraceNoteTypeWebApiServi
 
     }
 
-    public async Task<Result<List<TraceNoteTypeDto>>> GetAllAsync()
-    {
-        var httpRes = await _httpClient.GetAsync($"api/tracenotetypes");
-        return await ProcessResultFromHttpResponse<List<TraceNoteTypeDto>>(httpRes, "Get trace note types");
-    }
+    public Task<Result<List<TraceNoteTypeDto>>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<TraceNoteTypeDto>>(ct => _httpClient.GetAsync($"api/tracenotetypes", ct), "Get trace note types",
+            cancellationToken: cancellationToken);
 
-    public async Task<Result<TraceNoteTypeDto>> GetAsync(Guid id)
-    {
-        var httpRes = await _httpClient.GetAsync($"api/tracenotetypes/{id}");
-        return await ProcessResultFromHttpResponse<TraceNoteTypeDto>(httpRes, "Get trace note type");
-    }
+    public Task<Result<TraceNoteTypeDto>> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<TraceNoteTypeDto>(ct => _httpClient.GetAsync($"api/tracenotetypes/{id}", ct), "Get trace note type",
+            cancellationToken: cancellationToken);
 
-    public async Task<Result<TraceNoteTypeDto>> SaveAsync(TraceNoteTypeDto traceNoteType)
-    {
-        HttpResponseMessage httpRes;
+    public Task<Result<TraceNoteTypeDto>> SaveAsync(TraceNoteTypeDto traceNoteType, CancellationToken cancellationToken = default) =>
+        SendAsync<TraceNoteTypeDto>(ct => traceNoteType.TraceNoteTypeId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync($"api/tracenotetypes", traceNoteType, ct)
+                : _httpClient.PutAsJsonAsync($"api/tracenotetypes", traceNoteType, ct),
+            "Save trace note type", true, cancellationToken);
 
-        if (traceNoteType.TraceNoteTypeId == Guid.Empty)
-            httpRes = await _httpClient.PostAsJsonAsync($"api/tracenotetypes", traceNoteType);
-        else
-            httpRes = await _httpClient.PutAsJsonAsync($"api/tracenotetypes", traceNoteType);
-
-        return await ProcessResultFromHttpResponse<TraceNoteTypeDto>(httpRes, "Save trace note type", true);
-    }
-
-    public async Task<Result<TraceNoteTypeDto>> DeleteAsync(Guid id)
-    {
-        var httpRes = await _httpClient.DeleteAsync($"api/tracenotetypes/{id}");
-        return await ProcessResultFromHttpResponse<TraceNoteTypeDto>(httpRes, "Delete trace note type", true);
-    }
+    public Task<Result<TraceNoteTypeDto>> DeleteAsync(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync<TraceNoteTypeDto>(ct => _httpClient.DeleteAsync($"api/tracenotetypes/{id}", ct), "Delete trace note type", true,
+            cancellationToken);
 }
