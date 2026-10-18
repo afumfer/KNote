@@ -54,6 +54,7 @@ Client/
 │     AppState.cs           – estado de la app (usuario, carpeta seleccionada, árbol de carpetas) y eventos
 │     ChatRoomHub.cs        – conexión SignalR del chat room, hilos seguidos y sus mensajes, no leídos
 │     KntWindows.cs         – ventanas de la app (notas, asistente de IA, chat room) y aviso entre ventanas de las notas guardadas
+│     KntSingleFlight.cs, KntLatestRequest.cs – doble envío y peticiones viejas (ver "Peticiones: doble envío y cancelación")
 │     ClientDataServices/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
@@ -64,7 +65,7 @@ Client/
 │                             KntIndexHeader, KntSections, KntDialogs, KntLogo, KntFolderSelector,
 │                             KntFoldersTreeView, KntNoteSelector, KntNotePicker, KntDialogFrame, KntFormSection,
 │                             KntField, KntMarkdownEditor, ...)
-├── Helpers/                – extensiones de IJSRuntime (localStorage) y NavigationManager (query strings)
+├── Helpers/                – extensiones de IJSRuntime (localStorage, carga de módulos JS) y NavigationManager (query strings)
 └── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/ (filePaste.js, chatRoom.js...), favicon.ico
 ```
 
@@ -83,6 +84,56 @@ Client/
   llamada a `store.Xxx`: basta con comprobar `result.IsValid`. Para operaciones de escritura se pasa
   `emitNotifySucess: true` y el aviso de éxito también sale solo. Los servicios nuevos heredan de
   `BaseService`.
+- **Todas las peticiones pasan por `BaseService.SendAsync`**, que nunca lanza por la petición: sin respuesta del
+  servidor (sin red, servidor parado, timeout del `HttpClient`) devuelve un `Result` no válido con el error, ya
+  notificado; cancelada por quien llama, un `Result` no válido **sin** notificación (no es un error para el usuario).
+  Todos los métodos de los `I*WebApiService` aceptan un `CancellationToken cancellationToken = default` como último
+  parámetro (ver "Peticiones: doble envío y cancelación"). Un `Result` no válido puede ser, por tanto, un fallo de
+  red o una cancelación: usa `Entity` solo dentro del `if (result.IsValid)`. Login y registro devuelven un
+  `UserTokenDto`, no un `Result`: sin respuesta, `success = false` con el motivo. En el streaming del asistente de
+  IA, un fallo de red (al empezar o a mitad de la respuesta) acaba en su evento `error`.
+
+## Peticiones: doble envío y cancelación
+
+Blazor vuelve a ejecutar un manejador `async` si el usuario pulsa otra vez (o Enter, o Supr) mientras espera al
+servidor, y no cancela nada al cambiar de selección o salir de una página. De ahí tres reglas, que siguen todas las
+páginas:
+
+- **Escrituras (guardar, borrar, subir, exportar): una a la vez, con `KntSingleFlight`** (`AppStoreService`). El
+  manejador es `RunAsync` del cuerpo de siempre (`private Task OnSave() => saving.RunAsync(SaveAsync);`); otra
+  llamada mientras dura se ignora. Una guarda por grupo de operaciones que no deben solaparse (`NoteForm`: una para
+  guardar la nota, en `NoteEdit`, y otra, `tabsSaving`, para las pestañas). Su `IsBusy` llega a los botones:
+  `IsBusy` en el que guarda, `Disabled` en los demás y en Cancel/cerrar; los formularios de presentación lo reciben
+  como parámetro (`Saving` en los `XxxForm` y `NoteForm`, `Busy` en `NoteKResources`/`NoteKTasks`/`NoteTraceNotes`).
+  **Las escrituras no se cancelan nunca** (el servidor puede haberlas aplicado ya). Casos especiales: el orden de una
+  carpeta (`NotesTree.OnOrderChanged`) se guarda en el orden en que se elige y solo el último pendiente; el guardado
+  de la sesión del asistente de IA (`AIAssistant.SaveSessionAsync`) se comparte: quien lo pide mientras se guarda
+  espera a ese guardado.
+- **Diálogos: `DialogService.Close` cierra el diálogo de arriba, sea cual sea.** Un `Close` tardío (tras el `await`
+  de un guardado o una carga, si el usuario ya cerró con Esc) cerraría otro diálogo (el padre, o una confirmación).
+  Los `XxxNew`/`XxxEdit` llevan `closed = true` en `Dispose` y cierran con `CloseDialog(...)`, que no hace nada si ya
+  se cerró; `OnExit` no hace nada mientras se guarda. Los selectores que se abren desde otro diálogo
+  (`KntFolderSelector`, `KntNoteSelector`) se cierran una sola vez. Referencia: `Types/TypeEdit`.
+- **Lecturas: gana la última, y nada sigue al salir.**
+  - Cuando una petición nueva deja vieja a la anterior (otra selección, otra búsqueda, otra página, recargar tras un
+    cambio), `KntLatestRequest`: `var r = await request.RunAsync(ct => store.Xxx.GetAsync(id, ct)); if (r.Canceled)
+    return;` (cancelada: no se toca nada) y `r.Value` es el `Result`. Su `Dispose` (en el del componente) cancela la
+    que esté en curso. Ejemplos: `NotePreviewPane`, `ViewMarkdown`, `NoteView`, las notas de `Index`, las listas de
+    Admin, `KntNoteSelector`, la ruta de la carpeta en `NoteForm`.
+  - Un componente con varias lecturas que solo deben pararse al salir: un `CancellationTokenSource disposal` que se
+    cancela en `Dispose` y cuyo token se pasa a cada `store.Xxx`; si tras el `await` está cancelado, no se toca el
+    estado compartido (`AppState`; ver `Index.LoadFolders`). Ejemplos: `NoteForm`, `NoteKAttributes`, `NoteEdit`.
+  - Si la respuesta modifica un DTO que se está editando, se lee aparte y se aplica de una vez cuando llega, para que
+    dos respuestas no se mezclen (`NoteForm.OnChangeNoteTypeActions` → `LoadNoteTypeAttributesAsync`).
+  - `NotesGrid.LoadPage` recibe un `CancellationToken`: se cancelan los bloques de una versión vieja de la lista
+    (recargada, ordenada) y al salir de la página.
+  - Un estado que se resuelve fuera de una petición HTTP sigue la misma idea: `ChatRoomHub.SelectThreadAsync` deja el
+    último hilo elegido (y sigue una sola vez el que se elige dos veces mientras se suscribe).
+
+Los **módulos JS de la app** se cargan con `js.ImportModuleAsync("./js/xxx.js", store.AppState)` (`Helpers`), no con
+`InvokeAsync("import", ...)`: el navegador los pide al servidor la primera vez que se usan y, si no responde, avisa y
+devuelve `null` en vez de romper la página; el componente sigue sin lo que hace el módulo (la lista, sin teclado; el
+chat, sin pegar imágenes...) y lo guarda con `??=`, así que lo vuelve a pedir la próxima vez.
 
 ## SmartDTO en la UI
 
@@ -460,10 +511,12 @@ No hay tests de `Client`. La API que consume se prueba en `Tests/` (ver `Server/
 
 1. Si hace falta, DTO en `Model/Dto` y operación en `Service` (ver "Notas para editar" del `CLAUDE.md` raíz).
 2. Endpoint en `Server/Controllers` con su `[Authorize(Roles = ...)]`.
-3. Método en el `I*WebApiService` + implementación (heredando de `BaseService`); si es un objeto de dominio
-   nuevo, su propiedad en `IStore`/`Store`.
-4. Página(s) y componentes con Radzen en `Pages/<Área>/`, con su `[Authorize(Roles = ...)]`. Si es una
-   sección nueva del menú: su `KntSection` en `Shared/KntSections.cs`, su entrada en
-   `Shared/MainLayoutNavMenu.razor` dentro del `<AuthorizeView>` correspondiente y
-   `<KntIndexHeader Section="KntSections.Xxx">` en la página.
+3. Método en el `I*WebApiService` + implementación (heredando de `BaseService`, con `SendAsync` y un
+   `CancellationToken cancellationToken = default` como último parámetro); si es un objeto de dominio nuevo, su
+   propiedad en `IStore`/`Store`.
+4. Página(s) y componentes con Radzen en `Pages/<Área>/`, con su `[Authorize(Roles = ...)]`, siguiendo las reglas de
+   "Peticiones: doble envío y cancelación" (escrituras con `KntSingleFlight`, lecturas con `KntLatestRequest` o
+   cancelación al salir, diálogos sin `Close` tardío). Si es una sección nueva del menú: su `KntSection` en
+   `Shared/KntSections.cs`, su entrada en `Shared/MainLayoutNavMenu.razor` dentro del `<AuthorizeView>`
+   correspondiente y `<KntIndexHeader Section="KntSections.Xxx">` en la página.
 5. Si cambia el comportamiento de cara al usuario, `Docs/Manual.md` y `Docs/Manual_es.md`.
