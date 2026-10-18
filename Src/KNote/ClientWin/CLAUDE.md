@@ -447,6 +447,14 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   (`KntEditView.ContentScriptsEnabled = false`, solo para el HTML mostrado con `ShowNavigationContent`; una URL
   navegada sí los ejecuta). El chat de IA (`AiChatHtml`) y el chat room (`ChatRoomHtml`) tienen su propia página
   con scripts y escapan el HTML.
+  La excepción son los **diagramas Mermaid** (`KntEditView.RenderDiagrams`, activo en las vistas de la nota, de su
+  tarea y del post-it): solo si el HTML tiene `class="mermaid"`, esa navegación activa los scripts y la página
+  (`KntEditViewControl/KntDiagrams.Page`) empieza con una CSP `script-src https://knote.diagrams/` y acaba con
+  `mermaid.min.js` y `kntMermaid.js` (`data-knt-render`: dibuja solo, la CSP no permite scripts en línea), servidos
+  desde el host virtual `knote.diagrams` (`KntEditView.DiagramsScriptsFolder`, fijado en `Program.cs` a
+  `Resources\mermaid`). Sin diagramas no cambia nada. Se descartó dejar los scripts desactivados e inyectar Mermaid
+  con `ExecuteScriptAsync`: su DOMPurify usa una política Trusted Types, cuyo callback Chromium no ejecuta en una
+  página sin scripts.
   Al pasar una nota HTML a Markdown (`Service.Notes.UtilHtmlToMarkdown`, ReverseMarkdown) los colores y fuentes
   dados con `style` (`span`, `p`, `div`..., típicos del texto pegado) se pasan antes a un `<font style>`
   (`Service/Core/KntHtmlStylesForMarkdown`), que el conversor conserva tal cual; si no, se perderían.

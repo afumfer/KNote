@@ -87,6 +87,27 @@ A repository is a KaNote database, SQLite or SQL Server. The **Repository** menu
 
 **Safe notes.** A note's description can carry HTML (written in the HTML editor or in Markdown). To protect whoever reads it, KaNote shows it without what could run code on its own (scripts, `javascript:` links, forms...), both in the desktop app and in the web app; the formatting (fonts, colors, tables, images, links) is kept.
 
+### Diagrams in notes
+
+A note written in Markdown can include diagrams (flowcharts, sequence, class or state diagrams, Gantt charts, pie charts...) described as text with [Mermaid](https://mermaid.js.org/): write the description in a code block whose language is `mermaid`. For example:
+
+````markdown
+```mermaid
+flowchart LR
+    WIN["Desktop app<br/>KNote.ClientWin"] --> DB[("Notes database")]
+    WEB["Web app<br/>KNote.Client"] -- "through the server" --> DB
+```
+````
+
+Both apps draw it wherever the note is shown as it looks: in the desktop app, the note's view, its tasks and the post-it; in the web app, Home, the note view and the **Preview** of the description and of the tasks.
+
+- In a label, `<br/>` starts a new line.
+- If the description has an error, the block is shown as text, so you can see it and fix it.
+- Diagrams follow the light or dark mode (in the web app they change with the theme). A note with colors of its own, shown on a white sheet in the dark themes of the web app, keeps its diagrams light.
+- They are not drawn in the desktop app's HTML editor and Markdown view (they are text there), in prints and PDFs, or in the answers of the AI assistant and the messages of the chat room.
+- No Internet connection is needed: Mermaid comes with KaNote. A note with diagrams takes a little longer to show (about half a second); the others are not affected.
+- They are safe to show: Mermaid draws them with its strict security level and, in the desktop app, the page of a note with diagrams can run only KaNote's own scripts (a Content Security Policy).
+
 ### Printing and exporting (desktop app)
 
 The **File** menu of the management window has these options (the three prints grouped in its **Print** submenu), all working on the notes list exactly as you see it: the notes of the selected folder, or the result of a search or a filter, in the order and with the columns shown on screen (including the compact view and the list filter).

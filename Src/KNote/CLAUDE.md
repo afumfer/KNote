@@ -170,6 +170,13 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   los usuarios, así que su HTML (tras Markdig) se sanea antes de mostrarse, con las mismas reglas en las dos
   apps: `IKntNoteService.UtilMarkdownToHtml`/`UtilSanitizeHtml` en `ClientWin` y `POST api/notes/html` en la Web.
   Tests en `Tests/KntHtmlSanitizerTests`.
+- **Diagramas Mermaid de las notas**: Markdig ya escribe un bloque ` ```mermaid ` como `<pre class="mermaid">` con la
+  definición como texto (escapada por el saneador; tests en `Tests/ServiceTests/NoteHtmlMarkdownTests`), y cada app lo
+  dibuja en el navegador con `mermaid.min.js` + `kntMermaid.js` (común: tema según el color del texto, cola de
+  dibujos, redibujo al cambiar el tema). **Una sola copia** en `Client/wwwroot/lib/mermaid/` (Mermaid 11.17.2, MIT,
+  comprobado con la integridad del paquete npm); `ClientWin` la enlaza en su `.csproj` a `Resources\mermaid\`. Para
+  subir de versión se sustituye `mermaid.min.js` (el de `dist/` del paquete npm, script clásico, sin `eval`) y su
+  `LICENSE` ahí, y se prueban las dos apps. Detalles de cada app en `ClientWin/CLAUDE.md` y `Client/CLAUDE.md`.
 - **Sesiones del asistente de IA** (`IKntService.AiSessions`, comandos en `KntAiSessionCommands.cs`, Staff).
   Cada conversación es una nota del tipo `@ChatSessions` (`KntConst.ChatSessionsTag`) en la carpeta
   `AI Assistant sessions`, con el proveedor y el modelo en los atributos `AiProvider`/`AiModel` del tipo y una

@@ -32,6 +32,10 @@ buena.
       misma relación (mismas notas, sentido y tipo, también sin tipo) y guardar: se avisa de que la relación ya existe
       (`KntNotesSaveTraceNoteAsyncCommand`) y el editor sigue abierto, como con una nota trazada consigo misma; al
       quitar la repetida se guarda, y al reabrir la nota la relación está una sola vez.
+- [ ] Diagramas Mermaid: una nota con un bloque ` ```mermaid ` lo muestra dibujado en la vista de la nota (modo
+      navegación) y en la de una tarea con ese bloque, en modo claro y oscuro; un bloque con errores se ve como
+      texto; una nota sin diagramas se ve igual que antes. En la vista Markdown y en el editor HTML el bloque es
+      texto, y al volver a la vista de navegación se dibuja otra vez.
 
 ## Carpetas y selección
 
@@ -48,6 +52,7 @@ buena.
 - [ ] Ocultar/activar todos los post-its (`Store.HidePostIts`/`ActivatePostIts`) desde el menú
       correspondiente.
 - [ ] Guardar/eliminar un post-it actualiza la nota asociada.
+- [ ] Un post-it de una nota con un diagrama Mermaid lo muestra dibujado.
 
 ## Scripting (KntScript)
 

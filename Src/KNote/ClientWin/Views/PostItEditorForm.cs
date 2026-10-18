@@ -49,8 +49,10 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         picMenu.BringToFront();
         picResize.BringToFront();
 
-        // The note's HTML (made safe by Service.Notes.UtilMarkdownToHtml) doesn't need scripts: none runs there.
+        // The note's HTML (made safe by Service.Notes.UtilMarkdownToHtml) doesn't need scripts: none runs there, only
+        // the ones that draw its Mermaid diagrams (see KntDiagrams).
         kntEditView.ContentScriptsEnabled = false;
+        kntEditView.RenderDiagrams = true;
 
         // In navigation mode picMenu is placed from the URL box's bounds, first while this form is still being
         // built: the URL box keeps moving and growing afterwards (kntEditView finishes its own scaling later,
