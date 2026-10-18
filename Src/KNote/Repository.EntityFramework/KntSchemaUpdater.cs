@@ -73,8 +73,19 @@ public static class KntSchemaUpdater
         // one created just above by EnsureCreated (seeded at CurrentSchemaRevision), or created elsewhere.
         AddRepositoryIdentity(ctx, repositoryRef);
 
+        if (repositoryRef.Provider == "Microsoft.Data.Sqlite")
+            UseWriteAheadLog(ctx);
+
         VerifiedConnectionStrings[repositoryRef.ConnectionString] = true;
     }
+
+    // Sqlite allows one writer at a time. In its default mode (rollback journal) concurrent writes, such as those of
+    // several requests of the Server, failed at once with "database is locked"; in WAL mode readers don't block the
+    // writer and writers wait their turn. The mode is kept in the database file: this sets it once and is a no-op
+    // afterwards (and for an in-memory database, which stays "memory"). WAL adds the -wal and -shm files next to the
+    // database and needs every process using it on the same machine: not for databases in network folders.
+    private static void UseWriteAheadLog(KntDbContext ctx) =>
+        ctx.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
 
     private static KntDbContext CreateContext(RepositoryRef repositoryRef)
     {
