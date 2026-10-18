@@ -1,5 +1,7 @@
 ﻿@page "/attributes"
 
+@implements IDisposable
+
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
@@ -45,12 +47,23 @@
         await Load();
     }
 
+    // The list asked for last: reading it again (after a change) or leaving the page cancels the one being read.
+    private readonly KntLatestRequest listRequest = new();
+
+    public void Dispose() => listRequest.Dispose();
+
     private async Task Load()
     {
-        var result = await store.KAttributes.GetAllAsync();
+        var request = await listRequest.RunAsync(ct => store.KAttributes.GetAllAsync(ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
+        {
             attributes = result.Entity;
-            selection = attributes!.Where(x => selection.Any(s => s.KAttributeId == x.KAttributeId)).ToList();
+            selection = attributes.Where(x => selection.Any(s => s.KAttributeId == x.KAttributeId)).ToList();
+        }
     }
 
     async Task OnNew()

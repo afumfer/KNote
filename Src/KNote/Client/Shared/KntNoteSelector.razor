@@ -98,6 +98,9 @@
     private bool loading;
     // A new list (another search or folder) is a new grid, which loads its first page.
     private int listVersion;
+    // The page asked for last: another page, search or folder asked for meanwhile cancels the one being read (its
+    // answer would replace the newer one's).
+    private readonly KntLatestRequest notesRequest = new();
 
     private IList<NoteMinimalDto> selection = new List<NoteMinimalDto>();
     private NoteMinimalDto? Selected => selection.FirstOrDefault();
@@ -116,7 +119,9 @@
 
     public void Dispose()
     {
+        closed = true;
         appState.OnChange -= StateHasChanged;
+        notesRequest.Dispose();
     }
 
     private RenderFragment NotesList => __builder =>
@@ -142,12 +147,14 @@
         loading = true;
 
         var page = new PageIdentifier { PageNumber = (args.Skip ?? 0) / PageSize + 1, PageSize = PageSize };
-        Result<List<NoteMinimalDto>> result;
-        if (mode == SelectorMode.Search)
-            result = await store.Notes.GetSearch($"textSearch={Uri.EscapeDataString(searchedText)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}");
-        else
-            result = await store.Notes.GetFilter(new NotesFilterDto { FolderId = folder?.FolderId, PageIdentifier = page });
+        var request = await notesRequest.RunAsync(ct => mode == SelectorMode.Search
+            ? store.Notes.GetSearch($"textSearch={Uri.EscapeDataString(searchedText)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}", ct)
+            : store.Notes.GetFilter(new NotesFilterDto { FolderId = folder?.FolderId, PageIdentifier = page }, ct));
+        // The newer request shows its notes (and ends the loading).
+        if (request.Canceled)
+            return;
 
+        var result = request.Value;
         notes = result.IsValid ? result.Entity : new List<NoteMinimalDto>();
         count = result.IsValid ? (int)Math.Max(result.TotalCount, notes.Count) : 0;
         loading = false;
@@ -206,14 +213,26 @@
     private void OnRowDoubleClick(NoteMinimalDto note)
     {
         if (!IsExcluded(note))
-            dialogService.Close(note);
+            CloseDialog(note);
     }
 
     private void OnConfirm()
     {
         if (Selected != null)
-            dialogService.Close(Selected);
+            CloseDialog(Selected);
     }
 
-    private void OnCancel() => dialogService.Close(null);
+    private void OnCancel() => CloseDialog(null);
+
+    // Closed once: it is opened from another dialog, and a second Close (a click repeated, or after Esc) would close
+    // that one (Radzen closes the dialog on top).
+    private bool closed;
+
+    private void CloseDialog(object? result)
+    {
+        if (closed)
+            return;
+        closed = true;
+        dialogService.Close(result);
+    }
 }

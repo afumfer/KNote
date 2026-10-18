@@ -28,7 +28,10 @@
     private NoteDto? note;
     private bool loadFailed;
     private Guid? requestedId;
+    // The selection: it changes before the note is loaded (SelectionDelay).
     private int version;
+    // The note loaded last: another one selected (or this one saved again) cancels the one being read.
+    private readonly KntLatestRequest noteRequest = new();
 
     protected override void OnInitialized()
     {
@@ -38,6 +41,7 @@
     public void Dispose()
     {
         kntWindows.NoteSaved -= OnNoteSaved;
+        noteRequest.Dispose();
     }
 
     protected override async Task OnParametersSetAsync()
@@ -47,6 +51,8 @@
 
         requestedId = NoteId;
         var current = ++version;
+        // The note being read is no longer the selected one.
+        noteRequest.Cancel();
         if (NoteId == null)
         {
             note = null;
@@ -56,16 +62,17 @@
         // The note shown so far stays while the next one is loaded.
         await Task.Delay(SelectionDelay);
         if (current == version)
-            await LoadNote(NoteId.Value, current);
+            await LoadNote(NoteId.Value);
     }
 
-    private async Task LoadNote(Guid noteId, int current)
+    private async Task LoadNote(Guid noteId)
     {
-        var result = await store.Notes.GetAsync(noteId);
+        var request = await noteRequest.RunAsync(ct => store.Notes.GetAsync(noteId, ct));
         // Another note selected meanwhile: that one is loaded instead.
-        if (current != version)
+        if (request.Canceled)
             return;
 
+        var result = request.Value;
         note = result.IsValid ? result.Entity : null;
         loadFailed = !result.IsValid;
     }
@@ -77,7 +84,7 @@
 
         _ = InvokeAsync(async () =>
         {
-            await LoadNote(noteId, version);
+            await LoadNote(noteId);
             StateHasChanged();
         });
     }

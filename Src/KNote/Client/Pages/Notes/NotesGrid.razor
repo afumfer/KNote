@@ -66,8 +66,9 @@
 </div>
 
 @code {
-    // Loads a page of the list in an order (null: the list's own order).
-    [Parameter][EditorRequired] public Func<PageIdentifier, NotesOrder?, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
+    // Loads a page of the list in an order (null: the list's own order); cancelled when its rows are no longer wanted
+    // (the list loaded again or sorted, or left).
+    [Parameter][EditorRequired] public Func<PageIdentifier, NotesOrder?, CancellationToken, Task<Result<List<NoteMinimalDto>>>> LoadPage { get; set; } = null!;
     [Parameter] public NotesListPosition? Position { get; set; }
     // Compact view: number, topic, priority and tags (NotesListViewToggle).
     [Parameter] public bool Compact { get; set; } = true;
@@ -126,6 +127,8 @@
     // aria-rowindex can't be trusted, it goes wrong when the grid is drawn again by its parent).
     private readonly Dictionary<Guid, int> noteIndexes = new();
     private int dataVersion;
+    // The requests of the blocks of this dataVersion: cancelled with it (their rows would be ignored anyway).
+    private CancellationTokenSource blocksCancellation = new();
     private NotesOrder? order;
     private NotesOrder? initialOrder;
     private NotesOrder? gridSort;
@@ -203,9 +206,7 @@
     /// window).</summary>
     public async Task RefreshAsync()
     {
-        blocks.Clear();
-        noteIndexes.Clear();
-        dataVersion++;
+        NewDataVersion();
 
         if (grid != null)
         {
@@ -267,9 +268,19 @@
         return blockTask;
     }
 
+    // The notes loaded are no longer valid (reloaded, or another order): the blocks still being read are cancelled.
+    private void NewDataVersion()
+    {
+        blocks.Clear();
+        noteIndexes.Clear();
+        dataVersion++;
+        blocksCancellation.Cancel();
+        blocksCancellation = new CancellationTokenSource();
+    }
+
     private async Task<List<NoteMinimalDto>?> FetchBlockAsync(int block, int version)
     {
-        var result = await LoadPage(new PageIdentifier { PageNumber = block + 1, PageSize = FetchSize }, order);
+        var result = await LoadPage(new PageIdentifier { PageNumber = block + 1, PageSize = FetchSize }, order, blocksCancellation.Token);
         if (version != dataVersion)
             return null;
 
@@ -294,9 +305,7 @@
         if (Position != null)
             Position.Order = newOrder;
 
-        blocks.Clear();
-        noteIndexes.Clear();
-        dataVersion++;
+        NewDataVersion();
         if (await GetModuleAsync() is { } gridModule)
             await gridModule.InvokeVoidAsync("setScrollTop", host, 0);
         await OrderChanged.InvokeAsync(newOrder);
@@ -405,6 +414,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        blocksCancellation.Cancel();
         if (keyboardHelper != null)
         {
             // The page is left (or the list replaced by another one): Position remembers where the list was

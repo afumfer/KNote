@@ -47,14 +47,22 @@ else
         await LoadNote();
     }
 
+    // The note read last: read again (saved in another window) or the window closed cancels the one being read.
+    private readonly KntLatestRequest noteRequest = new();
+
     public void Dispose()
     {
         kntWindows.NoteSaved -= OnNoteSaved;
+        noteRequest.Dispose();
     }
 
     private async Task LoadNote()
     {
-        var result = await store.Notes.GetAsync(NoteId);
+        var request = await noteRequest.RunAsync(ct => store.Notes.GetAsync(NoteId, ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
             note = result.Entity;
         else

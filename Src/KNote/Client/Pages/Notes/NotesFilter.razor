@@ -82,14 +82,14 @@
         filterVersion++;
     }
 
-    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order, CancellationToken cancellationToken)
     {
         // A new filter for each request: the grid may ask for several pages at the same time.
         var filter = appState.NotesFilter!.GetSimpleDto<NotesFilterDto>();
         filter.PageIdentifier = page;
         filter.OrderColumn = order?.Column;
         filter.OrderAscending = order?.Ascending ?? true;
-        return await store.Notes.GetFilter(filter);
+        return await store.Notes.GetFilter(filter, cancellationToken);
     }
 
     // The notes of the filter applied (not of criteria changed and not applied yet), to print or export them

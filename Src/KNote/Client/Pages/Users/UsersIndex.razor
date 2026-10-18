@@ -1,5 +1,7 @@
 ﻿@page "/users"
 
+@implements IDisposable
+
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
@@ -46,12 +48,23 @@
         await Load();
     }
 
+    // The list asked for last: reading it again (after a change) or leaving the page cancels the one being read.
+    private readonly KntLatestRequest listRequest = new();
+
+    public void Dispose() => listRequest.Dispose();
+
     private async Task Load()
     {
-        var result = await store.Users.GetAllAsync();
+        var request = await listRequest.RunAsync(ct => store.Users.GetAllAsync(cancellationToken: ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
+        {
             users = result.Entity;
-            selection = users!.Where(x => selection.Any(s => s.UserId == x.UserId)).ToList();
+            selection = users.Where(x => selection.Any(s => s.UserId == x.UserId)).ToList();
+        }
 
         StateHasChanged();
     }

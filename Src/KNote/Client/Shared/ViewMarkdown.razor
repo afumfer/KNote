@@ -5,6 +5,8 @@
 @inject IStore store
 @inject IJSRuntime js
 
+@implements IDisposable
+
 @if (string.IsNullOrEmpty(htmlContent))
 {
     if (TemplateContent != null)
@@ -43,7 +45,9 @@ else
 
     private string? htmlContent;
     private string? renderedMarkdown;
-    private int version;
+    // The HTML of the content shown last: new content (or leaving) cancels the one being made; until it arrives the
+    // content shown so far stays.
+    private readonly KntLatestRequest htmlRequest = new();
     private ElementReference markdownElement;
     private string? drawnHtml;
 
@@ -59,19 +63,21 @@ else
             return;
 
         renderedMarkdown = MarkdownContent;
-        var current = ++version;
+        htmlRequest.Cancel();
         if (string.IsNullOrEmpty(MarkdownContent))
             htmlContent = null;
         else if (DisableHtml)
             htmlContent = RenderWithoutHtml(MarkdownContent);
         else
         {
-            // The content shown so far stays until the new one arrives (and an older answer is ignored).
-            var result = await store.Notes.HtmlAsync(MarkdownContent);
-            if (current == version)
-                htmlContent = result.IsValid ? result.Entity : null;
+            var markdown = MarkdownContent;
+            var request = await htmlRequest.RunAsync(ct => store.Notes.HtmlAsync(markdown, ct));
+            if (!request.Canceled)
+                htmlContent = request.Value.IsValid ? request.Value.Entity : null;
         }
     }
+
+    public void Dispose() => htmlRequest.Dispose();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

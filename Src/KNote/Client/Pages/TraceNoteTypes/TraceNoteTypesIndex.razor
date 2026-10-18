@@ -1,5 +1,7 @@
 @page "/tracenotetypes"
 
+@implements IDisposable
+
 @inject IStore store
 @inject DialogService dialogService
 @inject ContextMenuService contextMenuService
@@ -42,9 +44,18 @@
         await Load();
     }
 
+    // The list asked for last: reading it again (after a change) or leaving the page cancels the one being read.
+    private readonly KntLatestRequest listRequest = new();
+
+    public void Dispose() => listRequest.Dispose();
+
     private async Task Load()
     {
-        var result = await store.TraceNoteTypes.GetAllAsync();
+        var request = await listRequest.RunAsync(ct => store.TraceNoteTypes.GetAllAsync(ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
         {
             traceNoteTypes = result.Entity;

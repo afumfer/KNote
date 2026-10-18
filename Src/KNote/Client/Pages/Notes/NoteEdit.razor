@@ -48,6 +48,8 @@ else
     private bool closing;
     // One save at a time: a double click (or Save and then Save and new) saves once; a new note isn't created twice.
     private readonly KntSingleFlight saving = new();
+    // The page left (another page in the window): what is being read is no longer needed (a save goes on).
+    private readonly CancellationTokenSource disposal = new();
     private DotNetObjectReference<NoteEdit>? dotNetRef;
     private IJSObjectReference? unsavedChangesWatch;
 
@@ -55,7 +57,7 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        var result = await store.NoteTypes.GetAllAsync();
+        var result = await store.NoteTypes.GetAllAsync(disposal.Token);
         if (result.IsValid)
         {
             noteTypes = result.Entity;
@@ -79,6 +81,7 @@ else
 
     public async ValueTask DisposeAsync()
     {
+        disposal.Cancel();
         if (unsavedChangesWatch != null)
         {
             await unsavedChangesWatch.InvokeVoidAsync("dispose");
@@ -93,7 +96,7 @@ else
 
     private async Task GetNote(Guid noteId)
     {
-        var result = await store.Notes.GetAsync(noteId);
+        var result = await store.Notes.GetAsync(noteId, disposal.Token);
         if (result.IsValid)
         {
             note = result.Entity;
@@ -126,14 +129,14 @@ else
         if (folderId == null)
             return null;
 
-        var result = await store.Folders.GetAsync(folderId.Value);
+        var result = await store.Folders.GetAsync(folderId.Value, disposal.Token);
         return result.IsValid ? result.Entity : null;
     }
 
     // A new note (IsNew: resources and tasks wait until it is saved), in the given folder.
     private async Task GetNewNote(FolderInfoDto? folder)
     {
-        var result = await store.Notes.NewAsync();
+        var result = await store.Notes.NewAsync(disposal.Token);
 
         if (result.IsValid)
         {

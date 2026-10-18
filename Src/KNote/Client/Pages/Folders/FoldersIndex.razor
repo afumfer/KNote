@@ -49,16 +49,24 @@
         await Load();
     }
 
+    // The tree asked for last: reading it again (after a change) or leaving the page cancels the one being read.
+    private readonly KntLatestRequest treeRequest = new();
+
     public void Dispose()
     {
         appState.OnChange -= StateHasChanged;
+        treeRequest.Dispose();
     }
 
     async Task Load()
     {
         selectedFolder = null;
 
-        var result = await store.Folders.GetTreeAsync();
+        var request = await treeRequest.RunAsync(ct => store.Folders.GetTreeAsync(ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
             foldersTree = result.Entity;
         else

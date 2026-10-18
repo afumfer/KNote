@@ -145,7 +145,7 @@
 
     private NotesOrder FolderOrder() => NotesOrder.From(NoteOrderCriteria.Parse(folder?.OrderNotes));
 
-    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order, CancellationToken cancellationToken)
     {
         // Without an order chosen in the list, the folder's one.
         order ??= FolderOrder();
@@ -157,7 +157,7 @@
             PageIdentifier = page,
             OrderColumn = order.Column,
             OrderAscending = order.Ascending
-        });
+        }, cancellationToken);
     }
 
     // The folder's notes, to print or export them (NotesPrintExportMenu adds the list's order and view).

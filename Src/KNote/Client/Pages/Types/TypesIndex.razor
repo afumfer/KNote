@@ -1,5 +1,7 @@
 ﻿@page "/types"
 
+@implements IDisposable
+
 @inject IStore store
 @inject TooltipService tooltipService
 @inject DialogService dialogService
@@ -43,12 +45,23 @@
         await Load();
     }
 
+    // The list asked for last: reading it again (after a change) or leaving the page cancels the one being read.
+    private readonly KntLatestRequest listRequest = new();
+
+    public void Dispose() => listRequest.Dispose();
+
     private async Task Load()
     {
-        var result = await store.NoteTypes.GetAllAsync();
+        var request = await listRequest.RunAsync(ct => store.NoteTypes.GetAllAsync(ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
         if (result.IsValid)
+        {
             noteTypes = result.Entity;
-            selection = noteTypes!.Where(x => selection.Any(s => s.NoteTypeId == x.NoteTypeId)).ToList();
+            selection = noteTypes.Where(x => selection.Any(s => s.NoteTypeId == x.NoteTypeId)).ToList();
+        }
 
         StateHasChanged();
     }

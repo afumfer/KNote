@@ -101,13 +101,13 @@
             OnSearch();
     }
 
-    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order)
+    private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order, CancellationToken cancellationToken)
     {
         var search = appState.NotesSearchPosition?.ListKey ?? "";
         var queryString = $"textSearch={Uri.EscapeDataString(search)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}";
         if (order != null)
             queryString += $"&orderColumn={order.Column}&orderAscending={order.Ascending}";
-        return await store.Notes.GetSearch(queryString);
+        return await store.Notes.GetSearch(queryString, cancellationToken);
     }
 
     // The text of the search shown in the list (the box may have been changed without searching it).
