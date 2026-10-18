@@ -74,10 +74,12 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             comboScriptType.Items.Add(scriptType.Text);
 
         // The views of the note show HTML written by users (made safe by Service.Notes.UtilMarkdownToHtml), which
-        // doesn't need scripts: none runs there.
+        // doesn't need scripts: none runs there, only the ones that draw its Mermaid diagrams (see KntDiagrams).
         kntEditView.ContentScriptsEnabled = false;
         kntEditViewTask.ContentScriptsEnabled = false;
         webViewResource.ContentScriptsEnabled = false;
+        kntEditView.RenderDiagrams = true;
+        kntEditViewTask.RenderDiagrams = true;
 
         // TODO: options for new versión
         buttonCheck.Visible = false;

@@ -60,6 +60,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <!-- The Mermaid diagrams of the notes (KntEditView.DiagramsScriptsFolder): the web app's copy, the only one. -->
+    <None Include="..\Client\wwwroot\lib\mermaid\*" LinkBase="Resources\mermaid" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Resources\Icons\KNote.ico" />
     <EmbeddedResource Include="Resources\Icons\KNote.ico" />
   </ItemGroup>

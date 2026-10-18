@@ -46,6 +46,13 @@ namespace KntWebView
         /// </summary>
         public static event EventHandler<Exception>? WebView2ErrorOccurred;
 
+        /// <summary>
+        /// Folder with the scripts that draw the Mermaid diagrams (mermaid.min.js and kntMermaid.js, see
+        /// KntDiagrams), served to the pages as https://knote.diagrams/. Set once by the host application at
+        /// startup; without it (or if it doesn't exist) RenderDiagrams has no effect.
+        /// </summary>
+        public static string? DiagramsScriptsFolder { get; set; }
+
         #endregion
 
         #region Public properties
@@ -74,6 +81,14 @@ namespace KntWebView
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ContentScriptsEnabled { get; set; } = true;
+
+        /// <summary>
+        /// Whether the Mermaid diagrams of the HTML shown with ShowNavigationContent are drawn (false by default).
+        /// For content without scripts of its own (ContentScriptsEnabled off): a page with diagrams runs only the
+        /// diagrams' scripts (see KntDiagrams), and one without them is shown as it is.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool RenderDiagrams { get; set; }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowNavigationTools
@@ -498,12 +513,34 @@ namespace KntWebView
                 webView.CoreWebView2.Profile.PreferredColorScheme = Application.IsDarkModeEnabled
                     ? CoreWebView2PreferredColorScheme.Dark
                     : CoreWebView2PreferredColorScheme.Light;
+
+                MapDiagramsScriptsFolder();
             }
             else
             {
                 _isInitialized = false; // allows a retry on a later call (see EnsureInitializedAsync)
             }
             statusLabel.Text = "";
+        }
+
+        private bool _diagramsScriptsMapped;
+
+        private void MapDiagramsScriptsFolder()
+        {
+            if (string.IsNullOrEmpty(DiagramsScriptsFolder) || !Directory.Exists(DiagramsScriptsFolder))
+                return;
+
+            try
+            {
+                webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    KntDiagrams.DiagramsHost, DiagramsScriptsFolder, CoreWebView2HostResourceAccessKind.Allow);
+                _diagramsScriptsMapped = true;
+            }
+            catch (Exception ex)
+            {
+                // The diagrams are then shown as their text.
+                WebView2ErrorOccurred?.Invoke(this, ex);
+            }
         }
 
         private void InitializeEditorsComponent()
@@ -604,9 +641,10 @@ namespace KntWebView
                 if (webView.CoreWebView2 != null)
                 {
                     NavigationStart?.Invoke(this, new EventArgs());
+                    var withDiagrams = RenderDiagrams && _diagramsScriptsMapped && KntDiagrams.HasDiagrams(contentString);
                     // Applies from the next navigation on (ExecuteScriptAsync, used by the host, still works).
-                    webView.CoreWebView2.Settings.IsScriptEnabled = ContentScriptsEnabled;
-                    webView.NavigateToString(contentString);
+                    webView.CoreWebView2.Settings.IsScriptEnabled = ContentScriptsEnabled || withDiagrams;
+                    webView.NavigateToString(withDiagrams ? KntDiagrams.Page(contentString) : contentString);
                 }
             }
             catch (Exception ex)

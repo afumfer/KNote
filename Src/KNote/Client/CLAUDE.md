@@ -424,7 +424,10 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   Markdig + `KntHtmlSanitizer` de `Service`), con las mismas reglas que `ClientWin`; las descripciones de Home ya
   llegan así de `HomeNotes` (anónimo) y se pasan con `SafeHtml`. Sanear en WebAssembly (HtmlSanitizer/AngleSharp)
   se descartó: +680 KB de descarga y 1-2 s con una nota de 130 KB. No insertes HTML de usuario de otra forma
-  (`MarkupString`), tampoco el tema de una nota. Para contenido sin HTML que cambia a menudo (el chat del
+  (`MarkupString`), tampoco el tema de una nota. Los **diagramas Mermaid** (`<pre class="mermaid">`) los dibuja
+  `ViewMarkdown` en `OnAfterRenderAsync`, solo si el HTML ha cambiado y los tiene (no con `DisableHtml`), con
+  `kntMermaid.render` (`wwwroot/lib/mermaid/kntMermaid.js`, cargado en `index.html`), que descarga
+  `mermaid.min.js` (~3,6 MB) la primera vez que hace falta y redibuja al cambiar el tema (ver el `CLAUDE.md` raíz). Para contenido sin HTML que cambia a menudo (el chat del
   asistente, que se repinta mientras llega la respuesta) `DisableHtml="true"` lo genera en el navegador, con su
   HTML como texto y solo enlaces `http`, `https`, `mailto` o relativos, igual que `AiChatHtml` en `ClientWin`.
 - **Informes imprimibles**: los genera `Server` (`IStore.Reports` → `api/reports`, ver `Server/CLAUDE.md`) como una

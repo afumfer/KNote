@@ -3,6 +3,7 @@
 @using Markdig.Syntax.Inlines
 
 @inject IStore store
+@inject IJSRuntime js
 
 @if (string.IsNullOrEmpty(htmlContent))
 {
@@ -14,7 +15,7 @@
 else
 {
     @* knt-markdown: see knt-theme.css (content with colors of its own in the dark themes). *@
-    <div class="knt-markdown">@((MarkupString)htmlContent)</div>
+    <div class="knt-markdown" @ref="markdownElement">@((MarkupString)htmlContent)</div>
 }
 
 @code {
@@ -35,9 +36,16 @@ else
     private static readonly MarkdownPipeline PipelineWithoutHtml =
         new MarkdownPipelineBuilder().UseAdvancedExtensions().DisableHtml().Build();
 
+    // The Mermaid diagrams of a note (<pre class="mermaid">, written by Markdig for a ```mermaid block), drawn in the
+    // browser once shown, by wwwroot/lib/mermaid/kntMermaid.js (shared with ClientWin), which loads mermaid.min.js
+    // the first time a note has them and follows the theme. Not in the content without HTML (AI answers, chat).
+    private const string MermaidLibraryUrl = "lib/mermaid/mermaid.min.js";
+
     private string? htmlContent;
     private string? renderedMarkdown;
     private int version;
+    private ElementReference markdownElement;
+    private string? drawnHtml;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -62,6 +70,25 @@ else
             var result = await store.Notes.HtmlAsync(MarkdownContent);
             if (current == version)
                 htmlContent = result.IsValid ? result.Entity : null;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (htmlContent == drawnHtml)
+            return;
+
+        drawnHtml = htmlContent;
+        if (DisableHtml || htmlContent == null || !htmlContent.Contains("class=\"mermaid\"", StringComparison.Ordinal))
+            return;
+
+        try
+        {
+            await js.InvokeAsync<int>("kntMermaid.render", markdownElement, MermaidLibraryUrl);
+        }
+        catch (JSException)
+        {
+            // The diagrams are shown as their text.
         }
     }
 

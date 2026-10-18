@@ -87,6 +87,27 @@ Un repositorio es una base de datos de KaNote, SQLite o SQL Server. El menú **R
 
 **Notas seguras.** La descripción de una nota puede llevar HTML (escrito en el editor HTML o en Markdown). Para proteger a quien la lee, KaNote la muestra sin lo que podría ejecutar código por sí solo (scripts, enlaces `javascript:`, formularios...), tanto en la aplicación de escritorio como en la Web; el formato (fuentes, colores, tablas, imágenes, enlaces) se conserva.
 
+### Diagramas en las notas
+
+Una nota escrita en Markdown puede incluir diagramas (de flujo, de secuencia, de clases o de estados, diagramas de Gantt, de tarta...) descritos como texto con [Mermaid](https://mermaid.js.org/): escribe la descripción en un bloque de código cuyo lenguaje sea `mermaid`. Por ejemplo:
+
+````markdown
+```mermaid
+flowchart LR
+    WIN["Aplicación de escritorio<br/>KNote.ClientWin"] --> DB[("Base de datos de notas")]
+    WEB["Aplicación Web<br/>KNote.Client"] -- "a través del servidor" --> DB
+```
+````
+
+Las dos aplicaciones lo dibujan allí donde la nota se muestra tal como se ve: en la aplicación de escritorio, la vista de la nota, sus tareas y el post-it; en la Web, Home, la vista de la nota y la **Preview** de la descripción y de las tareas.
+
+- En una etiqueta, `<br/>` empieza una línea nueva.
+- Si la descripción tiene un error, el bloque se muestra como texto, para que puedas verlo y corregirlo.
+- Los diagramas siguen el modo claro u oscuro (en la Web cambian con el tema). Una nota con colores propios, que en los temas oscuros de la Web se muestra sobre una hoja blanca, mantiene claros sus diagramas.
+- No se dibujan en el editor HTML ni en la vista Markdown de la aplicación de escritorio (ahí son texto), en las impresiones y los PDF, ni en las respuestas del asistente de IA y los mensajes del chat room.
+- No hace falta conexión a Internet: Mermaid viene con KaNote. Una nota con diagramas tarda algo más en mostrarse (alrededor de medio segundo); las demás no se ven afectadas.
+- Son seguros de mostrar: Mermaid los dibuja con su nivel de seguridad estricto y, en la aplicación de escritorio, la página de una nota con diagramas solo puede ejecutar los scripts propios de KaNote (una política de seguridad de contenido, CSP).
+
 ### Impresión y exportación (aplicación de escritorio)
 
 El menú **File** de la ventana de gestión tiene estas opciones (las tres impresiones, agrupadas en su submenú **Print**), todas sobre la lista de notas tal como la ves: las notas de la carpeta seleccionada, o el resultado de una búsqueda o de un filtro, en el orden y con las columnas que se muestran en pantalla (incluidas la vista compacta y el filtro de la lista).

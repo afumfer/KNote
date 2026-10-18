@@ -61,4 +61,34 @@ public class NoteHtmlMarkdownTests
 
         Assert.AreEqual("Normal **bold** and plain span", markdown.Trim());
     }
+
+    // A Mermaid diagram (```mermaid): the block both apps draw (kntMermaid.js), with its definition as text.
+    private const string MermaidDiagram = "flowchart LR\n    A[\"Desktop<br/>App.sln\"] -- \"by default\" --> B[(\"Database\")]\n    A -. \"uses\" .-> C";
+
+    [TestMethod]
+    public void MarkdownToHtml_MermaidBlock_IsADiagramBlockWithItsDefinitionAsText()
+    {
+        var shown = service.Notes.UtilMarkdownToHtml($"Text\n\n```mermaid\n{MermaidDiagram}\n```\n");
+
+        Assert.IsTrue(shown.Contains("<pre class=\"mermaid\">flowchart LR"), shown);
+        Assert.IsTrue(shown.Contains("A[\"Desktop&lt;br/&gt;App.sln\"] -- \"by default\" --&gt; B[(\"Database\")]"), shown);
+        Assert.IsTrue(shown.Contains("A -. \"uses\" .-&gt; C"), shown);
+    }
+
+    [TestMethod]
+    public void MarkdownToHtml_MermaidBlockWithHtml_KeepsItAsText()
+    {
+        var shown = service.Notes.UtilMarkdownToHtml("```mermaid\nflowchart LR\n    A[\"<img src=x onerror=alert(1)>\"] --> B\n```\n");
+
+        Assert.IsFalse(shown.Contains("<img", StringComparison.OrdinalIgnoreCase), shown);
+        Assert.IsTrue(shown.Contains("&lt;img src=x onerror=alert(1)&gt;"), shown);
+    }
+
+    [TestMethod]
+    public void MarkdownToHtmlToMarkdown_MermaidBlock_KeepsIt()
+    {
+        var markdown = service.Notes.UtilHtmlToMarkdown(service.Notes.UtilMarkdownToHtml($"```mermaid\n{MermaidDiagram}\n```\n"));
+
+        Assert.AreEqual($"```mermaid\n{MermaidDiagram}\n```", markdown.Trim().ReplaceLineEndings("\n"));
+    }
 }
