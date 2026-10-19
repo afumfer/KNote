@@ -59,7 +59,16 @@ The options that don't belong to one repository (options, AI, chat, scripts, cre
 
 **Who gets which role.** The first user who registers in a repository where `adminKNote` is still the only Admin becomes an Admin too: the creator of a new repository manages it. From then on, new users register as **Guest** until an Admin raises their role in **Repository → Users**.
 
-**Where to see it.** The status bar of the management window shows your user, your role in the active repository (it changes as you move to a folder of another repository) and your application role, e.g. `jdoe · Personal repository: Admin · Application: Admin`. Its tooltip shows how you signed in and your role in every linked repository.
+**Where to see it.** The status bar of the management window shows your user, your role in the active repository (it changes as you move to a folder of another repository) and your application role, e.g. `jdoe · Personal repository: Admin · Application: Admin`. Its tooltip, above the status bar, shows how you signed in and your role in every linked repository; a double click opens **My profile**.
+
+**Your profile and password.** **Tools → User** has two options, for any role:
+
+- **My profile ...**: your full name and e-mail, as they are in the active repository. Only an Admin can change your user name. Changing the e-mail asks for your current password. **Save it in every linked repository** (checked by default; shown when there is more than one) saves them in all your repositories.
+- **Change password ...**: your current password and the new one, twice. It changes in every linked repository, as each one keeps your user (signed in with a KNote user name, the same password must open all of them). If a repository refuses it (another password there, a disabled user...), the others change anyway and KaNote tells you which; signed in with a KNote user name, that repository won't open in your next session until it has the same password.
+
+A new password has at least 8 characters and can't be your user name, also when you register or an Admin sets it; the passwords set before keep working.
+
+**Forgot your password?** The link of the sign-in window explains who can set a new one, as your user is kept in each repository and the desktop app has no e-mail to send a link from: an Admin of each repository (**File → Repositories → Edit repository properties → Users**, edit the user, **Reset password**); the web app's **Forgot your password?**, if the repository is also used by the web app; or your Windows account, if your repositories have that user.
 
 **When an option isn't for your role.** All the menus stay available; choosing one your role doesn't allow just tells you which role it takes. A note opened by a Guest opens to be read: KaNote says so, and changes can't be saved. Automatic processes (reopening PostIts, alarms, script alarms) skip the repositories where your role doesn't allow them.
 
@@ -199,7 +208,7 @@ The chat room lets the users of a KaNote web server talk in **threads**: each th
 
 ### Chat room (desktop app)
 
-**Signing in to the chat room's server.** The desktop app works with its own repositories, so it signs in once to the web server of the chat room: in **Options**, tab **Chat room**, enter the **chat hub url** (the address of the web server ending in `/chathub`, e.g. `https://server/KNote/chathub`), your **user name** and **password** in that server, and click **Sign in**. KaNote checks them and connects to test them; then it keeps only the sign-in token the server gives (encrypted, like the other secrets of `KNoteData.config`) and forgets the password. **Accept** the options to keep it. The token lasts a year: if the server refuses it (it expired, your role there changed...), sign in again. **Sign out** forgets it, and so does changing the url.
+**Signing in to the chat room's server.** The desktop app works with its own repositories, so it signs in once to the web server of the chat room: in **Options**, tab **Chat room**, enter the **chat hub url** (the address of the web server ending in `/chathub`, e.g. `https://server/KNote/chathub`), your **user name** and **password** in that server, and click **Sign in**. KaNote checks them and connects to test them; then it keeps only the sign-in token the server gives (encrypted, like the other secrets of `KNoteData.config`) and forgets the password. **Accept** the options to keep it. The token lasts a year: if the server refuses it (it expired, your password or your role there changed...), sign in again. **Sign out** forgets it, and so does changing the url.
 
 **The window.** **Chat room ...** in the menu opens it. When the app starts, it connects in the background with the window hidden, and shows the window when somebody else writes in a thread you follow; closing the window only hides it. On the left, the conversation of the thread shown and, below it, the message box; on the right, the **Threads** list (**New**: the messages that arrived since you last saw it; **Activity**: its last message). **New thread** asks for its topic; **Stop following**, above the conversation, also shows who is in the thread now; **Image ...** chooses an image to send. The status bar shows the connection, your user and the server. The **Actions** menu repeats them: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** and **Reconnect**. KaNote remembers the window's position and size, the width of the threads panel and the height of the message box.
 
@@ -276,6 +285,20 @@ A new note has to be saved before adding resources, tasks or trace notes to it, 
 
 The palette button in the top bar of the web app opens the **Appearance** panel, where you choose the **theme** (Software, Standard, Material, Humanistic or Default), the **mode** (light or dark), the style of the **Home header** (*Soft*, a light tint of the theme's color, or *Ink*, dark) and **high contrast (WCAG)**, which makes text and borders easier to tell apart. Changes apply at once. The sun / moon button next to it switches between light and dark directly. Your browser remembers the choice (in cookies), so each browser keeps its own.
 
+### Your account (web app)
+
+Once you are signed in, your user name in the top bar opens your menu (on a phone, only its icon is shown):
+
+- **My profile**: your full name and e-mail. Only an Admin can change your user name. Changing the e-mail asks for your current password.
+- **Change password**: your current password and the new one, twice (at least 8 characters, not your user name). Your sessions in other browsers and devices are closed; the one you are using goes on.
+- **Sign out**.
+
+**Forgot your password?** The sign-in dialog has that link: write your user name or your e-mail and click **Send link**. If there is such a user with an e-mail, the server sends it a link to set a new password; the answer is the same either way, so nobody can find out who is registered. The link works once, for 30 minutes by default, and opens the **Set a new password** page, which signs you in when the password is set and closes your other sessions. The server must be configured for it (see *Password reset by e-mail (server configuration)*); otherwise the dialog says it isn't available. An Admin can also set a user's password: **Admin panel → Users**, edit the user, **Set password** (that user's sessions are closed too).
+
+**Sessions.** A session lasts a year, unless your password changes. When the server refuses yours, the web app signs you out and tells you; if you changed the password in another window of the app, this one goes on with the new session. After upgrading the server to this version, everybody signs in once again: the sessions of earlier versions are refused (in the desktop app, sign in again to the chat room in **Options**).
+
+**Too many attempts.** The server limits, per address, the sign-in attempts (10 per minute) and the password reset requests (10 per hour); past that, it asks you to try again later.
+
 ### AI Assistant (web app)
 
 **AI Assistant** in the side menu (Staff role or higher) opens the web version of the assistant. Its header shows the list of AI models (configured in the server, see below), the **New conversation** button and the one that opens the assistant in a new window; the **Sessions** panel on the right lists your sessions, as in the desktop app (see *AI assistant sessions*), and the session you are in shows the tokens of its conversation. Drag the bar between the conversation and the question box to make the box taller or shorter.
@@ -319,5 +342,34 @@ dotnet user-secrets set "ai:providers:0:apiKey" "sk-..." --project Server/KNote.
 ```
 
 In a server, use environment variables (`ai__providers__0__apiKey`) or your hosting's secret store. If a key is empty, the server uses the `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable. The keys never reach the browser: the web app only receives the alias, provider and model of each one.
+
+### Password reset by e-mail (server configuration)
+
+*Forgot your password?* of the web app sends the links through an SMTP account of the server. It is configured in three sections; as with the API keys, keep the password in the server's user secrets or in environment variables (`Email__Password`), never in `appsettings.json`:
+
+```json
+"PasswordReset:PublicBaseUrl": "https://myserver/KNote/",
+"PasswordReset:LinkMinutes": "30",
+"Email:Host": "smtp.gmail.com",
+"Email:Port": "587",
+"Email:EnableSsl": "true",
+"Email:FromAddress": "myaccount@gmail.com",
+"Email:FromDisplayName": "KNote",
+"Email:Username": "myaccount@gmail.com",
+"Email:Password": "...",
+"RateLimits:SignInPerMinute": "10",
+"RateLimits:PasswordResetPerHour": "10"
+```
+
+| Setting | Meaning |
+|---|---|
+| `PasswordReset:PublicBaseUrl` | The address of the web app as its users open it, ending in `/KNote/`: the links point there. It is never taken from the request, whose host can be forged. |
+| `PasswordReset:LinkMinutes` | How long a link works (5 minutes to a day; 30 by default). |
+| `Email:*` | The SMTP account. Without `Username`, `FromAddress` is used to authenticate. |
+| `RateLimits:*` | Attempts per client address. Behind a reverse proxy all the clients share its address. |
+
+Without `PublicBaseUrl`, `Email:Host` or `Email:FromAddress`, password reset by e-mail is off. A link that can't be sent is written in the server log.
+
+**Gmail.** Gmail doesn't accept the account's password: turn on 2-Step Verification in your Google account, create an *app password* at <https://myaccount.google.com/apppasswords> and use its 16 letters, without spaces, as `Email:Password`. `FromAddress` must be the account's address. Changing the Google password revokes the app passwords. The same app password works in the desktop app (**Options → Email**).
 
 TODO: ...

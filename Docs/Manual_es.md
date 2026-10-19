@@ -59,7 +59,16 @@ Las opciones que no pertenecen a un repositorio (opciones, IA, chat, scripts, cr
 
 **Quién recibe qué rol.** El primer usuario que se registra en un repositorio donde `adminKNote` sigue siendo el único Admin pasa a ser Admin también: quien crea un repositorio nuevo lo administra. A partir de ahí, los usuarios nuevos se registran como **Guest** hasta que un Admin les sube el rol en **Repository → Users**.
 
-**Dónde se ve.** La barra de estado de la ventana de gestión muestra tu usuario, tu rol en el repositorio activo (cambia al pasar a una carpeta de otro repositorio) y tu rol de aplicación, p. ej. `jdoe · Personal repository: Admin · Application: Admin`. Su tooltip muestra cómo has entrado y tu rol en cada repositorio vinculado.
+**Dónde se ve.** La barra de estado de la ventana de gestión muestra tu usuario, tu rol en el repositorio activo (cambia al pasar a una carpeta de otro repositorio) y tu rol de aplicación, p. ej. `jdoe · Personal repository: Admin · Application: Admin`. Su tooltip, encima de la barra de estado, muestra cómo has entrado y tu rol en cada repositorio vinculado; un doble clic abre **My profile**.
+
+**Tu perfil y tu contraseña.** **Tools → User** tiene dos opciones, para cualquier rol:
+
+- **My profile ...**: tu nombre completo y tu correo, tal como están en el repositorio activo. Solo un Admin puede cambiar tu nombre de usuario. Cambiar el correo pide tu contraseña actual. **Save it in every linked repository** (marcada por defecto; aparece cuando hay más de uno) los guarda en todos tus repositorios.
+- **Change password ...**: tu contraseña actual y la nueva, dos veces. Cambia en todos los repositorios vinculados, porque cada uno guarda tu usuario (si entras con un usuario de KNote, la misma contraseña tiene que abrirlos todos). Si un repositorio la rechaza (otra contraseña allí, un usuario deshabilitado...), los demás cambian igualmente y KaNote te dice cuál; si entras con un usuario de KNote, ese repositorio no se abrirá en tu próxima sesión hasta que tenga la misma contraseña.
+
+Una contraseña nueva tiene al menos 8 caracteres y no puede ser tu nombre de usuario, también al registrarte o cuando la pone un Admin; las contraseñas puestas antes siguen valiendo.
+
+**¿Olvidaste tu contraseña?** El enlace **Forgot your password?** de la ventana de acceso explica quién puede ponerte una nueva, ya que tu usuario está en cada repositorio y la aplicación de escritorio no tiene un correo desde el que enviar un enlace: un Admin de cada repositorio (**File → Repositories → Edit repository properties → Users**, editar el usuario, **Reset password**); el **Forgot your password?** de la aplicación Web, si el repositorio también lo usa la Web; o tu cuenta de Windows, si tus repositorios tienen ese usuario.
 
 **Cuando una opción no es para tu rol.** Todos los menús siguen disponibles; elegir uno que tu rol no permite solo te indica qué rol hace falta. Una nota abierta por un Guest se abre para leerla: KaNote lo avisa y los cambios no se pueden guardar. Los procesos automáticos (reabrir post-its, alarmas, alarmas de script) se saltan los repositorios donde tu rol no los permite.
 
@@ -199,7 +208,7 @@ El chat room permite a los usuarios de un servidor Web de KaNote hablar en **hil
 
 ### Chat room (aplicación de escritorio)
 
-**Identificarse en el servidor del chat room.** La aplicación de escritorio trabaja con sus propios repositorios, así que se identifica una vez en el servidor Web del chat room: en **Options**, pestaña **Chat room**, escribe la **chat hub url** (la dirección del servidor Web terminada en `/chathub`, p. ej. `https://servidor/KNote/chathub`), tu **usuario** y tu **contraseña** en ese servidor, y pulsa **Sign in**. KaNote los comprueba y se conecta para probarlos; después guarda solo el token de acceso que da el servidor (cifrado, como los demás secretos de `KNoteData.config`) y olvida la contraseña. **Acepta** las opciones para conservarlo. El token dura un año: si el servidor lo rechaza (caducó, cambió tu rol allí...), vuelve a identificarte. **Sign out** lo olvida, igual que cambiar la URL.
+**Identificarse en el servidor del chat room.** La aplicación de escritorio trabaja con sus propios repositorios, así que se identifica una vez en el servidor Web del chat room: en **Options**, pestaña **Chat room**, escribe la **chat hub url** (la dirección del servidor Web terminada en `/chathub`, p. ej. `https://servidor/KNote/chathub`), tu **usuario** y tu **contraseña** en ese servidor, y pulsa **Sign in**. KaNote los comprueba y se conecta para probarlos; después guarda solo el token de acceso que da el servidor (cifrado, como los demás secretos de `KNoteData.config`) y olvida la contraseña. **Acepta** las opciones para conservarlo. El token dura un año: si el servidor lo rechaza (caducó, cambió tu contraseña o tu rol allí...), vuelve a identificarte. **Sign out** lo olvida, igual que cambiar la URL.
 
 **La ventana.** **Chat room ...** en el menú la abre. Al arrancar, la aplicación se conecta en segundo plano con la ventana oculta, y muestra la ventana cuando otro usuario escribe en un hilo que sigues; cerrar la ventana solo la oculta. A la izquierda, la conversación del hilo mostrado y, debajo, la caja del mensaje; a la derecha, la lista **Threads** (**New**: los mensajes que han llegado desde la última vez que lo viste; **Activity**: su último mensaje). **New thread** pide su tema; **Stop following**, encima de la conversación, muestra también quién está ahora en el hilo; **Image ...** elige una imagen para enviarla. La barra de estado muestra la conexión, tu usuario y el servidor. El menú **Actions** los repite: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** y **Reconnect**. KaNote recuerda la posición y el tamaño de la ventana, el ancho del panel de hilos y la altura de la caja del mensaje.
 
@@ -276,6 +285,20 @@ Una nota nueva tiene que guardarse antes de añadirle recursos, tareas o notas t
 
 El botón de la paleta de la barra superior de la aplicación Web abre el panel **Appearance**, donde eliges el **tema** (Software, Standard, Material, Humanistic o Default), el **modo** (claro u oscuro), el estilo de la **cabecera de Home** (*Soft*, un tinte suave del color del tema, o *Ink*, oscura) y el **alto contraste (WCAG)**, que hace más fáciles de distinguir los textos y los bordes. Los cambios se aplican al momento. El botón del sol / la luna, a su lado, cambia directamente entre claro y oscuro. Tu navegador recuerda la elección (en cookies), así que cada navegador conserva la suya.
 
+### Tu cuenta (aplicación Web)
+
+Una vez dentro, tu nombre de usuario en la barra superior abre tu menú (en un móvil solo se ve su icono):
+
+- **My profile**: tu nombre completo y tu correo. Solo un Admin puede cambiar tu nombre de usuario. Cambiar el correo pide tu contraseña actual.
+- **Change password**: tu contraseña actual y la nueva, dos veces (al menos 8 caracteres, distinta de tu nombre de usuario). Se cierran tus sesiones en otros navegadores y dispositivos; la que estás usando sigue.
+- **Sign out**.
+
+**¿Olvidaste tu contraseña?** El diálogo de acceso tiene el enlace **Forgot your password?**: escribe tu nombre de usuario o tu correo y pulsa **Send link**. Si existe ese usuario con un correo, el servidor le envía un enlace para poner una contraseña nueva; la respuesta es la misma en los dos casos, así que nadie puede averiguar quién está registrado. El enlace sirve una vez, durante 30 minutos por defecto, y abre la página **Set a new password**, que te deja dentro al guardar la contraseña y cierra tus otras sesiones. El servidor tiene que estar configurado (ver *Restablecer la contraseña por correo (configuración del servidor)*); si no, el diálogo dice que no está disponible. Un Admin también puede poner la contraseña de un usuario: **Admin panel → Users**, editar el usuario, **Set password** (se cierran también las sesiones de ese usuario).
+
+**Sesiones.** Una sesión dura un año, salvo que cambie tu contraseña. Cuando el servidor rechaza la tuya, la aplicación Web cierra la sesión y te avisa; si cambiaste la contraseña en otra ventana de la aplicación, esta sigue con la sesión nueva. Al actualizar el servidor a esta versión, todos vuelven a entrar una vez: las sesiones de versiones anteriores se rechazan (en la aplicación de escritorio, vuelve a identificarte en el chat room desde **Options**).
+
+**Demasiados intentos.** El servidor limita, por dirección, los intentos de acceso (10 por minuto) y las peticiones para restablecer la contraseña (10 por hora); pasado ese límite, pide que lo intentes más tarde.
+
 ### Asistente de IA (aplicación Web)
 
 **AI Assistant**, en el menú lateral (rol Staff o superior), abre la versión Web del asistente. Su cabecera muestra la lista de modelos de IA (configurados en el servidor, ver más abajo), el botón **New conversation** y el que abre el asistente en una ventana nueva; el panel **Sessions** de la derecha muestra tus sesiones, como en la aplicación de escritorio (ver *Sesiones del asistente de IA*), y la sesión en la que estás muestra los tokens de su conversación. Arrastra la barra entre la conversación y la caja de la pregunta para hacer la caja más alta o más baja.
@@ -319,5 +342,34 @@ dotnet user-secrets set "ai:providers:0:apiKey" "sk-..." --project Server/KNote.
 ```
 
 En un servidor, usa variables de entorno (`ai__providers__0__apiKey`) o el almacén de secretos de tu hosting. Si una clave está vacía, el servidor usa la variable de entorno `OPENAI_API_KEY` o `ANTHROPIC_API_KEY`. Las claves nunca llegan al navegador: la aplicación Web solo recibe el alias, el proveedor y el modelo de cada una.
+
+### Restablecer la contraseña por correo (configuración del servidor)
+
+El *Forgot your password?* de la aplicación Web envía los enlaces con una cuenta SMTP del servidor. Se configura en tres secciones; como las claves de API, guarda la contraseña en los secretos de usuario del servidor o en variables de entorno (`Email__Password`), nunca en `appsettings.json`:
+
+```json
+"PasswordReset:PublicBaseUrl": "https://miservidor/KNote/",
+"PasswordReset:LinkMinutes": "30",
+"Email:Host": "smtp.gmail.com",
+"Email:Port": "587",
+"Email:EnableSsl": "true",
+"Email:FromAddress": "micuenta@gmail.com",
+"Email:FromDisplayName": "KNote",
+"Email:Username": "micuenta@gmail.com",
+"Email:Password": "...",
+"RateLimits:SignInPerMinute": "10",
+"RateLimits:PasswordResetPerHour": "10"
+```
+
+| Ajuste | Significado |
+|---|---|
+| `PasswordReset:PublicBaseUrl` | La dirección de la aplicación Web tal como la abren sus usuarios, terminada en `/KNote/`: los enlaces apuntan ahí. Nunca se toma de la petición, cuyo host se puede falsear. |
+| `PasswordReset:LinkMinutes` | Cuánto dura un enlace (de 5 minutos a un día; 30 por defecto). |
+| `Email:*` | La cuenta SMTP. Sin `Username`, se usa `FromAddress` para autenticarse. |
+| `RateLimits:*` | Intentos por dirección del cliente. Detrás de un proxy inverso todos los clientes comparten su dirección. |
+
+Sin `PublicBaseUrl`, `Email:Host` o `Email:FromAddress`, restablecer la contraseña por correo está desactivado. Un enlace que no se puede enviar queda en el log del servidor.
+
+**Gmail.** Gmail no acepta la contraseña de la cuenta: activa la verificación en dos pasos en tu cuenta de Google, crea una *contraseña de aplicación* en <https://myaccount.google.com/apppasswords> y usa sus 16 letras, sin espacios, como `Email:Password`. `FromAddress` tiene que ser la dirección de la cuenta. Cambiar la contraseña de Google revoca las contraseñas de aplicación. La misma contraseña de aplicación sirve en la aplicación de escritorio (**Options → Email**).
 
 TODO: ...

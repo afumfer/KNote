@@ -164,6 +164,18 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   `ClientWin` usa `RepositoryId` como clave de un repositorio (ver `ClientWin/CLAUDE.md`). La compatibilidad con
   el antiguo alias (`<Alias>` de la configuración, `RepositoryRef:Alias` del `Server`) lleva el marcador
   `LEGACY(repository-alias)`.
+- **Cuenta del usuario y contraseñas** (`KntUserCommands.cs`). `GetProfileAsync`/`SaveProfileAsync`/`ChangePasswordAsync`
+  actúan siempre sobre el usuario actual (`UserIdentityName`), nunca sobre un id que llegue de fuera (Guest; un usuario
+  deshabilitado se rechaza también donde no se comprueba el rol): el nombre de usuario no se cambia ahí y un email nuevo
+  pide la contraseña actual. Toda contraseña nueva (registro, alta, `SetPassword`, cambio, restablecimiento) pasa por
+  `KntPasswordPolicy` (`Model`); el hash y su comprobación solo están en `Service/Core/KntPasswordHasher`, que da
+  también la huella de la contraseña (`Stamp`, para los tokens del `Server`, `GetPasswordStampAsync`). "Olvidé mi
+  contraseña": `CreatePasswordResetAsync`/`ResetPasswordAsync`, anónimos, con un token firmado con la clave de quien lo
+  emite (`Service/Core/KntPasswordResetToken`: usuario, caducidad y huella; sin nada en la BD, sirve una vez porque la
+  huella cambia). `KntServiceBase` escribe el `Param` de cada comando en el log de Trace: un parámetro con una
+  contraseña o una clave es una clase con un `ToString()` que no la muestra (`KntSetPasswordParam`...), nunca una
+  tupla. El envío de correo (`Service/Core/EmailSender`: `SmtpSettings`, `IEmailSender`) lo comparten `ClientWin` y
+  `Server`. Tests en `Tests/ServiceTests/UserAccountServiceTests` y `UserPasswordResetServiceTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben

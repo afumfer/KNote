@@ -135,6 +135,23 @@ Los **módulos JS de la app** se cargan con `js.ImportModuleAsync("./js/xxx.js",
 devuelve `null` en vez de romper la página; el componente sigue sin lo que hace el módulo (la lista, sin teclado; el
 chat, sin pegar imágenes...) y lo guarda con `??=`, así que lo vuelve a pedir la próxima vez.
 
+## Cuenta del usuario y sesión
+
+- **Menú del usuario** (`Pages/Auth/AdminLogin`, en la cabecera): `RadzenProfileMenu` (`.knt-user-menu`; en un móvil
+  solo el icono) con **My profile** (`Auth/UserProfile`), **Change password** (`Auth/ChangePassword`: al terminar
+  entra con el token nuevo que devuelve el servidor) y **Sign out**. Un Admin pone la contraseña de otro desde el
+  editor de usuarios (`Users/UserSetPassword`, botón del pie con `.knt-footer-start`). La política
+  (`KntPasswordPolicy`) se comprueba antes de enviar, también en el registro.
+- **Olvidé mi contraseña**: el diálogo `Auth/Login` abre `Auth/ForgotPassword` encima (el login sigue abierto); el
+  enlace del correo lleva a la página anónima `Auth/ResetPassword` (`/reset-password?token=`), que entra con el token
+  devuelto.
+- **Sesión rechazada**: un 401 con sesión iniciada (`BaseService`) no se notifica como error: avisa a
+  `AppState.OnSessionEnded`, y los dos layouts llaman a `ILoginService.SessionRefusedAsync`, que adopta el token de
+  `localStorage` si otra ventana de la app ya guardó uno nuevo (tras cambiar la contraseña) o, si no, cierra la
+  sesión. `Logout` vacía lo leído con la sesión (`AppState.ClearUserData`: árbol de carpetas, carpeta, filtro y
+  posiciones de las listas), y **en `AppState` solo se cachea una lectura válida**: un árbol que no se pudo leer
+  (401, sin red) quedaba vacío hasta recargar la página.
+
 ## SmartDTO en la UI
 
 Los DTO de `Model/Dto` heredan de `SmartModelDtoBase` (`Model/Core`): no son POCO, llevan estado y

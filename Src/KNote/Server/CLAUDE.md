@@ -43,7 +43,11 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
   `ClockSkew = 0`), `AddAuthorization`, CORS `KntPolicy` abierto (`*`), SignalR, compresión de respuesta,
   NLog (`nlog.config`, logs en `Log/`). Para el hub (`ChatRoomHubContract.Path`) el token también se lee del
   parámetro `access_token` (`JwtBearerEvents.OnMessageReceived`): WebSockets y SSE no envían la cabecera
-  `Authorization`. `ChatRoomManager` se registra como singleton.
+  `Authorization`. `ChatRoomManager` se registra como singleton. `JwtBearerEvents.OnTokenValidated` rechaza los
+  tokens cuya huella de contraseña ya no es la del usuario (ver "Autorización").
+- `KntAddPasswordReset` (secciones `PasswordReset` y `Email`, `IEmailSender`, `Helpers/KntPasswordResetMail`) y
+  `KntAddRateLimits` (`Helpers/KntRateLimits`, sección `RateLimits`; `UseRateLimiter` tras `UseRouting`), ver
+  "Cuentas de usuario".
 - Los estáticos de `Client` (`UseStaticFiles` y `MapFallbackToFile("index.html")`) se sirven con
   `Cache-Control: no-cache`: sus URLs no cambian entre versiones (`index.html`, `css/*.css`,
   `KNote.Client.styles.css`) y sin esa cabecera el navegador sigue usando los antiguos tras un despliegue (HTML
@@ -98,7 +102,8 @@ public class FoldersController : ControllerBase
   (`BaseService.ProcessResultFromHttpResponse`) lee ese cuerpo sin mirar el código de estado para mostrar al
   usuario el motivo real (p. ej. "no se puede borrar este tipo: N notas lo usan"). No devuelvas
   `BadRequest()` vacío, `Problem(...)` ni un string. Excepciones: `UsersController.Login`/`Register`, que
-  devuelven `UserTokenDto` (`success`, `token`, `error`).
+  devuelven `UserTokenDto` (`success`, `token`, `error`); `ChangePassword` y `ResetPassword` devuelven un
+  `Result<UserTokenDto>` con el token nuevo.
 - Errores en el `catch`: `ex.ToApiErrorMessage()` (`Helpers/ExceptionExtensions`; la capa `Service` envuelve
   las excepciones en `KntServiceException`, así que se devuelve el mensaje de la causa raíz).
 - `_service.UserIdentityName` se fija en cada controlador con el usuario del JWT: es la identidad del usuario
@@ -110,8 +115,9 @@ public class FoldersController : ControllerBase
 
 - Se hace **en los controladores** con `[Authorize]` a nivel de clase + `[Authorize(Roles = "...")]` por acción
   (lectura abierta a cualquier usuario autenticado; escritura con rol). `[AllowAnonymous]` solo en `Login`,
-  `Register` y lo que muestra la Home pública de `Client`: `NotesController.HomeNotes` (las notas de Home o, con
-  `?folderId=`, de una carpeta hija directa de Home; cualquier otra la rechaza `Service`,
+  `Register`, `ForgotPassword`, `ResetPassword` y lo que muestra la Home pública de `Client`:
+  `NotesController.HomeNotes` (las notas de Home o, con `?folderId=`, de una carpeta hija directa de Home; cualquier
+  otra la rechaza `Service`,
   `KntNotesHomeFolderAsyncCommand`), `FoldersController.HomeChildren` (las carpetas hijas directas de Home) y
   `SystemValuesController.RepositoryName` (el nombre del repositorio, `DB_REPOSITORYNAME`). Lo que se ve ahí es
   público: no amplíes esa zona sin decidirlo.
@@ -126,6 +132,27 @@ public class FoldersController : ControllerBase
   `Role` por cada valor de `User.RoleDefinition` (separado por comas); HS256 con `AppSettings.Secret`; caduca
   en un año. El rol de un usuario que se registra lo decide `Service` (`Users.RegisterAsync`), no el cuerpo de
   la petición.
+- **Sesiones cerradas al cambiar la contraseña**: el token lleva también `knt_pwd`, la huella de la contraseña del
+  usuario (`Users.GetPasswordStampAsync`, `KntPasswordHasher.Stamp`), y `OnTokenValidated` rechaza el que no la lleva
+  o no coincide (API y hub). `Helpers/KntPasswordStamps` las cachea un minuto: lo que cambia la contraseña aquí la
+  olvida al momento (`BuildTokenAsync` la relee, `SetPassword` la olvida); un cambio desde `ClientWin` sobre la
+  misma BD cuenta en un minuto como mucho. Los tokens de antes de esta comprobación no la llevan: tras actualizar,
+  todos vuelven a entrar una vez.
+
+## Cuentas de usuario (`UsersController`)
+
+- `GET/PUT api/users/me` (perfil) y `POST api/users/me/password` (cambio, devuelve el token nuevo): cualquier usuario
+  autenticado, siempre su propia cuenta (`Users.GetProfileAsync`...). `PUT api/users/{id}/password`: un Admin pone la
+  contraseña de otro (`UserSetPasswordDto`).
+- **Olvidé mi contraseña**: `POST api/users/forgot-password` (`UserForgotPasswordDto`, usuario o email) responde
+  siempre lo mismo y, si hay usuario con correo, `KntPasswordResetMail` le envía en segundo plano (la respuesta tarda
+  lo mismo) un enlace a `{PasswordReset:PublicBaseUrl}reset-password?token=...`, con el token de
+  `Users.CreatePasswordResetAsync` firmado con `AppSettings.Secret`. `PublicBaseUrl` se configura, nunca sale de la
+  petición (su `Host` se puede falsear). Sin `PublicBaseUrl`, `Email:Host` o `Email:FromAddress` responde que no está
+  disponible. `POST api/users/reset-password` (`UserResetPasswordDto`) pone la contraseña y devuelve un token nuevo.
+- **Límites** (`[EnableRateLimiting]`, por dirección IP, ventana fija): `Login` (`RateLimits:SignInPerMinute`, 10) y
+  forgot/reset (`RateLimits:PasswordResetPerHour`, 10). El 429 lleva un cuerpo que se lee como `Result<T>` y como
+  `UserTokenDto`. `Register` no está limitado (los tests en proceso registran muchos usuarios).
 
 ## Recursos de notas y descripciones
 
@@ -238,7 +265,7 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
 ## Configuración y secretos
 
 `appsettings.json` solo contiene marcadores (`"... MyLongStringSecurityKeySecret ..."`). Los valores reales
-(`AppSettings:Secret`, `RepositoryRef:ConnectionString`, `ai:providers:n:apiKey`...) van en
+(`AppSettings:Secret`, `RepositoryRef:ConnectionString`, `ai:providers:n:apiKey`, `Email:Password`...) van en
 user-secrets (`UserSecretsId` en `KNote.Server.csproj`) o variables de entorno (`RepositoryRef__Orm`, ...).
 No escribas secretos reales en `appsettings.json`.
 
@@ -263,7 +290,10 @@ En `Tests/` (`KNoteTest.slnx`), ver `CLAUDE.md` raíz:
   `Helpers/ScriptedAiChatClientProvider`: un modelo con respuestas guionizadas (texto, uso, llamadas a tools)
   envuelto con las tools y la invocación de funciones reales, sin llamar a ningún proveedor.
   `ChatRoomHubInProcessTests` usa el cliente de SignalR contra el host (`HttpMessageHandlerFactory` del
-  `TestServer`, LongPolling) con usuarios Staff y Guest creados por la API. La fábrica guarda los recursos de las
+  `TestServer`, LongPolling) con usuarios Staff y Guest creados por la API. `PasswordResetInProcessTests` cambia
+  `IEmailSender` por `Helpers/FakeEmailSender` (guarda los correos; `WaitForAsync`, porque se envían en segundo plano);
+  los límites se prueban con un host por test (`PasswordResetRestrictionsInProcessTests`), ya que cuentan todas las
+  peticiones de un host. La fábrica guarda los recursos de las
   notas en una carpeta temporal propia (`ResourcesFolder`, `ResourcesContainer`, `ResourcesRootUrl`): sin ella se
   escribirían en el `wwwroot` del proyecto `Server`.
 - `Tests/WebApiIntegrationTests` — contra un `Server` real ya en ejecución.

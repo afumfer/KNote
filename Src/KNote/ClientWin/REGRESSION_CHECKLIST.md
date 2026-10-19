@@ -139,6 +139,13 @@ Probar con una BD de pruebas (o una copia): el primer arranque de esta versión 
 - [ ] Sin ser **Admin** en ningún repositorio: Crear repositorio, Gestionar repositorio, COM Port Server y Lab
       dan el aviso.
 - [ ] Ningún menú aparece deshabilitado por el rol: el aviso sale al usarlo.
+- [ ] Tools → User → My profile (y doble clic en el usuario de la barra de estado): cambiar el nombre completo se
+      guarda en todos los repositorios; cambiar el correo pide la contraseña actual; desmarcar "Save it in every
+      linked repository" lo guarda solo en el activo.
+- [ ] Tools → User → Change password con dos repositorios: cambia en los dos; con una contraseña actual distinta en
+      uno, cambia en el otro y avisa; con credenciales, el siguiente arranque entra con la nueva.
+- [ ] El tooltip del usuario de la barra de estado sale encima, sin parpadear, con la ventana maximizada.
+- [ ] En el login (credenciales), "Forgot your password?" explica quién puede poner una nueva.
 
 ## Otros
 
