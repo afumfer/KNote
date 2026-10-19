@@ -16,11 +16,12 @@ public class FolderWebApiService : BaseService, IFolderWebApiService
         SendAsync<List<FolderInfoDto>>(ct => _httpClient.GetAsync("api/folders", ct), "Get folders", cancellationToken: cancellationToken);
 
     public Task<Result<List<FolderDto>>> GetTreeAsync(CancellationToken cancellationToken = default) =>
-        SendAsync<List<FolderDto>>(ct => _httpClient.GetAsync("api/folders/tree", ct), "Get folders", cancellationToken: cancellationToken);
+        SendAsync<List<FolderDto>>(ct => _httpClient.GetAsync("api/folders/tree", ct), "Get folders",
+            cancellationToken: cancellationToken, timeout: ListReadTimeout);
 
     public Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync(CancellationToken cancellationToken = default) =>
         SendAsync<List<FolderInfoDto>>(ct => _httpClient.GetAsync("api/folders/homechildren", ct), "Get Home folders",
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken, timeout: ListReadTimeout);
 
     public Task<Result<FolderDto>> GetAsync(Guid folderId, CancellationToken cancellationToken = default) =>
         SendAsync<FolderDto>(ct => _httpClient.GetAsync($"api/folders/{folderId}", ct), "Get folder", cancellationToken: cancellationToken);

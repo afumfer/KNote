@@ -4,7 +4,7 @@
    the toggles read the choices kept in the browser as soon as the page opens. *@
 
 <RadzenMenuItem Text="View options" Icon="visibility" class="knt-menu-separator">
-    <RadzenMenuItem Text="View note" Icon="launch" Disabled="@(!(Grid?.CanViewCurrent ?? false))" Click="@(() => Grid!.ViewCurrentAsync())" />
+    <RadzenMenuItem Text="View note" Icon="launch" Disabled="@(!(Grid?.HasCurrent ?? false))" Click="@(() => Grid!.ViewCurrentAsync())" />
     <NotesPreviewToggle Changed="Changed" />
     <NotesListViewToggle Changed="Changed" />
 </RadzenMenuItem>

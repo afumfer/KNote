@@ -27,7 +27,8 @@
 @* At the right of the notes, Home and the folders directly inside it (only when it has any). *@
 <div class="@(HasFolders ? "knt-home-content knt-home-with-folders" : "knt-home-content")">
     <div class="knt-home-notes">
-        <NotesList Notes="notes" OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
+        <NotesList Notes="notes" LoadFailed="notesFailed" Retry="LoadNotes"
+                   OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
     </div>
     @if (HasFolders)
     {
@@ -39,6 +40,9 @@
 @code {    
 
     private List<NoteInfoDto>? notes;
+    // The notes could not be read: the list says so, with Retry (the error is already notified). Without it the list
+    // would show "loading" for ever.
+    private bool notesFailed;
 
     // The folders directly inside Home, and the one whose notes are shown (null: Home's own).
     private List<FolderInfoDto>? folders;
@@ -95,6 +99,7 @@
     {
         var folderId = selectedFolderId;
         notes = null;
+        notesFailed = false;
         var request = await notesRequest.RunAsync(ct => store.Notes.GetHomeNotesAsync(folderId, ct));
 
         // Another folder was chosen while these notes were read: its own notes are on their way.
@@ -103,6 +108,8 @@
 
         if (request.Value.IsValid)
             notes = request.Value.Entity;
+        else
+            notesFailed = true;
     }
 
     private async Task SelectFolderAsync(Guid? folderId)

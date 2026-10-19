@@ -1,8 +1,11 @@
 ﻿@page "/notes/taskscalendar"
 @page "/taskscalendar"
 
+@using KNote.Client.Auth
+
 @inject IStore store
 @inject KntWindows kntWindows
+@inject KntAccess access
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 
@@ -51,6 +54,7 @@
 
 
 @code {
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     RadzenScheduler<Appointment> scheduler;
 
@@ -135,7 +139,12 @@
         }
     }
 
-    Task OnNew() => kntWindows.OpenNewAsync();
+    // Creating a note needs Staff (KntAccess, checked with no wait before: it opens a window).
+    async Task OnNew()
+    {
+        if (await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Creating notes"))
+            await kntWindows.OpenNewAsync();
+    }
 
     public class Appointment
     {

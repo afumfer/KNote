@@ -2,11 +2,9 @@
 @using KNote.Client.Pages.Auth
 @using System.Threading.Tasks
 
-@inject IStore store
-@inject ILoginService loginService
+@inject KntSignIn signIn
 @inject NavigationManager navigationManager
 @inject DialogService dialogService
-@inject NotificationService notificationService
 @inject TooltipService tooltipService
 
 
@@ -37,12 +35,10 @@
 
 @code {
 
-    // One sign in or registration at a time: a click repeated opens one dialog and signs in once.
-    private readonly KntSingleFlight signing = new();
+    // From the header, signing in goes to Home (KntSignIn: one dialog at a time).
+    private Task GoRegister() => signIn.RegisterAsync(goHome: true);
 
-    private Task GoRegister() => signing.RunAsync(RegisterAsync);
-
-    private Task GoLogin() => signing.RunAsync(LoginAsync);
+    private Task GoLogin() => signIn.SignInAsync(goHome: true);
 
     private async Task OnUserMenuClick(RadzenProfileMenuItem item)
     {
@@ -58,47 +54,6 @@
                 GoLogout();
                 break;
         }
-    }
-
-    private async Task RegisterAsync()
-    {
-        var resDialog = await dialogService.OpenAsync<Register>($"Register",
-               new Dictionary<string, object?>() {  },
-               KntDialogs.Framed(KntDialogs.Medium()));
-
-        if(resDialog != null)
-        {
-            // The new user's role is decided by the server (see KntUsersRegisterAsyncCommand).
-            var result = await store.Users.RegisterAsync(resDialog);
-            if (!result.success)                
-                await dialogService.Alert(result.error, "Error", new AlertOptions() { OkButtonText = "OK" });
-            else
-            {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Login user.", Detail = "Authenticated use.", Duration = 3000 });
-                await loginService.Login(result.token);
-                navigationManager.NavigateTo("");
-            }
-        }
-    }
-
-    private async Task LoginAsync()
-    {
-        var resDialog = await dialogService.OpenAsync<Login>($"{KntConst.AppName} login",
-               new Dictionary<string, object?>() {  },
-               KntDialogs.Framed(KntDialogs.Small()));
-
-        if(resDialog != null)
-        {
-            var result = await store.Users.LoginAsync(resDialog);
-            if (!result.success)                        
-                await dialogService.Alert(result.error, "Error", new AlertOptions() { OkButtonText = "OK" });
-            else
-            {
-                notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Login user.", Detail =  "Authenticated use.", Duration = 3000 });
-                await loginService.Login(result.token);
-                navigationManager.NavigateTo("");
-            }                        
-        }             
     }
 
     private void GoLogout()

@@ -1,12 +1,15 @@
 ﻿@page "/notes/tree"
 @page "/tree"
 
+@using KNote.Client.Auth
 @using KNote.Model.Core
+@using KNote.Client.Pages.Folders
 
 @implements IDisposable
 
 @inject IStore store
 @inject KntWindows kntWindows
+@inject KntAccess access
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject IJSRuntime js
@@ -17,10 +20,16 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-            <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
-            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.HasCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.HasCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+            @* The selected folder (managing folders needs ProjectManager, checked when chosen) and the tree. *@
+            <RadzenMenuItem Text="Folder" Icon="folder" class="knt-menu-separator">
+                <RadzenMenuItem Text="New folder ..." Icon="create_new_folder" Click="OnNewFolder" />
+                <RadzenMenuItem Text="Edit folder ..." Icon="edit" Disabled="@(folder == null)" Click="@(() => OnEditFolder(folder!))" />
+                <RadzenMenuItem Text="Delete folder ..." Icon="delete" Disabled="@(folder == null || folderAction.IsBusy)" Click="@(() => OnDeleteFolder(folder!))" />
+                <RadzenMenuItem Text="Refresh tree" Icon="refresh" Click="RefreshTreeFolders" />
+            </RadzenMenuItem>
             <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
-            <RadzenMenuItem Text="Refresh tree" Icon="refresh"  Click="RefreshTreeFolders" ></RadzenMenuItem>
             <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" DefaultOrder="FolderOrder()" ListName="@folder?.Name" />
         </RadzenMenu>
     </IndexMenu>
@@ -31,7 +40,17 @@
 <RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 10rem)">
     <RadzenSplitter class="@(appState.NotesPreviewVisible == true ? null : "knt-preview-hidden")" Resize="paneSizes.Resized">
         <RadzenSplitterPane Size="@paneSizes[0]" Min="160px" Max="45%" Style="overflow: auto">
-            <KntFoldersTreeView  FoldersInfo="foldersTree" FolderSelected="FolderSelected"  /> @* ShowRefreshTree="false"  RefreshTreeFolders="OnRefreshTreeFolders"*@
+            @if (treeFailed)
+            {
+                <div class="knt-load-error">
+                    <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The folders could not be loaded.</span>
+                    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="RefreshTreeFolders" />
+                </div>
+            }
+            else
+            {
+                <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="FolderSelected" FolderActions="FolderActionsOf" />
+            }
         </RadzenSplitterPane>
         <RadzenSplitterPane Size="@paneSizes[1]" Min="320px" class="knt-notes-list-pane">
             @if (folder != null)
@@ -57,6 +76,8 @@
 
 @code {
     private List<FolderDto>? foldersTree;
+    // The tree could not be read: the pane says so, with Retry (the error is already notified).
+    private bool treeFailed;
     private FolderDto? folder;
     private NotesGrid? notesGrid;
     private AppState appState = null!;
@@ -70,8 +91,8 @@
     {
         paneSizes = new KntPaneSizes(js, "KNoteNotesTreePanes", "20%", "45%", "35%");
 
-        var user = (await AuthenticationState).User;
-        canSaveOrder = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
+        // The order chosen in the list is saved silently, only for who can (Staff and up).
+        canSaveOrder = KntAccess.HasRole((await AuthenticationState).User, EnumRoles.Staff);
 
         appState = store.AppState;
         appState.OnChange += StateHasChanged;
@@ -84,6 +105,7 @@
         if (appState.FoldersTree == null)
         {
             var result = await store.Folders.GetTreeAsync();
+            treeFailed = !result.IsValid;
             if (result.IsValid)
                 foldersTree = result.Entity;
             else
@@ -95,7 +117,9 @@
 
             if (foldersTree?.Count > 0)
             {
-                var f = foldersTree.Select(x => x).FirstOrDefault();
+                // The folder that was selected, if it is still there (the tree read again: refreshed, or a folder
+                // changed), or the first one.
+                var f = FindFolder(foldersTree, appState.SelectedFolder?.FolderId ?? Guid.Empty) ?? foldersTree.FirstOrDefault();
                 if (f != null)
                 {
                     f.Selected = true;
@@ -205,7 +229,12 @@
         }
     }
 
-    Task OnNew() => kntWindows.OpenNewAsync();
+    // Creating a note needs Staff (KntAccess, checked with no wait before: it opens a window).
+    async Task OnNew()
+    {
+        if (await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Creating notes"))
+            await kntWindows.OpenNewAsync();
+    }
 
     Task OnView(NoteMinimalDto note) => kntWindows.OpenViewAsync(note.NoteId);
 
@@ -239,8 +268,40 @@
         }
     }
 
+    // Managing folders needs ProjectManager (KntAccess, as FolderEditorCtrl in ClientWin); one at a time. After a
+    // change the tree is read again, with the selected folder.
+    private readonly KntSingleFlight folderAction = new();
+
+    private Task<bool> CanManageFoldersAsync() => access.CheckAsync(AuthenticationState, EnumRoles.ProjectManager, "Managing folders");
+
+    // A right click on a folder of the tree.
+    private List<KntAction> FolderActionsOf(FolderDto f) =>
+    [
+        new("Edit folder", "edit", () => OnEditFolder(f)),
+        new("Delete folder", "delete", () => OnDeleteFolder(f), Danger: true)
+    ];
+
+    private Task OnNewFolder() => folderAction.RunAsync(async () =>
+    {
+        if (await CanManageFoldersAsync() && await FolderDialogs.NewAsync(dialogService))
+            await RefreshTreeFolders();
+    });
+
+    private Task OnEditFolder(FolderDto f) => folderAction.RunAsync(async () =>
+    {
+        if (await CanManageFoldersAsync() && await FolderDialogs.EditAsync(dialogService, f))
+            await RefreshTreeFolders();
+    });
+
+    private Task OnDeleteFolder(FolderDto f) => folderAction.RunAsync(async () =>
+    {
+        if (await CanManageFoldersAsync() && await FolderDialogs.DeleteAsync(dialogService, store, f))
+            await RefreshTreeFolders();
+    });
+
     private async Task RefreshTreeFolders()
     {
+        treeFailed = false;
         foldersTree = null;
         folder = null;
         appState.FoldersTree = null;

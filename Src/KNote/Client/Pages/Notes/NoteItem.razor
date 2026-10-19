@@ -1,4 +1,8 @@
-﻿<RadzenCard class="rz-m-1 rz-p-1">
+﻿@using KNote.Client.Auth
+
+@inject KntAccess access
+
+<RadzenCard class="rz-m-1 rz-p-1">
 
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
                  Wrap="FlexWrap.Wrap" class="rz-m-1 rz-p-2 knt-background-subtle rz-border-radius-1">
@@ -26,18 +30,25 @@
 
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
+    // Always offered: editing and deleting check the role when chosen (KntAccess), with no wait before (editing opens
+    // a window).
     private List<KntAction> actions = [];
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
-        var user = (await AuthenticationState).User;
-        var canEdit = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
-
-        actions = [new("View", "launch", () => OnNoteView.InvokeAsync(Note))];
-        if (canEdit)
-        {
-            actions.Add(new("Edit", "edit", () => OnNoteEdit.InvokeAsync(Note)));
-            actions.Add(new("Delete", "delete", () => OnNoteDelete.InvokeAsync(Note), Danger: true));
-        }
+        actions =
+        [
+            new("View", "launch", () => OnNoteView.InvokeAsync(Note)),
+            new("Edit", "edit", async () =>
+            {
+                if (await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Editing notes"))
+                    await OnNoteEdit.InvokeAsync(Note);
+            }),
+            new("Delete", "delete", async () =>
+            {
+                if (await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Deleting notes"))
+                    await OnNoteDelete.InvokeAsync(Note);
+            }, Danger: true)
+        ];
     }
 }

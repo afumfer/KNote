@@ -1,6 +1,16 @@
 ﻿@typeparam TItem
 
-@if (List == null)
+@* A list loaded by its page: "loading" while List is null, the error and Retry if the page couldn't read it
+   (LoadFailed), "no records" if it is empty, and its items. *@
+
+@if (LoadFailed)
+{
+    <div class="knt-load-error">
+        <span class="knt-load-error-text"><RadzenIcon Icon="error" /> @FailedText</span>
+        <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="Retry" />
+    </div>
+}
+else if (List == null)
 {
     @if (Loading == null)
     {
@@ -13,8 +23,8 @@
     }
 }
 else if (List.Count == 0)
-    {
-    @if (Loading == null)
+{
+    @if (NotRecordsFound == null)
     {
         <p>No records found.</p>    
     }
@@ -42,4 +52,9 @@ else
     [Parameter] public RenderFragment NotRecordsFound { get; set; } = null!;
     [Parameter] public RenderFragment AllItems { get; set; } = null!;
     [Parameter] public RenderFragment<TItem> Item { get; set; } = null!;
+    // The page couldn't read the list (the error is already notified, BaseService): shown instead of "loading",
+    // with Retry, which asks the page to read it again.
+    [Parameter] public bool LoadFailed { get; set; }
+    [Parameter] public EventCallback Retry { get; set; }
+    [Parameter] public string FailedText { get; set; } = "The list could not be loaded.";
 }

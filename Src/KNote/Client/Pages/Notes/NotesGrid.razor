@@ -1,15 +1,20 @@
+@using KNote.Client.Auth
+@using System.Security.Claims
+
 @implements IAsyncDisposable
 
 @inject TooltipService tooltipService
 @inject ContextMenuService contextMenuService
 @inject IJSRuntime js
 @inject IStore store
+@inject KntAccess access
 
 @*
     Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
     height of its container. A click selects a row (the current row, js/notesGrid.js), which the arrows, page
     keys, Home and End move too (a right click selects it as well); double click or Enter edits its note (views it,
     for who can't edit); a right click, the context menu key or Shift+F10 show its actions, and Delete deletes it.
+    The actions are always offered: editing and deleting check the user's role when chosen (KntAccess).
     View and edit open the note in a window of its own (the page's OnNoteView/OnNoteEdit, see KntWindows). The
     page's header acts on the selected note too (Current, ViewCurrentAsync, EditCurrentAsync, DeleteCurrentAsync).
     The headers sort the list (in the server: LoadPage gets the order). With Position it remembers where the user
@@ -17,13 +22,41 @@
 *@
 
 <div @ref="host" class="knt-notes-grid-host" data-count="@count" @oncontextmenu:preventDefault="true">
-    <div class="knt-notes-grid-summary">@count notes</div>
+    <div class="knt-notes-grid-summary">
+        @if (!loadFailed)
+        {
+            @($"{count} notes")
+        }
+        else if (noteIndexes.Count > 0)
+        {
+            @* Some rows of this list could not be loaded, others could (none: the list's own message, below; count
+               may still be the one of the list before a sort). *@
+            <span class="knt-load-error-text">
+                <RadzenIcon Icon="error" />
+                Some notes could not be loaded.
+                <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Text" Size="ButtonSize.ExtraSmall" Click="RetryAsync" />
+            </span>
+        }
+    </div>
     <RadzenDataGrid @ref="grid" TItem="NoteMinimalDto" KeyProperty="NoteId" class="knt-notes-grid"
-                    Data="@notes" Count="@count" LoadData="OnLoadData" IsLoading="@isLoading"
+                    Data="@notes" Count="@count" LoadData="OnLoadData" IsLoading="@(loadsRunning > 0)"
                     AllowVirtualization="true" VirtualizationOverscanCount="10"
                     Density="Density.Compact" GridLines="DataGridGridLines.Horizontal" AllowAlternatingRows="false"
-                    AllowColumnResize="true" AllowSorting="true" EmptyText="No notes found."
+                    AllowColumnResize="true" AllowSorting="true"
                     RowRender="OnRowRender" RowDoubleClick="OnRowDoubleClick" CellContextMenu="OnCellContextMenu">
+        <EmptyTemplate>
+            @if (loadFailed)
+            {
+                <div class="knt-load-error">
+                    <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The notes could not be loaded.</span>
+                    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="RetryAsync" />
+                </div>
+            }
+            else
+            {
+                <span>No notes found.</span>
+            }
+        </EmptyTemplate>
         @* The columns of ClientWin's notes selector, in the same order. *@
         <Columns>
             <RadzenDataGridColumn TItem="NoteMinimalDto" Property="NoteNumber" Title="#" Width="64px" TextAlign="TextAlign.Right"
@@ -91,11 +124,8 @@
     /// <summary>How many notes the list has (all of them, not only the ones loaded); 0 until they are known.</summary>
     public int TotalCount => count;
 
-    /// <summary>Whether there is a selected note to view.</summary>
-    public bool CanViewCurrent => Current != null;
-
-    /// <summary>Whether the user can edit or delete the selected note.</summary>
-    public bool CanEditCurrent => Current != null && canEdit;
+    /// <summary>Whether there is a selected note (to view, edit or delete).</summary>
+    public bool HasCurrent => Current != null;
 
     public Task ViewCurrentAsync() => Current == null ? Task.CompletedTask : RunActionAsync(NoteAction.View, Current);
 
@@ -119,7 +149,13 @@
     private RadzenDataGrid<NoteMinimalDto>? grid;
     private IEnumerable<NoteMinimalDto>? notes;
     private int count;
-    private bool isLoading;
+    // The loads of rows running (the grid can ask for several at a time): the loading indicator is shown while
+    // there is any, and each one ends it whatever happens (an error, a reload, an exception).
+    private int loadsRunning;
+    // A block of the current rows could not be read (no answer from the server, an error): the list says so,
+    // with Retry. The error itself is already notified (BaseService).
+    private bool loadFailed;
+    private ClaimsPrincipal user = new();
     private bool canEdit;
     private bool restoreScroll;
     private readonly Dictionary<int, Task<List<NoteMinimalDto>?>> blocks = new();
@@ -140,14 +176,16 @@
         restoreScroll = Position?.ScrollTop > 0;
         order = initialOrder = Position?.Order ?? Order;
 
-        var user = (await AuthenticationState).User;
-        canEdit = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
+        user = (await AuthenticationState).User;
+        canEdit = KntAccess.HasRole(user, EnumRoles.Staff);
     }
 
     // The page draws itself again often (its header follows the selected note, AppState changes...). If that
     // draws the grid again while Radzen loads rows (virtualization), the grid can be left without rows or with
     // old ones: the grid only draws again for the page when its view (Compact) changes. Its own changes (rows
-    // loaded, order, selection) draw it as usual.
+    // loaded, order, selection) draw it as usual. A page's render that came while the grid already had one of its
+    // own queued doesn't reach ShouldRender (Blazor skips StateHasChanged then): that render clears the mark
+    // (OnAfterRender), or the grid's next own change (e.g. the end of a load) wouldn't be drawn.
     private bool parentRender;
     private bool renderedCompact;
 
@@ -170,6 +208,8 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        parentRender = false;
+
         if (firstRender)
         {
             dotNetRef = DotNetObjectReference.Create(this);
@@ -222,7 +262,22 @@
     private SortOrder? SortOrderOf(string column) =>
         initialOrder?.Column != column ? null : initialOrder.Ascending ? SortOrder.Ascending : SortOrder.Descending;
 
+    // Counted from the start: a sort's first wait (ChangeOrderAsync) already draws the grid, and it must show the
+    // indicator while its rows are read.
     private async Task OnLoadData(LoadDataArgs args)
+    {
+        loadsRunning++;
+        try
+        {
+            await LoadRowsAsync(args);
+        }
+        finally
+        {
+            loadsRunning--;
+        }
+    }
+
+    private async Task LoadRowsAsync(LoadDataArgs args)
     {
         // The sort of the headers changed (not just reported again, nor the initial one by a column not shown).
         var sort = args.Sorts?.FirstOrDefault(s => s.SortOrder != null && s.Property != null);
@@ -235,8 +290,6 @@
         var version = dataVersion;
         var skip = args.Skip ?? 0;
         var top = args.Top ?? FetchSize;
-
-        isLoading = true;
 
         var items = new List<NoteMinimalDto>();
         var firstBlock = skip / FetchSize;
@@ -255,8 +308,11 @@
         }
 
         notes = items.Skip(skip - firstBlock * FetchSize).Take(top).ToList();
-        isLoading = false;
     }
+
+    // Retry after an error: the rows in view are read again (RefreshDataAsync also makes Radzen ask for rows it
+    // already asked for).
+    private Task RetryAsync() => RefreshAsync();
 
     private Task<List<NoteMinimalDto>?> GetBlockAsync(int block)
     {
@@ -271,6 +327,7 @@
     // The notes loaded are no longer valid (reloaded, or another order): the blocks still being read are cancelled.
     private void NewDataVersion()
     {
+        loadFailed = false;
         blocks.Clear();
         noteIndexes.Clear();
         dataVersion++;
@@ -286,8 +343,10 @@
 
         if (!result.IsValid)
         {
-            // The error is already notified; forget it so that the block is requested again.
+            // The error is already notified; forget it so that the block is requested again. Not valid with the
+            // same version can't be a cancellation (that comes with a new version, or leaving the list).
             blocks.Remove(block);
+            loadFailed = true;
             return null;
         }
 
@@ -358,10 +417,7 @@
         if (action == "menu")
             await OpenActions(note, null);
         else if (action == "delete")
-        {
-            if (canEdit)
-                await RunActionAsync(NoteAction.Delete, note);
-        }
+            await RunActionAsync(NoteAction.Delete, note);
         else
             await RunActionAsync(OpenAction, note);
     }
@@ -373,16 +429,12 @@
             .SelectMany(blockTask => blockTask.Result!)
             .FirstOrDefault(n => n.NoteId.ToString() == noteId);
 
-    private List<KntAction> ActionsOf(NoteMinimalDto note)
-    {
-        var actions = new List<KntAction> { new("View", "launch", () => RunActionAsync(NoteAction.View, note)) };
-        if (canEdit)
-        {
-            actions.Add(new("Edit", "edit", () => RunActionAsync(NoteAction.Edit, note)));
-            actions.Add(new("Delete", "delete", () => RunActionAsync(NoteAction.Delete, note), Danger: true));
-        }
-        return actions;
-    }
+    private List<KntAction> ActionsOf(NoteMinimalDto note) =>
+    [
+        new("View", "launch", () => RunActionAsync(NoteAction.View, note)),
+        new("Edit", "edit", () => RunActionAsync(NoteAction.Edit, note)),
+        new("Delete", "delete", () => RunActionAsync(NoteAction.Delete, note), Danger: true)
+    ];
 
     /// <summary>Shows the actions of a note at the mouse (args) or, from the keyboard, below its row.</summary>
     private async Task OpenActions(NoteMinimalDto note, MouseEventArgs? args)
@@ -400,11 +452,12 @@
         KntActionsMenu.Open(contextMenuService, args, ActionsOf(note));
     }
 
+    // Editing and deleting check the role first, with no wait before (editing opens a window).
     private Task RunActionAsync(NoteAction action, NoteMinimalDto note) => action switch
     {
         NoteAction.View => OnNoteView.InvokeAsync(note),
-        NoteAction.Edit => OnNoteEdit.InvokeAsync(note),
-        _ => OnNoteDelete.InvokeAsync(note)
+        NoteAction.Edit => access.Check(user, EnumRoles.Staff, "Editing notes") ? OnNoteEdit.InvokeAsync(note) : Task.CompletedTask,
+        _ => access.Check(user, EnumRoles.Staff, "Deleting notes") ? OnNoteDelete.InvokeAsync(note) : Task.CompletedTask
     };
 
     private async Task<IJSObjectReference?> GetModuleAsync() =>

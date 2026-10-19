@@ -1,4 +1,6 @@
-﻿@implements IDisposable
+﻿@using System.Reflection
+
+@implements IDisposable
 
 @inject ThemeService themeService
 @inject IJSRuntime js
@@ -10,12 +12,16 @@
 
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">        
-        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+        @* The page's own layout (a window of the app: KntWindowLayout) also for Authorizing and NotAuthorized, which
+           AuthorizeRouteView draws in DefaultLayout. *@
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@LayoutOf(routeData)">
             <Authorizing>
-                <text>** Authorizing ... </text>
+                <RadzenStack AlignItems="AlignItems.Center" class="rz-py-12">
+                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+                </RadzenStack>
             </Authorizing>
             <NotAuthorized>
-                <text>** User no authorized to show this component ... </text>
+                <KntAccessDenied SignedIn="@(context.User.Identity?.IsAuthenticated == true)" />
             </NotAuthorized>
         </AuthorizeRouteView>        
     </Found>
@@ -56,4 +62,7 @@
     }
 
     private record SavedTheme(string? Theme, bool Wcag);
+
+    private static Type LayoutOf(RouteData routeData) =>
+        routeData.PageType.GetCustomAttribute<LayoutAttribute>()?.LayoutType ?? typeof(MainLayout);
 }

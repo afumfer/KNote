@@ -21,7 +21,14 @@
 </KntIndexHeader>
 
 <div class="rz-border rz-p-2 rz-mt-2 knt-admin-list" style="overflow: auto">
-    @if (foldersTree == null)
+    @if (treeFailed)
+    {
+        <div class="knt-load-error">
+            <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The folders could not be loaded.</span>
+            <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="OnRefreshTree" />
+        </div>
+    }
+    else if (foldersTree == null)
     {
         <RadzenLabel class="rz-m-2" Text="Loading tree folders ..." />
     }
@@ -38,6 +45,8 @@
 @code {
 
     private List<FolderDto>? foldersTree;
+    // The tree could not be read: the error and Retry (the error itself is already notified).
+    private bool treeFailed;
     private FolderDto? selectedFolder;
     private AppState appState = null!;
 
@@ -67,6 +76,7 @@
             return;
 
         var result = request.Value;
+        treeFailed = !result.IsValid;
         if (result.IsValid)
             foldersTree = result.Entity;
         else
@@ -101,12 +111,8 @@
 
     async Task OnNew()
     {
-        var res = await dialogService.OpenAsync<FolderNew>($"New folder",
-               new Dictionary<string, object?>() {  },
-               KntDialogs.Framed(KntDialogs.Medium()));
-
-        if(res != null)           
-            await Load();  
+        if (await FolderDialogs.NewAsync(dialogService))
+            await Load();
     }
 
     // A right click on a folder; the header buttons and a double click act on the selected one.
@@ -118,12 +124,8 @@
 
     async Task OnEdit(FolderDto folder)
     {
-        var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
-               new Dictionary<string, object?>() { { "FolderId", folder.FolderId.ToString() } },
-               KntDialogs.Framed(KntDialogs.Medium()));
-
-        if(res != null)        
-            await Load(); 
+        if (await FolderDialogs.EditAsync(dialogService, folder))
+            await Load();
     }
 
 
@@ -134,20 +136,10 @@
 
     async Task DeleteAsync(FolderDto folder)
     {
-        var resultDialog = await dialogService.Confirm(
-            $"Are you sure you want delete folder - {@folder.Name})?", 
-            "Delete folder", 
-            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
-
-        if (resultDialog == true)
+        if (await FolderDialogs.DeleteAsync(dialogService, store, folder))
         {
-            var result = await store.Folders.DeleteAsync(folder.FolderId);
-            if (result.IsValid)                            
-            {
-                foldersTree = null;
-                await OnRefreshTree();
-                await Load();
-            }
+            foldersTree = null;
+            await OnRefreshTree();
         }
     }
 

@@ -1,0 +1,55 @@
+@using KNote.Client.Auth
+
+@inject KntSignIn signIn
+@inject KntWindows kntWindows
+@inject NavigationManager navigationManager
+
+@*
+    What a page shows to who can't see it (App.razor, AuthorizeRouteView's NotAuthorized), inside the page's layout.
+    Without a session: sign in or register, and the page is shown once signed in (the router evaluates it again).
+    Signed in without the role the page asks for: back to Home or, in a window of the app (KntWindowLayout), close it.
+*@
+
+<div class="knt-access">
+    <RadzenCard class="knt-access-card">
+        <RadzenStack AlignItems="AlignItems.Center" Gap="0.75rem">
+            <div class="knt-access-icon">
+                <RadzenIcon Icon="@(SignedIn ? "block" : "lock")" />
+            </div>
+            @if (SignedIn)
+            {
+                <div class="knt-access-title">You don't have access to this page</div>
+                <div class="knt-access-text">Your role doesn't allow you to see this page. If you need it, ask an administrator.</div>
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.5rem" class="rz-mt-2">
+                    @if (InWindow)
+                    {
+                        <RadzenButton Text="Close window" Icon="close" ButtonStyle="ButtonStyle.Primary" Click="@(() => kntWindows.CloseAsync())" />
+                    }
+                    else
+                    {
+                        <RadzenButton Text="Back to Home" Icon="home" ButtonStyle="ButtonStyle.Primary" Click="@(() => navigationManager.NavigateTo(""))" />
+                    }
+                </RadzenStack>
+            }
+            else
+            {
+                <div class="knt-access-title">Sign in to continue</div>
+                <div class="knt-access-text">This page is only available to signed in users. Sign in with your account, or register if you don't have one yet.</div>
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.5rem" class="rz-mt-2">
+                    <RadzenButton Text="Register" Icon="how_to_reg" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                                  Disabled="@signIn.IsBusy" Click="@(() => signIn.RegisterAsync(goHome: false))" />
+                    <RadzenButton Text="Sign in" Icon="login" ButtonStyle="ButtonStyle.Primary"
+                                  IsBusy="@signIn.IsBusy" Click="@(() => signIn.SignInAsync(goHome: false))" />
+                </RadzenStack>
+            }
+        </RadzenStack>
+    </RadzenCard>
+</div>
+
+@code {
+    // Whether there is a signed in user (then the page asks for a role they don't have).
+    [Parameter] public bool SignedIn { get; set; }
+
+    // Set by KntWindowLayout: the page is a window of the app, with no Home to go back to.
+    [CascadingParameter(Name = "KntWindow")] private bool InWindow { get; set; }
+}

@@ -16,7 +16,10 @@
 
 <RadzenLayout>
     <RadzenBody>
-        @Body
+        @* Tells the page (and KntAccessDenied) it is a window of the app. *@
+        <CascadingValue Name="KntWindow" Value="true" IsFixed="true">
+            @Body
+        </CascadingValue>
     </RadzenBody>
 </RadzenLayout>
 
