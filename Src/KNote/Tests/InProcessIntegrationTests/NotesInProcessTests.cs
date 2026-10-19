@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -181,6 +182,33 @@ public class NotesInProcessTests
         {
             await _httpClient.DeleteAsync($"api/notes/{note.NoteId}");
         }
+    }
+
+    // The notes lists of the web app (tree, filter, search) are for every signed in user, Guest included, as the
+    // service's commands (KntNotesGetMinimalFilterAsyncCommand, KntNotesGetMinimalSearchAsyncCommand).
+    [TestMethod]
+    public async Task AGuest_CanFilterAndSearch()
+    {
+        // Registered after the suite's Admin, so the service makes this user a Guest.
+        using var guestClient = _factory.CreateClient();
+        var register = await guestClient.PostAsJsonAsync("api/users/register", new UserRegisterDto
+        {
+            UserName = $"guest-{Guid.NewGuid():N}"[..24],
+            EMail = $"{Guid.NewGuid():N}@knote.tests",
+            FullName = "Guest user",
+            Password = "InProcess-Test-Password-1!"
+        });
+        var token = await register.Content.ReadFromJsonAsync<UserTokenDto>();
+        guestClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token!.token);
+
+        var filterDto = new NotesFilterDto { FolderId = _folder.FolderId, PageIdentifier = new PageIdentifier { PageNumber = 1, PageSize = 25 } };
+        var filterRes = await guestClient.PostAsJsonAsync("api/notes/filter", filterDto);
+        var filter = await filterRes.Content.ReadFromJsonAsync<Result<List<NoteMinimalDto>>>();
+        var searchRes = await guestClient.GetAsync("api/notes/search?textSearch=KNote&pageNumber=1&pageSize=25");
+
+        Assert.IsTrue(filterRes.IsSuccessStatusCode, filterRes.StatusCode.ToString());
+        Assert.IsTrue(filter?.IsValid == true);
+        Assert.IsTrue(searchRes.IsSuccessStatusCode, searchRes.StatusCode.ToString());
     }
 
     [TestMethod]

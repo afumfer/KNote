@@ -68,7 +68,6 @@ public class NotesController : ControllerBase
     }
 
     [HttpPost("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjectManager")]        
     public async Task <IActionResult> Filter([FromBody] NotesFilterDto notesFilter)
     {
         try
