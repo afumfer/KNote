@@ -20,6 +20,9 @@ internal class FakeKntUserService : IKntUserService
     public Func<Guid, Task<Result<UserDto>>>? DeleteAsyncImpl { get; set; }
     public Func<Guid, string, Task<Result<UserDto>>>? SetPasswordAsyncImpl { get; set; }
     public Func<UserCredentialsDto, Task<Result<UserDto>>>? AuthenticateAsyncImpl { get; set; }
+    public Func<Task<Result<UserProfileDto>>>? GetProfileAsyncImpl { get; set; }
+    public Func<UserProfileDto, Task<Result<UserProfileDto>>>? SaveProfileAsyncImpl { get; set; }
+    public Func<UserChangePasswordDto, Task<Result<UserDto>>>? ChangePasswordAsyncImpl { get; set; }
 
     public Task<Result<UserDto>> GetByUserNameAsync(string userName) =>
         (GetByUserNameAsyncImpl ?? throw new NotSupportedException($"{nameof(GetByUserNameAsync)} not configured for this test"))(userName);
@@ -47,4 +50,16 @@ internal class FakeKntUserService : IKntUserService
 
     public Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials) =>
         (AuthenticateAsyncImpl ?? throw new NotSupportedException($"{nameof(AuthenticateAsync)} not configured for this test"))(userCredentials);
+
+    public Task<Result<string>> GetPasswordStampAsync(string userName) =>
+        throw new NotSupportedException($"{nameof(GetPasswordStampAsync)} is only used by the Server");
+
+    public Task<Result<UserProfileDto>> GetProfileAsync() =>
+        (GetProfileAsyncImpl ?? throw new NotSupportedException($"{nameof(GetProfileAsync)} not configured for this test"))();
+
+    public Task<Result<UserProfileDto>> SaveProfileAsync(UserProfileDto profile) =>
+        (SaveProfileAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveProfileAsync)} not configured for this test"))(profile);
+
+    public Task<Result<UserDto>> ChangePasswordAsync(UserChangePasswordDto passwords) =>
+        (ChangePasswordAsyncImpl ?? throw new NotSupportedException($"{nameof(ChangePasswordAsync)} not configured for this test"))(passwords);
 }

@@ -83,3 +83,8 @@
     border-top: 1px solid color-mix(in srgb, var(--rz-text-color) 10%, transparent);
     background-color: color-mix(in srgb, var(--rz-text-color) 3%, transparent);
 }
+
+/* A secondary action of the dialog (e.g. "Set password" in the user editor), apart from Cancel and the main one. */
+.knt-dialog-footer ::deep .knt-footer-start {
+    margin-right: auto;
+}

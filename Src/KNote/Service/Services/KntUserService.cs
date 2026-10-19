@@ -77,5 +77,29 @@ public class KntUserService : KntServiceBase, IKntUserService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<string>> GetPasswordStampAsync(string userName)
+    {
+        var command = new KntUsersGetPasswordStampAsyncCommand(Service, userName);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<UserProfileDto>> GetProfileAsync()
+    {
+        var command = new KntUsersGetProfileAsyncCommand(Service);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<UserProfileDto>> SaveProfileAsync(UserProfileDto profile)
+    {
+        var command = new KntUsersSaveProfileAsyncCommand(Service, profile);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<UserDto>> ChangePasswordAsync(UserChangePasswordDto passwords)
+    {
+        var command = new KntUsersChangePasswordAsyncCommand(Service, passwords);
+        return await ExecuteCommand(command);
+    }
+
     #endregion
 }

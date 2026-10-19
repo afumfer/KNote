@@ -113,6 +113,24 @@ public class AppState
     // Preview of the selected note beside the notes lists (NotesPreviewToggle); null until read from the browser.
     public bool? NotesPreviewVisible { get; set; }
 
+    /// <summary>
+    /// Forgets what was read with the session that ends (the folders tree, the folder selected, the notes filter and
+    /// where the lists were), so the next user signed in reads it again with their own permissions. The view
+    /// preferences and the repository's name stay.
+    /// </summary>
+    public void ClearUserData()
+    {
+        _foldersTree = null;
+        _foldersIndex = null;
+        _selectedFolder = null;
+        NotesTreePosition = null;
+        NotesFilter = null;
+        NotesFilterFolderName = null;
+        NotesFilterPosition = null;
+        NotesSearchPosition = null;
+        NotifyStateChanged();
+    }
+
     #endregion 
 
     #region App event
@@ -130,6 +148,13 @@ public class AppState
     public void NotifySuccess(string summary, string details)
     {
         OnNotifySuccess?.Invoke(summary, details);
+    }
+
+    // The server refused the session of the signed in user (BaseService): the layout signs them out.
+    public event Action? OnSessionEnded;
+    public void NotifySessionEnded()
+    {
+        OnSessionEnded?.Invoke();
     }
 
     #endregion

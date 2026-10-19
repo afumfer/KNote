@@ -17,4 +17,10 @@ public interface IKntUserService
     Task<Result<UserDto>> AuthenticateAsync(UserCredentialsDto userCredentials);
     Task<Result<UserDto>> CreateAsync(UserRegisterDto userRegisterInfoDto);
     Task<Result<UserDto>> RegisterAsync(UserRegisterDto userRegisterInfoDto);
+    Task<Result<string>> GetPasswordStampAsync(string userName);
+
+    // The account of the current user (UserIdentityName), for the user themselves.
+    Task<Result<UserProfileDto>> GetProfileAsync();
+    Task<Result<UserProfileDto>> SaveProfileAsync(UserProfileDto profile);
+    Task<Result<UserDto>> ChangePasswordAsync(UserChangePasswordDto passwords);
 }

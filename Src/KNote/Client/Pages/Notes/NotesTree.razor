@@ -89,7 +89,9 @@
             else
                 foldersTree = new List<FolderDto>();
 
-            appState.FoldersTree = foldersTree;
+            // Only a tree read is kept: after a failure (the session refused, no network) it is asked again next time.
+            if (result.IsValid)
+                appState.FoldersTree = foldersTree;
 
             if (foldersTree?.Count > 0)
             {

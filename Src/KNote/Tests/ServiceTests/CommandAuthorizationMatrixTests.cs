@@ -50,7 +50,9 @@ public class CommandAuthorizationMatrixTests
             "KntNoteTypeGetAllAsyncCommand", "KntNoteTypeGetAsyncCommand",
             "KntSystemValueGetAllAsyncCommand", "KntSystemValueGetByScopeKeyAsyncCommand", "KntSystemValueGetAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
-            "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand");
+            "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
+            // The user's own account (every user has one).
+            "KntUsersGetProfileAsyncCommand", "KntUsersSaveProfileAsyncCommand", "KntUsersChangePasswordAsyncCommand");
 
         // Creating, editing and deleting notes and everything inside them. KntNotesGetAlarmNotesIdAsyncCommand
         // is here too: besides reading the due alarms it updates them (alarm processing).
@@ -86,7 +88,7 @@ public class CommandAuthorizationMatrixTests
             "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
-            "KntUsersSetPasswordAsyncCommand");
+            "KntUsersSetPasswordAsyncCommand", "KntUsersGetPasswordStampAsyncCommand");
 
         return matrix;
     }

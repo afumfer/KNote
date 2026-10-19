@@ -49,6 +49,10 @@
 
         </ChildContent>
         <Footer>
+            @if (!IsNew && OnSetPassword.HasDelegate)
+            {
+                <RadzenButton Text="Set password" Icon="key" Click="() => OnSetPassword.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Disabled="@Saving" class="knt-footer-start" />
+            }
             <RadzenButton Text="Cancel" Click="() => OnExit.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Disabled="@Saving" />
             <RadzenButton Text="Save" Icon="save" Click="() => Save(formContext)" ButtonStyle="ButtonStyle.Primary" IsBusy="@Saving" />
         </Footer>
@@ -61,6 +65,8 @@
     [Parameter] public string Title { get; set; } = "...";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }
+    // An existing user's password, set by the Admin apart from the save (UserEdit).
+    [Parameter] public EventCallback OnSetPassword { get; set; }
     // Being saved: the buttons wait for it (the page ignores another save or leaving meanwhile).
     [Parameter] public bool Saving { get; set; }
 
