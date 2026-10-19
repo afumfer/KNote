@@ -299,7 +299,7 @@ abstract public class CtrlBase : IDisposable
     /// Ctrl's catch block receives. Used by every editor Ctrl's SaveModel/DeleteModel catch block instead
     /// of showing the generic wrapper message.
     /// </summary>
-    protected static string RootExceptionMessage(Exception ex)
+    protected internal static string RootExceptionMessage(Exception ex)
     {
         var rootEx = ex;
         while (rootEx.InnerException != null)

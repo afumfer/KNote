@@ -14,6 +14,9 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
     private readonly KNoteManagementCtrl _ctrl;
 
+    // The user's details, above the status bar (see ToolStripItemToolTip: the bar's own tooltip flashed there).
+    private readonly ToolStripItemToolTip _userToolTip;
+
     #endregion
 
     #region IViewKNoteManagement events
@@ -43,6 +46,11 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 #endif
 
         SetIcons();
+
+        // The user in the status bar: its details above it, and its profile with a double-click.
+        _userToolTip = new ToolStripItemToolTip(statusLabelUser, () => _ctrl.SessionUserDetail);
+        statusLabelUser.DoubleClickEnabled = true;
+        statusLabelUser.DoubleClick += async (s, e) => { _userToolTip.Hide(); await _ctrl.UserProfile(); };
     }
 
     private void SetIcons()
@@ -120,7 +128,6 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
         // The user and its role in the active repository, which changes along with it.
         statusLabelUser.Text = _ctrl.SessionUserInfo;
-        statusLabelUser.ToolTipText = _ctrl.SessionUserDetail;
 
         return DialogResult.OK;
     }
@@ -322,6 +329,14 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         else if (menuSel == menuAbout)
         {
             _ctrl.About();
+        }
+        else if (menuSel == menuUserProfile)
+        {
+            await _ctrl.UserProfile();
+        }
+        else if (menuSel == menuChangePassword)
+        {
+            await _ctrl.ChangePassword();
         }
         else if (menuSel == menuHelpDoc)
         {

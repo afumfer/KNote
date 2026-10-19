@@ -22,6 +22,8 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<FolderEditorCtrl, IViewEditor<FolderDto>>(c => new FolderEditorForm(c));
         Registry.Register<RepositoryEditorCtrl, IViewEditor<RepositoryRef>>(c => new RepositoryEditorForm(c));
         Registry.Register<UserRegisterCtrl, IViewEditor<UserRegisterDto>>(c => new UserRegisterForm(c));
+        Registry.Register<UserProfileCtrl, IViewEditor<UserProfileDto>>(c => new UserProfileForm(c));
+        Registry.Register<ChangePasswordCtrl, IViewEditor<ChangePasswordModel>>(c => new ChangePasswordForm(c));
         Registry.Register<LoginCtrl, IViewEditor<LoginModel>>(c => new LoginForm(c));
         Registry.Register<NotesListCsvExportCtrl, IViewFileExport>(c => new FileExportForm());
         Registry.Register<UserEditorCtrl, IViewEditor<UserDto>>(c => new UserEditorForm(c));
