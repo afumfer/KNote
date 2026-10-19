@@ -50,6 +50,7 @@ public class OptionsEditorCtrl : CtrlEditorBase<IViewEditor<OptionsModel>, Optio
         Model.ApplyTo(Store.Settings, Store.State);
         Store.SaveConfig();
 
+        Finalize();
         return Task.FromResult(true);
     }
 
