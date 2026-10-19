@@ -192,9 +192,32 @@
     color: var(--rz-on-primary);
 }
 
+/* A note's content (Shared/ViewMarkdown) never widens the page: its wide blocks (<pre>, code, tables) scroll
+   sideways on their own, long words break, and anything else too wide (images, diagrams, HTML of ClientWin's editor
+   with fixed widths) scrolls inside the content, as in the editor's preview. */
+.knt-markdown {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-wrap: break-word;
+}
+
+    .knt-markdown pre {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .knt-markdown img {
+        max-width: 100%;
+        height: auto;
+    }
+
 /* Tables in a note's content (Markdown or the HTML of ClientWin's editor, Shared/ViewMarkdown): lines and room, as
-   in the editor. */
+   in the editor; a wide one scrolls sideways by itself. */
 .knt-markdown table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
     border-collapse: collapse;
     margin: 0.5rem 0;
 }
