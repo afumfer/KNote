@@ -1,10 +1,13 @@
 ﻿@page "/notes/search"
 @page "/search"
 
+@using KNote.Client.Auth
+
 @implements IDisposable
 
 @inject IStore store
 @inject KntWindows kntWindows
+@inject KntAccess access
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject IJSRuntime js
@@ -15,8 +18,8 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-            <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.CanEditCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
-            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.CanEditCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.HasCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
+            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.HasCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
             <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
             <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" ListName="@($"Search: {SearchedText()}")" />
         </RadzenMenu>
@@ -57,6 +60,8 @@
 
 
 @code {
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
     private NotesGrid? notesGrid;
     private AppState appState = null!;
     private string textSearch = "";
@@ -120,7 +125,12 @@
         TextSearch = SearchedText()
     };
 
-    Task OnNew() => kntWindows.OpenNewAsync();
+    // Creating a note needs Staff (KntAccess, checked with no wait before: it opens a window).
+    async Task OnNew()
+    {
+        if (await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Creating notes"))
+            await kntWindows.OpenNewAsync();
+    }
 
     private Task OnView(NoteMinimalDto note) => kntWindows.OpenViewAsync(note.NoteId);
 

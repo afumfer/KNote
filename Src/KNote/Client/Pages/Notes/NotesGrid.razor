@@ -1,15 +1,20 @@
+@using KNote.Client.Auth
+@using System.Security.Claims
+
 @implements IAsyncDisposable
 
 @inject TooltipService tooltipService
 @inject ContextMenuService contextMenuService
 @inject IJSRuntime js
 @inject IStore store
+@inject KntAccess access
 
 @*
     Notes list that loads its own data through LoadPage while it is scrolled (virtualized rows), filling the
     height of its container. A click selects a row (the current row, js/notesGrid.js), which the arrows, page
     keys, Home and End move too (a right click selects it as well); double click or Enter edits its note (views it,
     for who can't edit); a right click, the context menu key or Shift+F10 show its actions, and Delete deletes it.
+    The actions are always offered: editing and deleting check the user's role when chosen (KntAccess).
     View and edit open the note in a window of its own (the page's OnNoteView/OnNoteEdit, see KntWindows). The
     page's header acts on the selected note too (Current, ViewCurrentAsync, EditCurrentAsync, DeleteCurrentAsync).
     The headers sort the list (in the server: LoadPage gets the order). With Position it remembers where the user
@@ -91,11 +96,8 @@
     /// <summary>How many notes the list has (all of them, not only the ones loaded); 0 until they are known.</summary>
     public int TotalCount => count;
 
-    /// <summary>Whether there is a selected note to view.</summary>
-    public bool CanViewCurrent => Current != null;
-
-    /// <summary>Whether the user can edit or delete the selected note.</summary>
-    public bool CanEditCurrent => Current != null && canEdit;
+    /// <summary>Whether there is a selected note (to view, edit or delete).</summary>
+    public bool HasCurrent => Current != null;
 
     public Task ViewCurrentAsync() => Current == null ? Task.CompletedTask : RunActionAsync(NoteAction.View, Current);
 
@@ -120,6 +122,7 @@
     private IEnumerable<NoteMinimalDto>? notes;
     private int count;
     private bool isLoading;
+    private ClaimsPrincipal user = new();
     private bool canEdit;
     private bool restoreScroll;
     private readonly Dictionary<int, Task<List<NoteMinimalDto>?>> blocks = new();
@@ -140,8 +143,8 @@
         restoreScroll = Position?.ScrollTop > 0;
         order = initialOrder = Position?.Order ?? Order;
 
-        var user = (await AuthenticationState).User;
-        canEdit = user.IsInRole("Admin") || user.IsInRole("ProjectManager") || user.IsInRole("Staff");
+        user = (await AuthenticationState).User;
+        canEdit = KntAccess.HasRole(user, EnumRoles.Staff);
     }
 
     // The page draws itself again often (its header follows the selected note, AppState changes...). If that
@@ -358,10 +361,7 @@
         if (action == "menu")
             await OpenActions(note, null);
         else if (action == "delete")
-        {
-            if (canEdit)
-                await RunActionAsync(NoteAction.Delete, note);
-        }
+            await RunActionAsync(NoteAction.Delete, note);
         else
             await RunActionAsync(OpenAction, note);
     }
@@ -373,16 +373,12 @@
             .SelectMany(blockTask => blockTask.Result!)
             .FirstOrDefault(n => n.NoteId.ToString() == noteId);
 
-    private List<KntAction> ActionsOf(NoteMinimalDto note)
-    {
-        var actions = new List<KntAction> { new("View", "launch", () => RunActionAsync(NoteAction.View, note)) };
-        if (canEdit)
-        {
-            actions.Add(new("Edit", "edit", () => RunActionAsync(NoteAction.Edit, note)));
-            actions.Add(new("Delete", "delete", () => RunActionAsync(NoteAction.Delete, note), Danger: true));
-        }
-        return actions;
-    }
+    private List<KntAction> ActionsOf(NoteMinimalDto note) =>
+    [
+        new("View", "launch", () => RunActionAsync(NoteAction.View, note)),
+        new("Edit", "edit", () => RunActionAsync(NoteAction.Edit, note)),
+        new("Delete", "delete", () => RunActionAsync(NoteAction.Delete, note), Danger: true)
+    ];
 
     /// <summary>Shows the actions of a note at the mouse (args) or, from the keyboard, below its row.</summary>
     private async Task OpenActions(NoteMinimalDto note, MouseEventArgs? args)
@@ -400,11 +396,12 @@
         KntActionsMenu.Open(contextMenuService, args, ActionsOf(note));
     }
 
+    // Editing and deleting check the role first, with no wait before (editing opens a window).
     private Task RunActionAsync(NoteAction action, NoteMinimalDto note) => action switch
     {
         NoteAction.View => OnNoteView.InvokeAsync(note),
-        NoteAction.Edit => OnNoteEdit.InvokeAsync(note),
-        _ => OnNoteDelete.InvokeAsync(note)
+        NoteAction.Edit => access.Check(user, EnumRoles.Staff, "Editing notes") ? OnNoteEdit.InvokeAsync(note) : Task.CompletedTask,
+        _ => access.Check(user, EnumRoles.Staff, "Deleting notes") ? OnNoteDelete.InvokeAsync(note) : Task.CompletedTask
     };
 
     private async Task<IJSObjectReference?> GetModuleAsync() =>

@@ -101,12 +101,8 @@
 
     async Task OnNew()
     {
-        var res = await dialogService.OpenAsync<FolderNew>($"New folder",
-               new Dictionary<string, object?>() {  },
-               KntDialogs.Framed(KntDialogs.Medium()));
-
-        if(res != null)           
-            await Load();  
+        if (await FolderDialogs.NewAsync(dialogService))
+            await Load();
     }
 
     // A right click on a folder; the header buttons and a double click act on the selected one.
@@ -118,12 +114,8 @@
 
     async Task OnEdit(FolderDto folder)
     {
-        var res = await dialogService.OpenAsync<FolderEdit>($"Edit folder",
-               new Dictionary<string, object?>() { { "FolderId", folder.FolderId.ToString() } },
-               KntDialogs.Framed(KntDialogs.Medium()));
-
-        if(res != null)        
-            await Load(); 
+        if (await FolderDialogs.EditAsync(dialogService, folder))
+            await Load();
     }
 
 
@@ -134,20 +126,10 @@
 
     async Task DeleteAsync(FolderDto folder)
     {
-        var resultDialog = await dialogService.Confirm(
-            $"Are you sure you want delete folder - {@folder.Name})?", 
-            "Delete folder", 
-            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
-
-        if (resultDialog == true)
+        if (await FolderDialogs.DeleteAsync(dialogService, store, folder))
         {
-            var result = await store.Folders.DeleteAsync(folder.FolderId);
-            if (result.IsValid)                            
-            {
-                foldersTree = null;
-                await OnRefreshTree();
-                await Load();
-            }
+            foldersTree = null;
+            await OnRefreshTree();
         }
     }
 

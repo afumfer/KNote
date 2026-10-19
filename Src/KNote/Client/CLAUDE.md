@@ -58,7 +58,7 @@ Client/
 │     ClientDataServices/
 │         Base/BaseService.cs   – manejo común de respuestas HTTP → Result<T> + notificaciones
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
-├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService)
+├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService), KntSignIn (entrar/registrarse)
 ├── Pages/                  – páginas por área: Notes/, Folders/, Types/, TraceNoteTypes/, Attributes/, Users/, Auth/,
 │                             AIAssistant/, ChatRoom/
 ├── Shared/                 – layouts (MainLayout*, KntWindowLayout) y componentes reutilizables (EntityList, ToolingHeader,
@@ -145,6 +145,22 @@ chat, sin pegar imágenes...) y lo guarda con `??=`, así que lo vuelve a pedir 
 - **Olvidé mi contraseña**: el diálogo `Auth/Login` abre `Auth/ForgotPassword` encima (el login sigue abierto); el
   enlace del correo lleva a la página anónima `Auth/ResetPassword` (`/reset-password?token=`), que entra con el token
   devuelto.
+- **Entrar y registrarse**: `Auth/KntSignIn` (servicio `Scoped`, de uno en uno) abre el diálogo, llama a `IStore.Users` e
+  inicia la sesión. Lo usan la cabecera (`AdminLogin`, que luego va a Home) y la tarjeta de acceso, que se queda en la página.
+- **Página sin acceso**: `App.razor` (`AuthorizeRouteView`) muestra un indicador circular mientras comprueba la sesión y, si la
+  página no se puede ver, `Shared/KntAccessDenied`: sin sesión, "Sign in"/"Register" (al entrar, el router vuelve a evaluar la
+  página y la muestra); con sesión pero sin el rol, "Back to Home" o, en una ventana de la app, "Close window" (la ventana lo
+  sabe por el `CascadingValue` `KntWindow` de `KntWindowLayout`). `AuthorizeRouteView` dibuja esos estados en su `DefaultLayout`,
+  no en el `@layout` de la página: `App.razor` le pasa el de la página (`LayoutOf`), para que una ventana no salga con los menús.
+- **Acciones según el rol** (como en `ClientWin`): los botones y menús de una acción (New/Edit/Delete note, Print/Export,
+  Folder...) están **siempre habilitados** (solo dependen de que haya algo seleccionado), y la acción comprueba el rol al
+  elegirla con `Auth/KntAccess` (`Check`/`CheckAsync`, rol mínimo y qué se intenta): si no llega, una notificación "Access
+  denied" dice qué rol hace falta y no se hace nada. La comprobación es síncrona (el `AuthenticationState` de la página, ya
+  resuelto): una acción que abre una ventana comprueba antes sin esperar. `KntAccess.HasRole` es la comprobación jerárquica
+  (`Guest < Staff < ProjectManager < Admin`); úsala en vez de varios `IsInRole`. Lo que no es una acción elegida se adapta
+  al rol sin avisar: el doble clic de una lista edita o, si no se puede, ve; el orden elegido en el árbol solo se guarda
+  para Staff+. Las secciones del menú lateral y las páginas siguen con `AuthorizeView`/`[Authorize]`, y `Server` comprueba
+  cada petición.
 - **Sesión rechazada**: un 401 con sesión iniciada (`BaseService`) no se notifica como error: avisa a
   `AppState.OnSessionEnded`, y los dos layouts llaman a `ILoginService.SessionRefusedAsync`, que adopta el token de
   `localStorage` si otra ventana de la app ya guardó uno nuevo (tras cambiar la contraseña) o, si no, cierra la
@@ -266,9 +282,14 @@ Patrones ya establecidos que hay que seguir:
   derecho, tecla de menú o Mayús+F10; la cabecera de la página tiene Edit/Delete y, tras un separador (clase
   `knt-menu-separator` de `knt-theme.css`), el desplegable "View options" (`NotesViewOptionsMenu`: View de la nota
   seleccionada, la vista previa y la vista compacta o extendida; agrupadas para dejar sitio en la barra a otros
-  casos de uso) (`NotesGrid.Current`, `CurrentChanged`,
-  `ViewCurrentAsync`/`EditCurrentAsync`/`DeleteCurrentAsync`). Ver y editar abren la nota en su ventana (ver
-  "Ventanas de la app"). **Vista previa**: `NotesPreviewToggle` (opción de "View options", `AppState.NotesPreviewVisible`
+  casos de uso) (`NotesGrid.Current`, `HasCurrent`, `CurrentChanged`,
+  `ViewCurrentAsync`/`EditCurrentAsync`/`DeleteCurrentAsync`; editar y borrar comprueban el rol en `NotesGrid`, ver
+  "Acciones según el rol"). Ver y editar abren la nota en su ventana (ver "Ventanas de la app"). En el árbol, el
+  desplegable "Folder" de la cabecera crea una carpeta dentro de la seleccionada, edita o borra la seleccionada y
+  vuelve a leer el árbol ("Refresh tree"), y el clic derecho en una carpeta da "Edit folder"/"Delete folder"
+  (ProjectManager+, como `FolderEditorCtrl` de `ClientWin`); los casos de uso de carpeta son los de `Admin`
+  (`Folders/FolderDialogs`, que también usa `FoldersIndex`), y tras un cambio el árbol se vuelve a leer con la carpeta
+  seleccionada. **Vista previa**: `NotesPreviewToggle` (opción de "View options", `AppState.NotesPreviewVisible`
   + `localStorage`, común a las tres páginas) muestra a la derecha de la lista `NotePreviewPane`, que carga la nota
   seleccionada cuando la selección se para 250 ms (con las flechas no carga cada nota del camino) y la recarga si
   se guarda en su ventana. Su `RadzenSplitterPane` está siempre, con el tamaño de todos los paneles fijado desde el
@@ -288,7 +309,7 @@ Patrones ya establecidos que hay que seguir:
   selección (`RefreshAsync`; la virtualización de Radzen recarga sin redibujar, de ahí su `StateHasChanged`). Una
   lista nueva (otra carpeta, filtro o búsqueda) es un `NotesGrid` nuevo (`@key`). **Imprimir y exportar** la
   lista: `NotesPrintExportMenu`, el último elemento de la botonera de las tres páginas (Staff+, como en
-  `ClientWin`), un desplegable "Print/Export" con la lista, el libro (pide confirmación con más de
+  `ClientWin`, comprobado al elegir cada opción), un desplegable "Print/Export" con la lista, el libro (pide confirmación con más de
   `LargeNotesBook.Notes` notas), el detalle de la nota seleccionada y el CSV. Cada página le da de dónde salen sus
   notas (`Request`: carpeta, texto buscado o `AppState.NotesFilter`) y, en el árbol, el orden de la carpeta
   (`DefaultOrder`); el componente añade el orden y la vista de la lista (`NotesGrid.CurrentOrder`, `Compact`) y

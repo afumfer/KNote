@@ -26,6 +26,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderJW
 builder.Services.AddScoped<ILoginService, AuthenticationProviderJWT>(
     provider => provider.GetRequiredService<AuthenticationProviderJWT>()
 );
+builder.Services.AddScoped<KntSignIn>();
+builder.Services.AddScoped<KntAccess>();
 
 builder.Services.AddRadzenComponents();
 

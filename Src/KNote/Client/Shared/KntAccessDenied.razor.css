@@ -1,0 +1,42 @@
+/* A card in the middle of the page, with the theme's colors (any theme, light or dark). */
+
+.knt-access {
+    display: flex;
+    justify-content: center;
+    padding: 4rem 1rem;
+}
+
+.knt-access ::deep .knt-access-card {
+    width: 100%;
+    max-width: 30rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.knt-access-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: color-mix(in srgb, var(--rz-primary) 14%, transparent);
+    color: color-mix(in srgb, var(--rz-primary) 75%, var(--rz-text-color));
+}
+
+    .knt-access-icon ::deep .rzi {
+        font-size: 2rem;
+    }
+
+.knt-access-title {
+    font-family: var(--knt-heading-font-family);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+}
+
+.knt-access-text {
+    max-width: 24rem;
+    font-size: 0.875rem;
+    color: var(--rz-text-secondary-color);
+}
