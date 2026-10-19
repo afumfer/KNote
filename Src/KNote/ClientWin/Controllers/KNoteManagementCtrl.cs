@@ -90,6 +90,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             };
             foreach (var serviceRef in Store.GetAllServiceRef())
                 lines.Add($"   {serviceRef.Name}: {Store.Security.GetRepositoryRoleName(serviceRef.Service)}");
+            lines.Add("Double-click: My profile.");
 
             return string.Join(Environment.NewLine, lines);
         }
@@ -1786,6 +1787,36 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         }
 
         return context;
+    }
+
+    // The user's own account, which exists once in each linked repository (User menu, double-click on the user in
+    // the status bar). The profile is shown as it is in the active repository.
+    public async Task UserProfile()
+    {
+        var service = SelectedServiceRef?.Service ?? Store.GetFirstServiceRef()?.Service;
+        if (service == null)
+        {
+            View.ShowInfo("There are no linked repositories: your user belongs to each repository.");
+            return;
+        }
+
+        var userProfileCtrl = new UserProfileCtrl(Store);
+        var res = await userProfileCtrl.LoadModelAsync(service);
+        if (!res.IsValid)
+        {
+            View.ShowInfo(res.ErrorMessage);
+            userProfileCtrl.Finalize();
+            return;
+        }
+
+        userProfileCtrl.RunModal();
+    }
+
+    public async Task ChangePassword()
+    {
+        var changePasswordCtrl = new ChangePasswordCtrl(Store);
+        await changePasswordCtrl.NewModel(SelectedServiceRef?.Service);
+        changePasswordCtrl.RunModal();
     }
 
     public async Task Options()

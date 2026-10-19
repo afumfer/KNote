@@ -164,7 +164,7 @@ public class KntUsersAuthenticateAsyncCommand : KntCommandServiceBase<UserCreden
             return resService;
         }
 
-        if (!VerifyPasswordHash(Param.Password, resRep.Entity.PasswordHash, resRep.Entity.PasswordSalt))
+        if (!KntPasswordHasher.Verify(Param.Password, resRep.Entity.PasswordHash, resRep.Entity.PasswordSalt))
         {
             resService.AddErrorMessage("User not authenticated");
             resService.Entity = null;
@@ -173,27 +173,6 @@ public class KntUsersAuthenticateAsyncCommand : KntCommandServiceBase<UserCreden
 
         resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
         return resService;
-    }
-
-    private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-    {
-        if (password == null) throw new ArgumentNullException("password");
-        if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-        if (storedHash == null) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "storedHash");
-        if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "storedHash");
-        if (storedSalt == null) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "storedSalt");
-        if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "storedSalt");
-
-        using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
-        {
-            var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            for (int i = 0; i < computedHash.Length; i++)
-            {
-                if (computedHash[i] != storedHash[i]) return false;
-            }
-        }
-
-        return true;
     }
 }
 
@@ -210,8 +189,12 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
         var resService = new Result<UserDto>();
         var password = Param.Password;
 
-        if (string.IsNullOrWhiteSpace(password))
-            throw new Exception("Password is required");
+        var passwordError = KntPasswordPolicy.Validate(password, Param.UserName);
+        if (passwordError != null)
+        {
+            resService.AddErrorMessage(passwordError);
+            return resService;
+        }
 
         if ((await Repository.Users.GetInternalAsync(Param.UserName)).Entity != null)
             throw new Exception("Username \"" + Param.UserName + "\" is already taken");
@@ -220,7 +203,7 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
         else
         {
             byte[] passwordHash, passwordSalt;
-            CreatePasswordHash(password, out passwordHash, out passwordSalt);
+            KntPasswordHasher.CreateHash(password, out passwordHash, out passwordSalt);
 
             var newEntity = new UserInternalDto();
             newEntity.SetSimpleDto(Param);
@@ -238,25 +221,6 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
         }
         return resService;
     }
-
-    // Not private: reused by KntUsersSetPasswordAsyncCommand below (same file/namespace) so a
-    // "reset password" action for an existing user hashes exactly the same way as account creation.
-    internal static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-    {
-        if (password == null) throw new ArgumentNullException("password");
-        if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-
-        using (var hmac = new System.Security.Cryptography.HMACSHA512())
-        {
-            passwordSalt = hmac.Key;
-            passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-
-            // TODO: remove (for debug and seed data).
-            //var strSalt = Convert.ToBase64String(passwordSalt);
-            //var strHash = Convert.ToBase64String(passwordHash);
-        }
-    }
-
 }
 
 /// <summary>
@@ -306,10 +270,10 @@ public class KntUsersRegisterAsyncCommand : KntUsersCreateAsyncCommand
 /// panel had no way to log in until either this command or the create flow set one explicitly.
 /// </summary>
 [KntAuthorize(EnumRoles.Admin)]
-public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<(Guid UserId, string NewPassword), Result<UserDto>>
+public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<KntSetPasswordParam, Result<UserDto>>
 {
     public KntUsersSetPasswordAsyncCommand(IKntService service, Guid userId, string newPassword)
-        : base(service, (userId, newPassword))
+        : base(service, new KntSetPasswordParam { UserId = userId, NewPassword = newPassword })
     {
 
     }
@@ -318,9 +282,6 @@ public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<(Guid UserI
     {
         var result = new Result<UserDto>();
 
-        if (string.IsNullOrWhiteSpace(Param.NewPassword))
-            throw new Exception("Password is required");
-
         var resGetEntity = await Repository.Users.GetAsync(Param.UserId);
         if (!resGetEntity.IsValid)
         {
@@ -328,7 +289,14 @@ public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<(Guid UserI
             return result;
         }
 
-        KntUsersCreateAsyncCommand.CreatePasswordHash(Param.NewPassword, out var passwordHash, out var passwordSalt);
+        var passwordError = KntPasswordPolicy.Validate(Param.NewPassword, resGetEntity.Entity.UserName);
+        if (passwordError != null)
+        {
+            result.AddErrorMessage(passwordError);
+            return result;
+        }
+
+        KntPasswordHasher.CreateHash(Param.NewPassword, out var passwordHash, out var passwordSalt);
 
         var resRep = await Repository.Users.UpdatePasswordAsync(Param.UserId, passwordHash, passwordSalt);
         if (resRep.IsValid)
@@ -339,4 +307,343 @@ public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<(Guid UserI
         return result;
     }
 }
+
+/// <summary>
+/// The fingerprint of the password of a user (KntPasswordHasher.Stamp): the Server's tokens carry it, and a token
+/// whose fingerprint is no longer the user's (the password changed since) is refused. Only the Server uses it,
+/// where the role isn't checked; Admin, so nobody else can read it.
+/// </summary>
+[KntAuthorize(EnumRoles.Admin)]
+public class KntUsersGetPasswordStampAsyncCommand : KntCommandServiceBase<string, Result<string>>
+{
+    public KntUsersGetPasswordStampAsyncCommand(IKntService service, string userName) : base(service, userName)
+    {
+
+    }
+
+    public override async Task<Result<string>> Execute()
+    {
+        var result = new Result<string>();
+
+        var resUser = string.IsNullOrWhiteSpace(Param) ? null : await Repository.Users.GetInternalAsync(Param);
+        if (resUser?.Entity == null)
+            result.AddErrorMessage($"The user '{Param}' is not registered.");
+        else
+            result.Entity = KntPasswordHasher.Stamp(resUser.Entity.PasswordHash);
+
+        return result;
+    }
+}
+
+#region Parameters with a password or a key
+
+// KntServiceBase writes each command's Param in its trace log, and a tuple would write its values: the parameters
+// that carry a password or a signing key are these classes, whose text says what they are for and nothing else.
+
+public sealed class KntSetPasswordParam
+{
+    public Guid UserId { get; init; }
+    public string NewPassword { get; init; }
+
+    public override string ToString() => $"Set the password of {UserId}";
+}
+
+public sealed class KntPasswordResetRequestParam
+{
+    public string UserNameOrEMail { get; init; }
+    public string SigningKey { get; init; }
+    public TimeSpan Lifetime { get; init; }
+
+    public override string ToString() => $"Password reset asked for '{UserNameOrEMail}'";
+}
+
+public sealed class KntPasswordResetParam
+{
+    public UserResetPasswordDto Reset { get; init; }
+    public string SigningKey { get; init; }
+
+    public override string ToString() => "Password reset with a link";
+}
+
+#endregion
+
+#region Forgotten password
+
+/// <summary>
+/// "Forgot your password?": a token to set a new password (KntPasswordResetToken), for the user with that user name
+/// or that email, to be sent to the user's email by the caller (the Server, signing it with its secret). Not valid
+/// when there is no such user, or it is disabled, or it has no email: the caller must not tell which (it would say
+/// who is registered), and must never give the token in its answer.
+/// </summary>
+[KntAllowAnonymous]
+public class KntUsersCreatePasswordResetAsyncCommand : KntCommandServiceBase<KntPasswordResetRequestParam, Result<UserPasswordResetTokenDto>>
+{
+    public KntUsersCreatePasswordResetAsyncCommand(IKntService service, string userNameOrEMail, string signingKey, TimeSpan lifetime)
+        : base(service, new KntPasswordResetRequestParam { UserNameOrEMail = userNameOrEMail, SigningKey = signingKey, Lifetime = lifetime })
+    {
+
+    }
+
+    public override async Task<Result<UserPasswordResetTokenDto>> Execute()
+    {
+        var result = new Result<UserPasswordResetTokenDto>();
+
+        var user = await FindAsync(Param.UserNameOrEMail?.Trim());
+        if (user == null || user.Disabled || string.IsNullOrWhiteSpace(user.EMail))
+        {
+            result.AddErrorMessage("There is no user to send a link to.");
+            return result;
+        }
+
+        var expiresUtc = DateTime.UtcNow.Add(Param.Lifetime);
+        result.Entity = new UserPasswordResetTokenDto
+        {
+            UserName = user.UserName,
+            FullName = user.FullName,
+            EMail = user.EMail,
+            ExpiresUtc = expiresUtc,
+            Token = KntPasswordResetToken.Create(user.UserId, KntPasswordHasher.Stamp(user.PasswordHash), expiresUtc, Param.SigningKey)
+        };
+        return result;
+    }
+
+    private async Task<UserInternalDto> FindAsync(string userNameOrEMail)
+    {
+        if (string.IsNullOrEmpty(userNameOrEMail))
+            return null;
+
+        var byName = (await Repository.Users.GetInternalAsync(userNameOrEMail)).Entity;
+        if (byName != null)
+            return byName;
+
+        var byEMail = (await Repository.Users.GetByEMailAsync(userNameOrEMail)).Entity;
+        return byEMail == null ? null : (await Repository.Users.GetInternalAsync(byEMail.UserName)).Entity;
+    }
+}
+
+/// <summary>
+/// Sets a new password with the token of a "set a new password" link (KntUsersCreatePasswordResetAsyncCommand),
+/// signed with the same key: it must not have expired, and the user's password must not have changed since it was
+/// issued (so it is used once). The new password follows KntPasswordPolicy.
+/// </summary>
+[KntAllowAnonymous]
+public class KntUsersResetPasswordAsyncCommand : KntCommandServiceBase<KntPasswordResetParam, Result<UserDto>>
+{
+    private const string InvalidLink = "The link to set a new password is not valid or has expired. Ask for a new one.";
+
+    public KntUsersResetPasswordAsyncCommand(IKntService service, UserResetPasswordDto reset, string signingKey)
+        : base(service, new KntPasswordResetParam { Reset = reset, SigningKey = signingKey })
+    {
+
+    }
+
+    public override async Task<Result<UserDto>> Execute()
+    {
+        var result = new Result<UserDto>();
+
+        if (!KntPasswordResetToken.TryRead(Param.Reset?.Token, Param.SigningKey, out var userId, out var expiresUtc, out var stamp)
+            || expiresUtc < DateTime.UtcNow)
+        {
+            result.AddErrorMessage(InvalidLink);
+            return result;
+        }
+
+        var userName = (await Repository.Users.GetAsync(userId)).Entity?.UserName;
+        var user = userName == null ? null : (await Repository.Users.GetInternalAsync(userName)).Entity;
+        if (user == null || user.Disabled || KntPasswordHasher.Stamp(user.PasswordHash) != stamp)
+        {
+            result.AddErrorMessage(InvalidLink);
+            return result;
+        }
+
+        var passwordError = KntPasswordPolicy.Validate(Param.Reset.NewPassword, user.UserName);
+        if (passwordError != null)
+        {
+            result.AddErrorMessage(passwordError);
+            return result;
+        }
+
+        KntPasswordHasher.CreateHash(Param.Reset.NewPassword, out var passwordHash, out var passwordSalt);
+
+        var resRep = await Repository.Users.UpdatePasswordAsync(user.UserId, passwordHash, passwordSalt);
+        if (resRep.IsValid)
+            result.Entity = user.GetSimpleDto<UserDto>();
+        else
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+        return result;
+    }
+}
+
+#endregion
+
+#region The user's own account
+
+// The commands below act on the account of the user running the service (UserIdentityName), never on a
+// user id given by the caller: whoever runs them can only reach their own account. Guest, since every
+// user has one; a disabled user (no role) is refused by each of them too, also where the role isn't checked
+// (Server, IKntService.EnforceAuthorization off).
+
+internal static class KntCurrentUserAccount
+{
+    public static async Task<(UserInternalDto User, string Error)> GetAsync(IKntService service)
+    {
+        var userName = service.UserIdentityName;
+        if (string.IsNullOrWhiteSpace(userName))
+            return (null, "There is no user signed in.");
+
+        var resUser = await service.Repository.Users.GetInternalAsync(userName);
+        if (resUser.Entity == null)
+            return (null, $"The user '{userName}' is not registered in the repository '{service.RepositoryRef?.Name}'.");
+        if (resUser.Entity.Disabled)
+            return (null, $"The user '{userName}' is disabled in the repository '{service.RepositoryRef?.Name}'.");
+
+        return (resUser.Entity, null);
+    }
+
+    public static UserProfileDto ToProfile(UserDto user) =>
+        new UserProfileDto { UserName = user.UserName, EMail = user.EMail, FullName = user.FullName };
+}
+
+[KntAuthorize(EnumRoles.Guest)]
+public class KntUsersGetProfileAsyncCommand : KntCommandServiceBase<Result<UserProfileDto>>
+{
+    public KntUsersGetProfileAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<UserProfileDto>> Execute()
+    {
+        var result = new Result<UserProfileDto>();
+
+        var (user, error) = await KntCurrentUserAccount.GetAsync(Service);
+        if (error != null)
+            result.AddErrorMessage(error);
+        else
+            result.Entity = KntCurrentUserAccount.ToProfile(user);
+
+        return result;
+    }
+}
+
+/// <summary>
+/// Saves the full name and the email of the current user. The user name isn't taken from the profile. A new
+/// email asks for the current password and must not be another user's.
+/// </summary>
+[KntAuthorize(EnumRoles.Guest)]
+public class KntUsersSaveProfileAsyncCommand : KntCommandSaveServiceBase<UserProfileDto, Result<UserProfileDto>>
+{
+    public KntUsersSaveProfileAsyncCommand(IKntService service, UserProfileDto profile) : base(service, profile)
+    {
+
+    }
+
+    public override async Task<Result<UserProfileDto>> Execute()
+    {
+        var result = new Result<UserProfileDto>();
+
+        var (user, error) = await KntCurrentUserAccount.GetAsync(Service);
+        if (error != null)
+        {
+            result.AddErrorMessage(error);
+            return result;
+        }
+
+        var eMail = Param.EMail.Trim();
+        if (!string.Equals(eMail, user.EMail, StringComparison.OrdinalIgnoreCase))
+        {
+            if (!KntPasswordHasher.IsCurrentPassword(user, Param.CurrentPassword))
+            {
+                result.AddErrorMessage("The current password is not correct. It is needed to change the email.");
+                return result;
+            }
+
+            var otherUser = (await Repository.Users.GetByEMailAsync(eMail)).Entity;
+            if (otherUser != null && otherUser.UserId != user.UserId)
+            {
+                result.AddErrorMessage($"Email \"{eMail}\" is already in use.");
+                return result;
+            }
+        }
+
+        // A plain UserDto, so that the update never carries the password hash.
+        var userDto = user.GetSimpleDto<UserDto>();
+        userDto.EMail = eMail;
+        userDto.FullName = Param.FullName.Trim();
+
+        var resRep = await Repository.Users.UpdateAsync(userDto);
+        if (resRep.IsValid)
+            result.Entity = KntCurrentUserAccount.ToProfile(resRep.Entity);
+        else
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+        Service.ResetCurrentUser();
+        return result;
+    }
+}
+
+/// <summary>
+/// The current user changes their password: the current one is checked (unless they have none yet, see
+/// KntPasswordHasher.IsCurrentPassword) and the new one must follow KntPasswordPolicy and be a different one.
+/// </summary>
+[KntAuthorize(EnumRoles.Guest)]
+public class KntUsersChangePasswordAsyncCommand : KntCommandServiceBase<UserChangePasswordDto, Result<UserDto>>
+{
+    public KntUsersChangePasswordAsyncCommand(IKntService service, UserChangePasswordDto passwords) : base(service, passwords)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null)
+            result.AddErrorMessage("The passwords are required.");
+        return result;
+    }
+
+    public override async Task<Result<UserDto>> Execute()
+    {
+        var result = new Result<UserDto>();
+
+        var (user, error) = await KntCurrentUserAccount.GetAsync(Service);
+        if (error != null)
+        {
+            result.AddErrorMessage(error);
+            return result;
+        }
+
+        if (!KntPasswordHasher.IsCurrentPassword(user, Param.CurrentPassword))
+        {
+            result.AddErrorMessage("The current password is not correct.");
+            return result;
+        }
+
+        var passwordError = KntPasswordPolicy.Validate(Param.NewPassword, user.UserName);
+        if (passwordError != null)
+        {
+            result.AddErrorMessage(passwordError);
+            return result;
+        }
+
+        if (Param.NewPassword == Param.CurrentPassword)
+        {
+            result.AddErrorMessage("The new password must be different from the current one.");
+            return result;
+        }
+
+        KntPasswordHasher.CreateHash(Param.NewPassword, out var passwordHash, out var passwordSalt);
+
+        var resRep = await Repository.Users.UpdatePasswordAsync(user.UserId, passwordHash, passwordSalt);
+        if (resRep.IsValid)
+            result.Entity = user.GetSimpleDto<UserDto>();
+        else
+            result.AddListErrorMessage(resRep.ListErrorMessage);
+
+        return result;
+    }
+}
+
+#endregion
 

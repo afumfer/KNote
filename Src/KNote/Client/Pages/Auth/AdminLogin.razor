@@ -11,11 +11,21 @@
 
 
 <AuthorizeView>
-    <Authorized>        
-        <RadzenIcon Icon="person" class="rz-mx-1"
-            MouseEnter="@(args => tooltipService.Open(args, @context?.User?.Identity?.Name, new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
-        <RadzenIcon Icon="logout" @onclick="@(() => GoLogout())" class="rz-mx-1" 
-            MouseEnter="@(args => tooltipService.Open(args, "Logout", new TooltipOptions(){ Position = TooltipPosition.Bottom }) )" />
+    <Authorized>
+        @* The signed in user's menu: their own account and signing out. *@
+        <RadzenProfileMenu Click="OnUserMenuClick" class="knt-user-menu">
+            <Template>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                    <RadzenIcon Icon="account_circle" />
+                    <span class="knt-user-menu-name">@context?.User?.Identity?.Name</span>
+                </RadzenStack>
+            </Template>
+            <ChildContent>
+                <RadzenProfileMenuItem Text="My profile" Icon="person" Value="profile" />
+                <RadzenProfileMenuItem Text="Change password" Icon="key" Value="password" />
+                <RadzenProfileMenuItem Text="Sign out" Icon="logout" Value="logout" />
+            </ChildContent>
+        </RadzenProfileMenu>
     </Authorized>
     <NotAuthorized>        
         <RadzenIcon Icon="how_to_reg" @onclick="@(() => GoRegister())" class="rz-mx-1" 
@@ -33,6 +43,22 @@
     private Task GoRegister() => signing.RunAsync(RegisterAsync);
 
     private Task GoLogin() => signing.RunAsync(LoginAsync);
+
+    private async Task OnUserMenuClick(RadzenProfileMenuItem item)
+    {
+        switch (item.Value)
+        {
+            case "profile":
+                await dialogService.OpenAsync<UserProfile>("My profile", new Dictionary<string, object?>(), KntDialogs.Framed(KntDialogs.Small()));
+                break;
+            case "password":
+                await dialogService.OpenAsync<ChangePassword>("Change password", new Dictionary<string, object?>(), KntDialogs.Framed(KntDialogs.Small()));
+                break;
+            case "logout":
+                GoLogout();
+                break;
+        }
+    }
 
     private async Task RegisterAsync()
     {

@@ -506,6 +506,15 @@ mano en los métodos:
 - **Las vistas no saben nada de seguridad**: todos los menús siguen habilitados y el aviso sale al usarlos.
   La barra de estado solo pinta los textos que prepara `KNoteManagementCtrl` (`SessionUserInfo`/
   `SessionUserDetail`).
+- **Cuenta del usuario** (**Tools → User**, y doble clic en el usuario de la barra de estado): `UserProfileCtrl` y
+  `ChangePasswordCtrl` (`[KntAuthorize(Guest, Application)]`). El usuario existe una vez en cada repositorio: el
+  perfil se muestra como está en el activo y se guarda, por defecto, en todos; la contraseña cambia en todos (con
+  credenciales, la misma tiene que abrirlos todos) y `Store.Security.PasswordChanged` la actualiza en la sesión.
+  `Core/RepositoriesOperation<T>` hace la operación repositorio a repositorio y recoge dónde falló, sin parar en el
+  primero. El login (`LoginCtrl.ForgotPasswordHelp`) explica quién puede poner una contraseña nueva: aquí no hay
+  correo desde el que enviar un enlace. El tooltip del usuario en la barra de estado lo muestra
+  `Utils/ToolStripItemToolTip` encima del elemento: el de la propia barra sale bajo el cursor y, abajo de la
+  pantalla, parpadeaba.
 - **Caso de uso nuevo**: decide si es de nivel superior (atributo) o incluido (sin atributo) y añádelo a la
   matriz de `ClientWin.Tests/ControllerAuthorizationMatrixTests` (falla hasta que lo hagas). Un comando nuevo
   del Service, igual con `Tests/ServiceTests/CommandAuthorizationMatrixTests`.

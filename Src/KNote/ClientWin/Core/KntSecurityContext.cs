@@ -33,6 +33,16 @@ public class KntSecurityContext
         _repositoryRoles.Clear();
     }
 
+    /// <summary>
+    /// The user changed their password (ChangePasswordCtrl): signed in with a KNote user, the repositories linked
+    /// from now on in this session are authenticated with the new one.
+    /// </summary>
+    public void PasswordChanged(string password)
+    {
+        if (AuthenticationMode == AppAuthenticationMode.Credentials)
+            Password = password;
+    }
+
     // Repositories are identified by their service (IKntService.IdServiceRef, which is also ServiceRef's).
     public void SetRepositoryRole(IKntService service, EnumRoles role)
         => _repositoryRoles[service.IdServiceRef] = role;

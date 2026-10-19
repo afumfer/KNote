@@ -23,6 +23,10 @@
                     <RadzenPassword Name="Password" @bind-Value="@user.Password" AutoCompleteType="AutoCompleteType.CurrentPassword" />
                     <ValidationMessage For="@(() => user.Password)" />
                 </KntField>
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenButton Text="Forgot your password?" Click="OnForgotPassword" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Text"
+                                  Size="ButtonSize.Small" />
+                </RadzenStack>
             </RadzenStack>
         </ChildContent>
         <Footer>
@@ -53,5 +57,11 @@
     {
         dialogService.Close(null);
     }
+
+    // On top of this dialog, which stays open to sign in afterwards.
+    private async Task OnForgotPassword() =>
+        await dialogService.OpenAsync<ForgotPassword>("Forgot your password?",
+            new Dictionary<string, object?>() { { "UserName", user.UserName } },
+            KntDialogs.Framed(KntDialogs.Small()));
 
 }

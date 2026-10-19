@@ -95,6 +95,10 @@
             menuKNoteLab = new ToolStripMenuItem();
             menuToolsS2 = new ToolStripSeparator();
             menuOptions = new ToolStripMenuItem();
+            menuToolsS3 = new ToolStripSeparator();
+            menuUser = new ToolStripMenuItem();
+            menuUserProfile = new ToolStripMenuItem();
+            menuChangePassword = new ToolStripMenuItem();
             menuHelp = new ToolStripMenuItem();
             menuHelpDoc = new ToolStripMenuItem();
             menuAbout = new ToolStripMenuItem();
@@ -540,7 +544,7 @@
             //
             // menuTools
             // 
-            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuKntScriptConsole, menuChat, menuAIAssistant, menuAppInfoAlarms, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuOptions });
+            menuTools.DropDownItems.AddRange(new ToolStripItem[] { menuKntScriptConsole, menuChat, menuAIAssistant, menuAppInfoAlarms, menuCOMPortServer, menuKNoteLab, menuToolsS2, menuAIProviders, menuToolsS3, menuUser, menuOptions });
             menuTools.Name = "menuTools";
             menuTools.Size = new Size(46, 20);
             menuTools.Text = "&Tools";
@@ -608,6 +612,32 @@
             menuOptions.Size = new Size(185, 22);
             menuOptions.Text = "&Options ...";
             menuOptions.Click += menu_Click;
+            // 
+            // menuUser
+            // 
+            menuUser.DropDownItems.AddRange(new ToolStripItem[] { menuUserProfile, menuChangePassword });
+            menuUser.Name = "menuUser";
+            menuUser.Size = new Size(185, 22);
+            menuUser.Text = "&User";
+            // 
+            // menuUserProfile
+            // 
+            menuUserProfile.Name = "menuUserProfile";
+            menuUserProfile.Size = new Size(185, 22);
+            menuUserProfile.Text = "My &profile ...";
+            menuUserProfile.Click += menu_Click;
+            // 
+            // menuChangePassword
+            // 
+            menuChangePassword.Name = "menuChangePassword";
+            menuChangePassword.Size = new Size(185, 22);
+            menuChangePassword.Text = "Change pass&word ...";
+            menuChangePassword.Click += menu_Click;
+            // 
+            // menuToolsS3
+            // 
+            menuToolsS3.Name = "menuToolsS3";
+            menuToolsS3.Size = new Size(182, 6);
             // 
             // menuHelp
             // 
@@ -1043,6 +1073,10 @@
         private ToolStripMenuItem menuKntScriptConsole;
         private ToolStripMenuItem menuKNoteLab;
         private ToolStripMenuItem menuOptions;
+        private ToolStripSeparator menuToolsS3;
+        private ToolStripMenuItem menuUser;
+        private ToolStripMenuItem menuUserProfile;
+        private ToolStripMenuItem menuChangePassword;
         private ToolStripMenuItem menuHelp;
         private ToolStripMenuItem menuHelpDoc;
         private ToolStripMenuItem menuAbout;

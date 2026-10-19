@@ -86,4 +86,18 @@ public class LoginCtrlTests
         Assert.IsNull(store.Security.Password);
         Assert.AreEqual(AppAuthenticationMode.Windows, store.Settings.Security.AuthenticationMode);
     }
+
+    [TestMethod]
+    public void ForgotPasswordHelp_SaysWhoCanSetANewOne()
+    {
+        var (ctrl, _, _) = CreateCtrl();
+
+        var help = ctrl.ForgotPasswordHelp;
+
+        // No email to send a link from here: an administrator of each repository, the web app, or the Windows account.
+        StringAssert.Contains(help, "administrator of each repository");
+        StringAssert.Contains(help, "Edit repository properties > Users");
+        StringAssert.Contains(help, "web app");
+        StringAssert.Contains(help, "WINUSER");
+    }
 }

@@ -63,7 +63,37 @@ public class AuthenticationProviderJWT : AuthenticationStateProvider, ILoginServ
         await js.LocalStorageRemoveItem(TOKENKEY);
         httpClient.DefaultRequestHeaders.Authorization = null;
         store.AppState.UserName = null;
+        store.AppState.ClearUserData();
         NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
+    }
+
+    private bool handlingRefusedSession;
+
+    // Every window of the app is another instance with its own HttpClient, sharing the token in localStorage: one
+    // that changed the password stored the new token, and the others still send the old one. Taking it, instead of
+    // signing out, keeps the session that the other window has just renewed.
+    public async Task<bool?> SessionRefusedAsync()
+    {
+        if (handlingRefusedSession)
+            return null;
+
+        handlingRefusedSession = true;
+        try
+        {
+            var stored = await js.LocalStorageGetItem(TOKENKEY);
+            if (!string.IsNullOrEmpty(stored) && stored != httpClient.DefaultRequestHeaders.Authorization?.Parameter)
+            {
+                NotifyAuthenticationStateChanged(Task.FromResult(BuildAuthenticationState(stored)));
+                return true;
+            }
+
+            await Logout();
+            return false;
+        }
+        finally
+        {
+            handlingRefusedSession = false;
+        }
     }
 }
 

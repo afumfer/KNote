@@ -41,6 +41,25 @@ public class UserWebApiService : BaseService, IUserWebApiService
     public Task<UserTokenDto?> LoginAsync(UserCredentialsDto user, CancellationToken cancellationToken = default) =>
         SendForTokenAsync(ct => _httpClient.PostAsJsonAsync($"api/users/login", user, ct), cancellationToken);
 
+    public Task<Result<UserDto>> SetPasswordAsync(Guid userId, string newPassword, CancellationToken cancellationToken = default) =>
+        SendAsync<UserDto>(ct => _httpClient.PutAsJsonAsync($"api/users/{userId}/password", new UserSetPasswordDto { NewPassword = newPassword }, ct),
+            "Set password", true, cancellationToken);
+
+    public Task<Result<string>> ForgotPasswordAsync(UserForgotPasswordDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<string>(ct => _httpClient.PostAsJsonAsync("api/users/forgot-password", request, ct), "Forgot your password?", cancellationToken: cancellationToken);
+
+    public Task<Result<UserTokenDto>> ResetPasswordAsync(UserResetPasswordDto reset, CancellationToken cancellationToken = default) =>
+        SendAsync<UserTokenDto>(ct => _httpClient.PostAsJsonAsync("api/users/reset-password", reset, ct), "Set a new password", cancellationToken: cancellationToken);
+
+    public Task<Result<UserProfileDto>> GetProfileAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<UserProfileDto>(ct => _httpClient.GetAsync("api/users/me", ct), "Get profile", cancellationToken: cancellationToken);
+
+    public Task<Result<UserProfileDto>> SaveProfileAsync(UserProfileDto profile, CancellationToken cancellationToken = default) =>
+        SendAsync<UserProfileDto>(ct => _httpClient.PutAsJsonAsync("api/users/me", profile, ct), "Save profile", true, cancellationToken);
+
+    public Task<Result<UserTokenDto>> ChangePasswordAsync(UserChangePasswordDto passwords, CancellationToken cancellationToken = default) =>
+        SendAsync<UserTokenDto>(ct => _httpClient.PostAsJsonAsync("api/users/me/password", passwords, ct), "Change password", true, cancellationToken);
+
     // Login and register answer with a UserTokenDto, not a Result: a failure without that answer (no network, the
     // server down, an answer that isn't one) is a UserTokenDto not successful with its reason, as the server's own.
     private static async Task<UserTokenDto?> SendForTokenAsync(Func<CancellationToken, Task<HttpResponseMessage>> send,

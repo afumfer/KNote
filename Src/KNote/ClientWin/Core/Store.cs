@@ -516,7 +516,8 @@ public class Store
         }
         else if (Security.AuthenticationMode == AppAuthenticationMode.Credentials && !await PasswordIsValidAsync(service))
         {
-            result.AddErrorMessage($"The password of the user '{AppUserName}' is not valid in the repository '{alias}', so it is not available in this session.");
+            result.AddErrorMessage($"The password of the user '{AppUserName}' is not valid in the repository '{alias}', so it is not available in this session. " +
+                "An administrator of that repository can set a new one (File > Repositories > Edit repository properties > Users).");
             return result;
         }
 

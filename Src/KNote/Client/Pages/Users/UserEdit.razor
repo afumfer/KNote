@@ -12,7 +12,7 @@
 
 @if (user != null)
 {
-    <UserForm Title="Edit user" OnValidSubmit="OnSave" OnExit="OnExit" Saving="saving.IsBusy" User="user"></UserForm>
+    <UserForm Title="Edit user" OnValidSubmit="OnSave" OnExit="OnExit" OnSetPassword="OnSetPassword" Saving="saving.IsBusy" User="user"></UserForm>
 }
 else
 {
@@ -71,6 +71,16 @@ else
                 }
             }
         }
+    }
+
+    private async Task OnSetPassword()
+    {
+        if (saving.IsBusy)
+            return;
+
+        await dialogService.OpenAsync<UserSetPassword>("Set password",
+            new Dictionary<string, object?>() { { "User", user } },
+            KntDialogs.Framed(KntDialogs.Small()));
     }
 
     private async Task OnExit()

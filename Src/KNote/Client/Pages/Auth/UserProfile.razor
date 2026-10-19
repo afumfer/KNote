@@ -1,0 +1,131 @@
+@implements IDisposable
+
+@inject IStore store
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+@* "My profile" dialog (Shared/MainLayoutHeader → AdminLogin opens it framed): the signed in user's full name and
+   email, loaded and saved here (api/users/me, Users.SaveProfileAsync). The user name is only shown; a new email asks
+   for the current password. The result is the saved profile, or null. *@
+
+@if (profile == null)
+{
+    <text>Loading ... </text>
+}
+else
+{
+    <EditForm Model="@profile" Context="formContext" OnSubmit="OnSave">
+
+        <DataAnnotationsValidator />
+
+        <KntDialogFrame Icon="person" Title="My profile" Subtitle="@profile.UserName" OnClose="OnExit">
+            <ChildContent>
+                <KntFormSection Icon="badge" Title="Account" Description="Who you are and how to reach you.">
+                    <KntField Label="User name" Component="UserName" Help="To sign in. Only an administrator can change it.">
+                        <RadzenTextBox Name="UserName" Value="@profile.UserName" Disabled="true" />
+                    </KntField>
+                    <KntField Label="Full name" Component="FullName" Required="true">
+                        <RadzenTextBox Name="FullName" @bind-Value="@profile.FullName" AutoCompleteType="AutoCompleteType.Name" />
+                        <ValidationMessage For="@(() => profile.FullName)" />
+                    </KntField>
+                    <KntField Label="Email" Component="EMail" Required="true" Help="Where a forgotten password is reset.">
+                        <RadzenTextBox Name="EMail" @bind-Value="@profile.EMail" Placeholder="name@example.com" AutoCompleteType="AutoCompleteType.Email" />
+                        <ValidationMessage For="@(() => profile.EMail)" />
+                    </KntField>
+                    @if (EMailChanged)
+                    {
+                        <KntField Label="Current password" Component="CurrentPassword" Required="true" Help="Needed to change the email.">
+                            <RadzenPassword Name="CurrentPassword" @bind-Value="@profile.CurrentPassword" AutoCompleteType="AutoCompleteType.CurrentPassword" />
+                        </KntField>
+                    }
+                </KntFormSection>
+            </ChildContent>
+            <Footer>
+                <RadzenButton Text="Cancel" Click="OnExit" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Disabled="@saving.IsBusy" />
+                <RadzenButton Text="Save" Icon="save" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" IsBusy="@saving.IsBusy" />
+            </Footer>
+        </KntDialogFrame>
+
+    </EditForm>
+}
+
+@code {
+    // One save at a time (a double click saves once), and leaving waits for it.
+    private readonly KntSingleFlight saving = new();
+    // Closed meanwhile (Esc): no result to give, and Radzen's Close would close the dialog on top, another one.
+    private bool closed;
+
+    private UserProfileDto? profile;
+    private string? loadedEMail;
+
+    private bool EMailChanged =>
+        profile != null && !string.Equals(profile.EMail?.Trim(), loadedEMail, StringComparison.OrdinalIgnoreCase);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await store.Users.GetProfileAsync();
+        if (!result.IsValid)
+        {
+            CloseDialog(null);
+            return;
+        }
+
+        profile = result.Entity;
+        loadedEMail = profile.EMail;
+        profile.SetIsDirty(false);
+    }
+
+    private Task OnSave(EditContext formContext) => saving.RunAsync(() => SaveAsync(formContext));
+
+    private async Task SaveAsync(EditContext formContext)
+    {
+        if (!formContext.Validate())
+        {
+            Notify("Incorrect data, check the required attributes.");
+            return;
+        }
+
+        if (!profile!.IsDirty())
+        {
+            CloseDialog(null);
+            return;
+        }
+
+        if (EMailChanged && string.IsNullOrEmpty(profile.CurrentPassword))
+        {
+            Notify("Enter your current password to change the email.");
+            return;
+        }
+
+        var result = await store.Users.SaveProfileAsync(profile);
+        if (result.IsValid)
+            CloseDialog(result.Entity);
+    }
+
+    private async Task OnExit()
+    {
+        if (saving.IsBusy)
+            return;
+
+        if (profile != null && profile.IsDirty())
+        {
+            var leave = await dialogService.Confirm("Do you want to leave and lose your changes?", KntConst.AppName,
+                new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+            if (leave != true)
+                return;
+        }
+
+        CloseDialog(null);
+    }
+
+    private void Notify(string detail) =>
+        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "My profile", Detail = detail, Duration = 12000 });
+
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
+}

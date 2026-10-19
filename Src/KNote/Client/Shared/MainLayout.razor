@@ -2,7 +2,10 @@
 
 @implements IDisposable
 
+@using KNote.Client.Auth
+
 @inject IStore store
+@inject ILoginService loginService
 @inject KntWindows kntWindows
 @inject NotificationService notificationService
 @inject NavigationManager navigationManager
@@ -64,6 +67,7 @@
         store.AppState.OnChange += StateHasChanged;
         store.AppState.OnNotifyError += NotifyError;
         store.AppState.OnNotifySuccess += NotifySuccess;
+        store.AppState.OnSessionEnded += OnSessionEnded;
 
         await LoadRepositoryNameAsync();
         await kntWindows.StartAsync();
@@ -77,7 +81,21 @@
         store.AppState.OnChange -= StateHasChanged;
         store.AppState.OnNotifyError -= NotifyError;
         store.AppState.OnNotifySuccess -= NotifySuccess;
+        store.AppState.OnSessionEnded -= OnSessionEnded;
         authenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+
+    // The server refused the session (expired, or the password changed): the user is signed out, unless another
+    // window of the app had already renewed it (see ILoginService.SessionRefusedAsync).
+    private async void OnSessionEnded()
+    {
+        var renewed = await loginService.SessionRefusedAsync();
+        if (renewed == true)
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Session renewed",
+                Detail = "Your session was renewed in another window of the app. Try again.", Duration = 6000 });
+        else if (renewed == false)
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Session ended",
+                Detail = "Your session has ended: it expired or your password was changed. Sign in again.", Duration = 12000 });
     }
 
     private async void OnAuthenticationStateChanged(Task<AuthenticationState> state)

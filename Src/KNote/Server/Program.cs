@@ -18,6 +18,7 @@ using KNote.Model.Dto;
 using KNote.Server.Helpers;
 using KNote.Server.Hubs;
 using KNote.MessageBroker.RabbitMQ;
+using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
@@ -50,6 +51,8 @@ try
 
     builder.Services.KntAddServices(appSettings, repositoryRef);
     builder.Services.KntAddAiAssistant(builder.Configuration);
+    builder.Services.KntAddPasswordReset(builder.Configuration);
+    builder.Services.KntAddRateLimits(builder.Configuration);
 
     builder.Services.AddAuthentication().AddJwtBearer(options =>
     {
@@ -72,10 +75,20 @@ try
                 if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments(ChatRoomHubContract.Path))
                     context.Token = accessToken;
                 return Task.CompletedTask;
+            },
+            // A token issued before the user's password changed is no longer valid (see KntPasswordStamps).
+            OnTokenValidated = async context =>
+            {
+                var services = context.HttpContext.RequestServices;
+                var stamps = services.GetRequiredService<KntPasswordStamps>();
+                if (!await stamps.IsValidAsync(context.Principal, services.GetRequiredService<IKntService>()))
+                    context.Fail("The session is closed: the password of the user has changed.");
             }
         };
     });
     builder.Services.AddAuthorization();
+    builder.Services.AddMemoryCache();
+    builder.Services.AddSingleton<KntPasswordStamps>();
 
     builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
     {
@@ -139,6 +152,7 @@ try
     app.KntAddResourcesStaticFiles(appSettings, repositoryRef);
 
     app.UseRouting();
+    app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseCors("KntPolicy");

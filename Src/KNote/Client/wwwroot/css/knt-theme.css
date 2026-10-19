@@ -70,9 +70,11 @@
     color: var(--rz-header-color);
 }
 
-/* On a phone there is only room for the application's name. */
+/* On a phone there is only room for the application's name; the signed in user's menu (AdminLogin) shows only its
+   icon (the footer has the user's name). */
 @media (max-width: 576px) {
-    .knt-app-repository {
+    .knt-app-repository,
+    .knt-user-menu-name {
         display: none;
     }
 }

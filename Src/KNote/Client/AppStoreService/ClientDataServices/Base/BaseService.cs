@@ -51,6 +51,16 @@ public class BaseService
     {
         Result<T>? res;
 
+        // The session of a signed in user is no longer valid (the token expired, or the password changed since it was
+        // issued, see the Server's KntPasswordStamps): the user is signed out (AppState.OnSessionEnded), which tells them.
+        if (httpRes.StatusCode == System.Net.HttpStatusCode.Unauthorized && _appState.UserName != null)
+        {
+            res = new Result<T>();
+            res.AddErrorMessage("The session has ended. Sign in again.");
+            _appState.NotifySessionEnded();
+            return res;
+        }
+
         // Server controllers deliberately return BadRequest(resApi) - not just Ok(resApi) - with a
         // real Result<T> body (IsValid=false, ErrorMessage set to the actual business-rule reason,
         // e.g. "Can't delete this note type: N note(s) still use it.") whenever a service call is

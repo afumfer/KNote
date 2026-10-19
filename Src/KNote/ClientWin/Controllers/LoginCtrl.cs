@@ -27,6 +27,16 @@ public class LoginCtrl : CtrlEditorBase<IViewEditor<LoginModel>, LoginModel>
     // The Windows account running the application, offered as the alternative to a KNote user.
     public string WindowsUserName { get; set; } = SystemInformation.UserName;
 
+    // "Forgot your password?": the user and its password are in each repository, opened here directly, so there is
+    // no email to send a link from: only who can set a new one.
+    public string ForgotPasswordHelp =>
+        $"Your user and its password are kept in each of your repositories. To set a new password:{Environment.NewLine}{Environment.NewLine}" +
+        $"- Ask an administrator of each repository to set it (File > Repositories > Edit repository properties > Users, " +
+        $"edit your user > Reset password).{Environment.NewLine}" +
+        $"- If a repository is also used by the {KntConst.AppName} web app, use \"Forgot your password?\" there: it sends a link " +
+        $"to your email.{Environment.NewLine}" +
+        $"- Or use your Windows account ({WindowsUserName}) instead, if your repositories have that user.";
+
     #endregion
 
     #region Controller editor implementation

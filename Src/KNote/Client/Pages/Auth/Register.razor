@@ -33,7 +33,7 @@
                     <RadzenTextBox Name="EMail" @bind-Value="@user.EMail" Placeholder="name@example.com" AutoCompleteType="AutoCompleteType.Email" />
                     <ValidationMessage For="@(() => user.EMail)" />
                 </KntField>
-                <KntField Label="Password" Component="Password" Required="true">
+                <KntField Label="Password" Component="Password" Required="true" Help="@ChangePassword.NewPasswordHelp">
                     <RadzenPassword Name="Password" @bind-Value="@user.Password" AutoCompleteType="AutoCompleteType.NewPassword" />
                     <ValidationMessage For="@(() => user.Password)" />
                 </KntField>
@@ -56,6 +56,13 @@
         if (formIsValid == false)
         {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Register user", Detail =  "Incorrect data, check the required attributes.", Duration = 12000 });
+            return;
+        }
+
+        var passwordError = KntPasswordPolicy.Validate(user.Password, user.UserName);
+        if (passwordError != null)
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Register user", Detail = passwordError, Duration = 12000 });
             return;
         }
 

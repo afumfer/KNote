@@ -34,6 +34,9 @@ public class ControllerAuthorizationMatrixTests
         ["KntLabCtrl"] = Requirement(EnumRoles.Admin, AuthorizationScope.Application),
         ["MonitorCtrl"] = Requirement(EnumRoles.Admin, AuthorizationScope.Application),
         ["KntHttpClientCtrl"] = Requirement(EnumRoles.Admin, AuthorizationScope.Application),
+        // The user's own account, in every linked repository (anybody signed in).
+        ["UserProfileCtrl"] = Requirement(EnumRoles.Guest, AuthorizationScope.Application),
+        ["ChangePasswordCtrl"] = Requirement(EnumRoles.Guest, AuthorizationScope.Application),
 
         // Use cases on one repository.
         ["NoteEditorCtrl"] = Requirement(EnumRoles.Guest, AuthorizationScope.Repository),
