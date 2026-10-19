@@ -3,8 +3,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.0.10</Version>
-    <AssemblyVersion>0.0.10.40</AssemblyVersion>
-    <FileVersion>0.0.10.40</FileVersion>
+    <AssemblyVersion>0.0.10.41</AssemblyVersion>
+    <FileVersion>0.0.10.41</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\KNoteReport.css" />
