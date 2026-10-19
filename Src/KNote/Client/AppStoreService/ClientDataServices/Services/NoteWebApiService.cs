@@ -14,15 +14,15 @@ public class NoteWebApiService : BaseService, INoteWebApiService
 
     public Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync(Guid? folderId = null, CancellationToken cancellationToken = default) =>
         SendAsync<List<NoteInfoDto>>(ct => _httpClient.GetAsync(folderId == null ? "api/notes/homenotes" : $"api/notes/homenotes?folderId={folderId}", ct),
-            "Get home notes", cancellationToken: cancellationToken);
+            "Get home notes", cancellationToken: cancellationToken, timeout: ListReadTimeout);
 
     public Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString, CancellationToken cancellationToken = default) =>
         SendAsync<List<NoteMinimalDto>>(ct => _httpClient.GetAsync($"api/notes/search?{queryString}", ct),
-            "Get notes from search string", cancellationToken: cancellationToken);
+            "Get notes from search string", cancellationToken: cancellationToken, timeout: ListReadTimeout);
 
     public Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter, CancellationToken cancellationToken = default) =>
         SendAsync<List<NoteMinimalDto>>(ct => _httpClient.PostAsJsonAsync($"api/notes/filter", notesFilter, ct),
-            "Get notes from filter", cancellationToken: cancellationToken);
+            "Get notes from filter", cancellationToken: cancellationToken, timeout: ListReadTimeout);
 
     public Task<Result<NoteDto>> GetAsync(Guid noteId, CancellationToken cancellationToken = default) =>
         SendAsync<NoteDto>(ct => _httpClient.GetAsync($"api/notes/{noteId}", ct), "Get note", cancellationToken: cancellationToken);

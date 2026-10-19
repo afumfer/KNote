@@ -1,6 +1,6 @@
 ﻿@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-<EntityList List="Notes">
+<EntityList List="Notes" LoadFailed="LoadFailed" Retry="Retry" FailedText="The notes could not be loaded.">
     <Item Context="note">
         <NoteItem Note="note"
                     OnNoteDelete="@(() => OnNoteDelete.InvokeAsync(note))"
@@ -15,4 +15,7 @@
     [Parameter] public EventCallback<NoteInfoDto> OnNoteDelete { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteEdit { get; set; }
     [Parameter] public EventCallback<NoteInfoDto> OnNoteView { get; set; }
+    // The page couldn't read the notes: the error and Retry (EntityList).
+    [Parameter] public bool LoadFailed { get; set; }
+    [Parameter] public EventCallback Retry { get; set; }
 }

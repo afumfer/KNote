@@ -20,7 +20,7 @@
 </KntIndexHeader>
 
 <div class="rz-pt-2">
-    <EntityList List="noteTypes">
+    <EntityList List="noteTypes" LoadFailed="loadFailed" Retry="Load">
         <AllItems>
             <RadzenDataGrid Data="@noteTypes" TItem="NoteTypeDto" AllowColumnResize="true" AllowSorting="true" Density="@Density.Compact"
                             class="knt-admin-list knt-list" AllowAlternatingRows="false"
@@ -50,6 +50,9 @@
 
     public void Dispose() => listRequest.Dispose();
 
+    // The list could not be read: EntityList says so, with Retry (else it would show "loading" for ever).
+    private bool loadFailed;
+
     private async Task Load()
     {
         var request = await listRequest.RunAsync(ct => store.NoteTypes.GetAllAsync(ct));
@@ -57,6 +60,7 @@
             return;
 
         var result = request.Value;
+        loadFailed = !result.IsValid;
         if (result.IsValid)
         {
             noteTypes = result.Entity;

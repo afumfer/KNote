@@ -21,7 +21,14 @@
 </KntIndexHeader>
 
 <div class="rz-border rz-p-2 rz-mt-2 knt-admin-list" style="overflow: auto">
-    @if (foldersTree == null)
+    @if (treeFailed)
+    {
+        <div class="knt-load-error">
+            <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The folders could not be loaded.</span>
+            <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="OnRefreshTree" />
+        </div>
+    }
+    else if (foldersTree == null)
     {
         <RadzenLabel class="rz-m-2" Text="Loading tree folders ..." />
     }
@@ -38,6 +45,8 @@
 @code {
 
     private List<FolderDto>? foldersTree;
+    // The tree could not be read: the error and Retry (the error itself is already notified).
+    private bool treeFailed;
     private FolderDto? selectedFolder;
     private AppState appState = null!;
 
@@ -67,6 +76,7 @@
             return;
 
         var result = request.Value;
+        treeFailed = !result.IsValid;
         if (result.IsValid)
             foldersTree = result.Entity;
         else

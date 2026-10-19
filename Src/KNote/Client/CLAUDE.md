@@ -91,7 +91,12 @@ Client/
   parámetro (ver "Peticiones: doble envío y cancelación"). Un `Result` no válido puede ser, por tanto, un fallo de
   red o una cancelación: usa `Entity` solo dentro del `if (result.IsValid)`. Login y registro devuelven un
   `UserTokenDto`, no un `Result`: sin respuesta, `success = false` con el motivo. En el streaming del asistente de
-  IA, un fallo de red (al empezar o a mitad de la respuesta) acaba en su evento `error`.
+  IA, un fallo de red (al empezar o a mitad de la respuesta) acaba en su evento `error`. `SendAsync` acepta además un
+  `timeout` opcional: sin respuesta en ese tiempo, un `Result` no válido notificado ("did not respond in N seconds").
+  Lo usan las lecturas de las listas de notas (`GetFilter`, `GetSearch`, `GetHomeNotesAsync`), del árbol de carpetas
+  (`GetTreeAsync`) y de las carpetas de Home (`GetHomeChildrenAsync`), con
+  `BaseService.ListReadTimeout` (60 s; el del `HttpClient` es de 100 s), para que una lista sin respuesta muestre su
+  error y se pueda reintentar.
 
 ## Peticiones: doble envío y cancelación
 
@@ -256,7 +261,8 @@ Patrones ya establecidos que hay que seguir:
   `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen
   (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
-  `Shared/EntityList` (que pinta "cargando"/"sin registros"). Las acciones de una fila van en la cabecera de
+  `Shared/EntityList` (que pinta "cargando"/"sin registros" y, si la página no pudo leer la lista, el error con Retry:
+  `LoadFailed`, `Retry`; sin él, una lectura fallida dejaba "cargando" para siempre). Las acciones de una fila van en la cabecera de
   la página (Edit/Delete junto a New, sobre la fila seleccionada) y en un menú con clic derecho
   (`CellContextMenu` → `KntActionsMenu.Open(...)` con una lista de `KntAction`: texto, icono, acción, `Danger` para
   borrar; el clic derecho también selecciona la fila); el doble clic hace la acción principal (editar). Sin
@@ -302,7 +308,16 @@ Patrones ya establecidos que hay que seguir:
   `wwwroot/js/notesGrid.js`, no Radzen: su navegación con flechas cuenta las filas dibujadas y con virtualización
   se pierde; la posición de cada fila va en `data-knt-index` (el `aria-rowindex` de Radzen se estropea al
   redibujar). `NotesGrid` no se redibuja por su página salvo si cambia `Compact` (`ShouldRender`): redibujarlo
-  mientras Radzen carga filas lo deja vacío o con filas viejas. Al dejar la página (p. ej. por el menú lateral)
+  mientras Radzen carga filas lo deja vacío o con filas viejas; la marca de ese redibujado se limpia también en
+  `OnAfterRender` (si el grid ya tenía uno suyo en cola, Blazor no llama a `ShouldRender` y se perdería el siguiente
+  propio, p. ej. el fin de una carga). **Carga y errores**: el indicador de Radzen (`IsLoading`) cuenta las cargas en
+  curso (`loadsRunning`, desde el principio de `OnLoadData` y con `finally`: varias a la vez, una que acaba por
+  recargarse o con excepción); un bloque que no se pudo leer deja `loadFailed`: sin filas, la lista dice "The notes
+  could not be loaded" con **Retry** (`EmptyTemplate`); con filas de esa misma lista, lo dice el resumen de arriba. Retry
+  es `RefreshAsync` (`RefreshDataAsync` hace que Radzen vuelva a pedir filas que ya pidió). El árbol de `NotesTree` hace
+  lo mismo si no se puede leer. Las dos usan `.knt-load-error`/`.knt-load-error-text` de `knt-theme.css`. El velo de
+  carga de los grids (`IsLoading`) es del color de fondo del tema y solo aparece si la carga dura más de 300 ms
+  (`knt-theme.css`): el gris de Radzen destellaba en cada carga rápida. Al dejar la página (p. ej. por el menú lateral)
   `NotesGrid` guarda en `AppState` (`NotesListPosition`, en su `DisposeAsync`; el desplazamiento lo va anotando
   `notesGrid.js`, porque entonces sus filas ya pueden no estar) el desplazamiento, el orden y la nota
   seleccionada, y al volver se restauran (con el filtro o el texto buscado). Una nota guardada en otra ventana recarga las filas a la vista sin perder la

@@ -40,7 +40,17 @@
 <RadzenCard class="rz-p-1 rz-mt-2" Style="height: calc(100vh - 10rem)">
     <RadzenSplitter class="@(appState.NotesPreviewVisible == true ? null : "knt-preview-hidden")" Resize="paneSizes.Resized">
         <RadzenSplitterPane Size="@paneSizes[0]" Min="160px" Max="45%" Style="overflow: auto">
-            <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="FolderSelected" FolderActions="FolderActionsOf" />
+            @if (treeFailed)
+            {
+                <div class="knt-load-error">
+                    <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The folders could not be loaded.</span>
+                    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="RefreshTreeFolders" />
+                </div>
+            }
+            else
+            {
+                <KntFoldersTreeView FoldersInfo="foldersTree" FolderSelected="FolderSelected" FolderActions="FolderActionsOf" />
+            }
         </RadzenSplitterPane>
         <RadzenSplitterPane Size="@paneSizes[1]" Min="320px" class="knt-notes-list-pane">
             @if (folder != null)
@@ -66,6 +76,8 @@
 
 @code {
     private List<FolderDto>? foldersTree;
+    // The tree could not be read: the pane says so, with Retry (the error is already notified).
+    private bool treeFailed;
     private FolderDto? folder;
     private NotesGrid? notesGrid;
     private AppState appState = null!;
@@ -93,6 +105,7 @@
         if (appState.FoldersTree == null)
         {
             var result = await store.Folders.GetTreeAsync();
+            treeFailed = !result.IsValid;
             if (result.IsValid)
                 foldersTree = result.Entity;
             else
@@ -288,6 +301,7 @@
 
     private async Task RefreshTreeFolders()
     {
+        treeFailed = false;
         foldersTree = null;
         folder = null;
         appState.FoldersTree = null;

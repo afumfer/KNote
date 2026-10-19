@@ -265,6 +265,57 @@
     font-size: 0.8125rem;
 }
 
+/* A list or tree that could not be read (no answer from the server, an error): what failed and a Retry button. The
+   error itself is notified (BaseService). knt-load-error-text alone fits in a line (the summary of a notes list). */
+.knt-load-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 0.5rem;
+    text-align: center;
+}
+
+.knt-load-error-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--rz-danger);
+}
+
+    .knt-load-error-text > .rzi {
+        font-size: 1rem;
+    }
+
+    /* In the block, the icon above the text (a narrow pane, such as the folders tree, wraps the text). */
+    .knt-load-error > .knt-load-error-text {
+        flex-direction: column;
+    }
+
+        .knt-load-error > .knt-load-error-text > .rzi {
+            font-size: 1.5rem;
+        }
+
+/* The loading indicator of the grids (IsLoading: the notes lists, the notes selector). Radzen covers the rows with a
+   dark gray veil at 50 % from the first moment, which flashes on every quick load (a local server): a light veil of
+   the theme's background instead, and the veil and its icon only appear when the load lasts (after 300 ms). */
+.rz-data-grid {
+    --rz-grid-loading-indicator-background-color: var(--rz-base-background-color);
+    --rz-grid-loading-indicator-background-opacity: 0.6;
+}
+
+.rz-data-grid .rz-datatable-loading,
+.rz-data-grid .rz-datatable-loading-content {
+    animation: knt-loading-appear 0.2s ease-out 0.3s both;
+}
+
+/* From hidden to the element's own opacity (the veil's 0.6, the icon's 1). */
+@keyframes knt-loading-appear {
+    from {
+        opacity: 0;
+    }
+}
+
 /* The header of a list in an editor: how many items there are, and the button to add one. */
 .knt-list-header {
     display: flex;
