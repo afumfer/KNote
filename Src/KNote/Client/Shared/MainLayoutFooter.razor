@@ -1,9 +1,42 @@
-﻿<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.Wrap">
-    <RadzenLabel Text="@TextLeft" />
-    <RadzenLabel Text="@TextRight" />
-</RadzenStack>
+﻿@using System.Security.Claims
 
-@code{
-    [Parameter] public string TextLeft { get; set; } = "";
-    [Parameter] public string TextRight { get; set; } = "";
+@inject IStore store
+
+@* The app's footer: the application on the left; on the right, the user signed in with their role and the
+   repository open. *@
+
+<div class="knt-footer">
+    <span class="knt-footer-app">
+        @KntConst.AppName · @KntConst.AppDescription · v@(store.AppState.AppVersion)
+    </span>
+    <span class="knt-footer-session">
+        <AuthorizeView>
+            <Authorized>
+                <span class="knt-footer-item">
+                    <RadzenIcon Icon="person" />
+                    @context.User.Identity?.Name
+                    @if (HighestRole(context.User) is { } role)
+                    {
+                        <span class="knt-footer-role">@role</span>
+                    }
+                </span>
+            </Authorized>
+        </AuthorizeView>
+        @if (!string.IsNullOrEmpty(RepositoryName))
+        {
+            <span class="knt-footer-item">
+                <RadzenIcon Icon="storage" />
+                @RepositoryName
+            </span>
+        }
+    </span>
+</div>
+
+@code {
+    // Given by MainLayout (read once there), so the footer is drawn again when it arrives.
+    [Parameter] public string? RepositoryName { get; set; }
+
+    // Roles are hierarchical (EnumRoles): the highest one is what the user can do.
+    private static EnumRoles? HighestRole(ClaimsPrincipal user) =>
+        Enum.GetValues<EnumRoles>().OrderDescending().Cast<EnumRoles?>().FirstOrDefault(r => user.IsInRole(r.ToString()!));
 }

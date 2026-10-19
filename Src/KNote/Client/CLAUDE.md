@@ -162,9 +162,10 @@ Cómo está integrada:
   `NotificationService`, `TooltipService`, `ContextMenuService`...).
 - `<RadzenComponents />` en `Shared/MainLayout.razor` (anfitrión de diálogos, notificaciones, menús
   contextuales y tooltips). Sin él los servicios anteriores no muestran nada.
-- Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter`. Las
-  ventanas de la app (notas, asistente de IA, chat room) usan `Shared/KntWindowLayout` (solo `RadzenBody`, con su
-  propio `<RadzenComponents />`).
+- Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter` (el pie,
+  `Shared/MainLayoutFooter`: la aplicación, su descripción y versión a la izquierda; el usuario con su rol más alto y
+  el repositorio abierto a la derecha). Las ventanas de la app (notas, asistente de IA, chat room) usan
+  `Shared/KntWindowLayout` (solo `RadzenBody`, con su propio `<RadzenComponents />`).
 - Tema: `<RadzenTheme Theme="@KntThemes.Default" />` en el `<HeadContent>` de `App.razor` (no un `<link>` fijo
   en `index.html`), seguido de `css/knt-theme.css`. El usuario elige tema (los 5 gratuitos de Radzen,
   `Shared/KntThemes`), modo claro/oscuro y alto contraste (WCAG) en el panel `Shared/KntThemeSelector` (botón
@@ -193,8 +194,10 @@ Cómo está integrada:
   blanca (`--knt-paper`, regla con `:has` en `knt-theme.css`); las notas sin colores propios siguen el tema.
   `knt-theme.css` también declara la fuente Inter (incluida en el paquete de Radzen) como
   `--knt-heading-font-family`, para títulos y cabeceras, y ajusta el ancho del sidebar a su texto
-  (`max-content`). El logo de la app es `Shared/KntLogo` (SVG, color `currentColor` → `--knt-brand`). Un ajuste
-  solo para los temas oscuros va bajo `:root:has(link[href*="dark-base.css"])` (sus hojas son
+  (`max-content`). El contenido de una nota (`.knt-markdown`) nunca ensancha la página: sus bloques anchos (`pre`,
+  tablas) tienen su propio scroll horizontal, las palabras largas se parten y lo demás (imágenes, diagramas, HTML de
+  `ClientWin` con anchos fijos) se desplaza dentro del contenido. El logo de la app es `Shared/KntLogo` (SVG, color
+  `currentColor` → `--knt-brand`). Un ajuste solo para los temas oscuros va bajo `:root:has(link[href*="dark-base.css"])` (sus hojas son
   `<tema>-dark-base.css` o `dark-base.css`), como el de los diálogos, que en oscuro se confundían con la página.
 
 Patrones ya establecidos que hay que seguir:

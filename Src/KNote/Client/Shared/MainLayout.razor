@@ -48,8 +48,7 @@
     </RadzenBody>
 
     <RadzenFooter class="rz-p-1 rz-mx-1">
-        <MainLayoutFooter TextLeft="@($"{KntConst.AppName} - v{store.AppState.AppVersion}")"
-                          TextRight="@KntConst.AppDescription" />
+        <MainLayoutFooter RepositoryName="@store.AppState.RepositoryName" />
     </RadzenFooter>
 
 </RadzenLayout>
