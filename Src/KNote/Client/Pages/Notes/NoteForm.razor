@@ -54,8 +54,9 @@
                                 <RadzenTextBox Name="Topic" @bind-Value="@Note.Topic" Placeholder="What the note is about" class="knt-note-topic" />
                                 <ValidationMessage For="@(() => Note.Topic)" />
                             </KntField>
-                            <KntField Label="Description">
-                                <KntMarkdownEditor @bind-Value="@Note.Description" Locked="@ContentLocked" />
+                            <KntField Label="Description" Component="Description">
+                                <KntMarkdownEditor @ref="descriptionEditor" @bind-Value="@Note.Description" Locked="@ContentLocked"
+                                                   Name="Description" State="descriptionState" />
                                 <ValidationMessage For="@(() => Note.Description)" />
                             </KntField>
                         </RadzenStack>
@@ -252,6 +253,11 @@
         Note.SetContentTypeExt(ct);
     }
 
+    // The description's editor (only while the Overview tab is shown), and where its cursor was when it was left: a
+    // resource is inserted there.
+    private KntMarkdownEditor? descriptionEditor;
+    private KntMarkdownEditorState descriptionState = new();
+
     // The note whose path, resources and tasks are loaded (another one after "Save and new").
     private Guid? loadedNoteId;
     private string folderPath = "";
@@ -286,6 +292,7 @@
             return;
 
         loadedNoteId = Note.NoteId;
+        descriptionState = new();
         oldNoteType = Note.NoteTypeId;
         resources = null;
         tasks = null;
@@ -343,6 +350,10 @@
     {
         if (Saving)
             return;
+
+        // The description as typed until now (the editor gives it back after a pause in the typing).
+        if (descriptionEditor != null)
+            await descriptionEditor.FlushAsync();
 
         string addMessage = "";
 
@@ -509,15 +520,17 @@
         }
     }
 
+    // Where the cursor of the description was (it is in another tab, left when this one was chosen), and the
+    // description is shown again, with its cursor after the resource.
     private void InsertInDescription(ResourceInfoDto resource)
     {
-        if (KntFileTypes.IsImage(resource.FileType, resource.Name))
-            Note.Description += "\n\n![alt text](" + resource?.FullUrl + " '" + resource?.Description + "' )";
-        else
-            Note.Description += "\n\n<a href=" + resource?.FullUrl + " target='_blank'>" + resource?.Description + "</a>";
+        var markdown = KntFileTypes.IsImage(resource.FileType, resource.Name)
+            ? "![alt text](" + resource.FullUrl + " '" + resource.Description + "' )"
+            : "<a href=" + resource.FullUrl + " target='_blank'>" + resource.Description + "</a>";
+        Note.Description = descriptionState.InsertBlock(Note.Description, markdown);
 
         tabsSelectedIndex = 0;
-        StateHasChanged();        
+        StateHasChanged();
     }
 
     #endregion

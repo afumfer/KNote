@@ -1,9 +1,16 @@
-@inject IJSRuntime js
+@using System.Linq.Expressions
 
-@* Editor of a note's description: its Markdown (Radzen's editor in its source mode, with its toolbar) or a Preview
-   (the note as it is shown, made safe by Server: ViewMarkdown). The mode chosen is kept in the browser. Radzen's
-   Design (WYSIWYG) mode is left out: there Enter makes a new paragraph, which Markdown writes as an extra blank
-   line, and ClientWin shows the Markdown as text, line by line. *@
+@inject IJSRuntime js
+@inject IStore store
+@inject TooltipService tooltipService
+
+@implements IAsyncDisposable
+
+@* Editor of a note's description: its Markdown (a textarea, with a toolbar) or a Preview (the note as it is shown,
+   made safe by Server: ViewMarkdown). The mode chosen is kept in the browser. The text is edited by the browser
+   (js/kntMarkdownEditor.js) and given back now and then, not at each key: an editor that works on the text at each
+   key (Radzen's, before) costs as much as the note is long, and with a long note the typing lags behind. Who saves
+   the text, or reads it, asks for it first (FlushAsync). *@
 
 @* Drawn once the mode saved is known (the editor shown for a moment would give its text back). *@
 @if (modeLoaded)
@@ -24,41 +31,61 @@
     @if (Locked || mode == PreviewMode)
     {
         <div class="knt-md-editor-preview" style="height: @Height">
-            <ViewMarkdown MarkdownContent="@Value">
+            <ViewMarkdown MarkdownContent="@editorText">
                 <TemplateContent>
                     <span class="knt-md-editor-empty">No description yet.</span>
                 </TemplateContent>
             </ViewMarkdown>
         </div>
     }
+    else if (scriptMissing)
+    {
+        @* Without its script (the server not reachable, already notified): the text alone, given back when left. *@
+        <div class="rz-markdown-editor knt-md-editor-source" style="height: @Height">
+            <div class="rz-markdown-editor-content">
+                <textarea id="@Name" name="@Name" class="rz-markdown-editor-textarea" aria-label="Markdown"
+                          value="@editorText" @onchange="OnFallbackChanged"></textarea>
+            </div>
+        </div>
+    }
     else
     {
-        @* Its toolbar without the Design/Source switch (RadzenMarkdownEditorSource). *@
-        <RadzenMarkdownEditor Value="@editorText" ValueChanged="@((string value) => OnValueChanged(value))"
-                              Mode="MarkdownEditorMode.Source" Style="@($"height: {Height}")">
-            <RadzenMarkdownEditorUndo />
-            <RadzenMarkdownEditorRedo />
-            <RadzenMarkdownEditorSeparator />
-            <RadzenMarkdownEditorFormatBlock />
-            <RadzenMarkdownEditorSeparator />
-            <RadzenMarkdownEditorBold />
-            <RadzenMarkdownEditorItalic />
-            <RadzenMarkdownEditorStrikethrough />
-            <RadzenMarkdownEditorSeparator />
-            <RadzenMarkdownEditorQuote />
-            <RadzenMarkdownEditorCode />
-            <RadzenMarkdownEditorCodeBlock />
-            <RadzenMarkdownEditorSeparator />
-            <RadzenMarkdownEditorUnorderedList />
-            <RadzenMarkdownEditorOrderedList />
-            <RadzenMarkdownEditorTaskList />
-            <RadzenMarkdownEditorSeparator />
-            <RadzenMarkdownEditorLink />
-            <RadzenMarkdownEditorImage />
-            <RadzenMarkdownEditorHorizontalRule />
-            <RadzenMarkdownEditorSeparator />
-            <RadzenMarkdownEditorTable />
-        </RadzenMarkdownEditor>
+        @* The same look as Radzen's editor (its classes). The textarea's text is the script's: never Blazor's (a
+           render would move the cursor and lose the undo). The tools are out of the tab order, as Radzen's: from
+           the keyboard there are Ctrl+B, Ctrl+I and Ctrl+K. *@
+        <div class="rz-markdown-editor knt-md-editor-source" style="height: @Height">
+            <div class="rz-toolbar rz-markdown-editor-toolbar">
+                <div class="rz-markdown-editor-tools" role="toolbar" aria-label="Markdown">
+                    @for (var i = 0; i < ToolGroups.Length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            <div class="rz-toolbar-separator"></div>
+                        }
+                        if (ToolGroups[i] is { } tools)
+                        {
+                            foreach (var tool in tools)
+                            {
+                                <RadzenButton Icon="@tool.Icon" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                              TabIndex="-1" aria-label="@tool.Text" Disabled="@(editor == null)"
+                                              Click="@(() => RunAsync(tool.Command))"
+                                              MouseEnter="@(args => tooltipService.Open(args, tool.Text))" />
+                            }
+                        }
+                        else
+                        {
+                            @* A new one after each choice: it shows Format block again (it keeps the one chosen). *@
+                            <RadzenDropDown @key="formatChoices" TValue="int?" Value="@((int?)null)" ValueChanged="@((int? level) => OnFormatBlockAsync(level))"
+                                            Data="@HeadingLevels" TextProperty="Text" ValueProperty="Level" Placeholder="Format block"
+                                            TabIndex="-1" Disabled="@(editor == null)" class="knt-md-editor-format" aria-label="Format block" />
+                        }
+                    }
+                </div>
+            </div>
+            <div class="rz-markdown-editor-content">
+                <textarea @ref="textArea" id="@Name" name="@Name" class="rz-markdown-editor-textarea" aria-label="Markdown"></textarea>
+            </div>
+        </div>
     }
 </div>
 }
@@ -66,22 +93,62 @@
 @code {
     [Parameter] public string? Value { get; set; }
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    // From @bind-Value: the field whose validation message follows the text (as the form's own fields).
+    [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
     // The note's content is locked (ContentType's DescriptionBlocked): only its preview, no editor.
     [Parameter] public bool Locked { get; set; }
     // Height of the editing (or preview) area.
     [Parameter] public string Height { get; set; } = "max(20rem, calc(100vh - 24rem))";
     // Where the mode chosen is kept in the browser: each use of the editor (a note, a task...) remembers its own.
     [Parameter] public string StorageKey { get; set; } = "KNoteDescriptionEditorMode";
+    // The textarea's id and name (KntField's Component, for its label).
+    [Parameter] public string? Name { get; set; }
+    // Where the cursor was, kept by who shows the editor now and then (NoteForm: its tab is left for another one).
+    [Parameter] public KntMarkdownEditorState? State { get; set; }
+
+    [CascadingParameter] private EditContext? EditContext { get; set; }
 
     private const string SourceMode = "source";
     private const string PreviewMode = "preview";
+    // The pause in the typing after which the text is given back.
+    private const int SendDelay = 300;
+
+    private record Tool(string Icon, string Command, string Text);
+
+    // The toolbar, as Radzen's; null: the headings (Format block).
+    private static readonly Tool[]?[] ToolGroups =
+    [
+        [new("undo", "undo", "Undo (Ctrl+Z)"), new("redo", "redo", "Redo (Ctrl+Y)")],
+        null,
+        [new("format_bold", "bold", "Bold (Ctrl+B)"), new("format_italic", "italic", "Italic (Ctrl+I)"), new("strikethrough_s", "strikethrough", "Strikethrough")],
+        [new("format_quote", "quote", "Quote"), new("code", "code", "Code"), new("code_blocks", "codeBlock", "Code block")],
+        [new("format_list_bulleted", "bullet", "Bulleted list"), new("format_list_numbered", "numbered", "Numbered list"), new("checklist", "task", "Task list")],
+        [new("link", "link", "Link (Ctrl+K)"), new("image", "image", "Image"), new("horizontal_rule", "rule", "Horizontal line")],
+        [new("table_chart", "table", "Table")],
+    ];
+
+    private record HeadingLevel(int Level, string Text);
+
+    private static readonly HeadingLevel[] HeadingLevels =
+        [new(0, "Normal"), .. Enumerable.Range(1, 6).Select(level => new HeadingLevel(level, $"Heading {level}"))];
 
     private string mode = SourceMode;
     private bool modeLoaded;
 
-    // The text as the editor has it. The editor always gets it back as it gave it: a different one (e.g. the note's,
-    // when a change is not one of the note) makes it start again, with the cursor at the beginning and no undo.
+    // The text as the editor gave it last (or as it was given to the editor).
     private string? editorText;
+    // A new text from outside, for the editor shown.
+    private bool textChangedOutside;
+
+    private ElementReference textArea;
+    private IJSObjectReference? module;
+    // The textarea shown, while the script edits it.
+    private IJSObjectReference? editor;
+    private DotNetObjectReference<KntMarkdownEditor>? selfReference;
+    private bool attaching;
+    private bool scriptMissing;
+
+    private bool SourceShown => modeLoaded && !Locked && mode == SourceMode;
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,34 +158,190 @@
         modeLoaded = true;
     }
 
-    // Only a new text from outside (another note, a resource inserted in the description...) replaces the editor's.
+    // Only a new text from outside (another note after "Save and new", a resource inserted in the description...)
+    // replaces the editor's.
     protected override void OnParametersSet()
     {
         if (!SameText(Value, editorText))
+        {
             editorText = Value;
+            textChangedOutside = true;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (attaching)
+            return;
+
+        if (!SourceShown || scriptMissing)
+        {
+            await DetachAsync();
+            return;
+        }
+
+        if (editor == null)
+        {
+            attaching = true;
+            try
+            {
+                await AttachAsync();
+            }
+            finally
+            {
+                attaching = false;
+            }
+            StateHasChanged();
+        }
+        else if (textChangedOutside)
+        {
+            textChangedOutside = false;
+            await editor.InvokeVoidAsync("setText", editorText ?? "");
+        }
+    }
+
+    private async Task AttachAsync()
+    {
+        module ??= await js.ImportModuleAsync("./js/kntMarkdownEditor.js", store.AppState);
+        if (module == null)
+        {
+            scriptMissing = true;
+            return;
+        }
+
+        selfReference ??= DotNetObjectReference.Create(this);
+        textChangedOutside = false;
+        var state = State ?? new KntMarkdownEditorState();
+        editor = await module.InvokeAsync<IJSObjectReference>("init", textArea, selfReference, editorText ?? "", SendDelay,
+            state.SelectionStart, state.SelectionEnd, state.ScrollTop, state.Focus);
+        state.Focus = false;
+    }
+
+    private async Task DetachAsync()
+    {
+        if (editor == null)
+            return;
+
+        var detached = editor;
+        editor = null;
+        try
+        {
+            await detached.InvokeVoidAsync("dispose");
+            await detached.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is being closed: nothing left to clean up in the browser.
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await DetachAsync();
+        try
+        {
+            if (module != null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        selfReference?.Dispose();
+    }
+
+    /// <summary>
+    /// The text being typed, given back now (it is given back after a pause in the typing): call it before the text is
+    /// saved or read.
+    /// </summary>
+    public async Task FlushAsync()
+    {
+        if (editor == null)
+            return;
+
+        string? text;
+        try
+        {
+            text = await editor.InvokeAsync<string?>("flush");
+        }
+        catch (Exception ex) when (ex is JSException or JSDisconnectedException or ObjectDisposedException)
+        {
+            // The editor went away meanwhile (left for another tab, the page closed): it gave its text back then.
+            return;
+        }
+        if (text != null)
+            await SetTextAsync(text);
+    }
+
+    [JSInvokable]
+    public Task OnTextChanged(string text) => SetTextAsync(text);
+
+    // The textarea is left: its text, if it changed, and where its cursor was.
+    [JSInvokable]
+    public async Task OnLeave(string? text, int selectionStart, int selectionEnd, double scrollTop)
+    {
+        if (State != null)
+        {
+            State.SelectionStart = selectionStart;
+            State.SelectionEnd = selectionEnd;
+            State.ScrollTop = scrollTop;
+        }
+        if (text != null)
+            await SetTextAsync(text);
+    }
+
+    private Task OnFallbackChanged(ChangeEventArgs e) => SetTextAsync(e.Value as string ?? "");
+
+    private async Task RunAsync(string command, int? argument = null)
+    {
+        if (editor != null)
+            await editor.InvokeVoidAsync("command", command, argument);
+    }
+
+    private int formatChoices;
+
+    private async Task OnFormatBlockAsync(int? level)
+    {
+        formatChoices++;
+        if (level != null)
+            await RunAsync("heading", level);
     }
 
     private async Task SetModeAsync(string value)
     {
         if (value == mode)
             return;
+        // The preview shows the text typed until now.
+        await FlushAsync();
         mode = value;
         await js.LocalStorageSetItem(StorageKey, mode);
     }
 
-    // Radzen's editor gives the text back when it starts, with its line breaks as LF (notes keep CR LF, as ClientWin
-    // writes them): that is not a change of the note. Neither are blank lines or spaces at the end (e.g. Enter at the
-    // end of the text, before writing the next line).
-    private Task OnValueChanged(string value)
+    // The browser keeps the line breaks as LF (notes keep CR LF, as ClientWin writes them): that is not a change of the
+    // note. Neither are blank lines or spaces at the end (e.g. Enter at the end of the text, before writing the next
+    // line).
+    private async Task SetTextAsync(string text)
     {
-        editorText = value;
-        if (SameText(value, Value))
-            return Task.CompletedTask;
+        editorText = text;
+        if (SameText(text, Value))
+            return;
 
-        Value = value;
-        return ValueChanged.InvokeAsync(value);
+        Value = text;
+        await ValueChanged.InvokeAsync(text);
+        if (EditContext != null && ValueExpression != null)
+            EditContext.NotifyFieldChanged(FieldIdentifier.Create(ValueExpression));
     }
 
-    private static bool SameText(string? a, string? b) =>
-        (a ?? "").Replace("\r\n", "\n").TrimEnd() == (b ?? "").Replace("\r\n", "\n").TrimEnd();
+    // Without copying the texts, unless they have CR LF (the note as it was read): the browser's have only LF.
+    private static bool SameText(string? a, string? b)
+    {
+        if (a == b)
+            return true;
+        a ??= "";
+        b ??= "";
+        if (a.Contains('\r'))
+            a = a.Replace("\r\n", "\n");
+        if (b.Contains('\r'))
+            b = b.Replace("\r\n", "\n");
+        return a.AsSpan().TrimEnd().SequenceEqual(b.AsSpan().TrimEnd());
+    }
 }

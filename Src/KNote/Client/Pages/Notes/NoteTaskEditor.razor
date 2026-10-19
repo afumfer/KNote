@@ -1,6 +1,8 @@
 ﻿@inject NotificationService notificationService
 @inject DialogService dialogService
 
+@implements IDisposable
+
 @* Dialog of a note's task (NoteForm opens it framed): who it is for and what (its topic, and its description in
    Markdown), its planning and its progress. The result is the task edited, or null if cancelled. *@
 
@@ -28,8 +30,9 @@
                         </KntField>
                     </RadzenColumn>
                 </RadzenRow>
-                <KntField Label="Description">
-                    <KntMarkdownEditor @bind-Value="@task.Description" Height="18rem" StorageKey="KNoteTaskEditorMode" />
+                <KntField Label="Description" Component="Description">
+                    <KntMarkdownEditor @ref="descriptionEditor" @bind-Value="@task.Description" Height="18rem" StorageKey="KNoteTaskEditorMode"
+                                       Name="Description" />
                     <ValidationMessage For="@(() => task.Description)" />
                 </KntField>
             </KntFormSection>
@@ -104,7 +107,7 @@
         </ChildContent>
         <Footer>
             <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
-            <RadzenButton Text="Ok" Icon="check" Click="() => OnConfirm(formContextTask)" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Ok" Icon="check" Click="() => OnConfirmAsync(formContextTask)" ButtonStyle="ButtonStyle.Primary" />
         </Footer>
     </KntDialogFrame>
 
@@ -118,6 +121,8 @@
     [Parameter] public string? NoteTopic { get; set; }
 
     private NoteTaskDto task;
+    private KntMarkdownEditor? descriptionEditor;
+    private bool closed;
 
     private bool IsNew => TaskEdit == null || TaskEdit.NoteTaskId == Guid.Empty;
 
@@ -132,8 +137,15 @@
         return base.OnInitializedAsync();
     }
 
-    private void OnConfirm(EditContext formContext)
+    private async Task OnConfirmAsync(EditContext formContext)
     {
+        // The description as typed until now (the editor gives it back after a pause in the typing).
+        if (descriptionEditor != null)
+            await descriptionEditor.FlushAsync();
+        // Closed meanwhile (Esc): Close would close another dialog.
+        if (closed)
+            return;
+
         bool formIsValid = formContext.Validate();
         if (formIsValid == false)
         {
@@ -143,6 +155,7 @@
 
         task.UserFullName = Users.Where(u => u.UserId == task.UserId).Select(u => u.FullName).SingleOrDefault();
 
+        closed = true;
         dialogService.Close(task);
     }
 
@@ -156,6 +169,9 @@
 
     private void OnCancel()
     {
+        closed = true;
         dialogService.Close(null);
     }
+
+    public void Dispose() => closed = true;
 }
