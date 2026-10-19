@@ -51,6 +51,8 @@ try
 
     builder.Services.KntAddServices(appSettings, repositoryRef);
     builder.Services.KntAddAiAssistant(builder.Configuration);
+    builder.Services.KntAddPasswordReset(builder.Configuration);
+    builder.Services.KntAddRateLimits(builder.Configuration);
 
     builder.Services.AddAuthentication().AddJwtBearer(options =>
     {
@@ -150,6 +152,7 @@ try
     app.KntAddResourcesStaticFiles(appSettings, repositoryRef);
 
     app.UseRouting();
+    app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseCors("KntPolicy");

@@ -41,6 +41,9 @@ public partial class LoginForm : KntForm, IViewEditor<LoginModel>
         this.DialogResult = DialogResult.Cancel;
     }
 
+    private void linkForgotPassword_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        => ShowInfo(_ctrl.ForgotPasswordHelp, "Forgot your password?");
+
     private void linkWindowsAccount_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
         _ctrl.UseWindowsAccount();

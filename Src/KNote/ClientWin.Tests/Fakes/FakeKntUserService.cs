@@ -54,6 +54,12 @@ internal class FakeKntUserService : IKntUserService
     public Task<Result<string>> GetPasswordStampAsync(string userName) =>
         throw new NotSupportedException($"{nameof(GetPasswordStampAsync)} is only used by the Server");
 
+    public Task<Result<UserPasswordResetTokenDto>> CreatePasswordResetAsync(string userNameOrEMail, string signingKey, TimeSpan lifetime) =>
+        throw new NotSupportedException($"{nameof(CreatePasswordResetAsync)} is only used by the Server");
+
+    public Task<Result<UserDto>> ResetPasswordAsync(UserResetPasswordDto reset, string signingKey) =>
+        throw new NotSupportedException($"{nameof(ResetPasswordAsync)} is only used by the Server");
+
     public Task<Result<UserProfileDto>> GetProfileAsync() =>
         (GetProfileAsyncImpl ?? throw new NotSupportedException($"{nameof(GetProfileAsync)} not configured for this test"))();
 

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using KNote.Server.Helpers;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -25,16 +26,18 @@ public class UsersController : ControllerBase
     private readonly IKntService _service;
     private readonly AppSettings _appSettings;
     private readonly KntPasswordStamps _passwordStamps;
+    private readonly KntPasswordResetMail _passwordResetMail;
     private readonly ILogger<UsersController> _logger;
 
     public UsersController(IKntService service, IHttpContextAccessor httpContextAccessor, IOptions<AppSettings> appSettings,
-        KntPasswordStamps passwordStamps, ILogger<UsersController> logger)
+        KntPasswordStamps passwordStamps, KntPasswordResetMail passwordResetMail, ILogger<UsersController> logger)
     {
         _service = service;
         _service.Logger = logger;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         _appSettings = appSettings.Value;
         _passwordStamps = passwordStamps;
+        _passwordResetMail = passwordResetMail;
         _logger = logger;
     }
 
@@ -164,6 +167,7 @@ public class UsersController : ControllerBase
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting(KntRateLimits.SignIn)]
     [HttpPost("[action]")]
     public async Task<IActionResult> Login([FromBody]UserCredentialsDto credentials)
     {            
@@ -213,6 +217,71 @@ public class UsersController : ControllerBase
             return BadRequest(kresApi);
         }
     }
+
+    #region Forgotten password (anonymous)
+
+    // Sends a link to set a new password to the email of the user with that user name or email. The answer is the
+    // same whether there is such a user or not, so it doesn't tell who is registered.
+    [AllowAnonymous]
+    [EnableRateLimiting(KntRateLimits.PasswordReset)]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] UserForgotPasswordDto request)
+    {
+        var kresApi = new Result<string>();
+        try
+        {
+            if (!_passwordResetMail.IsAvailable)
+            {
+                kresApi.AddErrorMessage("Setting a new password by email is not available in this server. Ask an administrator to set it.");
+                return BadRequest(kresApi);
+            }
+
+            var kresService = await _service.Users.CreatePasswordResetAsync(request?.UserNameOrEMail, _appSettings.Secret, _passwordResetMail.LinkLifetime);
+            if (kresService.IsValid)
+                _passwordResetMail.SendInBackground(kresService.Entity);
+            else
+                _logger.LogInformation("Password reset asked for {user}, without a user to send it to.", request?.UserNameOrEMail);
+
+            kresApi.Entity = "If there is a user with that name or email, a message with a link to set a new password has been sent to its email.";
+            return Ok(kresApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Password reset asked for {user} at {dateTime}.", request?.UserNameOrEMail, DateTime.Now);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    // Sets a new password with the token of that link, and signs the user in (a new token, as with ChangePassword).
+    [AllowAnonymous]
+    [EnableRateLimiting(KntRateLimits.PasswordReset)]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] UserResetPasswordDto reset)
+    {
+        var kresApi = new Result<UserTokenDto>();
+        try
+        {
+            var kresService = await _service.Users.ResetPasswordAsync(reset, _appSettings.Secret);
+            if (!kresService.IsValid)
+            {
+                kresApi.AddListErrorMessage(kresService.ListErrorMessage);
+                return BadRequest(kresApi);
+            }
+
+            _logger.LogInformation("User {user} set a new password with a reset link.", kresService.Entity.UserName);
+            kresApi.Entity = await BuildTokenAsync(kresService.Entity);
+            return Ok(kresApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Password reset at {dateTime}.", DateTime.Now);
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    #endregion
 
     #region The signed in user's own account (any role)
 

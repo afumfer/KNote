@@ -29,6 +29,7 @@ public class CommandAuthorizationMatrixTests
 
         Add(Anonymous,
             "KntUsersAuthenticateAsyncCommand", "KntUsersRegisterAsyncCommand",
+            "KntUsersCreatePasswordResetAsyncCommand", "KntUsersResetPasswordAsyncCommand",
             "KntSystemValueGetRepositoryInfoAsyncCommand");
 
         // Reading anything in the repository.

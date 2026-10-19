@@ -38,6 +38,7 @@ namespace KNote.ClientWin.Views
             linkWindowsAccount = new LinkLabel();
             panelSignIn = new Panel();
             pictureBoxSignIn = new PictureBox();
+            linkForgotPassword = new LinkLabel();
             panelSignIn.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxSignIn).BeginInit();
             SuspendLayout();
@@ -45,11 +46,11 @@ namespace KNote.ClientWin.Views
             // buttonCancel
             //
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonCancel.Location = new Point(456, 186);
+            buttonCancel.Location = new Point(456, 206);
             buttonCancel.Margin = new Padding(3);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(64, 23);
-            buttonCancel.TabIndex = 7;
+            buttonCancel.TabIndex = 8;
             buttonCancel.Text = "&Cancel";
             buttonCancel.UseVisualStyleBackColor = true;
             buttonCancel.Click += buttonCancel_Click;
@@ -57,11 +58,11 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             //
             buttonAccept.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonAccept.Location = new Point(386, 186);
+            buttonAccept.Location = new Point(386, 206);
             buttonAccept.Margin = new Padding(3);
             buttonAccept.Name = "buttonAccept";
             buttonAccept.Size = new Size(64, 23);
-            buttonAccept.TabIndex = 6;
+            buttonAccept.TabIndex = 7;
             buttonAccept.Text = "&Accept";
             buttonAccept.UseVisualStyleBackColor = true;
             buttonAccept.Click += buttonAccept_Click;
@@ -119,14 +120,26 @@ namespace KNote.ClientWin.Views
             // linkWindowsAccount
             //
             linkWindowsAccount.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            linkWindowsAccount.Location = new Point(118, 150);
+            linkWindowsAccount.Location = new Point(118, 170);
             linkWindowsAccount.Margin = new Padding(3, 0, 3, 0);
             linkWindowsAccount.Name = "linkWindowsAccount";
             linkWindowsAccount.Size = new Size(400, 18);
-            linkWindowsAccount.TabIndex = 5;
+            linkWindowsAccount.TabIndex = 6;
             linkWindowsAccount.TabStop = true;
             linkWindowsAccount.Text = "Use my Windows account instead";
             linkWindowsAccount.LinkClicked += linkWindowsAccount_LinkClicked;
+            //
+            // linkForgotPassword
+            //
+            linkForgotPassword.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            linkForgotPassword.Location = new Point(118, 148);
+            linkForgotPassword.Margin = new Padding(3, 0, 3, 0);
+            linkForgotPassword.Name = "linkForgotPassword";
+            linkForgotPassword.Size = new Size(400, 18);
+            linkForgotPassword.TabIndex = 5;
+            linkForgotPassword.TabStop = true;
+            linkForgotPassword.Text = "Forgot your password?";
+            linkForgotPassword.LinkClicked += linkForgotPassword_LinkClicked;
             //
             // panelSignIn
             //
@@ -136,8 +149,8 @@ namespace KNote.ClientWin.Views
             panelSignIn.Location = new Point(0, 0);
             panelSignIn.Margin = new Padding(0);
             panelSignIn.Name = "panelSignIn";
-            panelSignIn.Size = new Size(104, 217);
-            panelSignIn.TabIndex = 8;
+            panelSignIn.Size = new Size(104, 237);
+            panelSignIn.TabIndex = 9;
             //
             // pictureBoxSignIn
             //
@@ -146,7 +159,7 @@ namespace KNote.ClientWin.Views
             pictureBoxSignIn.Location = new Point(0, 0);
             pictureBoxSignIn.Margin = new Padding(0);
             pictureBoxSignIn.Name = "pictureBoxSignIn";
-            pictureBoxSignIn.Size = new Size(104, 217);
+            pictureBoxSignIn.Size = new Size(104, 237);
             pictureBoxSignIn.TabIndex = 0;
             pictureBoxSignIn.TabStop = false;
             //
@@ -156,7 +169,7 @@ namespace KNote.ClientWin.Views
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new Size(530, 217);
+            ClientSize = new Size(530, 237);
             Controls.Add(buttonCancel);
             Controls.Add(buttonAccept);
             Controls.Add(labelInfo);
@@ -164,6 +177,7 @@ namespace KNote.ClientWin.Views
             Controls.Add(textUserName);
             Controls.Add(labelPassword);
             Controls.Add(textPassword);
+            Controls.Add(linkForgotPassword);
             Controls.Add(linkWindowsAccount);
             Controls.Add(panelSignIn);
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -191,6 +205,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelPassword;
         private System.Windows.Forms.TextBox textPassword;
         private System.Windows.Forms.LinkLabel linkWindowsAccount;
+        private System.Windows.Forms.LinkLabel linkForgotPassword;
         private System.Windows.Forms.Panel panelSignIn;
         private System.Windows.Forms.PictureBox pictureBoxSignIn;
     }

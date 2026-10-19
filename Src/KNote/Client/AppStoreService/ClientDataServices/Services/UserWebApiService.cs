@@ -45,6 +45,12 @@ public class UserWebApiService : BaseService, IUserWebApiService
         SendAsync<UserDto>(ct => _httpClient.PutAsJsonAsync($"api/users/{userId}/password", new UserSetPasswordDto { NewPassword = newPassword }, ct),
             "Set password", true, cancellationToken);
 
+    public Task<Result<string>> ForgotPasswordAsync(UserForgotPasswordDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<string>(ct => _httpClient.PostAsJsonAsync("api/users/forgot-password", request, ct), "Forgot your password?", cancellationToken: cancellationToken);
+
+    public Task<Result<UserTokenDto>> ResetPasswordAsync(UserResetPasswordDto reset, CancellationToken cancellationToken = default) =>
+        SendAsync<UserTokenDto>(ct => _httpClient.PostAsJsonAsync("api/users/reset-password", reset, ct), "Set a new password", cancellationToken: cancellationToken);
+
     public Task<Result<UserProfileDto>> GetProfileAsync(CancellationToken cancellationToken = default) =>
         SendAsync<UserProfileDto>(ct => _httpClient.GetAsync("api/users/me", ct), "Get profile", cancellationToken: cancellationToken);
 

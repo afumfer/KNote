@@ -50,6 +50,23 @@ public static class KntExtensions
         return services;
     }
 
+    // "Forgot your password?": the links sent by email (the "PasswordReset" section) through the Server's SMTP account
+    // (the "Email" section), bound when first used like the "ai" section.
+    public static IServiceCollection KntAddPasswordReset(this IServiceCollection services, IConfiguration configuration)
+    {
+        if (services == null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        services.Configure<PasswordResetConfig>(configuration.GetSection("PasswordReset"));
+        services.Configure<EmailConfig>(configuration.GetSection("Email"));
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddSingleton<KntPasswordResetMail>();
+
+        return services;
+    }
+
     public static IApplicationBuilder KntAddResourcesStaticFiles(this IApplicationBuilder app, AppSettings appSettings, RepositoryRef repositoryRef)
     {        
         if (app == null)

@@ -83,6 +83,18 @@ public class KntUserService : KntServiceBase, IKntUserService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<UserPasswordResetTokenDto>> CreatePasswordResetAsync(string userNameOrEMail, string signingKey, TimeSpan lifetime)
+    {
+        var command = new KntUsersCreatePasswordResetAsyncCommand(Service, userNameOrEMail, signingKey, lifetime);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<UserDto>> ResetPasswordAsync(UserResetPasswordDto reset, string signingKey)
+    {
+        var command = new KntUsersResetPasswordAsyncCommand(Service, reset, signingKey);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<UserProfileDto>> GetProfileAsync()
     {
         var command = new KntUsersGetProfileAsyncCommand(Service);

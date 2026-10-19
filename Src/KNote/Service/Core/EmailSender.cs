@@ -1,13 +1,14 @@
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
 
 using KNote.Model;
 
-namespace KNote.ClientWin.Core;
+namespace KNote.Service.Core;
 
-// The settings needed to send a message through the single, per-installation SMTP account
-// configured in the settings (Options > Email). Kept separate from EmailConfig itself so this project's
-// email sending code isn't tied to the specific shape of the app configuration.
+// The settings needed to send a message through an SMTP account: ClientWin's, one per installation (Options >
+// Email), and the Server's (its Email section, for the links to set a new password). Kept separate from EmailConfig
+// itself so the email sending code isn't tied to the specific shape of the app configuration.
 public class SmtpSettings
 {
     public string Host { get; set; }
