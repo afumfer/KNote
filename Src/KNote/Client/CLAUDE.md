@@ -464,12 +464,26 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   salir: cerrarla mientras responde o sin haber podido guardar pregunta (`WatchUnsavedChangesAsync`,
   `HasUnsavedChanges`).
 - **Markdown**: las descripciones de nota se editan con `Shared/KntMarkdownEditor` y se muestran con
-  `Shared/ViewMarkdown` (Markdig). `KntMarkdownEditor` es el `RadzenMarkdownEditor` en modo `Source` (el Markdown,
-  con su barra; la barra se le da explícita, sin `RadzenMarkdownEditorSource`) más una vista "Preview"
-  (`ViewMarkdown`); el modo se recuerda en el navegador. El modo Design (WYSIWYG) de Radzen se quitó: Enter crea un
-  párrafo y Markdown lo escribe como una línea en blanco más, y `ClientWin` muestra el Markdown como texto, línea a
-  línea. Radzen devuelve el texto al arrancar con saltos LF y las notas los guardan CR LF: ese "cambio" se ignora
-  (si no, la nota quedaría modificada sin tocarla), y el componente no se dibuja hasta saber el modo guardado. `Server` reescribe las URLs de recursos de la descripción al leer/guardar
+  `Shared/ViewMarkdown` (Markdig). `KntMarkdownEditor` es un `textarea` con una barra de herramientas (con las clases
+  y el aspecto del editor de Radzen) más una vista "Preview" (`ViewMarkdown`); el modo se recuerda en el navegador.
+  **No se usa `RadzenMarkdownEditor`**: en cada tecla vuelve a analizar todo el Markdown en .NET, en el hilo del
+  navegador (~6 ms por KB y tecla: con una nota de 130 KB, ~770 ms por tecla y el texto decenas de segundos por
+  detrás al teclear seguido; medido con 12.1.2 y 12.1.4). El texto lo edita el navegador (`wwwroot/js/
+  kntMarkdownEditor.js`) y .NET lo recibe pocas veces (`OnTextChanged`): en el primer cambio (la nota queda
+  modificada al momento: el aviso de cerrar la ventana pregunta a .NET de forma síncrona), tras 300 ms sin teclear,
+  al perder el foco (`OnLeave`, con la posición del cursor) y cuando se pide con `FlushAsync()`. **Quien guarde o lea
+  la descripción llama antes a `FlushAsync()`** (`NoteForm.Save`, `NoteTaskEditor` al aceptar, el paso a Preview). El
+  `textarea` no se enlaza con Blazor: su texto lo pone el script (al arrancar o con un texto nuevo de fuera, como
+  tras "Save and new"), porque un render movería el cursor y perdería el deshacer. Las herramientas y `Ctrl+B`/`I`/`K`
+  (`command` del script) cambian la selección con `execCommand('insertText')`, para que el deshacer del navegador
+  (`Ctrl+Z`, Undo) las incluya; sin el script (no se pudo cargar) queda el `textarea` con `@onchange` y sin barra. En
+  `NoteForm` las pestañas se dibujan solo la elegida (`TabRenderMode.Server`): el editor desaparece al ir a otra
+  pestaña, así que guarda dónde estaba el cursor en un `KntMarkdownEditorState` de `NoteForm` (al volver se restaura,
+  y "insertar en la descripción" un recurso lo pone ahí, en su propio párrafo: `InsertBlock`). El modo Design
+  (WYSIWYG) de Radzen no está: Enter crea un párrafo y Markdown lo escribe como una línea en blanco más, y `ClientWin`
+  muestra el Markdown como texto, línea a línea. El navegador devuelve el texto con saltos LF y las notas los guardan
+  CR LF: esa diferencia (y los espacios o líneas en blanco del final) no es un cambio de la nota (`SameText`), y el
+  componente no se dibuja hasta saber el modo guardado. `Server` reescribe las URLs de recursos de la descripción al leer/guardar
   para compatibilizarla con `ClientWin` (ver `Server/CLAUDE.md`). **El HTML de una nota no se genera en el
   navegador**: `ViewMarkdown` lo pide ya saneado a `Server` (`IStore.Notes.HtmlAsync` → `POST api/notes/html`,
   Markdig + `KntHtmlSanitizer` de `Service`), con las mismas reglas que `ClientWin`; las descripciones de Home ya

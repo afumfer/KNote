@@ -14,8 +14,12 @@
     gap: 0.5rem 1rem;
 }
 
-.knt-md-editor ::deep .rz-markdown-editor {
+.knt-md-editor-source {
     width: 100%;
+}
+
+.knt-md-editor ::deep .knt-md-editor-format {
+    width: 11rem;
 }
 
 .knt-md-editor-preview {
