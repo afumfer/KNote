@@ -1,14 +1,12 @@
-# KaNote manual
+# KNote manual
 
 ## Introduction 
 
-KaNote is a minimalist note and task manager. Tasks or notes are stored in databases and can be organized in thematic folders. These notes can contain different resources (images, attachments, ...), link various alarms and be enriched with custom attributes. KaNote also integrates a minimalist language with which you can automate tasks. In addition to the task manager, you can give KaNote other uses, for example a small content manager.
+KNote is a minimalist note and task manager. Tasks or notes are stored in databases and can be organized in thematic folders. These notes can contain different resources (images, attachments, ...), link various alarms and be enriched with custom attributes. KNote also integrates a minimalist language with which you can automate tasks. In addition to the task manager, you can give KNote other uses, for example a small content manager.
 
 Two different database engines are supported, Sqlite for personal tasks and SQL server for corporate use.
 
-KaNote also has two different front-ends, an old-school Windows desktop application (WinForm app) and a Web application (Blazor app). 
-
-TODO: ...
+KNote also has two different front-ends, an old-school Windows desktop application (WinForm app) and a Web application (Blazor app). 
 
 
 ## User's Guide 
@@ -20,31 +18,31 @@ The Windows desktop application keeps its configuration in the folder `%LocalApp
 | File | What it holds | When it changes |
 |---|---|---|
 | `KNoteData.config` | What you configure: how you sign in, repositories (their names are kept in their databases, see *Repositories*), AI providers, e-mail (SMTP) account, alarm and auto-save options, chat room (its server and your sign-in token) and ServerCOM settings. | Only when you change a setting. |
-| `KNoteState.config` | What KaNote remembers by itself: last user name you signed in with (never the password), last active folder, window positions and sizes, list layout, visible panels, the rows of the alarms panel, and the last AI provider and view options of the AI assistant. | As you use the application. |
+| `KNoteState.config` | What KNote remembers by itself: last user name you signed in with (never the password), last active folder, window positions and sizes, list layout, visible panels, the rows of the alarms panel, and the last AI provider and view options of the AI assistant. | As you use the application. |
 
-Deleting `KNoteState.config` only resets the window layout. Deleting `KNoteData.config` makes KaNote start as if it were the first run: your databases are not deleted, but the list of repositories and AI providers is lost.
+Deleting `KNoteState.config` only resets the window layout. Deleting `KNoteData.config` makes KNote start as if it were the first run: your databases are not deleted, but the list of repositories and AI providers is lost.
 
-**Passwords and API keys.** The e-mail account password, the API keys of the AI providers, the sign-in token of the chat room and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KaNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
+**Passwords and API keys.** The e-mail account password, the API keys of the AI providers, the sign-in token of the chat room and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
 
-**Backups.** Every time a file is saved, the previous version is kept next to it as `KNoteData.config.bak` / `KNoteState.config.bak`. If a file cannot be read, KaNote loads its `.bak` and tells you.
+**Backups.** Every time a file is saved, the previous version is kept next to it as `KNoteData.config.bak` / `KNoteState.config.bak`. If a file cannot be read, KNote loads its `.bak` and tells you.
 
 **Upgrading from a previous version.** Older versions kept everything in a single `KNoteData.config`. The first time this version starts, it converts that file automatically into the two files above, keeping all your values (passwords and API keys are kept, now encrypted). A copy of the old file, **without** passwords and API keys, is kept as `KNoteData.config.v1.bak`.
 
-**Going back to an older version.** Older versions cannot read the new files and will fail at startup. To go back: close KaNote, keep a copy of the current `KNoteData.config` somewhere else, rename `KNoteData.config.v1.bak` to `KNoteData.config`, delete `KNoteState.config`, start the older version and enter your passwords and API keys again.
+**Going back to an older version.** Older versions cannot read the new files and will fail at startup. To go back: close KNote, keep a copy of the current `KNoteData.config` somewhere else, rename `KNoteData.config.v1.bak` to `KNoteData.config`, delete `KNoteState.config`, start the older version and enter your passwords and API keys again.
 
 ### Signing in, users and roles (desktop app)
 
-**How you sign in.** By default the desktop app identifies you with your **Windows account**, without asking for anything (like the integrated security of SQL Server). In **Options → Sign in** you can choose **With a KNote user name and password** instead; the change applies the next time KaNote starts (it offers to restart). From then on, KaNote asks for a user name and password at startup, proposing the last user name used. The sign-in window also has a **Use my Windows account instead** link, which signs in with the Windows account and switches the option back.
+**How you sign in.** By default the desktop app identifies you with your **Windows account**, without asking for anything (like the integrated security of SQL Server). In **Options → Sign in** you can choose **With a KNote user name and password** instead; the change applies the next time KNote starts (it offers to restart). From then on, KNote asks for a user name and password at startup, proposing the last user name used. The sign-in window also has a **Use my Windows account instead** link, which signs in with the Windows account and switches the option back.
 
-**Each repository has its own users.** When KaNote starts, and whenever you link or create a repository, it checks your user in that repository:
+**Each repository has its own users.** When KNote starts, and whenever you link or create a repository, it checks your user in that repository:
 
 | Situation | What happens |
 |---|---|
 | You are registered there | The repository is linked. With a KNote user name, the password must also match. |
 | You are not registered there | The **Register user** window asks for your full name and e-mail (and a password). If you sign in with a KNote user name, the password is the one you signed in with, so the same credentials open all your repositories. |
-| Wrong password, user disabled, or registration cancelled | The repository is not available in this session. It stays in your configuration and is tried again at the next start; KaNote tells you why once the main window opens. |
+| Wrong password, user disabled, or registration cancelled | The repository is not available in this session. It stays in your configuration and is tried again at the next start; KNote tells you why once the main window opens. |
 
-If none of your repositories accepts you, KaNote lets you try again (signing in again with a KNote user name) or close.
+If none of your repositories accepts you, KNote lets you try again (signing in again with a KNote user name) or close.
 
 **Roles.** Your role is per repository, so you can be an Admin of your personal repository and a Guest in a shared one. The roles are hierarchical: each one can do everything the previous ones can, and more.
 
@@ -64,13 +62,13 @@ The options that don't belong to one repository (options, AI, chat, scripts, cre
 **Your profile and password.** **Tools → User** has two options, for any role:
 
 - **My profile ...**: your full name and e-mail, as they are in the active repository. Only an Admin can change your user name. Changing the e-mail asks for your current password. **Save it in every linked repository** (checked by default; shown when there is more than one) saves them in all your repositories.
-- **Change password ...**: your current password and the new one, twice. It changes in every linked repository, as each one keeps your user (signed in with a KNote user name, the same password must open all of them). If a repository refuses it (another password there, a disabled user...), the others change anyway and KaNote tells you which; signed in with a KNote user name, that repository won't open in your next session until it has the same password.
+- **Change password ...**: your current password and the new one, twice. It changes in every linked repository, as each one keeps your user (signed in with a KNote user name, the same password must open all of them). If a repository refuses it (another password there, a disabled user...), the others change anyway and KNote tells you which; signed in with a KNote user name, that repository won't open in your next session until it has the same password.
 
 A new password has at least 8 characters and can't be your user name, also when you register or an Admin sets it; the passwords set before keep working.
 
 **Forgot your password?** The link of the sign-in window explains who can set a new one, as your user is kept in each repository and the desktop app has no e-mail to send a link from: an Admin of each repository (**File → Repositories → Edit repository properties → Users**, edit the user, **Reset password**); the web app's **Forgot your password?**, if the repository is also used by the web app; or your Windows account, if your repositories have that user.
 
-**When an option isn't for your role.** All the menus stay available; choosing one your role doesn't allow just tells you which role it takes. A note opened by a Guest opens to be read: KaNote says so, and changes can't be saved. Automatic processes (reopening PostIts, alarms, script alarms) skip the repositories where your role doesn't allow them.
+**When an option isn't for your role.** All the menus stay available; choosing one your role doesn't allow just tells you which role it takes. A note opened by a Guest opens to be read: KNote says so, and changes can't be saved. Automatic processes (reopening PostIts, alarms, script alarms) skip the repositories where your role doesn't allow them.
 
 **Upgrading from a previous version.** The first time a database is opened with this version it is updated automatically: the role *Public* is renamed **Guest** (so users registered as *Public* can only read until an Admin raises them to Staff), the typo *ProjecManager* becomes **ProjectManager**, and the demo user `owner` is deleted if it was never used. Older versions don't know the new role names; keep a copy of a shared database before opening it with this version.
 
@@ -78,13 +76,13 @@ These permissions are enforced by the application. Somebody who connects to the 
 
 ### Repositories (desktop app)
 
-A repository is a KaNote database, SQLite or SQL Server. The **Repository** menu links an existing one, creates a new one or edits the properties of the selected one. Their **General** tab asks, in this order, for the type of database, where it is (directory and file for SQLite; server\instance and database for SQL Server), the resources container (its name, whether to save a copy of each resource in the database, its root folder and its root URL) and the repository's **Name**.
+A repository is a KNote database, SQLite or SQL Server. The **Repository** menu links an existing one, creates a new one or edits the properties of the selected one. Their **General** tab asks, in this order, for the type of database, where it is (directory and file for SQLite; server\instance and database for SQL Server), the resources container (its name, whether to save a copy of each resource in the database, its root folder and its root URL) and the repository's **Name**.
 
 **The name is kept in the database.** The name you see in the folders tree, the status bar and the window titles is stored in the repository's own database, so everybody who opens it, in the desktop app or in the web app, sees the same name. You give it when you create the repository, and an Admin of the repository can change it in **Edit repository properties**. It can't be the name of another repository you have linked. When you link an existing repository the name isn't asked: it is the one in its database.
 
-**One link per database.** Each database is also given an identifier of its own when it is created. A database that is already linked can't be linked again, nor can a copy of it (copying a database copies its identifier too): KaNote tells you which repository it is. If two repositories of your configuration turn out to be the same database, only the first one is opened, and KaNote tells you at startup.
+**One link per database.** Each database is also given an identifier of its own when it is created. A database that is already linked can't be linked again, nor can a copy of it (copying a database copies its identifier too): KNote tells you which repository it is. If two repositories of your configuration turn out to be the same database, only the first one is opened, and KNote tells you at startup.
 
-**SQLite files.** KaNote opens SQLite databases in WAL mode, so that several users of the web app, or several windows, can save at the same time. Next to the database file (e.g. `knote.db`) you will see two more files while it is in use, `knote.db-wal` and `knote.db-shm`: they belong to the database, don't delete them. To copy the database (a backup, another computer), close KaNote and the web server first, so that everything is in the `.db` file. Keep SQLite databases on a disk of the computer that uses them, not in a network folder.
+**SQLite files.** KNote opens SQLite databases in WAL mode, so that several users of the web app, or several windows, can save at the same time. Next to the database file (e.g. `knote.db`) you will see two more files while it is in use, `knote.db-wal` and `knote.db-shm`: they belong to the database, don't delete them. To copy the database (a backup, another computer), close KNote and the web server first, so that everything is in the `.db` file. Keep SQLite databases on a disk of the computer that uses them, not in a network folder.
 
 **Upgrading from a previous version.** Earlier versions kept the repository's name (its *alias*) in `KNoteData.config`. The first time this version opens a repository, its database takes that alias as its name (or, if there is none, the name of the database: the SQLite file or the SQL Server database), and the alias is removed from the file. A repository that can't be opened keeps its alias until it can. If another user already opened a shared database with this version, you see the name that user's alias gave it; an Admin can rename it.
 
@@ -92,9 +90,9 @@ A repository is a KaNote database, SQLite or SQL Server. The **Repository** menu
 
 **Refreshing the list.** **Edit → Refresh notes list** (`Ctrl+R`) reads the notes of the selected folder, search or filter again from the database and sorts them again. Use it after changing the field the list is ordered by (the priority, for instance): an edited note is updated in the list, but it isn't moved to its new place until the list is refreshed. The selected note stays selected.
 
-**All the notes of a repository.** Clicking a repository's node in the folders tree (the one with its name in brackets) lists all of its notes. As that can take a long time in a large database, KaNote asks first: **Cancel** leaves the notes list and the note viewer empty. Refreshing the list you have already loaded doesn't ask again.
+**All the notes of a repository.** Clicking a repository's node in the folders tree (the one with its name in brackets) lists all of its notes. As that can take a long time in a large database, KNote asks first: **Cancel** leaves the notes list and the note viewer empty. Refreshing the list you have already loaded doesn't ask again.
 
-**Safe notes.** A note's description can carry HTML (written in the HTML editor or in Markdown). To protect whoever reads it, KaNote shows it without what could run code on its own (scripts, `javascript:` links, forms...), both in the desktop app and in the web app; the formatting (fonts, colors, tables, images, links) is kept.
+**Safe notes.** A note's description can carry HTML (written in the HTML editor or in Markdown). To protect whoever reads it, KNote shows it without what could run code on its own (scripts, `javascript:` links, forms...), both in the desktop app and in the web app; the formatting (fonts, colors, tables, images, links) is kept.
 
 ### Diagrams in notes
 
@@ -114,8 +112,8 @@ Both apps draw it wherever the note is shown as it looks: in the desktop app, th
 - If the description has an error, the block is shown as text, so you can see it and fix it.
 - Diagrams follow the light or dark mode (in the web app they change with the theme). A note with colors of its own, shown on a white sheet in the dark themes of the web app, keeps its diagrams light.
 - They are not drawn in the desktop app's HTML editor and Markdown view (they are text there), in prints and PDFs, or in the answers of the AI assistant and the messages of the chat room.
-- No Internet connection is needed: Mermaid comes with KaNote. A note with diagrams takes a little longer to show (about half a second); the others are not affected.
-- They are safe to show: Mermaid draws them with its strict security level and, in the desktop app, the page of a note with diagrams can run only KaNote's own scripts (a Content Security Policy).
+- No Internet connection is needed: Mermaid comes with KNote. A note with diagrams takes a little longer to show (about half a second); the others are not affected.
+- They are safe to show: Mermaid draws them with its strict security level and, in the desktop app, the page of a note with diagrams can run only KNote's own scripts (a Content Security Policy).
 
 ### Printing and exporting (desktop app)
 
@@ -124,7 +122,7 @@ The **File** menu of the management window has these options (the three prints g
 | Option | Result |
 |---|---|
 | **Print > Notes list ...** | The list as a table, in landscape, headed by the folder path or a summary of the search/filter. All the visible columns fit the page width. The **Print** button of the toolbar does the same. |
-| **Print > Notes list as book ...** | A book: a cover, a table of contents with page numbers and one chapter per note, in the order of the list. The chapter title is the note's topic and its text the note's description. A book of more than 100 notes can take a long time to generate, so KaNote asks first. |
+| **Print > Notes list as book ...** | A book: a cover, a table of contents with page numbers and one chapter per note, in the order of the list. The chapter title is the note's topic and its text the note's description. A book of more than 100 notes can take a long time to generate, so KNote asks first. |
 | **Print > Selected note details ...** | Everything about the selected note, as saved: properties, description, attributes, resources (with a thumbnail of the images), tasks and trace notes. The note's script and its alarms are not printed. |
 | **Export notes list to CSV ...** | The same content as the printed list, as a CSV file. |
 
@@ -174,7 +172,7 @@ The **Options** menu has the rest:
 | **Show model info (tokens, time)** | Shows or hides, below each answer of the chat view, the tokens and the time it took. The Markdown view always has them, in the marker of each answer. |
 | **Manage models ...** | Adds, changes or removes the AI models (providers) you can choose. |
 
-Sending a question keeps the view you are in. KaNote remembers the view and the **Show model info** option for the next time you open the assistant. The assistant opened from the menu also remembers its window's position and size, the width of the **Sessions** panel and the height of the question box. The tokens are the ones reported by the AI provider; when a provider doesn't report them, they are estimated (the chat says so). If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. If an answer reaches the maximum length a model can write in one answer, the chat view ends it with a notice saying it was cut (shown even with **Show model info** off): ask the assistant to continue. **New session**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation; the current one is already saved.
+Sending a question keeps the view you are in. KNote remembers the view and the **Show model info** option for the next time you open the assistant. The assistant opened from the menu also remembers its window's position and size, the width of the **Sessions** panel and the height of the question box. The tokens are the ones reported by the AI provider; when a provider doesn't report them, they are estimated (the chat says so). If an answer fails halfway, what arrived of it is marked as failed and is not part of the conversation: it disappears when you send the next question. If an answer reaches the maximum length a model can write in one answer, the chat view ends it with a notice saying it was cut (shown even with **Show model info** off): ask the assistant to continue. **New session**, changing the AI provider or choosing a prompt of the catalog start a new, empty conversation; the current one is already saved.
 
 ### AI assistant sessions
 
@@ -182,9 +180,9 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 
 **Where they are kept.** Each session is a note of the repository you are working in, of the note type **`@ChatSessions`**, in the folder **AI Assistant sessions**. The note's topic is the first line of your first question, its description is the conversation (as the Markdown view shows it), its attributes **AiProvider** and **AiModel** say which AI model answered, and a task assigned to you, starting when the session began, links it to you. The note type, its two attributes and the folder are created the first time you open the assistant in a repository that doesn't have them.
 
-**When they are saved.** After every answer. If saving fails, KaNote tries again before you leave the conversation (a new session, another session, another provider, closing the window) and, if it still can't, asks you whether to discard its last messages.
+**When they are saved.** After every answer. If saving fails, KNote tries again before you leave the conversation (a new session, another session, another provider, closing the window) and, if it still can't, asks you whether to discard its last messages.
 
-**Going back to a session.** The **Sessions** panel lists your sessions, the most recent first; choose one to see it again and go on with it. It continues with the AI model it was held with; if that model is no longer configured, it continues with your default one and KaNote tells you so. The panel only lists your own sessions, and only you can open or continue them from the assistant.
+**Going back to a session.** The **Sessions** panel lists your sessions, the most recent first; choose one to see it again and go on with it. It continues with the AI model it was held with; if that model is no longer configured, it continues with your default one and KNote tells you so. The panel only lists your own sessions, and only you can open or continue them from the assistant.
 
 **Privacy.** Sessions are ordinary notes: anybody who can browse the **AI Assistant sessions** folder of a shared repository can open them as any other note. Don't write in a conversation anything you wouldn't write in a note of that repository.
 
@@ -192,7 +190,7 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 
 ### Chat room
 
-The chat room lets the users of a KaNote web server talk in **threads**: each thread is a conversation about one topic, and every user with the Staff role or a higher one in that server can read it, join it and write in it. The web app and the desktop app share the same chat room, the one of the web server: a message written in one appears at once in the other.
+The chat room lets the users of a KNote web server talk in **threads**: each thread is a conversation about one topic, and every user with the Staff role or a higher one in that server can read it, join it and write in it. The web app and the desktop app share the same chat room, the one of the web server: a message written in one appears at once in the other.
 
 **Where threads are kept.** Each thread is a note of the web server's repository, of the note type **`@KNoteChatRoom`**, in the folder **KNote Chat Room**; the note type and the folder are created the first time the chat room is used. The note's topic is the thread's topic and its description is the conversation, in Markdown, with a hidden marker before each message (`<!-- knt-chat:message {...} -->`) that holds who wrote it and when. Whoever creates a thread, writes in it or sends an image to it gets a task in its note that links them to it: they are its participants. Each message is saved as soon as it is sent.
 
@@ -208,13 +206,13 @@ The chat room lets the users of a KaNote web server talk in **threads**: each th
 
 ### Chat room (desktop app)
 
-**Signing in to the chat room's server.** The desktop app works with its own repositories, so it signs in once to the web server of the chat room: in **Options**, tab **Chat room**, enter the **chat hub url** (the address of the web server ending in `/chathub`, e.g. `https://server/KNote/chathub`), your **user name** and **password** in that server, and click **Sign in**. KaNote checks them and connects to test them; then it keeps only the sign-in token the server gives (encrypted, like the other secrets of `KNoteData.config`) and forgets the password. **Accept** the options to keep it. The token lasts a year: if the server refuses it (it expired, your password or your role there changed...), sign in again. **Sign out** forgets it, and so does changing the url.
+**Signing in to the chat room's server.** The desktop app works with its own repositories, so it signs in once to the web server of the chat room: in **Options**, tab **Chat room**, enter the **chat hub url** (the address of the web server ending in `/chathub`, e.g. `https://server/KNote/chathub`), your **user name** and **password** in that server, and click **Sign in**. KNote checks them and connects to test them; then it keeps only the sign-in token the server gives (encrypted, like the other secrets of `KNoteData.config`) and forgets the password. **Accept** the options to keep it. The token lasts a year: if the server refuses it (it expired, your password or your role there changed...), sign in again. **Sign out** forgets it, and so does changing the url.
 
-**The window.** **Chat room ...** in the menu opens it. When the app starts, it connects in the background with the window hidden, and shows the window when somebody else writes in a thread you follow; closing the window only hides it. On the left, the conversation of the thread shown and, below it, the message box; on the right, the **Threads** list (**New**: the messages that arrived since you last saw it; **Activity**: its last message). **New thread** asks for its topic; **Stop following**, above the conversation, also shows who is in the thread now; **Image ...** chooses an image to send. The status bar shows the connection, your user and the server. The **Actions** menu repeats them: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** and **Reconnect**. KaNote remembers the window's position and size, the width of the threads panel and the height of the message box.
+**The window.** **Chat room ...** in the menu opens it. When the app starts, it connects in the background with the window hidden, and shows the window when somebody else writes in a thread you follow; closing the window only hides it. On the left, the conversation of the thread shown and, below it, the message box; on the right, the **Threads** list (**New**: the messages that arrived since you last saw it; **Activity**: its last message). **New thread** asks for its topic; **Stop following**, above the conversation, also shows who is in the thread now; **Image ...** chooses an image to send. The status bar shows the connection, your user and the server. The **Actions** menu repeats them: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** and **Reconnect**. KNote remembers the window's position and size, the width of the threads panel and the height of the message box.
 
 **Images.** `Ctrl+V` in the message box sends the image of the clipboard (a screenshot, for example) or the image files copied in the file explorer; image files can also be dropped on the message box, or chosen with **Image ...**.
 
-If the connection fails when the app starts, KaNote tells you without interrupting and stops connecting at startup until you sign in again from **Options**.
+If the connection fails when the app starts, KNote tells you without interrupting and stops connecting at startup until you sign in again from **Options**.
 
 ### Chat room (web app)
 
@@ -261,7 +259,7 @@ The **Print/Export** menu of the **Tree panel**, **Notes filter** and **Quick se
 | Option | Result |
 |---|---|
 | **Print list ...** | The list as a table, in landscape, headed by the folder path or a summary of the search/filter. |
-| **Print as book ...** | A book: a cover, a table of contents and one chapter per note, in the order of the list. The chapter title is the note's topic and its text the note's description. The table of contents links to the chapters but has no page numbers: the browser can't know them before printing. A book of more than 100 notes can take a long time to generate, so KaNote asks first. |
+| **Print as book ...** | A book: a cover, a table of contents and one chapter per note, in the order of the list. The chapter title is the note's topic and its text the note's description. The table of contents links to the chapters but has no page numbers: the browser can't know them before printing. A book of more than 100 notes can take a long time to generate, so KNote asks first. |
 | **Print note details ...** | Everything about the selected note, as saved: properties, description, attributes, resources (with a thumbnail of the images), tasks and trace notes. Available when a note is selected. |
 | **Export to CSV ...** | The same content as the printed list, as a CSV file that the browser downloads. |
 
@@ -307,9 +305,9 @@ Once you are signed in, your user name in the top bar opens your menu (on a phon
 
 Write a question in the box at the bottom and click the send button (or press `Ctrl+Enter`). The answer appears as it is written; while it arrives you can stop it with the stop button, and then the question goes back to the box. An answer that fails or that you stop is not part of the conversation and is not saved.
 
-The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KaNote tells you, and the chat shows a link that opens it in its edit window.
+The assistant can search your notes and create tasks, as in the desktop app. A note it creates is saved in the repository's home folder: KNote tells you, and the chat shows a link that opens it in its edit window.
 
-Changing the AI model of a conversation that has already started begins a new conversation (KaNote asks first). For your safety, any HTML that an answer contains is shown as text, never as part of the page.
+Changing the AI model of a conversation that has already started begins a new conversation (KNote asks first). For your safety, any HTML that an answer contains is shown as text, never as part of the page.
 
 **In its own window.** The button that opens it in a new window moves the assistant, with the session you are in, to a window of its own, without the app's menus; the main window goes back to Home. It can't be used while an answer is arriving. There is only one assistant window: opening it again brings it to the front. Closing that window while an answer is arriving, or when the conversation could not be saved, asks first.
 
@@ -374,4 +372,4 @@ Without `PublicBaseUrl`, `Email:Host` or `Email:FromAddress`, password reset by 
 
 **Gmail.** Gmail doesn't accept the account's password: turn on 2-Step Verification in your Google account, create an *app password* at <https://myaccount.google.com/apppasswords> and use its 16 letters, without spaces, as `Email:Password`. `FromAddress` must be the account's address. Changing the Google password revokes the app passwords. The same app password works in the desktop app (**Options → Email**).
 
-TODO: ...
+(This program is under construction and the documentation isn't ready yet. Thanks for your patience!)

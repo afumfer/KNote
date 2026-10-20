@@ -107,7 +107,7 @@ public static class KntConst
         };
 
         StringBuilder info = new();
-        info.Append(@"Copyright (C) 2021-2025 Armando Fumero ");
+        info.Append(@"Copyright (C) 2021-2026 Armando Fumero ");
         info.Append(Environment.NewLine + Environment.NewLine);
         info.Append(@"This program is free software; you can redistribute it and/or modify ");
         info.Append(@"it under the terms of the GNU General Public License as published by ");

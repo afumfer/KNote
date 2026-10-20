@@ -1,14 +1,12 @@
-# Manual KaNote
+# Manual KNote
 
 ## Introducción
 
-KaNote es un gestor de notas y tareas minimalista. Las tareas o notas se almacenan en bases de datos y se pueden organizar en carpetas temáticas. Estas notas pueden contener diferentes recursos (imágenes, archivos adjuntos, ...), vincular diversas alarmas y enriquecerse con atributos personalizados. KaNote integra también un lenguaje minimalista con el que puedes automatizar tareas. Además de gestor de tareas puedes darle otros usos a KaNote, por ejemplo un pequeño gestor de contenido. 
+KNote es un gestor de notas y tareas minimalista. Las tareas o notas se almacenan en bases de datos y se pueden organizar en carpetas temáticas. Estas notas pueden contener diferentes recursos (imágenes, archivos adjuntos, ...), vincular diversas alarmas y enriquecerse con atributos personalizados. KNote integra también un lenguaje minimalista con el que puedes automatizar tareas. Además de gestor de tareas puedes darle otros usos a KNote, por ejemplo un pequeño gestor de contenido. 
 
 Se soportan dos motores diferentes de bases de datos, Sqlite para tareas personales y SQL server para uso corporativo. 
 
-KaNote tiene también dos front-end diferentes, una aplicación windows de escritorio a la vieja escuela (WinForm app) y un aplicativo Web (Blazor app).
-
-TODO: ...
+KNote tiene también dos front-end diferentes, una aplicación windows de escritorio a la vieja escuela (WinForm app) y un aplicativo Web (Blazor app).
 
 
 ## Guía de usuario
@@ -20,31 +18,31 @@ La aplicación de escritorio de Windows guarda su configuración en la carpeta `
 | Fichero | Qué contiene | Cuándo cambia |
 |---|---|---|
 | `KNoteData.config` | Lo que tú configuras: cómo entras, repositorios (sus nombres se guardan en sus bases de datos, ver *Repositorios*), proveedores de IA, cuenta de correo (SMTP), opciones de alarmas y autoguardado, chat room (su servidor y tu token de acceso) y ajustes de ServerCOM. | Solo cuando cambias un ajuste. |
-| `KNoteState.config` | Lo que KaNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), última carpeta activa, posición y tamaño de las ventanas, disposición de las listas, paneles visibles, las filas del panel de alarmas, y el último proveedor de IA y las opciones de vista del asistente de IA. | Mientras usas la aplicación. |
+| `KNoteState.config` | Lo que KNote recuerda por sí mismo: último usuario con el que entraste (nunca la contraseña), última carpeta activa, posición y tamaño de las ventanas, disposición de las listas, paneles visibles, las filas del panel de alarmas, y el último proveedor de IA y las opciones de vista del asistente de IA. | Mientras usas la aplicación. |
 
-Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borrar `KNoteData.config` hace que KaNote arranque como si fuera la primera vez: tus bases de datos no se borran, pero se pierde la lista de repositorios y de proveedores de IA.
+Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borrar `KNoteData.config` hace que KNote arranque como si fuera la primera vez: tus bases de datos no se borran, pero se pierde la lista de repositorios y de proveedores de IA.
 
-**Contraseñas y API keys.** La contraseña de la cuenta de correo, las API keys de los proveedores de IA, el token de acceso del chat room y la contraseña incluida en la cadena de conexión de un repositorio (autenticación SQL) se guardan cifradas con la protección de datos de Windows, ligadas a tu usuario de Windows y a este equipo. Las cadenas de conexión sin contraseña (SQLite, autenticación de Windows) siguen siendo legibles. Si copias `KNoteData.config` a otro equipo o usuario, esos secretos no se pueden descifrar: KaNote te indica al arrancar cuáles debes volver a introducir, y el resto se carga con normalidad. Un secreto escrito en texto plano a mano en el fichero se acepta y se cifra la siguiente vez que se guarde.
+**Contraseñas y API keys.** La contraseña de la cuenta de correo, las API keys de los proveedores de IA, el token de acceso del chat room y la contraseña incluida en la cadena de conexión de un repositorio (autenticación SQL) se guardan cifradas con la protección de datos de Windows, ligadas a tu usuario de Windows y a este equipo. Las cadenas de conexión sin contraseña (SQLite, autenticación de Windows) siguen siendo legibles. Si copias `KNoteData.config` a otro equipo o usuario, esos secretos no se pueden descifrar: KNote te indica al arrancar cuáles debes volver a introducir, y el resto se carga con normalidad. Un secreto escrito en texto plano a mano en el fichero se acepta y se cifra la siguiente vez que se guarde.
 
-**Copias de seguridad.** Cada vez que se guarda un fichero, la versión anterior se conserva a su lado como `KNoteData.config.bak` / `KNoteState.config.bak`. Si un fichero no se puede leer, KaNote carga su `.bak` y te avisa.
+**Copias de seguridad.** Cada vez que se guarda un fichero, la versión anterior se conserva a su lado como `KNoteData.config.bak` / `KNoteState.config.bak`. Si un fichero no se puede leer, KNote carga su `.bak` y te avisa.
 
 **Actualización desde una versión anterior.** Las versiones anteriores guardaban todo en un único `KNoteData.config`. La primera vez que arranca esta versión, convierte ese fichero automáticamente en los dos anteriores, conservando todos tus valores (las contraseñas y API keys se conservan, ahora cifradas). Se guarda una copia del fichero antiguo, **sin** contraseñas ni API keys, como `KNoteData.config.v1.bak`.
 
-**Volver a una versión anterior.** Las versiones anteriores no pueden leer los ficheros nuevos y fallarán al arrancar. Para volver: cierra KaNote, guarda en otro sitio una copia del `KNoteData.config` actual, renombra `KNoteData.config.v1.bak` a `KNoteData.config`, borra `KNoteState.config`, arranca la versión anterior y vuelve a introducir tus contraseñas y API keys.
+**Volver a una versión anterior.** Las versiones anteriores no pueden leer los ficheros nuevos y fallarán al arrancar. Para volver: cierra KNote, guarda en otro sitio una copia del `KNoteData.config` actual, renombra `KNoteData.config.v1.bak` a `KNoteData.config`, borra `KNoteState.config`, arranca la versión anterior y vuelve a introducir tus contraseñas y API keys.
 
 ### Acceso, usuarios y roles (aplicación de escritorio)
 
-**Cómo entras.** Por defecto la aplicación de escritorio te identifica con tu **cuenta de Windows**, sin pedirte nada (como la seguridad integrada de SQL Server). En **Options → Sign in** puedes elegir en su lugar **With a KNote user name and password**; el cambio se aplica la próxima vez que arranque KaNote (te ofrece reiniciar). A partir de entonces, KaNote pide un usuario y una contraseña al arrancar, proponiendo el último usuario usado. La ventana de acceso tiene también un enlace **Use my Windows account instead**, que entra con la cuenta de Windows y vuelve a dejar la opción como estaba.
+**Cómo entras.** Por defecto la aplicación de escritorio te identifica con tu **cuenta de Windows**, sin pedirte nada (como la seguridad integrada de SQL Server). En **Options → Sign in** puedes elegir en su lugar **With a KNote user name and password**; el cambio se aplica la próxima vez que arranque KNote (te ofrece reiniciar). A partir de entonces, KNote pide un usuario y una contraseña al arrancar, proponiendo el último usuario usado. La ventana de acceso tiene también un enlace **Use my Windows account instead**, que entra con la cuenta de Windows y vuelve a dejar la opción como estaba.
 
-**Cada repositorio tiene sus propios usuarios.** Al arrancar KaNote, y siempre que vinculas o creas un repositorio, se comprueba tu usuario en ese repositorio:
+**Cada repositorio tiene sus propios usuarios.** Al arrancar KNote, y siempre que vinculas o creas un repositorio, se comprueba tu usuario en ese repositorio:
 
 | Situación | Qué pasa |
 |---|---|
 | Estás registrado en él | El repositorio se vincula. Con un usuario de KNote, la contraseña también tiene que coincidir. |
 | No estás registrado en él | La ventana **Register user** te pide el nombre completo y el correo (y una contraseña). Si entras con un usuario de KNote, la contraseña es la del acceso, para que las mismas credenciales abran todos tus repositorios. |
-| Contraseña incorrecta, usuario deshabilitado o registro cancelado | El repositorio no está disponible en esta sesión. Se mantiene en tu configuración y se vuelve a intentar en el siguiente arranque; KaNote te dice el motivo al abrirse la ventana principal. |
+| Contraseña incorrecta, usuario deshabilitado o registro cancelado | El repositorio no está disponible en esta sesión. Se mantiene en tu configuración y se vuelve a intentar en el siguiente arranque; KNote te dice el motivo al abrirse la ventana principal. |
 
-Si ninguno de tus repositorios te acepta, KaNote te deja reintentar (volviendo a pedir el usuario, si entras con uno de KNote) o cerrar.
+Si ninguno de tus repositorios te acepta, KNote te deja reintentar (volviendo a pedir el usuario, si entras con uno de KNote) o cerrar.
 
 **Roles.** Tu rol es por repositorio, así que puedes ser Admin de tu repositorio personal y Guest en uno compartido. Los roles son jerárquicos: cada uno puede hacer todo lo de los anteriores, y algo más.
 
@@ -64,13 +62,13 @@ Las opciones que no pertenecen a un repositorio (opciones, IA, chat, scripts, cr
 **Tu perfil y tu contraseña.** **Tools → User** tiene dos opciones, para cualquier rol:
 
 - **My profile ...**: tu nombre completo y tu correo, tal como están en el repositorio activo. Solo un Admin puede cambiar tu nombre de usuario. Cambiar el correo pide tu contraseña actual. **Save it in every linked repository** (marcada por defecto; aparece cuando hay más de uno) los guarda en todos tus repositorios.
-- **Change password ...**: tu contraseña actual y la nueva, dos veces. Cambia en todos los repositorios vinculados, porque cada uno guarda tu usuario (si entras con un usuario de KNote, la misma contraseña tiene que abrirlos todos). Si un repositorio la rechaza (otra contraseña allí, un usuario deshabilitado...), los demás cambian igualmente y KaNote te dice cuál; si entras con un usuario de KNote, ese repositorio no se abrirá en tu próxima sesión hasta que tenga la misma contraseña.
+- **Change password ...**: tu contraseña actual y la nueva, dos veces. Cambia en todos los repositorios vinculados, porque cada uno guarda tu usuario (si entras con un usuario de KNote, la misma contraseña tiene que abrirlos todos). Si un repositorio la rechaza (otra contraseña allí, un usuario deshabilitado...), los demás cambian igualmente y KNote te dice cuál; si entras con un usuario de KNote, ese repositorio no se abrirá en tu próxima sesión hasta que tenga la misma contraseña.
 
 Una contraseña nueva tiene al menos 8 caracteres y no puede ser tu nombre de usuario, también al registrarte o cuando la pone un Admin; las contraseñas puestas antes siguen valiendo.
 
 **¿Olvidaste tu contraseña?** El enlace **Forgot your password?** de la ventana de acceso explica quién puede ponerte una nueva, ya que tu usuario está en cada repositorio y la aplicación de escritorio no tiene un correo desde el que enviar un enlace: un Admin de cada repositorio (**File → Repositories → Edit repository properties → Users**, editar el usuario, **Reset password**); el **Forgot your password?** de la aplicación Web, si el repositorio también lo usa la Web; o tu cuenta de Windows, si tus repositorios tienen ese usuario.
 
-**Cuando una opción no es para tu rol.** Todos los menús siguen disponibles; elegir uno que tu rol no permite solo te indica qué rol hace falta. Una nota abierta por un Guest se abre para leerla: KaNote lo avisa y los cambios no se pueden guardar. Los procesos automáticos (reabrir post-its, alarmas, alarmas de script) se saltan los repositorios donde tu rol no los permite.
+**Cuando una opción no es para tu rol.** Todos los menús siguen disponibles; elegir uno que tu rol no permite solo te indica qué rol hace falta. Una nota abierta por un Guest se abre para leerla: KNote lo avisa y los cambios no se pueden guardar. Los procesos automáticos (reabrir post-its, alarmas, alarmas de script) se saltan los repositorios donde tu rol no los permite.
 
 **Actualización desde una versión anterior.** La primera vez que se abre una base de datos con esta versión se actualiza automáticamente: el rol *Public* pasa a llamarse **Guest** (así que los usuarios registrados como *Public* solo pueden leer hasta que un Admin los sube a Staff), la errata *ProjecManager* pasa a **ProjectManager** y el usuario de ejemplo `owner` se borra si nunca se usó. Las versiones anteriores no conocen los nombres nuevos de los roles; guarda una copia de una base de datos compartida antes de abrirla con esta versión.
 
@@ -78,13 +76,13 @@ Estos permisos los aplica la aplicación. Quien se conecte a la base de datos di
 
 ### Repositorios (aplicación de escritorio)
 
-Un repositorio es una base de datos de KaNote, SQLite o SQL Server. El menú **Repository** vincula uno existente, crea uno nuevo o edita las propiedades del seleccionado. Su pestaña **General** pide, en este orden, el tipo de base de datos, dónde está (directorio y fichero en SQLite; servidor\instancia y base de datos en SQL Server), el contenedor de recursos (su nombre, si se guarda una copia de cada recurso en la base de datos, su carpeta raíz y su URL raíz) y el **Name** (nombre) del repositorio.
+Un repositorio es una base de datos de KNote, SQLite o SQL Server. El menú **Repository** vincula uno existente, crea uno nuevo o edita las propiedades del seleccionado. Su pestaña **General** pide, en este orden, el tipo de base de datos, dónde está (directorio y fichero en SQLite; servidor\instancia y base de datos en SQL Server), el contenedor de recursos (su nombre, si se guarda una copia de cada recurso en la base de datos, su carpeta raíz y su URL raíz) y el **Name** (nombre) del repositorio.
 
 **El nombre se guarda en la base de datos.** El nombre que ves en el árbol de carpetas, la barra de estado y los títulos de las ventanas se guarda en la propia base de datos del repositorio, así que todo el que la abre, en la aplicación de escritorio o en la Web, ve el mismo nombre. Lo das al crear el repositorio, y un Admin del repositorio puede cambiarlo en **Edit repository properties**. No puede ser el nombre de otro repositorio que tengas vinculado. Al vincular un repositorio existente no se pide el nombre: es el de su base de datos.
 
-**Un vínculo por base de datos.** Cada base de datos recibe además un identificador propio al crearse. Una base de datos ya vinculada no se puede volver a vincular, ni tampoco una copia suya (copiar una base de datos copia también su identificador): KaNote te dice qué repositorio es. Si dos repositorios de tu configuración resultan ser la misma base de datos, solo se abre el primero, y KaNote te avisa al arrancar.
+**Un vínculo por base de datos.** Cada base de datos recibe además un identificador propio al crearse. Una base de datos ya vinculada no se puede volver a vincular, ni tampoco una copia suya (copiar una base de datos copia también su identificador): KNote te dice qué repositorio es. Si dos repositorios de tu configuración resultan ser la misma base de datos, solo se abre el primero, y KNote te avisa al arrancar.
 
-**Ficheros SQLite.** KaNote abre las bases de datos SQLite en modo WAL, para que varios usuarios de la aplicación Web, o varias ventanas, puedan guardar a la vez. Junto al fichero de la base de datos (p. ej. `knote.db`) verás otros dos mientras está en uso, `knote.db-wal` y `knote.db-shm`: son parte de la base de datos, no los borres. Para copiar la base de datos (una copia de seguridad, otro equipo), cierra antes KaNote y el servidor Web, así todo queda en el fichero `.db`. Guarda las bases de datos SQLite en un disco del equipo que las usa, no en una carpeta de red.
+**Ficheros SQLite.** KNote abre las bases de datos SQLite en modo WAL, para que varios usuarios de la aplicación Web, o varias ventanas, puedan guardar a la vez. Junto al fichero de la base de datos (p. ej. `knote.db`) verás otros dos mientras está en uso, `knote.db-wal` y `knote.db-shm`: son parte de la base de datos, no los borres. Para copiar la base de datos (una copia de seguridad, otro equipo), cierra antes KNote y el servidor Web, así todo queda en el fichero `.db`. Guarda las bases de datos SQLite en un disco del equipo que las usa, no en una carpeta de red.
 
 **Actualización desde una versión anterior.** Las versiones anteriores guardaban el nombre del repositorio (su *alias*) en `KNoteData.config`. La primera vez que esta versión abre un repositorio, su base de datos toma ese alias como nombre (o, si no lo hay, el nombre de la base de datos: el fichero SQLite o la base de datos de SQL Server), y el alias se quita del fichero. Un repositorio que no se puede abrir conserva su alias hasta que se pueda. Si otro usuario ya abrió una base de datos compartida con esta versión, ves el nombre que le dio su alias; un Admin puede cambiarlo.
 
@@ -92,9 +90,9 @@ Un repositorio es una base de datos de KaNote, SQLite o SQL Server. El menú **R
 
 **Refrescar la lista.** **Edit → Refresh notes list** (`Ctrl+R`) vuelve a leer de la base de datos las notas de la carpeta, búsqueda o filtro seleccionados y las ordena de nuevo. Úsalo después de cambiar el campo por el que se ordena la lista (la prioridad, por ejemplo): una nota editada se actualiza en la lista, pero no se mueve a su nuevo sitio hasta que se refresca la lista. La nota seleccionada sigue seleccionada.
 
-**Todas las notas de un repositorio.** Al pulsar el nodo de un repositorio en el árbol de carpetas (el de su nombre entre corchetes) se listan todas sus notas. Como puede tardar en una base de datos grande, KaNote pregunta antes: **Cancelar** deja vacíos la lista de notas y el visor de la nota. Refrescar la lista que ya has cargado no vuelve a preguntar.
+**Todas las notas de un repositorio.** Al pulsar el nodo de un repositorio en el árbol de carpetas (el de su nombre entre corchetes) se listan todas sus notas. Como puede tardar en una base de datos grande, KNote pregunta antes: **Cancelar** deja vacíos la lista de notas y el visor de la nota. Refrescar la lista que ya has cargado no vuelve a preguntar.
 
-**Notas seguras.** La descripción de una nota puede llevar HTML (escrito en el editor HTML o en Markdown). Para proteger a quien la lee, KaNote la muestra sin lo que podría ejecutar código por sí solo (scripts, enlaces `javascript:`, formularios...), tanto en la aplicación de escritorio como en la Web; el formato (fuentes, colores, tablas, imágenes, enlaces) se conserva.
+**Notas seguras.** La descripción de una nota puede llevar HTML (escrito en el editor HTML o en Markdown). Para proteger a quien la lee, KNote la muestra sin lo que podría ejecutar código por sí solo (scripts, enlaces `javascript:`, formularios...), tanto en la aplicación de escritorio como en la Web; el formato (fuentes, colores, tablas, imágenes, enlaces) se conserva.
 
 ### Diagramas en las notas
 
@@ -114,8 +112,8 @@ Las dos aplicaciones lo dibujan allí donde la nota se muestra tal como se ve: e
 - Si la descripción tiene un error, el bloque se muestra como texto, para que puedas verlo y corregirlo.
 - Los diagramas siguen el modo claro u oscuro (en la Web cambian con el tema). Una nota con colores propios, que en los temas oscuros de la Web se muestra sobre una hoja blanca, mantiene claros sus diagramas.
 - No se dibujan en el editor HTML ni en la vista Markdown de la aplicación de escritorio (ahí son texto), en las impresiones y los PDF, ni en las respuestas del asistente de IA y los mensajes del chat room.
-- No hace falta conexión a Internet: Mermaid viene con KaNote. Una nota con diagramas tarda algo más en mostrarse (alrededor de medio segundo); las demás no se ven afectadas.
-- Son seguros de mostrar: Mermaid los dibuja con su nivel de seguridad estricto y, en la aplicación de escritorio, la página de una nota con diagramas solo puede ejecutar los scripts propios de KaNote (una política de seguridad de contenido, CSP).
+- No hace falta conexión a Internet: Mermaid viene con KNote. Una nota con diagramas tarda algo más en mostrarse (alrededor de medio segundo); las demás no se ven afectadas.
+- Son seguros de mostrar: Mermaid los dibuja con su nivel de seguridad estricto y, en la aplicación de escritorio, la página de una nota con diagramas solo puede ejecutar los scripts propios de KNote (una política de seguridad de contenido, CSP).
 
 ### Impresión y exportación (aplicación de escritorio)
 
@@ -124,7 +122,7 @@ El menú **File** de la ventana de gestión tiene estas opciones (las tres impre
 | Opción | Resultado |
 |---|---|
 | **Print > Notes list ...** | La lista como una tabla, en horizontal, encabezada por la ruta de la carpeta o por un resumen de la búsqueda o el filtro. Todas las columnas visibles caben en el ancho de la página. El botón **Print** de la barra de herramientas hace lo mismo. |
-| **Print > Notes list as book ...** | Un libro: portada, índice con números de página y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. Un libro de más de 100 notas puede tardar mucho en generarse, así que KaNote pregunta antes. |
+| **Print > Notes list as book ...** | Un libro: portada, índice con números de página y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. Un libro de más de 100 notas puede tardar mucho en generarse, así que KNote pregunta antes. |
 | **Print > Selected note details ...** | Toda la información de la nota seleccionada, tal como está guardada: propiedades, descripción, atributos, recursos (con una miniatura de las imágenes), tareas y notas trazadas. No se imprimen ni el script de la nota ni sus alarmas. |
 | **Export notes list to CSV ...** | El mismo contenido que la lista impresa, como fichero CSV. |
 
@@ -174,7 +172,7 @@ El menú **Options** tiene el resto:
 | **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta de la vista de chat, los tokens y el tiempo que tardó. La vista Markdown los tiene siempre, en la marca de cada respuesta. |
 | **Manage models ...** | Añade, cambia o quita los modelos de IA (proveedores) que puedes elegir. |
 
-Enviar una pregunta mantiene la vista en la que estás. KaNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. El asistente abierto desde el menú recuerda también la posición y el tamaño de su ventana, el ancho del panel **Sessions** y la altura del cuadro de la pregunta. Los tokens son los que informa el proveedor de IA; cuando un proveedor no los informa, se estiman (el chat lo indica). Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. Si una respuesta llega a la longitud máxima que un modelo puede escribir en una respuesta, la vista de chat la termina con un aviso de que se ha cortado (visible aunque **Show model info** esté desactivada): pide al asistente que continúe. **New session**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía; la actual ya está guardada.
+Enviar una pregunta mantiene la vista en la que estás. KNote recuerda la vista y la opción **Show model info** para la próxima vez que abras el asistente. El asistente abierto desde el menú recuerda también la posición y el tamaño de su ventana, el ancho del panel **Sessions** y la altura del cuadro de la pregunta. Los tokens son los que informa el proveedor de IA; cuando un proveedor no los informa, se estiman (el chat lo indica). Si una respuesta falla a medias, lo que llegó de ella se marca como fallido y no forma parte de la conversación: desaparece al enviar la siguiente pregunta. Si una respuesta llega a la longitud máxima que un modelo puede escribir en una respuesta, la vista de chat la termina con un aviso de que se ha cortado (visible aunque **Show model info** esté desactivada): pide al asistente que continúe. **New session**, cambiar de proveedor de IA o elegir un prompt del catálogo empiezan una conversación nueva y vacía; la actual ya está guardada.
 
 ### Sesiones del asistente de IA
 
@@ -182,9 +180,9 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 
 **Dónde se guardan.** Cada sesión es una nota del repositorio en el que estás trabajando, del tipo de nota **`@ChatSessions`**, en la carpeta **AI Assistant sessions**. El topic de la nota es la primera línea de tu primera pregunta, su descripción es la conversación (tal como la muestra la vista Markdown), sus atributos **AiProvider** y **AiModel** dicen qué modelo de IA respondió, y una tarea asignada a ti, que empieza cuando empezó la sesión, la vincula contigo. El tipo de nota, sus dos atributos y la carpeta se crean la primera vez que abres el asistente en un repositorio que no los tiene.
 
-**Cuándo se guardan.** Tras cada respuesta. Si el guardado falla, KaNote lo intenta de nuevo antes de que dejes la conversación (una sesión nueva, otra sesión, otro proveedor, cerrar la ventana) y, si aún no puede, te pregunta si descartas sus últimos mensajes.
+**Cuándo se guardan.** Tras cada respuesta. Si el guardado falla, KNote lo intenta de nuevo antes de que dejes la conversación (una sesión nueva, otra sesión, otro proveedor, cerrar la ventana) y, si aún no puede, te pregunta si descartas sus últimos mensajes.
 
-**Volver a una sesión.** El panel **Sessions** muestra tus sesiones, la más reciente primero; elige una para verla de nuevo y seguir con ella. Continúa con el modelo de IA con el que se mantuvo; si ese modelo ya no está configurado, continúa con el predefinido y KaNote te lo indica. El panel solo muestra tus propias sesiones, y solo tú puedes abrirlas o continuarlas desde el asistente.
+**Volver a una sesión.** El panel **Sessions** muestra tus sesiones, la más reciente primero; elige una para verla de nuevo y seguir con ella. Continúa con el modelo de IA con el que se mantuvo; si ese modelo ya no está configurado, continúa con el predefinido y KNote te lo indica. El panel solo muestra tus propias sesiones, y solo tú puedes abrirlas o continuarlas desde el asistente.
 
 **Privacidad.** Las sesiones son notas normales: cualquiera que pueda ver la carpeta **AI Assistant sessions** de un repositorio compartido puede abrirlas como cualquier otra nota. No escribas en una conversación nada que no escribirías en una nota de ese repositorio.
 
@@ -192,7 +190,7 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 
 ### Chat room
 
-El chat room permite a los usuarios de un servidor Web de KaNote hablar en **hilos**: cada hilo es una conversación sobre un tema, y cualquier usuario con rol Staff o superior en ese servidor puede leerlo, unirse y escribir en él. La aplicación Web y la de escritorio comparten el mismo chat room, el del servidor Web: un mensaje escrito en una aparece al momento en la otra.
+El chat room permite a los usuarios de un servidor Web de KNote hablar en **hilos**: cada hilo es una conversación sobre un tema, y cualquier usuario con rol Staff o superior en ese servidor puede leerlo, unirse y escribir en él. La aplicación Web y la de escritorio comparten el mismo chat room, el del servidor Web: un mensaje escrito en una aparece al momento en la otra.
 
 **Dónde se guardan los hilos.** Cada hilo es una nota del repositorio del servidor Web, del tipo de nota **`@KNoteChatRoom`**, en la carpeta **KNote Chat Room**; el tipo de nota y la carpeta se crean la primera vez que se usa el chat room. El tema de la nota es el del hilo y su descripción es la conversación, en Markdown, con una marca oculta antes de cada mensaje (`<!-- knt-chat:message {...} -->`) que guarda quién lo escribió y cuándo. Quien crea un hilo, escribe en él o le envía una imagen tiene una tarea en su nota que lo vincula a él: son sus participantes. Cada mensaje se guarda en cuanto se envía.
 
@@ -208,13 +206,13 @@ El chat room permite a los usuarios de un servidor Web de KaNote hablar en **hil
 
 ### Chat room (aplicación de escritorio)
 
-**Identificarse en el servidor del chat room.** La aplicación de escritorio trabaja con sus propios repositorios, así que se identifica una vez en el servidor Web del chat room: en **Options**, pestaña **Chat room**, escribe la **chat hub url** (la dirección del servidor Web terminada en `/chathub`, p. ej. `https://servidor/KNote/chathub`), tu **usuario** y tu **contraseña** en ese servidor, y pulsa **Sign in**. KaNote los comprueba y se conecta para probarlos; después guarda solo el token de acceso que da el servidor (cifrado, como los demás secretos de `KNoteData.config`) y olvida la contraseña. **Acepta** las opciones para conservarlo. El token dura un año: si el servidor lo rechaza (caducó, cambió tu contraseña o tu rol allí...), vuelve a identificarte. **Sign out** lo olvida, igual que cambiar la URL.
+**Identificarse en el servidor del chat room.** La aplicación de escritorio trabaja con sus propios repositorios, así que se identifica una vez en el servidor Web del chat room: en **Options**, pestaña **Chat room**, escribe la **chat hub url** (la dirección del servidor Web terminada en `/chathub`, p. ej. `https://servidor/KNote/chathub`), tu **usuario** y tu **contraseña** en ese servidor, y pulsa **Sign in**. KNote los comprueba y se conecta para probarlos; después guarda solo el token de acceso que da el servidor (cifrado, como los demás secretos de `KNoteData.config`) y olvida la contraseña. **Acepta** las opciones para conservarlo. El token dura un año: si el servidor lo rechaza (caducó, cambió tu contraseña o tu rol allí...), vuelve a identificarte. **Sign out** lo olvida, igual que cambiar la URL.
 
-**La ventana.** **Chat room ...** en el menú la abre. Al arrancar, la aplicación se conecta en segundo plano con la ventana oculta, y muestra la ventana cuando otro usuario escribe en un hilo que sigues; cerrar la ventana solo la oculta. A la izquierda, la conversación del hilo mostrado y, debajo, la caja del mensaje; a la derecha, la lista **Threads** (**New**: los mensajes que han llegado desde la última vez que lo viste; **Activity**: su último mensaje). **New thread** pide su tema; **Stop following**, encima de la conversación, muestra también quién está ahora en el hilo; **Image ...** elige una imagen para enviarla. La barra de estado muestra la conexión, tu usuario y el servidor. El menú **Actions** los repite: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** y **Reconnect**. KaNote recuerda la posición y el tamaño de la ventana, el ancho del panel de hilos y la altura de la caja del mensaje.
+**La ventana.** **Chat room ...** en el menú la abre. Al arrancar, la aplicación se conecta en segundo plano con la ventana oculta, y muestra la ventana cuando otro usuario escribe en un hilo que sigues; cerrar la ventana solo la oculta. A la izquierda, la conversación del hilo mostrado y, debajo, la caja del mensaje; a la derecha, la lista **Threads** (**New**: los mensajes que han llegado desde la última vez que lo viste; **Activity**: su último mensaje). **New thread** pide su tema; **Stop following**, encima de la conversación, muestra también quién está ahora en el hilo; **Image ...** elige una imagen para enviarla. La barra de estado muestra la conexión, tu usuario y el servidor. El menú **Actions** los repite: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** y **Reconnect**. KNote recuerda la posición y el tamaño de la ventana, el ancho del panel de hilos y la altura de la caja del mensaje.
 
 **Imágenes.** `Ctrl+V` en la caja del mensaje envía la imagen del portapapeles (una captura de pantalla, por ejemplo) o los ficheros de imagen copiados en el explorador de archivos; los ficheros de imagen también se pueden soltar sobre la caja del mensaje, o elegir con **Image ...**.
 
-Si la conexión falla al arrancar, KaNote te lo indica sin interrumpir y deja de conectarse al arrancar hasta que vuelvas a identificarte desde **Options**.
+Si la conexión falla al arrancar, KNote te lo indica sin interrumpir y deja de conectarse al arrancar hasta que vuelvas a identificarte desde **Options**.
 
 ### Chat room (aplicación Web)
 
@@ -261,7 +259,7 @@ El menú **Print/Export** de las páginas **Tree panel**, **Notes filter** y **Q
 | Opción | Resultado |
 |---|---|
 | **Print list ...** | La lista como una tabla, en horizontal, encabezada por la ruta de la carpeta o por un resumen de la búsqueda o el filtro. |
-| **Print as book ...** | Un libro: portada, índice y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. El índice enlaza con los capítulos pero no lleva números de página: el navegador no los puede conocer antes de imprimir. Un libro de más de 100 notas puede tardar mucho en generarse, así que KaNote pregunta antes. |
+| **Print as book ...** | Un libro: portada, índice y un capítulo por cada nota, en el orden de la lista. El título del capítulo es el topic de la nota y su texto, la descripción de la nota. El índice enlaza con los capítulos pero no lleva números de página: el navegador no los puede conocer antes de imprimir. Un libro de más de 100 notas puede tardar mucho en generarse, así que KNote pregunta antes. |
 | **Print note details ...** | Toda la información de la nota seleccionada, tal como está guardada: propiedades, descripción, atributos, recursos (con una miniatura de las imágenes), tareas y notas trazadas. Disponible cuando hay una nota seleccionada. |
 | **Export to CSV ...** | El mismo contenido que la lista impresa, como fichero CSV que descarga el navegador. |
 
@@ -307,9 +305,9 @@ Una vez dentro, tu nombre de usuario en la barra superior abre tu menú (en un m
 
 Escribe una pregunta en el cuadro de abajo y pulsa el botón de enviar (o `Ctrl+Enter`). La respuesta aparece a medida que se escribe; mientras llega puedes detenerla con el botón de parar, y entonces la pregunta vuelve al cuadro. Una respuesta que falla o que detienes no forma parte de la conversación y no se guarda.
 
-El asistente puede buscar en tus notas y crear tareas, como en la aplicación de escritorio. Una nota que crea se guarda en la carpeta raíz (Home) del repositorio: KaNote te lo indica, y el chat muestra un enlace que la abre en su ventana de edición.
+El asistente puede buscar en tus notas y crear tareas, como en la aplicación de escritorio. Una nota que crea se guarda en la carpeta raíz (Home) del repositorio: KNote te lo indica, y el chat muestra un enlace que la abre en su ventana de edición.
 
-Cambiar el modelo de IA de una conversación ya empezada inicia una conversación nueva (KaNote lo pregunta antes). Por tu seguridad, el HTML que contenga una respuesta se muestra como texto, nunca como parte de la página.
+Cambiar el modelo de IA de una conversación ya empezada inicia una conversación nueva (KNote lo pregunta antes). Por tu seguridad, el HTML que contenga una respuesta se muestra como texto, nunca como parte de la página.
 
 **En su propia ventana.** El botón que lo abre en una ventana nueva traslada el asistente, con la sesión en la que estás, a una ventana propia, sin los menús de la aplicación; la ventana principal vuelve a Home. No se puede usar mientras llega una respuesta. Solo hay una ventana del asistente: volver a abrirla la trae al frente. Cerrar esa ventana mientras llega una respuesta, o cuando la conversación no se pudo guardar, pregunta antes.
 
@@ -374,4 +372,4 @@ Sin `PublicBaseUrl`, `Email:Host` o `Email:FromAddress`, restablecer la contrase
 
 **Gmail.** Gmail no acepta la contraseña de la cuenta: activa la verificación en dos pasos en tu cuenta de Google, crea una *contraseña de aplicación* en <https://myaccount.google.com/apppasswords> y usa sus 16 letras, sin espacios, como `Email:Password`. `FromAddress` tiene que ser la dirección de la cuenta. Cambiar la contraseña de Google revoca las contraseñas de aplicación. La misma contraseña de aplicación sirve en la aplicación de escritorio (**Options → Email**).
 
-TODO: ...
+(This program is under construction and the documentation isn't ready yet. Thanks for your patience!)
