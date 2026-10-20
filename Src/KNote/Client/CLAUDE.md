@@ -262,7 +262,9 @@ Patrones ya establecidos que hay que seguir:
   (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
   `Shared/EntityList` (que pinta "cargando"/"sin registros" y, si la página no pudo leer la lista, el error con Retry:
-  `LoadFailed`, `Retry`; sin él, una lectura fallida dejaba "cargando" para siempre). Las acciones de una fila van en la cabecera de
+  `LoadFailed`, `Retry`; sin él, una lectura fallida dejaba "cargando" para siempre; `Loading` y `NotRecordsFound`
+  sustituyen sus textos: las notas de Home, `Notes/NotesList`, muestran tarjetas fantasma con la forma de `NoteItem` mientras
+  se leen, solo si tarda más de 300 ms, y sin notas un `.knt-empty-state` centrado que dice de qué carpeta salen). Las acciones de una fila van en la cabecera de
   la página (Edit/Delete junto a New, sobre la fila seleccionada) y en un menú con clic derecho
   (`CellContextMenu` → `KntActionsMenu.Open(...)` con una lista de `KntAction`: texto, icono, acción, `Danger` para
   borrar; el clic derecho también selecciona la fila); el doble clic hace la acción principal (editar). Sin

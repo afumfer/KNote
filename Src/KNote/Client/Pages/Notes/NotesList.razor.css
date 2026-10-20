@@ -1,0 +1,80 @@
+/* Home's note cards while they are read: placeholders with the shape of NoteItem (a card, its header with the topic
+   and the date, some lines of description) and a soft shimmer. They only appear when the read lasts (after 300 ms,
+   as the grids' loading veil, knt-theme.css), so a quick read doesn't flash. Only theme variables. */
+
+.knt-note-skeletons {
+    animation: knt-skeletons-appear 0.2s ease-out 0.3s both;
+}
+
+.knt-note-skeleton {
+    margin: 0.25rem;
+    padding: 0.25rem;
+    border-radius: var(--rz-card-border-radius, var(--rz-border-radius));
+    background-color: var(--rz-card-background-color, var(--rz-base-background-color));
+    box-shadow: var(--rz-card-shadow, var(--rz-shadow-1));
+}
+
+.knt-note-skeleton-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.25rem;
+    padding: 0.75rem;
+    border-radius: var(--rz-border-radius);
+}
+
+.knt-note-skeleton-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.75rem 0.75rem 1rem;
+}
+
+.knt-skeleton-line {
+    display: block;
+    height: 0.625rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--rz-text-color) 8%, transparent) 25%,
+        color-mix(in srgb, var(--rz-text-color) 15%, transparent) 50%,
+        color-mix(in srgb, var(--rz-text-color) 8%, transparent) 75%);
+    background-size: 200% 100%;
+    animation: knt-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.knt-skeleton-title {
+    width: 40%;
+    height: 0.875rem;
+}
+
+.knt-skeleton-info {
+    width: 25%;
+}
+
+/* No notes: the app's empty state, centered in the notes column. */
+.knt-notes-empty {
+    margin: 0.25rem;
+    padding-block: 3rem;
+}
+
+@keyframes knt-skeletons-appear {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes knt-skeleton-shimmer {
+    from {
+        background-position: 100% 0;
+    }
+
+    to {
+        background-position: -100% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .knt-skeleton-line {
+        animation: none;
+    }
+}
