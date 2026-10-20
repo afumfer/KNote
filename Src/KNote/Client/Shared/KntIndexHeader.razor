@@ -1,5 +1,7 @@
 @* Header of a section page: icon, title and the section's buttons (IndexMenu). Section gives the title and
-   icon of the side menu entry; TextHead/Icon override them (Tree panel shows the selected folder). Inside
+   icon of the side menu entry; TextHead/Icon override them (Tree panel shows the selected folder), and Subtitle is a
+   line in small print below the title (Tree panel: the folder's path). The title and the subtitle are cut (…) when the
+   window narrows, so that the buttons stay in place, at the right; with a subtitle, a tooltip shows it whole. Inside
    another section (the admin panel tabs cascade KntCompactHeader = true) it is drawn in a compact style. *@
 
 <div class="knt-section-header @(Compact ? "knt-section-header-compact" : null)">
@@ -8,21 +10,43 @@
         {
             <span class="knt-section-header-icon"><RadzenIcon Icon="@HeaderIcon" /></span>
         }
-        <h1 class="knt-section-header-title">@HeaderText</h1>
+        <div class="knt-section-header-text" @ref="textElement" @onmouseenter="ShowFullText">
+            <h1 class="knt-section-header-title">@HeaderText</h1>
+            @if (!string.IsNullOrEmpty(Subtitle))
+            {
+                <div class="knt-section-header-subtitle">@Subtitle</div>
+            }
+        </div>
     </div>
     <div class="knt-section-header-tools">
         @IndexMenu
     </div>
 </div>
 
+@inject TooltipService tooltipService
+
 @code {
     [Parameter] public KntSection? Section { get; set; }
     [Parameter] public string? TextHead { get; set; }
     [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Subtitle { get; set; }
     [Parameter] public RenderFragment? IndexMenu { get; set; }
 
     [CascadingParameter(Name = "KntCompactHeader")] public bool Compact { get; set; }
 
     private string? HeaderText => TextHead ?? Section?.Text;
+
+    private ElementReference textElement;
+
+    // The subtitle whole (it may be cut), or the title when the subtitle is only a blank line.
+    private void ShowFullText()
+    {
+        if (string.IsNullOrEmpty(Subtitle))
+            return;
+
+        var text = string.IsNullOrWhiteSpace(Subtitle) ? HeaderText : Subtitle;
+        if (!string.IsNullOrEmpty(text))
+            tooltipService.Open(textElement, text, new TooltipOptions { Position = TooltipPosition.Bottom });
+    }
     private string? HeaderIcon => Icon ?? Section?.Icon;
 }

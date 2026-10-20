@@ -5,9 +5,14 @@
 @inject ContextMenuService contextMenuService
 
 
-@* Compact: the same text size as the notes lists (NotesGrid), so the tree takes less room. *@
+@* Compact: the same text size as the notes lists (NotesGrid), so the tree takes less room.
+   Which branches are open is kept in the folders themselves (FolderDto.Expanded, in the tree cached in AppState): the
+   user opens and closes them (Expand/Collapse), and the selected folder's ancestors are opened when the selection is
+   set, so it is always in view. Radzen evaluates Expanded on every render and closes a branch whose value goes from
+   true to false: computing it from the selected folder (its parent only) closed the user's branches when the selection
+   moved. *@
 <div class="knt-folders-tree">
-<RadzenTree Data=@FoldersInfo Change=@OnFolderSelected ItemContextMenu=@OnItemContextMenu>
+<RadzenTree Data=@FoldersInfo Change=@OnFolderSelected Expand=@OnExpand Collapse=@OnCollapse ItemContextMenu=@OnItemContextMenu>
     <RadzenTreeLevel 
         TextProperty="Name" 
         ChildrenProperty="ChildFolders"     
@@ -38,7 +43,7 @@
     protected override void OnInitialized()
     {
         appState = store.AppState;
-        appState.OnChange += StateHasChanged;
+        appState.OnChange += OnAppStateChanged;
 
         base.OnInitialized();
     }
@@ -48,11 +53,63 @@
         base.OnParametersSet();
         if (FoldersInfo is null)
             FoldersInfo = new List<FolderDto>();
+        RevealSelectedFolder();
     }
 
     public void Dispose()
     {
-        appState.OnChange -= StateHasChanged;
+        appState.OnChange -= OnAppStateChanged;
+    }
+
+    private void OnAppStateChanged()
+    {
+        RevealSelectedFolder();
+        StateHasChanged();
+    }
+
+    // The tree and the selected folder whose ancestors were opened last: they are opened once for each selection (or
+    // tree read again), so that the user can still close the branch of the selected folder.
+    private List<FolderDto>? revealedTree;
+    private Guid? revealedFolderId;
+
+    private void RevealSelectedFolder()
+    {
+        var folderId = appState.SelectedFolder?.FolderId;
+        if (ReferenceEquals(revealedTree, FoldersInfo) && revealedFolderId == folderId)
+            return;
+
+        revealedTree = FoldersInfo;
+        revealedFolderId = folderId;
+        if (folderId != null)
+            ExpandAncestors(FoldersInfo, folderId.Value);
+    }
+
+    // Opens the folders on the way to the folder; whether it was found.
+    private static bool ExpandAncestors(IEnumerable<FolderDto> folders, Guid folderId)
+    {
+        foreach (var folder in folders)
+        {
+            if (folder.FolderId == folderId)
+                return true;
+            if (ExpandAncestors(folder.ChildFolders, folderId))
+            {
+                folder.Expanded = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void OnExpand(TreeExpandEventArgs args)
+    {
+        if (args.Value is FolderDto folder)
+            folder.Expanded = true;
+    }
+
+    private void OnCollapse(TreeEventArgs args)
+    {
+        if (args.Value is FolderDto folder)
+            folder.Expanded = false;
     }
 
     private async Task OnFolderSelected(TreeEventArgs args)
@@ -72,28 +129,8 @@
             KntActionsMenu.Open(contextMenuService, args, FolderActions(folder));
     }
 
-    private bool ShouldSelected(object data)
-    {
-        if (appState.SelectedFolder is null)
-            return false;
+    private bool ShouldSelected(object data) =>
+        data is FolderDto folder && appState.SelectedFolder != null && folder.FolderId == appState.SelectedFolder.FolderId;
 
-        if(string.IsNullOrEmpty(appState.SelectedFolder.Name))
-            return false; 
-
-        var folder = data as FolderDto;
-        return folder?.Name == appState.SelectedFolder.Name;              
-    }
-
-    // TODO: ### refactor (is not working when level folder > 1)
-    private bool ShouldExpanded(object data)
-    {
-        if(!appState.IsSelectedFolder())
-            return false; 
-
-        if(appState.SelectedFolder?.ParentId is null)
-            return false; 
-
-        var folder = data as FolderDto;
-        return folder?.FolderId == appState.SelectedFolder.ParentId;        
-    }
+    private static bool ShouldExpanded(object data) => data is FolderDto { Expanded: true };
 }

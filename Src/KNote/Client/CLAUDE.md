@@ -271,7 +271,12 @@ Patrones ya establecidos que hay que seguir:
   columna de acciones ni botones por fila. Ver `Users/UsersIndex`. Fuera de una lista (las tarjetas de Home) el
   menú es el botón ⋮ de `Shared/KntActionsMenu`. En un árbol, el menú va con el clic derecho
   (`KntFoldersTreeView.FolderActions`, `ItemContextMenu` de `RadzenTree`) y los botones de la cabecera actúan sobre
-  el elemento seleccionado (`Folders/FoldersIndex`). Las listas de administración se ordenan con
+  el elemento seleccionado (`Folders/FoldersIndex`). El árbol de carpetas (`Shared/KntFoldersTreeView`, en el Tree panel,
+  `FoldersIndex` y los selectores) guarda qué ramas están abiertas en `FolderDto.Expanded` (del árbol cacheado en
+  `AppState.FoldersTree`, así que se recuerdan al volver a la página), que cambian los eventos `Expand`/`Collapse`; al
+  cambiar la selección (o leerse de nuevo el árbol) abre una vez los ancestros de la carpeta seleccionada. No calcules
+  `Expanded` de la selección: Radzen lo evalúa en cada dibujado y cierra la rama cuyo valor pasa de `true` a `false`. La
+  selección se compara por `FolderId`. Las listas de administración se ordenan con
   `AllowSorting` (todos los datos en memoria, sin paginar) y, dentro de `Admin`, la clase `knt-admin-list` les da
   la altura de la ventana con scroll propio (`Admin.razor.css`). Tienen selección simple (`SelectionMode.Single`,
   el clic derecho también selecciona) y la clase `knt-list` (`knt-theme.css`: filas como las de las listas de notas,
@@ -332,7 +337,9 @@ Patrones ya establecidos que hay que seguir:
   (`DefaultOrder`); el componente añade el orden y la vista de la lista (`NotesGrid.CurrentOrder`, `Compact`) y
   `Server` vuelve a cargar la lista entera (`TotalCount` solo decide si hay notas y el aviso del libro).
 - **Cabeceras**: la de una página de sección es `KntIndexHeader` con `Section="KntSections.Xxx"` (título e
-  icono de su entrada del menú; `TextHead`/`Icon` los sustituyen, como en `NotesTree`, que muestra la carpeta) y
+  icono de su entrada del menú; `TextHead`/`Icon` los sustituyen, como en `NotesTree`, que muestra la carpeta, y
+  `Subtitle` añade una línea en letra pequeña debajo: en `NotesTree`, la ruta de la carpeta, sacada del árbol ya cargado,
+  sin pedirla al servidor, como la cabecera de `ClientWin`) y
   la botonera en `IndexMenu` (normalmente un `RadzenMenu`, que la cabecera deja sin fondo). `Shared/KntSections`
   es la única fuente de texto, ruta e icono de cada sección: la usan el menú lateral, las pestañas de `Admin` y
   las cabeceras. Dentro de otra sección (las pestañas de `Admin` pasan el `CascadingValue`
