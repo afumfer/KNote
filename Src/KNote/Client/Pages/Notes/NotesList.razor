@@ -1,6 +1,37 @@
 ﻿@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
+@* The note cards of Home. While they are read, placeholder cards with their shape (shown only when the read lasts,
+   NotesList.razor.css); with none, a centered empty state that says where the notes come from. *@
+
 <EntityList List="Notes" LoadFailed="LoadFailed" Retry="Retry" FailedText="The notes could not be loaded.">
+    <Loading>
+        <div class="knt-note-skeletons" role="status" aria-label="Loading notes">
+            @for (var i = 0; i < 3; i++)
+            {
+                <div class="knt-note-skeleton">
+                    <div class="knt-note-skeleton-header knt-background-subtle">
+                        <span class="knt-skeleton-line knt-skeleton-title"></span>
+                        <span class="knt-skeleton-line knt-skeleton-info"></span>
+                    </div>
+                    <div class="knt-note-skeleton-body">
+                        <span class="knt-skeleton-line" style="width: 92%"></span>
+                        <span class="knt-skeleton-line" style="width: 84%"></span>
+                        <span class="knt-skeleton-line" style="width: 61%"></span>
+                    </div>
+                </div>
+            }
+        </div>
+    </Loading>
+    <NotRecordsFound>
+        <div class="knt-empty-state knt-notes-empty">
+            <RadzenIcon Icon="sticky_note_2" />
+            <div class="knt-empty-state-title">@EmptyTitle</div>
+            @if (!string.IsNullOrEmpty(EmptyText))
+            {
+                <div class="knt-empty-state-text">@EmptyText</div>
+            }
+        </div>
+    </NotRecordsFound>
     <Item Context="note">
         <NoteItem Note="note"
                     OnNoteDelete="@(() => OnNoteDelete.InvokeAsync(note))"
@@ -18,4 +49,7 @@
     // The page couldn't read the notes: the error and Retry (EntityList).
     [Parameter] public bool LoadFailed { get; set; }
     [Parameter] public EventCallback Retry { get; set; }
+    // Without notes: what the empty state says (e.g. which folder they come from).
+    [Parameter] public string EmptyTitle { get; set; } = "No notes here yet";
+    [Parameter] public string? EmptyText { get; set; }
 }

@@ -27,7 +27,7 @@
 @* At the right of the notes, Home and the folders directly inside it (only when it has any). *@
 <div class="@(HasFolders ? "knt-home-content knt-home-with-folders" : "knt-home-content")">
     <div class="knt-home-notes">
-        <NotesList Notes="notes" LoadFailed="notesFailed" Retry="LoadNotes"
+        <NotesList Notes="notes" LoadFailed="notesFailed" Retry="LoadNotes" EmptyTitle="@EmptyTitle" EmptyText="@EmptyText"
                    OnNoteDelete="OnNoteDelete" OnNoteEdit="OnNoteEdit" OnNoteView="OnNoteView" />
     </div>
     @if (HasFolders)
@@ -49,6 +49,15 @@
     private Guid? selectedFolderId;
 
     private bool HasFolders => folders?.Count > 0;
+
+    // Without notes, Home says which folder they come from: Home itself or the one chosen in the side panel.
+    private string? SelectedFolderName => folders?.FirstOrDefault(f => f.FolderId == selectedFolderId)?.Name;
+
+    private string EmptyTitle => SelectedFolderName is { } name ? $"No notes in {name} yet" : "No notes in Home yet";
+
+    private string EmptyText => SelectedFolderName is { } name
+        ? $"The notes saved in the folder {name} are shown here."
+        : "The notes saved in the Home folder are shown here.";
 
     // The repository's name (read by MainLayout): empty while it is read, the application's name if it can't be.
     private string Title => store.AppState.RepositoryName switch
