@@ -305,7 +305,10 @@ Patrones ya establecidos que hay que seguir:
   seleccionada. **Vista previa**: `NotesPreviewToggle` (opción de "View options", `AppState.NotesPreviewVisible`
   + `localStorage`, común a las tres páginas) muestra a la derecha de la lista `NotePreviewPane`, que carga la nota
   seleccionada cuando la selección se para 250 ms (con las flechas no carga cada nota del camino) y la recarga si
-  se guarda en su ventana. Su `RadzenSplitterPane` está siempre, con el tamaño de todos los paneles fijado desde el
+  se guarda en su ventana. Desde el clic hasta que se ve la nota seleccionada, la anterior se atenúa y corre una barra
+  fina arriba (tras un rato sin uso el servidor tarda y parecía la seleccionada); la nota y el HTML de su descripción se
+  leen juntos y cambian a la vez (`NoteViewer.DescriptionHtml`), para que no se vea el tema de una con la descripción de
+  otra. Su `RadzenSplitterPane` está siempre, con el tamaño de todos los paneles fijado desde el
   principio: Radzen reparte los tamaños al registrar los paneles y uno añadido después no cabe (el anterior pasa a
   `flex: 0 0` con su tamaño). Oculto, lo esconde la clase `knt-preview-hidden` del splitter (`knt-theme.css`) y la
   lista (`knt-notes-list-pane`) ocupa su sitio; así `NotesGrid` no se recrea y conserva su estado. Los tamaños

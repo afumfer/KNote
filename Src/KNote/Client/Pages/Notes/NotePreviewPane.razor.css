@@ -11,3 +11,63 @@
     text-align: center;
     color: var(--rz-text-secondary-color);
 }
+
+/* The note shown: a new one fades in; while the selected one is loaded, the one shown so far is dimmed. */
+.knt-note-preview-content {
+    transition: opacity 0.15s ease-out;
+    animation: knt-preview-in 0.2s ease-out;
+}
+
+.knt-note-preview-pending .knt-note-preview-content {
+    opacity: 0.35;
+}
+
+/* The selected note is being loaded: a thin bar runs at the top of the pane (it stays in view when it scrolls). */
+.knt-note-preview-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: 3px;
+    margin-bottom: -3px;
+    overflow: hidden;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, var(--rz-primary) 18%, transparent);
+}
+
+    .knt-note-preview-bar::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 35%;
+        border-radius: inherit;
+        background-color: var(--rz-primary);
+        animation: knt-preview-bar 1.1s ease-in-out infinite;
+    }
+
+@keyframes knt-preview-bar {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(300%);
+    }
+}
+
+@keyframes knt-preview-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .knt-note-preview-content {
+        animation: none;
+    }
+
+    .knt-note-preview-bar::before {
+        width: 100%;
+        animation: none;
+        opacity: 0.6;
+    }
+}
