@@ -5,7 +5,8 @@
     <RadzenStack Gap="0.5rem">
         <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H4" class="rz-pb-2 rz-border-bottom">@Note.Topic</RadzenText>
         <div class="rz-p-2 rz-border-bottom">
-            <ViewMarkdown MarkdownContent="@Note.Description" />
+            @* The preview gives the HTML read with the note; otherwise ViewMarkdown asks Server for it. *@
+            <ViewMarkdown MarkdownContent="@(DescriptionHtml == null ? Note.Description : null)" SafeHtml="@DescriptionHtml" />
         </div>
         <i>
             <p>Tags: @(Note.Tags)</p>
@@ -17,4 +18,7 @@
 
 @code {
     [Parameter][EditorRequired] public NoteDto Note { get; set; } = null!;
+    // The description's HTML, already made safe by Server (NotePreviewPane reads it with the note); null: ViewMarkdown
+    // gets it.
+    [Parameter] public string? DescriptionHtml { get; set; }
 }

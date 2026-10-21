@@ -5,12 +5,21 @@
 
 @* Preview of the note selected in a notes list (NotesPreviewToggle), at its right. The note is loaded once the
    selection stops for a moment (moving with the arrows doesn't load every note on the way), and again when it is
-   saved in its window. *@
+   saved in its window. Until the selected note is shown (the pause, reading it and the HTML of its description), the
+   note shown so far is dimmed and a thin bar runs at the top, from the click on: after a while without use the server
+   can take long, and the previous note looked like the selected one. The note and its HTML change at once, so the
+   topic of one note is never shown with the description of another. *@
 
-<div class="knt-note-preview">
+<div class="knt-note-preview @(pending ? "knt-note-preview-pending" : null)">
+    @if (pending)
+    {
+        <div class="knt-note-preview-bar" role="progressbar" aria-label="Loading the note"></div>
+    }
     @if (note != null)
     {
-        <NoteViewer Note="note" />
+        <div class="knt-note-preview-content" @key="note.NoteId">
+            <NoteViewer Note="note" DescriptionHtml="@descriptionHtml" />
+        </div>
     }
     else
     {
@@ -26,7 +35,11 @@
     private const int SelectionDelay = 250;
 
     private NoteDto? note;
+    // The HTML of the note's description (made safe by Server), read with the note: null without description.
+    private string? descriptionHtml;
     private bool loadFailed;
+    // The selected note isn't shown yet: from the selection until it (and its HTML) arrives, or fails.
+    private bool pending;
     private Guid? requestedId;
     // The selection: it changes before the note is loaded (SelectionDelay).
     private int version;
@@ -56,10 +69,13 @@
         if (NoteId == null)
         {
             note = null;
+            descriptionHtml = null;
+            pending = false;
             return;
         }
 
-        // The note shown so far stays while the next one is loaded.
+        // At once: the note shown so far stays, dimmed, while the selected one is loaded.
+        pending = true;
         await Task.Delay(SelectionDelay);
         if (current == version)
             await LoadNote(NoteId.Value);
@@ -67,14 +83,32 @@
 
     private async Task LoadNote(Guid noteId)
     {
-        var request = await noteRequest.RunAsync(ct => store.Notes.GetAsync(noteId, ct));
+        pending = true;
+        var request = await noteRequest.RunAsync(ct => ReadPreviewAsync(noteId, ct));
         // Another note selected meanwhile: that one is loaded instead.
         if (request.Canceled)
             return;
 
-        var result = request.Value;
-        note = result.IsValid ? result.Entity : null;
-        loadFailed = !result.IsValid;
+        var preview = request.Value;
+        pending = false;
+        loadFailed = preview == null;
+        note = preview?.Note;
+        descriptionHtml = preview?.Html;
+    }
+
+    // The note and the HTML of its description, or null if either can't be read (already notified, BaseService).
+    private async Task<Preview?> ReadPreviewAsync(Guid noteId, CancellationToken cancellationToken)
+    {
+        var noteResult = await store.Notes.GetAsync(noteId, cancellationToken);
+        if (!noteResult.IsValid || noteResult.Entity == null)
+            return null;
+
+        var read = noteResult.Entity;
+        if (string.IsNullOrEmpty(read.Description))
+            return new Preview(read, null);
+
+        var htmlResult = await store.Notes.HtmlAsync(read.Description, cancellationToken);
+        return htmlResult.IsValid ? new Preview(read, htmlResult.Entity) : null;
     }
 
     private void OnNoteSaved(Guid noteId)
@@ -84,8 +118,12 @@
 
         _ = InvokeAsync(async () =>
         {
-            await LoadNote(noteId);
+            var loading = LoadNote(noteId);
+            StateHasChanged();
+            await loading;
             StateHasChanged();
         });
     }
+
+    private sealed record Preview(NoteDto Note, string? Html);
 }
