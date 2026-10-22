@@ -1,4 +1,5 @@
 ﻿using KntScript;
+using KntWebView;
 
 namespace KNote.ClientWin.Views;
 
@@ -72,7 +73,7 @@ public partial class ReadVarForm : KntForm
         foreach (ReadVarItem var in _readVarItems)
         {
             label = new Label();
-            label.Font = new Font(new FontFamily("Courier New"), 10);
+            label.Font = new Font(KntEditView.MonospaceFontFamily, 10);
             label.Text = var.Label.ToString();
             label.Top = topLabel;
             label.Left = leftLabel;

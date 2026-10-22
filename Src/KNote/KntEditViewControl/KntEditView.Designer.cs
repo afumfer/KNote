@@ -133,7 +133,7 @@
             // 
             // textContent
             // 
-            textContent.Font = new Font("Courier New", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textContent.Font = new Font("Consolas", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textContent.Location = new Point(14, 18);
             textContent.MaxLength = 10485760;
             textContent.Multiline = true;

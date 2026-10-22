@@ -207,7 +207,7 @@
             // 
             textSourceCode.AcceptsTab = true;
             textSourceCode.Dock = DockStyle.Fill;
-            textSourceCode.Font = new Font("Courier New", 11.25F);
+            textSourceCode.Font = new Font("Consolas", 11.25F);
             textSourceCode.Location = new Point(0, 0);
             textSourceCode.Margin = new Padding(6);
             textSourceCode.Multiline = true;

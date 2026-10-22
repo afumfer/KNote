@@ -15,6 +15,8 @@ namespace KntWebView
             InitializeComponent();
             InitializeEditorsComponent();
 
+            UseMonospaceFont(textContent);
+
             btnBack.SetKntIcon(KntIcon.Back);
             btnForward.SetKntIcon(KntIcon.Forward);
             btnNavigate.SetKntIcon(KntIcon.Refresh);
@@ -52,6 +54,29 @@ namespace KntWebView
         /// startup; without it (or if it doesn't exist) RenderDiagrams has no effect.
         /// </summary>
         public static string? DiagramsScriptsFolder { get; set; }
+
+        /// <summary>
+        /// Fixed-width font of the text editor, also used by the host application for its own fixed-width text:
+        /// Cascadia Mono (Windows 11) if installed, otherwise Consolas, which every Windows has. Both read
+        /// better on screen than Courier New.
+        /// </summary>
+        public static string MonospaceFontFamily => _monospaceFontFamily ??= ResolveMonospaceFontFamily();
+        private static string? _monospaceFontFamily;
+
+        /// <summary>
+        /// Switches the control's font to MonospaceFontFamily, keeping its size and style (the designer's
+        /// font is the fallback, Consolas).
+        /// </summary>
+        public static void UseMonospaceFont(Control control)
+            => control.Font = new Font(MonospaceFontFamily, control.Font.Size, control.Font.Style);
+
+        private static string ResolveMonospaceFontFamily()
+        {
+            using var fonts = new System.Drawing.Text.InstalledFontCollection();
+            return fonts.Families.Any(f => f.Name.Equals("Cascadia Mono", StringComparison.OrdinalIgnoreCase))
+                ? "Cascadia Mono"
+                : "Consolas";
+        }
 
         #endregion
 

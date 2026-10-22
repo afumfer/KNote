@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KntScript;
 using System.Runtime.InteropServices;
 using KNote.ClientWin.Utils;
+using KntWebView;
 using KntIcons;
 
 namespace KNote.ClientWin.Views;
@@ -40,6 +41,7 @@ internal partial class KntScriptConsoleForm : KntForm, IViewBase
     {
         InitializeComponent();
         PersonalizeTabStop();
+        KntEditView.UseMonospaceFont(textSourceCode);
 
         buttonNew.SetKntIcon(KntIcon.NewDocument);
         buttonOpen.SetKntIcon(KntIcon.FolderOpen);

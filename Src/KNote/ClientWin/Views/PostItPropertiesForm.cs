@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.ClientWin.Utils;
+using KntWebView;
 
 namespace KNote.ClientWin.Views;
 
@@ -227,7 +228,7 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
                 labelText.BackColor = ColorTranslator.FromHtml("#EBEBEB");
 
                 style = new FontStyle();
-                font = new Font("Courier New", 11, style);
+                font = new Font(KntEditView.MonospaceFontFamily, 11, style);
                 break;
 
             case 2:
@@ -239,7 +240,7 @@ public partial class PostItPropertiesForm : KntForm, IViewPostIt<WindowDto>
                 labelText.BackColor = ColorTranslator.FromHtml("#464646");
 
                 style = new FontStyle();
-                font = new Font("Courier New", 11, style);
+                font = new Font(KntEditView.MonospaceFontFamily, 11, style);
                 break;
         }
             

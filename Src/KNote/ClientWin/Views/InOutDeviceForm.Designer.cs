@@ -36,7 +36,7 @@
             // 
             textOut.BackColor = Color.Black;
             textOut.Dock = DockStyle.Fill;
-            textOut.Font = new Font("Courier New", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
+            textOut.Font = new Font("Consolas", 11.25F, FontStyle.Regular, GraphicsUnit.Point);
             textOut.ForeColor = Color.White;
             textOut.Location = new Point(0, 0);
             textOut.Multiline = true;
