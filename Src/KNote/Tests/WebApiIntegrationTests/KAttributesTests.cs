@@ -17,6 +17,13 @@ public class KAttributesTests : WebApiTestBase
         
     }
 
+    // Before and after each test (also when it fails): the attribute the tests create, left by a run that failed half way.
+    [TestInitialize]
+    [TestCleanup]
+    public Task DeleteTestDataAsync() =>
+        DeleteNamedAsync<KAttributeInfoDto>("api/kattributes", "api/kattributes", kAttribute => kAttribute.Name, kAttribute => kAttribute.KAttributeId,
+            "__TEST_KATTRIBUTE_###__");
+
     [TestMethod]
     public async Task Get_All()
     {

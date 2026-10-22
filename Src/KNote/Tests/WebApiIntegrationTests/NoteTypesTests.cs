@@ -17,6 +17,13 @@ public class NoteTypesTests : WebApiTestBase
         
     }
 
+    // Before and after each test (also when it fails): the note type the tests create, left by a run that failed half way.
+    [TestInitialize]
+    [TestCleanup]
+    public Task DeleteTestDataAsync() =>
+        DeleteNamedAsync<NoteTypeDto>("api/notetypes", "api/notetypes", noteType => noteType.Name, noteType => noteType.NoteTypeId,
+            "__TEST_NOTETYPE_###__");
+
     [TestMethod]
     public async Task Get_All()
     {

@@ -58,7 +58,13 @@ Hay dos suites de test independientes, en dos `.slnx` distintos, con propósitos
   `Tests/WebApiIntegrationTests/*.cs` (`FoldersTests`, `KAttributesTests`, `NoteTypesTests`,
   `NotesTests`, `UsersTests`) son **tests de integración HTTP reales**, no tests unitarios.
   `Tests/Helpers/WebApiTestBase.cs` inicia sesión vía `POST {testsWebApiUrlBase}api/users/login` contra una
-  instancia real de `Server` en ejecución y reutiliza el JWT en las siguientes peticiones. Configura
+  instancia real de `Server` en ejecución **una sola vez por ejecución** y todos los tests reutilizan ese JWT: el
+  `Server` limita los inicios de sesión por minuto y dirección (`RateLimits:SignInPerMinute`), y uno por test lo
+  superaba (429). Si no puede iniciar sesión, cada test falla diciendo por qué (contraseña, `Server` parado, 429).
+  Los datos que crean los tests tienen nombres fijos (`__TEST_..._###__`): cada clase que los crea los borra antes y
+  después de cada test (`DeleteNamedAsync` en `[TestInitialize]`/`[TestCleanup]`), para que una ejecución que falle a
+  medias no deje restos que impidan las siguientes, y ningún test depende de datos concretos de la BD salvo las
+  búsquedas de `NotesTests` (una nota con "Hopper"). Configura
   `testsUserName`, `testsUserPwd`, `testsWebApiUrlBase` en `Tests/appsettings.json` o en user-secrets (id de
   secretos `f25fed7b-9b03-406c-8e4a-b98eb14f5579`) — **debe haber una instancia de `Server` en ejecución y
   accesible en esa URL antes de correr el proyecto de tests.** `Tests/InProcessIntegrationTests/*.cs` es la

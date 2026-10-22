@@ -17,6 +17,13 @@ public class UsersTests : WebApiTestBase
         
     }
 
+    // Before and after each test (also when it fails): the users the tests create, left by a run that failed half way.
+    [TestInitialize]
+    [TestCleanup]
+    public Task DeleteTestDataAsync() =>
+        DeleteNamedAsync<UserDto>("api/users", "api/users", user => user.UserName, user => user.UserId,
+            "__TEST_REGISTERUSER_###__", "__TEST_DUPEMAIL_1_###__", "__TEST_DUPEMAIL_2_###__", "__TEST_CREATEUSER_###__");
+
     [TestMethod]
     public async Task Get_All()
     {
