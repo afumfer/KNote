@@ -12,6 +12,13 @@ public class FoldersTests : WebApiTestBase
 
     }
 
+    // Before and after each test (also when it fails): the folder the tests create (also renamed), left by a run that failed half way.
+    [TestInitialize]
+    [TestCleanup]
+    public Task DeleteTestDataAsync() =>
+        DeleteNamedAsync<FolderInfoDto>("api/folders", "api/folders", folder => folder.Name, folder => folder.FolderId,
+            "__TEST FOLDER ###__", "__TEST FOLDER ###__ UPDATED!!");
+
     [TestMethod]
     public async Task Get_All()
     {

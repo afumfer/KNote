@@ -57,24 +57,26 @@ public class NotesTests : WebApiTestBase
     [TestMethod]
     public async Task Execute_BasicCRUD()
     {
-        // Get note 
-        // TODO: hack this guid
-        Guid id = Guid.Parse("1BF07EDF-039C-4CE9-98A6-0001A9C1E0C2");
+        // A note of its own, in the first folder: the test doesn't depend on a given note being in the database.
+        var httpResFolders = await HttpClient.GetAsync($"{UrlBase}api/folders");
+        var resFolders = await ProcessResultFromTestHttpResponse<List<FolderInfoDto>>(httpResFolders);
 
-        var httpResGet = await HttpClient.GetAsync($"{UrlBase}api/notes/{id}");
-        var res = await ProcessResultFromTestHttpResponse<NoteDto>(httpResGet);
-
-        Assert.IsTrue(res.IsValid);
-
-        if (!res.IsValid || res.Entity is null)
-            return;
+        Assert.IsTrue(resFolders.IsValid);
+        var folder = resFolders.Entity?.FirstOrDefault();
+        Assert.IsNotNull(folder);
 
         // Add
-        var newNote = res.Entity.GetSimpleDto<NoteDto>();
-        newNote.Topic = "NEW NOTE ###";
-        newNote.Description = "NEW NOTE ###";
-        newNote.NoteId = Guid.Empty;
-        newNote.NoteNumber = 0;
+        var newNote = new NoteDto
+        {
+            NoteId = Guid.Empty,
+            Topic = "NEW NOTE ###",
+            Description = "NEW NOTE ###",
+            FolderId = folder.FolderId,
+            // MVC validates this nested property too: without it, an empty FolderDto fails its [Required] Name.
+            FolderDto = folder,
+            CreationDateTime = DateTime.Now,
+            ModificationDateTime = DateTime.Now
+        };
 
         var httpResPost = await HttpClient.PostAsJsonAsync($"{UrlBase}api/notes", newNote);
         var resNewNote = await ProcessResultFromTestHttpResponse<NoteDto>(httpResPost);
@@ -88,27 +90,36 @@ public class NotesTests : WebApiTestBase
         var newNoteId = resNewNote.Entity.NoteId;
         newNote = resNewNote.Entity;
 
-        // Update 
-        newNote.Topic = " UPDATED!!";
-        newNote.Description = "UPDATED!!";
+        try
+        {
+            // Get
+            var httpResGet = await HttpClient.GetAsync($"{UrlBase}api/notes/{newNoteId}");
+            var resGet = await ProcessResultFromTestHttpResponse<NoteDto>(httpResGet);
 
-        var httpResUpd = await HttpClient.PutAsJsonAsync($"{UrlBase}api/notes", newNote);
-        var resUpd = await ProcessResultFromTestHttpResponse<NoteDto>(httpResUpd);
+            Assert.IsTrue(resGet.IsValid);
+            Assert.IsTrue(newNote.Topic == resGet.Entity?.Topic);
 
-        Assert.IsTrue(resUpd.IsValid);
-        Assert.IsNotNull(resUpd.Entity);
-        Assert.IsTrue(newNote.Topic == resUpd.Entity?.Topic);
-        Assert.IsTrue(newNote.Description == resUpd.Entity?.Description);
+            // Update
+            newNote.Topic = " UPDATED!!";
+            newNote.Description = "UPDATED!!";
 
-        if (!res.IsValid || res.Entity is null)
-            return;
+            var httpResUpd = await HttpClient.PutAsJsonAsync($"{UrlBase}api/notes", newNote);
+            var resUpd = await ProcessResultFromTestHttpResponse<NoteDto>(httpResUpd);
 
-        // Delete
-        var httpResDel = await HttpClient.DeleteAsync($"{UrlBase}api/notes/{newNoteId}");
-        var resDel = await ProcessResultFromTestHttpResponse<NoteDto>(httpResDel);
+            Assert.IsTrue(resUpd.IsValid);
+            Assert.IsNotNull(resUpd.Entity);
+            Assert.IsTrue(newNote.Topic == resUpd.Entity?.Topic);
+            Assert.IsTrue(newNote.Description == resUpd.Entity?.Description);
+        }
+        finally
+        {
+            // Delete, also when a step above failed: the note is the test's own.
+            var httpResDel = await HttpClient.DeleteAsync($"{UrlBase}api/notes/{newNoteId}");
+            var resDel = await ProcessResultFromTestHttpResponse<NoteDto>(httpResDel);
 
-        Assert.IsTrue(resDel.IsValid);
-        Assert.IsNotNull(resDel.Entity);
-        Assert.IsTrue(newNoteId == resDel.Entity?.NoteId);
+            Assert.IsTrue(resDel.IsValid);
+            Assert.IsNotNull(resDel.Entity);
+            Assert.IsTrue(newNoteId == resDel.Entity?.NoteId);
+        }
     }
 }
