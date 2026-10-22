@@ -1,5 +1,6 @@
 ﻿using KntScript;
 using KNote.ClientWin.Utils;
+using KntWebView;
 
 namespace KNote.ClientWin.Views;
 
@@ -18,6 +19,7 @@ public partial class InOutDeviceForm : Form, IInOutDevice
     {
         InitializeComponent();
         Icon = AppIcon.Icon;
+        KntEditView.UseMonospaceFont(textOut);
 
         // Not a KntForm (it's also embedded in KntScriptConsoleForm, after that form's own adjustment): the
         // output box's Fixed3D border would show as a thick white frame in dark mode.

@@ -1462,7 +1462,7 @@
             // textScriptCode
             // 
             textScriptCode.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textScriptCode.Font = new Font("Courier New", 9.75F);
+            textScriptCode.Font = new Font("Consolas", 9.75F);
             textScriptCode.Location = new Point(7, 34);
             textScriptCode.Margin = new Padding(4, 3, 4, 3);
             textScriptCode.Multiline = true;

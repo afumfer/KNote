@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KntWebView;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Reports;
@@ -44,6 +45,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     public NoteEditorForm(NoteEditorCtrl ctrl)
     {
         InitializeComponent();
+        KntEditView.UseMonospaceFont(textScriptCode);
 
         _ctrl = ctrl;
 
