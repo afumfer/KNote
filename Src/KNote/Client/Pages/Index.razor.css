@@ -87,7 +87,8 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(11rem, 15rem);
     grid-template-areas: "notes folders";
-    gap: 1rem;
+    /* With the cards' and the panel's own margins (0.25rem each), 12px between the notes and the folders. */
+    gap: 0.25rem;
     align-items: start;
 }
 
