@@ -79,8 +79,8 @@
     // The tree could not be read: the pane says so, with Retry (the error is already notified).
     private bool treeFailed;
     private FolderDto? folder;
-    // The selected folder's path (Home › Projects › KNote), from the tree already loaded, as ClientWin's header does: no
-    // request to the server.
+    // The selected folder's path ("Full path: Home >> Projects >> KNote"), from the tree already loaded, as ClientWin's
+    // header does: no request to the server.
     private string? folderPath;
     private NotesGrid? notesGrid;
     private AppState appState = null!;
@@ -158,9 +158,8 @@
             appState.NotesTreePosition = new NotesListPosition { ListKey = listKey };
 
         folder = f;
-        // A folder at the root: its path is its name, already the title; a blank line keeps the header's height.
-        var path = FolderPath(foldersTree, f.FolderId);
-        folderPath = path == null || path == f.Name ? "\u00A0" : path;
+        // Also for a folder at the root (its path is its name).
+        folderPath = $"Full path: {FolderPath(foldersTree, f.FolderId) ?? f.Name}";
         appState.SelectedFolder = folder.GetSimpleDto<FolderDto>();
     }
 
@@ -172,7 +171,7 @@
             if (f.FolderId == folderId)
                 return f.Name;
             if (FolderPath(f.ChildFolders, folderId) is { } path)
-                return $"{f.Name} › {path}";
+                return $"{f.Name} >> {path}";
         }
         return null;
     }
