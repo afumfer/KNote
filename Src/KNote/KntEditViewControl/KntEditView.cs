@@ -235,6 +235,17 @@ namespace KntWebView
             }
         }
 
+        /// <summary>
+        /// Space between the markdown text box's border and its text, in logical pixels (6, 4, 6, 4 by default).
+        /// Padding.Empty leaves the text box's own, for hosts that already keep the text off the borders.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Padding MarkdownContentPadding
+        {
+            get { return textContent.TextPadding; }
+            set { textContent.TextPadding = value; }
+        }
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public HtmlEditorControl HtmlContentControl
         {

@@ -37,7 +37,7 @@
             textUrl = new TextBox();
             panelWebView = new Panel();
             htmlContent = new MSDN.Html.Editor.HtmlEditorControl();
-            textContent = new TextBox();
+            textContent = new KntPaddedTextBox();
             webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             statusBar = new StatusStrip();
             statusLabel = new ToolStripStatusLabel();
@@ -141,6 +141,7 @@
             textContent.ScrollBars = ScrollBars.Vertical;
             textContent.Size = new Size(315, 128);
             textContent.TabIndex = 0;
+            textContent.TextPadding = new Padding(6, 4, 6, 4);
             textContent.Visible = false;
             // 
             // webView
@@ -208,7 +209,7 @@
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;
         private StatusStrip statusBar;
         private ToolStripStatusLabel statusLabel;
-        private TextBox textContent;
+        private KntPaddedTextBox textContent;
         private MSDN.Html.Editor.HtmlEditorControl htmlContent;
     }
 }

@@ -625,6 +625,8 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
 
         kntEditView.ShowStatusInfo = false;
         kntEditView.MarkdownContentControl.ScrollBars = ScrollBars.None;
+        // panelContent's padding already keeps the text off the post-it's borders.
+        kntEditView.MarkdownContentPadding = Padding.Empty;
 
         kntEditView.NavigationStart += KntEditView_NavigationStart;
         kntEditView.NavigationEnd += KntEditView_NavigationEnd;
