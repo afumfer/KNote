@@ -176,6 +176,30 @@
                 </ChildContent>
             </RadzenTabsItem>
 
+            <RadzenTabsItem Icon="alarm">
+                <Template Context="tab">
+                    <span class="knt-tab-text">Alarms</span>
+                    @if (alarms != null)
+                    {
+                        <span class="knt-tab-count">@alarms.Count</span>
+                    }
+                </Template>
+                <ChildContent>
+                    @if (alarms == null && !Note.IsNew())
+                    {
+                        <p>Loading alarms ...</p>
+                    }
+                    else
+                    {
+                        <NoteKMessages Alarms="alarms ?? new()" Busy="tabsSaving.IsBusy"
+                                       OnNew="() => tabsSaving.RunAsync(OnNewAlarm)"
+                                       OnEdit="a => tabsSaving.RunAsync(() => OpenAlarmEditor(a))"
+                                       OnDelete="a => tabsSaving.RunAsync(() => OnDeleteAlarm(a))">
+                        </NoteKMessages>
+                    }
+                </ChildContent>
+            </RadzenTabsItem>
+
             <RadzenTabsItem Icon="@KntSections.TraceNoteTypes.Icon">
                 <Template Context="tab">
                     <span class="knt-tab-text">Trace notes</span>
@@ -219,7 +243,7 @@
 
     // The button that saved: the one that shows it is busy.
     private bool savingAndNew;
-    // One change at a time in the tabs (a resource, a task or a trace note added, edited or deleted): a double click
+    // One change at a time in the tabs (a resource, a task, an alarm or a trace note added, edited or deleted): a double click
     // saves or deletes once.
     private readonly KntSingleFlight tabsSaving = new();
 
@@ -227,6 +251,7 @@
     private List<NoteTaskDto>? tasks;
     private NoteTaskDto? taskEdit;
     private List<UserDto>? users;
+    private List<KMessageDto>? alarms;
     private NoteTraceNotesDto? traceNotes;
     // Read the first time a trace note is added or edited.
     private List<TraceNoteTypeDto>? traceNoteTypes;
@@ -294,11 +319,12 @@
         oldNoteType = Note.NoteTypeId;
         resources = null;
         tasks = null;
+        alarms = null;
         traceNotes = null;
 
         await LoadFolderPathAsync();
         if (!Note.IsNew())
-            await Task.WhenAll(LoadResourcesAsync(), LoadTasksAsync(), LoadTraceNotesAsync());
+            await Task.WhenAll(LoadResourcesAsync(), LoadTasksAsync(), LoadAlarmsAsync(), LoadTraceNotesAsync());
     }
 
     // The path of the note's folder, as ClientWin shows it (Service: Folders.GetPathAsync).
@@ -330,6 +356,14 @@
         var result = await webApiService.Notes.GetNoteTasksAsync(noteId, disposal.Token);
         if (result.IsValid && noteId == Note.NoteId)
             tasks = result.Entity;
+    }
+
+    private async Task LoadAlarmsAsync()
+    {
+        var noteId = Note.NoteId;
+        var result = await webApiService.Notes.GetAlarmsAsync(noteId, disposal.Token);
+        if (result.IsValid && noteId == Note.NoteId)
+            alarms = result.Entity;
     }
 
     private async Task LoadTraceNotesAsync()
@@ -424,8 +458,11 @@
         if (panel == 3 && tasks == null && !Note.IsNew())
             await LoadTasksAsync();
 
+        if (panel == 4 && alarms == null && !Note.IsNew())
+            await LoadAlarmsAsync();
+
         // Read again each time: a relation is also changed from the other note's window.
-        if (panel == 4 && !Note.IsNew())
+        if (panel == 5 && !Note.IsNew())
             await LoadTraceNotesAsync();
 
         StateHasChanged();
@@ -609,6 +646,65 @@
 
     #endregion
 
+    #region Alarms management
+
+    // Saved at once, as the tasks (not with the note, as ClientWin does). A new alarm comes with the values the server
+    // gives it (for the user signed in, now, Application info).
+    private async Task OnNewAlarm()
+    {
+        if (Note.IsNew())
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "New alarm for this note.", Detail = "You must save the note before adding alarms to it.", Duration = 12000 });
+            return;
+        }
+
+        var result = await webApiService.Notes.NewAlarmAsync(Note.NoteId, disposal.Token);
+        if (result.IsValid)
+            await OpenAlarmEditor(result.Entity);
+    }
+
+    private async Task OpenAlarmEditor(KMessageDto alarm)
+    {
+        var result = await dialogService.OpenAsync<NoteMessageEditor>(alarm.KMessageId == Guid.Empty ? "New alarm" : "Edit alarm",
+               new Dictionary<string, object?>()
+               {
+                   { "Alarm", alarm }, { "Users", users ?? new() }, { "NoteDisplay", $"#{Note.NoteNumber} · {Note.Topic}" },
+                   { "Save", (Func<KMessageDto, Task<bool>>)SaveAlarm }
+               },
+               KntDialogs.Framed(KntDialogs.Medium()));
+
+        if (result != null)
+        {
+            alarms = null;
+            await ShowPanel(4);
+        }
+    }
+
+    private async Task<bool> SaveAlarm(KMessageDto alarm)
+    {
+        alarm.NoteId = Note.NoteId;
+        var result = await webApiService.Notes.SaveAlarmAsync(alarm);
+        return result.IsValid;
+    }
+
+    private async Task OnDeleteAlarm(KMessageDto alarm)
+    {
+        var confirmed = await dialogService.Confirm(
+            $"Are you sure you want to delete the alarm of {alarm.AlarmDateTime:g}?", "Delete alarm",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+        if (confirmed != true)
+            return;
+
+        var result = await webApiService.Notes.DeleteAlarmAsync(alarm.KMessageId);
+        if (result.IsValid)
+        {
+            alarms = null;
+            await ShowPanel(4);
+        }
+    }
+
+    #endregion
+
     #region Trace notes management
 
     // Saved at once, as the tasks and the resources (not with the note, as ClientWin does).
@@ -646,7 +742,7 @@
                KntDialogs.Framed(KntDialogs.Medium()));
 
         if (result != null)
-            await ShowPanel(4);
+            await ShowPanel(5);
     }
 
     private async Task<bool> SaveTraceNote(TraceNoteDto traceNote)
@@ -666,7 +762,7 @@
 
         var result = await webApiService.Notes.DeleteTraceNoteAsync(traceNote.TraceNoteId);
         if (result.IsValid)
-            await ShowPanel(4);
+            await ShowPanel(5);
     }
 
     // The other note of the relation, in its own window (as ClientWin opens it in its note editor). Nothing is awaited

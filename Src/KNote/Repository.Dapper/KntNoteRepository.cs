@@ -934,7 +934,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
                     KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
                     KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
-                FROM  KMessages INNER JOIN
+                FROM  KMessages LEFT JOIN
                     Users ON KMessages.UserId = Users.UserId
                 WHERE (KMessages.NoteId = @noteId)
                 ORDER BY KMessages.AlarmDateTime;";
@@ -965,7 +965,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType, 
                     KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime, 
                     KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
-                FROM  KMessages INNER JOIN
+                FROM  KMessages LEFT JOIN
                         Users ON KMessages.UserId = Users.UserId  
                 WHERE KMessageId = @Id";
 

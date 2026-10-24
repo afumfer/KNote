@@ -1,0 +1,69 @@
+@inject TooltipService tooltipService
+
+@* The note's alarms, as in ClientWin's note editor (its KMessages): when, how often, how it is notified, for which user,
+   whether it is activated and its comment, by date. Double click (or Enter) edits an alarm. *@
+
+<div class="knt-list-header">
+    <span>@Alarms.Count @(Alarms.Count == 1 ? "alarm" : "alarms")@(Alarms.Count > 0 ? $" · {Alarms.Count(a => a.AlarmActivated == true)} activated" : "")</span>
+    <RadzenButton Text="Add alarm" Icon="alarm_add" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
+</div>
+
+@if (Alarms.Count == 0)
+{
+    <div class="knt-empty-state">
+        <RadzenIcon Icon="alarm" />
+        <div class="knt-empty-state-title">No alarms yet</div>
+        <div class="knt-empty-state-text">Add alarms to be reminded of the note when it is due (a new note has to be saved first).</div>
+    </div>
+}
+else
+{
+    <div class="knt-alarm-list" role="list" aria-label="Alarms">
+        @foreach (var alarm in Ordered)
+        {
+            <div class="knt-alarm @(alarm.AlarmActivated == true ? null : "knt-alarm-off")" role="listitem" tabindex="0"
+                 @ondblclick="() => OnEdit.InvokeAsync(alarm)" @onkeydown="@(e => OnAlarmKey(e, alarm))">
+                <span class="knt-alarm-icon"><RadzenIcon Icon="@KntAlarmTexts.NotificationIcon(alarm.NotificationType)" /></span>
+                <div class="knt-alarm-body">
+                    <div class="knt-alarm-title">
+                        @(alarm.AlarmDateTime?.ToString("g") ?? "-")
+                        <span class="knt-alarm-state">@(alarm.AlarmActivated == true ? "Activated" : "Not activated")</span>
+                    </div>
+                    <div class="knt-alarm-meta">
+                        <span><RadzenIcon Icon="repeat" />@KntAlarmTexts.Periodicity(alarm)</span>
+                        <span><RadzenIcon Icon="@KntAlarmTexts.NotificationIcon(alarm.NotificationType)" />@KntAlarmTexts.Notification(alarm.NotificationType)</span>
+                        <span><RadzenIcon Icon="person" />@(alarm.UserFullName ?? "-")</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(alarm.Comment))
+                    {
+                        <div class="knt-alarm-comment">@alarm.Comment</div>
+                    }
+                </div>
+                <div class="knt-alarm-actions">
+                    <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="() => OnEdit.InvokeAsync(alarm)" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit alarm"))" />
+                    <RadzenButton Icon="delete" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
+                                  Click="() => OnDelete.InvokeAsync(alarm)" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Delete alarm"))" />
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public List<KMessageDto> Alarms { get; set; } = new();
+    [Parameter] public EventCallback OnNew { get; set; }
+    [Parameter] public EventCallback<KMessageDto> OnEdit { get; set; }
+    [Parameter] public EventCallback<KMessageDto> OnDelete { get; set; }
+    // A change being saved (NoteForm): adding, editing and deleting wait for it.
+    [Parameter] public bool Busy { get; set; }
+
+    // As ClientWin lists them: by date.
+    private IEnumerable<KMessageDto> Ordered => Alarms.OrderBy(a => a.AlarmDateTime);
+
+    private async Task OnAlarmKey(KeyboardEventArgs e, KMessageDto alarm)
+    {
+        if (e.Key == "Enter")
+            await OnEdit.InvokeAsync(alarm);
+    }
+}

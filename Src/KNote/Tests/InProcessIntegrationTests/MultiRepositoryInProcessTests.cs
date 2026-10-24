@@ -139,6 +139,30 @@ public class MultiRepositoryInProcessTests
     }
 
     [TestMethod]
+    public async Task TheAlarmsOfANote_AreOnlyReachedFromItsRepository()
+    {
+        var userName = await NewUserAsync(Password, inA: true, inB: true);
+        Guid alarmId;
+        using (var serviceB = _factory.CreateServiceForRepository(1))
+        {
+            var folder = (await serviceB.Folders.SaveAsync(new FolderDto { FolderId = Guid.Empty, Name = $"__TEST_ALARMS_{Guid.NewGuid():N}__" })).Entity;
+            var note = (await serviceB.Notes.SaveAsync(new NoteDto { Topic = "Alarm in B", FolderId = folder.FolderId, CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now })).Entity;
+            var alarm = (await serviceB.Notes.SaveMessageAsync(new KMessageDto { NoteId = note.NoteId, Comment = "In B", AlarmActivated = true, AlarmDateTime = DateTime.Now })).Entity;
+            alarmId = alarm.KMessageId;
+        }
+        using var inA = ClientFor((await LoginAsync(userName, Password, _repositoryA)).token);
+        using var inB = ClientFor((await LoginAsync(userName, Password, _repositoryB)).token);
+
+        var fromA = await inA.GetAsync($"api/notes/alarms/{alarmId}");
+        var deleteFromA = await inA.DeleteAsync($"api/notes/alarms/{alarmId}");
+        var fromB = await inB.GetAsync($"api/notes/alarms/{alarmId}");
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, fromA.StatusCode, "Not in A.");
+        Assert.AreEqual(HttpStatusCode.BadRequest, deleteFromA.StatusCode);
+        Assert.AreEqual(HttpStatusCode.OK, fromB.StatusCode, "Still in B.");
+    }
+
+    [TestMethod]
     public async Task WithoutASession_TheDefaultRepository_AndWithOne_ItsRepository()
     {
         var userName = await NewUserAsync(Password, inA: true, inB: true);

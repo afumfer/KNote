@@ -63,7 +63,7 @@ public class CommandAuthorizationMatrixTests
             "KntNotesSaveExtendedAsyncCommand", "KntNotesDeleteAsyncCommand", "KntNotesDeleteExtendedAsyncCommand",
             "KntNotesSaveResourceAsyncCommand", "KntNotesSaveResourceInfoAsyncCommand", "KntNotesDeleteResourceAsyncCommand",
             "KntNotesDeleteResourceInfoAsyncCommand", "KntNotesSaveNoteTaskAsyncCommand", "KntNotesDeleteNoteTaskAsyncCommand",
-            "KntNotesSaveMessageAsyncCommand", "KntNotesDeleteMessageAsyncCommand", "KntNotesSaveTraceNoteAsyncCommand",
+            "KntNotesNewMessageAsyncCommand", "KntNotesSaveMessageAsyncCommand", "KntNotesDeleteMessageAsyncCommand", "KntNotesSaveTraceNoteAsyncCommand",
             "KntNotesDeleteTraceNoteAsyncCommand", "KntNotesSaveWindowAsyncCommand", "KntNotesGetAlarmNotesIdAsyncCommand",
             "KntNotesPatchFolderAsyncCommand", "KntNotesPatchChangeTagsAsyncCommand");
 

@@ -512,6 +512,111 @@ public class NotesController : ControllerBase
         }
     }
 
+    #region Alarms (the note's KMessages), saved at once as the tasks
+
+    [HttpGet("{id}/alarms")]
+    public async Task<IActionResult> Alarms(Guid id)
+    {
+        try
+        {
+            _logger.LogTrace("Alarms {id} {dateTime}.", id, DateTime.Now);
+
+            var resApi = await _service.Notes.GetMessagesAsync(id);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Alarms {id} at {dateTime}.", id, DateTime.Now);
+            var kresApi = new Result<List<KMessageDto>>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    // A new alarm of the note with the values the Service gives it (not saved).
+    [HttpGet("{id}/alarms/new")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> NewAlarm(Guid id)
+    {
+        try
+        {
+            _logger.LogTrace("NewAlarm {id} {dateTime}.", id, DateTime.Now);
+
+            var resApi = await _service.Notes.NewMessageAsync(id);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "NewAlarm {id} at {dateTime}.", id, DateTime.Now);
+            var kresApi = new Result<KMessageDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    [HttpGet("alarms/{id}")]
+    public async Task<IActionResult> Alarm(Guid id)
+    {
+        try
+        {
+            _logger.LogTrace("Alarm {id} {dateTime}.", id, DateTime.Now);
+
+            var resApi = await _service.Notes.GetMessageAsync(id);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Alarm {id} at {dateTime}.", id, DateTime.Now);
+            var kresApi = new Result<KMessageDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    // A new alarm (KMessageId empty) or a change of one.
+    [HttpPost("alarms")]
+    [HttpPut("alarms")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> SaveAlarm([FromBody] KMessageDto alarm)
+    {
+        try
+        {
+            _logger.LogTrace("SaveAlarm {dateTime}.", DateTime.Now);
+
+            var resApi = await _service.Notes.SaveMessageAsync(alarm);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SaveAlarm at {dateTime}.", DateTime.Now);
+            var kresApi = new Result<KMessageDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    [HttpDelete("alarms/{id}")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> DeleteAlarm(Guid id)
+    {
+        try
+        {
+            _logger.LogTrace("DeleteAlarm {id} {dateTime}.", id, DateTime.Now);
+
+            var resApi = await _service.Notes.DeleteMessageAsync(id);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "DeleteAlarm {id} at {dateTime}.", id, DateTime.Now);
+            var kresApi = new Result<KMessageDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    #endregion
+
     // The note's trace notes in both directions, each one with the other note of the relation and its type
     // resolved as ClientWin's note editor shows them (TraceNoteRows).
     [HttpGet("{id}/[action]")]

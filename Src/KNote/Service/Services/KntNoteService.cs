@@ -233,6 +233,12 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<KMessageDto>> NewMessageAsync(Guid noteId)
+    {
+        var command = new KntNotesNewMessageAsyncCommand(Service, noteId);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false)
     {
         var command = new KntNotesSaveMessageAsyncCommand(Service, entity, forceNew);

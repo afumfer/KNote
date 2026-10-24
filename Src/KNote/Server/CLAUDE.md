@@ -240,6 +240,13 @@ public class FoldersController : ControllerBase
 - **Descripción de las tareas** (`api/notes/{id}/tasks`, `POST/PUT api/notes/tasks`, y las del calendario): es
   Markdown como la de una nota, así que pasa por `UtilUpdateResourceInDescriptionForRead`/`ForWrite` y al guardar
   sus saltos de línea se normalizan a CR LF.
+- **Alarmas de una nota** (sus `KMessage`, pestaña "Alarms" del editor de la Web): se guardan al momento, como las
+  tareas. `GET api/notes/{id}/alarms` (la lista, con el nombre del usuario) y `GET api/notes/alarms/{id}`: cualquier
+  usuario autenticado; `GET api/notes/{id}/alarms/new` (una alarma nueva con los valores de `Notes.NewMessageAsync`:
+  usuario actual, activada, ahora al minuto, Application info), `POST/PUT api/notes/alarms` y `DELETE
+  api/notes/alarms/{id}`: Staff+, como los comandos. Las reglas, en `KMessageDto.Validate` (fecha obligatoria; "cada N
+  minutos" con minutos). Guardar una alarma no recalcula el estado de la nota ("Alarms pending", `InternalTags`): lo hace
+  el guardado de la nota, como con las tareas. Tests en `NoteAlarmsInProcessTests`.
 - **Editar un recurso** (`PUT api/notes/resources`, `ResourceInfoDto`): un recurso que ya existe solo cambia su
   descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
   fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el

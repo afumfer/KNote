@@ -97,4 +97,22 @@ public class NoteWebApiService : BaseService, INoteWebApiService
     public Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId, CancellationToken cancellationToken = default) =>
         SendAsync<TraceNoteDto>(ct => _httpClient.DeleteAsync($"api/notes/tracenotes/{traceNoteId}", ct),
             "Delete trace note", true, cancellationToken);
+
+    public Task<Result<List<KMessageDto>>> GetAlarmsAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<List<KMessageDto>>(ct => _httpClient.GetAsync($"api/notes/{noteId}/alarms", ct),
+            "Get note alarms", cancellationToken: cancellationToken);
+
+    public Task<Result<KMessageDto>> NewAlarmAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        SendAsync<KMessageDto>(ct => _httpClient.GetAsync($"api/notes/{noteId}/alarms/new", ct),
+            "New alarm", cancellationToken: cancellationToken);
+
+    public Task<Result<KMessageDto>> SaveAlarmAsync(KMessageDto alarm, CancellationToken cancellationToken = default) =>
+        SendAsync<KMessageDto>(ct => alarm.KMessageId == Guid.Empty
+                ? _httpClient.PostAsJsonAsync("api/notes/alarms", alarm, ct)
+                : _httpClient.PutAsJsonAsync("api/notes/alarms", alarm, ct),
+            "Save alarm", true, cancellationToken);
+
+    public Task<Result<KMessageDto>> DeleteAlarmAsync(Guid alarmId, CancellationToken cancellationToken = default) =>
+        SendAsync<KMessageDto>(ct => _httpClient.DeleteAsync($"api/notes/alarms/{alarmId}", ct),
+            "Delete alarm", true, cancellationToken);
 }

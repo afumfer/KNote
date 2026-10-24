@@ -638,7 +638,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             foreach (var m in listMessages)
             {
                 var msg = m.GetSimpleDto<KMessageDto>();
-                msg.UserFullName = m.User.FullName;
+                msg.UserFullName = m.User?.FullName;
                 result.Entity.Add(msg);
             }
 
@@ -661,10 +661,15 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var ctx = GetOpenConnection();
             var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
-            var resGenRep = await kmessages.GetAsync((object)messageId);
-
-            result.Entity = resGenRep.Entity?.GetSimpleDto<KMessageDto>();
-            result.AddListErrorMessage(resGenRep.ListErrorMessage);
+            // With its user's name, as GetMessagesAsync (and the Dapper repository).
+            var message = await kmessages.DbSet.Include(m => m.User).FirstOrDefaultAsync(m => m.KMessageId == messageId);
+            if (message == null)
+                result.AddErrorMessage("Entity not found.");
+            else
+            {
+                result.Entity = message.GetSimpleDto<KMessageDto>();
+                result.Entity.UserFullName = message.User?.FullName;
+            }
 
             await CloseIsTempConnection(ctx);
         
