@@ -4,6 +4,7 @@ using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.ClientWin.Utils;
+using KNote.Service.Core;
 using KntIcons;
 
 namespace KNote.ClientWin.Views;
@@ -113,8 +114,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     public override void ShowView()
     {
-        toolStripStatusServiceRef.Text = $" {_ctrl.ServiceRef.Name}";
+        UpdateRepositoryDisplay();
         PopulateProviders();
+        PopulateRepositories();
         UpdateOptionsMenu();
 
         // The sessions panel only when the conversation is persisted (the assistant opened from the menu).
@@ -221,8 +223,38 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
                 return;
 
             RestartAIAssistantView();
-            Text = $"{ViewCaptionText}";
+            SetCaption();
             SelectCurrentSession();
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
+    }
+
+    // Another repository: its sessions and its notes, so a new conversation (the current one is saved first).
+    private async void comboRepositories_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (comboRepositories.SelectedItem is not ServiceRef repository || repository == _ctrl.ServiceRef)
+            return;
+
+        try
+        {
+            if (_ctrl.ChatTurns.Count > 0)
+            {
+                var result = ShowInfo($"Changing the repository starts a new conversation, with the sessions of {repository.Name}. Continue?",
+                    "KNote", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result != DialogResult.Yes || !await _ctrl.LeaveSessionAsync())
+                {
+                    SelectRepositoryInCombo(_ctrl.ServiceRef);
+                    return;
+                }
+            }
+
+            _ctrl.SetRepository(repository);
+            RestartAIAssistantView();
+            UpdateRepositoryDisplay();
+            await LoadSessionsAsync();
         }
         catch (Exception ex)
         {
@@ -249,7 +281,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
                 // Resumed with its own provider, which may not be the one in the list.
                 SelectProviderInCombo(_ctrl.CurrentProviderRef);
                 buttonSend.Enabled = true;
-                Text = $"{ViewCaptionText} - {_ctrl.SessionTopic}";
+                SetCaption(_ctrl.SessionTopic);
                 RefreshView();
             }
             else
@@ -300,7 +332,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             return;
 
         RestartAIAssistantView();
-        Text = $"{ViewCaptionText} - {assistantInfo.Name}";
+        SetCaption(assistantInfo.Name);
         textPrompt.Text = assistantInfo.User;
         // A new conversation, not in the list yet.
         SelectCurrentSession();
@@ -351,7 +383,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
             _ctrl.SetProvider(providerRef);
             RestartAIAssistantView();
-            Text = ViewCaptionText;
+            SetCaption();
             SelectCurrentSession();
             // Covers the case where the assistant opened with zero providers configured (Send stays
             // disabled until one is picked): SetProvider just succeeded, so it's safe to re-enable now.
@@ -463,6 +495,39 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
         comboProviders.SelectedItem = providerRef;
     }
+
+    // The repositories where the sessions can be (only shown with the sessions panel): the one of the assistant
+    // selected, even if the user's role there no longer allows the sessions (then it is the only one listed with it).
+    private void PopulateRepositories()
+    {
+        comboRepositories.SelectedIndexChanged -= comboRepositories_SelectedIndexChanged;
+
+        var repositories = _ctrl.Repositories;
+        if (!repositories.Contains(_ctrl.ServiceRef))
+            repositories.Insert(0, _ctrl.ServiceRef);
+        comboRepositories.DataSource = null;
+        comboRepositories.DisplayMember = nameof(ServiceRef.Name);
+        comboRepositories.DataSource = repositories;
+        SelectRepositoryInCombo(_ctrl.ServiceRef);
+
+        comboRepositories.SelectedIndexChanged += comboRepositories_SelectedIndexChanged;
+    }
+
+    private void SelectRepositoryInCombo(ServiceRef repository)
+    {
+        comboRepositories.Enabled = comboRepositories.Items.Count > 1 && !_processing;
+        comboRepositories.SelectedItem = repository;
+    }
+
+    // Where the assistant works: in the title, the status bar and the sessions panel.
+    private void UpdateRepositoryDisplay()
+    {
+        toolStripStatusServiceRef.Text = $" Repository: {_ctrl.ServiceRef.Name}";
+        SetCaption();
+    }
+
+    private void SetCaption(string detail = null) =>
+        Text = string.IsNullOrEmpty(detail) ? $"{ViewCaptionText} - {_ctrl.ServiceRef.Name}" : $"{ViewCaptionText} - {_ctrl.ServiceRef.Name} - {detail}";
 
     // For the synchronous ShowView.
     private async void LoadSessions()
@@ -605,6 +670,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             toolStripStatusLabelProcessing.Text = " Processing ...";
             textPrompt.Enabled = false;
             comboProviders.Enabled = false;
+            comboRepositories.Enabled = false;
             menuOptions.Enabled = false;
             buttonSend.Enabled = false;
             buttonNewSession.Enabled = false;
@@ -619,6 +685,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             toolStripStatusLabelProcessing.Text = " ";
             textPrompt.Enabled = true;
             comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
+            comboRepositories.Enabled = comboRepositories.Items.Count > 1;
             menuOptions.Enabled = true;
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
             buttonNewSession.Enabled = true;

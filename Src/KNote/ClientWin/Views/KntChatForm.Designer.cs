@@ -49,6 +49,9 @@
             listViewThreads = new ListView();
             panelThreadsHeader = new Panel();
             labelThreads = new Label();
+            panelRepositoryHeader = new Panel();
+            labelRepository = new Label();
+            comboRepositories = new ComboBox();
             buttonNewThread = new Button();
             menuChatRoom = new MenuStrip();
             menuActions = new ToolStripMenuItem();
@@ -70,6 +73,7 @@
             panelConversationHeader.SuspendLayout();
             panelMessageHeader.SuspendLayout();
             panelThreadsHeader.SuspendLayout();
+            panelRepositoryHeader.SuspendLayout();
             menuChatRoom.SuspendLayout();
             SuspendLayout();
             //
@@ -128,6 +132,7 @@
             //
             splitThreads.Panel2.Controls.Add(listViewThreads);
             splitThreads.Panel2.Controls.Add(panelThreadsHeader);
+            splitThreads.Panel2.Controls.Add(panelRepositoryHeader);
             splitThreads.Panel2.Padding = new Padding(4);
             splitThreads.Panel2MinSize = 160;
             splitThreads.Size = new Size(1100, 577);
@@ -278,10 +283,10 @@
             //
             listViewThreads.Dock = DockStyle.Fill;
             listViewThreads.HideSelection = false;
-            listViewThreads.Location = new Point(4, 38);
+            listViewThreads.Location = new Point(4, 92);
             listViewThreads.MultiSelect = false;
             listViewThreads.Name = "listViewThreads";
-            listViewThreads.Size = new Size(266, 535);
+            listViewThreads.Size = new Size(266, 481);
             listViewThreads.TabIndex = 1;
             listViewThreads.UseCompatibleStateImageBehavior = false;
             listViewThreads.ItemSelectionChanged += listViewThreads_ItemSelectionChanged;
@@ -291,7 +296,7 @@
             panelThreadsHeader.Controls.Add(labelThreads);
             panelThreadsHeader.Controls.Add(buttonNewThread);
             panelThreadsHeader.Dock = DockStyle.Top;
-            panelThreadsHeader.Location = new Point(4, 4);
+            panelThreadsHeader.Location = new Point(4, 58);
             panelThreadsHeader.Name = "panelThreadsHeader";
             panelThreadsHeader.Size = new Size(266, 34);
             panelThreadsHeader.TabIndex = 0;
@@ -317,6 +322,36 @@
             buttonNewThread.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonNewThread.UseVisualStyleBackColor = true;
             buttonNewThread.Click += buttonNewThread_Click;
+            //
+            // panelRepositoryHeader
+            //
+            panelRepositoryHeader.Controls.Add(labelRepository);
+            panelRepositoryHeader.Controls.Add(comboRepositories);
+            panelRepositoryHeader.Dock = DockStyle.Top;
+            panelRepositoryHeader.Location = new Point(4, 4);
+            panelRepositoryHeader.Name = "panelRepositoryHeader";
+            panelRepositoryHeader.Padding = new Padding(0, 0, 0, 2);
+            panelRepositoryHeader.Size = new Size(266, 54);
+            panelRepositoryHeader.TabIndex = 2;
+            //
+            // labelRepository
+            //
+            labelRepository.AutoSize = true;
+            labelRepository.Font = new Font("Segoe UI", 9.75F);
+            labelRepository.Location = new Point(4, 6);
+            labelRepository.Name = "labelRepository";
+            labelRepository.Size = new Size(184, 17);
+            labelRepository.TabIndex = 0;
+            labelRepository.Text = "Chat room of the repository:";
+            //
+            // comboRepositories
+            //
+            comboRepositories.Dock = DockStyle.Bottom;
+            comboRepositories.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboRepositories.Location = new Point(0, 29);
+            comboRepositories.Name = "comboRepositories";
+            comboRepositories.Size = new Size(266, 23);
+            comboRepositories.TabIndex = 1;
             //
             // menuChatRoom
             //
@@ -407,6 +442,8 @@
             panelMessageHeader.PerformLayout();
             panelThreadsHeader.ResumeLayout(false);
             panelThreadsHeader.PerformLayout();
+            panelRepositoryHeader.ResumeLayout(false);
+            panelRepositoryHeader.PerformLayout();
             menuChatRoom.ResumeLayout(false);
             menuChatRoom.PerformLayout();
             ResumeLayout(false);
@@ -436,6 +473,9 @@
         private ListView listViewThreads;
         private Panel panelThreadsHeader;
         private Label labelThreads;
+        private Panel panelRepositoryHeader;
+        private Label labelRepository;
+        private ComboBox comboRepositories;
         private Button buttonNewThread;
         private MenuStrip menuChatRoom;
         private ToolStripMenuItem menuActions;

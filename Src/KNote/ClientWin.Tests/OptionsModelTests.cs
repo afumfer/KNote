@@ -6,6 +6,9 @@ namespace KNote.ClientWin.Tests;
 [TestClass]
 public class OptionsModelTests
 {
+    private static readonly Guid WorkId = Guid.NewGuid();
+    private static readonly Guid PersonalId = Guid.NewGuid();
+
     private static (AppUserSettings Settings, AppUserState State) NewConfig()
     {
         var settings = new AppUserSettings();
@@ -17,8 +20,7 @@ public class OptionsModelTests
         settings.Security.AuthenticationMode = AppAuthenticationMode.Credentials;
         settings.Connectivity.ChatHub.Url = "http://chat.example.com/hub";
         settings.Connectivity.ChatHub.UserName = "jdoe";
-        settings.Connectivity.ChatHub.Token = "token-1";
-        settings.Connectivity.ChatHub.RepositoryName = "Work";
+        settings.Connectivity.ChatHub.Repositories.Add(new ChatHubRepositoryConfig { RepositoryId = WorkId, Name = "Work", Token = "token-1" });
         settings.Notifications.Email.Host = "smtp.example.com";
         settings.Notifications.Email.Port = 465;
         settings.Notifications.Email.EnableSsl = false;
@@ -46,8 +48,9 @@ public class OptionsModelTests
         Assert.AreEqual(AppAuthenticationMode.Credentials, model.AuthenticationMode);
         Assert.AreEqual("http://chat.example.com/hub", model.ChatHubUrl);
         Assert.AreEqual("jdoe", model.ChatHubUserName);
-        Assert.AreEqual("token-1", model.ChatHubToken);
-        Assert.AreEqual("Work", model.ChatHubRepositoryName);
+        Assert.AreEqual("token-1", model.ChatHubRepositories.Single().Token);
+        Assert.AreEqual(WorkId, model.ChatHubRepositories.Single().RepositoryId);
+        Assert.AreNotSame(settings.Connectivity.ChatHub.Repositories[0], model.ChatHubRepositories[0], "A copy: editing the model doesn't change the settings.");
         Assert.IsTrue(model.ChatHubAutoConnectDisabled);
         Assert.AreEqual("smtp.example.com", model.SmtpHost);
         Assert.AreEqual(465, model.SmtpPort);
@@ -72,8 +75,7 @@ public class OptionsModelTests
         model.AuthenticationMode = AppAuthenticationMode.Windows;
         model.ChatHubUrl = "http://other/hub";
         model.ChatHubUserName = "ana";
-        model.ChatHubToken = "token-2";
-        model.ChatHubRepositoryName = "Personal";
+        model.ChatHubRepositories = new() { new ChatHubRepositoryConfig { RepositoryId = PersonalId, Name = "Personal", Token = "token-2" } };
         model.ChatHubAutoConnectDisabled = false;
         model.SmtpHost = "smtp.other.com";
         model.SmtpPort = 25;
@@ -95,7 +97,7 @@ public class OptionsModelTests
         Assert.AreEqual("http://other/hub", settings.Connectivity.ChatHub.Url);
         Assert.AreEqual("ana", settings.Connectivity.ChatHub.UserName);
         Assert.AreEqual("token-2", settings.Connectivity.ChatHub.Token);
-        Assert.AreEqual("Personal", settings.Connectivity.ChatHub.RepositoryName);
+        Assert.AreEqual("Personal", settings.Connectivity.ChatHub.Current().Name);
         Assert.IsFalse(state.Session.ChatHubAutoConnectDisabled);
         var email = settings.Notifications.Email;
         Assert.AreEqual("smtp.other.com", email.Host);

@@ -65,37 +65,53 @@ public class ChatRoomServerTests
     }
 
     [TestMethod]
-    public async Task SignIn_ValidInSeveralRepositories_GivesThem_WithoutAToken()
+    public async Task SignIn_ValidInSeveralRepositories_GetsATokenForEachOne()
     {
-        var repositories = new List<RepositoryInfoDto>
-        {
-            new() { RepositoryId = Guid.NewGuid(), Name = "Work" },
-            new() { RepositoryId = Guid.NewGuid(), Name = "Personal" }
-        };
-        var server = new FakeServer(_ => new UserTokenDto { success = false, token = "", Repositories = repositories, error = "Choose one." });
+        var work = new RepositoryInfoDto { RepositoryId = Guid.NewGuid(), Name = "Work" };
+        var personal = new RepositoryInfoDto { RepositoryId = Guid.NewGuid(), Name = "Personal" };
+        var server = new FakeServer(credentials => credentials.RepositoryId is Guid id
+            ? new UserTokenDto { success = true, token = $"token-{id}" }
+            : new UserTokenDto { success = false, token = "", Repositories = new() { work, personal }, error = "Choose one." });
 
         var res = await ChatRoomServer.SignInAsync(server, "https://server/KNote/chathub", "jdoe", "pwd");
 
         Assert.IsTrue(res.IsValid, res.ErrorMessage);
-        Assert.IsNull(res.Entity.Token);
-        CollectionAssert.AreEqual(new[] { "Work", "Personal" }, res.Entity.Repositories.Select(r => r.Name).ToArray());
-        Assert.IsNull(server.Credentials[0].RepositoryId);
+        CollectionAssert.AreEqual(new[] { "Work", "Personal" }, res.Entity.Select(r => r.Name).ToArray());
+        CollectionAssert.AreEqual(new[] { work.RepositoryId, personal.RepositoryId }, res.Entity.Select(r => r.RepositoryId).ToArray());
+        CollectionAssert.AreEqual(new[] { $"token-{work.RepositoryId}", $"token-{personal.RepositoryId}" }, res.Entity.Select(r => r.Token).ToArray());
+        Assert.IsNull(server.Credentials[0].RepositoryId, "First, without a repository.");
+        Assert.HasCount(3, server.Credentials, "Then once in each one, with the same password.");
     }
 
     [TestMethod]
-    public async Task SignIn_InTheRepositoryChosen_GivesItsTokenAndName()
+    public async Task SignIn_ValidInOneRepository_GivesItsTokenNameAndId()
     {
-        var chosen = Guid.NewGuid();
-        var server = new FakeServer(_ => new UserTokenDto { success = true, token = "token-1" }, repositoryName: "Work");
+        var repositoryId = Guid.NewGuid();
+        var token = FakeJwt($"{{\"knt_repo\":\"{repositoryId}\",\"unique_name\":\"jdoe@knote.tests\"}}");
+        var server = new FakeServer(_ => new UserTokenDto { success = true, token = token }, repositoryName: "Work");
 
-        var res = await ChatRoomServer.SignInAsync(server, "https://server/KNote/chathub", "jdoe", "pwd", chosen);
+        var res = await ChatRoomServer.SignInAsync(server, "https://server/KNote/chathub", "jdoe", "pwd");
 
         Assert.IsTrue(res.IsValid, res.ErrorMessage);
-        Assert.AreEqual("token-1", res.Entity.Token);
-        Assert.AreEqual("Work", res.Entity.RepositoryName);
-        Assert.IsNull(res.Entity.Repositories);
-        Assert.AreEqual(chosen, server.Credentials[0].RepositoryId);
-        Assert.AreEqual("token-1", server.RepositoryNameToken, "The name is read with the token: its repository's.");
+        var repository = res.Entity.Single();
+        Assert.AreEqual(token, repository.Token);
+        Assert.AreEqual("Work", repository.Name);
+        Assert.AreEqual(repositoryId, repository.RepositoryId, "Read from the token (its knt_repo claim).");
+        Assert.AreEqual(token, server.RepositoryNameToken, "The name is read with the token: its repository's.");
+    }
+
+    [TestMethod]
+    public void RepositoryIdOf_ATokenWithoutTheClaim_OrNotAToken_IsEmpty()
+    {
+        Assert.AreEqual(Guid.Empty, ChatRoomServer.RepositoryIdOf(FakeJwt("{\"unique_name\":\"jdoe\"}")));
+        Assert.AreEqual(Guid.Empty, ChatRoomServer.RepositoryIdOf("not-a-token"));
+    }
+
+    // A JWT with that payload (not signed: the client only reads it).
+    private static string FakeJwt(string payload)
+    {
+        static string Base64Url(string text) => Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(text)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        return $"{Base64Url("{\"alg\":\"HS256\",\"typ\":\"JWT\"}")}.{Base64Url(payload)}.signature";
     }
 
     [TestMethod]

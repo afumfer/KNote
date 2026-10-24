@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using KNote.Model;
 using KNote.Model.Dto;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -7,22 +8,10 @@ using Microsoft.AspNetCore.SignalR.Client;
 namespace KNote.ClientWin.Core;
 
 /// <summary>
-/// Signing in to the chat room's Server (ChatRoomServer.SignInAsync): the token and its repository's name or, when the
-/// credentials are valid in several repositories of the Server, those repositories (no token yet).
-/// </summary>
-public sealed class ChatRoomSignIn
-{
-    public string Token { get; init; }
-
-    public string RepositoryName { get; init; }
-
-    public List<RepositoryInfoDto> Repositories { get; init; }
-}
-
-/// <summary>
 /// The KNote Server of the chat room, as ClientWin reaches it: the hub's url (ChatHubConfig.Url, ending in
-/// ChatRoomHubContract.Path, e.g. https://server/KNote/chathub), the sign-in that gives the token the hub asks for
-/// (api/users/login of the same Server), and a connection test. Used by Options, where the user signs in once.
+/// ChatRoomHubContract.Path, e.g. https://server/KNote/chathub), the sign-in that gives the tokens the hub asks for
+/// (api/users/login of the same Server; one per repository of the Server, each one with its chat room), and a
+/// connection test. Used by Options, where the user signs in once.
 /// </summary>
 public static class ChatRoomServer
 {
@@ -100,18 +89,17 @@ public static class ChatRoomServer
     }
 
     /// <summary>
-    /// Signs in to the Server of the hub, in the repository given (repositoryId) or, without it, in the only one where
-    /// the credentials are valid. A Server can have several repositories, each one with its chat room: when the
-    /// credentials are valid in several, the answer is them (ChatRoomSignIn.Repositories, without a token), to sign in
-    /// again with the one chosen. The token and its repository's name, or the reason it was refused.
+    /// Signs in to the Server of the hub in every repository where the credentials are valid (a Server can have several,
+    /// each one with its chat room): one token for each one, so the chat room's window changes repository without
+    /// asking for the password again. The repositories with their tokens, or the reason it was refused.
     /// </summary>
-    public static Task<Result<ChatRoomSignIn>> SignInAsync(string hubUrl, string userName, string password, Guid? repositoryId = null) =>
-        SignInAsync(new HttpClientHandler(), hubUrl, userName, password, repositoryId);
+    public static Task<Result<List<ChatHubRepositoryConfig>>> SignInAsync(string hubUrl, string userName, string password) =>
+        SignInAsync(new HttpClientHandler(), hubUrl, userName, password);
 
     // handler: how the requests are sent (the tests use a fake one).
-    internal static async Task<Result<ChatRoomSignIn>> SignInAsync(HttpMessageHandler handler, string hubUrl, string userName, string password, Guid? repositoryId = null)
+    internal static async Task<Result<List<ChatHubRepositoryConfig>>> SignInAsync(HttpMessageHandler handler, string hubUrl, string userName, string password)
     {
-        var result = new Result<ChatRoomSignIn>();
+        var result = new Result<List<ChatHubRepositoryConfig>>();
 
         var loginUrl = LoginUrl(hubUrl);
         if (loginUrl == null)
@@ -128,14 +116,36 @@ public static class ChatRoomServer
         try
         {
             using var httpClient = new HttpClient(handler) { Timeout = ConnectTimeout };
-            var response = await httpClient.PostAsJsonAsync(loginUrl, new UserCredentialsDto { UserName = userName.Trim(), Password = password, RepositoryId = repositoryId });
-            var token = await ReadTokenAsync(response);
+            var (token, refused) = await LoginAsync(httpClient, loginUrl, userName.Trim(), password, null);
+
+            // Valid in one repository: its token.
             if (token?.success == true && !string.IsNullOrEmpty(token.token))
-                result.Entity = new ChatRoomSignIn { Token = token.token, RepositoryName = await ReadRepositoryNameAsync(httpClient, BaseUrl(hubUrl), token.token) };
-            else if (token?.Repositories is { Count: > 1 } repositories)
-                result.Entity = new ChatRoomSignIn { Repositories = repositories };
-            else
-                result.AddErrorMessage(string.IsNullOrEmpty(token?.error) ? $"The server refused the sign in ({(int)response.StatusCode} {response.ReasonPhrase})." : token.error);
+            {
+                result.Entity = new List<ChatHubRepositoryConfig> { new()
+                {
+                    RepositoryId = RepositoryIdOf(token.token),
+                    Name = await ReadRepositoryNameAsync(httpClient, BaseUrl(hubUrl), token.token),
+                    Token = token.token
+                } };
+                return result;
+            }
+
+            // Valid in several: a token for each one.
+            if (token?.Repositories is { Count: > 1 } repositories)
+            {
+                result.Entity = new List<ChatHubRepositoryConfig>();
+                foreach (var repository in repositories)
+                {
+                    var (repositoryToken, _) = await LoginAsync(httpClient, loginUrl, userName.Trim(), password, repository.RepositoryId);
+                    if (repositoryToken?.success == true && !string.IsNullOrEmpty(repositoryToken.token))
+                        result.Entity.Add(new ChatHubRepositoryConfig { RepositoryId = repository.RepositoryId, Name = repository.Name, Token = repositoryToken.token });
+                }
+                if (result.Entity.Count == 0)
+                    result.AddErrorMessage("The server refused the sign in to its repositories.");
+                return result;
+            }
+
+            result.AddErrorMessage(string.IsNullOrEmpty(token?.error) ? $"The server refused the sign in ({refused})." : token.error);
         }
         catch (Exception ex)
         {
@@ -143,6 +153,31 @@ public static class ChatRoomServer
         }
 
         return result;
+    }
+
+    // The sign in's answer, and the response's status (for when it isn't a UserTokenDto).
+    private static async Task<(UserTokenDto Token, string Status)> LoginAsync(HttpClient httpClient, Uri loginUrl, string userName, string password, Guid? repositoryId)
+    {
+        var response = await httpClient.PostAsJsonAsync(loginUrl, new UserCredentialsDto { UserName = userName, Password = password, RepositoryId = repositoryId });
+        return (await ReadTokenAsync(response), $"{(int)response.StatusCode} {response.ReasonPhrase}");
+    }
+
+    /// <summary>The repository of a token of the Server (its knt_repo claim), Guid.Empty if it doesn't say it.</summary>
+    internal static Guid RepositoryIdOf(string token)
+    {
+        try
+        {
+            var payload = token.Split('.')[1].Replace('-', '+').Replace('_', '/');
+            var json = Convert.FromBase64String(payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '='));
+            using var document = JsonDocument.Parse(json);
+            return document.RootElement.TryGetProperty(KntConst.RepositoryClaimType, out var claim) && Guid.TryParse(claim.GetString(), out var id)
+                ? id
+                : Guid.Empty;
+        }
+        catch (Exception)
+        {
+            return Guid.Empty;
+        }
     }
 
     // The name of the token's repository (null if the Server doesn't say it).

@@ -67,8 +67,6 @@ namespace KNote.ClientWin.Views
             this.textChatUserName = new System.Windows.Forms.TextBox();
             this.labelChatPassword = new System.Windows.Forms.Label();
             this.textChatPassword = new System.Windows.Forms.TextBox();
-            this.labelChatRepository = new System.Windows.Forms.Label();
-            this.comboChatRepository = new System.Windows.Forms.ComboBox();
             this.buttonChatSignIn = new System.Windows.Forms.Button();
             this.buttonChatSignOut = new System.Windows.Forms.Button();
             this.labelChatStatus = new System.Windows.Forms.Label();
@@ -401,8 +399,6 @@ namespace KNote.ClientWin.Views
             this.tabChatRoomOptions.Controls.Add(this.textChatUserName);
             this.tabChatRoomOptions.Controls.Add(this.labelChatPassword);
             this.tabChatRoomOptions.Controls.Add(this.textChatPassword);
-            this.tabChatRoomOptions.Controls.Add(this.labelChatRepository);
-            this.tabChatRoomOptions.Controls.Add(this.comboChatRepository);
             this.tabChatRoomOptions.Controls.Add(this.buttonChatSignIn);
             this.tabChatRoomOptions.Controls.Add(this.buttonChatSignOut);
             this.tabChatRoomOptions.Controls.Add(this.labelChatStatus);
@@ -473,50 +469,32 @@ namespace KNote.ClientWin.Views
             this.textChatPassword.TabIndex = 6;
             this.textChatPassword.UseSystemPasswordChar = true;
             //
-            // labelChatRepository
-            //
-            this.labelChatRepository.AutoSize = true;
-            this.labelChatRepository.Location = new System.Drawing.Point(9, 128);
-            this.labelChatRepository.Name = "labelChatRepository";
-            this.labelChatRepository.Size = new System.Drawing.Size(65, 15);
-            this.labelChatRepository.TabIndex = 7;
-            this.labelChatRepository.Text = "Repository:";
-            //
-            // comboChatRepository
-            //
-            this.comboChatRepository.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboChatRepository.Enabled = false;
-            this.comboChatRepository.Location = new System.Drawing.Point(127, 124);
-            this.comboChatRepository.Name = "comboChatRepository";
-            this.comboChatRepository.Size = new System.Drawing.Size(313, 23);
-            this.comboChatRepository.TabIndex = 8;
-            //
             // buttonChatSignIn
             //
-            this.buttonChatSignIn.Location = new System.Drawing.Point(127, 157);
+            this.buttonChatSignIn.Location = new System.Drawing.Point(127, 128);
             this.buttonChatSignIn.Name = "buttonChatSignIn";
             this.buttonChatSignIn.Size = new System.Drawing.Size(85, 25);
-            this.buttonChatSignIn.TabIndex = 9;
+            this.buttonChatSignIn.TabIndex = 7;
             this.buttonChatSignIn.Text = "Sign &in";
             this.buttonChatSignIn.UseVisualStyleBackColor = true;
             this.buttonChatSignIn.Click += new System.EventHandler(this.buttonChatSignIn_Click);
             //
             // buttonChatSignOut
             //
-            this.buttonChatSignOut.Location = new System.Drawing.Point(218, 157);
+            this.buttonChatSignOut.Location = new System.Drawing.Point(218, 128);
             this.buttonChatSignOut.Name = "buttonChatSignOut";
             this.buttonChatSignOut.Size = new System.Drawing.Size(85, 25);
-            this.buttonChatSignOut.TabIndex = 10;
+            this.buttonChatSignOut.TabIndex = 8;
             this.buttonChatSignOut.Text = "Sign &out";
             this.buttonChatSignOut.UseVisualStyleBackColor = true;
             this.buttonChatSignOut.Click += new System.EventHandler(this.buttonChatSignOut_Click);
             //
             // labelChatStatus
             //
-            this.labelChatStatus.Location = new System.Drawing.Point(9, 190);
+            this.labelChatStatus.Location = new System.Drawing.Point(9, 166);
             this.labelChatStatus.Name = "labelChatStatus";
-            this.labelChatStatus.Size = new System.Drawing.Size(431, 48);
-            this.labelChatStatus.TabIndex = 11;
+            this.labelChatStatus.Size = new System.Drawing.Size(431, 60);
+            this.labelChatStatus.TabIndex = 9;
             this.labelChatStatus.Text = "Not signed in.";
             //
             // OptionsEditorForm
@@ -568,8 +546,6 @@ namespace KNote.ClientWin.Views
         private TextBox textChatUserName;
         private Label labelChatPassword;
         private TextBox textChatPassword;
-        private Label labelChatRepository;
-        private ComboBox comboChatRepository;
         private Button buttonChatSignIn;
         private Button buttonChatSignOut;
         private Label labelChatStatus;

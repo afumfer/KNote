@@ -251,6 +251,62 @@ public class KNoteAiToolsTests
     }
 
     [TestMethod]
+    public async Task CreateTask_TheDefaultFolderInAnotherRepository_GoesToTheHomeOfTheAssistantsRepository()
+    {
+        var homeId = Guid.NewGuid();
+        var assistantService = new FakeKntService();
+        assistantService.FoldersFake.GetHomeAsyncImpl = () => Task.FromResult(Valid(new FolderDto { FolderId = homeId, Name = "Home" }));
+        assistantService.NotesFake.NewExtendedAsyncImpl = _ => Task.FromResult(Valid(new NoteExtendedDto()));
+        NoteExtendedDto savedNote = null;
+        assistantService.NotesFake.SaveExtendedAsyncImpl = note =>
+        {
+            savedNote = note;
+            return Task.FromResult(Valid(note));
+        };
+        var defaultService = new FakeKntService();
+        defaultService.NotesFake.SaveExtendedAsyncImpl = _ => throw new AssertFailedException("Saved in the default folder's repository.");
+        var store = TestStoreFactory.CreateEmpty();
+        store.DefaultFolderWithServiceRef = new FolderWithServiceRef
+        {
+            ServiceRef = TestServiceRefFactory.CreateWithFakeService(defaultService),
+            FolderInfo = new FolderInfoDto { FolderId = Guid.NewGuid(), Name = "Default folder" }
+        };
+        var assistantRepository = TestServiceRefFactory.CreateWithFakeService(assistantService);
+        var tools = new KNoteAiTools(assistantService, new KNoteAiToolsHost(store, assistantRepository));
+
+        await GetCreateTaskTool(tools)("Buy milk", "details");
+
+        Assert.IsNotNull(savedNote, "Not saved in the assistant's repository.");
+        Assert.AreEqual(homeId, savedNote.FolderId);
+    }
+
+    [TestMethod]
+    public async Task CreateTask_TheDefaultFolderInTheAssistantsRepository_GoesToIt()
+    {
+        var defaultFolderId = Guid.NewGuid();
+        var service = new FakeKntService();
+        service.NotesFake.NewExtendedAsyncImpl = _ => Task.FromResult(Valid(new NoteExtendedDto()));
+        NoteExtendedDto savedNote = null;
+        service.NotesFake.SaveExtendedAsyncImpl = note =>
+        {
+            savedNote = note;
+            return Task.FromResult(Valid(note));
+        };
+        var repository = TestServiceRefFactory.CreateWithFakeService(service);
+        var store = TestStoreFactory.CreateEmpty();
+        store.DefaultFolderWithServiceRef = new FolderWithServiceRef
+        {
+            ServiceRef = repository,
+            FolderInfo = new FolderInfoDto { FolderId = defaultFolderId, Name = "Default folder" }
+        };
+        var tools = new KNoteAiTools(service, new KNoteAiToolsHost(store, repository));
+
+        await GetCreateTaskTool(tools)("Buy milk", "details");
+
+        Assert.AreEqual(defaultFolderId, savedNote?.FolderId);
+    }
+
+    [TestMethod]
     public async Task CreateTask_NullDescription_IsSavedAsEmptyString()
     {
         var defaultService = new FakeKntService();

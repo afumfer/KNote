@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace KNote.Model;
@@ -137,10 +138,30 @@ public class ChatHubConfig
 
     public string UserName { get; set; }
 
-    public string Token { get; set; }
+    // The repositories of the Server where the user signed in (each one has its chat room), with a token for each
+    // one, obtained when signing in once from Options. The chat room connected is the one of RepositoryId.
+    public List<ChatHubRepositoryConfig> Repositories { get; set; } = new();
 
-    // The repository of the Server the token is for (its chat room), only to show it: the token says which one it is.
-    public string RepositoryName { get; set; }
+    public Guid? RepositoryId { get; set; }
+
+    // The repository connected: the one chosen or, if it is no longer among them, the first one. Null if not signed in.
+    public ChatHubRepositoryConfig Current() =>
+        Repositories.FirstOrDefault(r => r.RepositoryId == RepositoryId) ?? Repositories.FirstOrDefault();
+
+    // The token of the repository connected (Current), null if not signed in.
+    [XmlIgnore]
+    public string Token => Current()?.Token;
+}
+
+// A repository of the chat room's Server and the token of the user's sign in there (encrypted on disk).
+[Serializable]
+public class ChatHubRepositoryConfig
+{
+    public Guid RepositoryId { get; set; }
+
+    public string Name { get; set; }
+
+    public string Token { get; set; }
 }
 
 [Serializable]

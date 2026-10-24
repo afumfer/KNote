@@ -47,5 +47,13 @@ internal class FakeChatRoomConnection : IChatRoomConnection
 
     public Task RaiseReconnectedAsync() => Reconnected?.Invoke("new-connection") ?? Task.CompletedTask;
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public bool Disposed { get; private set; }
+
+    public bool HasClosedHandler => Closed != null;
+
+    public ValueTask DisposeAsync()
+    {
+        Disposed = true;
+        return ValueTask.CompletedTask;
+    }
 }

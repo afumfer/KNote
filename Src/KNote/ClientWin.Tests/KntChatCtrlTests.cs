@@ -37,12 +37,17 @@ public class KntChatCtrlTests
         var store = new Store(factoryViews) { AppUserName = "windows-user" }.GrantAdmin();
         store.Settings.Connectivity.ChatHub.Url = chatHubUrl;
         store.Settings.Connectivity.ChatHub.UserName = UserName;
-        store.Settings.Connectivity.ChatHub.Token = token;
+        if (!string.IsNullOrEmpty(token))
+            store.Settings.Connectivity.ChatHub.Repositories.Add(new ChatHubRepositoryConfig { RepositoryId = WorkId, Name = "Work", Token = token });
 
         var connection = new FakeChatRoomConnection { InvokeImpl = Hub };
-        var ctrl = new KntChatCtrl(store) { ConnectionFactory = (url, tokenProvider) => connection };
+        // SaveSettings: not the real Store.SaveConfig, which writes the user's config files.
+        var ctrl = new KntChatCtrl(store) { ConnectionFactory = (url, tokenProvider) => connection, SaveSettings = () => { } };
         return new Setup(ctrl, view, connection, store);
     }
+
+    private static readonly Guid WorkId = Guid.NewGuid();
+    private static readonly Guid PersonalId = Guid.NewGuid();
 
     // The hub: every thread, each one subscribed with no messages, the general thread, and messages saved as sent.
     private static object Hub(string method, object[] args) => method switch
@@ -146,9 +151,67 @@ public class KntChatCtrlTests
         };
 
         Start(setup);
-        setup.Store.Settings.Connectivity.ChatHub.Token = "token-2";
+        setup.Store.Settings.Connectivity.ChatHub.Repositories[0].Token = "token-2";
 
         Assert.AreEqual("token-2", tokenProvider!(), "Read on every connection attempt: signing in again needs no restart.");
+    }
+
+    [TestMethod]
+    public async Task SelectRepository_ConnectsToItsChatRoomWithItsToken_AndLeavesTheOther()
+    {
+        var setup = CreateCtrl();
+        setup.Store.Settings.Connectivity.ChatHub.Repositories.Add(new ChatHubRepositoryConfig { RepositoryId = PersonalId, Name = "Personal", Token = "token-p" });
+        var saved = 0;
+        setup.Ctrl.SaveSettings = () => saved++;
+        var connections = new List<(FakeChatRoomConnection Connection, Func<string> Token)>();
+        setup.Ctrl.ConnectionFactory = (url, token) =>
+        {
+            var connection = new FakeChatRoomConnection { InvokeImpl = Hub };
+            connections.Add((connection, token));
+            return connection;
+        };
+        Start(setup);
+        Assert.AreEqual("token-1", connections[0].Token(), "The first repository: none chosen yet.");
+        Assert.IsTrue(await setup.Ctrl.SelectThreadAsync(ThreadC.ThreadId));
+
+        var selected = await setup.Ctrl.SelectRepositoryAsync(PersonalId);
+
+        Assert.IsTrue(selected);
+        Assert.HasCount(2, connections);
+        Assert.IsTrue(connections[0].Connection.Disposed, "The other chat room's connection is left.");
+        Assert.IsFalse(connections[0].Connection.HasClosedHandler, "And not reconnected.");
+        Assert.AreEqual("token-p", connections[1].Token());
+        Assert.AreEqual(PersonalId, setup.Store.Settings.Connectivity.ChatHub.RepositoryId);
+        Assert.AreEqual("Personal", setup.Ctrl.CurrentRepository.Name);
+        Assert.AreEqual(1, saved, "The choice is kept.");
+        Assert.AreEqual(ChatRoomConnectionState.Connected, setup.Ctrl.ConnectionState);
+        Assert.IsNull(setup.Ctrl.CurrentThreadId, "The thread shown was of the other chat room.");
+        Assert.IsFalse(setup.Ctrl.IsFollowed(ThreadC.ThreadId));
+        Assert.AreEqual(3, setup.Ctrl.Threads.Count, "This chat room's threads.");
+    }
+
+    [TestMethod]
+    public async Task SelectRepository_NotOneOfTheSignedInOnes_IsRefused()
+    {
+        var setup = CreateCtrl();
+        Start(setup);
+
+        Assert.IsFalse(await setup.Ctrl.SelectRepositoryAsync(Guid.NewGuid()));
+        Assert.AreEqual(WorkId, setup.Ctrl.CurrentRepository.RepositoryId);
+    }
+
+    [TestMethod]
+    public void CurrentRepository_TheOneChosen_OrTheFirstWhenItIsGone()
+    {
+        var chatHub = new ChatHubConfig();
+        chatHub.Repositories.Add(new ChatHubRepositoryConfig { RepositoryId = WorkId, Name = "Work", Token = "t-w" });
+        chatHub.Repositories.Add(new ChatHubRepositoryConfig { RepositoryId = PersonalId, Name = "Personal", Token = "t-p" });
+
+        chatHub.RepositoryId = PersonalId;
+        Assert.AreEqual("t-p", chatHub.Token);
+        chatHub.RepositoryId = Guid.NewGuid();
+        Assert.AreEqual("t-w", chatHub.Token);
+        Assert.IsNull(new ChatHubConfig().Token, "Not signed in.");
     }
 
     [TestMethod]

@@ -40,6 +40,7 @@ namespace KNote.ClientWin.Views
             splitChat = new SplitContainer();
             panelSessionsHeader = new Panel();
             labelSessions = new Label();
+            comboRepositories = new ComboBox();
             listViewSessions = new ListView();
             buttonNavigate = new Button();
             buttonMarkDown = new Button();
@@ -159,31 +160,42 @@ namespace KNote.ClientWin.Views
             // panelSessionsHeader
             //
             panelSessionsHeader.Controls.Add(labelSessions);
+            panelSessionsHeader.Controls.Add(comboRepositories);
             panelSessionsHeader.Dock = DockStyle.Top;
             panelSessionsHeader.Location = new Point(4, 4);
             panelSessionsHeader.Name = "panelSessionsHeader";
-            panelSessionsHeader.Size = new Size(246, 34);
+            panelSessionsHeader.Padding = new Padding(0, 0, 0, 6);
+            panelSessionsHeader.Size = new Size(246, 62);
             panelSessionsHeader.TabIndex = 0;
             //
             // labelSessions
             //
             labelSessions.AutoSize = true;
             labelSessions.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelSessions.Location = new Point(4, 12);
+            labelSessions.Location = new Point(4, 8);
             labelSessions.Name = "labelSessions";
-            labelSessions.Size = new Size(59, 17);
+            labelSessions.Size = new Size(169, 17);
             labelSessions.TabIndex = 0;
-            labelSessions.Text = "Sessions:";
+            labelSessions.Text = "Sessions in the repository:";
+            //
+            // comboRepositories
+            //
+            comboRepositories.Dock = DockStyle.Bottom;
+            comboRepositories.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboRepositories.Location = new Point(0, 33);
+            comboRepositories.Name = "comboRepositories";
+            comboRepositories.Size = new Size(246, 23);
+            comboRepositories.TabIndex = 1;
             //
             // listViewSessions
             //
             listViewSessions.Dock = DockStyle.Fill;
             listViewSessions.HideSelection = false;
-            listViewSessions.Location = new Point(4, 38);
+            listViewSessions.Location = new Point(4, 66);
             listViewSessions.MultiSelect = false;
             listViewSessions.Name = "listViewSessions";
-            listViewSessions.Size = new Size(246, 559);
-            listViewSessions.TabIndex = 1;
+            listViewSessions.Size = new Size(246, 531);
+            listViewSessions.TabIndex = 2;
             listViewSessions.UseCompatibleStateImageBehavior = false;
             listViewSessions.ItemSelectionChanged += listViewSessions_ItemSelectionChanged;
             //
@@ -523,6 +535,7 @@ namespace KNote.ClientWin.Views
         private SplitContainer splitChat;
         private Panel panelSessionsHeader;
         private Label labelSessions;
+        private ComboBox comboRepositories;
         private ListView listViewSessions;
         private Label labelResult;
         private Button buttonNewSession;
