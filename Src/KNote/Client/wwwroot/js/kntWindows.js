@@ -1,8 +1,9 @@
 // Windows of the app (AppStoreService/KntWindows): a note is viewed or edited in a window of its own, one per note
 // and use (the AI assistant and the chat room, one each), and the windows of the app tell each other when a note is
-// saved (BroadcastChannel, same origin).
+// saved and when the session changes (BroadcastChannel, same origin).
 
 const channel = new BroadcastChannel('knote-notes');
+const sessionChannel = new BroadcastChannel('knote-session');
 
 // The new windows cascade from this one: each one a step further down and right, back to the first step after a
 // few, and always inside the screen.
@@ -66,4 +67,16 @@ export function listenNoteSaved(dotNet) {
     const onMessage = e => dotNet.invokeMethodAsync('OnNoteSaved', e.data.noteId);
     channel.addEventListener('message', onMessage);
     return { dispose: () => channel.removeEventListener('message', onMessage) };
+}
+
+// A window signed in (repositoryId: its session's repository) or signed out (null).
+export function notifySessionChanged(repositoryId) {
+    sessionChannel.postMessage({ repositoryId });
+}
+
+// dotNet.OnSessionChanged(repositoryId) when another window signs in or out.
+export function listenSessionChanged(dotNet) {
+    const onMessage = e => dotNet.invokeMethodAsync('OnSessionChanged', e.data.repositoryId);
+    sessionChannel.addEventListener('message', onMessage);
+    return { dispose: () => sessionChannel.removeEventListener('message', onMessage) };
 }

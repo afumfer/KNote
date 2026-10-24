@@ -140,6 +140,21 @@ public class OptionsModel : SmartModelDtoBase
         }
     }
 
+    // The repository of the Server the token is for (a Server can have several, each one with its chat room).
+    private string _chatHubRepositoryName;
+    public string ChatHubRepositoryName
+    {
+        get { return _chatHubRepositoryName; }
+        set
+        {
+            if (_chatHubRepositoryName != value)
+            {
+                _chatHubRepositoryName = value;
+                OnPropertyChanged("ChatHubRepositoryName");
+            }
+        }
+    }
+
     // Lives in the application state (set automatically when a connection fails); the dialog can clear
     // it after signing in again.
     private bool _chatHubAutoConnectDisabled;
@@ -269,6 +284,7 @@ public class OptionsModel : SmartModelDtoBase
             ChatHubUrl = settings.Connectivity.ChatHub.Url,
             ChatHubUserName = settings.Connectivity.ChatHub.UserName,
             ChatHubToken = settings.Connectivity.ChatHub.Token,
+            ChatHubRepositoryName = settings.Connectivity.ChatHub.RepositoryName,
             ChatHubAutoConnectDisabled = state.Session.ChatHubAutoConnectDisabled,
             SmtpHost = email.Host,
             SmtpPort = email.Port,
@@ -295,6 +311,7 @@ public class OptionsModel : SmartModelDtoBase
         settings.Connectivity.ChatHub.Url = ChatHubUrl;
         settings.Connectivity.ChatHub.UserName = ChatHubUserName;
         settings.Connectivity.ChatHub.Token = ChatHubToken;
+        settings.Connectivity.ChatHub.RepositoryName = ChatHubRepositoryName;
         state.Session.ChatHubAutoConnectDisabled = ChatHubAutoConnectDisabled;
         email.Host = SmtpHost;
         email.Port = SmtpPort;

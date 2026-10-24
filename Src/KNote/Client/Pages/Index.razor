@@ -9,6 +9,7 @@
 @inject KntWindows kntWindows
 @inject TooltipService tooltipService
 @inject DialogService dialogService
+@inject AuthenticationStateProvider authenticationStateProvider
 
 @*@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]*@
 
@@ -72,10 +73,25 @@
     {        
         store.AppState.OnChange += StateHasChanged;
         kntWindows.NoteSaved += OnNoteSaved;
+        authenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
         selectedFolderId = store.AppState.HomeFolderId;
         await LoadFolders();
         await LoadNotes();
+    }
+
+    // Signed in, out or in another repository: Home is the one of the session's repository (or, without a session, of
+    // the server's default one).
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> state)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await state;
+            selectedFolderId = store.AppState.HomeFolderId;
+            await LoadFolders();
+            await LoadNotes();
+            StateHasChanged();
+        });
     }
 
     // Leaving Home: what is being read is no longer needed.
@@ -87,6 +103,7 @@
     {
         store.AppState.OnChange -= StateHasChanged;
         kntWindows.NoteSaved -= OnNoteSaved;
+        authenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
         disposal.Cancel();
         notesRequest.Dispose();
     }

@@ -138,6 +138,9 @@ public class ChatHubConfig
     public string UserName { get; set; }
 
     public string Token { get; set; }
+
+    // The repository of the Server the token is for (its chat room), only to show it: the token says which one it is.
+    public string RepositoryName { get; set; }
 }
 
 [Serializable]

@@ -5,28 +5,30 @@ using System.Text;
 namespace KNote.Service.Core;
 
 /// <summary>
-/// The token of a "set a new password" link: the user, when it expires and the fingerprint of the user's password
-/// (KntPasswordHasher.Stamp), signed with a key only its issuer has (the Server's secret). Nothing is stored: the
-/// signature proves who issued it, and it can be used once, as setting the password changes the fingerprint (so
-/// does any other change of the password meanwhile).
+/// The token of a "set a new password" link: the repository (its RepositoryId: a Server serves several), the user,
+/// when it expires and the fingerprint of the user's password (KntPasswordHasher.Stamp), signed with a key only its
+/// issuer has (the Server's secret). Nothing is stored: the signature proves who issued it, and it can be used once, as
+/// setting the password changes the fingerprint (so does any other change of the password meanwhile). The tokens of
+/// before the repository was in them ("v1") are no longer valid.
 /// </summary>
 internal static class KntPasswordResetToken
 {
-    private const string Version = "v1";
+    private const string Version = "v2";
 
-    public static string Create(Guid userId, string passwordStamp, DateTime expiresUtc, string signingKey)
+    public static string Create(Guid repositoryId, Guid userId, string passwordStamp, DateTime expiresUtc, string signingKey)
     {
-        var payload = $"{Version}|{userId:N}|{new DateTimeOffset(expiresUtc).ToUnixTimeSeconds()}|{passwordStamp}";
+        var payload = $"{Version}|{repositoryId:N}|{userId:N}|{new DateTimeOffset(expiresUtc).ToUnixTimeSeconds()}|{passwordStamp}";
         var payloadBytes = Encoding.UTF8.GetBytes(payload);
         return $"{Base64Url(payloadBytes)}.{Base64Url(Sign(payloadBytes, signingKey))}";
     }
 
     /// <summary>
-    /// The user, expiry and password fingerprint of a token, if it was signed with signingKey (expiry and
-    /// fingerprint are checked by the caller).
+    /// The repository, user, expiry and password fingerprint of a token, if it was signed with signingKey (they are
+    /// checked by the caller).
     /// </summary>
-    public static bool TryRead(string token, string signingKey, out Guid userId, out DateTime expiresUtc, out string passwordStamp)
+    public static bool TryRead(string token, string signingKey, out Guid repositoryId, out Guid userId, out DateTime expiresUtc, out string passwordStamp)
     {
+        repositoryId = Guid.Empty;
         userId = Guid.Empty;
         expiresUtc = DateTime.MinValue;
         passwordStamp = null;
@@ -50,11 +52,12 @@ internal static class KntPasswordResetToken
             return false;
 
         var fields = Encoding.UTF8.GetString(payloadBytes).Split('|');
-        if (fields.Length != 4 || fields[0] != Version || !Guid.TryParse(fields[1], out userId) || !long.TryParse(fields[2], out var expires))
+        if (fields.Length != 5 || fields[0] != Version || !Guid.TryParse(fields[1], out repositoryId) || !Guid.TryParse(fields[2], out userId)
+            || !long.TryParse(fields[3], out var expires))
             return false;
 
         expiresUtc = DateTimeOffset.FromUnixTimeSeconds(expires).UtcDateTime;
-        passwordStamp = fields[3];
+        passwordStamp = fields[4];
         return true;
     }
 

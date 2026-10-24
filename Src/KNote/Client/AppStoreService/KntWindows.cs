@@ -9,7 +9,8 @@ namespace KNote.Client.AppStoreService;
 /// - where a note is viewed (notes/view/{id}), edited (notes/edit/{id}) or created (notes/new): one per note and use
 ///   (a new note gets a new window, which becomes the note's edit window once saved);
 /// - the AI assistant (aiassistant/window) and the chat room (chat/window): one for each.
-/// The windows of the app tell each other when a note is saved (NoteSaved), so that the lists show it changed.
+/// The windows of the app tell each other when a note is saved (NoteSaved), so that the lists show it changed, and
+/// when the session changes (SessionChanged, see AuthenticationProviderJWT and the layouts).
 /// Without its script (js/kntWindows.js, not loaded when the server can't be reached: already notified) the windows
 /// aren't opened, and this window goes on as it can (closing it goes to Home).
 /// </summary>
@@ -20,6 +21,7 @@ public class KntWindows : IAsyncDisposable
     private readonly IStore _store;
     private IJSObjectReference? _module;
     private IJSObjectReference? _listener;
+    private IJSObjectReference? _sessionListener;
     private DotNetObjectReference<KntWindows>? _dotNetRef;
 
     public KntWindows(IJSRuntime js, NavigationManager navigationManager, IStore store)
@@ -32,8 +34,11 @@ public class KntWindows : IAsyncDisposable
     /// <summary>A note was saved in another window of the app (its id).</summary>
     public event Action<Guid>? NoteSaved;
 
-    /// <summary>Hears NoteSaved. Called by the layouts: it also loads the script beforehand, since a window has to
-    /// be opened right after the click that asks for it (or the browser blocks it).</summary>
+    /// <summary>Another window of the app signed in (the repository of its session) or out (null).</summary>
+    public event Action<Guid?>? SessionChanged;
+
+    /// <summary>Hears NoteSaved and SessionChanged. Called by the layouts: it also loads the script beforehand, since a
+    /// window has to be opened right after the click that asks for it (or the browser blocks it).</summary>
     public async Task StartAsync()
     {
         var module = await GetModuleAsync();
@@ -42,6 +47,7 @@ public class KntWindows : IAsyncDisposable
 
         _dotNetRef = DotNetObjectReference.Create(this);
         _listener = await module.InvokeAsync<IJSObjectReference>("listenNoteSaved", _dotNetRef);
+        _sessionListener = await module.InvokeAsync<IJSObjectReference>("listenSessionChanged", _dotNetRef);
     }
 
     public Task<bool> OpenViewAsync(Guid noteId) =>
@@ -103,6 +109,17 @@ public class KntWindows : IAsyncDisposable
             NoteSaved?.Invoke(id);
     }
 
+    /// <summary>Tells the other windows of the app that this one signed in (repositoryId) or out (null).</summary>
+    public async Task NotifySessionChangedAsync(Guid? repositoryId)
+    {
+        if (await GetModuleAsync() is { } module)
+            await module.InvokeVoidAsync("notifySessionChanged", repositoryId?.ToString());
+    }
+
+    [JSInvokable]
+    public void OnSessionChanged(string? repositoryId) =>
+        SessionChanged?.Invoke(Guid.TryParse(repositoryId, out var id) ? id : null);
+
     private static string EditPath(Guid noteId) => $"notes/edit/{noteId}";
 
     private static string EditWindowName(Guid noteId) => $"knt-note-edit-{noteId}";
@@ -129,10 +146,12 @@ public class KntWindows : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_listener != null)
+        foreach (var listener in new[] { _listener, _sessionListener })
         {
-            await _listener.InvokeVoidAsync("dispose");
-            await _listener.DisposeAsync();
+            if (listener == null)
+                continue;
+            await listener.InvokeVoidAsync("dispose");
+            await listener.DisposeAsync();
         }
         if (_module != null)
             await _module.DisposeAsync();

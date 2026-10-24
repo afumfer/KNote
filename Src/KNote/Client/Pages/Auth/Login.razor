@@ -5,14 +5,15 @@
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
-@* Sign in dialog (Shared/MainLayoutHeader → AdminLogin opens it framed): the result is the credentials, or null.
-   Enter signs in (the form's submit). *@
+@* Sign in dialog (Auth/KntSignIn opens it framed): the result is the credentials, or null. Enter signs in (the form's
+   submit). Also to change repository (ChangingRepository), with the user's name already in. *@
 
 <EditForm Model="@user" Context="formContext" OnSubmit="OnLogin">
 
     <DataAnnotationsValidator />
 
-    <KntDialogFrame Icon="login" Title="Sign in" Subtitle="@($"Welcome to {KntConst.AppName}.")">
+    <KntDialogFrame Icon="login" Title="@(ChangingRepository ? "Change repository" : "Sign in")"
+                    Subtitle="@(ChangingRepository ? "Sign in again to choose another repository." : $"Welcome to {KntConst.AppName}.")">
         <ChildContent>
             <RadzenStack Gap="1rem">
                 <KntField Label="User name" Component="UserName" Required="true">
@@ -39,7 +40,14 @@
 
 
 @code {
+    // The user's name, to start with (changing repository).
+    [Parameter] public string? UserName { get; set; }
+
+    [Parameter] public bool ChangingRepository { get; set; }
+
     private UserCredentialsDto user = new UserCredentialsDto();
+
+    protected override void OnInitialized() => user.UserName = UserName;
 
     private void OnLogin(EditContext formContext)
     {

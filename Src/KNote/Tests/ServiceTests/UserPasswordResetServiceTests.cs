@@ -119,6 +119,22 @@ public class UserPasswordResetServiceTests
     }
 
     [TestMethod]
+    public async Task TokenOfAnotherRepository_DoesNotWork()
+    {
+        var (service, user, _) = await CreateAsync("Dapper");
+        var reset = await service.Users.CreatePasswordResetAsync(user.UserName, Key, Lifetime);
+        // The same user in another repository: here, the same database with another RepositoryId.
+        var id = (await service.Repository.SystemValues.GetAsync(KntConst.SystemScope, KntConst.RepositoryIdKey)).Entity;
+        id.Value = Guid.NewGuid().ToString();
+        Assert.IsTrue((await service.Repository.SystemValues.UpdateAsync(id)).IsValid);
+
+        var res = await service.Users.ResetPasswordAsync(new UserResetPasswordDto { Token = reset.Entity.Token, NewPassword = NewPassword }, Key);
+
+        Assert.IsFalse(res.IsValid);
+        Assert.IsTrue(await CanSignInAsync(service, user.UserName, Password));
+    }
+
+    [TestMethod]
     public async Task NewPasswordAgainstThePolicy_IsRefused_AndTheTokenStillWorks()
     {
         var (service, user, _) = await CreateAsync("Dapper");

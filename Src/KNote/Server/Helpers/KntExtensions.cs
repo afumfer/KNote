@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
@@ -20,16 +21,21 @@ public static class KntExtensions
 {
     private static KntService _kntServiceForMessageBroker;
 
-    public static IServiceCollection KntAddServices(this IServiceCollection services, AppSettings appSettings, RepositoryRef repositoryRef)
-    {        
+    // The service of each request is the one of the session's repository (the knt_repo claim of its token), or of the
+    // default repository without a user. The controllers set its UserIdentityName.
+    public static IServiceCollection KntAddServices(this IServiceCollection services, KntRepositories repositories)
+    {
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
         }
 
-        services.AddScoped<IKntRepository>(provider => KntRepositoryFactory.Create(repositoryRef));
-
-        services.AddScoped<IKntService, KntService>();
+        services.AddSingleton(repositories);
+        services.AddScoped<IKntService>(provider =>
+        {
+            var httpContext = provider.GetRequiredService<IHttpContextAccessor>().HttpContext;
+            return repositories.CreateService(repositories.ForUser(httpContext?.User), null, httpContext?.Request);
+        });
 
         return services;
     }
@@ -67,8 +73,11 @@ public static class KntExtensions
         return services;
     }
 
-    public static IApplicationBuilder KntAddResourcesStaticFiles(this IApplicationBuilder app, AppSettings appSettings, RepositoryRef repositoryRef)
-    {        
+    // With MountResourceContainerOnStartup, the resources folder of each repository is served from its url (a path of
+    // this host, e.g. /KNoteResources). Without it, they are served by the web server (IIS virtual directory) or, when
+    // they are in this host's web root, by UseStaticFiles.
+    public static IApplicationBuilder KntAddResourcesStaticFiles(this IApplicationBuilder app, AppSettings appSettings, KntRepositories repositories)
+    {
         if (app == null)
         {
             throw new ArgumentNullException(nameof(app));
@@ -77,27 +86,28 @@ public static class KntExtensions
         {
             throw new ArgumentNullException(nameof(appSettings));
         }
-        if (repositoryRef == null)
+        if (repositories == null)
         {
-            throw new ArgumentNullException(nameof(repositoryRef));
+            throw new ArgumentNullException(nameof(repositories));
         }
 
-        StaticFileOptions options = null!;
-
-        if (appSettings.MountResourceContainerOnStartup)
-        {
-            options = new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    repositoryRef.ResourcesContainerRootPath),
-                RequestPath = repositoryRef.ResourcesContainerRootUrl
-            };
-            return app.UseMiddleware<StaticFileMiddleware>(Options.Create(options));
-        }
-        else
-        {
+        if (!appSettings.MountResourceContainerOnStartup)
             return app;
+
+        foreach (var repositoryRef in repositories.All.Select(r => r.RepositoryRef))
+        {
+            if (string.IsNullOrEmpty(repositoryRef.ResourcesContainerRootPath) || repositoryRef.ResourcesContainerRootUrl?.StartsWith('/') != true)
+                continue;
+
+            var options = new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(repositoryRef.ResourcesContainerRootPath),
+                RequestPath = repositoryRef.ResourcesContainerRootUrl.TrimEnd('/')
+            };
+            app.UseMiddleware<StaticFileMiddleware>(Options.Create(options));
         }
+
+        return app;
     }
     
     public static async Task KntConfigureMessageBroker(this IApplicationBuilder app, AppSettings appSettings, RepositoryRef repositoryRef)

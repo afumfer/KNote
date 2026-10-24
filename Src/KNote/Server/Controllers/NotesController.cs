@@ -32,12 +32,8 @@ public class NotesController : ControllerBase
         _fileStore = fileStore;
         _logger = logger;
 
+        // The resources' folder and url, when the configuration doesn't give them, are this host's (KntRepositories).
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
-
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootPath))
-            _service.RepositoryRef.ResourcesContainerRootPath = _fileStore.GetResourcesContainerRootPath();
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootUrl))
-            _service.RepositoryRef.ResourcesContainerRootUrl = _fileStore.GetResourcesContainerRootUrl();
     }
 
     [HttpGet]

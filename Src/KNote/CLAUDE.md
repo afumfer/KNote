@@ -124,8 +124,9 @@ el ORM que sirva las consultas después; en Sqlite también pone la base de dato
 el fichero: en el modo por defecto las escrituras concurrentes del Server fallaban al momento con "database is
 locked"):
 
-- En `Server`: `Server/Program.cs` llama a `builder.Services.KntAddServices(appSettings, repositoryRef)`
-  (`Server/Helpers/KntExtensions.cs`), que registra `IKntRepository` (vía la factoría) e `IKntService` en DI.
+- En `Server`: `Server/Program.cs` abre los repositorios configurados (`KntRepositories.OpenAsync`, vía la factoría)
+  y `builder.Services.KntAddServices(repositories)` (`Server/Helpers/KntExtensions.cs`) registra en DI el `IKntService`
+  de cada petición, el del repositorio de la sesión.
 - En `ClientWin`: no hay contenedor de DI — `Service/Core/ServiceRef.cs` llama a la factoría de forma
   perezosa, y `ClientWin/Core/Store.cs` mantiene una lista de estos `ServiceRef` (cada app puede tener varias
   bases de datos de notas configuradas abiertas a la vez).
@@ -133,7 +134,7 @@ locked"):
 `RepositoryRef` (en `Model`) también incluye `Provider` (`Microsoft.Data.SqlClient` vs
 `Microsoft.Data.Sqlite`) y `ConnectionString`, por lo que el motor de BD y el ORM son elecciones
 independientes. Se configuran en `Server/appsettings.json` → sección `RepositoryRef` (`Orm`, `Provider`,
-`ConnectionString`).
+`ConnectionString`) o, con varios repositorios, la lista `Repositories`.
 
 ### Capa Service y el motor de scripting
 
@@ -258,6 +259,10 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Hubs/ChatHub.cs` — hub de SignalR del chat room, mapeado en `/chathub`: exige el JWT del usuario (Staff+),
   un grupo por hilo y `ChatRoomManager` (presencia y escrituras en orden por hilo). Ver `Server/CLAUDE.md`.
+- **Varios repositorios, uno por sesión** (`Server/Helpers/KntRepositories`, configuración `Repositories` o el
+  `RepositoryRef` de siempre): el usuario elige repositorio al iniciar sesión (donde valen sus credenciales), el token
+  lo lleva (claim `knt_repo`, el `RepositoryId`) y el `IKntService` de cada petición es el de ese repositorio; sin
+  sesión, el predeterminado. Los controladores y las páginas no cambian. Ver "Repositorios" en `Server/CLAUDE.md`.
 - `Server` también sirve la app `Client` Blazor compilada
   (`Microsoft.AspNetCore.Components.WebAssembly.Server`), todo bajo la base `/KNote`.
 - Plantilla de controlador, JWT, configuración y tests: `Server/CLAUDE.md`.

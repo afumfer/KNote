@@ -593,8 +593,12 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
 - **Identidad en el servidor**: `ClientWin` no tiene cuenta en el `Server`. En Opciones, pestaña **Chat room**, el
   usuario se identifica una vez (`ChatRoomServer.SignInAsync`: `api/users/login` junto al hub, que se deduce de la
   URL del hub con `ChatRoomServer.BaseUrl`) y se comprueba la conexión (`TestConnectionAsync`). Solo se guardan
-  `ChatHubConfig.UserName` y `Token` (secreto DPAPI); la contraseña no. El token pertenece al servidor de la URL:
-  cambiarla lo olvida (`OptionsEditorForm.ControlsToModel`). `ChatHubConfig.UserName` es el usuario del chat
+  `ChatHubConfig.UserName`, `Token` (secreto DPAPI) y `RepositoryName` (para mostrarlo); la contraseña no. El token
+  pertenece al servidor de la URL: cambiarla lo olvida (`OptionsEditorForm.ControlsToModel`). **Un `Server` puede tener
+  varios repositorios, cada uno con su chat room**, y el token es de uno: si las credenciales valen en varios, el login
+  los devuelve (`ChatRoomSignIn.Repositories`, sin token), Opciones los pone en `comboChatRepository` y se vuelve a
+  entrar con el elegido (`SignInAsync(..., repositoryId)`); el estado dice en qué repositorio. Un token de antes del
+  multirepositorio ya no vale: hay que volver a entrar desde Opciones. `ChatHubConfig.UserName` es el usuario del chat
   (no `Store.AppUserName`): decide qué mensajes son "propios".
 - **`KntChatCtrl`** (Staff, de aplicación) habla con el hub a través de `Core/IChatRoomConnection`
   (`ChatRoomConnection` = `HubConnection` con `AccessTokenProvider` y `WithAutomaticReconnect`; `ConnectionFactory`

@@ -21,19 +21,13 @@ public class ChatRoomController : ControllerBase
     private readonly IKntService _service;
     private readonly ILogger<ChatRoomController> _logger;
 
-    public ChatRoomController(IKntService service, IFileStore fileStore, IHttpContextAccessor httpContextAccessor, ILogger<ChatRoomController> logger)
+    public ChatRoomController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<ChatRoomController> logger)
     {
         _service = service;
         _service.Logger = logger;
         _logger = logger;
 
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
-
-        // As NotesController: the resources are kept and served by this host unless the configuration says otherwise.
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootPath))
-            _service.RepositoryRef.ResourcesContainerRootPath = fileStore.GetResourcesContainerRootPath();
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootUrl))
-            _service.RepositoryRef.ResourcesContainerRootUrl = fileStore.GetResourcesContainerRootUrl();
     }
 
     // The image's Url and Markdown come with the absolute url the clients show it from.

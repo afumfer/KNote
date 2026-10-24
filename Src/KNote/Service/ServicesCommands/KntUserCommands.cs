@@ -395,6 +395,13 @@ public class KntUsersCreatePasswordResetAsyncCommand : KntCommandServiceBase<Knt
             return result;
         }
 
+        var repository = await Service.SystemValues.GetRepositoryInfoAsync();
+        if (!repository.IsValid)
+        {
+            result.AddListErrorMessage(repository.ListErrorMessage);
+            return result;
+        }
+
         var expiresUtc = DateTime.UtcNow.Add(Param.Lifetime);
         result.Entity = new UserPasswordResetTokenDto
         {
@@ -402,7 +409,7 @@ public class KntUsersCreatePasswordResetAsyncCommand : KntCommandServiceBase<Knt
             FullName = user.FullName,
             EMail = user.EMail,
             ExpiresUtc = expiresUtc,
-            Token = KntPasswordResetToken.Create(user.UserId, KntPasswordHasher.Stamp(user.PasswordHash), expiresUtc, Param.SigningKey)
+            Token = KntPasswordResetToken.Create(repository.Entity.RepositoryId, user.UserId, KntPasswordHasher.Stamp(user.PasswordHash), expiresUtc, Param.SigningKey)
         };
         return result;
     }
@@ -423,8 +430,8 @@ public class KntUsersCreatePasswordResetAsyncCommand : KntCommandServiceBase<Knt
 
 /// <summary>
 /// Sets a new password with the token of a "set a new password" link (KntUsersCreatePasswordResetAsyncCommand),
-/// signed with the same key: it must not have expired, and the user's password must not have changed since it was
-/// issued (so it is used once). The new password follows KntPasswordPolicy.
+/// signed with the same key: it must be for this repository, it must not have expired, and the user's password must
+/// not have changed since it was issued (so it is used once). The new password follows KntPasswordPolicy.
 /// </summary>
 [KntAllowAnonymous]
 public class KntUsersResetPasswordAsyncCommand : KntCommandServiceBase<KntPasswordResetParam, Result<UserDto>>
@@ -441,8 +448,16 @@ public class KntUsersResetPasswordAsyncCommand : KntCommandServiceBase<KntPasswo
     {
         var result = new Result<UserDto>();
 
-        if (!KntPasswordResetToken.TryRead(Param.Reset?.Token, Param.SigningKey, out var userId, out var expiresUtc, out var stamp)
+        if (!KntPasswordResetToken.TryRead(Param.Reset?.Token, Param.SigningKey, out var repositoryId, out var userId, out var expiresUtc, out var stamp)
             || expiresUtc < DateTime.UtcNow)
+        {
+            result.AddErrorMessage(InvalidLink);
+            return result;
+        }
+
+        // A link for the user of another repository.
+        var repository = await Service.SystemValues.GetRepositoryInfoAsync();
+        if (!repository.IsValid || repository.Entity.RepositoryId != repositoryId)
         {
             result.AddErrorMessage(InvalidLink);
             return result;

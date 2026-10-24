@@ -45,5 +45,15 @@ public static class IJSRuntimeExtensionMethods
         => js.InvokeAsync<object>(
             "localStorage.removeItem",
             key);
+
+    // Of this window (tab) only; kept when it is reloaded.
+    public static ValueTask<object> SessionStorageSetItem(this IJSRuntime js, string key, string content)
+        => js.InvokeAsync<object>("sessionStorage.setItem", key, content);
+
+    public static ValueTask<string> SessionStorageGetItem(this IJSRuntime js, string key)
+        => js.InvokeAsync<string>("sessionStorage.getItem", key);
+
+    public static ValueTask<object> SessionStorageRemoveItem(this IJSRuntime js, string key)
+        => js.InvokeAsync<object>("sessionStorage.removeItem", key);
 }
 

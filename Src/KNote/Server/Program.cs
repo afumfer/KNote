@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,20 +36,16 @@ try
     // Configure the application and add services to the container.
 
     var appSettingsSection = builder.Configuration.GetSection("AppSettings");
-    var repositoryRefSection = builder.Configuration.GetSection("RepositoryRef");
-
     builder.Services.Configure<AppSettings>(appSettingsSection);
-    builder.Services.Configure<RepositoryRef>(repositoryRefSection);
-
     var appSettings = appSettingsSection.Get<AppSettings>();
-    var repositoryRef = repositoryRefSection.Get<RepositoryRef>();
-    // LEGACY(repository-alias): remove once every Server configuration uses "Name".
-    // Before the name was kept in the database, this setting was called "Alias" (KntSchemaUpdater gives it
-    // to the database when it has no name yet).
-    if (string.IsNullOrWhiteSpace(repositoryRef.Name))
-        repositoryRef.Name = repositoryRefSection["Alias"];
 
-    builder.Services.KntAddServices(appSettings, repositoryRef);
+    // The repositories ("Repositories", or the single "RepositoryRef"), opened now: their databases are created or
+    // updated, and each one's RepositoryId is read.
+    using var startupLoggerFactory = new NLog.Extensions.Logging.NLogLoggerFactory();
+    var repositories = await KntRepositories.OpenAsync(KntRepositories.ReadConfiguration(builder.Configuration),
+        builder.Environment.WebRootPath, startupLoggerFactory.CreateLogger<KntRepositories>());
+
+    builder.Services.KntAddServices(repositories);
     builder.Services.KntAddAiAssistant(builder.Configuration);
     builder.Services.KntAddPasswordReset(builder.Configuration);
     builder.Services.KntAddRateLimits(builder.Configuration);
@@ -78,12 +74,20 @@ try
                     context.Token = accessToken;
                 return Task.CompletedTask;
             },
-            // A token issued before the user's password changed is no longer valid (see KntPasswordStamps).
+            // A session is in one of this Server's repositories (KntRepositories), and a token issued before the user's
+            // password changed in it is no longer valid (see KntPasswordStamps). Checked with a service of the token's
+            // repository: the request's IKntService can't be created yet (HttpContext.User isn't set until this ends).
             OnTokenValidated = async context =>
             {
                 var services = context.HttpContext.RequestServices;
+                var repository = repositories.FindForUser(context.Principal);
+                if (repository == null)
+                {
+                    context.Fail("The session is not in a repository of this server.");
+                    return;
+                }
                 var stamps = services.GetRequiredService<KntPasswordStamps>();
-                if (!await stamps.IsValidAsync(context.Principal, services.GetRequiredService<IKntService>()))
+                if (!await stamps.IsValidAsync(context.Principal, repository, repositories))
                     context.Fail("The session is closed: the password of the user has changed.");
             }
         };
@@ -148,7 +152,7 @@ try
     };
 
     app.UseStaticFiles(clientStaticFileOptions);
-    app.KntAddResourcesStaticFiles(appSettings, repositoryRef);
+    app.KntAddResourcesStaticFiles(appSettings, repositories);
 
     app.UseRouting();
     app.UseRateLimiter();
@@ -161,7 +165,7 @@ try
     app.MapHub<ChatHub>(ChatRoomHubContract.Path);
     app.MapFallbackToFile("index.html", clientStaticFileOptions);
 
-    await app.KntConfigureMessageBroker(appSettings, repositoryRef);
+    await app.KntConfigureMessageBroker(appSettings, repositories.Default.RepositoryRef);
 
     app.Run();
 }
