@@ -115,6 +115,39 @@ public class NoteResourceFilesServiceTests
     }
 
     [TestMethod]
+    [DataRow("KntResources/2026", "image.png")]
+    [DataRow(@"KntResources\2026", "image.png")]
+    [DataRow("KntResources/2026", "sub/image.png")]
+    [DataRow(@"KntResources\2026", @"sub\image.png")]
+    public void UtilGetResourceFilePath_AcceptsBothSeparators_AndUsesThisSystemsOne(string container, string name)
+    {
+        var resource = new ResourceDto { Container = container, Name = name };
+
+        var path = service.Notes.UtilGetResourceFilePath(resource);
+
+        var expected = Path.Combine(rootPath, "KntResources", "2026") + Path.DirectorySeparatorChar
+            + name.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+        Assert.AreEqual(expected, path);
+        if (OperatingSystem.IsWindows())
+            Assert.AreEqual(Path.Combine(rootPath, container.Replace("/", @"\"), name.Replace("/", @"\")), path, "Windows: the same path as before.");
+    }
+
+    [TestMethod]
+    public async Task DeleteResourceAsync_DeletesItsFile()
+    {
+        var noteId = await AddNoteAsync();
+        var saved = await service.Notes.SaveResourceAsync(NewResource(noteId, "image.png"));
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+        var file = service.Notes.UtilGetResourceFilePath(saved.Entity);
+        Assert.IsTrue(File.Exists(file));
+
+        var deleted = await service.Notes.DeleteResourceAsync(saved.Entity.ResourceId);
+
+        Assert.IsTrue(deleted.IsValid, deleted.ErrorMessage);
+        Assert.IsFalse(File.Exists(file));
+    }
+
+    [TestMethod]
     public void ResourceInfoDto_Validate_OnlyANewResourceNeedsItsContent()
     {
         var newOne = new ResourceInfoDto { Name = "a.png", Container = Container };

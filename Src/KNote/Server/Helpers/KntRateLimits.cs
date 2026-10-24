@@ -23,7 +23,8 @@ public class RateLimitsConfig
 /// <summary>
 /// Limits on the anonymous endpoints that check a password or send an email, per client address
 /// ([EnableRateLimiting] on the actions): guessing passwords, or flooding someone's mailbox with links. Behind a
-/// reverse proxy every client would share the proxy's address.
+/// reverse proxy every client would share the proxy's address unless the "ForwardedHeaders" section is enabled
+/// (KntForwardedHeaders).
 /// </summary>
 public static class KntRateLimits
 {

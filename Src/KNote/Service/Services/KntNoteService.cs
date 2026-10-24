@@ -440,7 +440,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         if (string.IsNullOrEmpty(rootPath) || string.IsNullOrEmpty(resource.Container))
             return "";
 
-        return Path.Combine(rootPath, resource.Container.Replace(@"/", @"\"));        
+        return Path.Combine(rootPath, ToFileSystemSeparators(resource.Container));
     }
 
     public string UtilGetResourceFilePath(ResourceDto resource)
@@ -450,7 +450,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         if (string.IsNullOrEmpty(dirPath) || string.IsNullOrEmpty(resource.Name))
             return "";
 
-        return Path.Combine(dirPath, resource.Name.Replace(@"/", @"\"));
+        return Path.Combine(dirPath, ToFileSystemSeparators(resource.Name));
     }
 
     public string UtilGetResourceFileUrl(string container, string fileName)
@@ -519,7 +519,11 @@ public class KntNoteService : KntServiceBase, IKntNoteService
 
     #endregion
 
-    #region Private methods 
+    #region Private methods
+
+    // Containers and names are kept with '/' (and '\' in data created in Windows): this system's separator.
+    private static string ToFileSystemSeparators(string path) =>
+        path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
 
     private string GetReplaceResourceString(bool considerRootPath = false)
     {
