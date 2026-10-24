@@ -269,7 +269,7 @@ The **Print/Export** menu of the **Tree panel**, **Notes filter** and **Quick se
 
 ### Note editor (web app)
 
-A note is edited in its own window. Its header shows the note's topic and number, the full path of its folder, its type and when it was modified, with **Save and new**, **Save** and the button that closes the window (it asks first if there are unsaved changes).
+A note is edited in its own window. Its header shows the note's number (*New* until it is saved) under its icon, and its topic and, below it, the full path of its folder, its type and its tags, with **Save and new**, **Save** and the button that closes the window (it asks first if there are unsaved changes).
 
 - **Overview**: the topic and the description and, at the right, the note's details (folder, type, priority, tags) and its record (number, dates, status). The description is written in Markdown, with a toolbar for its formats (headings, bold, lists, tasks, links, images, tables...): each tool works on the selected text or lines, and clicking it again removes the format. `Ctrl+B`, `Ctrl+I` and `Ctrl+K` make bold, italics and a link; **Link** and **Image** write the link with its address selected, ready to type it (if the selection is an address, its text is selected instead). `Ctrl+Z` and **Undo** undo the tools too. Typing is as fast with a long note as with a short one. **Preview** shows it as it looks. The browser remembers which of the two you use.
 - **Locked content**: the **Content** switch of the record locks the note's description: it is shown, not edited, until it is unlocked. The lock is saved with the note, and it is the same one the desktop app sets.
@@ -284,6 +284,8 @@ A new note has to be saved before adding resources, tasks or trace notes to it, 
 ### Appearance (web app)
 
 The palette button in the top bar of the web app opens the **Appearance** panel, where you choose the **theme** (Software, Standard, Material, Humanistic or Default), the **mode** (light or dark), the style of the **Home header** (*Soft*, a light tint of the theme's color, or *Ink*, dark) and **high contrast (WCAG)**, which makes text and borders easier to tell apart. Changes apply at once. The sun / moon button next to it switches between light and dark directly. Your browser remembers the choice (in cookies), so each browser keeps its own.
+
+The button with three lines at the left of the top bar switches the side menu between its icons with their names and only the icons, a narrow bar that leaves more room for the page; with only the icons, each one shows its name when the mouse is over it. The browser remembers the choice; until you make one, a phone shows only the icons.
 
 ### Your account (web app)
 

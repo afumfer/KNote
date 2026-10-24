@@ -10,8 +10,11 @@
 @inject NotificationService notificationService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider authenticationStateProvider
+@inject IJSRuntime js
 
 <RadzenComponents />
+
+<RadzenMediaQuery Query="(max-width: 768px)" Change="@(narrow => narrowScreen = narrow)" />
 
 <RadzenLayout>
 
@@ -20,7 +23,7 @@
             <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Gap="0px">
                 <RadzenColumn Size="5">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                        <RadzenSidebarToggle Click="@(() => sidebar = !sidebar)" />
+                        <RadzenSidebarToggle Click="ToggleMenuAsync" />
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="knt-app-brand">
                             <KntLogo Size="24" />
                             <span class="knt-app-title">
@@ -42,8 +45,9 @@
         </ChildContent>
     </RadzenHeader>
 
-    <RadzenSidebar @bind-Expanded="@sidebar">
-        <MainLayoutNavMenu />
+    @* Always shown: the toggle switches the menu between icons with their texts and only the icons. *@
+    <RadzenSidebar Expanded="true" Responsive="false" class="@(MenuCompact ? "knt-sidebar-compact" : null)">
+        <MainLayoutNavMenu Compact="MenuCompact" />
     </RadzenSidebar>
 
     <RadzenBody>
@@ -58,11 +62,22 @@
 
 @code {
 
-    private bool sidebar;    
+    private const string MenuCompactStorageKey = "KNoteMenuCompact";
+
+    // The menu shows only its icons as the user left it (kept in the browser) or, until they choose, on a narrow
+    // screen (a phone).
+    private bool? menuCompact;
+    private bool narrowScreen;
+
+    private bool MenuCompact => menuCompact ?? narrowScreen;
 
     protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
+
+        var savedMenuCompact = await js.LocalStorageGetItem(MenuCompactStorageKey);
+        if (savedMenuCompact != null)
+            menuCompact = savedMenuCompact == "true";
 
         store.AppState.OnChange += StateHasChanged;
         store.AppState.OnNotifyError += NotifyError;
@@ -96,6 +111,12 @@
         else if (renewed == false)
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Session ended",
                 Detail = "Your session has ended: it expired or your password was changed. Sign in again.", Duration = 12000 });
+    }
+
+    private async Task ToggleMenuAsync()
+    {
+        menuCompact = !MenuCompact;
+        await js.LocalStorageSetItem(MenuCompactStorageKey, menuCompact == true ? "true" : "false");
     }
 
     private async void OnAuthenticationStateChanged(Task<AuthenticationState> state)

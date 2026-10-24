@@ -22,7 +22,7 @@
 
 @if (showForm)
 {
-    <NoteForm Title="@(note!.IsNew() ? "New note" : "Edit note")" Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" Saving="saving.IsBusy" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" Saving="saving.IsBusy" NoteTypes="noteTypes"></NoteForm>
 }
 else if (loadFailed)
 {
