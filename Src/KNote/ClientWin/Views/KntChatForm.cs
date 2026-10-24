@@ -104,6 +104,7 @@ public partial class KntChatForm : KntForm, IViewChatRoom
 
     public override void RefreshView()
     {
+        PopulateRepositories();
         RefreshConnectionState();
         RefreshThreads();
         RefreshConversation();
@@ -162,7 +163,8 @@ public partial class KntChatForm : KntForm, IViewChatRoom
         _shownThreadId = thread?.ThreadId;
 
         labelThread.Text = thread == null ? "No thread selected" : $"#{thread.NoteNumber}  {thread.Topic}";
-        Text = thread == null ? ViewCaptionText : $"{ViewCaptionText} - {thread.Topic}";
+        var repository = string.IsNullOrEmpty(_ctrl.CurrentRepository?.Name) ? "" : $" - {_ctrl.CurrentRepository.Name}";
+        Text = thread == null ? $"{ViewCaptionText}{repository}" : $"{ViewCaptionText}{repository} - {thread.Topic}";
         RefreshOnlineUsers();
         UpdateActions();
         ShowConversation();
@@ -194,8 +196,48 @@ public partial class KntChatForm : KntForm, IViewChatRoom
             _ => string.IsNullOrEmpty(_ctrl.ConnectionError) ? " Disconnected" : $" Disconnected: {_ctrl.ConnectionError}"
         };
         toolStripStatusUser.Text = string.IsNullOrEmpty(_ctrl.UserName) ? "Not signed in" : _ctrl.UserName;
-        toolStripStatusServer.Text = _ctrl.ServerUrl;
+        toolStripStatusServer.Text = string.IsNullOrEmpty(_ctrl.CurrentRepository?.Name) ? _ctrl.ServerUrl : $"{_ctrl.ServerUrl} · {_ctrl.CurrentRepository.Name}";
         UpdateActions();
+    }
+
+    // The repositories of the Server where the user signed in (each one with its chat room): only with some, and
+    // enabled with more than one.
+    private void PopulateRepositories()
+    {
+        comboRepositories.SelectedIndexChanged -= comboRepositories_SelectedIndexChanged;
+
+        var repositories = _ctrl.Repositories;
+        comboRepositories.DataSource = null;
+        comboRepositories.DisplayMember = nameof(ChatHubRepositoryConfig.Name);
+        comboRepositories.DataSource = repositories.ToList();
+        comboRepositories.SelectedItem = _ctrl.CurrentRepository;
+        comboRepositories.Enabled = repositories.Count > 1;
+        panelRepositoryHeader.Visible = repositories.Count > 0;
+
+        comboRepositories.SelectedIndexChanged += comboRepositories_SelectedIndexChanged;
+    }
+
+    // Another repository's chat room: the threads of this one are left (only one chat room is connected).
+    private async void comboRepositories_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (comboRepositories.SelectedItem is not ChatHubRepositoryConfig repository || repository == _ctrl.CurrentRepository)
+            return;
+
+        comboRepositories.Enabled = false;
+        try
+        {
+            await _ctrl.SelectRepositoryAsync(repository.RepositoryId);
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
+        finally
+        {
+            comboRepositories.Enabled = _ctrl.Repositories.Count > 1;
+            RefreshConnectionState();
+            RefreshConversation();
+        }
     }
 
     #endregion

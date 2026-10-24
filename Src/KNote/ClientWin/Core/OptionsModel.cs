@@ -110,8 +110,9 @@ public class OptionsModel : SmartModelDtoBase
         }
     }
 
-    // The user signed in to the chat room's Server, and the token it gave (see ChatHubConfig). Set by signing in
-    // from the dialog (the password is not kept), cleared by signing out.
+    // The user signed in to the chat room's Server, and the repositories where it signed in, with the token of each
+    // one (see ChatHubConfig). Set by signing in from the dialog (the password is not kept), cleared by signing out.
+    // The repository connected is chosen in the chat room's window (ChatHubConfig.RepositoryId), not here.
     private string _chatHubUserName;
     public string ChatHubUserName
     {
@@ -126,34 +127,22 @@ public class OptionsModel : SmartModelDtoBase
         }
     }
 
-    private string _chatHubToken;
-    public string ChatHubToken
+    // Replaced as a whole (a new list) when it changes.
+    private List<ChatHubRepositoryConfig> _chatHubRepositories = new();
+    public List<ChatHubRepositoryConfig> ChatHubRepositories
     {
-        get { return _chatHubToken; }
+        get { return _chatHubRepositories; }
         set
         {
-            if (_chatHubToken != value)
+            if (_chatHubRepositories != value)
             {
-                _chatHubToken = value;
-                OnPropertyChanged("ChatHubToken");
+                _chatHubRepositories = value ?? new();
+                OnPropertyChanged("ChatHubRepositories");
             }
         }
     }
 
-    // The repository of the Server the token is for (a Server can have several, each one with its chat room).
-    private string _chatHubRepositoryName;
-    public string ChatHubRepositoryName
-    {
-        get { return _chatHubRepositoryName; }
-        set
-        {
-            if (_chatHubRepositoryName != value)
-            {
-                _chatHubRepositoryName = value;
-                OnPropertyChanged("ChatHubRepositoryName");
-            }
-        }
-    }
+    public bool ChatHubSignedIn => ChatHubRepositories.Count > 0;
 
     // Lives in the application state (set automatically when a connection fails); the dialog can clear
     // it after signing in again.
@@ -283,8 +272,7 @@ public class OptionsModel : SmartModelDtoBase
             AuthenticationMode = settings.Security.AuthenticationMode,
             ChatHubUrl = settings.Connectivity.ChatHub.Url,
             ChatHubUserName = settings.Connectivity.ChatHub.UserName,
-            ChatHubToken = settings.Connectivity.ChatHub.Token,
-            ChatHubRepositoryName = settings.Connectivity.ChatHub.RepositoryName,
+            ChatHubRepositories = CopyOf(settings.Connectivity.ChatHub.Repositories),
             ChatHubAutoConnectDisabled = state.Session.ChatHubAutoConnectDisabled,
             SmtpHost = email.Host,
             SmtpPort = email.Port,
@@ -310,8 +298,7 @@ public class OptionsModel : SmartModelDtoBase
         settings.Security.AuthenticationMode = AuthenticationMode;
         settings.Connectivity.ChatHub.Url = ChatHubUrl;
         settings.Connectivity.ChatHub.UserName = ChatHubUserName;
-        settings.Connectivity.ChatHub.Token = ChatHubToken;
-        settings.Connectivity.ChatHub.RepositoryName = ChatHubRepositoryName;
+        settings.Connectivity.ChatHub.Repositories = CopyOf(ChatHubRepositories);
         state.Session.ChatHubAutoConnectDisabled = ChatHubAutoConnectDisabled;
         email.Host = SmtpHost;
         email.Port = SmtpPort;
@@ -321,6 +308,10 @@ public class OptionsModel : SmartModelDtoBase
         email.Username = SmtpUsername;
         email.Password = SmtpPassword;
     }
+
+    // The model and the settings never share the entries (editing one doesn't change the other).
+    private static List<ChatHubRepositoryConfig> CopyOf(List<ChatHubRepositoryConfig> repositories) =>
+        (repositories ?? new()).Select(r => new ChatHubRepositoryConfig { RepositoryId = r.RepositoryId, Name = r.Name, Token = r.Token }).ToList();
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

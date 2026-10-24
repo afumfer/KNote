@@ -22,7 +22,8 @@ public class AppUserSettingsSecretsTests
         settings.Repositories.Assistant = new RepositoryRef { Name = "Assistant", ConnectionString = SqlAuthConnectionString };
         settings.Connectivity.ChatHub.Url = "https://server/KNote/chathub";
         settings.Connectivity.ChatHub.UserName = "jdoe";
-        settings.Connectivity.ChatHub.Token = "tok-1";
+        settings.Connectivity.ChatHub.Repositories.Add(new ChatHubRepositoryConfig { RepositoryId = Guid.NewGuid(), Name = "Work", Token = "tok-1" });
+        settings.Connectivity.ChatHub.Repositories.Add(new ChatHubRepositoryConfig { RepositoryId = Guid.NewGuid(), Name = "Personal", Token = "tok-2" });
         return settings;
     }
 
@@ -45,7 +46,9 @@ public class AppUserSettingsSecretsTests
         Assert.AreEqual("fake:1-yek", protectedSettings.Ai.Providers[0].ApiKey);
         Assert.IsTrue(protectedSettings.Repositories.Items[1].ConnectionString.StartsWith("fake:"));
         Assert.IsTrue(protectedSettings.Repositories.Assistant.ConnectionString.StartsWith("fake:"));
-        Assert.AreEqual("fake:1-kot", protectedSettings.Connectivity.ChatHub.Token);
+        Assert.AreEqual("fake:1-kot", protectedSettings.Connectivity.ChatHub.Repositories[0].Token);
+        Assert.AreEqual("fake:2-kot", protectedSettings.Connectivity.ChatHub.Repositories[1].Token);
+        Assert.AreEqual("Work", protectedSettings.Connectivity.ChatHub.Repositories[0].Name);
         Assert.AreEqual("smtp-pwd", settings.Notifications.Email.Password);
         Assert.AreEqual("tok-1", settings.Connectivity.ChatHub.Token);
         Assert.AreEqual("key-1", settings.Ai.Providers[0].ApiKey);
@@ -71,7 +74,7 @@ public class AppUserSettingsSecretsTests
     {
         var xml = ToXml(new AppUserSettingsSecrets(new FakeSecretProtector()).Protect(NewSettings()));
 
-        foreach (var secret in new[] { "smtp-pwd", "key-1", "s3cr3t" })
+        foreach (var secret in new[] { "smtp-pwd", "key-1", "s3cr3t", "tok-1", "tok-2" })
             Assert.IsFalse(xml.Contains(secret), $"'{secret}' must not appear in clear text");
     }
 

@@ -13,10 +13,12 @@ internal class FakeKntFolderService : IKntFolderService
 {
     public Func<Guid, string, Task<Result>>? UpdateOrderNotesAsyncImpl { get; set; }
     public Func<Guid, Task<Result<FolderDto>>>? GetByIdAsyncImpl { get; set; }
+    public Func<Task<Result<FolderDto>>>? GetHomeAsyncImpl { get; set; }
 
     public Task<Result<List<FolderInfoDto>>> GetAllAsync() => throw new NotSupportedException();
     public Task<Result<List<FolderDto>>> GetTreeAsync() => throw new NotSupportedException();
-    public Task<Result<FolderDto>> GetHomeAsync() => throw new NotSupportedException();
+    public Task<Result<FolderDto>> GetHomeAsync() =>
+        (GetHomeAsyncImpl ?? throw new NotSupportedException($"{nameof(GetHomeAsync)} not configured for this test"))();
     public Task<Result<List<FolderInfoDto>>> GetHomeChildrenAsync() => throw new NotSupportedException();
     public Task<Result<FolderDto>> GetAsync(Guid folderId) =>
         (GetByIdAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAsync)}(Guid) not configured for this test"))(folderId);

@@ -12,13 +12,9 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
 
     private readonly OptionsEditorCtrl _ctrl;
 
-    // The chat hub url the token in the model was given for: the token belongs to that Server, so changing the url
-    // forgets it (see ControlsToModel).
+    // The chat hub url the tokens in the model were given for: they belong to that Server, so changing the url
+    // forgets them (see ControlsToModel).
     private string _chatSignedInUrl;
-
-    // The repositories of the Server where the credentials signed in are valid, when they are several (each one has its
-    // chat room): in comboChatRepository, in the same order, to sign in again in the one chosen.
-    private List<RepositoryInfoDto> _chatRepositories = new();
 
     // Items of comboColorMode, in the same order.
     private static readonly (AppColorMode Mode, string Text)[] ColorModes =
@@ -45,9 +41,6 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         this.Text = $"{KntConst.AppName} options";
         comboColorMode.Items.AddRange(ColorModes.Select(c => (object)c.Text).ToArray());
         comboAuthenticationMode.Items.AddRange(AuthenticationModes.Select(a => (object)a.Text).ToArray());
-        // The repositories offered are those of that server and user.
-        textChatHubUrl.TextChanged += (_, _) => SetChatRepositories(new());
-        textChatUserName.TextChanged += (_, _) => SetChatRepositories(new());
 
         _ctrl = ctrl;
     }
@@ -72,38 +65,27 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
     protected override void CancelEdition()
         => _ctrl.CancelEdition();
 
-    // Signs in to the chat room's Server (its api/users/login, next to the hub) and checks the hub takes the token.
-    // Only the user name, the token and its repository's name are kept (the token encrypted on disk, see
-    // ChatHubConfig): the password is cleared. Kept when the dialog is accepted, as every other option. When the
-    // credentials are valid in several repositories of the Server (each one with its chat room), they are offered in
-    // comboChatRepository to sign in again in the one chosen.
+    // Signs in to the chat room's Server (its api/users/login, next to the hub) in every repository where the user is
+    // (each one has its chat room, chosen in the chat room's window) and checks the hub takes the token. Only the user
+    // name and the repositories with their tokens are kept (encrypted on disk, see ChatHubConfig): the password is
+    // cleared. Kept when the dialog is accepted, as every other option.
     private async void buttonChatSignIn_Click(object sender, EventArgs e)
     {
         var url = textChatHubUrl.Text?.Trim();
         var userName = textChatUserName.Text?.Trim();
-        Guid? repositoryId = comboChatRepository.Enabled && comboChatRepository.SelectedIndex >= 0
-            ? _chatRepositories[comboChatRepository.SelectedIndex].RepositoryId
-            : null;
 
         buttonChatSignIn.Enabled = false;
         this.Cursor = Cursors.WaitCursor;
         try
         {
-            var signIn = await ChatRoomServer.SignInAsync(url, userName, textChatPassword.Text, repositoryId);
+            var signIn = await ChatRoomServer.SignInAsync(url, userName, textChatPassword.Text);
             if (!signIn.IsValid)
             {
                 ShowInfo($"Could not sign in to the chat room server. {signIn.ErrorMessage}");
                 return;
             }
 
-            if (signIn.Entity.Repositories != null)
-            {
-                SetChatRepositories(signIn.Entity.Repositories);
-                ShowInfo("Your user has access to several repositories in this server, each one with its own chat room. Choose one and sign in again.");
-                return;
-            }
-
-            var test = await ChatRoomServer.TestConnectionAsync(url, signIn.Entity.Token);
+            var test = await ChatRoomServer.TestConnectionAsync(url, signIn.Entity[0].Token);
             if (!test.IsValid)
             {
                 ShowInfo($"Signed in, but the chat room could not be reached. {test.ErrorMessage}");
@@ -112,14 +94,12 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
 
             textChatHubUrl.Text = url;
             _ctrl.Model.ChatHubUserName = userName;
-            _ctrl.Model.ChatHubToken = signIn.Entity.Token;
-            _ctrl.Model.ChatHubRepositoryName = signIn.Entity.RepositoryName;
+            _ctrl.Model.ChatHubRepositories = signIn.Entity;
             _ctrl.Model.ChatHubAutoConnectDisabled = false;
             _chatSignedInUrl = url;
             textChatPassword.Text = "";
-            SetChatRepositories(new());
             RefreshChatStatus();
-            ShowInfo($"Signed in to the chat room as {userName}{InRepository(signIn.Entity.RepositoryName)}. Accept the options to keep it.");
+            ShowInfo($"Signed in to the chat room as {userName}{InRepositories()}. Accept the options to keep it.");
         }
         finally
         {
@@ -130,33 +110,32 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
 
     private void buttonChatSignOut_Click(object sender, EventArgs e)
     {
-        _ctrl.Model.ChatHubToken = null;
-        _ctrl.Model.ChatHubRepositoryName = null;
+        _ctrl.Model.ChatHubRepositories = new();
         _chatSignedInUrl = null;
         RefreshChatStatus();
     }
 
     private void RefreshChatStatus()
     {
-        var signedIn = !string.IsNullOrEmpty(_ctrl.Model.ChatHubToken);
+        var signedIn = _ctrl.Model.ChatHubSignedIn;
         labelChatStatus.Text = signedIn
-            ? $"Signed in as {_ctrl.Model.ChatHubUserName}{InRepository(_ctrl.Model.ChatHubRepositoryName)}. Only the sign-in token is kept (encrypted), not the password. Sign in again if the server refuses it (it expires after a year)."
+            ? $"Signed in as {_ctrl.Model.ChatHubUserName}{InRepositories()}" +
+                (_ctrl.Model.ChatHubRepositories.Count > 1 ? " (choose the chat room in its window)" : "") +
+                ". Only the sign-in tokens are kept (encrypted), not the password. Sign in again if the server refuses them (they expire after a year)."
             : "Not signed in. Enter the user name and the password of your user in the KNote Server (Staff or higher) and sign in. The password is not kept.";
         buttonChatSignOut.Enabled = signedIn;
     }
 
-    private static string InRepository(string repositoryName) =>
-        string.IsNullOrEmpty(repositoryName) ? "" : $" in the repository {repositoryName}";
-
-    // The repositories to choose from (enabled only with some).
-    private void SetChatRepositories(List<RepositoryInfoDto> repositories)
+    // " in the repository A" or " in the repositories A, B" (nothing for a Server that doesn't name them).
+    private string InRepositories()
     {
-        _chatRepositories = repositories;
-        comboChatRepository.Items.Clear();
-        comboChatRepository.Items.AddRange(repositories.Select(r => (object)r.Name).ToArray());
-        comboChatRepository.Enabled = repositories.Count > 0;
-        if (repositories.Count > 0)
-            comboChatRepository.SelectedIndex = 0;
+        var names = _ctrl.Model.ChatHubRepositories.Select(r => r.Name).Where(n => !string.IsNullOrEmpty(n)).ToList();
+        return names.Count switch
+        {
+            0 => "",
+            1 => $" in the repository {names[0]}",
+            _ => $" in the repositories {string.Join(", ", names)}"
+        };
     }
 
     private async void buttonTestSmtp_Click(object sender, EventArgs e)
@@ -217,7 +196,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         textChatHubUrl.Text = _ctrl.Model.ChatHubUrl;
         textChatUserName.Text = _ctrl.Model.ChatHubUserName;
         textChatPassword.Text = "";
-        _chatSignedInUrl = string.IsNullOrEmpty(_ctrl.Model.ChatHubToken) ? null : _ctrl.Model.ChatHubUrl;
+        _chatSignedInUrl = _ctrl.Model.ChatHubSignedIn ? _ctrl.Model.ChatHubUrl : null;
         RefreshChatStatus();
         comboColorMode.SelectedIndex = Math.Max(0, Array.FindIndex(ColorModes, c => c.Mode == _ctrl.Model.ColorMode));
         comboAuthenticationMode.SelectedIndex = Math.Max(0, Array.FindIndex(AuthenticationModes, a => a.Mode == _ctrl.Model.AuthenticationMode));
@@ -240,12 +219,9 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         _ctrl.Model.AutoSaveActivated = checkAutoSaveActivated.Checked;
         _ctrl.Model.AutoSaveSeconds = int.Parse(textAutosaveSeconds.Text);
         _ctrl.Model.ChatHubUrl = textChatHubUrl.Text?.Trim();
-        // The token belongs to the Server it was given by: another url needs signing in again.
+        // The tokens belong to the Server they were given by: another url needs signing in again.
         if (_ctrl.Model.ChatHubUrl != _chatSignedInUrl)
-        {
-            _ctrl.Model.ChatHubToken = null;
-            _ctrl.Model.ChatHubRepositoryName = null;
-        }
+            _ctrl.Model.ChatHubRepositories = new();
         _ctrl.Model.ColorMode = ColorModes[comboColorMode.SelectedIndex].Mode;
         _ctrl.Model.AuthenticationMode = AuthenticationModes[comboAuthenticationMode.SelectedIndex].Mode;
         _ctrl.Model.SmtpHost = textSmtpHost.Text;

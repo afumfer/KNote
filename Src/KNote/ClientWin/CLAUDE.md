@@ -592,13 +592,20 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
 
 - **Identidad en el servidor**: `ClientWin` no tiene cuenta en el `Server`. En Opciones, pestaña **Chat room**, el
   usuario se identifica una vez (`ChatRoomServer.SignInAsync`: `api/users/login` junto al hub, que se deduce de la
-  URL del hub con `ChatRoomServer.BaseUrl`) y se comprueba la conexión (`TestConnectionAsync`). Solo se guardan
-  `ChatHubConfig.UserName`, `Token` (secreto DPAPI) y `RepositoryName` (para mostrarlo); la contraseña no. El token
-  pertenece al servidor de la URL: cambiarla lo olvida (`OptionsEditorForm.ControlsToModel`). **Un `Server` puede tener
-  varios repositorios, cada uno con su chat room**, y el token es de uno: si las credenciales valen en varios, el login
-  los devuelve (`ChatRoomSignIn.Repositories`, sin token), Opciones los pone en `comboChatRepository` y se vuelve a
-  entrar con el elegido (`SignInAsync(..., repositoryId)`); el estado dice en qué repositorio. Un token de antes del
-  multirepositorio ya no vale: hay que volver a entrar desde Opciones. `ChatHubConfig.UserName` es el usuario del chat
+  URL del hub con `ChatRoomServer.BaseUrl`) y se comprueba la conexión (`TestConnectionAsync`). **Un `Server` puede tener
+  varios repositorios, cada uno con su chat room**, y un token es de uno: `SignInAsync` entra en todos donde valen las
+  credenciales (con varios, el login devuelve la lista y vuelve a entrar en cada uno con su `RepositoryId`) y guarda
+  `ChatHubConfig.Repositories` (`RepositoryId`, `Name`, `Token`: secreto DPAPI, uno por repositorio) y `UserName`; la
+  contraseña no. El chat conectado es el de `ChatHubConfig.RepositoryId` (`Current()`; si ya no está, el primero) y
+  `ChatHubConfig.Token` es el suyo. Los tokens pertenecen al servidor de la URL: cambiarla los olvida
+  (`OptionsEditorForm.ControlsToModel`). Un token de antes del multirepositorio ya no vale (el fichero antiguo con
+  `<Token>` se lee sin él): hay que volver a entrar desde Opciones.
+- **Repositorio del chat**: el combo "Chat room of the repository" de la ventana (`KntChatForm.comboRepositories`, encima
+  de los hilos; habilitado con más de uno) llama a `KntChatCtrl.SelectRepositoryAsync`: guarda la elección
+  (`SaveSettings`, que los tests sustituyen porque `Store.SaveConfig` escribe los ficheros reales), deja la conexión del
+  otro chat (sin su manejador `Closed`, para que no se reconecte), olvida sus hilos y se conecta con el token del
+  elegido, sin pedir contraseña. **Un chat conectado cada vez**: solo se avisa de sus mensajes, como en la Web. El título
+  y la barra de estado dicen el repositorio. Son repositorios del `Server`, no los enlazados en ClientWin. `ChatHubConfig.UserName` es el usuario del chat
   (no `Store.AppUserName`): decide qué mensajes son "propios".
 - **`KntChatCtrl`** (Staff, de aplicación) habla con el hub a través de `Core/IChatRoomConnection`
   (`ChatRoomConnection` = `HubConnection` con `AccessTokenProvider` y `WithAutomaticReconnect`; `ConnectionFactory`
@@ -640,13 +647,14 @@ La construcción del `IChatClient` por proveedor (`AiChatClientFactory`) y las t
 `search_notes`, `get_note_details`, `create_task`) viven en el proyecto compartido **`KNote.Ai`** (carpeta
 `Ai/`), que usa también `Server`; ahí están además todos los paquetes NuGet de IA (`ClientWin` los recibe por
 la referencia al proyecto). `KNoteAIAssistantCtrl.ApplyProvider` los combina:
-`AiChatClientFactory.Create(providerRef, new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store)).GetTools())`.
+`AiChatClientFactory.Create(providerRef, new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef)).GetTools())`.
 
 - `KNoteAiTools` recibe `IKntService` (no `ServiceRef`), así que sus tests corren contra los fakes de
   servicio (`Fakes/FakeKntService.cs`) sin base de datos real. Lo que `create_task` hace distinto en cada
   aplicación lo pide a un `IKNoteAiToolsHost`; el de `ClientWin` es **`Core/KNoteAiToolsHost`**:
-  - destino de la nota: `Store.DefaultFolderWithServiceRef` (que puede ser otro repositorio que aquel sobre
-    el que trabajan `search_notes`/`get_note_details`);
+  - destino de la nota: el repositorio del asistente (el mismo de `search_notes`/`get_note_details`): la carpeta
+    por defecto (`Store.DefaultFolderWithServiceRef`) si es de ese repositorio y, si no, su Home; sin repositorio
+    (`new KNoteAiToolsHost(store)`), la carpeta por defecto;
   - una vez guardada (siempre **solo por la capa Service**, `NewExtendedAsync` + `SaveExtendedAsync`), la abre
     con el mismo camino "editar nota existente" que el resto de la app: `NoteEditorCtrl.LoadModelById(service,
     noteId)` + `.Run()`, sin tocar su `View` ni precargar `Model`. Queda en manos del usuario modificarla,
@@ -662,6 +670,15 @@ la referencia al proyecto). `KNoteAIAssistantCtrl.ApplyProvider` los combina:
   (`ChatTurns`), y el turno solo se añade a la conversación (`ChatTurns`, `ChatMessages` para los scripts,
   totales) cuando la respuesta termina, así que un fallo del proveedor no deja mensajes huérfanos. El uso de
   tokens es el que da el proveedor (en streaming también); si no lo da, se estima.
+- **Repositorio del asistente** (`KNoteAIAssistantCtrl.ServiceRef`): donde buscan las tools, donde `create_task` guarda
+  (`KNoteAiToolsHost(store, repositorio)`: la carpeta por defecto si es de ese repositorio; si no, su Home) y donde
+  están las sesiones. Se elige en el combo "Sessions in the repository" del panel de sesiones
+  (`KNoteAIAssistantForm.comboRepositories`, entre `Repositories`: los enlazados donde el rol permite las sesiones,
+  Staff) y cambiarlo empieza una conversación nueva, como cambiar de proveedor (`SetRepository`, tras
+  `LeaveSessionAsync`). El abierto desde el menú (`PersistSession`) empieza en el último elegido
+  (`AppUserState.Session.LastAiRepositoryId`; si ya no está enlazado, el de la carpeta activa); un script, en el de la
+  carpeta activa. El título y la barra de estado dicen el repositorio. `ApplyRepository` es `internal` para los tests
+  (`SetRepository` guarda la configuración real).
 - **Sesiones** (persistencia de las conversaciones, `IKntService.AiSessions` del `ServiceRef` del asistente,
   el mismo en el que trabajan las tools; formato común con la Web, ver `CLAUDE.md` raíz). Solo si
   `PersistSession`: lo activa `KNoteManagementCtrl` al abrir el asistente desde el menú

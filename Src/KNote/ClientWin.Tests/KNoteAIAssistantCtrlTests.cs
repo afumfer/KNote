@@ -1,7 +1,9 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
+using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
+using KNote.Service.Core;
 using Microsoft.Extensions.AI;
 
 namespace KNote.ClientWin.Tests;
@@ -317,6 +319,70 @@ public class KNoteAIAssistantCtrlTests
         var ctrl = CreateCtrlWithProviders("anything");
 
         Assert.IsNull(ctrl.GetPreferredProvider());
+    }
+
+    // Two linked repositories, A (the first: the one the assistant starts in) and B; the user is Admin of both unless
+    // given another role in B. SetRepository is not exercised: it saves the user's real config files (see above).
+    private static (Store Store, ServiceRef A, ServiceRef B) CreateStoreWithRepositories(EnumRoles roleInB = EnumRoles.Admin, Guid? lastRepositoryId = null)
+    {
+        var store = new Store(new TestFactoryViews());
+        var a = TestServiceRefFactory.CreateInMemorySqlite("A");
+        var b = TestServiceRefFactory.CreateInMemorySqlite("B");
+        store.AddServiceRef(a);
+        store.AddServiceRef(b);
+        store.GrantAdmin(a.Service);
+        store.Security.SetRepositoryRole(b.Service, roleInB);
+        store.State.Session.LastAiRepositoryId = lastRepositoryId;
+        return (store, a, b);
+    }
+
+    [TestMethod]
+    public void Repositories_AreThoseWhereTheUserCanKeepSessions()
+    {
+        var (store, a, _) = CreateStoreWithRepositories(roleInB: EnumRoles.Guest);
+
+        var ctrl = new KNoteAIAssistantCtrl(store);
+
+        CollectionAssert.AreEqual(new[] { a }, ctrl.Repositories);
+    }
+
+    [TestMethod]
+    public void GetPreferredRepository_TheLastOneChosen_WhenItIsStillLinked()
+    {
+        var (store, a, b) = CreateStoreWithRepositories();
+        store.State.Session.LastAiRepositoryId = b.RepositoryId;
+
+        var ctrl = new KNoteAIAssistantCtrl(store);
+
+        Assert.AreEqual(a, ctrl.ServiceRef, "Created in the active (here, the first) repository.");
+        Assert.AreEqual(b, ctrl.GetPreferredRepository());
+    }
+
+    [TestMethod]
+    public void GetPreferredRepository_WithoutAUsableLastOne_TheCurrentOne()
+    {
+        var (store, a, b) = CreateStoreWithRepositories(roleInB: EnumRoles.Guest);
+        var unknown = new KNoteAIAssistantCtrl(CreateStoreWithRepositories(lastRepositoryId: Guid.NewGuid()).Store);
+        store.State.Session.LastAiRepositoryId = b.RepositoryId;
+
+        Assert.AreEqual(a, new KNoteAIAssistantCtrl(store).GetPreferredRepository(), "B doesn't allow the sessions.");
+        Assert.AreEqual(unknown.ServiceRef, unknown.GetPreferredRepository(), "No longer linked.");
+    }
+
+    [TestMethod]
+    public async Task ApplyRepository_StartsANewConversationThere()
+    {
+        var (store, _, b) = CreateStoreWithRepositories();
+        var ctrl = new KNoteAIAssistantCtrl(store);
+        ctrl.SetChatClientForTesting(new FakeChatClient { GetStreamingResponseImpl = (messages, options, ct) => StreamOf("Hi") });
+        ctrl.RestartAIAssistant();
+        await ctrl.StreamCompletionAsync("Hello");
+
+        ctrl.ApplyRepository(b);
+
+        Assert.AreEqual(b, ctrl.ServiceRef);
+        Assert.IsEmpty(ctrl.ChatTurns);
+        Assert.AreEqual(Guid.Empty, ctrl.SessionNoteId);
     }
 
     // An answer as providers stream it: its text, then a last update with why it stopped and its usage.

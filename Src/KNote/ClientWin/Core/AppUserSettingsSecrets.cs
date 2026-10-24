@@ -80,8 +80,11 @@ public sealed class AppUserSettingsSecrets
         var email = settings.Notifications.Email;
         yield return new Secret("e-mail account password", () => email.Password, v => email.Password = v);
 
-        var chatHub = settings.Connectivity.ChatHub;
-        yield return new Secret("chat room sign-in token", () => chatHub.Token, v => chatHub.Token = v);
+        foreach (var chatRepository in settings.Connectivity.ChatHub.Repositories)
+        {
+            var c = chatRepository;
+            yield return new Secret($"chat room sign-in token of '{c.Name}'", () => c.Token, v => c.Token = v);
+        }
 
         foreach (var provider in settings.Ai.Providers)
         {

@@ -37,6 +37,9 @@ public class KntChatCtrl : CtrlBase, IDisposable
     // Sends an image to the Server (REST, not the hub): the real one, or a fake in the tests.
     internal Func<ChatRoomImageDto, Task<Result<ChatRoomImageDto>>> ImageUploader { get; set; }
 
+    // Keeps the repository chosen in KNoteData.config: Store.SaveConfig, or nothing in the tests (it writes the real file).
+    internal Action SaveSettings { get; set; }
+
     #endregion
 
     #region Properties
@@ -57,6 +60,12 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
     // The user in the chat room: the one signed in to its Server (not necessarily the app's one).
     public string UserName => Store.Settings.Connectivity.ChatHub.UserName;
+
+    // The repositories of the Server where the user signed in (from Options), each one with its chat room, and the one
+    // connected (SelectRepositoryAsync). Not ClientWin's repositories: those of the chat room's Server.
+    public List<ChatHubRepositoryConfig> Repositories => Store.Settings.Connectivity.ChatHub.Repositories;
+
+    public ChatHubRepositoryConfig CurrentRepository => Store.Settings.Connectivity.ChatHub.Current();
 
     // Every thread, most recent activity first.
     public List<ChatRoomThreadInfoDto> Threads { get; private set; } = new();
@@ -81,6 +90,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
     public KntChatCtrl(Store store) : base(store)
     {
         ControllerName = "KntChat controller";
+        SaveSettings = () => Store.SaveConfig();
     }
 
     #endregion
@@ -106,16 +116,7 @@ public class KntChatCtrl : CtrlBase, IDisposable
 
             UiContext = SynchronizationContext.Current;
 
-            _connection = ConnectionFactory(chatHub.Url, () => Store.Settings.Connectivity.ChatHub.Token);
-            _connection.On<ChatRoomMessageDto>(ChatRoomHubContract.MessageReceived, m => PostToUi(() => OnMessageReceived(m)));
-            _connection.On<ChatRoomThreadInfoDto>(ChatRoomHubContract.ThreadCreated, t => PostToUi(() => OnThreadCreated(t)));
-            _connection.On<ChatRoomThreadActivityDto>(ChatRoomHubContract.ThreadActivity, a => PostToUi(() => OnThreadActivity(a)));
-            _connection.On<ChatRoomOnlineUsersDto>(ChatRoomHubContract.OnlineUsersChanged, o => PostToUi(() => OnOnlineUsersChanged(o)));
-            _connection.Reconnecting += _ => PostToUiAsync(() => SetConnectionState(ChatRoomConnectionState.Reconnecting));
-            // A new connection: its subscriptions are made again (and the threads read again, as messages may have
-            // been missed meanwhile).
-            _connection.Reconnected += connectionId => PostToUiAsync(() => _ = OnConnectedAsync());
-            _connection.Closed += OnConnectionClosedAsync;
+            _connection = NewConnection();
 
             // Fire-and-forget: connecting must never block startup. Its continuations return to the UI thread
             // through the WinForms SynchronizationContext captured here.
@@ -276,6 +277,51 @@ public class KntChatCtrl : CtrlBase, IDisposable
         View?.RefreshThreads();
     }
 
+    /// <summary>
+    /// Connects to the chat room of another repository of the Server (one of Repositories), with its token: its
+    /// threads, and only its messages (one chat room at a time). Remembered in KNoteData.config
+    /// (ChatHubConfig.RepositoryId). False if it isn't one of them.
+    /// </summary>
+    public async Task<bool> SelectRepositoryAsync(Guid repositoryId)
+    {
+        var chatHub = Store.Settings.Connectivity.ChatHub;
+        if (!chatHub.Repositories.Any(r => r.RepositoryId == repositoryId))
+            return false;
+        if (CurrentRepository?.RepositoryId == repositoryId && _connection != null)
+            return true;
+
+        chatHub.RepositoryId = repositoryId;
+        try
+        {
+            SaveSettings?.Invoke();
+        }
+        catch (Exception)
+        {
+            // Remembering the choice is a convenience: the chat room changes anyway.
+        }
+
+        // The connection of the other chat room is left (without trying to reconnect it) and its state forgotten.
+        var previous = _connection;
+        if (previous != null)
+        {
+            previous.Closed -= OnConnectionClosedAsync;
+            await previous.DisposeAsync();
+        }
+        _followed.Clear();
+        _unread.Clear();
+        Threads = new();
+        CurrentThreadId = null;
+        View?.RefreshThreads();
+        View?.RefreshConversation();
+
+        // Chosen by the user, who is waiting: a failure is shown (not the startup's silent auto-connect disabling).
+        ShowErrorMessagesOnInitialize = true;
+        _connection = NewConnection();
+        _connecting = ConnectWithTimeoutAsync();
+        await _connecting;
+        return true;
+    }
+
     /// <summary>Connects again after the connection was lost (automatic reconnection gives up after a while).</summary>
     public async Task ReconnectAsync()
     {
@@ -318,6 +364,22 @@ public class KntChatCtrl : CtrlBase, IDisposable
     {
         PostToUi(action);
         return Task.CompletedTask;
+    }
+
+    // The connection to the hub with the token of the repository connected (read on every connection attempt).
+    private IChatRoomConnection NewConnection()
+    {
+        var connection = ConnectionFactory(Store.Settings.Connectivity.ChatHub.Url, () => Store.Settings.Connectivity.ChatHub.Token);
+        connection.On<ChatRoomMessageDto>(ChatRoomHubContract.MessageReceived, m => PostToUi(() => OnMessageReceived(m)));
+        connection.On<ChatRoomThreadInfoDto>(ChatRoomHubContract.ThreadCreated, t => PostToUi(() => OnThreadCreated(t)));
+        connection.On<ChatRoomThreadActivityDto>(ChatRoomHubContract.ThreadActivity, a => PostToUi(() => OnThreadActivity(a)));
+        connection.On<ChatRoomOnlineUsersDto>(ChatRoomHubContract.OnlineUsersChanged, o => PostToUi(() => OnOnlineUsersChanged(o)));
+        connection.Reconnecting += _ => PostToUiAsync(() => SetConnectionState(ChatRoomConnectionState.Reconnecting));
+        // A new connection: its subscriptions are made again (and the threads read again, as messages may have
+        // been missed meanwhile).
+        connection.Reconnected += connectionId => PostToUiAsync(() => _ = OnConnectedAsync());
+        connection.Closed += OnConnectionClosedAsync;
+        return connection;
     }
 
     private async Task ConnectWithTimeoutAsync()

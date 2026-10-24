@@ -48,6 +48,10 @@ public class SessionState
     // KntServerCOMCtrl). When empty, or no longer among the configured providers, the first one is used.
     public string LastAiProviderAlias { get; set; }
 
+    // RepositoryId of the repository the user chose last in the AI assistant (where its sessions are, and the notes
+    // its tools work with). When empty, or no longer linked, the active folder's repository is used.
+    public Guid? LastAiRepositoryId { get; set; }
+
     // The AI assistant shows the conversation as its Markdown source instead of as a chat (the default).
     public bool AiAssistantMarkdownView { get; set; }
 

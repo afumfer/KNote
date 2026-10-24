@@ -4,6 +4,7 @@ using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using KNote.Service.ServicesCommands;
 using KntScript;
 using Microsoft.Extensions.AI;
 using System.Text;
@@ -100,7 +101,14 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public string Tag { get; set; } = "KNoteAIAssistantCtrl v0.1";
 
+    // The repository the assistant works in: its tools search its notes, create_task saves there and the sessions are
+    // kept there. Chosen in the view (SetRepository) among Repositories; the assistant opened from the menu starts in
+    // the last one chosen (State.Session.LastAiRepositoryId), a script in the active folder's repository.
     public ServiceRef ServiceRef { get; private set; }
+
+    // The linked repositories the assistant can work in: those where the user's role allows the AI sessions (Staff).
+    public List<ServiceRef> Repositories =>
+        Store.GetAllServiceRef().Where(s => Store.Security.IsAuthorized(typeof(KntAiSessionsSaveAsyncCommand), s.Service)).ToList();
 
     public string RootSystemChat { get; set; }
 
@@ -222,6 +230,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
         AutoCloseCtrlOnViewExit = autoCloseCtrlOnViewExit;
         PersistSession = persistSession;
+        // Its sessions are in the repository chosen last: the same place each time, whatever folder is active.
+        if (persistSession && GetPreferredRepository() is { } preferred && preferred != ServiceRef)
+            ApplyRepository(preferred);
         AIAssistantView.ShowView();
     }
 
@@ -273,9 +284,43 @@ public class KNoteAIAssistantCtrl : CtrlBase
             throw new ArgumentNullException(nameof(providerRef));
 
         _currentProviderRef = providerRef;
-        var tools = new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store));
+        var tools = new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
         _chatClient = AiChatClientFactory.Create(providerRef, tools.GetTools());
         RestartAIAssistant();
+    }
+
+    // Another repository: its sessions and its notes, so a new conversation (as with another provider). The view
+    // confirms it with the user and leaves the current conversation first (LeaveSessionAsync). Remembered in
+    // KNoteState.config (State.Session.LastAiRepositoryId) for the next time the assistant is opened.
+    public void SetRepository(ServiceRef repository)
+    {
+        ApplyRepository(repository);
+
+        var repositoryId = repository.RepositoryId == Guid.Empty ? (Guid?)null : repository.RepositoryId;
+        if (Store.State.Session.LastAiRepositoryId != repositoryId)
+        {
+            Store.State.Session.LastAiRepositoryId = repositoryId;
+            SaveState();
+        }
+    }
+
+    // The repository to start with: the last one chosen if it is still linked (and allowed), else the current one.
+    public ServiceRef GetPreferredRepository()
+    {
+        var lastId = Store.State.Session.LastAiRepositoryId;
+        var preferred = lastId == null ? null : Repositories.FirstOrDefault(s => s.RepositoryId == lastId);
+        return preferred ?? ServiceRef;
+    }
+
+    // Internal for the tests (SetRepository also saves the user's real configuration files).
+    internal void ApplyRepository(ServiceRef repository)
+    {
+        ServiceRef = repository ?? throw new ArgumentNullException(nameof(repository));
+        RootSystemChat = KntConst.DefaultRootSystemChat;
+        if (_currentProviderRef != null)
+            ApplyProvider(_currentProviderRef);
+        else
+            RestartAIAssistant();
     }
 
     private void SaveLastProviderAlias(string alias)
