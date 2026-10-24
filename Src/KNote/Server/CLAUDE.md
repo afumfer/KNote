@@ -26,19 +26,13 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
 ## Arranque (`Program.cs`, `Helpers/KntExtensions.cs`)
 
 - Configuración: secciones `AppSettings` (`Helpers/AppSettings`: `Secret` del JWT, `ActivateMessageBroker`,
-  `MountResourceContainerOnStartup`), `RepositoryRef` (`Model/Config/RepositoryRef`: `Orm`, `Provider`,
-  `ConnectionString`, contenedor de recursos...) y `ai` (proveedores del asistente de IA, ver "Asistente de IA").
-  `RepositoryRef:Name` solo da nombre a una base de datos que aún no lo tiene (una nueva o una de antes de la
-  revisión 5 de `KntSchemaUpdater`): el nombre del repositorio se guarda en la propia base de datos. Va vacío en
-  `appsettings.json` para que, si falta, `Program.cs` use el antiguo `RepositoryRef:Alias` (de los user-secrets de
-  un despliegue anterior; `LEGACY(repository-alias)`).
+  `MountResourceContainerOnStartup`), los repositorios (ver "Repositorios") y `ai` (proveedores del asistente de IA,
+  ver "Asistente de IA").
 - `KntAddAiAssistant` registra lo del asistente de IA: `AiConfig` enlazado a la sección `ai` **al usarse** (no
   leído al arrancar como `AppSettings`/`RepositoryRef`, así los tests en proceso pueden sobrescribirlo),
   `Ai/AiProvidersCatalog` e `Ai/IAiChatClientProvider` (singletons).
-- `KntAddServices` registra, ambos `Scoped` (uno por petición):
-  `IKntRepository` vía `KntRepositoryFactory.Create(repositoryRef)` (`Service/Core`; decide Dapper/EF según
-  `RepositoryRef.Orm` y antes pasa por `KntSchemaUpdater.EnsureUpToDate` de EF) e `IKntService` → `KntService`.
-  Una sola base de datos por instancia de `Server` (a diferencia de `ClientWin`, que puede tener varias).
+- `KntRepositories.OpenAsync` abre los repositorios al arrancar y `KntAddServices` registra el registro (singleton) y
+  el `IKntService` de cada petición (`Scoped`), el del repositorio de la sesión (ver "Repositorios").
 - Autenticación JWT bearer (clave simétrica `AppSettings.Secret`, sin validar issuer/audience,
   `ClockSkew = 0`), `AddAuthorization`, SignalR, compresión de respuesta, NLog (`nlog.config`, logs en `Log/`, rutas
   con `/` para que valgan en cualquier sistema).
@@ -53,7 +47,10 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
   llevarían el esquema y el host del proxy. Tests en `ProxyAndCorsInProcessTests`. Para el hub (`ChatRoomHubContract.Path`) el token también se lee del
   parámetro `access_token` (`JwtBearerEvents.OnMessageReceived`): WebSockets y SSE no envían la cabecera
   `Authorization`. `ChatRoomManager` se registra como singleton. `JwtBearerEvents.OnTokenValidated` rechaza los
-  tokens cuya huella de contraseña ya no es la del usuario (ver "Autorización").
+  tokens sin repositorio (`knt_repo`) o de uno que no está en `KntRepositories`, y los de huella de contraseña que ya
+  no es la del usuario en ese repositorio (ver "Autorización"). Lo comprueba con un servicio del repositorio del token
+  creado por el registro, **nunca con el `IKntService` de la petición**: aún no hay `HttpContext.User` y quedaría el del
+  repositorio por defecto para toda la petición.
 - `KntAddPasswordReset` (secciones `PasswordReset` y `Email`, `IEmailSender`, `Helpers/KntPasswordResetMail`) y
   `KntAddRateLimits` (`Helpers/KntRateLimits`, sección `RateLimits`; `UseRateLimiter` tras `UseRouting`), ver
   "Cuentas de usuario".
@@ -61,10 +58,48 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
   `Cache-Control: no-cache`: sus URLs no cambian entre versiones (`index.html`, `css/*.css`,
   `KNote.Client.styles.css`) y sin esa cabecera el navegador sigue usando los antiguos tras un despliegue (HTML
   nuevo con CSS viejo). Con `no-cache` revalida por ETag y recibe `304` si no han cambiado.
-- `IFileStore` → `LocalFileStore` (ficheros de recursos de notas en disco). `KntAddResourcesStaticFiles` monta
-  el contenedor de recursos como estáticos solo si `MountResourceContainerOnStartup`.
-- `KntConfigureMessageBroker`: experimental, crea un `KntService` propio con RabbitMQ si
-  `ActivateMessageBroker`.
+- `IFileStore` → `LocalFileStore` (ficheros en disco; solo lo usa ya la acción obsoleta `NotesController.SaveFile`).
+  `KntAddResourcesStaticFiles`, solo si `MountResourceContainerOnStartup`, monta como estáticos la carpeta de recursos
+  de cada repositorio cuya `ResourcesContainerRootUrl` es una ruta de este host (`/...`).
+- `KntConfigureMessageBroker`: experimental, crea un `KntService` propio con RabbitMQ si `ActivateMessageBroker`, solo
+  para el repositorio por defecto.
+
+## Repositorios (`Helpers/KntRepositories`)
+
+Un `Server` sirve uno o varios repositorios; **una sesión está en uno** (claim `knt_repo` del token,
+`KntConst.RepositoryClaimType`, con su `RepositoryId`), y los controladores y las páginas no saben nada de ello.
+
+- **Configuración**: la lista `Repositories` (cada uno, los campos de `RepositoryRef` más `IsDefault`;
+  `KntRepositoryConfig`, solo en `Server`) o, si está vacía, la sección `RepositoryRef` (un solo repositorio: forma
+  permanente, la del despliegue IIS y la de los tests). `appsettings.json` lleva `"Repositories": []` para no tapar el
+  `RepositoryRef` de los user-secrets. Con `RepositoryRef`, `Name` vacío toma el antiguo `Alias`
+  (`LEGACY(repository-alias)`). Ejemplo (en user-secrets o variables `Repositories__0__ConnectionString`...):
+
+  ```json
+  "Repositories": [
+    { "Name": "Work", "Orm": "EntityFramework", "Provider": "Microsoft.Data.SqlClient", "ConnectionString": "...",
+      "ResourcesContainer": "NotesResources", "ResourcesContainerRootPath": "", "ResourcesContainerRootUrl": "",
+      "IsDefault": true },
+    { "Name": "Personal", "Orm": "Dapper", "Provider": "Microsoft.Data.Sqlite", "ConnectionString": "Data Source=D:\\KNote\\Personal.db",
+      "ResourcesContainer": "NotesResources", "ResourcesContainerRootPath": "D:\\KNote\\PersonalResources",
+      "ResourcesContainerRootUrl": "/PersonalResources" }
+  ]
+  ```
+- **Al arrancar** (`OpenAsync`), cada uno se abre (`KntRepositoryFactory` → `KntSchemaUpdater`) y se lee su
+  `RepositoryId`. Se dejan fuera, con el error en el log y sin impedir que arranquen los demás: el que no se puede abrir
+  (no se reintenta: hay que reiniciar), una copia de otro (mismo `RepositoryId`, como `ClientWin`) y uno cuyos recursos
+  (carpeta `RootPath` + `ResourcesContainer`, o su URL) serían los de otro. Sin ninguno, el `Server` no arranca. El
+  predeterminado es el `IsDefault` (el primero si hay varios) o, si no hay o no se abrió, el primero. Los nombres no se
+  guardan: se leen de cada base de datos (un Admin los cambia).
+- **Por petición** (`KntAddServices`): `CreateService(ForUser(HttpContext.User), ...)`: el repositorio del token o,
+  sin usuario (Home pública, login, registro, olvidé/restablecer contraseña), el predeterminado. Cada petición recibe
+  **una copia** del `RepositoryRef`, con la carpeta (`wwwroot`) y la URL (`{Scheme}://{Host}{PathBase}`) de los
+  recursos de este host si la configuración no las da: antes cada controlador las escribía en un `RepositoryRef`
+  compartido, y la primera URL se quedaba para siempre. Para varios repositorios, cada uno necesita su `RootPath` y su
+  `RootUrl` (solo uno puede usar el `wwwroot`): `ResourcesContainer` es el guardado en esa base de datos (lo comparte
+  con `ClientWin`). En IIS, cada repositorio con su directorio virtual (o el montaje de `MountResourceContainerOnStartup`)
+  y la identidad del pool con permisos en su carpeta.
+- Tests: `Tests/InProcessIntegrationTests/KntRepositoriesTests` (sin host) y `MultiRepositoryInProcessTests`.
 - `public partial class Program { }` al final existe para `WebApplicationFactory<Program>` de `Tests`: no lo
   quites.
 
@@ -137,36 +172,59 @@ public class FoldersController : ControllerBase
   atributos. Al añadir o cambiar un endpoint, alinea su rol con el `[KntAuthorize]` del comando que invoca
   (y con el `[Authorize(Roles)]` de la página de `Client` que lo usa), para que Web y escritorio permitan lo
   mismo.
-- El token lo emite `UsersController.BuildToken`: claims `Name` (UserName), `UniqueName` (email), `Jti` y un
-  `Role` por cada valor de `User.RoleDefinition` (separado por comas); HS256 con `AppSettings.Secret`; caduca
-  en un año. El rol de un usuario que se registra lo decide `Service` (`Users.RegisterAsync`), no el cuerpo de
-  la petición.
+- El token lo emite `UsersController.BuildTokenAsync` para un repositorio: claims `Name` (UserName), `UniqueName`
+  (email), `Jti`, `knt_repo` (el `RepositoryId`) y un `Role` por cada valor de `User.RoleDefinition` en **ese
+  repositorio** (separado por comas); HS256 con `AppSettings.Secret`; caduca en un año. El rol de un usuario que se
+  registra lo decide `Service` (`Users.RegisterAsync`), no el cuerpo de la petición. Un token sin `knt_repo` (de antes
+  del multirepositorio) se rechaza: tras actualizar, todos vuelven a entrar una vez (también el chat de `ClientWin`).
 - **Sesiones cerradas al cambiar la contraseña**: el token lleva también `knt_pwd`, la huella de la contraseña del
-  usuario (`Users.GetPasswordStampAsync`, `KntPasswordHasher.Stamp`), y `OnTokenValidated` rechaza el que no la lleva
-  o no coincide (API y hub). `Helpers/KntPasswordStamps` las cachea un minuto: lo que cambia la contraseña aquí la
-  olvida al momento (`BuildTokenAsync` la relee, `SetPassword` la olvida); un cambio desde `ClientWin` sobre la
-  misma BD cuenta en un minuto como mucho. Los tokens de antes de esta comprobación no la llevan: tras actualizar,
-  todos vuelven a entrar una vez.
+  usuario en su repositorio (`Users.GetPasswordStampAsync`, `KntPasswordHasher.Stamp`), y `OnTokenValidated` rechaza el
+  que no la lleva o no coincide (API y hub). `Helpers/KntPasswordStamps` las cachea un minuto por repositorio y
+  usuario: lo que cambia la contraseña aquí la olvida al momento (`BuildTokenAsync` la relee, `SetPassword` y
+  `ChangePassword` la olvidan en cada repositorio donde cambia); un cambio desde `ClientWin` sobre la misma BD cuenta en
+  un minuto como mucho.
 
 ## Cuentas de usuario (`UsersController`)
 
-- `GET/PUT api/users/me` (perfil) y `POST api/users/me/password` (cambio, devuelve el token nuevo): cualquier usuario
-  autenticado, siempre su propia cuenta (`Users.GetProfileAsync`...). `PUT api/users/{id}/password`: un Admin pone la
-  contraseña de otro (`UserSetPasswordDto`).
+- **Iniciar sesión** (`POST api/users/login`, `UserCredentialsDto`), en dos pasos: sin `RepositoryId`, las credenciales
+  se comprueban en cada repositorio; válidas en uno, su token; en varios, `success = false`, sin token, con
+  `UserTokenDto.Repositories` (solo donde valen: a un anónimo no se le dice qué repositorios hay) y un `error` que
+  entiende un cliente antiguo; el cliente vuelve a enviar las credenciales con el `RepositoryId` elegido (no hay
+  ticket: no aporta nada frente a quien ya tiene la contraseña). Con `RepositoryId`, solo ahí ("User not
+  authenticated" si no valen o no existe). El límite de intentos es el mismo: el paso 1 verifica un hash por
+  repositorio, y elegir cuesta una petición más.
+- **Registro** (`Register`, anónimo): en el repositorio por defecto. El alta por un Admin (`POST api/users`) es en el
+  de su sesión.
+- `GET/PUT api/users/me` (perfil, **solo en el repositorio de la sesión**: el mismo nombre de usuario en otro
+  repositorio puede ser otra persona, y guardar el perfil no pide la contraseña) y `POST api/users/me/password`
+  (cambio, devuelve el token nuevo): cualquier usuario autenticado, siempre su propia cuenta
+  (`Users.GetProfileAsync`...). El cambio de contraseña, como en `ClientWin`, primero en el repositorio de la sesión
+  (si falla, nada más) y después en los demás donde la contraseña actual abre ese usuario (las mismas credenciales, la
+  misma persona); `UserTokenDto.Notice` dice dónde cambió y dónde no pudo (solo entre esos). `PUT api/users/{id}/password`:
+  un Admin pone la contraseña de otro (`UserSetPasswordDto`), en el repositorio de su sesión.
 - **Olvidé mi contraseña**: `POST api/users/forgot-password` (`UserForgotPasswordDto`, usuario o email) responde
-  siempre lo mismo y, si hay usuario con correo, `KntPasswordResetMail` le envía en segundo plano (la respuesta tarda
-  lo mismo) un enlace a `{PasswordReset:PublicBaseUrl}reset-password?token=...`, con el token de
-  `Users.CreatePasswordResetAsync` firmado con `AppSettings.Secret`. `PublicBaseUrl` se configura, nunca sale de la
-  petición (su `Host` se puede falsear). Sin `PublicBaseUrl`, `Email:Host` o `Email:FromAddress` responde que no está
-  disponible. `POST api/users/reset-password` (`UserResetPasswordDto`) pone la contraseña y devuelve un token nuevo.
+  siempre lo mismo y, por cada repositorio donde hay ese usuario con correo, un token de
+  `Users.CreatePasswordResetAsync` (firmado con `AppSettings.Secret`; lleva el `RepositoryId` y solo vale en él,
+  `KntPasswordResetToken` v2 de `Service`). Se agrupan por **usuario y correo** (lo que prueba quién pide es el buzón:
+  la cuenta de otro repositorio con el mismo nombre y otro correo puede ser otra persona y recibe su propio enlace en su
+  dirección) y `KntPasswordResetMail` envía en segundo plano (la respuesta tarda lo mismo) **un correo con un solo
+  enlace** por grupo, `{PasswordReset:PublicBaseUrl}reset-password?token=...`, que dice en qué repositorios se pondrá la
+  contraseña. El token del enlace (`KntPasswordResetLinkToken`) es la lista de los tokens de cada repositorio, sin firma
+  propia (cada uno la lleva). `PublicBaseUrl` se configura, nunca sale de la petición (su `Host` se puede falsear). Sin
+  `PublicBaseUrl`, `Email:Host` o `Email:FromAddress` responde que no está disponible.
+  `POST api/users/reset-password` (`UserResetPasswordDto`) pone la contraseña en cada repositorio del enlace (olvida sus
+  huellas): en uno, devuelve su token; en varios, `Repositories` y `UserName` sin token (`Client` entra como en el segundo
+  paso del login); `Notice` dice dónde no se pudo (p. ej. la contraseña cambió allí mientras tanto). Si no se pudo en
+  ninguno, un 400 con el motivo (la política de contraseñas es la misma en todos: el mismo usuario).
 - **Límites** (`[EnableRateLimiting]`, por dirección IP, ventana fija): `Login` (`RateLimits:SignInPerMinute`, 10) y
   forgot/reset (`RateLimits:PasswordResetPerHour`, 10). El 429 lleva un cuerpo que se lee como `Result<T>` y como
   `UserTokenDto`. `Register` no está limitado (los tests en proceso registran muchos usuarios).
 
 ## Recursos de notas y descripciones
 
-- `NotesController` completa en su constructor `RepositoryRef.ResourcesContainerRootPath`/`RootUrl` con los
-  valores del host (`IFileStore`) cuando vienen vacíos en la configuración.
+- `ResourcesContainerRootPath`/`RootUrl` vacíos en la configuración son los del host (`wwwroot` y la URL de la
+  petición), puestos por `KntRepositories.CreateService` en la copia del `RepositoryRef` de cada petición (ver
+  "Repositorios").
 - Al leer y guardar notas, la descripción pasa por `UtilUpdateResourceInDescriptionForRead`/`ForWrite`
   (`Service`), y al guardar se ajustan el `ContentType` y los saltos de línea (ver el punto siguiente). Está
   marcado como *hack* de compatibilidad con `ClientWin`: si lo cambias, comprueba que una nota
@@ -248,21 +306,24 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
 - **`ChatHub`** (`/chathub`, `[Authorize(Roles = "Staff, ProjectManager, Admin")]`): capa fina sobre
   `IKntService.ChatRooms`. Métodos `GetThreads`, `CreateThread`, `GetGeneralThread`, `Subscribe`, `Unsubscribe` y
   `SendMessage`, que devuelven `Result<T>` (un error es un `Result` inválido, nunca una excepción al cliente).
-  Eventos: `MessageReceived` (al grupo del hilo), `ThreadCreated` y `ThreadActivity` (a todos) y
-  `OnlineUsersChanged` (al grupo). **Un grupo de SignalR por hilo** (`chatroom:{id}`): un cliente recibe los mensajes
-  de los hilos a los que se suscribe en su conexión, y se suscribe de nuevo al reconectar (los grupos son de la
-  conexión). Escribir no exige suscripción.
+  **Cada repositorio tiene su chat room**: una conexión está en el repositorio de su token, y el hub crea su servicio
+  con `KntRepositories` y `Context.User` (no con el `IKntService` de DI ni con `IHttpContextAccessor`).
+  Eventos: `MessageReceived` (al grupo del hilo), `ThreadCreated` y `ThreadActivity` (al grupo del repositorio,
+  `repository:{id}`, al que se une cada conexión en `OnConnectedAsync`) y `OnlineUsersChanged` (al grupo del hilo).
+  **Un grupo de SignalR por hilo** (`chatroom:{repositorio}:{hilo}`): un cliente recibe los mensajes de los hilos a los
+  que se suscribe en su conexión, y se suscribe de nuevo al reconectar (los grupos son de la conexión). Escribir no
+  exige suscripción.
 - **`ChatRoomManager`** (singleton; un `Hub` vive una llamada): qué hilos sigue cada conexión (los usuarios
   conectados de cada hilo, `OnDisconnectedAsync` los limpia), **un bloqueo por hilo** para guardar y difundir los
-  mensajes en orden (el servicio no serializa: añadir un mensaje reescribe la nota) y otro para no crear dos veces
-  el hilo `General`.
+  mensajes en orden (el servicio no serializa: añadir un mensaje reescribe la nota) y otro por repositorio para no
+  crear dos veces el hilo `General`. Las claves llevan el repositorio (`ChatThreadKey`).
 - **Imágenes**: no van por el hub (los mensajes de SignalR son pequeños). `POST api/chatroom/threads/{id}/images`
   (`ChatRoomController`, Staff+, cuerpo `ChatRoomImageDto` en base64) las guarda como recursos de la nota del hilo
   (`ChatRooms.AddImageAsync`) y devuelve su URL y su Markdown con la URL absoluta; el cliente envía ese Markdown
   como un mensaje. En la nota se guarda la ruta relativa a los recursos, como en las descripciones: el hub aplica
   `UtilUpdateResourceInDescriptionForWrite` al guardar y `ForRead` al dar los mensajes (`SendMessage`,
-  `Subscribe`), y fija `ResourcesContainerRootPath`/`RootUrl` del host si están vacíos, como `NotesController` (la
-  URL, de la petición de la conexión). Con `MountResourceContainerOnStartup` la URL de los recursos puede ser
+  `Subscribe`), con los `ResourcesContainerRootPath`/`RootUrl` del host si están vacíos, como en las demás peticiones
+  (la URL, de la petición de la conexión). Con `MountResourceContainerOnStartup` la URL de los recursos puede ser
   relativa (`/Ruta`): la Web la resuelve sola y ClientWin con un `<base href>` del servidor.
 
 ## Otros endpoints
@@ -274,8 +335,9 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
 ## Configuración y secretos
 
 `appsettings.json` solo contiene marcadores (`"... MyLongStringSecurityKeySecret ..."`). Los valores reales
-(`AppSettings:Secret`, `RepositoryRef:ConnectionString`, `ai:providers:n:apiKey`, `Email:Password`...) van en
-user-secrets (`UserSecretsId` en `KNote.Server.csproj`) o variables de entorno (`RepositoryRef__Orm`, ...).
+(`AppSettings:Secret`, `RepositoryRef:ConnectionString` o `Repositories:n:ConnectionString`, `ai:providers:n:apiKey`,
+`Email:Password`...) van en user-secrets (`UserSecretsId` en `KNote.Server.csproj`) o variables de entorno
+(`RepositoryRef__Orm`, `Repositories__0__Orm`, ...).
 No escribas secretos reales en `appsettings.json`.
 
 ## Compilar, ejecutar y depurar
@@ -292,8 +354,10 @@ No escribas secretos reales en `appsettings.json`.
 En `Tests/` (`KNoteTest.slnx`), ver `CLAUDE.md` raíz:
 
 - `Tests/InProcessIntegrationTests` — levantan `Server` en proceso con `Tests/Helpers/KNoteWebApplicationFactory`
-  (Sqlite temporal por instancia, configuración por variables de entorno `RepositoryRef__*`). Es donde se
-  añaden los tests de un endpoint nuevo. Antes de crear el cliente, `KNoteWebApplicationFactory.AppConfiguration`
+  (Sqlite temporal por instancia, configuración por variables de entorno `RepositoryRef__*`; con
+  `repositoryCount: 2`, `Repositories__0__*`/`Repositories__1__*`, cada variante borra las de la otra, y
+  `CreateServiceForRepository(i)` da un servicio directo sobre la base de datos de cada uno, p. ej. para crear los
+  usuarios del segundo). Es donde se añaden los tests de un endpoint nuevo. Antes de crear el cliente, `KNoteWebApplicationFactory.AppConfiguration`
   sobrescribe configuración leída con `IOptions` (p. ej. `ai:providers`) y `TestServices` sustituye servicios
   (ver `InProcessTestHost.CreateAuthenticatedClientAsync(configure)`). `AiAssistantInProcessTests` usa
   `Helpers/ScriptedAiChatClientProvider`: un modelo con respuestas guionizadas (texto, uso, llamadas a tools)

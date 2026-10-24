@@ -8,6 +8,7 @@
 @inject ILoginService loginService
 @inject KntWindows kntWindows
 @inject NotificationService notificationService
+@inject AuthenticationStateProvider authenticationStateProvider
 
 @* Layout of the windows of the app (AppStoreService/KntWindows: a note viewed or edited, the AI assistant, the chat
    room): the page alone, without the app's header, side menu and footer, so there is nowhere else to go from it. *@
@@ -16,6 +17,13 @@
 
 <RadzenLayout>
     <RadzenBody>
+        @if (otherRepositoryNotice != null)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" Size="AlertSize.Small"
+                         AllowClose="false" class="rz-mb-2">
+                @otherRepositoryNotice
+            </RadzenAlert>
+        }
         @* Tells the page (and KntAccessDenied) it is a window of the app. *@
         <CascadingValue Name="KntWindow" Value="true" IsFixed="true">
             @Body
@@ -25,6 +33,9 @@
 
 @code {
 
+    // The session moved to another repository in another window: this one goes on in its own (its token), saying so.
+    private string? otherRepositoryNotice;
+
     protected override async Task OnInitializedAsync()
     {
         store.AppState.OnNotifyError += NotifyError;
@@ -32,6 +43,12 @@
         store.AppState.OnSessionEnded += OnSessionEnded;
 
         await kntWindows.StartAsync();
+        kntWindows.SessionChanged += OnSessionChangedElsewhere;
+
+        // Reloaded after the session moved to another repository: still in its own.
+        await authenticationStateProvider.GetAuthenticationStateAsync();
+        if (loginService.RepositoryId is Guid own && await loginService.GetLastSessionRepositoryIdAsync() is Guid last && last != own)
+            await ShowOtherRepositoryNoticeAsync();
     }
 
     public void Dispose()
@@ -39,6 +56,37 @@
         store.AppState.OnNotifyError -= NotifyError;
         store.AppState.OnNotifySuccess -= NotifySuccess;
         store.AppState.OnSessionEnded -= OnSessionEnded;
+        kntWindows.SessionChanged -= OnSessionChangedElsewhere;
+    }
+
+    // Another window signed in or out. Signed out: so is this one. In this window's repository: its session (e.g. a new
+    // token after the password changed). In another one: this window keeps its own, so what is open here (a note) is
+    // never saved in another repository.
+    private async void OnSessionChangedElsewhere(Guid? repositoryId)
+    {
+        if (repositoryId == null)
+        {
+            await loginService.SignOutHereAsync();
+            return;
+        }
+
+        if (loginService.RepositoryId == null || repositoryId == loginService.RepositoryId)
+        {
+            await loginService.AdoptLastSessionAsync();
+            otherRepositoryNotice = null;
+            StateHasChanged();
+        }
+        else
+            await ShowOtherRepositoryNoticeAsync();
+    }
+
+    private async Task ShowOtherRepositoryNoticeAsync()
+    {
+        var name = await store.SystemValues.GetRepositoryNameAsync();
+        var repository = name.IsValid && !string.IsNullOrEmpty(name.Entity) ? $"the repository {name.Entity}" : "its repository";
+        otherRepositoryNotice = $"This window works in {repository}; the session has been started in another repository. " +
+            "Save what you are doing here and close the window.";
+        StateHasChanged();
     }
 
     // The server refused the session (expired, or the password changed): the user is signed out, unless another

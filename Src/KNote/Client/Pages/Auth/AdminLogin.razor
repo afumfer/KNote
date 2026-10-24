@@ -10,7 +10,7 @@
 
 <AuthorizeView>
     <Authorized>
-        @* The signed in user's menu: their own account and signing out. *@
+        @* The signed in user's menu: their own account, the session's repository and signing out. *@
         <RadzenProfileMenu Click="OnUserMenuClick" class="knt-user-menu">
             <Template>
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
@@ -21,6 +21,7 @@
             <ChildContent>
                 <RadzenProfileMenuItem Text="My profile" Icon="person" Value="profile" />
                 <RadzenProfileMenuItem Text="Change password" Icon="key" Value="password" />
+                <RadzenProfileMenuItem Text="Change repository" Icon="storage" Value="repository" />
                 <RadzenProfileMenuItem Text="Sign out" Icon="logout" Value="logout" />
             </ChildContent>
         </RadzenProfileMenu>
@@ -49,6 +50,9 @@
                 break;
             case "password":
                 await dialogService.OpenAsync<ChangePassword>("Change password", new Dictionary<string, object?>(), KntDialogs.Framed(KntDialogs.Small()));
+                break;
+            case "repository":
+                await signIn.ChangeRepositoryAsync();
                 break;
             case "logout":
                 GoLogout();

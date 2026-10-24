@@ -208,6 +208,8 @@ The chat room lets the users of a KNote web server talk in **threads**: each thr
 
 **Signing in to the chat room's server.** The desktop app works with its own repositories, so it signs in once to the web server of the chat room: in **Options**, tab **Chat room**, enter the **chat hub url** (the address of the web server ending in `/chathub`, e.g. `https://server/KNote/chathub`), your **user name** and **password** in that server, and click **Sign in**. KNote checks them and connects to test them; then it keeps only the sign-in token the server gives (encrypted, like the other secrets of `KNoteData.config`) and forgets the password. **Accept** the options to keep it. The token lasts a year: if the server refuses it (it expired, your password or your role there changed...), sign in again. **Sign out** forgets it, and so does changing the url.
 
+**A server with several repositories.** Each repository of the web server has its own chat room. If your user and password are valid in more than one, **Sign in** fills the **Repository** list with them: choose the one whose chat room you want and click **Sign in** again. The status below says which repository you are signed in to. After upgrading the server to the version with several repositories, sign in again here once: the earlier tokens are refused.
+
 **The window.** **Chat room ...** in the menu opens it. When the app starts, it connects in the background with the window hidden, and shows the window when somebody else writes in a thread you follow; closing the window only hides it. On the left, the conversation of the thread shown and, below it, the message box; on the right, the **Threads** list (**New**: the messages that arrived since you last saw it; **Activity**: its last message). **New thread** asks for its topic; **Stop following**, above the conversation, also shows who is in the thread now; **Image ...** chooses an image to send. The status bar shows the connection, your user and the server. The **Actions** menu repeats them: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** and **Reconnect**. KNote remembers the window's position and size, the width of the threads panel and the height of the message box.
 
 **Images.** `Ctrl+V` in the message box sends the image of the clipboard (a screenshot, for example) or the image files copied in the file explorer; image files can also be dropped on the message box, or chosen with **Image ...**.
@@ -224,13 +226,13 @@ The web app connects to the chat room when you sign in and leaves it when you si
 
 ### Home (web app)
 
-Home is the first page of the web app, and it can be seen without signing in. Its header shows the repository's name, the same one as in the desktop app; on the other pages the top bar shows it after *KNote* (on a phone there is only room for *KNote*).
+Home is the first page of the web app, and it can be seen without signing in. Its header shows the repository's name, the same one as in the desktop app; on the other pages the top bar shows it after *KNote* (on a phone there is only room for *KNote*). Without signing in, it is the server's default repository; once you are signed in, the repository you chose (see *Signing in and repositories (web app)*).
 
 Home shows the notes of the repository's **Home** folder, by priority and topic, 25 at most. When Home has folders inside, a panel at the right of the notes lists them after **Home**: choose one to see its notes, with the same order. Home remembers your choice while the app is open. On a phone the panel is a row above the notes.
 
 Only the folders directly inside Home are listed there, and anybody can open them and their notes without signing in, like Home itself: keep there only what can be public.
 
-The web server names a new database with the `Name` setting of its `RepositoryRef` section (in `appsettings.json` or its secrets); the old `Alias` setting is still read.
+The web server names a new database with the `Name` setting of its repository (see *Repositories of the web server (server configuration)*); the old `Alias` setting is still read.
 
 ### Notes lists (web app)
 
@@ -287,17 +289,27 @@ The palette button in the top bar of the web app opens the **Appearance** panel,
 
 The button with three lines at the left of the top bar switches the side menu between its icons with their names and only the icons, a narrow bar that leaves more room for the page; with only the icons, each one shows its name when the mouse is over it. The browser remembers the choice; until you make one, a phone shows only the icons.
 
+### Signing in and repositories (web app)
+
+A web server can serve several repositories. You work in one of them at a time, chosen when you sign in, and you see the repositories where your user exists with the same password.
+
+- **Signing in.** Write your user name and password. If they are valid in only one repository, you are in. If they are valid in several, KNote asks you which one (**Choose a repository**). Nobody sees the list of repositories without signing in.
+- **Changing repository.** **Change repository**, in your user menu, asks for your password again and lets you choose another repository; the app goes back to Home in it. The footer and the top bar show the repository you are in.
+- **Note windows.** A note, AI assistant or chat room window that is open stays in the repository it was opened in, even if you change repository in the main window: a notice at its top says so, so you can save what you are doing and close it. Your other tabs of the app follow the change.
+- **Registering.** A new user registers in the server's default repository. An Admin adds users to the repository of their session (**Admin panel → Users**).
+
 ### Your account (web app)
 
 Once you are signed in, your user name in the top bar opens your menu (on a phone, only its icon is shown):
 
-- **My profile**: your full name and e-mail. Only an Admin can change your user name. Changing the e-mail asks for your current password.
-- **Change password**: your current password and the new one, twice (at least 8 characters, not your user name). Your sessions in other browsers and devices are closed; the one you are using goes on.
+- **My profile**: your full name and e-mail, in the repository you are in. Only an Admin can change your user name. Changing the e-mail asks for your current password.
+- **Change password**: your current password and the new one, twice (at least 8 characters, not your user name). As in the desktop app, it changes in the repository you are in and in the other repositories of the server where your current password signs you in; KNote tells you where it changed. Your sessions in other browsers and devices are closed; the one you are using goes on.
+- **Change repository**: see *Signing in and repositories (web app)*.
 - **Sign out**.
 
-**Forgot your password?** The sign-in dialog has that link: write your user name or your e-mail and click **Send link**. If there is such a user with an e-mail, the server sends it a link to set a new password; the answer is the same either way, so nobody can find out who is registered. The link works once, for 30 minutes by default, and opens the **Set a new password** page, which signs you in when the password is set and closes your other sessions. The server must be configured for it (see *Password reset by e-mail (server configuration)*); otherwise the dialog says it isn't available. An Admin can also set a user's password: **Admin panel → Users**, edit the user, **Set password** (that user's sessions are closed too).
+**Forgot your password?** The sign-in dialog has that link: write your user name or your e-mail and click **Send link**. If there is such a user with an e-mail, the server sends it a link to set a new password. The new password is set in every repository of the server where you have that same user and e-mail (the message says which ones), so the same credentials open all of them again; an account with the same user name and another e-mail gets its own link at its own address. The answer is the same either way, so nobody can find out who is registered. The link works once, for 30 minutes by default, and opens the **Set a new password** page, which sets the password, closes your other sessions and signs you in (choosing the repository, if there are several). The server must be configured for it (see *Password reset by e-mail (server configuration)*); otherwise the dialog says it isn't available. An Admin can also set a user's password: **Admin panel → Users**, edit the user, **Set password** (that user's sessions are closed too).
 
-**Sessions.** A session lasts a year, unless your password changes. When the server refuses yours, the web app signs you out and tells you; if you changed the password in another window of the app, this one goes on with the new session. After upgrading the server to this version, everybody signs in once again: the sessions of earlier versions are refused (in the desktop app, sign in again to the chat room in **Options**).
+**Sessions.** A session lasts a year, unless your password changes. When the server refuses yours, the web app signs you out and tells you; if you changed the password in another window of the app, this one goes on with the new session. After upgrading the server to the version with several repositories, everybody signs in once again: the sessions of earlier versions are refused (in the desktop app, sign in again to the chat room in **Options**).
 
 **Too many attempts.** The server limits, per address, the sign-in attempts (10 per minute) and the password reset requests (10 per hour); past that, it asks you to try again later.
 
@@ -312,6 +324,21 @@ The assistant can search your notes and create tasks, as in the desktop app. A n
 Changing the AI model of a conversation that has already started begins a new conversation (KNote asks first). For your safety, any HTML that an answer contains is shown as text, never as part of the page.
 
 **In its own window.** The button that opens it in a new window moves the assistant, with the session you are in, to a window of its own, without the app's menus; the main window goes back to Home. It can't be used while an answer is arriving. There is only one assistant window: opening it again brings it to the front. Closing that window while an answer is arriving, or when the conversation could not be saved, asks first.
+
+### Repositories of the web server (server configuration)
+
+A web server with one repository configures it in the `RepositoryRef` section, as always. For several, use the `Repositories` list instead (it takes precedence when it isn't empty), with the same fields and `IsDefault` for the default repository (the one of Home without signing in and of new registrations; without it, the first one):
+
+```json
+"Repositories": [
+  { "Name": "Work", "Orm": "EntityFramework", "Provider": "Microsoft.Data.SqlClient", "ConnectionString": "...",
+    "ResourcesContainer": "NotesResources", "ResourcesContainerRootPath": "", "ResourcesContainerRootUrl": "", "IsDefault": true },
+  { "Name": "Personal", "Orm": "Dapper", "Provider": "Microsoft.Data.Sqlite", "ConnectionString": "Data Source=D:\\KNote\\Personal.db",
+    "ResourcesContainer": "NotesResources", "ResourcesContainerRootPath": "D:\\KNote\\PersonalResources", "ResourcesContainerRootUrl": "/PersonalResources" }
+]
+```
+
+Keep the connection strings in the server's user secrets or in environment variables (`Repositories__0__ConnectionString`...). Each repository needs its own resources folder and url: only one of them can leave them empty (the server's own folder and address). When the server starts, it opens every repository; one that can't be opened, a copy of another database (same identifier, as in the desktop app) or one that would share the resources of another is left out, and the server log says why.
 
 ### AI providers of the web app (server configuration)
 

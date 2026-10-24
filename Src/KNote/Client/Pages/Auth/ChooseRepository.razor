@@ -1,0 +1,53 @@
+@implements IDisposable
+
+@inject DialogService dialogService
+
+@* Second step of signing in (Auth/KntSignIn), when the credentials are valid in several repositories of the server: the
+   result is the RepositoryId chosen, or null. A session is in one repository; to work in another one, the user changes
+   repository (the user's menu). *@
+
+<EditForm Model="@this" Context="formContext" OnSubmit="OnChoose">
+
+    <KntDialogFrame Icon="storage" Title="Choose a repository" Subtitle="Your user has access to several repositories." OnClose="OnExit">
+        <ChildContent>
+            <KntField Label="Repository" Component="RepositoryId" Required="true" Help="@(CurrentRepositoryId != null ? "The one you are in is selected." : null)">
+                <RadzenDropDown Name="RepositoryId" @bind-Value="@repositoryId" Data="@Repositories"
+                                TextProperty="@nameof(RepositoryInfoDto.Name)" ValueProperty="@nameof(RepositoryInfoDto.RepositoryId)" />
+            </KntField>
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="OnExit" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+            <RadzenButton Text="Sign in" Icon="login" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Disabled="@(repositoryId == null)" />
+        </Footer>
+    </KntDialogFrame>
+
+</EditForm>
+
+@code {
+    [Parameter] [EditorRequired] public List<RepositoryInfoDto> Repositories { get; set; } = null!;
+
+    // The repository of the session the user is changing from, if any: selected at first.
+    [Parameter] public Guid? CurrentRepositoryId { get; set; }
+
+    private Guid? repositoryId;
+    private bool closed;
+
+    protected override void OnInitialized() =>
+        repositoryId = Repositories.Any(r => r.RepositoryId == CurrentRepositoryId) ? CurrentRepositoryId : Repositories.FirstOrDefault()?.RepositoryId;
+
+    private void OnChoose()
+    {
+        if (repositoryId != null)
+            CloseDialog(repositoryId);
+    }
+
+    private void OnExit() => CloseDialog(null);
+
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
+}

@@ -26,7 +26,8 @@ public class AppState
         set { _userName = value; NotifyStateChanged(); }
     }
 
-    // The repository's name (DB_REPOSITORYNAME), read once by MainLayout: null until then, empty if it could
+    // The repository's name (DB_REPOSITORYNAME): of the session's repository or, without one, of the server's default
+    // repository. Read by MainLayout when it starts and when the session changes: null until then, empty if it could
     // not be read. Home shows it as its title, and the header of the other pages after the application's name.
     private string? _repositoryName;
     public string? RepositoryName
@@ -114,15 +115,16 @@ public class AppState
     public bool? NotesPreviewVisible { get; set; }
 
     /// <summary>
-    /// Forgets what was read with the session that ends (the folders tree, the folder selected, the notes filter and
-    /// where the lists were), so the next user signed in reads it again with their own permissions. The view
-    /// preferences and the repository's name stay.
+    /// Forgets what was read with the session that ends or moves to another repository (the folders tree, the folder
+    /// selected, Home's folder, the notes filter and where the lists were), so the next session reads it again with its
+    /// own repository and permissions. The view preferences stay; the repository's name is read again (MainLayout).
     /// </summary>
     public void ClearUserData()
     {
         _foldersTree = null;
         _foldersIndex = null;
         _selectedFolder = null;
+        HomeFolderId = null;
         NotesTreePosition = null;
         NotesFilter = null;
         NotesFilterFolderName = null;

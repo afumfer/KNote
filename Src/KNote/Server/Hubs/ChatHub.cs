@@ -16,7 +16,9 @@ namespace KNote.Server.Hubs;
 /// The chat room (see ChatRoomHubContract for what its clients call and receive). A thin layer over
 /// IKntService.ChatRooms, which keeps the threads as notes, plus what only the hub knows: who is subscribed to each
 /// thread (one SignalR group per thread, and ChatRoomManager for the online users) and the order of the writes of
-/// each thread (ChatRoomManager's locks). Staff, like the chat room commands of the Service. The images of the messages
+/// each thread (ChatRoomManager's locks). Each repository of the Server has its own chat room: a connection is in the
+/// repository of its token's session (one group per repository for what goes to all its clients, and the threads'
+/// groups and ChatRoomManager's keys include it). Staff, like the chat room commands of the Service. The images of the messages
 /// (resources of the thread's note, see ChatRoomController) are kept in the note with the path note descriptions use,
 /// relative to the resources, and reach the clients with the absolute url they are served from, as NotesController does
 /// with descriptions.
@@ -24,42 +26,44 @@ namespace KNote.Server.Hubs;
 [Authorize(Roles = "Staff, ProjectManager, Admin")]
 public class ChatHub : Hub
 {
-    private readonly IKntService _service;
-    private readonly IFileStore _fileStore;
+    private readonly KntRepositories _repositories;
     private readonly ChatRoomManager _manager;
     private readonly ILogger<ChatHub> _logger;
+    private IKntService _service;
 
-    public ChatHub(IKntService service, IFileStore fileStore, ChatRoomManager manager, ILogger<ChatHub> logger)
+    public ChatHub(KntRepositories repositories, ChatRoomManager manager, ILogger<ChatHub> logger)
     {
-        _service = service;
-        _service.Logger = logger;
-        _fileStore = fileStore;
+        _repositories = repositories;
         _manager = manager;
         _logger = logger;
     }
 
-    // The user of the connection, for the Service, and where the resources are served from (as NotesController sets
-    // it, from this host unless the configuration says otherwise). Context isn't available yet in the constructor.
+    // The repository of the connection's session (its token's) and its user, for the Service, with the resources
+    // served from this host unless the configuration says otherwise (KntRepositories; the url, of the connection's
+    // request). Created from Context, which isn't available yet in the constructor.
     private IKntService Service
     {
         get
         {
-            _service.UserIdentityName = Context.User?.Identity?.Name;
-
-            var repositoryRef = _service.RepositoryRef;
-            if (string.IsNullOrEmpty(repositoryRef.ResourcesContainerRootPath))
-                repositoryRef.ResourcesContainerRootPath = _fileStore.GetResourcesContainerRootPath();
-            var request = Context.GetHttpContext()?.Request;
-            if (string.IsNullOrEmpty(repositoryRef.ResourcesContainerRootUrl) && request != null)
-                repositoryRef.ResourcesContainerRootUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
-
+            if (_service == null)
+            {
+                _service = _repositories.CreateService(_repositories.ForUser(Context.User), UserName, Context.GetHttpContext()?.Request);
+                _service.Logger = _logger;
+            }
             return _service;
         }
     }
 
     private string UserName => Context.User?.Identity?.Name;
 
-    public static string ThreadGroup(Guid threadId) => $"chatroom:{threadId}";
+    private Guid RepositoryId => _repositories.ForUser(Context.User).RepositoryId;
+
+    private ChatThreadKey Thread(Guid threadId) => new(RepositoryId, threadId);
+
+    // Each repository has its own chat room: its clients, and one group per thread.
+    public static string RepositoryGroup(Guid repositoryId) => $"repository:{repositoryId}";
+
+    public static string ThreadGroup(ChatThreadKey thread) => $"chatroom:{thread.RepositoryId}:{thread.ThreadId}";
 
     #region Client -> Server
 
@@ -86,7 +90,7 @@ public class ChatHub : Hub
             // Under the creation lock, so two users asking for it at the same time don't create it twice.
             Result<List<ChatRoomThreadInfoDto>> resBefore;
             Result<ChatRoomThreadInfoDto> res;
-            using (await _manager.LockCreationAsync())
+            using (await _manager.LockCreationAsync(RepositoryId))
             {
                 resBefore = await Service.ChatRooms.GetThreadsAsync();
                 res = await Service.ChatRooms.GetGeneralAsync();
@@ -109,8 +113,8 @@ public class ChatHub : Hub
             foreach (var message in res.Entity.Messages)
                 message.Text = ForRead(message.Text);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, ThreadGroup(threadId));
-            var online = _manager.Subscribe(Context.ConnectionId, UserName, threadId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, ThreadGroup(Thread(threadId)));
+            var online = _manager.Subscribe(Context.ConnectionId, UserName, Thread(threadId));
             res.Entity.OnlineUserNames = online;
             await AnnounceOnlineUsersAsync(threadId, online);
             return res;
@@ -121,8 +125,8 @@ public class ChatHub : Hub
     {
         return await RunAsync(nameof(Unsubscribe), async () =>
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ThreadGroup(threadId));
-            var online = _manager.Unsubscribe(Context.ConnectionId, threadId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ThreadGroup(Thread(threadId)));
+            var online = _manager.Unsubscribe(Context.ConnectionId, Thread(threadId));
             if (online != null)
                 await AnnounceOnlineUsersAsync(threadId, online);
             return new Result();
@@ -135,15 +139,15 @@ public class ChatHub : Hub
         {
             // Saved and sent inside the thread's lock, so every subscriber receives the messages in the order they
             // are kept in the thread.
-            using (await _manager.LockThreadAsync(threadId))
+            using (await _manager.LockThreadAsync(Thread(threadId)))
             {
                 var res = await Service.ChatRooms.AddMessageAsync(new ChatRoomMessageDto { ThreadId = threadId, Text = ForWrite(text) });
                 if (!res.IsValid)
                     return res;
                 res.Entity.Text = ForRead(res.Entity.Text);
 
-                await Clients.Group(ThreadGroup(threadId)).SendAsync(ChatRoomHubContract.MessageReceived, res.Entity);
-                await Clients.All.SendAsync(ChatRoomHubContract.ThreadActivity, new ChatRoomThreadActivityDto
+                await Clients.Group(ThreadGroup(Thread(threadId))).SendAsync(ChatRoomHubContract.MessageReceived, res.Entity);
+                await Clients.Group(RepositoryGroup(RepositoryId)).SendAsync(ChatRoomHubContract.ThreadActivity, new ChatRoomThreadActivityDto
                 {
                     ThreadId = threadId,
                     ModificationDateTime = res.Entity.SentDateTime,
@@ -158,12 +162,25 @@ public class ChatHub : Hub
 
     #region Connection
 
+    public override async Task OnConnectedAsync()
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, RepositoryGroup(RepositoryId));
+        await base.OnConnectedAsync();
+    }
+
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        foreach (var (threadId, online) in _manager.RemoveConnection(Context.ConnectionId))
-            await AnnounceOnlineUsersAsync(threadId, online);
+        foreach (var (thread, online) in _manager.RemoveConnection(Context.ConnectionId))
+            await AnnounceOnlineUsersAsync(thread.ThreadId, online);
 
         await base.OnDisconnectedAsync(exception);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+            _service?.Dispose();
+        base.Dispose(disposing);
     }
 
     #endregion
@@ -176,7 +193,7 @@ public class ChatHub : Hub
     private string ForWrite(string text) => Service.Notes.UtilUpdateResourceInDescriptionForWrite(text);
 
     private Task AnnounceThreadCreatedAsync(ChatRoomThreadInfoDto thread) =>
-        Clients.All.SendAsync(ChatRoomHubContract.ThreadCreated, new ChatRoomThreadInfoDto
+        Clients.Group(RepositoryGroup(RepositoryId)).SendAsync(ChatRoomHubContract.ThreadCreated, new ChatRoomThreadInfoDto
         {
             ThreadId = thread.ThreadId,
             NoteNumber = thread.NoteNumber,
@@ -186,7 +203,7 @@ public class ChatHub : Hub
         });
 
     private Task AnnounceOnlineUsersAsync(Guid threadId, List<string> online) =>
-        Clients.Group(ThreadGroup(threadId)).SendAsync(ChatRoomHubContract.OnlineUsersChanged,
+        Clients.Group(ThreadGroup(Thread(threadId))).SendAsync(ChatRoomHubContract.OnlineUsersChanged,
             new ChatRoomOnlineUsersDto { ThreadId = threadId, UserNames = online });
 
     // As the controllers: a failure is an invalid Result with the reason, never an exception to the client.

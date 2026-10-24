@@ -84,11 +84,14 @@
         store.AppState.OnNotifySuccess += NotifySuccess;
         store.AppState.OnSessionEnded += OnSessionEnded;
 
+        // The session first: the repository's name is the session's repository's.
+        var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
         await LoadRepositoryNameAsync();
         await kntWindows.StartAsync();
+        kntWindows.SessionChanged += OnSessionChangedElsewhere;
 
         authenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-        await UpdateChatRoomAsync(await authenticationStateProvider.GetAuthenticationStateAsync());
+        await UpdateChatRoomAsync(authenticationState);
     }
 
     public void Dispose()
@@ -97,7 +100,28 @@
         store.AppState.OnNotifyError -= NotifyError;
         store.AppState.OnNotifySuccess -= NotifySuccess;
         store.AppState.OnSessionEnded -= OnSessionEnded;
+        kntWindows.SessionChanged -= OnSessionChangedElsewhere;
         authenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+
+    // Another tab of the app signed in or out: this one follows it (the windows of a note keep their repository, see
+    // KntWindowLayout), back to Home when the repository changes.
+    private async void OnSessionChangedElsewhere(Guid? repositoryId)
+    {
+        if (repositoryId == null)
+        {
+            await loginService.SignOutHereAsync();
+            return;
+        }
+
+        var repositoryChanged = repositoryId != loginService.RepositoryId;
+        await loginService.AdoptLastSessionAsync();
+        if (repositoryChanged)
+        {
+            navigationManager.NavigateTo("");
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Session changed",
+                Detail = "The session was started in another repository in another tab of the app.", Duration = 6000 });
+        }
     }
 
     // The server refused the session (expired, or the password changed): the user is signed out, unless another
@@ -119,8 +143,10 @@
         await js.LocalStorageSetItem(MenuCompactStorageKey, menuCompact == true ? "true" : "false");
     }
 
+    // Signed in, out or in another repository: its name, and its chat room.
     private async void OnAuthenticationStateChanged(Task<AuthenticationState> state)
     {
+        await LoadRepositoryNameAsync();
         await UpdateChatRoomAsync(await state);
     }
 

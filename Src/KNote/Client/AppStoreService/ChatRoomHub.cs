@@ -32,6 +32,7 @@ public class ChatRoomHub : IAsyncDisposable
     private readonly Uri _hubUri;
     private HubConnection? _connection;
     private string? _connectedUserName;
+    private string? _connectedRepositoryId;
 
     // The threads followed in this connection, with their messages.
     private readonly Dictionary<Guid, ChatRoomThreadDto> _followed = new();
@@ -75,25 +76,28 @@ public class ChatRoomHub : IAsyncDisposable
     #region Connection
 
     /// <summary>Connects as the user, if they are signed in and a Staff user (the chat room is theirs); otherwise
-    /// disconnects.</summary>
+    /// disconnects. The chat room is the one of the session's repository (the token's).</summary>
     public async Task StartForUserAsync(ClaimsPrincipal user)
     {
         if (user.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(user.Identity.Name)
             && (user.IsInRole("Staff") || user.IsInRole("ProjectManager") || user.IsInRole("Admin")))
-            await StartAsync(user.Identity.Name);
+            await StartAsync(user.Identity.Name, user.FindFirst(KntConst.RepositoryClaimType)?.Value);
         else
             await StopAsync();
     }
 
-    /// <summary>Connects as the signed-in user (again, if it was connected as another one).</summary>
-    public async Task StartAsync(string userName)
+    /// <summary>Connects as the signed-in user in the session's repository (again, if it was connected as another one,
+    /// or in another repository).</summary>
+    public async Task StartAsync(string userName, string? repositoryId)
     {
-        if (_connection != null && _connectedUserName == userName && State != ChatRoomConnectionState.Disconnected)
+        if (_connection != null && _connectedUserName == userName && _connectedRepositoryId == repositoryId
+            && State != ChatRoomConnectionState.Disconnected)
             return;
 
         await StopAsync();
 
         _connectedUserName = userName;
+        _connectedRepositoryId = repositoryId;
         _connection = new HubConnectionBuilder()
             .WithUrl(_hubUri, options =>
                 options.AccessTokenProvider = () => Task.FromResult(_httpClient.DefaultRequestHeaders.Authorization?.Parameter))
@@ -124,6 +128,7 @@ public class ChatRoomHub : IAsyncDisposable
         var connection = _connection;
         _connection = null;
         _connectedUserName = null;
+        _connectedRepositoryId = null;
         _followed.Clear();
         _unread.Clear();
         Threads = new();

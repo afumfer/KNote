@@ -24,20 +24,15 @@ public class ReportsController : ControllerBase
     private readonly IKntService _service;
     private readonly ILogger<ReportsController> _logger;
 
-    public ReportsController(IKntService service, IFileStore fileStore, IHttpContextAccessor httpContextAccessor, ILogger<ReportsController> logger)
+    // The report loads the resources (images of the notes) from this host unless the configuration says otherwise
+    // (KntRepositories).
+    public ReportsController(IKntService service, IHttpContextAccessor httpContextAccessor, ILogger<ReportsController> logger)
     {
         _service = service;
         _service.Logger = logger;
         _logger = logger;
 
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
-
-        // As NotesController: the report loads the resources (images of the notes) from this host unless the
-        // configuration says otherwise.
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootPath))
-            _service.RepositoryRef.ResourcesContainerRootPath = fileStore.GetResourcesContainerRootPath();
-        if (string.IsNullOrEmpty(_service.RepositoryRef.ResourcesContainerRootUrl))
-            _service.RepositoryRef.ResourcesContainerRootUrl = fileStore.GetResourcesContainerRootUrl();
     }
 
     [HttpPost("noteslist")]

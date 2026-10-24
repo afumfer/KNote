@@ -208,6 +208,8 @@ El chat room permite a los usuarios de un servidor Web de KNote hablar en **hilo
 
 **Identificarse en el servidor del chat room.** La aplicación de escritorio trabaja con sus propios repositorios, así que se identifica una vez en el servidor Web del chat room: en **Options**, pestaña **Chat room**, escribe la **chat hub url** (la dirección del servidor Web terminada en `/chathub`, p. ej. `https://servidor/KNote/chathub`), tu **usuario** y tu **contraseña** en ese servidor, y pulsa **Sign in**. KNote los comprueba y se conecta para probarlos; después guarda solo el token de acceso que da el servidor (cifrado, como los demás secretos de `KNoteData.config`) y olvida la contraseña. **Acepta** las opciones para conservarlo. El token dura un año: si el servidor lo rechaza (caducó, cambió tu contraseña o tu rol allí...), vuelve a identificarte. **Sign out** lo olvida, igual que cambiar la URL.
 
+**Un servidor con varios repositorios.** Cada repositorio del servidor Web tiene su propio chat room. Si tu usuario y tu contraseña valen en más de uno, **Sign in** llena con ellos la lista **Repository**: elige aquel cuyo chat room quieres y vuelve a pulsar **Sign in**. El estado, debajo, dice en qué repositorio has entrado. Al actualizar el servidor a la versión con varios repositorios, vuelve a identificarte aquí una vez: los tokens anteriores se rechazan.
+
 **La ventana.** **Chat room ...** en el menú la abre. Al arrancar, la aplicación se conecta en segundo plano con la ventana oculta, y muestra la ventana cuando otro usuario escribe en un hilo que sigues; cerrar la ventana solo la oculta. A la izquierda, la conversación del hilo mostrado y, debajo, la caja del mensaje; a la derecha, la lista **Threads** (**New**: los mensajes que han llegado desde la última vez que lo viste; **Activity**: su último mensaje). **New thread** pide su tema; **Stop following**, encima de la conversación, muestra también quién está ahora en el hilo; **Image ...** elige una imagen para enviarla. La barra de estado muestra la conexión, tu usuario y el servidor. El menú **Actions** los repite: **Send** (`Ctrl+Enter`), **Send image ...**, **New thread ...**, **Stop following the thread** y **Reconnect**. KNote recuerda la posición y el tamaño de la ventana, el ancho del panel de hilos y la altura de la caja del mensaje.
 
 **Imágenes.** `Ctrl+V` en la caja del mensaje envía la imagen del portapapeles (una captura de pantalla, por ejemplo) o los ficheros de imagen copiados en el explorador de archivos; los ficheros de imagen también se pueden soltar sobre la caja del mensaje, o elegir con **Image ...**.
@@ -224,13 +226,13 @@ La aplicación Web se conecta al chat room al iniciar sesión y lo deja al cerra
 
 ### Home (aplicación Web)
 
-Home es la primera página de la aplicación Web, y se puede ver sin iniciar sesión. Su cabecera muestra el nombre del repositorio, el mismo que en la aplicación de escritorio; en las demás páginas la barra superior lo muestra después de *KNote* (en un móvil solo cabe *KNote*).
+Home es la primera página de la aplicación Web, y se puede ver sin iniciar sesión. Su cabecera muestra el nombre del repositorio, el mismo que en la aplicación de escritorio; en las demás páginas la barra superior lo muestra después de *KNote* (en un móvil solo cabe *KNote*). Sin iniciar sesión es el repositorio predeterminado del servidor; con la sesión iniciada, el repositorio que elegiste (ver *Iniciar sesión y repositorios (aplicación Web)*).
 
 Home muestra las notas de la carpeta **Home** del repositorio, por prioridad y tema, 25 como mucho. Cuando Home tiene carpetas dentro, un panel a la derecha de las notas las muestra después de **Home**: elige una para ver sus notas, con el mismo orden. Home recuerda tu elección mientras la aplicación está abierta. En un móvil el panel es una fila encima de las notas.
 
 Ahí solo aparecen las carpetas que están directamente dentro de Home, y cualquiera puede abrirlas, con sus notas, sin iniciar sesión, como la propia Home: deja ahí solo lo que pueda ser público.
 
-El servidor Web da nombre a una base de datos nueva con el ajuste `Name` de su sección `RepositoryRef` (en `appsettings.json` o en sus secretos); el ajuste antiguo `Alias` se sigue leyendo.
+El servidor Web da nombre a una base de datos nueva con el ajuste `Name` de su repositorio (ver *Repositorios del servidor Web (configuración del servidor)*); el ajuste antiguo `Alias` se sigue leyendo.
 
 ### Listas de notas (aplicación Web)
 
@@ -287,17 +289,27 @@ El botón de la paleta de la barra superior de la aplicación Web abre el panel 
 
 El botón de las tres rayas, a la izquierda de la barra superior, cambia el menú lateral entre sus iconos con sus nombres y solo los iconos, una barra estrecha que deja más sitio a la página; con solo los iconos, cada uno muestra su nombre al pasar el ratón por encima. El navegador recuerda la elección; mientras no la hagas, en un móvil se ven solo los iconos.
 
+### Iniciar sesión y repositorios (aplicación Web)
+
+Un servidor Web puede servir varios repositorios. Trabajas en uno cada vez, elegido al iniciar sesión, y ves los repositorios donde existe tu usuario con la misma contraseña.
+
+- **Iniciar sesión.** Escribe tu usuario y tu contraseña. Si valen en un solo repositorio, entras en él. Si valen en varios, KNote te pregunta en cuál (**Choose a repository**). Nadie ve la lista de repositorios sin iniciar sesión.
+- **Cambiar de repositorio.** **Change repository**, en tu menú de usuario, vuelve a pedir tu contraseña y te deja elegir otro repositorio; la aplicación vuelve a Home en él. El pie y la barra superior muestran el repositorio en el que estás.
+- **Ventanas de notas.** Una ventana abierta de una nota, del asistente de IA o del chat room se queda en el repositorio en el que se abrió, aunque cambies de repositorio en la ventana principal: un aviso arriba lo dice, para que guardes lo que estés haciendo y la cierres. Tus otras pestañas de la aplicación siguen el cambio.
+- **Registrarse.** Un usuario nuevo se registra en el repositorio predeterminado del servidor. Un Admin da de alta usuarios en el repositorio de su sesión (**Admin panel → Users**).
+
 ### Tu cuenta (aplicación Web)
 
 Una vez dentro, tu nombre de usuario en la barra superior abre tu menú (en un móvil solo se ve su icono):
 
-- **My profile**: tu nombre completo y tu correo. Solo un Admin puede cambiar tu nombre de usuario. Cambiar el correo pide tu contraseña actual.
-- **Change password**: tu contraseña actual y la nueva, dos veces (al menos 8 caracteres, distinta de tu nombre de usuario). Se cierran tus sesiones en otros navegadores y dispositivos; la que estás usando sigue.
+- **My profile**: tu nombre completo y tu correo, en el repositorio en el que estás. Solo un Admin puede cambiar tu nombre de usuario. Cambiar el correo pide tu contraseña actual.
+- **Change password**: tu contraseña actual y la nueva, dos veces (al menos 8 caracteres, distinta de tu nombre de usuario). Como en la aplicación de escritorio, cambia en el repositorio en el que estás y en los demás repositorios del servidor donde tu contraseña actual te deja entrar; KNote te dice dónde ha cambiado. Se cierran tus sesiones en otros navegadores y dispositivos; la que estás usando sigue.
+- **Change repository**: ver *Iniciar sesión y repositorios (aplicación Web)*.
 - **Sign out**.
 
-**¿Olvidaste tu contraseña?** El diálogo de acceso tiene el enlace **Forgot your password?**: escribe tu nombre de usuario o tu correo y pulsa **Send link**. Si existe ese usuario con un correo, el servidor le envía un enlace para poner una contraseña nueva; la respuesta es la misma en los dos casos, así que nadie puede averiguar quién está registrado. El enlace sirve una vez, durante 30 minutos por defecto, y abre la página **Set a new password**, que te deja dentro al guardar la contraseña y cierra tus otras sesiones. El servidor tiene que estar configurado (ver *Restablecer la contraseña por correo (configuración del servidor)*); si no, el diálogo dice que no está disponible. Un Admin también puede poner la contraseña de un usuario: **Admin panel → Users**, editar el usuario, **Set password** (se cierran también las sesiones de ese usuario).
+**¿Olvidaste tu contraseña?** El diálogo de acceso tiene el enlace **Forgot your password?**: escribe tu nombre de usuario o tu correo y pulsa **Send link**. Si existe ese usuario con un correo, el servidor le envía un enlace para poner una contraseña nueva. La contraseña nueva se pone en todos los repositorios del servidor donde tienes ese mismo usuario y correo (el mensaje dice cuáles), así que las mismas credenciales vuelven a abrirlos todos; una cuenta con el mismo nombre de usuario y otro correo recibe su propio enlace en su dirección. La respuesta es la misma en los dos casos, así que nadie puede averiguar quién está registrado. El enlace sirve una vez, durante 30 minutos por defecto, y abre la página **Set a new password**, que pone la contraseña, cierra tus otras sesiones y te deja dentro (eligiendo el repositorio, si hay varios). El servidor tiene que estar configurado (ver *Restablecer la contraseña por correo (configuración del servidor)*); si no, el diálogo dice que no está disponible. Un Admin también puede poner la contraseña de un usuario: **Admin panel → Users**, editar el usuario, **Set password** (se cierran también las sesiones de ese usuario).
 
-**Sesiones.** Una sesión dura un año, salvo que cambie tu contraseña. Cuando el servidor rechaza la tuya, la aplicación Web cierra la sesión y te avisa; si cambiaste la contraseña en otra ventana de la aplicación, esta sigue con la sesión nueva. Al actualizar el servidor a esta versión, todos vuelven a entrar una vez: las sesiones de versiones anteriores se rechazan (en la aplicación de escritorio, vuelve a identificarte en el chat room desde **Options**).
+**Sesiones.** Una sesión dura un año, salvo que cambie tu contraseña. Cuando el servidor rechaza la tuya, la aplicación Web cierra la sesión y te avisa; si cambiaste la contraseña en otra ventana de la aplicación, esta sigue con la sesión nueva. Al actualizar el servidor a la versión con varios repositorios, todos vuelven a entrar una vez: las sesiones de versiones anteriores se rechazan (en la aplicación de escritorio, vuelve a identificarte en el chat room desde **Options**).
 
 **Demasiados intentos.** El servidor limita, por dirección, los intentos de acceso (10 por minuto) y las peticiones para restablecer la contraseña (10 por hora); pasado ese límite, pide que lo intentes más tarde.
 
@@ -312,6 +324,21 @@ El asistente puede buscar en tus notas y crear tareas, como en la aplicación de
 Cambiar el modelo de IA de una conversación ya empezada inicia una conversación nueva (KNote lo pregunta antes). Por tu seguridad, el HTML que contenga una respuesta se muestra como texto, nunca como parte de la página.
 
 **En su propia ventana.** El botón que lo abre en una ventana nueva traslada el asistente, con la sesión en la que estás, a una ventana propia, sin los menús de la aplicación; la ventana principal vuelve a Home. No se puede usar mientras llega una respuesta. Solo hay una ventana del asistente: volver a abrirla la trae al frente. Cerrar esa ventana mientras llega una respuesta, o cuando la conversación no se pudo guardar, pregunta antes.
+
+### Repositorios del servidor Web (configuración del servidor)
+
+Un servidor Web con un repositorio lo configura en la sección `RepositoryRef`, como siempre. Para varios, usa en su lugar la lista `Repositories` (tiene prioridad cuando no está vacía), con los mismos campos e `IsDefault` para el repositorio predeterminado (el de Home sin iniciar sesión y el de los registros nuevos; sin él, el primero):
+
+```json
+"Repositories": [
+  { "Name": "Work", "Orm": "EntityFramework", "Provider": "Microsoft.Data.SqlClient", "ConnectionString": "...",
+    "ResourcesContainer": "NotesResources", "ResourcesContainerRootPath": "", "ResourcesContainerRootUrl": "", "IsDefault": true },
+  { "Name": "Personal", "Orm": "Dapper", "Provider": "Microsoft.Data.Sqlite", "ConnectionString": "Data Source=D:\\KNote\\Personal.db",
+    "ResourcesContainer": "NotesResources", "ResourcesContainerRootPath": "D:\\KNote\\PersonalResources", "ResourcesContainerRootUrl": "/PersonalResources" }
+]
+```
+
+Guarda las cadenas de conexión en los secretos de usuario del servidor o en variables de entorno (`Repositories__0__ConnectionString`...). Cada repositorio necesita su propia carpeta y URL de recursos: solo uno puede dejarlas vacías (la carpeta y la dirección del propio servidor). Al arrancar, el servidor abre todos los repositorios; uno que no se puede abrir, una copia de otra base de datos (el mismo identificador, como en la aplicación de escritorio) o uno que compartiría los recursos de otro se deja fuera, y el log del servidor dice por qué.
 
 ### Proveedores de IA de la aplicación Web (configuración del servidor)
 

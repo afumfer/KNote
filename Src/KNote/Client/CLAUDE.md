@@ -144,14 +144,23 @@ chat, sin pegar imágenes...) y lo guarda con `??=`, así que lo vuelve a pedir 
 
 - **Menú del usuario** (`Pages/Auth/AdminLogin`, en la cabecera): `RadzenProfileMenu` (`.knt-user-menu`; en un móvil
   solo el icono) con **My profile** (`Auth/UserProfile`), **Change password** (`Auth/ChangePassword`: al terminar
-  entra con el token nuevo que devuelve el servidor) y **Sign out**. Un Admin pone la contraseña de otro desde el
+  entra con el token nuevo que devuelve el servidor y muestra su `Notice`, dónde cambió si el usuario está en varios
+  repositorios), **Change repository** (`KntSignIn.ChangeRepositoryAsync`) y **Sign out**. Un Admin pone la contraseña de otro desde el
   editor de usuarios (`Users/UserSetPassword`, botón del pie con `.knt-footer-start`). La política
   (`KntPasswordPolicy`) se comprueba antes de enviar, también en el registro.
 - **Olvidé mi contraseña**: el diálogo `Auth/Login` abre `Auth/ForgotPassword` encima (el login sigue abierto); el
-  enlace del correo lleva a la página anónima `Auth/ResetPassword` (`/reset-password?token=`), que entra con el token
-  devuelto.
+  enlace del correo lleva a la página anónima `Auth/ResetPassword` (`/reset-password?token=`), que pone la contraseña
+  en todos los repositorios del enlace y entra con el token devuelto o, si se puso en varios, con el usuario y la
+  contraseña nueva por `KntSignIn.SignInWithAsync` (elige el repositorio como en el login).
 - **Entrar y registrarse**: `Auth/KntSignIn` (servicio `Scoped`, de uno en uno) abre el diálogo, llama a `IStore.Users` e
   inicia la sesión. Lo usan la cabecera (`AdminLogin`, que luego va a Home) y la tarjeta de acceso, que se queda en la página.
+  **Una sesión está en un repositorio del servidor** (claim `knt_repo` del token): si las credenciales valen en varios,
+  la respuesta trae `Repositories` y `Auth/ChooseRepository` (diálogo `Small`, `RadzenDropDown`) pide uno; se vuelve a
+  enviar el login con su `RepositoryId`. **Cambiar de repositorio** es volver a entrar (el `Login` con el usuario
+  relleno, `ChangingRepository`): no se salta de repositorio sin comprobar otra vez las credenciales. Al entrar en otro
+  repositorio, `AppState.ClearUserData` (también `HomeFolderId`), `MainLayout` relee el nombre del repositorio (en cada
+  `AuthenticationStateChanged`), Home relee sus carpetas y notas, y el chat room se reconecta (`ChatRoomHub` compara
+  usuario y repositorio).
 - **Página sin acceso**: `App.razor` (`AuthorizeRouteView`) muestra un indicador circular mientras comprueba la sesión y, si la
   página no se puede ver, `Shared/KntAccessDenied`: sin sesión, "Sign in"/"Register" (al entrar, el router vuelve a evaluar la
   página y la muestra); con sesión pero sin el rol, "Back to Home" o, en una ventana de la app, "Close window" (la ventana lo
@@ -166,11 +175,20 @@ chat, sin pegar imágenes...) y lo guarda con `??=`, así que lo vuelve a pedir 
   al rol sin avisar: el doble clic de una lista edita o, si no se puede, ve; el orden elegido en el árbol solo se guarda
   para Staff+. Las secciones del menú lateral y las páginas siguen con `AuthorizeView`/`[Authorize]`, y `Server` comprueba
   cada petición.
+- **La sesión de cada ventana** (`Auth/AuthenticationProviderJWT`): cada ventana (o pestaña) es otra instancia de la app
+  con su token en memoria y en `sessionStorage` (`KNoteSessionToken`: lo conserva al recargarla); `localStorage`
+  (`TOKENKEY`) tiene la última sesión iniciada, con la que empieza una ventana nueva. `Login` escribe los dos y lo anuncia
+  por el canal `knote-session` (`KntWindows.NotifySessionChangedAsync`/`SessionChanged`, `kntWindows.js`); `Logout`
+  también (todas cierran la sesión). Al oírlo, otra pestaña principal (`MainLayout`) adopta la sesión nueva
+  (`AdoptLastSessionAsync`) y, si es de otro repositorio, vuelve a Home; **una ventana de la app (`KntWindowLayout`) de otro
+  repositorio sigue con su token** y muestra un aviso fijo ("This window works in the repository ...": guardar y cerrar),
+  también si se recarga: así una nota del repositorio A nunca se guarda con el token de B.
 - **Sesión rechazada**: un 401 con sesión iniciada (`BaseService`) no se notifica como error: avisa a
   `AppState.OnSessionEnded`, y los dos layouts llaman a `ILoginService.SessionRefusedAsync`, que adopta el token de
-  `localStorage` si otra ventana de la app ya guardó uno nuevo (tras cambiar la contraseña) o, si no, cierra la
-  sesión. `Logout` vacía lo leído con la sesión (`AppState.ClearUserData`: árbol de carpetas, carpeta, filtro y
-  posiciones de las listas), y **en `AppState` solo se cachea una lectura válida**: un árbol que no se pudo leer
+  `localStorage` si otra ventana de la app ya guardó uno nuevo **del mismo repositorio** (tras cambiar la contraseña) o,
+  si no, cierra la sesión de esa ventana (`SignOutHereAsync`; el de `localStorage` solo se borra si era el mismo token).
+  Cerrar sesión vacía lo leído con la sesión (`AppState.ClearUserData`: árbol de carpetas, carpeta, carpeta de Home,
+  filtro y posiciones de las listas), y **en `AppState` solo se cachea una lectura válida**: un árbol que no se pudo leer
   (401, sin red) quedaba vacío hasta recargar la página.
 
 ## SmartDTO en la UI
@@ -449,7 +467,8 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   de esa nota (`BecomeEditWindowAsync`: cambia su nombre y su URL). El navegador
   solo deja abrirla justo tras un clic o una tecla: no pongas otra espera delante (el script se carga de antemano
   en `KntWindows.StartAsync`, que llaman los dos layouts); si la bloquea, se avisa. Cada ventana es otra
-  instancia de la app (su propio `AppState`; la sesión sí se comparte, el JWT está en `localStorage`). Al guardar,
+  instancia de la app (su propio `AppState`; empieza con la sesión de la ventana que la abre y se queda en su
+  repositorio, ver "La sesión de cada ventana"). Al guardar,
   `NoteEdit` avisa a las demás ventanas (`NotifyNoteSavedAsync`, `BroadcastChannel`) y quien muestre notas se
   suscribe a `KntWindows.NoteSaved` para refrescarse (las listas, Home, `NoteView`). La salida de `NoteEdit`
   cierra la ventana (`CloseAsync`; si no la abrió un script, va a Home) y cerrarla con cambios sin guardar
@@ -474,9 +493,10 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - Login/registro: `Shared/MainLayoutHeader` → `Pages/Auth/AdminLogin` abre `Login`/`Register` como diálogos,
   llama a `store.Users.LoginAsync`/`RegisterAsync` (`api/users/login|register`) y entrega el JWT a
   `ILoginService.Login(token)`.
-- `Auth/AuthenticationProviderJWT` guarda el token en `localStorage` (clave `TOKENKEY`), lo pone como cabecera
-  `Authorization: bearer` del `HttpClient` compartido y construye el `ClaimsPrincipal` leyendo los claims del
-  JWT (nombre y roles; el rol del usuario lo decide `Service` al registrar, ver `CLAUDE.md` raíz).
+- `Auth/AuthenticationProviderJWT` guarda el token en `sessionStorage` y `localStorage` (ver "La sesión de cada
+  ventana"), lo pone como cabecera `Authorization: bearer` del `HttpClient` compartido y construye el
+  `ClaimsPrincipal` leyendo los claims del JWT (nombre, roles en el repositorio de la sesión y `knt_repo`,
+  `RepositoryId`; el rol del usuario lo decide `Service` al registrar, ver `CLAUDE.md` raíz).
 - Las páginas declaran `@attribute [Authorize(Roles = "...")]` y el menú usa `<AuthorizeView Roles="...">`.
   Los roles de ASP.NET **no son jerárquicos**: enumera todos los que tienen acceso
   (`"Staff, ProjectManager, Admin"`), con los nombres de `EnumRoles` (`Guest`, `Staff`, `ProjectManager`,
@@ -487,9 +507,10 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 ## Otros
 
 - **Home y nombre del repositorio**: Home (`Pages/Index`) es pública (sin `[Authorize]`), igual que los endpoints
-  anónimos que usa (ver `Server/CLAUDE.md`, "Autorización"). `MainLayout` lee una vez el nombre del repositorio
-  (`IStore.SystemValues.GetRepositoryNameAsync`, `DB_REPOSITORYNAME`) en `AppState.RepositoryName` (`null`
-  mientras se lee, vacío si no se pudo): Home lo muestra como título de su cabecera y las demás páginas en la
+  anónimos que usa (ver `Server/CLAUDE.md`, "Autorización"): sin sesión muestra el repositorio por defecto del servidor y,
+  con sesión, el de la sesión (el bearer decide; Home relee al cambiar la sesión). `MainLayout` lee el nombre del
+  repositorio (`IStore.SystemValues.GetRepositoryNameAsync`, `DB_REPOSITORYNAME`) al empezar y en cada cambio de
+  sesión en `AppState.RepositoryName` (`null` mientras se lee, vacío si no se pudo): Home lo muestra como título de su cabecera y las demás páginas en la
   barra superior, "KNote - nombre" (`.knt-app-repository`, oculto en un móvil; el layout se redibuja en cada
   navegación, así que el título sigue la página sin suscribirse a `LocationChanged`). A la derecha de las notas,
   `Pages/HomeFolders` (presentación) lista Home y sus carpetas hijas directas (`Folders.GetHomeChildrenAsync`) y

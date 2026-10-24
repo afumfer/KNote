@@ -51,6 +51,10 @@ public static class KntConst
     public static string RepositoryNameKey { get; private set; } = "DB_REPOSITORYNAME";
     public static string RepositoryIdKey { get; private set; } = "DB_REPOSITORYID";
 
+    // The claim of the web app's tokens with the RepositoryId of the session's repository (the Server resolves the
+    // service of each request from it; a session is in one repository).
+    public const string RepositoryClaimType = "knt_repo";
+
     static KntConst()
     {
         KAttributes = new Dictionary<EnumKAttributeDataType, string>
