@@ -45,6 +45,8 @@ public interface IKntNoteService
     Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId);
     Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId);
     Task<Result<KMessageDto>> GetMessageAsync(Guid messageId);
+    // A new alarm of the note with its default values (not saved).
+    Task<Result<KMessageDto>> NewMessageAsync(Guid noteId);
     Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false);
     Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId);
     Task<Result<List<TraceNoteDto>>> GetTraceNotesFromAsync(Guid noteId);

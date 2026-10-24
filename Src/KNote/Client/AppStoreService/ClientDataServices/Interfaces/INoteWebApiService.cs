@@ -29,6 +29,12 @@ public interface INoteWebApiService
     Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto traceNote, CancellationToken cancellationToken = default);
     Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId, CancellationToken cancellationToken = default);
 
+    // The note's alarms (KMessages), saved at once (api/notes/{id}/alarms, api/notes/alarms).
+    Task<Result<List<KMessageDto>>> GetAlarmsAsync(Guid noteId, CancellationToken cancellationToken = default);
+    Task<Result<KMessageDto>> NewAlarmAsync(Guid noteId, CancellationToken cancellationToken = default);
+    Task<Result<KMessageDto>> SaveAlarmAsync(KMessageDto alarm, CancellationToken cancellationToken = default);
+    Task<Result<KMessageDto>> DeleteAlarmAsync(Guid alarmId, CancellationToken cancellationToken = default);
+
     Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString, CancellationToken cancellationToken = default);
     Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter, CancellationToken cancellationToken = default);
 

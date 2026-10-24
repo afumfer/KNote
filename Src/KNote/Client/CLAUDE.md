@@ -422,6 +422,14 @@ Patrones ya establecidos que hay que seguir:
   marca y su estado (sin tachar). `NoteTaskEditor` edita la descripción con `KntMarkdownEditor` (su modo se guarda
   aparte: `StorageKey`), y como `ClientWin` una tarea nueva es del usuario conectado, con prioridad n+1 y empezada
   ahora, y al resolverla sin fecha de fin se le pone la actual.
+- **Alarmas de la nota** (`NoteKMessages`, lista; `NoteMessageEditor`, diálogo), con los datos de `ClientWin` (sus
+  `KMessageDto`): una fila por alarma, por fecha, con su periodicidad, cómo se avisa, el usuario, si está activada y el
+  comentario; Edit/Delete en la fila y doble clic (o Enter) para editar. **Se guardan al momento** (como las tareas; la
+  nota tiene que estar guardada): una nueva la pide a `Server` con sus valores por defecto (`IStore.Notes.NewAlarmAsync`
+  → `Notes.NewMessageAsync`: usuario actual, ahora, Application info) y el diálogo recibe `Save` y solo se cierra si
+  `Server` la acepta, como el de las notas trazadas. Los textos de la periodicidad y de los cuatro tipos de notificación
+  (con la ayuda de cuáles avisa cada aplicación) están en `Shared/KntAlarmTexts`; los minutos solo se piden con "Every few
+  minutes". La pestaña va después de Tasks (`ShowPanel(4)`; las notas trazadas son la 5).
 - **Notas trazadas** (`NoteTraceNotes`, presentación; `NoteTraceNoteEditor`, diálogo), como en `ClientWin`: dos paneles,
   "Trace notes from" (la nota es `ToId`) y "Trace notes to" (es `FromId`), cada relación descrita por la otra nota y
   su tipo, orden y peso (`IStore.Notes.GetTraceNotesAsync` → `NoteTraceNotesDto`, resuelto en `Server`). A diferencia

@@ -80,6 +80,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId) => throw new NotSupportedException();
     public Task<Result<KMessageDto>> GetMessageAsync(Guid messageId) =>
         (GetMessageAsyncImpl ?? throw new NotSupportedException($"{nameof(GetMessageAsync)} not configured for this test"))(messageId);
+    public Task<Result<KMessageDto>> NewMessageAsync(Guid noteId) => throw new NotSupportedException();
     public Task<Result<KMessageDto>> SaveMessageAsync(KMessageDto entity, bool forceNew = false) => throw new NotSupportedException();
     public Task<Result<KMessageDto>> DeleteMessageAsync(Guid messageId) => throw new NotSupportedException();
     public Task<Result<List<TraceNoteDto>>> GetTraceNotesFromAsync(Guid noteId) =>

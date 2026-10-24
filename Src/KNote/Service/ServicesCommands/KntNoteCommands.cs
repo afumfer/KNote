@@ -944,6 +944,42 @@ public class KntNotesGetMessageAsyncCommand : KntCommandServiceBase<Guid, Result
     }
 }
 
+/// <summary>
+/// A new alarm of the note, not saved yet: for the user running the service, activated, for now (to the minute), shown
+/// as Application info (the notification the web app gives) and with a comment to replace.
+/// </summary>
+[KntAuthorize(EnumRoles.Staff)]
+public class KntNotesNewMessageAsyncCommand : KntCommandServiceBase<Guid, Result<KMessageDto>>
+{
+    public const string DefaultComment = "(Additional text for the alarm)";
+
+    public KntNotesNewMessageAsyncCommand(IKntService service, Guid noteId) : base(service, noteId)
+    {
+
+    }
+
+    public override async Task<Result<KMessageDto>> Execute()
+    {
+        var user = await Service.GetCurrentUserAsync();
+        var now = DateTime.Now;
+
+        var message = new KMessageDto
+        {
+            NoteId = Param,
+            UserId = user?.UserId,
+            UserFullName = user?.FullName,
+            AlarmActivated = true,
+            AlarmDateTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, now.Kind),
+            AlarmType = EnumAlarmType.Standard,
+            NotificationType = EnumNotificationType.AppInfo,
+            Comment = DefaultComment
+        };
+        message.SetIsNew(true);
+
+        return new Result<KMessageDto>(message);
+    }
+}
+
 [KntAuthorize(EnumRoles.Staff)]
 public class KntNotesSaveMessageAsyncCommand : KntCommandSaveServiceBase<KMessageDto, Result<KMessageDto>>
 {

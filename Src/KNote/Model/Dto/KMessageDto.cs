@@ -181,7 +181,8 @@ public class KMessageDto : SmartModelDtoBase, IAlarmSchedule
         }
 
         //
-        if(AlarmType == EnumAlarmType.InMinutes && AlarmMinutes < 1)
+        // Also without minutes (null < 1 is false).
+        if(AlarmType == EnumAlarmType.InMinutes && (AlarmMinutes ?? 0) < 1)
         {
             results.Add(new ValidationResult
              ("The minutes are mandatory in types of periodic alarms 'in minutes'."

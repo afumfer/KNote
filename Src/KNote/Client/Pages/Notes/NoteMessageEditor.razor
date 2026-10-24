@@ -1,0 +1,136 @@
+@implements IDisposable
+
+@inject NotificationService notificationService
+@inject DialogService dialogService
+
+@* Dialog of one of the note's alarms (NoteForm opens it framed), with the data of ClientWin's alarm editor: when, how
+   often, whether it is activated, how it is notified, for which user and a comment. The rules are KMessageDto's. The
+   alarm is saved by Save, which keeps the dialog open if the server rejects it; the result is the alarm saved, or null
+   if cancelled. *@
+
+<EditForm Model="alarm" Context="formContextAlarm" OnSubmit="OnConfirm">
+
+    <DataAnnotationsValidator />
+
+    <KntDialogFrame Icon="alarm" Title="@(IsNew ? "New alarm" : "Edit alarm")" Subtitle="@NoteDisplay" OnClose="OnCancel">
+        <ChildContent>
+
+            <KntFormSection Icon="schedule" Title="When" Description="When the alarm is due and how often it repeats.">
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Date and time" Component="AlarmDateTime" Required="true">
+                            <RadzenDatePicker Name="AlarmDateTime" TValue="DateTime?" @bind-Value="@alarm.AlarmDateTime" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" />
+                            <ValidationMessage For="@(() => alarm.AlarmDateTime)" />
+                        </KntField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Repeat" Component="AlarmType">
+                            <RadzenDropDown Name="AlarmType" TValue="EnumAlarmType" @bind-Value="@alarm.AlarmType"
+                                            Data="@KntAlarmTexts.Periodicities" TextProperty="Text" ValueProperty="Value" />
+                        </KntField>
+                    </RadzenColumn>
+                </RadzenRow>
+                @if (alarm.AlarmType == EnumAlarmType.InMinutes)
+                {
+                    <KntField Label="Every (minutes)" Component="AlarmMinutes" Required="true">
+                        <RadzenNumeric Name="AlarmMinutes" TValue="int?" @bind-Value="@alarm.AlarmMinutes" Min="1" />
+                        <ValidationMessage For="@(() => alarm.AlarmMinutes)" />
+                    </KntField>
+                }
+                <KntField Label="Activated" Component="AlarmActivated" Help="A deactivated alarm is kept, but never notified.">
+                    <RadzenSwitch Name="AlarmActivated" @bind-Value="@Activated" />
+                </KntField>
+            </KntFormSection>
+
+            <KntFormSection Icon="notifications" Title="Notice" Description="How the alarm is notified, to whom and with what text.">
+                <KntField Label="Notification" Component="NotificationType" Help="@KntAlarmTexts.NotificationsHelp">
+                    <RadzenDropDown Name="NotificationType" TValue="EnumNotificationType" @bind-Value="@alarm.NotificationType"
+                                    Data="@KntAlarmTexts.Notifications" TextProperty="Text" ValueProperty="Value" />
+                </KntField>
+                <KntField Label="User" Component="UserId">
+                    <RadzenDropDown Name="UserId" TValue="Guid?" Value="@alarm.UserId" ValueChanged="OnUserChanged"
+                                    Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" AllowClear="true" Placeholder="No user" />
+                </KntField>
+                <KntField Label="Comment" Component="Comment">
+                    <RadzenTextArea Name="Comment" @bind-Value="@alarm.Comment" Rows="3" />
+                    <ValidationMessage For="@(() => alarm.Comment)" />
+                </KntField>
+            </KntFormSection>
+
+        </ChildContent>
+        <Footer>
+            <RadzenButton Text="Cancel" Click="OnCancel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Disabled="@saving" />
+            <RadzenButton Text="Save" Icon="save" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" IsBusy="@saving" />
+        </Footer>
+    </KntDialogFrame>
+
+</EditForm>
+
+@code {
+    // The alarm to edit (a new one has no id, with the values the server gives it).
+    [Parameter][EditorRequired] public KMessageDto Alarm { get; set; } = null!;
+    [Parameter] public List<UserDto> Users { get; set; } = new();
+    // The note's text ("#123 · Topic").
+    [Parameter] public string NoteDisplay { get; set; } = "";
+    // Saves the alarm: false keeps the dialog open (the error has already been notified).
+    [Parameter][EditorRequired] public Func<KMessageDto, Task<bool>> Save { get; set; } = null!;
+
+    private KMessageDto alarm = null!;
+    private bool saving;
+    private bool closed;
+
+    private bool IsNew => Alarm.KMessageId == Guid.Empty;
+
+    // The switch needs a bool: AlarmActivated may be null (an alarm saved by an old version).
+    private bool Activated
+    {
+        get => alarm.AlarmActivated == true;
+        set => alarm.AlarmActivated = value;
+    }
+
+    // A copy: the list keeps showing the alarm as saved until it is saved again.
+    protected override void OnInitialized() => alarm = Alarm.GetSimpleDto<KMessageDto>();
+
+    private void OnUserChanged(Guid? userId)
+    {
+        alarm.UserId = userId;
+        alarm.UserFullName = Users.FirstOrDefault(u => u.UserId == userId)?.FullName;
+    }
+
+    private async Task OnConfirm(EditContext formContext)
+    {
+        if (saving)
+            return;
+
+        if (!formContext.Validate())
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Save alarm.", Detail = alarm.GetErrorMessage(), Duration = 12000 });
+            return;
+        }
+
+        saving = true;
+        try
+        {
+            if (await Save(alarm))
+                CloseDialog(alarm);
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void OnCancel()
+    {
+        if (!saving)
+            CloseDialog(null);
+    }
+
+    public void Dispose() => closed = true;
+
+    private void CloseDialog(object? result)
+    {
+        if (!closed)
+            dialogService.Close(result);
+    }
+}

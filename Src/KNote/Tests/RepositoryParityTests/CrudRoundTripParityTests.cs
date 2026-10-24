@@ -165,4 +165,38 @@ public class CrudRoundTripParityTests
         Assert.AreEqual(addRes.Entity.Description, getRes.Entity.Description);
         Assert.AreEqual(addRes.Entity.FolderId, getRes.Entity.FolderId);
     }
+
+    // An alarm of a user (with the user's name) and one without a user: both listed and read by either ORM.
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
+    public async Task Alarms_WithAndWithoutAUser_AreReadByTheOther(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+
+        var folderRes = await writer.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Parity Alarms Folder" });
+        var noteId = Guid.NewGuid();
+        var noteRes = await writer.Notes.AddAsync(new NoteDto { NoteId = noteId, Topic = "Parity alarms", FolderId = folderRes.Entity.FolderId, CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now });
+        Assert.IsTrue(noteRes.IsValid, noteRes.ErrorMessage);
+        var user = (await writer.Users.GetAllAsync()).Entity.First();
+
+        var withUser = new KMessageDto { KMessageId = Guid.NewGuid(), NoteId = noteId, UserId = user.UserId, Comment = "With user", AlarmActivated = true, AlarmDateTime = DateTime.Now };
+        var withoutUser = new KMessageDto { KMessageId = Guid.NewGuid(), NoteId = noteId, UserId = null, Comment = "Without user", AlarmActivated = true, AlarmDateTime = DateTime.Now.AddHours(1) };
+        Assert.IsTrue((await writer.Notes.AddMessageAsync(withUser)).IsValid);
+        Assert.IsTrue((await writer.Notes.AddMessageAsync(withoutUser)).IsValid);
+
+        var list = await reader.Notes.GetMessagesAsync(noteId);
+        var one = await reader.Notes.GetMessageAsync(withUser.KMessageId);
+        var other = await reader.Notes.GetMessageAsync(withoutUser.KMessageId);
+
+        Assert.IsTrue(list.IsValid, list.ErrorMessage);
+        Assert.HasCount(2, list.Entity);
+        Assert.AreEqual(user.FullName, list.Entity.Single(m => m.KMessageId == withUser.KMessageId).UserFullName);
+        Assert.IsNull(list.Entity.Single(m => m.KMessageId == withoutUser.KMessageId).UserFullName);
+        Assert.AreEqual(user.FullName, one.Entity.UserFullName);
+        Assert.IsTrue(other.IsValid, other.ErrorMessage);
+        Assert.IsNull(other.Entity.UserId);
+    }
 }

@@ -1,0 +1,101 @@
+.knt-alarm-list {
+    max-height: max(18rem, calc(100vh - 22rem));
+    overflow: auto;
+}
+
+.knt-alarm {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+    border-left: 3px solid transparent;
+    border-radius: var(--rz-border-radius);
+    cursor: default;
+    outline: none;
+}
+
+    .knt-alarm + .knt-alarm {
+        margin-top: 0.25rem;
+    }
+
+    .knt-alarm:hover {
+        border-left-color: var(--rz-primary);
+        background-color: color-mix(in srgb, var(--rz-primary) 6%, transparent);
+    }
+
+    .knt-alarm:focus-visible {
+        box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rz-primary) 50%, transparent);
+    }
+
+/* A deactivated alarm reads as the others, only its icon and state are dimmed. */
+.knt-alarm-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background-color: var(--rz-primary-lighter);
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+.knt-alarm-off .knt-alarm-icon {
+    background-color: transparent;
+    color: var(--rz-text-disabled-color);
+}
+
+.knt-alarm-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.knt-alarm-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+}
+
+.knt-alarm-state {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--rz-primary);
+}
+
+.knt-alarm-off .knt-alarm-state {
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-alarm-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.125rem 0.875rem;
+    margin-top: 0.125rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+    .knt-alarm-meta > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .knt-alarm-meta ::deep .rzi {
+        font-size: 1rem;
+    }
+
+.knt-alarm-comment {
+    margin-top: 0.125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.knt-alarm-actions {
+    display: flex;
+    flex: none;
+    gap: 0.125rem;
+}
