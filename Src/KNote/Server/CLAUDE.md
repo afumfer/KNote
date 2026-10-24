@@ -40,8 +40,17 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
   `RepositoryRef.Orm` y antes pasa por `KntSchemaUpdater.EnsureUpToDate` de EF) e `IKntService` → `KntService`.
   Una sola base de datos por instancia de `Server` (a diferencia de `ClientWin`, que puede tener varias).
 - Autenticación JWT bearer (clave simétrica `AppSettings.Secret`, sin validar issuer/audience,
-  `ClockSkew = 0`), `AddAuthorization`, CORS `KntPolicy` abierto (`*`), SignalR, compresión de respuesta,
-  NLog (`nlog.config`, logs en `Log/`). Para el hub (`ChatRoomHubContract.Path`) el token también se lee del
+  `ClockSkew = 0`), `AddAuthorization`, SignalR, compresión de respuesta, NLog (`nlog.config`, logs en `Log/`, rutas
+  con `/` para que valgan en cualquier sistema).
+- **CORS** (`Helpers/KntCors`, sección `Cors:AllowedOrigins`): vacía por defecto, sin orígenes cruzados (`Client` es del
+  mismo origen; `ClientWin` y los tests no son navegadores, CORS no les aplica); `"*"` = cualquier origen. `UseKntCors`
+  va entre `UseRouting` y `UseAuthentication`.
+- **Tras un proxy inverso** (`Helpers/KntForwardedHeaders`, sección `ForwardedHeaders`: `Enabled`, `KnownProxies`,
+  `KnownNetworks` en CIDR, `ForwardLimit`): desactivado por defecto (en IIS, ANCM ya da la dirección y el esquema del
+  cliente). Activado, `UseForwardedHeaders` es el primer middleware y aplica `X-Forwarded-For/Proto/Host` de los
+  proxies de confianza (siempre los de loopback, más los configurados): sin él, el límite de inicios de sesión por
+  dirección (`KntRateLimits`) sería uno para todos y las URLs construidas desde la petición (`LocalFileStore`, `ChatHub`)
+  llevarían el esquema y el host del proxy. Tests en `ProxyAndCorsInProcessTests`. Para el hub (`ChatRoomHubContract.Path`) el token también se lee del
   parámetro `access_token` (`JwtBearerEvents.OnMessageReceived`): WebSockets y SSE no envían la cabecera
   `Authorization`. `ChatRoomManager` se registra como singleton. `JwtBearerEvents.OnTokenValidated` rechaza los
   tokens cuya huella de contraseña ya no es la del usuario (ver "Autorización").

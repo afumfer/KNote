@@ -53,6 +53,8 @@ try
     builder.Services.KntAddAiAssistant(builder.Configuration);
     builder.Services.KntAddPasswordReset(builder.Configuration);
     builder.Services.KntAddRateLimits(builder.Configuration);
+    builder.Services.KntAddForwardedHeaders(builder.Configuration);
+    builder.Services.KntAddCors();
 
     builder.Services.AddAuthentication().AddJwtBearer(options =>
     {
@@ -90,11 +92,6 @@ try
     builder.Services.AddMemoryCache();
     builder.Services.AddSingleton<KntPasswordStamps>();
 
-    builder.Services.AddCors(p => p.AddPolicy("KntPolicy", builder =>
-    {
-        builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-    }));
-
     builder.Services.AddScoped<IFileStore, LocalFileStore>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddControllersWithViews()
@@ -119,6 +116,8 @@ try
     /// Build App and configure the HTTP request pipeline.
 
     var app = builder.Build();
+
+    app.UseKntForwardedHeaders();
 
     if (app.Environment.IsDevelopment())
     {
@@ -153,9 +152,9 @@ try
 
     app.UseRouting();
     app.UseRateLimiter();
+    app.UseKntCors(app.Configuration);
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseCors("KntPolicy");
 
     app.MapRazorPages();
     app.MapControllers();
