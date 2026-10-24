@@ -269,7 +269,7 @@ El menú **Print/Export** de las páginas **Tree panel**, **Notes filter** y **Q
 
 ### Editor de notas (aplicación Web)
 
-Una nota se edita en su propia ventana. Su cabecera muestra el tema y el número de la nota, la ruta completa de su carpeta, su tipo y cuándo se modificó, con **Save and new**, **Save** y el botón que cierra la ventana (pregunta antes si hay cambios sin guardar).
+Una nota se edita en su propia ventana. Su cabecera muestra el número de la nota (*New* hasta que se guarda) bajo su icono, y su tema y, debajo, la ruta completa de su carpeta, su tipo y sus etiquetas, con **Save and new**, **Save** y el botón que cierra la ventana (pregunta antes si hay cambios sin guardar).
 
 - **Overview**: el tema y la descripción y, a la derecha, los detalles de la nota (carpeta, tipo, prioridad, etiquetas) y su registro (número, fechas, estado). La descripción se escribe en Markdown, con una barra para sus formatos (títulos, negrita, listas, tareas, enlaces, imágenes, tablas...): cada herramienta actúa sobre el texto o las líneas seleccionados, y pulsarla otra vez quita el formato. `Ctrl+B`, `Ctrl+I` y `Ctrl+K` ponen negrita, cursiva y un enlace; **Link** e **Image** escriben el enlace con su dirección seleccionada, lista para escribirla (si lo seleccionado es una dirección, se selecciona su texto). `Ctrl+Z` y **Undo** deshacen también las herramientas. Se escribe igual de rápido en una nota larga que en una corta. **Preview** la muestra tal como se ve. El navegador recuerda cuál de los dos usas.
 - **Contenido bloqueado**: el interruptor **Content** del registro bloquea la descripción de la nota: se muestra, pero no se edita, hasta que se desbloquea. El bloqueo se guarda con la nota y es el mismo que pone la aplicación de escritorio.
@@ -284,6 +284,8 @@ Una nota nueva tiene que guardarse antes de añadirle recursos, tareas o notas t
 ### Apariencia (aplicación Web)
 
 El botón de la paleta de la barra superior de la aplicación Web abre el panel **Appearance**, donde eliges el **tema** (Software, Standard, Material, Humanistic o Default), el **modo** (claro u oscuro), el estilo de la **cabecera de Home** (*Soft*, un tinte suave del color del tema, o *Ink*, oscura) y el **alto contraste (WCAG)**, que hace más fáciles de distinguir los textos y los bordes. Los cambios se aplican al momento. El botón del sol / la luna, a su lado, cambia directamente entre claro y oscuro. Tu navegador recuerda la elección (en cookies), así que cada navegador conserva la suya.
+
+El botón de las tres rayas, a la izquierda de la barra superior, cambia el menú lateral entre sus iconos con sus nombres y solo los iconos, una barra estrecha que deja más sitio a la página; con solo los iconos, cada uno muestra su nombre al pasar el ratón por encima. El navegador recuerda la elección; mientras no la hagas, en un móvil se ven solo los iconos.
 
 ### Tu cuenta (aplicación Web)
 

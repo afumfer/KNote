@@ -203,7 +203,11 @@ Cómo está integrada:
 - Layout: `RadzenLayout` + `RadzenHeader`/`RadzenSidebar`(`RadzenPanelMenu`)/`RadzenBody`/`RadzenFooter` (el pie,
   `Shared/MainLayoutFooter`: la aplicación, su descripción y versión a la izquierda; el usuario con su rol más alto y
   el repositorio abierto a la derecha). Las ventanas de la app (notas, asistente de IA, chat room) usan
-  `Shared/KntWindowLayout` (solo `RadzenBody`, con su propio `<RadzenComponents />`).
+  `Shared/KntWindowLayout` (solo `RadzenBody`, con su propio `<RadzenComponents />`). El sidebar está siempre
+  visible (`Expanded="true"`, `Responsive="false"`: plegado, Radzen lo deja con ancho 0) y su botón cambia el
+  `DisplayStyle` del `RadzenPanelMenu` entre `IconAndText` e `Icon` (`MainLayoutNavMenu.Compact`; clase
+  `knt-sidebar-compact` en `knt-theme.css`; solo con iconos, cada entrada muestra su texto como tooltip). La elección
+  se guarda en `localStorage` (`KNoteMenuCompact`); sin ella, `RadzenMediaQuery` (máx. 768 px) empieza con iconos.
 - Tema: `<RadzenTheme Theme="@KntThemes.Default" />` en el `<HeadContent>` de `App.razor` (no un `<link>` fijo
   en `index.html`), seguido de `css/knt-theme.css`. El usuario elige tema (los 5 gratuitos de Radzen,
   `Shared/KntThemes`), modo claro/oscuro y alto contraste (WCAG) en el panel `Shared/KntThemeSelector` (botón
@@ -375,8 +379,8 @@ Patrones ya establecidos que hay que seguir:
   convención de las listas de página (acciones en la cabecera y clic derecho). Borrar pide confirmación. Iconos:
   `Shared/KntFileTypes` (tipo de fichero) y `Shared/KntDataTypes` (tipo de dato de un atributo); ninguna imagen de
   otros sitios.
-- **Editor de notas** (`Notes/NoteForm`, en su ventana): cabecera con la nota (tema, número, ruta de la carpeta,
-  tipo, modificación) y sus botones; pestañas con contadores (`RadzenTabsItem` `Template`); Overview en dos
+- **Editor de notas** (`Notes/NoteForm`, en su ventana): cabecera compacta con la nota (el número, o "New", bajo el
+  icono; el tema y, debajo, la ruta de la carpeta, el tipo y las etiquetas) y sus botones; pestañas con contadores (`RadzenTabsItem` `Template`); Overview en dos
   columnas (tema y descripción; panel "Details" y "Record"). La ruta de la carpeta la da `Server`
   (`IStore.Folders.GetPathAsync` → `api/folders/{id}/path`, `Folders.GetPathAsync` de `Service`, la misma de
   `ClientWin`). "Record" tiene el interruptor que bloquea el contenido de la nota (`ContentType` → JSON con

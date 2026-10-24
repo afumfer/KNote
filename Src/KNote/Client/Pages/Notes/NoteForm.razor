@@ -14,15 +14,11 @@
 
     @* The note: what it is and where it is, and the buttons to save it or leave. *@
     <div class="knt-note-header">
-        <span class="knt-note-header-icon"><RadzenIcon Icon="@(Note.IsNew() ? "note_add" : "edit_note")" /></span>
+        <div class="knt-note-header-badge">
+            <span class="knt-note-header-icon"><RadzenIcon Icon="@(Note.IsNew() ? "note_add" : "edit_note")" /></span>
+            <span class="knt-note-header-number">@(Note.IsNew() ? "New" : $"#{Note.NoteNumber}")</span>
+        </div>
         <div class="knt-note-header-caption">
-            <div class="knt-note-header-kicker">
-                @Title
-                @if (!Note.IsNew())
-                {
-                    <span class="knt-note-header-number">#@Note.NoteNumber</span>
-                }
-            </div>
             <h1 class="knt-note-header-title">@(string.IsNullOrWhiteSpace(Note.Topic) ? "Untitled note" : Note.Topic)</h1>
             <div class="knt-note-header-meta">
                 <span><RadzenIcon Icon="folder" />@(string.IsNullOrEmpty(folderPath) ? "No folder" : folderPath)</span>
@@ -30,7 +26,10 @@
                 {
                     <span><RadzenIcon Icon="@KntSections.NoteTypes.Icon" />@Note.NoteTypeDto.Name</span>
                 }
-                <span><RadzenIcon Icon="schedule" />@(Note.IsNew() ? "Not saved yet" : $"Modified {Note.ModificationDateTime:g}")</span>
+                @if (!string.IsNullOrWhiteSpace(Note.Tags))
+                {
+                    <span><RadzenIcon Icon="sell" />@Note.Tags</span>
+                }
             </div>
         </div>
         <div class="knt-note-header-actions">
@@ -212,7 +211,6 @@
 @code {
     [Parameter] [EditorRequired] public NoteDto Note { get; set; } = null!;
     [Parameter] public List<NoteTypeDto>? NoteTypes { get; set; } 
-    [Parameter] public string Title { get; set; } = "...";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnValidSubmitWithNew { get; set; }
     [Parameter] public EventCallback OnExit { get; set; }

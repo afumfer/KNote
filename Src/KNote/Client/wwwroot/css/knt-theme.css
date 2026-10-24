@@ -111,6 +111,11 @@
         padding-inline-end: calc(var(--rz-panel-menu-item-padding-inline) + var(--knt-sidebar-air));
     }
 
+    /* Only the icons (MainLayout's toggle): a bar as wide as them, without the air for the texts. */
+    .rz-sidebar.knt-sidebar-compact .rz-panel-menu .rz-navigation-item-link {
+        padding-inline-end: var(--rz-panel-menu-item-padding-inline);
+    }
+
 /* Lists with a selected row (admin lists, class knt-list on the RadzenDataGrid): the compact rows of the notes
    lists (NotesGrid), the selected row in the color of the notes lists' current row and a softer hover, so the
    selection stands out (the grids use AllowAlternatingRows="false"). */

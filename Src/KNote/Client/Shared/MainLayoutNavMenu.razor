@@ -1,22 +1,43 @@
-﻿@* Entries come from KntSections, so the page headers show the same icons. *@
-<RadzenPanelMenu style="height: 100%">
-    <RadzenPanelMenuItem Text="@KntSections.Home.Text" Path="@KntSections.Home.Path" Icon="@KntSections.Home.Icon" />
-    <RadzenPanelMenuItem Text="@KntSections.QuickSearch.Text" Path="@KntSections.QuickSearch.Path" Icon="@KntSections.QuickSearch.Icon" />
-    <RadzenPanelMenuItem Text="@KntSections.TreePanel.Text" Path="@KntSections.TreePanel.Path" Icon="@KntSections.TreePanel.Icon" />
-    <RadzenPanelMenuItem Text="@KntSections.NotesFilter.Text" Path="@KntSections.NotesFilter.Path" Icon="@KntSections.NotesFilter.Icon" />
+﻿@* Entries come from KntSections, so the page headers show the same icons. Compact (MainLayout's toggle) shows only
+   the icons, and each entry's text as its tooltip. *@
+
+@inject TooltipService tooltipService
+
+<RadzenPanelMenu style="height: 100%" DisplayStyle="@(Compact ? MenuItemDisplayStyle.Icon : MenuItemDisplayStyle.IconAndText)">
+    <RadzenPanelMenuItem Text="@KntSections.Home.Text" Path="@KntSections.Home.Path" Icon="@KntSections.Home.Icon"
+                         MouseEnter="@(args => ShowTooltip(args, KntSections.Home.Text))" />
+    <RadzenPanelMenuItem Text="@KntSections.QuickSearch.Text" Path="@KntSections.QuickSearch.Path" Icon="@KntSections.QuickSearch.Icon"
+                         MouseEnter="@(args => ShowTooltip(args, KntSections.QuickSearch.Text))" />
+    <RadzenPanelMenuItem Text="@KntSections.TreePanel.Text" Path="@KntSections.TreePanel.Path" Icon="@KntSections.TreePanel.Icon"
+                         MouseEnter="@(args => ShowTooltip(args, KntSections.TreePanel.Text))" />
+    <RadzenPanelMenuItem Text="@KntSections.NotesFilter.Text" Path="@KntSections.NotesFilter.Path" Icon="@KntSections.NotesFilter.Icon"
+                         MouseEnter="@(args => ShowTooltip(args, KntSections.NotesFilter.Text))" />
     <AuthorizeView Roles="Staff, ProjectManager, Admin">
         <Authorized>
             @* Hidden until developed: NotesTasksCalendar and NotesAlarmsCalendar still show demo data.
             <RadzenPanelMenuItem Text="@KntSections.TasksCalendar.Text" Path="@KntSections.TasksCalendar.Path" Icon="@KntSections.TasksCalendar.Icon" />
             <RadzenPanelMenuItem Text="@KntSections.Alarms.Text" Path="@KntSections.Alarms.Path" Icon="@KntSections.Alarms.Icon" />
             *@
-            <RadzenPanelMenuItem Text="@KntSections.ChatRoom.Text" Path="@KntSections.ChatRoom.Path" Icon="@KntSections.ChatRoom.Icon" />
-            <RadzenPanelMenuItem Text="@KntSections.AiAssistant.Text" Path="@KntSections.AiAssistant.Path" Icon="@KntSections.AiAssistant.Icon" />
+            <RadzenPanelMenuItem Text="@KntSections.ChatRoom.Text" Path="@KntSections.ChatRoom.Path" Icon="@KntSections.ChatRoom.Icon"
+                                 MouseEnter="@(args => ShowTooltip(args, KntSections.ChatRoom.Text))" />
+            <RadzenPanelMenuItem Text="@KntSections.AiAssistant.Text" Path="@KntSections.AiAssistant.Path" Icon="@KntSections.AiAssistant.Icon"
+                                 MouseEnter="@(args => ShowTooltip(args, KntSections.AiAssistant.Text))" />
         </Authorized>
     </AuthorizeView>
     <AuthorizeView Roles="Admin">
         <Authorized>
-            <RadzenPanelMenuItem Text="@KntSections.Admin.Text" Path="@KntSections.Admin.Path" Icon="@KntSections.Admin.Icon" />
+            <RadzenPanelMenuItem Text="@KntSections.Admin.Text" Path="@KntSections.Admin.Path" Icon="@KntSections.Admin.Icon"
+                                 MouseEnter="@(args => ShowTooltip(args, KntSections.Admin.Text))" />
         </Authorized>
     </AuthorizeView>
 </RadzenPanelMenu>
+
+@code {
+    [Parameter] public bool Compact { get; set; }
+
+    private void ShowTooltip(ElementReference element, string text)
+    {
+        if (Compact)
+            tooltipService.Open(element, text, new TooltipOptions { Position = TooltipPosition.Right });
+    }
+}
