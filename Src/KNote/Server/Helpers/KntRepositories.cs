@@ -222,7 +222,7 @@ public class KntRepositories
     }
 
     // Opening a repository creates or updates its database (KntSchemaUpdater), which gives it its id.
-    private static async Task<Guid> ReadRepositoryIdAsync(RepositoryRef repositoryRef)
+    public static async Task<Guid> ReadRepositoryIdAsync(RepositoryRef repositoryRef)
     {
         using var service = new KntService(KntRepositoryFactory.Create(repositoryRef));
         var info = await service.SystemValues.GetRepositoryInfoAsync();

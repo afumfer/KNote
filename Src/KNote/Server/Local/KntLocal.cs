@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using KNote.Model;
+using KNote.Server.Helpers;
 
 namespace KNote.Server.Local;
 
@@ -72,11 +74,22 @@ public static class KntLocal
         return protector;
     }
 
+    /// <summary>
+    /// The services of KNote Local: the data folder, the secrets' protector, the computer's settings (api/local) and the
+    /// health check. The settings that can be changed from the app (AI providers, e-mail, alarms, password reset) are
+    /// read from the configuration each time they are used (KntCurrentOptions), so a change applies at once; the AI
+    /// providers from Local:ai (see KntLocalSettings).
+    /// </summary>
     public static IServiceCollection KntAddLocal(this IServiceCollection services, IConfiguration configuration, KntLocalData localData, KntSecretProtector protector)
     {
         services.AddSingleton(localData);
         services.AddSingleton(protector);
+        services.AddSingleton<KntLocalSettings>();
         services.Configure<LocalConfig>(configuration.GetSection("Local"));
+        services.AddSingleton<IOptions<AiConfig>>(new KntCurrentOptions<AiConfig>(() => configuration.GetSection(KntLocalSettings.AiSection).Get<AiConfig>() ?? new AiConfig()));
+        services.AddSingleton<IOptions<EmailConfig>>(new KntCurrentOptions<EmailConfig>(() => configuration.GetSection("Email").Get<EmailConfig>() ?? new EmailConfig()));
+        services.AddSingleton<IOptions<AlarmsConfig>>(new KntCurrentOptions<AlarmsConfig>(() => configuration.GetSection("Alarms").Get<AlarmsConfig>() ?? new AlarmsConfig()));
+        services.AddSingleton<IOptions<PasswordResetConfig>>(new KntCurrentOptions<PasswordResetConfig>(() => configuration.GetSection("PasswordReset").Get<PasswordResetConfig>() ?? new PasswordResetConfig()));
         services.AddHealthChecks();
         services.AddSingleton<KntLocalInstance>();
         services.AddHostedService(provider => provider.GetRequiredService<KntLocalInstance>());

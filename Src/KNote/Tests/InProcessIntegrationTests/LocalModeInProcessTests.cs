@@ -186,4 +186,20 @@ public class ServerModeCapabilitiesInProcessTests
         Assert.AreNotEqual(HttpStatusCode.Accepted, stop.StatusCode);
         Assert.AreNotEqual("text/plain", resources.Content.Headers.ContentType?.MediaType, "No resources served by repository (the app's index.html, at most).");
     }
+
+    [TestMethod]
+    public async Task ServerMode_NoComputerSettings_EvenForAnAdmin()
+    {
+        var (factory, admin) = await InProcessTestHost.CreateAuthenticatedClientAsync();
+        try
+        {
+            Assert.AreEqual(HttpStatusCode.NotFound, (await admin.GetAsync("api/local/repositories")).StatusCode);
+            Assert.AreEqual(HttpStatusCode.NotFound, (await admin.PostAsync("api/local/stop", null)).StatusCode);
+        }
+        finally
+        {
+            admin.Dispose();
+            await factory.DisposeAsync();
+        }
+    }
 }
