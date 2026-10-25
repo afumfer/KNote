@@ -337,6 +337,19 @@ Changing the AI model of a conversation that has already started begins a new co
 
 **In its own window.** The button that opens it in a new window moves the assistant, with the session you are in, to a window of its own, without the app's menus; the main window goes back to Home. It can't be used while an answer is arriving. There is only one assistant window: opening it again brings it to the front. Closing that window while an answer is arriving, or when the conversation could not be saved, asks first.
 
+### KNote Local (the web app in your computer)
+
+KNote Local is the web app running entirely in your computer, without internet, on Windows, macOS and Linux: the same server and the same app, listening only at `http://127.0.0.1`, started by KNote's launcher. Its guide, from installing it to its settings, is [KNoteLocal.md](KNoteLocal.md).
+
+In KNote Local the **Admin panel** has one more tab, **This computer**, for an Admin and only from the computer itself:
+
+- **Repositories**: **New repository** (an empty SQLite database in the data folder), **Link existing database** (a SQLite database of the computer, for example the desktop app's: both apps can use it at the same time), **Link SQL Server**, and in each row **Rename**, **Make default** (the repository of the sign-ups and of the visitors) and **Unlink** (it is only removed from the list: the database is never deleted). The changes apply at once.
+- **AI providers** of the assistant, with their API keys kept encrypted and never shown again (empty keeps the saved one). The first one is the default.
+- **E-mail**: the SMTP account and **Send the Email alarms** (off by default; if you turn it on, uncheck **Process Email alarms** in the desktop app's options).
+- **Local server**: its address, data folder and version, its **Port** (applies the next time it starts) and **Stop local server**.
+
+To sign in to a desktop app's database you need a password: if you sign in to the desktop app with your Windows account, set one there first (**My account → Change password**).
+
 ### Repositories of the web server (server configuration)
 
 A web server with one repository configures it in the `RepositoryRef` section, as always. For several, use the `Repositories` list instead (it takes precedence when it isn't empty), with the same fields and `IsDefault` for the default repository (the one of Home without signing in and of new registrations; without it, the first one):

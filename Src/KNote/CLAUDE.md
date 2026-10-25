@@ -9,12 +9,16 @@ misma lógica de backend: una app de escritorio WinForms (`ClientWin`) y una app
 (`Client`) servida por una API ASP.NET Core (`Server`). Soporta dos motores de BD (Sqlite, SQL Server)
 detrás de dos implementaciones de repositorio intercambiables (Dapper, Entity Framework Core).
 
+La app Web se despliega de dos formas: en un servidor (IIS, un repositorio o varios) o como **KNote Local**, el mismo
+`Server` y la misma app en `127.0.0.1` del equipo del usuario (Windows, macOS, Linux), arrancado por `KNote.Launcher`.
+Las diferencias solo están en la configuración (ver "KNote Local" en `Server/CLAUDE.md` y `Launcher/CLAUDE.md`).
+
 ## Archivos de solución
 
 No hay un único `.sln` en la raíz; hay varios `.slnx` ("VS solution XML"), cada uno cubriendo una parte
 distinta del código:
 
-- `KNote.slnx` — la app completa: `Server`, `Model`, `Service`, `KNote.Ai`, `KNote.Reports`, `Repository*`, `ClientWin`, `Client`,
+- `KNote.slnx` — la app completa: `Server`, `KNote.Launcher`, `Model`, `Service`, `KNote.Ai`, `KNote.Reports`, `Repository*`, `ClientWin`, `Client`,
   `KntScript`, `MessageBroker*`, `HtmlEditorControl`, `KntEditViewControl`, `KntIcons`. Úsalo para la mayoría del
   trabajo.
 - `KNoteTest.slnx` — solo `Model` + `Tests`, para ejecutar la suite de tests de integración de forma aislada.
@@ -31,6 +35,11 @@ dotnet build KNote.slnx
 
 # Compilar/ejecutar el servidor web (también sirve el Client Blazor)
 dotnet run --project Server/KNote.Server.csproj
+
+# KNote Local: el lanzador (arranca la compilación del Server en el entorno Local; compila los dos antes)
+dotnet run --project Launcher/KNote.Launcher.csproj -- --data <carpeta de pruebas>
+# paquete e instaladores de KNote Local (ver Deploy/Local/README.md)
+./Deploy/Local/publish-local.ps1
 
 # Compilar/ejecutar el cliente de escritorio WinForms
 dotnet run --project ClientWin/KNote.ClientWin.csproj
@@ -98,7 +107,8 @@ KntEditViewControl → HtmlEditorControl, KntIcons
 HtmlEditorControl → KntIcons
 ```
 
-`KntScript` y `KntIcons` no tienen referencias a otros proyectos (son hojas). `KntIcons` dibuja los iconos de
+`KntScript`, `KntIcons` y `KNote.Launcher` (carpeta `Launcher/`, el lanzador de KNote Local, ver `Launcher/CLAUDE.md`) no
+tienen referencias a otros proyectos (son hojas). `KntIcons` dibuja los iconos de
 la UI WinForms (`ClientWin`, `HtmlEditorControl`, `KntEditViewControl`) a partir de una fuente vectorial para
 que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`.
 
@@ -280,6 +290,10 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
   sesión, el predeterminado. Los controladores y las páginas no cambian. Ver "Repositorios" en `Server/CLAUDE.md`.
 - `Server` también sirve la app `Client` Blazor compilada
   (`Microsoft.AspNetCore.Components.WebAssembly.Server`), todo bajo la base `/KNote`.
+- **KNote Local** (`Server/Local`, `appsettings.Local.json`): activo solo si hay carpeta de datos del usuario
+  (`Local__DataPath` o el entorno `Local`), con su configuración (`knote-local.json`, secretos cifrados con Data
+  Protection), `/health`, parada con token y la API del equipo (`api/local`: repositorios, IA, correo, puerto). Ver
+  "KNote Local" en `Server/CLAUDE.md`.
 - Plantilla de controlador, JWT, configuración y tests: `Server/CLAUDE.md`.
 
 ### Model

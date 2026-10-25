@@ -141,6 +141,25 @@ Como el programa no está firmado digitalmente (la firma es un certificado de pa
 
 **Actualizar** es sencillo: se detiene el servidor, se sustituye la carpeta del programa por la nueva y se vuelve a abrir. Tus notas no se tocan. **Desinstalar** quita el programa y sus accesos; tu carpeta de datos se conserva, por si vuelves a instalarlo (bórrala a mano si ya no la quieres).
 
+### Los comandos, paso a paso
+
+Descomprime el paquete y, desde su carpeta, ejecuta el script de tu sistema:
+
+| Sistema | Instalar | Desinstalar | Dónde queda KNote |
+|---|---|---|---|
+| Windows | `powershell -ExecutionPolicy Bypass -File install-windows.ps1` | `uninstall-windows.ps1` | Menú de inicio, **KNote** |
+| Mac | `bash install-macos.sh` | `bash uninstall-macos.sh` | `~/Applications/KNote.app` (y Launchpad) |
+| Linux | `bash install-linux.sh` | `bash uninstall-linux.sh` | Menú de aplicaciones, **KNote** |
+
+Para que el servidor arranque al iniciar sesión, añade `-StartAtSignIn` (Windows) o `--start-at-login` (Mac, Linux). En Windows, `-AppWindow` hace que el acceso del menú de inicio abra KNote en una ventana de aplicación. Para actualizar, instala el paquete nuevo de la misma forma.
+
+## Si algo va mal
+
+- **Otro programa usa el puerto de KNote**: el lanzador te lo dice. Abre KNote una vez con otro puerto, `KNote.Launcher --port 5300` (en Mac y Linux, `dotnet KNote.Launcher.dll --port 5300` desde la carpeta donde está instalado); KNote lo recuerda para las próximas veces.
+- **Falta el ASP.NET Core Runtime 10**: el lanzador te lo dice; instálalo (enlace de arriba) y vuelve a abrir KNote.
+- **Detener el servidor local**: **panel de administración → This computer → Stop local server**, o `KNote.Launcher --stop`.
+- **Para averiguar qué pasó**: los registros del lanzador (`launcher.log`) y del servidor están en la carpeta `Logs` de tu carpeta de datos.
+
 ## Convivencia con lo que ya existe
 
 **La aplicación de escritorio no desaparece.** Sigue siendo una opción más y puede convivir con KNote Local en el mismo ordenador, incluso usando las mismas bases de datos a la vez.

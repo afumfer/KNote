@@ -141,6 +141,25 @@ As the program isn't digitally signed (a signature is a paid certificate that id
 
 **Updating** is simple: the server is stopped, the program folder is replaced by the new one and it is opened again. Your notes aren't touched. **Uninstalling** removes the program and its shortcuts; your data folder is kept, in case you install it again (delete it by hand if you no longer want it).
 
+### The commands, step by step
+
+Unzip the package and, from its folder, run your system's script:
+
+| System | Install | Uninstall | Where KNote is |
+|---|---|---|---|
+| Windows | `powershell -ExecutionPolicy Bypass -File install-windows.ps1` | `uninstall-windows.ps1` | Start menu, **KNote** |
+| Mac | `bash install-macos.sh` | `bash uninstall-macos.sh` | `~/Applications/KNote.app` (and Launchpad) |
+| Linux | `bash install-linux.sh` | `bash uninstall-linux.sh` | Applications menu, **KNote** |
+
+To start the server when you sign in, add `-StartAtSignIn` (Windows) or `--start-at-login` (Mac, Linux). On Windows, `-AppWindow` makes the Start menu shortcut open KNote in an app window. To update, install the new package the same way.
+
+## If something goes wrong
+
+- **Another program uses KNote's port**: the launcher tells you. Open KNote once with another port, `KNote.Launcher --port 5300` (on Mac and Linux, `dotnet KNote.Launcher.dll --port 5300` from the folder where it is installed); KNote remembers it from then on.
+- **The ASP.NET Core Runtime 10 is missing**: the launcher tells you; install it (link above) and open KNote again.
+- **Stopping the local server**: **Admin panel → This computer → Stop local server**, or `KNote.Launcher --stop`.
+- **To find out what happened**: the launcher's (`launcher.log`) and the server's logs are in the `Logs` folder of your data folder.
+
 ## Living together with what already exists
 
 **The desktop app doesn't go away.** It is still one more option and can live with KNote Local on the same computer, even using the same databases at the same time.

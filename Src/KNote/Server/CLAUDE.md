@@ -56,6 +56,11 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
   "Cuentas de usuario".
 - `KntAddAlarms` (`Helpers/KntAlarms`, sección `Alarms`): `AlarmsConfig` enlazado al usarse y `EmailAlarmsService`
   (singleton y hosted service), ver "Alarmas".
+- **Raíz de contenido** = carpeta de la aplicación (`AppContext.BaseDirectory`, `KntLocal.ContentRootPath`) salvo en
+  `Development` (la del proyecto): arrancado por el sistema, un servicio o el lanzador, el directorio de trabajo puede
+  ser otro y la app saldría en blanco. En IIS no cambia nada (ANCM ya usa esa carpeta).
+- `AppSettings:UseHttpsRedirection` (por defecto `true`): HSTS y la redirección a HTTPS; `false` en KNote Local.
+- **KNote Local** (`Server/Local`): solo si hay carpeta de datos (`KntLocalData.FromEnvironment`), ver "KNote Local".
 - Los estáticos de `Client` (`UseStaticFiles` y `MapFallbackToFile("index.html")`) se sirven con
   `Cache-Control: no-cache`: sus URLs no cambian entre versiones (`index.html`, `css/*.css`,
   `KNote.Client.styles.css`) y sin esa cabecera el navegador sigue usando los antiguos tras un despliegue (HTML
@@ -368,6 +373,64 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
 - `Helpers/CheckUserPermissionsMiddleware`, `HttpContextExtensions` (cabeceras de paginación): sin uso
   actualmente.
 
+## KNote Local (`Server/Local`, `appsettings.Local.json`)
+
+El mismo `Server` y la misma app WebAssembly en `127.0.0.1`, en el equipo del usuario, sin internet (guía de usuario:
+`Docs/KNoteLocal.md`). Lo arranca `KNote.Launcher` (ver `Launcher/CLAUDE.md`). **El modo local es la configuración, nunca
+un `if` en controladores o páginas**: está activo cuando hay **carpeta de datos** (`KntLocalData.FromEnvironment`:
+`Local__DataPath`, que pone el lanzador, o sin ella la predeterminada en el entorno `Local`); sin ella no se registra
+nada de lo que sigue y el modo servidor no cambia.
+
+- **Entorno `Local`** (`appsettings.Local.json`): Kestrel solo en `http://127.0.0.1:5280` (`Kestrel:Endpoints`, el
+  puerto real lo pone el JSON del usuario), `AllowedHosts` = `localhost;127.0.0.1` (sin él, una web que haga resolver su
+  dominio a `127.0.0.1`, *DNS rebinding*, podría leer las respuestas), sin HTTPS ni HSTS, CORS vacío, sin message broker,
+  `PasswordReset:PublicBaseUrl` vacío y `ServeRepositoryResources`. `UseStaticWebAssets` en local, para que una
+  compilación (F5) sirva la app como en `Development`.
+- **Carpeta de datos** (`KntLocalData`; Windows `%LocalAppData%\KNote\Server`, macOS `~/Library/Application
+  Support/KNote/Server`, Linux `~/.local/share/KNote/Server`): `knote-local.json` (la configuración del usuario, por
+  encima de la demás, recargada al cambiar), `Data` (SQLite), `Resources` (una carpeta por repositorio), `Keys`, `Logs`
+  (NLog vía el `gdc` `logDir`, puesto por `Program` antes del primer log) y, mientras corre, `knote-server.pid` y
+  `knote-server.token`. **Primer arranque** (`EnsureCreated`): un `InstanceId`, el puerto 5280 o el siguiente libre, un
+  `AppSettings:Secret` aleatorio cifrado (nunca uno distribuido) y un repositorio SQLite (`Data/KNote.db`, su base de datos
+  la crea `KntSchemaUpdater` al abrirse; el primero que se registra es Admin, la regla de siempre). La escritura es
+  atómica (fichero temporal y `File.Move`).
+- **Secretos** (`KntSecretProtector`, `KntProtectedJsonConfigurationSource`): valores `protected:...` cifrados con Data
+  Protection (`DataProtectionProvider.Create` con `Keys/` y `SetApplicationName("KNote")`, así sobreviven a reinstalar;
+  en Windows **`ProtectKeysWithDpapi` explícito**: con una carpeta de claves propia Data Protection no lo hace solo; en
+  macOS y Linux, solo los permisos del perfil). Se descifran al leer la configuración; uno que no se puede descifrar
+  (claves de otro usuario o equipo) queda vacío y se registra en el log. Se cifran el `Secret`, las claves de IA, la
+  contraseña SMTP y las cadenas de conexión de SQL Server.
+- **`/health`** (`/KNote/health`, anónimo): `{ app: "KNote", version, instanceId, status }`, para que el lanzador
+  distinga su KNote de otro programa o del KNote de otro usuario en el mismo puerto. **`POST /local/stop`** con el token
+  de control de la carpeta de datos en `X-KNote-Control` (y desde el propio equipo): para limpio (`StopApplication`);
+  lo usan `--stop` del lanzador, el instalador y las actualizaciones (`KntLocalInstance` escribe y borra el PID y el
+  token).
+- **Capacidades** (`ServerController`, `GET api/server/capabilities`, anónimo, en los dos modos):
+  `ServerCapabilitiesDto.LocalAdmin`, para que la Web muestre la pestaña "This computer".
+- **API del equipo** (`LocalController`, `api/local`; `KntLocalSettings`): repositorios (añadir SQLite nuevo, SQLite
+  existente o SQL Server; renombrar en su BD con `SaveRepositoryNameAsync`; predeterminado; desvincular, nunca el último
+  ni el de la sesión, nunca borra la BD), proveedores de IA (la lista entera, la clave nunca se devuelve y vacía la
+  conserva), correo y el interruptor de las alarmas Email, puerto (tras reiniciar) y `stop`. **Admin de la sesión y solo
+  desde el propio equipo** (`KntLocalOnly`, filtro de recursos: 404 fuera del modo local, 403 desde la red): son del
+  equipo, no de un repositorio, y así quedan a salvo si algún día se abre el servidor a la intranet. Un repositorio
+  nuevo se abre antes de escribirlo (rechazado si ya está vinculado) y, si al recargar queda fuera, se deshace.
+- **Cambios al momento** (`KntLocalSettings.ApplyAsync`): `IConfigurationRoot.Reload()`, `AiProvidersCatalog.Reload()` y
+  `KntRepositories.ReloadAsync`. En local `KntAddLocal` sustituye `IOptions<T>` de `AiConfig`, `EmailConfig`,
+  `AlarmsConfig` y `PasswordResetConfig` por `KntCurrentOptions` (leen la configuración cada vez); en modo servidor
+  siguen los `IOptions` de siempre. Los proveedores de IA del equipo van en **`Local:ai`**, no en `ai`: las listas de la
+  configuración se mezclan por posición y asomarían los ejemplos de `appsettings.json`.
+- **Repositorios sin reiniciar** (`KntRepositories.ReloadAsync`): una instantánea inmutable que se sustituye entera,
+  con las reglas del arranque; si no abre ninguno se conservan los actuales; un token de un repositorio desvinculado da
+  401. **Recursos por repositorio** (`AppSettings:ServeRepositoryResources`, en local): un repositorio sin
+  `ResourcesContainerRootUrl` la recibe como `/KNote/Resources/{RepositoryId}` y `MapKntRepositoryResources` sirve sus
+  ficheros buscando el repositorio en cada petición (nada fuera de su carpeta).
+- Tests: `KntLocalDataTests`, `LocalModeInProcessTests` (y su parada y el modo servidor), `LocalSettingsInProcessTests`,
+  `KntRepositoriesTests` (recarga y recursos). `KNoteWebApplicationFactory(localDataPath: ...)` arranca en el entorno
+  `Local` con esa carpeta (y limpia la variable y el `gdc` al terminar).
+- **Probar a mano**: nunca con `ASPNETCORE_ENVIRONMENT=Development`, que carga los user-secrets (con su lista
+  `Repositories`, que manda sobre las variables `RepositoryRef__*`). En local: `ASPNETCORE_ENVIRONMENT=Local` y
+  `Local__DataPath` con una carpeta de pruebas, o el lanzador con `--data`.
+
 ## Configuración y secretos
 
 `appsettings.json` solo contiene marcadores (`"... MyLongStringSecurityKeySecret ..."`). Los valores reales
@@ -380,6 +443,8 @@ No escribas secretos reales en `appsettings.json`.
 
 - Visual Studio: proyecto de inicio `Server`, perfil `KNote.Server` (`https://localhost:44339/KNote`, abre el
   navegador; permite depurar también `Client`). Hay también un perfil `IIS Express`.
+- KNote Local: perfil `KNote.Server (Local)` (VS) y configuración `KNote.Server (Local)` (VS Code), con el entorno
+  `Local` y la carpeta de datos predeterminada del usuario; o el lanzador (`Launcher/CLAUDE.md`).
 - VS Code: configuración `KNote.Web (Server + Client WASM)` de `.vscode/launch.json` para depurar `Server` y
   `Client` juntos (ver `Client/CLAUDE.md`), o `KNote.Server` (`coreclr`, tarea previa `build: Server`; abre
   `<url>/KNote`) para depurar solo `Server`. La tarea `watch: Server` para iterar sin depurador.- CLI: `dotnet run --project Server/KNote.Server.csproj`.

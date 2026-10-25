@@ -113,6 +113,14 @@ It can also run without IIS, as a standalone process: `KNote.Server.exe --urls "
 
 Keep a Sqlite database on a local disk of the server, not in a network folder. For a shared database with many users, SQL Server is the recommended engine.
 
+**KNote Local.** The web app can also run entirely in your own computer, without internet, on Windows, macOS and Linux: the same server and the same app, listening only at `http://127.0.0.1`, started by a launcher. Make its package, the same for the three systems, with:
+
+```powershell
+./Src/KNote/Deploy/Local/publish-local.ps1
+```
+
+Then install it with the script of each system included in the package (it needs the [ASP.NET Core Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0)). See [Docs/KNoteLocal.md](Docs/KNoteLocal.md) (in Spanish, [Docs/KNoteLocal_es.md](Docs/KNoteLocal_es.md)).
+
 
 ## AI-assisted development
 

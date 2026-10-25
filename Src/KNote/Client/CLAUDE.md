@@ -61,13 +61,14 @@ Client/
 │         Interfaces/, Services/ – un I*WebApiService + implementación por objeto de dominio
 ├── Auth/                   – AuthenticationProviderJWT (AuthenticationStateProvider + ILoginService), KntSignIn (entrar/registrarse)
 ├── Pages/                  – páginas por área: Notes/, Folders/, Types/, TraceNoteTypes/, Attributes/, Users/, Auth/,
-│                             AIAssistant/, ChatRoom/
+│                             AIAssistant/, ChatRoom/, Local/ (pestaña "This computer" de KNote Local)
 ├── Shared/                 – layouts (MainLayout*, KntWindowLayout) y componentes reutilizables (EntityList, ToolingHeader,
 │                             KntIndexHeader, KntSections, KntDialogs, KntLogo, KntFolderSelector,
 │                             KntFoldersTreeView, KntNoteSelector, KntNotePicker, KntDialogFrame, KntFormSection,
 │                             KntField, KntMarkdownEditor, ...)
 ├── Helpers/                – extensiones de IJSRuntime (localStorage, carga de módulos JS) y NavigationManager (query strings)
-└── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/ (filePaste.js, chatRoom.js...), favicon.ico
+└── wwwroot/                – index.html, css/app.css, css/knt-theme.css, js/ (filePaste.js, chatRoom.js...), favicon.ico,
+                              manifest.webmanifest + icons/ (instalable como app)
 ```
 
 ## Acceso a datos: `IStore` y los `I*WebApiService`
@@ -208,6 +209,22 @@ validación que ambas UIs usan directamente:
   la página.
 - Cambiar `SmartModelDtoBase` o un DTO cambia el comportamiento de `ClientWin` también (y el JSON de la API).
 
+## KNote Local: pestaña "This computer" y app instalable
+
+- **Capacidades del servidor** (`IStore.Server.GetCapabilitiesAsync`, `api/server/capabilities`, sin notificar errores):
+  la UI muestra u oculta lo que depende de cómo está configurado el servidor, nunca con un "modo local" propio.
+  `Admin.razor` las pide y solo con `LocalAdmin` añade la pestaña **This computer** (`KntSections.ThisComputer`).
+- **`Pages/Local`** (`IStore.Local`, `api/local`, ver "KNote Local" en `Server/CLAUDE.md`): `LocalSettingsIndex` con
+  cuatro secciones (`KntFormSection`) que leen y guardan cada una lo suyo: `LocalRepositories` (lista con acciones
+  Rename/Make default/Unlink y los diálogos `LocalRepositoryAdd`, según `LocalRepositoryKind`: nuevo, SQLite existente o
+  SQL Server, y `LocalRepositoryRename`), `LocalAiProviders` (la lista entera se guarda en cada cambio; el primero es el
+  predeterminado; diálogo `LocalAiProviderEdit`, la clave nunca vuelve y vacía la conserva), `LocalEmailSettings` (SMTP y
+  el interruptor de las alarmas Email) y `LocalServerSettings` (dirección, carpeta de datos, versión, puerto y "Stop
+  local server"). El servidor responde con la lista tal como queda tras cada cambio de repositorios.
+- **Instalable como app** (Chrome, Edge, Safari, también en modo servidor): `wwwroot/manifest.webmanifest`,
+  `icons/icon-192.png`/`icon-512.png` (dibujados con la forma de `KntLogo` y `--knt-brand`) e `icon.svg`, enlazados en
+  `index.html` (con `theme-color` y `apple-touch-icon`). Sin *service worker*: no hace falta para instalarla.
+
 ## Interfaz de usuario: Radzen.Blazor
 
 La librería de componentes de la UI es **Radzen.Blazor** (paquete `Radzen.Blazor`, ver versión en
@@ -305,7 +322,8 @@ Patrones ya establecidos que hay que seguir:
   `Expanded` de la selección: Radzen lo evalúa en cada dibujado y cierra la rama cuyo valor pasa de `true` a `false`. La
   selección se compara por `FolderId`. Las listas de administración se ordenan con
   `AllowSorting` (todos los datos en memoria, sin paginar) y, dentro de `Admin`, la clase `knt-admin-list` les da
-  la altura de la ventana con scroll propio (`Admin.razor.css`). Tienen selección simple (`SelectionMode.Single`,
+  la altura de la ventana con scroll propio (`Admin.razor.css`; no las de la pestaña "This computer", que tiene varias
+  secciones una debajo de otra). Tienen selección simple (`SelectionMode.Single`,
   el clic derecho también selecciona) y la clase `knt-list` (`knt-theme.css`: filas como las de las listas de notas,
   sin rayado, `AllowAlternatingRows="false"`, y la fila seleccionada con el color de su fila actual); la cabecera
   lleva Edit/Delete del elemento seleccionado junto a New, como en `Folders/FoldersIndex`.
