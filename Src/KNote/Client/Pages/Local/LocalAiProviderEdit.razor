@@ -1,0 +1,55 @@
+@* An AI provider of KNote Local's computer (LocalAiProviders): its alias, provider, model, host (Ollama) and API key.
+   The key is never shown: empty keeps the saved one. Gives back the provider changed (a copy), saved by the list. *@
+
+@inject DialogService dialogService
+
+<KntDialogFrame Icon="smart_toy" Title="AI provider" Subtitle="@(string.IsNullOrEmpty(Provider.Alias) ? "A new AI provider." : Provider.Alias)"
+                OnClose="() => dialogService.Close(null)">
+    <ChildContent>
+        <KntFormSection Icon="badge" Title="General">
+            <KntField Label="Alias" Component="Alias" Required="true" Help="The name you choose it by in the AI assistant.">
+                <RadzenTextBox Name="Alias" @bind-Value="@provider.Alias" />
+            </KntField>
+            <KntField Label="Provider" Component="ProviderName" Required="true">
+                <RadzenDropDown Name="ProviderName" @bind-Value="@provider.Provider" Data="@EnumAiProvider.All" />
+            </KntField>
+            <KntField Label="Model" Component="Model" Required="true" Help="The model of the provider, for example gpt-4o-mini, claude-haiku-4-5 or llama3.1.">
+                <RadzenTextBox Name="Model" @bind-Value="@provider.Model" />
+            </KntField>
+            @if (provider.Provider == EnumAiProvider.Ollama)
+            {
+                <KntField Label="Host" Component="Host" Required="true" Help="Where Ollama runs, for example http://localhost:11434.">
+                    <RadzenTextBox Name="Host" @bind-Value="@provider.Host" />
+                </KntField>
+            }
+            else
+            {
+                <KntField Label="API key" Component="ApiKey" Help="@(Provider.HasApiKey ? "Saved: leave it empty to keep it." : "The key the provider gives you. It is kept encrypted.")">
+                    <RadzenPassword Name="ApiKey" @bind-Value="@provider.ApiKey" AutoCompleteType="AutoCompleteType.Off" />
+                </KntField>
+            }
+        </KntFormSection>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => dialogService.Close(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+        <RadzenButton Text="Save" Icon="save" Click="OnSave" ButtonStyle="ButtonStyle.Primary" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public LocalAiProviderDto Provider { get; set; } = null!;
+
+    private LocalAiProviderDto provider = new();
+
+    protected override void OnInitialized() => provider = new LocalAiProviderDto
+    {
+        Index = Provider.Index,
+        Alias = Provider.Alias,
+        Provider = Provider.Provider,
+        Model = Provider.Model,
+        Host = Provider.Host,
+        HasApiKey = Provider.HasApiKey
+    };
+
+    private void OnSave() => dialogService.Close(provider);
+}

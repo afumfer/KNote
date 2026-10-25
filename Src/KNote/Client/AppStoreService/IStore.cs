@@ -19,6 +19,8 @@ public interface IStore
     ISystemValueWebApiService SystemValues { get; }
     IReportWebApiService Reports { get; }
     IAlarmWebApiService Alarms { get; }
+    IServerWebApiService Server { get; }
+    ILocalWebApiService Local { get; }
 
     ChatRoomHub ChatRoom { get; }
 }

@@ -161,6 +161,28 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private IServerWebApiService? _server;
+    public IServerWebApiService Server
+    {
+        get
+        {
+            if (_server == null)
+                _server = new ServerWebApiService(AppState, _httpClient);
+            return _server;
+        }
+    }
+
+    private ILocalWebApiService? _local;
+    public ILocalWebApiService Local
+    {
+        get
+        {
+            if (_local == null)
+                _local = new LocalWebApiService(AppState, _httpClient);
+            return _local;
+        }
+    }
+
     public ChatRoomHub ChatRoom { get; }
 
     #endregion

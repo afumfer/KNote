@@ -1,0 +1,34 @@
+@* Renames a repository of KNote Local's computer: the name is kept in its database, the one both apps show. *@
+
+@inject IStore store
+@inject DialogService dialogService
+
+<KntDialogFrame Icon="database" Title="Rename repository" Subtitle="@Repository.Name" OnClose="() => dialogService.Close(null)">
+    <ChildContent>
+        <KntFormSection Icon="badge" Title="Name" Description="Kept in the repository's database: the desktop app shows it too.">
+            <KntField Label="Name" Component="Name" Required="true">
+                <RadzenTextBox Name="Name" @bind-Value="@name" />
+            </KntField>
+        </KntFormSection>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => dialogService.Close(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Disabled="@saving.IsBusy" />
+        <RadzenButton Text="Save" Icon="save" Click="OnSave" ButtonStyle="ButtonStyle.Primary" IsBusy="@saving.IsBusy" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public LocalRepositoryDto Repository { get; set; } = null!;
+
+    private string name = "";
+    private readonly KntSingleFlight saving = new();
+
+    protected override void OnInitialized() => name = Repository.Name;
+
+    private Task OnSave() => saving.RunAsync(async () =>
+    {
+        var result = await store.Local.RenameRepositoryAsync(Repository.Index, name);
+        if (result.IsValid)
+            dialogService.Close(result.Entity);
+    });
+}

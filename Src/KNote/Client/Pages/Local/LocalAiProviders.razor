@@ -1,0 +1,102 @@
+@* The AI providers of the assistant in KNote Local's computer (the first one is the default). Their API keys are kept
+   encrypted and never come back: the list only says whether each one has one. Each change saves the whole list. *@
+
+@inject IStore store
+@inject DialogService dialogService
+@inject ContextMenuService contextMenuService
+
+<KntFormSection Icon="smart_toy" Title="AI providers"
+                Description="The services the AI assistant uses (OpenAI, Anthropic or Ollama). The first one is the default.">
+    <div class="knt-local-actions">
+        <RadzenButton Text="Add provider" Icon="add" Size="ButtonSize.Small" Click="OnAdd" Disabled="@(providers == null)" />
+    </div>
+    <EntityList List="providers" LoadFailed="loadFailed" Retry="Load">
+        <AllItems>
+            <RadzenDataGrid Data="@providers" TItem="LocalAiProviderDto" Density="@Density.Compact" AllowColumnResize="true"
+                            class="knt-list" AllowAlternatingRows="false" CellContextMenu="OnCellContextMenu"
+                            RowDoubleClick="@(args => OnEdit(args.Data!))">
+                <Columns>
+                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Title="Alias">
+                        <Template Context="provider">
+                            @provider.Alias
+                            @if (provider == providers!.FirstOrDefault())
+                            {
+                                <RadzenBadge Text="Default" BadgeStyle="BadgeStyle.Primary" Shade="Shade.Lighter" IsPill="true" class="knt-local-badge" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Property="Provider" Title="Provider" />
+                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Property="Model" Title="Model" />
+                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Title="API key">
+                        <Template Context="provider">@(provider.Provider == EnumAiProvider.Ollama ? "-" : provider.HasApiKey ? "Saved" : "None")</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Width="56px" Sortable="false">
+                        <Template Context="provider">
+                            <KntActionsMenu Actions="ActionsOf(provider)" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </AllItems>
+    </EntityList>
+</KntFormSection>
+
+@code {
+    private List<LocalAiProviderDto>? providers;
+    private bool loadFailed;
+    private readonly KntSingleFlight saving = new();
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        var result = await store.Local.GetAiProvidersAsync();
+        loadFailed = !result.IsValid;
+        if (result.IsValid)
+            providers = result.Entity;
+    }
+
+    private List<KntAction> ActionsOf(LocalAiProviderDto provider)
+    {
+        var actions = new List<KntAction> { new("Edit", "edit", () => OnEdit(provider)) };
+        if (provider != providers!.FirstOrDefault())
+            actions.Add(new("Make default", "star", () => Save(providers!.Where(p => p != provider).Prepend(provider).ToList())));
+        actions.Add(new("Remove", "delete", () => OnRemove(provider), Danger: true));
+        return actions;
+    }
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<LocalAiProviderDto> args) =>
+        KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!));
+
+    private async Task OnAdd()
+    {
+        if (await EditAsync(new LocalAiProviderDto { Provider = EnumAiProvider.OpenAI }, "New AI provider") is LocalAiProviderDto added)
+            await Save(providers!.Append(added).ToList());
+    }
+
+    private async Task OnEdit(LocalAiProviderDto provider)
+    {
+        if (await EditAsync(provider, "Edit AI provider") is LocalAiProviderDto edited)
+            await Save(providers!.Select(p => p == provider ? edited : p).ToList());
+    }
+
+    private async Task OnRemove(LocalAiProviderDto provider)
+    {
+        var confirmed = await dialogService.Confirm($"Remove the AI provider - {provider.Alias} - and its API key?", "Remove AI provider",
+            new ConfirmOptions { OkButtonText = "Remove", CancelButtonText = "Cancel" });
+        if (confirmed == true)
+            await Save(providers!.Where(p => p != provider).ToList());
+    }
+
+    private Task<dynamic> EditAsync(LocalAiProviderDto provider, string title) =>
+        dialogService.OpenAsync<LocalAiProviderEdit>(title, new Dictionary<string, object?> { { "Provider", provider } },
+            KntDialogs.Framed(KntDialogs.Small()));
+
+    private Task Save(List<LocalAiProviderDto> list) => saving.RunAsync(async () =>
+    {
+        var result = await store.Local.SaveAiProvidersAsync(list);
+        if (result.IsValid)
+            providers = result.Entity;
+        StateHasChanged();
+    });
+}

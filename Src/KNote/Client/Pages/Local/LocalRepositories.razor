@@ -1,0 +1,121 @@
+@* The repositories of KNote Local's computer: a new SQLite database, an existing one (e.g. the desktop app's) or a SQL
+   Server one; renamed, made the default one (the one of the sign-ups and of the visitors) or unlinked (never deleting
+   its database). Each change is applied at once by the server. *@
+
+@implements IDisposable
+
+@inject IStore store
+@inject DialogService dialogService
+@inject ContextMenuService contextMenuService
+
+<KntFormSection Icon="database" Title="Repositories"
+                Description="The notebooks of this computer. Unlinking one only removes it from the list: its database is never deleted.">
+    <div class="knt-local-actions">
+        <RadzenButton Text="New repository" Icon="add" Size="ButtonSize.Small" Click="() => OnAdd(LocalRepositoryKind.New)" />
+        <RadzenButton Text="Link existing database" Icon="link" Size="ButtonSize.Small" Variant="Variant.Outlined" Click="() => OnAdd(LocalRepositoryKind.Existing)" />
+        <RadzenButton Text="Link SQL Server" Icon="dns" Size="ButtonSize.Small" Variant="Variant.Outlined" Click="() => OnAdd(LocalRepositoryKind.SqlServer)" />
+    </div>
+    <EntityList List="repositories" LoadFailed="loadFailed" Retry="Load">
+        <AllItems>
+            <RadzenDataGrid Data="@repositories" TItem="LocalRepositoryDto" Density="@Density.Compact" AllowColumnResize="true"
+                            class="knt-list" AllowAlternatingRows="false" CellContextMenu="OnCellContextMenu">
+                <Columns>
+                    <RadzenDataGridColumn TItem="LocalRepositoryDto" Title="Name">
+                        <Template Context="repository">
+                            @repository.Name
+                            @if (repository.IsDefault)
+                            {
+                                <RadzenBadge Text="Default" BadgeStyle="BadgeStyle.Primary" Shade="Shade.Lighter" IsPill="true" class="knt-local-badge" />
+                            }
+                            @if (!repository.IsOpen)
+                            {
+                                <RadzenBadge Text="Not open" BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" IsPill="true" class="knt-local-badge" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LocalRepositoryDto" Title="Database">
+                        <Template Context="repository"><span class="knt-local-path">@repository.Database</span></Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LocalRepositoryDto" Title="Resources folder">
+                        <Template Context="repository"><span class="knt-local-path">@repository.ResourcesFolder</span></Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LocalRepositoryDto" Width="56px" Sortable="false">
+                        <Template Context="repository">
+                            <KntActionsMenu Actions="ActionsOf(repository)" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </AllItems>
+    </EntityList>
+</KntFormSection>
+
+@code {
+    private List<LocalRepositoryDto>? repositories;
+    private bool loadFailed;
+    private readonly KntLatestRequest listRequest = new();
+    private readonly KntSingleFlight changing = new();
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    public void Dispose() => listRequest.Dispose();
+
+    private async Task Load()
+    {
+        var request = await listRequest.RunAsync(ct => store.Local.GetRepositoriesAsync(ct));
+        if (request.Canceled)
+            return;
+        loadFailed = !request.Value.IsValid;
+        if (request.Value.IsValid)
+            repositories = request.Value.Entity;
+        StateHasChanged();
+    }
+
+    private List<KntAction> ActionsOf(LocalRepositoryDto repository)
+    {
+        var actions = new List<KntAction>();
+        if (repository.IsOpen)
+            actions.Add(new("Rename", "edit", () => OnRename(repository)));
+        if (repository.IsOpen && !repository.IsDefault)
+            actions.Add(new("Make default", "star", () => Change(() => store.Local.SetDefaultRepositoryAsync(repository.Index))));
+        actions.Add(new("Unlink", "link_off", () => OnUnlink(repository), Danger: true));
+        return actions;
+    }
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<LocalRepositoryDto> args) =>
+        KntActionsMenu.Open(contextMenuService, args, ActionsOf(args.Data!));
+
+    private async Task OnAdd(LocalRepositoryKind kind)
+    {
+        var result = await dialogService.OpenAsync<LocalRepositoryAdd>(LocalRepositoryAdd.TitleOf(kind),
+            new Dictionary<string, object?> { { "Kind", kind } }, KntDialogs.Framed(KntDialogs.Medium()));
+        if (result is List<LocalRepositoryDto> list)
+            repositories = list;
+    }
+
+    private async Task OnRename(LocalRepositoryDto repository)
+    {
+        var result = await dialogService.OpenAsync<LocalRepositoryRename>("Rename repository",
+            new Dictionary<string, object?> { { "Repository", repository } }, KntDialogs.Framed(KntDialogs.Small()));
+        if (result is List<LocalRepositoryDto> list)
+            repositories = list;
+    }
+
+    private async Task OnUnlink(LocalRepositoryDto repository)
+    {
+        var confirmed = await dialogService.Confirm(
+            $"Unlink the repository - {repository.Name} -? It is only removed from the list: its database ({repository.Database}) is not deleted.",
+            "Unlink repository", new ConfirmOptions { OkButtonText = "Unlink", CancelButtonText = "Cancel" });
+        if (confirmed == true)
+            await Change(() => store.Local.UnlinkRepositoryAsync(repository.Index));
+    }
+
+    // The server answers with the list as it is after the change (also when part of it failed, already notified).
+    private Task Change(Func<Task<Result<List<LocalRepositoryDto>>>> change) => changing.RunAsync(async () =>
+    {
+        var result = await change();
+        if (result.Entity != null)
+            repositories = result.Entity;
+        StateHasChanged();
+    });
+}
