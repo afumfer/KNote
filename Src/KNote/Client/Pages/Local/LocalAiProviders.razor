@@ -88,7 +88,7 @@
             await Save(providers!.Where(p => p != provider).ToList());
     }
 
-    private Task<dynamic> EditAsync(LocalAiProviderDto provider, string title) =>
+    private Task<dynamic?> EditAsync(LocalAiProviderDto provider, string title) =>
         dialogService.OpenAsync<LocalAiProviderEdit>(title, new Dictionary<string, object?> { { "Provider", provider } },
             KntDialogs.Framed(KntDialogs.Small()));
 

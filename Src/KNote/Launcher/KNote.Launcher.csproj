@@ -16,4 +16,7 @@
     <FileVersion>0.0.10.44</FileVersion>
   </PropertyGroup>
 
+  <!-- KNote Local's package: publishing with the profile LocalServerPackage also publishes the server and the installers. -->
+  <Import Project="..\DeployLocalServer\KNote.LocalServer.targets" />
+
 </Project>

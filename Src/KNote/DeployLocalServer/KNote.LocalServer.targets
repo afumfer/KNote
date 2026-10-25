@@ -1,0 +1,58 @@
+<Project>
+
+  <!--
+    KNote Local's package, made by publishing KNote.Launcher with its publish profile LocalServerPackage (Visual Studio:
+    right click on KNote.Launcher > Publish > LocalServerPackage > Publish; console:
+    dotnet publish Launcher/KNote.Launcher.csproj -p:PublishProfile=LocalServerPackage). Imported by
+    KNote.Launcher.csproj; nothing here runs without that profile (KntLocalServerPackage).
+
+    Result, in DeployLocalServer\out\:
+      KNote-Local\                 the package: the launcher, server\ (the server published, with the web app), the
+                                   installation scripts, the icons and the README files of this folder
+      KNote-Local-<version>.zip    the same, to take to the computer where KNote Local is installed
+
+    Framework-dependent (it needs the ASP.NET Core Runtime 10) and the same for Windows, macOS and Linux. The launcher
+    doesn't reference the server: the server is published here.
+  -->
+
+  <!-- Without a condition: the publish profile is imported after this file, so KntLocalServerPackage isn't known yet
+       when these are evaluated (the targets check it when they run). -->
+  <PropertyGroup>
+    <KntDeployFolder>$(MSBuildThisFileDirectory)</KntDeployFolder>
+    <KntSources>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))\</KntSources>
+    <KntServerProject>$(KntSources)Server\KNote.Server.csproj</KntServerProject>
+    <!-- Global properties of the launcher's publication that aren't the server's (PublishDir is given to it). -->
+    <KntNotForTheServer>PublishProfile;PublishProfileFullPath;KntLocalServerPackage;PublishUrl;PublishProtocol;_TargetId;RuntimeIdentifier;SelfContained</KntNotForTheServer>
+  </PropertyGroup>
+
+  <!-- A clean package each time (only the KNote-Local folder of the profile, never another one). -->
+  <Target Name="KntCleanLocalServerPackage" BeforeTargets="PrepareForPublish"
+          Condition="'$(KntLocalServerPackage)' == 'true' And $([System.String]::Copy('$(PublishDir)').TrimEnd('\').TrimEnd('/').EndsWith('KNote-Local'))">
+    <RemoveDir Directories="$(PublishDir)" />
+  </Target>
+
+  <Target Name="KntLocalServerPackage" AfterTargets="Publish" Condition="'$(KntLocalServerPackage)' == 'true'">
+    <PropertyGroup>
+      <_KntPackageFolder>$([System.IO.Path]::GetFullPath('$(PublishDir)'))</_KntPackageFolder>
+      <_KntServerProperties>Configuration=$(Configuration);PublishDir=$(_KntPackageFolder)server\</_KntServerProperties>
+      <_KntZip>$([System.IO.Path]::GetFullPath('$(_KntPackageFolder)..'))\KNote-Local-$(FileVersion).zip</_KntZip>
+    </PropertyGroup>
+
+    <Message Importance="high" Text="KNote Local: publishing the server into $(_KntPackageFolder)server ..." />
+    <!-- Restored first (from the console the server isn't part of the launcher's build), in an evaluation of its own. -->
+    <MSBuild Projects="$(KntServerProject)" Targets="Restore" Properties="$(_KntServerProperties);KntRestoring=true" RemoveProperties="$(KntNotForTheServer)" />
+    <MSBuild Projects="$(KntServerProject)" Targets="Publish" Properties="$(_KntServerProperties)" RemoveProperties="$(KntNotForTheServer)" />
+    <Delete Files="$(_KntPackageFolder)server\appsettings.Development.json" />
+
+    <ItemGroup>
+      <_KntPackageFiles Include="$(KntDeployFolder)install-*;$(KntDeployFolder)uninstall-*;$(KntDeployFolder)README*.md" />
+      <_KntPackageFiles Include="$(KntSources)ClientWin\Resources\Icons\KNote.ico;$(KntSources)Client\wwwroot\icons\icon-512.png" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_KntPackageFiles)" DestinationFolder="$(_KntPackageFolder)" />
+
+    <ZipDirectory SourceDirectory="$(_KntPackageFolder)" DestinationFile="$(_KntZip)" Overwrite="true" />
+    <Message Importance="high" Text="KNote Local package: $(_KntPackageFolder)" />
+    <Message Importance="high" Text="KNote Local zip: $(_KntZip)" />
+  </Target>
+
+</Project>

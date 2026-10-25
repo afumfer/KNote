@@ -38,8 +38,9 @@ dotnet run --project Server/KNote.Server.csproj
 
 # KNote Local: el lanzador (arranca la compilación del Server en el entorno Local; compila los dos antes)
 dotnet run --project Launcher/KNote.Launcher.csproj -- --data <carpeta de pruebas>
-# paquete e instaladores de KNote Local (ver Deploy/Local/README.md)
-./Deploy/Local/publish-local.ps1
+# paquete e instaladores de KNote Local (en VS: botón derecho en KNote.Launcher > Publish > LocalServerPackage;
+# deja el paquete y su zip en DeployLocalServer/out, ver DeployLocalServer/README.md)
+dotnet publish Launcher/KNote.Launcher.csproj -p:PublishProfile=LocalServerPackage
 
 # Compilar/ejecutar el cliente de escritorio WinForms
 dotnet run --project ClientWin/KNote.ClientWin.csproj

@@ -59,4 +59,13 @@ Código de salida: 0 bien, 1 problema (ya avisado), 2 argumentos no válidos.
 - Sin `--data` usa la carpeta de datos real del usuario. Para probar: `KNote.Launcher --no-browser --data <carpeta de
   pruebas>` y `--stop --data <la misma>`.
 - Tests: `Tests/LauncherTests.cs` (argumentos, configuración, puerto, salud, `dotnet` y servidor; no arranca nada).
-- Paquete e instaladores: `Deploy/Local/` (`publish-local.ps1` y los scripts de cada sistema, ver su `README.md`).
+- **Paquete e instaladores** (`DeployLocalServer/`): se construye como los demás proyectos, publicando a una carpeta.
+  VS: botón derecho en **KNote.Launcher → Publish → LocalServerPackage → Publish**; consola: `dotnet publish
+  Launcher/KNote.Launcher.csproj -p:PublishProfile=LocalServerPackage`. El perfil
+  (`Properties/PublishProfiles/LocalServerPackage.pubxml`, excepción en el `.gitignore`, que ignora los `*.pubxml`) activa
+  `KntLocalServerPackage`, y `DeployLocalServer/KNote.LocalServer.targets` (importado por el `.csproj`) publica además el
+  `Server` en `server\`, copia los scripts, los iconos y los README y lo comprime: `DeployLocalServer/out/KNote-Local` y
+  `KNote-Local-<versión>.zip`. Sin ese perfil no hace nada. Las propiedades globales de la publicación del lanzador que
+  no son del servidor se quitan en su llamada (`KntNotForTheServer`; `PublishDir` se le pasa, no se quita). Los `.sh`
+  van con LF (`DeployLocalServer/.gitattributes`). Los `README.md`/`README_es.md` de esa carpeta son para el usuario
+  final.
