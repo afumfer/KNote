@@ -24,6 +24,27 @@
             "console": "internalConsole"
         },
         {
+            // KNote Local: the Server as the launcher starts it (Local environment, data folder in the user's profile,
+            // http://127.0.0.1 and the port of its knote-local.json). See Server/CLAUDE.md, "KNote Local".
+            "name": "KNote.Server (Local)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build: Server",
+            "program": "${workspaceFolder}/Server/bin/Debug/net10.0/KNote.Server.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Server",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Local"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/KNote"
+            },
+            "console": "internalConsole"
+        },
+        {
             // Server + Client (Blazor WebAssembly). Requires C# Dev Kit; uses the first "Project" profile of
             // Server/Properties/launchSettings.json (inspectUri, launchUrl "KNote") and attaches the browser debugger.
             "name": "KNote.Web (Server + Client WASM)",
