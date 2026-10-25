@@ -1,0 +1,2 @@
+# bash does not accept CR LF line ends.
+*.sh text eol=lf
