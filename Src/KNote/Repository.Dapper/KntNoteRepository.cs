@@ -1403,6 +1403,53 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<KMessageDto>>> ConsumeDueMessagesAsync(Guid? userId, EnumNotificationType notificationType)
+    {
+        try
+        {
+            var result = new Result<List<KMessageDto>>(new List<KMessageDto>());
+            var now = DateTime.Now;
+
+            var db = GetOpenConnection();
+
+            var sql = @"
+                SELECT
+                    KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType,
+                    KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime,
+                    KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName
+                FROM  KMessages LEFT JOIN
+                    Users ON KMessages.UserId = Users.UserId
+                WHERE KMessages.AlarmActivated = 1 AND KMessages.AlarmDateTime <= @now AND KMessages.NoteId IS NOT NULL
+                    AND KMessages.NotificationType = @notificationType";
+            if (userId != null)
+                sql += " AND KMessages.UserId = @userId";
+
+            var dueMessages = await db.QueryAsync<KMessageDto>(sql, new { now, notificationType, userId });
+
+            // Only if nobody consumed it meanwhile (it would no longer be activated and due).
+            var sqlConsume = @"UPDATE KMessages SET AlarmDateTime = @AlarmDateTime, AlarmActivated = @AlarmActivated
+                WHERE KMessageId = @KMessageId AND AlarmActivated = 1 AND AlarmDateTime <= @now";
+
+            foreach (var due in dueMessages)
+            {
+                var next = due.GetSimpleDto<KMessageDto>();
+                next.ApplyAlarmControl();
+
+                var consumed = await db.ExecuteAsync(sqlConsume, new { next.AlarmDateTime, next.AlarmActivated, due.KMessageId, now });
+                if (consumed == 1)
+                    result.Entity.Add(due);
+            }
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
     {
         try

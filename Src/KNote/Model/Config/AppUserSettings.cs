@@ -95,6 +95,10 @@ public class AiConfig
 public class NotificationsConfig
 {
     public EmailConfig Email { get; set; } = new();
+
+    // Whether this app sends the Email alarms of its user (with Email). Off where the KNote Server sends them (its
+    // EmailAlarmsService): each alarm is sent once by whoever checks first, so either one may send it otherwise.
+    public bool ProcessEmailAlarms { get; set; } = true;
 }
 
 // SMTP account used to send Email-type alarm notifications (one account per installation). The password

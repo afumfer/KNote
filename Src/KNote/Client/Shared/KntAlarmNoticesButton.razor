@@ -1,0 +1,37 @@
+@* The header's bell: shown while the alarms are checked (AlarmNotices, a Staff user signed in), with how many notices
+   there are; it opens the alarms panel (KntAlarmNoticesPanel). *@
+
+@implements IDisposable
+
+@inject AlarmNotices alarmNotices
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+
+@if (alarmNotices.Started)
+{
+    var count = alarmNotices.Notices.Count;
+    <span class="knt-alarm-notices-button">
+        <RadzenButton Icon="@(count > 0 ? "notifications_active" : "notifications")" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base"
+                      Click="OpenPanel" MouseEnter="@(args => ShowTooltip(args, count == 0 ? "Alarms" : $"Alarms: {count} {(count == 1 ? "notice" : "notices")}"))" />
+        @if (count > 0)
+        {
+            <RadzenBadge BadgeStyle="BadgeStyle.Danger" IsPill="true" Text="@(count > 99 ? "99+" : count.ToString())" class="knt-alarm-notices-badge" />
+        }
+    </span>
+}
+
+@code {
+    protected override void OnInitialized() => alarmNotices.Changed += OnChanged;
+
+    public void Dispose() => alarmNotices.Changed -= OnChanged;
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    private void ShowTooltip(ElementReference element, string text) =>
+        tooltipService.Open(element, text, new TooltipOptions { Position = TooltipPosition.Bottom });
+
+    // Side panel without mask, like Appearance: a note opened from it goes to its own window.
+    private async Task OpenPanel() =>
+        await dialogService.OpenSideAsync<KntAlarmNoticesPanel>("Alarms",
+            options: new SideDialogOptions { Position = DialogPosition.Right, Width = "360px", ShowMask = false });
+}

@@ -7,6 +7,7 @@
 @inject IStore store
 @inject ILoginService loginService
 @inject KntWindows kntWindows
+@inject AlarmNotices alarmNotices
 @inject NotificationService notificationService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider authenticationStateProvider
@@ -83,6 +84,7 @@
         store.AppState.OnNotifyError += NotifyError;
         store.AppState.OnNotifySuccess += NotifySuccess;
         store.AppState.OnSessionEnded += OnSessionEnded;
+        alarmNotices.Arrived += OnAlarmNoticesArrived;
 
         // The session first: the repository's name is the session's repository's.
         var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
@@ -92,6 +94,7 @@
 
         authenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await UpdateChatRoomAsync(authenticationState);
+        await UpdateAlarmNoticesAsync(authenticationState);
     }
 
     public void Dispose()
@@ -100,6 +103,7 @@
         store.AppState.OnNotifyError -= NotifyError;
         store.AppState.OnNotifySuccess -= NotifySuccess;
         store.AppState.OnSessionEnded -= OnSessionEnded;
+        alarmNotices.Arrived -= OnAlarmNoticesArrived;
         kntWindows.SessionChanged -= OnSessionChangedElsewhere;
         authenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
@@ -143,11 +147,26 @@
         await js.LocalStorageSetItem(MenuCompactStorageKey, menuCompact == true ? "true" : "false");
     }
 
-    // Signed in, out or in another repository: its name, and its chat room.
+    // Signed in, out or in another repository: its name, its chat room and its alarms.
     private async void OnAuthenticationStateChanged(Task<AuthenticationState> state)
     {
         await LoadRepositoryNameAsync();
-        await UpdateChatRoomAsync(await state);
+        var authenticationState = await state;
+        await UpdateChatRoomAsync(authenticationState);
+        await UpdateAlarmNoticesAsync(authenticationState);
+    }
+
+    // The alarms are checked for a Staff user while they are signed in (see AlarmNotices), in this window only (the
+    // windows of the app don't, see KntWindowLayout).
+    private async Task UpdateAlarmNoticesAsync(AuthenticationState state) =>
+        await alarmNotices.StartForUserAsync(state.User);
+
+    // New alarm notices while the app is on screen: they stay in the alarms panel (the header's bell).
+    private void OnAlarmNoticesArrived(List<AlarmNotice> notices)
+    {
+        foreach (var notice in notices)
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = AlarmNotices.Title(notice.Notice),
+                Detail = notice.Notice.Comment ?? "", Duration = 15000, Click = _ => kntWindows.OpenEditAsync(notice.Notice.NoteId) });
     }
 
     // The chat room is open for a Staff user while they are signed in (see ChatRoomHub): its threads are followed

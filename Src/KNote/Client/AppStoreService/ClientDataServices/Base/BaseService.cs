@@ -30,9 +30,11 @@ public class BaseService
     ///   component was left): a Result not valid, but not notified, as it isn't an error for the user. The caller
     ///   tells it apart with its own token (KntLatestRequest does it);
     /// - with a timeout (e.g. ListReadTimeout), no answer in that time: a Result with the error, notified.
+    /// notifyErrors false: no error is notified (a request the app makes by itself, e.g. every minute, whose
+    /// errors the user didn't ask for); an ended session still is.
     /// </summary>
     protected async Task<Result<T>> SendAsync<T>(Func<CancellationToken, Task<HttpResponseMessage>> send, string action,
-        bool emitNotifySucess = false, CancellationToken cancellationToken = default, TimeSpan? timeout = null)
+        bool emitNotifySucess = false, CancellationToken cancellationToken = default, TimeSpan? timeout = null, bool notifyErrors = true)
     {
         using var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         if (timeout != null)
@@ -41,7 +43,7 @@ public class BaseService
         try
         {
             using var httpRes = await send(timeoutSource.Token);
-            return await ProcessResultFromHttpResponse<T>(httpRes, action, emitNotifySucess, timeoutSource.Token);
+            return await ProcessResultFromHttpResponse<T>(httpRes, action, emitNotifySucess, timeoutSource.Token, notifyErrors);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -51,7 +53,8 @@ public class BaseService
         {
             var res = new Result<T>();
             res.AddErrorMessage($"Error. The web server did not respond in {timeout!.Value.TotalSeconds:0} seconds.");
-            _appState.NotifyError(action, res.ErrorMessage);
+            if (notifyErrors)
+                _appState.NotifyError(action, res.ErrorMessage);
             return res;
         }
         catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException)
@@ -59,13 +62,14 @@ public class BaseService
             // OperationCanceledException not asked for: HttpClient's timeout.
             var res = new Result<T>();
             res.AddErrorMessage($"Error. The web server could not be reached: {ex.Message}");
-            _appState.NotifyError(action, res.ErrorMessage);
+            if (notifyErrors)
+                _appState.NotifyError(action, res.ErrorMessage);
             return res;
         }
     }
 
     protected async Task<Result<T>> ProcessResultFromHttpResponse<T>(HttpResponseMessage httpRes, string action, bool emitNotifySucess = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool notifyErrors = true)
     {
         Result<T>? res;
 
@@ -110,7 +114,7 @@ public class BaseService
             if (emitNotifySucess)
                 _appState.NotifySuccess(action, $"The action '{action}' has been executed.");
         }
-        else
+        else if (notifyErrors)
             _appState.NotifyError(action, res.ErrorMessage);
 
         return res;

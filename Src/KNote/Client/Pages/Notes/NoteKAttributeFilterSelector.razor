@@ -14,7 +14,7 @@
             <RadzenStack Gap="1rem">
                 <KntField Label="Attribute" Component="AtrId" Required="true">
                     <RadzenDropDown Name="AtrId" TValue="Guid" @bind-Value="@Attribute.AtrId"
-                                    Data="@listAtr" TextProperty="Name" ValueProperty="KAttributeId" AllowFiltering="true" Placeholder="Choose an attribute">
+                                    Data="@listAtr" TextProperty="Name" ValueProperty="KAttributeId" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Choose an attribute">
                         <Template Context="atr">
                             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
                                 <RadzenIcon Icon="@KntDataTypes.Icon(((KAttributeInfoDto)atr).KAttributeDataType)" />

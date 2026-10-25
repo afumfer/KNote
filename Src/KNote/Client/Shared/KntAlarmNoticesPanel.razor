@@ -1,0 +1,89 @@
+@* The alarms panel (side dialog opened from the header's bell, KntAlarmNoticesButton): the user's Application info
+   alarms that became due (AlarmNotices), most recent first, until the user removes them. A notice opens its note in
+   the note's edit window. *@
+
+@implements IDisposable
+
+@inject AlarmNotices alarmNotices
+@inject KntWindows kntWindows
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+
+<div class="knt-alarm-notices">
+
+    @if (alarmNotices.NotificationPermission == "default")
+    {
+        <div class="knt-alarm-notices-permission">
+            <span>Allow desktop notifications to see the alarms while the app is not on screen.</span>
+            <RadzenButton Text="Allow" Icon="notifications_active" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                          Variant="Variant.Outlined" Click="alarmNotices.RequestNotificationPermissionAsync" />
+        </div>
+    }
+    else if (alarmNotices.NotificationPermission == "denied")
+    {
+        <div class="knt-alarm-notices-permission">
+            <span>Desktop notifications are blocked for this site: the alarms are shown while the app is on screen.</span>
+        </div>
+    }
+
+    @if (alarmNotices.Notices.Count == 0)
+    {
+        <div class="knt-empty-state">
+            <RadzenIcon Icon="notifications" />
+            <div class="knt-empty-state-title">No alarm notices</div>
+            <div class="knt-empty-state-text">The Application info alarms of your notes appear here when they are due, until you remove them.</div>
+        </div>
+    }
+    else
+    {
+        <div class="knt-list-header">
+            <span>@alarmNotices.Notices.Count @(alarmNotices.Notices.Count == 1 ? "notice" : "notices")</span>
+            <RadzenButton Text="Remove all" Icon="clear_all" Size="ButtonSize.Small" Variant="Variant.Text" Click="RemoveAll" />
+        </div>
+
+        <div class="knt-alarm-notice-list" role="list" aria-label="Alarm notices">
+            @foreach (var item in alarmNotices.Notices)
+            {
+                var notice = item.Notice;
+                <div class="knt-alarm-notice" role="listitem">
+                    <div class="knt-alarm-notice-body">
+                        <button type="button" class="knt-alarm-notice-title" @onclick="() => kntWindows.OpenEditAsync(notice.NoteId)">
+                            @AlarmNotices.Title(notice)
+                        </button>
+                        @if (!string.IsNullOrWhiteSpace(notice.Comment))
+                        {
+                            <div class="knt-alarm-notice-comment">@notice.Comment</div>
+                        }
+                        <div class="knt-alarm-notice-meta">
+                            <span><RadzenIcon Icon="alarm" />@(notice.AlarmDateTime?.ToString("g") ?? "-")</span>
+                            <span><RadzenIcon Icon="notifications" />@item.NotifiedAt.ToString("g")</span>
+                        </div>
+                    </div>
+                    <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="() => alarmNotices.RemoveAsync(notice.KMessageId)"
+                                  MouseEnter="@(args => ShowTooltip(args, "Remove"))" />
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+@code {
+    protected override void OnInitialized() => alarmNotices.Changed += OnChanged;
+
+    public void Dispose() => alarmNotices.Changed -= OnChanged;
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    private async Task RemoveAll()
+    {
+        var confirmed = await dialogService.Confirm("Remove all the alarm notices?", "Alarm notices",
+            new ConfirmOptions { OkButtonText = "Remove all", CancelButtonText = "Cancel" });
+        if (confirmed == true)
+            await alarmNotices.RemoveAllAsync();
+    }
+
+    private void ShowTooltip(ElementReference element, string text) =>
+        tooltipService.Open(element, text, new TooltipOptions { Position = TooltipPosition.Left });
+}

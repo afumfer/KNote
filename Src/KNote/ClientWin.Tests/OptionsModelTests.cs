@@ -28,6 +28,7 @@ public class OptionsModelTests
         settings.Notifications.Email.FromDisplayName = "From";
         settings.Notifications.Email.Username = "user";
         settings.Notifications.Email.Password = "pwd";
+        settings.Notifications.ProcessEmailAlarms = false;
         var state = new AppUserState();
         state.Session.ChatHubAutoConnectDisabled = true;
         return (settings, state);
@@ -59,6 +60,7 @@ public class OptionsModelTests
         Assert.AreEqual("From", model.SmtpFromDisplayName);
         Assert.AreEqual("user", model.SmtpUsername);
         Assert.AreEqual("pwd", model.SmtpPassword);
+        Assert.IsFalse(model.ProcessEmailAlarms);
         Assert.IsFalse(model.IsDirty(), "an untouched model must not look edited");
     }
 
@@ -84,6 +86,7 @@ public class OptionsModelTests
         model.SmtpFromDisplayName = "A";
         model.SmtpUsername = "u2";
         model.SmtpPassword = "p2";
+        model.ProcessEmailAlarms = true;
         Assert.IsTrue(model.IsDirty());
 
         model.ApplyTo(settings, state);
@@ -107,6 +110,18 @@ public class OptionsModelTests
         Assert.AreEqual("A", email.FromDisplayName);
         Assert.AreEqual("u2", email.Username);
         Assert.AreEqual("p2", email.Password);
+        Assert.IsTrue(settings.Notifications.ProcessEmailAlarms);
+    }
+
+    [TestMethod]
+    public void ProcessEmailAlarms_IsOn_AlsoInAFileWrittenBeforeIt()
+    {
+        var oldFile = "<NotificationsConfig><Email><Host>smtp.example.com</Host></Email></NotificationsConfig>";
+
+        var read = (NotificationsConfig)new System.Xml.Serialization.XmlSerializer(typeof(NotificationsConfig)).Deserialize(new StringReader(oldFile))!;
+
+        Assert.IsTrue(read.ProcessEmailAlarms);
+        Assert.IsTrue(new AppUserSettings().Notifications.ProcessEmailAlarms);
     }
 
     [TestMethod]

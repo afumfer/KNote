@@ -156,6 +156,36 @@ public class UsersInProcessTests
     }
 
     [TestMethod]
+    public async Task Execute_Update_AnotherUsersEmail_ReturnsTheRuleOfTheDomain()
+    {
+        UserDto NewUser(string prefix) => new()
+        {
+            UserName = $"{prefix}{Guid.NewGuid():N}"[..24],
+            EMail = $"{Guid.NewGuid():N}@knote.tests",
+            FullName = "__TEST_UPDATEEMAIL_FULLNAME_###__",
+            RoleDefinition = "Guest"
+        };
+        var user = (await (await _httpClient.PostAsJsonAsync("api/users", NewUser("itest-upd1-"))).Content.ReadFromJsonAsync<Result<UserDto>>())!.Entity!;
+        var other = (await (await _httpClient.PostAsJsonAsync("api/users", NewUser("itest-upd2-"))).Content.ReadFromJsonAsync<Result<UserDto>>())!.Entity!;
+
+        try
+        {
+            // The admin's users editor saves the user with another user's email: the Service's message, not the database's.
+            user.EMail = other.EMail;
+            var httpRes = await _httpClient.PutAsJsonAsync("api/users", user);
+            var res = await httpRes.Content.ReadFromJsonAsync<Result<UserDto>>();
+
+            Assert.AreEqual(System.Net.HttpStatusCode.BadRequest, httpRes.StatusCode);
+            Assert.AreEqual($"Email \"{other.EMail}\" is already in use.", res!.ErrorMessage.Trim());
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/users/{user.UserId}");
+            await _httpClient.DeleteAsync($"api/users/{other.UserId}");
+        }
+    }
+
+    [TestMethod]
     public async Task Execute_BasicCRUD()
     {
         // Create

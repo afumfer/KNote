@@ -293,6 +293,24 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<List<KMessageDto>>> ConsumeDueAlarmsAsync(EnumNotificationType notificationType)
+    {
+        var command = new KntNotesConsumeDueAlarmsAsyncCommand(Service, notificationType);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<List<KMessageDto>>> ConsumeAllUsersDueAlarmsAsync(EnumNotificationType notificationType)
+    {
+        var command = new KntNotesConsumeAllUsersDueAlarmsAsyncCommand(Service, notificationType);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<List<AlarmNoticeDto>>> GetAlarmNoticesAsync(List<Guid> messageIds)
+    {
+        var command = new KntNotesGetAlarmNoticesAsyncCommand(Service, messageIds);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null)
     {
         var command = new KntNotesGetAlarmNotesIdAsyncCommand(Service, userName, notificationType);

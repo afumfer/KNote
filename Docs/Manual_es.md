@@ -281,11 +281,19 @@ Una nota se edita en su propia ventana. Su cabecera muestra el número de la not
 - **Resources**: los ficheros de la nota como tarjetas. Al pulsar un recurso se ve en la ventana de la nota, sin salir de ella: imágenes (pulsa la imagen para verla a su tamaño), PDF, vídeo, audio y ficheros de texto; los demás ficheros se abren en otra pestaña de la ventana principal. Cualquier fichero se puede editar (su descripción y su orden, no el fichero), abrir en otra pestaña, insertar en la descripción (donde estaba su cursor, en un párrafo propio; al final si no se ha usado) o borrar. **Add resource** sube un fichero: suéltalo en la zona, pégalo o pulsa para elegirlo.
 - **Tasks**: como en la aplicación de escritorio, la lista de tareas (por prioridad) y, a su lado, la tarea seleccionada: para quién es, su prioridad, fechas y tiempos, y su descripción tal como se ve (puede ser larga, con imágenes). Arrastra la barra que las separa para cambiar su tamaño (el navegador lo recuerda); en una ventana estrecha la tarea va debajo de la lista. Una tarea resuelta se marca como tal y su texto se lee como el de las demás. **Add task**, **Edit** o un doble clic abren la tarea: su tema, su usuario, su descripción (Markdown, con **Preview**), su planificación y su progreso. Una tarea nueva es tuya, va tras las demás y empieza ahora; al resolver una tarea sin fecha de fin se le pone la actual.
 
-- **Alarms**: las alarmas de la nota, las mismas que en la aplicación de escritorio, por fecha: cuándo vence cada una, cada cuánto se repite, cómo se avisa, para qué usuario, si está activada y su comentario. **Add alarm** abre una nueva para ti, para ahora, avisada como *Application info*; **Edit**, un doble clic o **Enter** abren una alarma, y el botón de borrar la elimina (pregunta antes). En la alarma: su **Date and time**, **Repeat** (una vez, cada día, semana, mes o año, o cada pocos minutos, que pide los minutos), **Activated** (una alarma desactivada se guarda pero nunca avisa), **Notification**, **User** y **Comment**. Están los cuatro avisos de la aplicación de escritorio: la aplicación Web avisa de las alarmas *Application info* y el servidor envía las *Email*; las *Post-it* y *Run KntScript* solo las procesa la aplicación de escritorio. Una alarma se guarda al momento, sin guardar la nota; el diálogo sigue abierto si el servidor la rechaza.
+- **Alarms**: las alarmas de la nota, las mismas que en la aplicación de escritorio, por fecha: cuándo vence cada una, cada cuánto se repite, cómo se avisa, para qué usuario, si está activada y su comentario. **Add alarm** abre una nueva para ti, para ahora, avisada como *Application info*; **Edit**, un doble clic o **Enter** abren una alarma, y el botón de borrar la elimina (pregunta antes). En la alarma: su **Date and time**, **Repeat** (una vez, cada día, semana, mes o año, o cada pocos minutos, que pide los minutos), **Activated** (una alarma desactivada se guarda pero nunca avisa), **Notification**, **User** y **Comment**. Están los cuatro avisos de la aplicación de escritorio: la aplicación Web avisa de las alarmas *Application info* (ver *Alarmas (aplicación Web)*), las *Email* las envía el servidor cuando las tiene activadas (ver *Alarmas de correo enviadas por el servidor (configuración del servidor)*) o la aplicación de escritorio, y las *Post-it* y *Run KntScript* solo las procesa la aplicación de escritorio. Una alarma se guarda al momento, sin guardar la nota; el diálogo sigue abierto si el servidor la rechaza.
 
 - **Trace notes**: como en la aplicación de escritorio, las relaciones de la nota con otras notas, en dos listas: **Trace notes from** (otras notas que llevan a esta) y **Trace notes to** (otras notas a las que lleva esta). Cada relación muestra la otra nota (número, tema y etiquetas), su tipo, su orden y su peso. **Add** abre la relación: la otra nota, que se elige con **Select** (una búsqueda de texto o recorriendo el árbol de carpetas; la propia nota no se puede elegir), su **Type** (opcional; los tipos se mantienen en el panel de administración), **Order** y **Weight**; el diálogo muestra el sentido de la relación. Las mismas dos notas solo se pueden trazar una vez en el mismo sentido con el mismo tipo (también sin tipo). Una relación se guarda al momento, sin guardar la nota. En cada fila están **Edit**, el botón que la quita (pide confirmación; la otra nota no se borra) y el que abre la otra nota en su ventana; un doble clic también la abre.
 
 Una nota nueva tiene que guardarse antes de añadirle recursos, tareas, alarmas o notas trazadas, y borrar un recurso, una tarea o una alarma pide confirmación. Los diálogos del panel de administración (usuarios, carpetas, tipos de nota, tipos de traza, atributos) y los de acceso y registro siguen el mismo estilo: etiquetas encima de los campos, agrupados en secciones.
+
+### Alarmas (aplicación Web)
+
+Mientras tienes la sesión iniciada como Staff o superior, la aplicación Web consulta tus alarmas *Application info* cada minuto (el servidor decide cada cuánto) y te avisa cuando vence una: con un aviso arriba a la derecha mientras la aplicación está en pantalla (un clic abre la nota), o como notificación de tu sistema si no lo está, si lo permitiste. Cada alarma se avisa una vez, en un solo sitio: si la recibe antes la aplicación de escritorio u otra pestaña de la aplicación Web, no se vuelve a avisar (otra pestaña de la aplicación Web también la muestra en su panel).
+
+Los avisos se quedan en el panel **Alarms**, que se abre con la campana de la cabecera (indica cuántos hay), hasta que los quitas: cada uno con el número y el tema de la nota, el comentario de la alarma, cuándo venció y cuándo se te avisó. Un clic en el tema abre la nota en su ventana de edición; el botón **×** quita un aviso, y **Remove all** los quita todos (pregunta antes). **Allow** pide al navegador que deje a la aplicación Web mostrar notificaciones del sistema (una vez; si las bloqueaste, el panel lo dice y puedes volver a permitirlas en la configuración del navegador para el sitio).
+
+Los avisos se guardan en este navegador, una lista por repositorio y usuario, como la aplicación de escritorio guarda las filas de su panel de alarmas en tu carpeta de usuario: los comparten las pestañas de la aplicación, pero no otro navegador u otro equipo. El aviso de una alarma que se borró, o que se cambió a otro usuario o a otro tipo de aviso, desaparece la próxima vez que se abre la aplicación. Solo consulta las alarmas la ventana principal, no las ventanas de las notas, del asistente de IA o del chat room.
 
 ### Apariencia (aplicación Web)
 
@@ -404,5 +412,25 @@ El *Forgot your password?* de la aplicación Web envía los enlaces con una cuen
 Sin `PublicBaseUrl`, `Email:Host` o `Email:FromAddress`, restablecer la contraseña por correo está desactivado. Un enlace que no se puede enviar queda en el log del servidor.
 
 **Gmail.** Gmail no acepta la contraseña de la cuenta: activa la verificación en dos pasos en tu cuenta de Google, crea una *contraseña de aplicación* en <https://myaccount.google.com/apppasswords> y usa sus 16 letras, sin espacios, como `Email:Password`. `FromAddress` tiene que ser la dirección de la cuenta. Cambiar la contraseña de Google revoca las contraseñas de aplicación. La misma contraseña de aplicación sirve en la aplicación de escritorio (**Options → Email**).
+
+### Alarmas de correo enviadas por el servidor (configuración del servidor)
+
+El servidor Web puede enviar las alarmas *Email* de todos los usuarios de todos sus repositorios, sin que nadie tenga abierta la aplicación de escritorio ni la aplicación Web. Está desactivado por defecto, ya que la aplicación de escritorio también las envía:
+
+```json
+"Alarms:AppInfoCheckSeconds": "60",
+"Alarms:Email:Enabled": "true",
+"Alarms:Email:IntervalSeconds": "60"
+```
+
+| Ajuste | Significado |
+|---|---|
+| `Alarms:AppInfoCheckSeconds` | Cada cuánto consulta la aplicación Web las alarmas *Application info* de su usuario (de 15 segundos a una hora; 60 por defecto). |
+| `Alarms:Email:Enabled` | El servidor envía las alarmas *Email* (`false` por defecto). |
+| `Alarms:Email:IntervalSeconds` | Cada cuánto busca las que han vencido (de 15 segundos a una hora; 60 por defecto). |
+
+Los correos salen por la cuenta SMTP del servidor (la sección `Email:*` de *Restablecer la contraseña por correo*; sin `Email:Host` o `Email:FromAddress` no se envía ninguno) al correo del usuario de cada alarma, con el tema de la nota como asunto y el comentario de la alarma y la descripción de la nota como texto, como los envía la aplicación de escritorio. Si falla el servidor SMTP, la alarma se vuelve a enviar la siguiente vez; si el usuario no tiene correo, el fallo se escribe en el comentario de la alarma. Las horas de las alarmas son la hora local del servidor.
+
+Cuando las envía el servidor, desmarca **Process Email alarms** en las opciones de la aplicación de escritorio (**Options → Email**) en todos los equipos: cada alarma se envía una sola vez de todos modos (la envía quien la recibe primero), pero así salen todas desde la cuenta del servidor.
 
 (This program is under construction and the documentation isn't ready yet. Thanks for your patience!)

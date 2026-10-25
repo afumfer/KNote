@@ -54,6 +54,8 @@ Client (I*WebApiService) ──HTTP/JWT──► XxxController ──► IKntSer
 - `KntAddPasswordReset` (secciones `PasswordReset` y `Email`, `IEmailSender`, `Helpers/KntPasswordResetMail`) y
   `KntAddRateLimits` (`Helpers/KntRateLimits`, sección `RateLimits`; `UseRateLimiter` tras `UseRouting`), ver
   "Cuentas de usuario".
+- `KntAddAlarms` (`Helpers/KntAlarms`, sección `Alarms`): `AlarmsConfig` enlazado al usarse y `EmailAlarmsService`
+  (singleton y hosted service), ver "Alarmas".
 - Los estáticos de `Client` (`UseStaticFiles` y `MapFallbackToFile("index.html")`) se sirven con
   `Cache-Control: no-cache`: sus URLs no cambian entre versiones (`index.html`, `css/*.css`,
   `KNote.Client.styles.css`) y sin esa cabecera el navegador sigue usando los antiguos tras un despliegue (HTML
@@ -278,6 +280,33 @@ public class FoldersController : ControllerBase
   las imágenes se cargan de la URL de los recursos de este host (`WebReportResources`) y el HTML de las notas
   sale saneado. La cultura solo vale para esa petición (`UseCulture`). El índice del libro no lleva números de
   página (el navegador no los puede calcular). Tests en `Tests/InProcessIntegrationTests/ReportsInProcessTests`.
+
+## Alarmas (`AlarmsController`, `Helpers/KntAlarms`)
+
+Las alarmas que vencen se **consumen** con `Notes.ConsumeDueAlarmsAsync` (las del usuario actual) o
+`ConsumeAllUsersDueAlarmsAsync` (las de todos, Admin): cada una se reprograma o se desactiva con una actualización
+condicional y la recibe un solo consumidor, aunque consulten a la vez `ClientWin`, el `Server` y varias pestañas (ver
+`CLAUDE.md` raíz). Las fechas son la hora local del servidor, como en `ClientWin`.
+
+- **Avisos de la Web** (`api/alarms`, Staff+): `POST check` consume las alarmas *Application info* vencidas del usuario
+  y devuelve `AlarmCheckDto`: los avisos ya rellenos (`AlarmNoticeDto`: alarma, nota, número, tema, comentario y fecha)
+  y cada cuántos segundos volver a consultar (`Alarms:AppInfoCheckSeconds`, 60; entre 15 y 3600). `POST notices`
+  recibe los `KMessageId` que guarda el panel (en el navegador) y devuelve los datos actuales de los que siguen siendo
+  avisos del usuario (`Notes.GetAlarmNoticesAsync`): se omiten los borrados o cambiados a otro usuario o tipo. El
+  servidor no guarda qué se ha avisado: lo guarda el navegador, como `ClientWin` en la carpeta del usuario.
+- **Alarmas de correo** (`EmailAlarmsService`, `BackgroundService` con `PeriodicTimer`): **apagado por defecto**
+  (`Alarms:Email:Enabled`; cada `Alarms:Email:IntervalSeconds`, 60). Encendido, en cada vuelta y en cada repositorio de
+  `KntRepositories`, consume las alarmas *Email* de todos los usuarios (un servicio sin usuario: el `Server` no exige
+  autorización) y envía cada una al correo de su usuario con la cuenta SMTP de la sección `Email` y el mismo correo que
+  `ClientWin` (`Service/Core/KntAlarmEmail`: el tema de la nota, el comentario y la descripción). Sin `Email:Host` o
+  `Email:FromAddress` no consume nada. Si el SMTP falla, la alarma se guarda como estaba al vencer, para reintentarla
+  en la siguiente vuelta; un usuario sin correo es un fallo definitivo que se escribe en el comentario de la alarma
+  (`KntAlarmEmail.FailedComment`, como `ClientWin`). Un repositorio o un correo que falla se registra en el log y los
+  demás siguen. Si lo enciendes, desactiva "Process Email alarms" en las Opciones de `ClientWin` (si no, los dos
+  envían, aunque cada alarma una sola vez: la envía el primero que la consume). `SendDueAlarmsAsync` es una vuelta,
+  pública para los tests.
+- Tests en `AlarmsInProcessTests` (dos repositorios; las vueltas del servicio las lanza el test) y
+  `Tests/ServiceTests/AlarmNoticesServiceTests`.
 
 ## Asistente de IA (`AiAssistantController`, `api/aiassistant`)
 

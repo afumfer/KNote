@@ -27,10 +27,7 @@ public static class AppInfoRowRefresh
     /// diverging, copy of these three checks.
     /// </summary>
     public static bool IsAddressedToActiveUser(KMessageDto message, Guid? activeUserId)
-        => message != null
-           && message.NotificationType == EnumNotificationType.AppInfo
-           && message.UserId != null
-           && message.UserId == activeUserId;
+        => message != null && message.IsAppInfoNoticeFor(activeUserId);
 
     /// <summary>
     /// A note was saved with its full message list (NoteEditor, the only editor that can change what

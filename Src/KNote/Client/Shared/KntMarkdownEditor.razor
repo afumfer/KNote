@@ -97,8 +97,9 @@
     [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
     // The note's content is locked (ContentType's DescriptionBlocked): only its preview, no editor.
     [Parameter] public bool Locked { get; set; }
-    // Height of the editing (or preview) area.
-    [Parameter] public string Height { get; set; } = "max(20rem, calc(100vh - 24rem))";
+    // Height of the editing (or preview) area. By default, the note's window (NoteForm): down to just above its bottom,
+    // without scrolling the window (above it, from the window's header to the field's label, and the paddings below).
+    [Parameter] public string Height { get; set; } = "max(20rem, calc(100vh - 21.25rem))";
     // Where the mode chosen is kept in the browser: each use of the editor (a note, a task...) remembers its own.
     [Parameter] public string StorageKey { get; set; } = "KNoteDescriptionEditorMode";
     // The textarea's id and name (KntField's Component, for its label).

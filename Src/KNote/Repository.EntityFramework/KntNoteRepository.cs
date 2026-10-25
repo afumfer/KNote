@@ -1006,6 +1006,48 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<KMessageDto>>> ConsumeDueMessagesAsync(Guid? userId, EnumNotificationType notificationType)
+    {
+        try
+        {
+            var result = new Result<List<KMessageDto>>(new List<KMessageDto>());
+            var now = DateTime.Now;
+
+            var ctx = GetOpenConnection();
+
+            var query = ctx.KMessages.AsNoTracking().Include(m => m.User)
+                .Where(m => m.AlarmActivated == true && m.AlarmDateTime <= now && m.NoteId != null && m.NotificationType == notificationType);
+            if (userId != null)
+                query = query.Where(m => m.UserId == userId);
+
+            foreach (var m in await query.ToListAsync())
+            {
+                var due = m.GetSimpleDto<KMessageDto>();
+                due.UserFullName = m.User?.FullName;
+                var next = m.GetSimpleDto<KMessageDto>();
+                next.ApplyAlarmControl();
+
+                // Only if nobody consumed it meanwhile (it would no longer be activated and due).
+                var id = m.KMessageId;
+                var consumed = await ctx.KMessages
+                    .Where(x => x.KMessageId == id && x.AlarmActivated == true && x.AlarmDateTime <= now)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(x => x.AlarmDateTime, next.AlarmDateTime)
+                        .SetProperty(x => x.AlarmActivated, next.AlarmActivated));
+                if (consumed == 1)
+                    result.Entity.Add(due);
+            }
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
     {
         try

@@ -776,8 +776,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
                 throw new InvalidOperationException("The assigned user has no valid email address.");
 
             var settings = SmtpSettings.FromConfig(Store.Settings.Notifications.Email);
-            var subject = note.Topic;
-            var body = $"{message.Comment}\r\n\r\n{note.Description}";
+            // The same email the Server's alarm service sends.
+            var (subject, body) = KntAlarmEmail.Compose(note, message);
 
             await Task.Run(() => new SmtpEmailSender().Send(settings, recipient.EMail, subject, body));
         }
@@ -786,7 +786,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             // Fire-and-forget by design (see plan): on failure the send is simply lost, and the
             // error is recorded in the message's own Comment so the user finds out next time they
             // open the note's alarm list - no retry.
-            message.Comment = $"[Email failed {DateTime.Now:dd/MM/yyyy HH:mm}: {ex.Message}] {message.Comment}";
+            message.Comment = KntAlarmEmail.FailedComment(message, ex.Message);
             message.SetIsDirty(true);
             await service.Notes.SaveMessageAsync(message, false);
         }

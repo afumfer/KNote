@@ -174,7 +174,10 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
 - **Cuenta del usuario y contraseñas** (`KntUserCommands.cs`). `GetProfileAsync`/`SaveProfileAsync`/`ChangePasswordAsync`
   actúan siempre sobre el usuario actual (`UserIdentityName`), nunca sobre un id que llegue de fuera (Guest; un usuario
   deshabilitado se rechaza también donde no se comprueba el rol): el nombre de usuario no se cambia ahí y un email nuevo
-  pide la contraseña actual. Toda contraseña nueva (registro, alta, `SetPassword`, cambio, restablecimiento) pasa por
+  pide la contraseña actual. El nombre de usuario y el correo son únicos: es una regla del dominio que comprueban todos
+  los comandos que guardan un usuario (`KntUserUniqueness`: `SaveAsync` del editor del Admin, `CreateAsync`/`RegisterAsync`,
+  `SaveProfileAsync`) y que devuelve un `Result` no válido que nombra el valor repetido; los índices únicos de la BD
+  siguen ahí como última defensa. Toda contraseña nueva (registro, alta, `SetPassword`, cambio, restablecimiento) pasa por
   `KntPasswordPolicy` (`Model`); el hash y su comprobación solo están en `Service/Core/KntPasswordHasher`, que da
   también la huella de la contraseña (`Stamp`, para los tokens del `Server`, `GetPasswordStampAsync`). "Olvidé mi
   contraseña": `CreatePasswordResetAsync`/`ResetPasswordAsync`, anónimos, con un token firmado con la clave de quien lo
@@ -183,6 +186,16 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   contraseña o una clave es una clase con un `ToString()` que no la muestra (`KntSetPasswordParam`...), nunca una
   tupla. El envío de correo (`Service/Core/EmailSender`: `SmtpSettings`, `IEmailSender`) lo comparten `ClientWin` y
   `Server`. Tests en `Tests/ServiceTests/UserAccountServiceTests` y `UserPasswordResetServiceTests`.
+- **Alarmas que vencen** (`IKntNoteService`, comandos en `KntNoteCommands.cs`): `GetAlarmNotesIdAsync` (ids de nota,
+  `ClientWin`), `ConsumeDueAlarmsAsync` (las del usuario actual, Staff) y `ConsumeAllUsersDueAlarmsAsync` (de todos,
+  Admin) devuelven los mensajes vencidos de un tipo **tal como estaban al vencer** y los reprograman o desactivan
+  (`KMessageDto.ApplyAlarmControl`) con una actualización condicional (`IKntNoteRepository.ConsumeDueMessagesAsync`:
+  solo si siguen activados y vencidos), así que cada alarma la recibe un solo consumidor aunque consulten a la vez
+  `ClientWin`, el `Server` y varias pestañas de la Web; quien no pudo avisar (el SMTP caído) la guarda como estaba.
+  `GetAlarmNoticesAsync` da los datos actuales (`AlarmNoticeDto`) de los avisos *Application info* del usuario de una
+  lista de ids (`KMessageDto.IsAppInfoNoticeFor`). El correo de una alarma *Email* es común
+  (`Service/Core/KntAlarmEmail`). Tests en `Tests/ServiceTests/AlarmNoticesServiceTests`. Usos: el panel de alarmas de
+  `ClientWin`, la campana de la Web y el servicio de correo del `Server` (ver los `CLAUDE.md` de cada uno).
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben
@@ -254,9 +267,11 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
   `NoteTypesController`, `TraceNoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
   proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatRoomController` (imágenes del chat
-  room), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), además del scaffold
+  room), `AlarmsController` (avisos de alarmas de la Web), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), además del scaffold
   `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
+- `Server/Helpers/KntAlarms.cs` — `EmailAlarmsService`, que envía las alarmas de correo de todos los repositorios
+  (apagado por defecto, sección `Alarms`). Ver `Server/CLAUDE.md`.
 - `Server/Hubs/ChatHub.cs` — hub de SignalR del chat room, mapeado en `/chathub`: exige el JWT del usuario (Staff+),
   un grupo por hilo y `ChatRoomManager` (presencia y escrituras en orden por hilo). Ver `Server/CLAUDE.md`.
 - **Varios repositorios, uno por sesión** (`Server/Helpers/KntRepositories`, configuración `Repositories` o el

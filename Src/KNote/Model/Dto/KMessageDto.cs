@@ -155,6 +155,14 @@ public class KMessageDto : SmartModelDtoBase, IAlarmSchedule
 
     #endregion
 
+    /// <summary>
+    /// Whether an Application info notice of this alarm belongs to the user (the alarms panels of both apps): an
+    /// Application info alarm of that user. The single definition of it, shared by ClientWin (AppInfoRowRefresh) and
+    /// the Service (Notes.GetAlarmNoticesAsync).
+    /// </summary>
+    public bool IsAppInfoNoticeFor(Guid? userId)
+        => NotificationType == EnumNotificationType.AppInfo && UserId != null && UserId == userId;
+
     #region Validations
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
