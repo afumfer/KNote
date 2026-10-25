@@ -4,8 +4,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using KNote.Model;
 using KNote.Model.Dto;
+using KNote.Server.Helpers;
 using KNote.Server.Local;
 using KNote.Tests.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KNote.Tests.InProcessIntegrationTests;
 
@@ -81,6 +83,26 @@ public class LocalModeInProcessTests
     }
 
     [TestMethod]
+    public async Task Resources_ServedFromTheRepositorysFolder_NothingOutsideIt()
+    {
+        var repository = _factory.Services.GetRequiredService<KntRepositories>().Default;
+        var repositoryRef = repository.RepositoryRef;
+        var folder = Path.Combine(repositoryRef.ResourcesContainerRootPath, repositoryRef.ResourcesContainer, "2026");
+        Directory.CreateDirectory(folder);
+        await File.WriteAllTextAsync(Path.Combine(folder, "note.txt"), "Resource of a note");
+
+        var resource = await _client.GetAsync($"{repositoryRef.ResourcesContainerRootUrl!.TrimStart('/')["KNote/".Length..]}/{repositoryRef.ResourcesContainer}/2026/note.txt");
+        var outside = await _client.GetAsync($"Resources/{repository.RepositoryId}/..%2F..%2Fknote-local.json");
+        var otherRepository = await _client.GetAsync($"Resources/{Guid.NewGuid()}/{repositoryRef.ResourcesContainer}/2026/note.txt");
+
+        Assert.AreEqual($"/KNote/Resources/{repository.RepositoryId}", repositoryRef.ResourcesContainerRootUrl);
+        Assert.AreEqual("Resource of a note", await resource.Content.ReadAsStringAsync());
+        Assert.AreEqual("text/plain", resource.Content.Headers.ContentType?.MediaType);
+        Assert.AreEqual(HttpStatusCode.NotFound, outside.StatusCode);
+        Assert.AreEqual(HttpStatusCode.NotFound, otherRepository.StatusCode);
+    }
+
+    [TestMethod]
     public async Task Capabilities_LocalAdmin()
     {
         var res = await _client.GetFromJsonAsync<Result<ServerCapabilitiesDto>>("api/server/capabilities");
@@ -148,7 +170,7 @@ public class LocalModeStopInProcessTests
 public class ServerModeCapabilitiesInProcessTests
 {
     [TestMethod]
-    public async Task ServerMode_NoLocalAdmin_NoHealth_NoStop()
+    public async Task ServerMode_NoLocalAdmin_NoHealth_NoStop_NoResourcesByRepository()
     {
         await using var factory = new KNoteWebApplicationFactory();
         using var client = factory.CreateClient();
@@ -156,10 +178,12 @@ public class ServerModeCapabilitiesInProcessTests
         var capabilities = await client.GetFromJsonAsync<Result<ServerCapabilitiesDto>>("api/server/capabilities");
         var health = await client.GetAsync("health");
         var stop = await client.PostAsync("local/stop", null);
+        var resources = await client.GetAsync($"Resources/{Guid.NewGuid()}/container/file.txt");
 
         Assert.IsFalse(capabilities!.Entity!.LocalAdmin);
         Assert.AreNotEqual(HttpStatusCode.OK, health.StatusCode);
         Assert.AreNotEqual("application/json", health.Content.Headers.ContentType?.MediaType, "Not the health answer (the app's index.html, at most).");
         Assert.AreNotEqual(HttpStatusCode.Accepted, stop.StatusCode);
+        Assert.AreNotEqual("text/plain", resources.Content.Headers.ContentType?.MediaType, "No resources served by repository (the app's index.html, at most).");
     }
 }

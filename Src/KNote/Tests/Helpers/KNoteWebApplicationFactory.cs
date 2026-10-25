@@ -149,7 +149,8 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Testing");
+        // In local mode, the Local environment: its appsettings.Local.json too, as KNote Local runs.
+        builder.UseEnvironment(LocalDataPath != null ? "Local" : "Testing");
 
         if (AppConfiguration.Count > 0)
             builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(AppConfiguration));

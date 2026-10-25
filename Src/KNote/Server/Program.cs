@@ -51,7 +51,7 @@ try
     // updated, and each one's RepositoryId is read.
     using var startupLoggerFactory = new NLog.Extensions.Logging.NLogLoggerFactory();
     var repositories = await KntRepositories.OpenAsync(KntRepositories.ReadConfiguration(builder.Configuration),
-        builder.Environment.WebRootPath, startupLoggerFactory.CreateLogger<KntRepositories>());
+        builder.Environment.WebRootPath, startupLoggerFactory.CreateLogger<KntRepositories>(), appSettings.ServeRepositoryResources);
 
     builder.Services.KntAddServices(repositories);
     builder.Services.KntAddAiAssistant(builder.Configuration);
@@ -176,6 +176,7 @@ try
     app.MapRazorPages();
     app.MapControllers();
     app.MapHub<ChatHub>(ChatRoomHubContract.Path);
+    app.MapKntRepositoryResources(appSettings);
     app.MapKntLocal();
     app.MapFallbackToFile("index.html", clientStaticFileOptions);
 
