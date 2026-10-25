@@ -124,6 +124,20 @@ public class LauncherTests
     }
 
     [TestMethod]
+    public void Runtimes_TheDotNetRuntime_AndTheAspNetCoreRuntime_Both10()
+    {
+        const string both = "Microsoft.AspNetCore.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\r\n" +
+                            "Microsoft.NETCore.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\r\n";
+        const string onlyAspNetCore = "Microsoft.AspNetCore.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\r\n";
+        const string older = "Microsoft.AspNetCore.App 9.0.10 [x]\nMicrosoft.NETCore.App 9.0.10 [x]\n";
+
+        Assert.IsTrue(ServerStarter.HasRuntimes(both));
+        Assert.IsFalse(ServerStarter.HasRuntimes(onlyAspNetCore), "On Windows, the ASP.NET Core Runtime's installer alone.");
+        Assert.IsFalse(ServerStarter.HasRuntimes(older));
+        Assert.IsFalse(ServerStarter.HasRuntimes(""));
+    }
+
+    [TestMethod]
     public void Server_Installed_NextToTheLauncher_OrTheBuildOfTheSameConfiguration()
     {
         var installed = Path.Combine(_path, "app");

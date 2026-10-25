@@ -119,7 +119,7 @@ Keep a Sqlite database on a local disk of the server, not in a network folder. F
 dotnet publish Src/KNote/Launcher/KNote.Launcher.csproj -p:PublishProfile=LocalServerPackage
 ```
 
-The package (and its zip) is left in `Src/KNote/DeployLocalServer/out`. Then install it with the script of each system included in the package, as its `README.md` explains (it needs the [ASP.NET Core Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0)). See [Docs/KNoteLocal.md](Docs/KNoteLocal.md) (in Spanish, [Docs/KNoteLocal_es.md](Docs/KNoteLocal_es.md)).
+The package (and its zip) is left in `Src/KNote/DeployLocalServer/out`. Then install it with the script of each system included in the package, as its `README.md` explains (it needs the [.NET Runtime 10 and the ASP.NET Core Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0): on Windows, the ASP.NET Core Hosting Bundle has both). See [Docs/KNoteLocal.md](Docs/KNoteLocal.md) (in Spanish, [Docs/KNoteLocal_es.md](Docs/KNoteLocal_es.md)).
 
 
 ## AI-assisted development

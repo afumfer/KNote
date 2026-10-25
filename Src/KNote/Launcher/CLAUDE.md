@@ -13,7 +13,9 @@ en marcha, espera a que responda y abre el navegador en KNote. Después termina;
    de todas las interfaces se alcanza en `127.0.0.1`) y el id de la instalación (`Local:InstanceId`).
 2. Pregunta a `/KNote/health` quién responde (`ServerHealth`): su KNote (mismo `InstanceId`), el KNote de otro usuario
    del equipo, otro programa o nadie. Si el puerto es de otro, lo explica (con `--port`) y termina.
-3. Si no responde nadie y no hay un PID vivo de un servidor arrancando (otro clic del lanzador), arranca
+3. Si no responde nadie y no hay un PID vivo de un servidor arrancando (otro clic del lanzador), comprueba que estén el
+   .NET Runtime 10 y el ASP.NET Core Runtime 10 (`dotnet --list-runtimes`, `ServerStarter.HasRuntimes`; en Windows el
+   instalador del ASP.NET Core Runtime no trae el .NET Runtime, el Hosting Bundle trae los dos) y arranca
    `dotnet server/KNote.Server.dll` **oculto** (`ServerStarter`: `CreateNoWindow`, sin redirigir la salida), con
    `ASPNETCORE_ENVIRONMENT=Local`, `Local__DataPath` y el directorio de trabajo en la carpeta del servidor.
 4. Espera (máximo 90 s) a que la salud responda; el primer arranque crea antes la configuración y el puerto. Mira la

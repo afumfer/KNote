@@ -6,12 +6,17 @@ is in KNote's documentation: `Docs/KNoteLocal.md` (in Spanish, `README_es.md` an
 
 ## 1. Before installing (once)
 
-KNote needs the **ASP.NET Core Runtime 10**, a free Microsoft component:
+KNote needs two free Microsoft components, the **.NET Runtime 10** and the **ASP.NET Core Runtime 10**. They are
+downloaded from <https://dotnet.microsoft.com/download/dotnet/10.0>:
 
-1. Go to <https://dotnet.microsoft.com/download/dotnet/10.0>.
-2. In the **ASP.NET Core Runtime 10.0.x** block, download the installer of your system (Windows x64, macOS Arm64 or
-   x64, or the one of your Linux distribution) and install it. The SDK isn't needed.
-3. To check it, open a terminal and type `dotnet --list-runtimes`: a line `Microsoft.AspNetCore.App 10.0.x` must appear.
+| System | What to install |
+|---|---|
+| Windows | In the **ASP.NET Core Runtime 10.0.x** block, the **Hosting Bundle**: a single installer with both components. (That block's "x64" installer does **not** bring the .NET Runtime: if you use it, also install the **.NET Runtime 10.0.x** x64.) |
+| Mac | In the **SDK 10.0.x** block, the installer of your Mac (Arm64 for Apple Silicon, x64 for Intel): it brings both components (the ASP.NET Core Runtime has no installer of its own on Mac). |
+| Linux | Your distribution's package `aspnetcore-runtime-10.0` (it also installs the .NET Runtime). The instructions of each distribution are on that same page. |
+
+To check it, open a terminal and type `dotnet --list-runtimes`: **two** lines must appear, `Microsoft.NETCore.App 10.0.x`
+and `Microsoft.AspNetCore.App 10.0.x`.
 
 ## 2. Preparing the package
 
@@ -78,7 +83,7 @@ you no longer want it.
 
 | What happens | What to do |
 |---|---|
-| Notice that the ASP.NET Core Runtime 10 is missing | Install it (step 1) and open KNote again |
+| Notice that the .NET Runtime 10 or the ASP.NET Core Runtime 10 is missing, or Windows says .NET must be installed to run the application | Install what step 1 says (on Windows, the Hosting Bundle) and open KNote again |
 | Notice that another program uses the port | Open KNote once with another port: on Windows `& "$env:LOCALAPPDATA\Programs\KNote\KNote.Launcher.exe" --port 5300`; on Mac and Linux, `dotnet KNote.Launcher.dll --port 5300` from the programs folder. KNote remembers it |
 | Nothing opens | Look at `Logs\launcher.log` and the server's logs in your data folder |
 | You want to turn the local server off | **Admin panel → This computer → Stop local server**, or the launcher with `--stop` |

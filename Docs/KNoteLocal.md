@@ -129,7 +129,7 @@ Besides the `127.0.0.1` address, which already stops anybody from outside from c
 
 ## Installing, updating and uninstalling
 
-KNote Local needs no paid installers or third-party tools. The only prerequisite is the **ASP.NET Core Runtime 10**, a free Microsoft component: the "engine" KNote runs on, just as some games need a particular graphics component. It is downloaded from Microsoft's official website (<https://dotnet.microsoft.com/download/dotnet/10.0>) and installed once.
+KNote Local needs no paid installers or third-party tools. The only prerequisites are the **.NET Runtime 10** and the **ASP.NET Core Runtime 10**, two free Microsoft components: the "engine" KNote runs on, just as some games need a particular graphics component. They are downloaded from Microsoft's official website (<https://dotnet.microsoft.com/download/dotnet/10.0>) and installed once. On **Windows**, the simplest is the **Hosting Bundle** of the ASP.NET Core Runtime block, which brings both (the ASP.NET Core Runtime's plain installer doesn't bring the .NET Runtime); on **Mac**, the **SDK 10** installer, which brings both too; on **Linux**, your distribution's package `aspnetcore-runtime-10.0`. The package's `README.md` explains it step by step.
 
 KNote comes as a single package, the same for the three systems, with a few small installation **scripts** (a *script* is a list of instructions the computer carries out automatically, like a recipe):
 
@@ -156,7 +156,7 @@ To start the server when you sign in, add `-StartAtSignIn` (Windows) or `--start
 ## If something goes wrong
 
 - **Another program uses KNote's port**: the launcher tells you. Open KNote once with another port, `KNote.Launcher --port 5300` (on Mac and Linux, `dotnet KNote.Launcher.dll --port 5300` from the folder where it is installed); KNote remembers it from then on.
-- **The ASP.NET Core Runtime 10 is missing**: the launcher tells you; install it (link above) and open KNote again.
+- **The .NET Runtime 10 or the ASP.NET Core Runtime 10 is missing**: the launcher tells you (or, if the .NET Runtime is missing, Windows says .NET must be installed to run the application); install what is said above (on Windows, the Hosting Bundle) and open KNote again.
 - **Stopping the local server**: **Admin panel → This computer → Stop local server**, or `KNote.Launcher --stop`.
 - **To find out what happened**: the launcher's (`launcher.log`) and the server's logs are in the `Logs` folder of your data folder.
 

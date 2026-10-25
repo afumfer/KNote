@@ -63,8 +63,8 @@ namespace KNote.Launcher
                     return Problem("The KNote server was not found next to the launcher (server/KNote.Server.dll). Install KNote again.");
 
                 var dotnet = ServerStarter.FindDotnet(Environment.GetEnvironmentVariable, File.Exists, Environment.ProcessPath, OperatingSystem.IsWindows());
-                if (dotnet == null)
-                    return Problem("KNote needs the ASP.NET Core Runtime 10, a free component of Microsoft. Install it from https://dotnet.microsoft.com/download/dotnet/10.0 and open KNote again.");
+                if (dotnet == null || ServerStarter.ListRuntimes(dotnet) is { } runtimes && !ServerStarter.HasRuntimes(runtimes))
+                    return Problem(ServerStarter.RuntimesMissing);
 
                 _notifier.Log($"Starting the server {serverDll} (data folder {_instance.Path}).");
                 using var server = ServerStarter.Start(dotnet, serverDll, _instance.Path);

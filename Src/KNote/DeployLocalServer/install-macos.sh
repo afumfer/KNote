@@ -6,7 +6,8 @@
 # Creates ~/Applications/KNote.app (drag it to the Dock if you want). Its only native program is dotnet, signed by
 # Microsoft: the app runs "dotnet KNote.Launcher.dll". --start-at-login starts the local server when you sign in
 # (without opening the browser). Your notes and settings stay in ~/Library/Application Support/KNote/Server and are never
-# touched (installing again is updating). Needs the ASP.NET Core Runtime 10.
+# touched (installing again is updating). Needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: on macOS the
+# ASP.NET Core Runtime has no installer, the .NET 10 SDK's installer has both.
 set -euo pipefail
 
 SOURCE="$(cd "$(dirname "$0")" && pwd)"
@@ -27,8 +28,8 @@ find_dotnet() {
     done
 }
 DOTNET="$(find_dotnet)"
-if [ -z "$DOTNET" ] || ! "$DOTNET" --list-runtimes | grep -q '^Microsoft.AspNetCore.App 10\.'; then
-    echo "Warning: the ASP.NET Core Runtime 10 is not installed: install it from https://dotnet.microsoft.com/download/dotnet/10.0 before opening KNote." >&2
+if [ -z "$DOTNET" ] || ! "$DOTNET" --list-runtimes | grep -q '^Microsoft.NETCore.App 10\.' || ! "$DOTNET" --list-runtimes | grep -q '^Microsoft.AspNetCore.App 10\.'; then
+    echo "Warning: KNote needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: install the .NET 10 SDK (it has both) from https://dotnet.microsoft.com/download/dotnet/10.0 before opening KNote." >&2
 fi
 
 # Updating: the running server is stopped first, then the programs are replaced.
@@ -49,7 +50,7 @@ APP_DIR="$(cd "$(dirname "$0")/../Resources/app" && pwd)"
 for DOTNET in "$(command -v dotnet 2>/dev/null)" /usr/local/share/dotnet/dotnet /opt/homebrew/opt/dotnet/libexec/dotnet /usr/local/bin/dotnet "$HOME/.dotnet/dotnet"; do
     [ -n "$DOTNET" ] && [ -x "$DOTNET" ] && exec "$DOTNET" "$APP_DIR/KNote.Launcher.dll" "$@"
 done
-osascript -e 'display alert "KNote" message "KNote needs the ASP.NET Core Runtime 10: install it from https://dotnet.microsoft.com/download/dotnet/10.0" as warning'
+osascript -e 'display alert "KNote" message "KNote needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: install the .NET 10 SDK from https://dotnet.microsoft.com/download/dotnet/10.0" as warning'
 exit 1
 SCRIPT
 chmod +x "$APP/Contents/MacOS/KNote"

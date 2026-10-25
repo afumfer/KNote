@@ -8,7 +8,8 @@
 #                 startup folder).
 #
 # The programs go to %LocalAppData%\Programs\KNote; your notes and settings stay in %LocalAppData%\KNote\Server and are
-# never touched (installing again is updating). Needs the ASP.NET Core Runtime 10.
+# never touched (installing again is updating). Needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: on Windows,
+# the ASP.NET Core Hosting Bundle has both (the ASP.NET Core Runtime's installer alone doesn't bring the .NET Runtime).
 
 param(
     [switch]$StartAtSignIn,
@@ -26,10 +27,10 @@ if (-not (Test-Path (Join-Path $source 'server\KNote.Server.dll'))) {
     throw "Run this script from the unzipped KNote-Local folder (server\KNote.Server.dll not found in $source)."
 }
 
-# The runtime KNote runs on.
+# The runtimes KNote runs on.
 $runtimes = try { & dotnet --list-runtimes 2>$null } catch { $null }
-if (-not ($runtimes -match '^Microsoft\.AspNetCore\.App 10\.')) {
-    Write-Warning 'The ASP.NET Core Runtime 10 is not installed: install it from https://dotnet.microsoft.com/download/dotnet/10.0 before opening KNote.'
+if (-not ($runtimes -match '^Microsoft\.NETCore\.App 10\.') -or -not ($runtimes -match '^Microsoft\.AspNetCore\.App 10\.')) {
+    Write-Warning 'KNote needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: install the ASP.NET Core Hosting Bundle (it has both) from https://dotnet.microsoft.com/download/dotnet/10.0 before opening KNote.'
 }
 
 # Updating: the running server is stopped first, then the programs are replaced.

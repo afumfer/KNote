@@ -5,7 +5,8 @@
 #
 # The programs go to ~/.local/share/knote/app, with KNote in the applications menu. --start-at-login starts the local
 # server when you sign in (without opening the browser). Your notes and settings stay in ~/.local/share/KNote/Server and
-# are never touched (installing again is updating). Needs the ASP.NET Core Runtime 10.
+# are never touched (installing again is updating). Needs the ASP.NET Core Runtime 10 (the package aspnetcore-runtime-10.0
+# brings the .NET Runtime 10 with it).
 set -euo pipefail
 
 SOURCE="$(cd "$(dirname "$0")" && pwd)"
@@ -20,8 +21,8 @@ if [ ! -f "$SOURCE/server/KNote.Server.dll" ]; then
     exit 1
 fi
 
-if ! command -v dotnet >/dev/null 2>&1 || ! dotnet --list-runtimes | grep -q '^Microsoft.AspNetCore.App 10\.'; then
-    echo "Warning: the ASP.NET Core Runtime 10 is not installed: install it from https://dotnet.microsoft.com/download/dotnet/10.0 before opening KNote." >&2
+if ! command -v dotnet >/dev/null 2>&1 || ! dotnet --list-runtimes | grep -q '^Microsoft.NETCore.App 10\.' || ! dotnet --list-runtimes | grep -q '^Microsoft.AspNetCore.App 10\.'; then
+    echo "Warning: KNote needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: install the package aspnetcore-runtime-10.0 (see https://dotnet.microsoft.com/download/dotnet/10.0) before opening KNote." >&2
 fi
 
 # Updating: the running server is stopped first, then the programs are replaced.
@@ -42,8 +43,8 @@ APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 for DOTNET in "$(command -v dotnet 2>/dev/null)" /usr/share/dotnet/dotnet /usr/lib/dotnet/dotnet /usr/local/bin/dotnet /snap/bin/dotnet "$HOME/.dotnet/dotnet"; do
     [ -n "$DOTNET" ] && [ -x "$DOTNET" ] && exec "$DOTNET" "$APP_DIR/KNote.Launcher.dll" "$@"
 done
-notify-send --urgency=critical KNote "KNote needs the ASP.NET Core Runtime 10: install it from https://dotnet.microsoft.com/download/dotnet/10.0" 2>/dev/null \
-    || echo "KNote needs the ASP.NET Core Runtime 10: install it from https://dotnet.microsoft.com/download/dotnet/10.0" >&2
+notify-send --urgency=critical KNote "KNote needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: install the package aspnetcore-runtime-10.0" 2>/dev/null \
+    || echo "KNote needs the .NET Runtime 10 and the ASP.NET Core Runtime 10: install the package aspnetcore-runtime-10.0" >&2
 exit 1
 SCRIPT
 chmod +x "$APP_DIR/knote"

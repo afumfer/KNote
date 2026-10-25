@@ -36,7 +36,7 @@ public static class ServerStarter
 
     /// <summary>
     /// The dotnet that runs the server: the one running the launcher (dotnet KNote.Launcher.dll), DOTNET_ROOT, the PATH or
-    /// where the installers of each system put it. Null if there is none (the ASP.NET Core Runtime isn't installed).
+    /// where the installers of each system put it. Null if there is none (.NET isn't installed).
     /// </summary>
     public static string? FindDotnet(Func<string, string?> environment, Func<string, bool> fileExists, string? processPath, bool isWindows)
     {
@@ -62,6 +62,39 @@ public static class ServerStarter
                 candidates.Add(Path.Combine(home, ".dotnet", "dotnet"));
         }
         return candidates.FirstOrDefault(fileExists);
+    }
+
+    /// <summary>
+    /// What it needs, besides dotnet: the .NET Runtime 10 (the launcher, a console application, needs it too) and the
+    /// ASP.NET Core Runtime 10 (the server). On Windows the ASP.NET Core Runtime's installer doesn't bring the .NET
+    /// Runtime: the Hosting Bundle has both. listRuntimes: what dotnet --list-runtimes says.
+    /// </summary>
+    public static bool HasRuntimes(string listRuntimes) =>
+        listRuntimes.Split('\n').Any(l => l.TrimStart().StartsWith("Microsoft.NETCore.App 10.", StringComparison.Ordinal))
+        && listRuntimes.Split('\n').Any(l => l.TrimStart().StartsWith("Microsoft.AspNetCore.App 10.", StringComparison.Ordinal));
+
+    public const string RuntimesMissing =
+        "KNote needs the .NET Runtime 10 and the ASP.NET Core Runtime 10, free components of Microsoft: on Windows, install the " +
+        "ASP.NET Core Hosting Bundle (it has both); on macOS, the .NET 10 SDK; on Linux, the package aspnetcore-runtime-10.0. " +
+        "Download them from https://dotnet.microsoft.com/download/dotnet/10.0 and open KNote again.";
+
+    // What dotnet --list-runtimes says; null if it can't be asked (then the server is started anyway).
+    public static string? ListRuntimes(string dotnet)
+    {
+        try
+        {
+            var start = new ProcessStartInfo(dotnet) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true };
+            start.ArgumentList.Add("--list-runtimes");
+            using var process = Process.Start(start);
+            if (process == null)
+                return null;
+            var output = process.StandardOutput.ReadToEnd();
+            return process.WaitForExit(10000) ? output : null;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
     }
 
     public static Process Start(string dotnet, string serverDll, string dataPath)
