@@ -31,6 +31,26 @@
             "group": "build"
         },
         {
+            // KNote Local's launcher and the server it starts (the launcher doesn't reference it: both are built).
+            "label": "build: Local",
+            "dependsOn": ["build: Server", "build: Launcher"],
+            "dependsOrder": "sequence",
+            "group": "build"
+        },
+        {
+            "label": "build: Launcher",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Launcher/KNote.Launcher.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
             "label": "build: ClientWin",
             "command": "dotnet",
             "type": "process",

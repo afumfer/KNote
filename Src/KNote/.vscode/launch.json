@@ -45,6 +45,30 @@
             "console": "internalConsole"
         },
         {
+            // KNote Local's launcher: starts the Server build of the same configuration (Local environment, the user's
+            // data folder) if it isn't running, and opens the browser. See Launcher/CLAUDE.md.
+            "name": "KNote.Launcher",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build: Local",
+            "program": "${workspaceFolder}/Launcher/bin/Debug/net10.0/KNote.Launcher.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Launcher",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "KNote.Launcher (stop)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build: Launcher",
+            "program": "${workspaceFolder}/Launcher/bin/Debug/net10.0/KNote.Launcher.dll",
+            "args": ["--stop"],
+            "cwd": "${workspaceFolder}/Launcher",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
             // Server + Client (Blazor WebAssembly). Requires C# Dev Kit; uses the first "Project" profile of
             // Server/Properties/launchSettings.json (inspectUri, launchUrl "KNote") and attaches the browser debugger.
             "name": "KNote.Web (Server + Client WASM)",

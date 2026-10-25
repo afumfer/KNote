@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Server/KNote.Server.csproj" />
+  <Project Path="Launcher/KNote.Launcher.csproj" />
   <Project Path="Model/KNote.Model.csproj" />
   <Project Path="Service/KNote.Service.csproj" />
   <Project Path="Ai/KNote.Ai.csproj" />
