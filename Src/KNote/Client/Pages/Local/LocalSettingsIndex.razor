@@ -1,0 +1,14 @@
+@* KNote Local: the computer's settings (api/local) — its repositories, the AI providers of the assistant, the e-mail
+   account of the Email alarms and the local server (port, data folder, stop). A tab of the admin panel, only there when
+   the server is KNote Local (Admin.razor, the server's capabilities). Each section reads and saves its own part. *@
+
+@attribute [Authorize(Roles = "Admin")]
+
+<KntIndexHeader Section="KntSections.ThisComputer" Subtitle="Settings of KNote Local in this computer" />
+
+<div class="rz-pt-2 knt-local-settings">
+    <LocalRepositories />
+    <LocalAiProviders />
+    <LocalEmailSettings />
+    <LocalServerSettings />
+</div>

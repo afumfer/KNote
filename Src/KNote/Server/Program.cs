@@ -17,9 +17,15 @@ using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Server.Helpers;
 using KNote.Server.Hubs;
+using KNote.Server.Local;
 using KNote.MessageBroker.RabbitMQ;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
+
+// KNote Local (a data folder: Local__DataPath, or the Local environment): its logs go to the data folder.
+var localData = KntLocalData.FromEnvironment();
+if (localData != null)
+    GlobalDiagnosticsContext.Set("logDir", localData.LogsFolder);
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Trace("Init KNote WebServer main.");
@@ -29,8 +35,10 @@ try
     ////////////////////////////////////////////////////////////////
     // Create HostBuilder
 
-    var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = args, ContentRootPath = KntLocal.ContentRootPath() });
 
+    // KNote Local: the user's configuration of the data folder over the rest (see Server/CLAUDE.md, "KNote Local").
+    var localProtector = localData != null ? builder.KntAddLocalConfiguration(localData, logger) : null;
 
     ////////////////////////////////////////////////////////////////
     // Configure the application and add services to the container.
@@ -43,7 +51,7 @@ try
     // updated, and each one's RepositoryId is read.
     using var startupLoggerFactory = new NLog.Extensions.Logging.NLogLoggerFactory();
     var repositories = await KntRepositories.OpenAsync(KntRepositories.ReadConfiguration(builder.Configuration),
-        builder.Environment.WebRootPath, startupLoggerFactory.CreateLogger<KntRepositories>());
+        builder.Environment.WebRootPath, startupLoggerFactory.CreateLogger<KntRepositories>(), appSettings.ServeRepositoryResources);
 
     builder.Services.KntAddServices(repositories);
     builder.Services.KntAddAiAssistant(builder.Configuration);
@@ -52,6 +60,8 @@ try
     builder.Services.KntAddRateLimits(builder.Configuration);
     builder.Services.KntAddForwardedHeaders(builder.Configuration);
     builder.Services.KntAddCors();
+    if (localData != null)
+        builder.Services.KntAddLocal(builder.Configuration, localData, localProtector);
 
     builder.Services.AddAuthentication().AddJwtBearer(options =>
     {
@@ -133,12 +143,14 @@ try
     {
         app.UseExceptionHandler("/Error");
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-        app.UseHsts();
+        if (appSettings.UseHttpsRedirection)
+            app.UseHsts();
     }
 
     app.UsePathBase("/KNote");
 
-    app.UseHttpsRedirection();
+    if (appSettings.UseHttpsRedirection)
+        app.UseHttpsRedirection();
     app.UseBlazorFrameworkFiles();
 
     // index.html and the Client's css/js keep their URLs from one version to the next, so browsers must
@@ -164,6 +176,8 @@ try
     app.MapRazorPages();
     app.MapControllers();
     app.MapHub<ChatHub>(ChatRoomHubContract.Path);
+    app.MapKntRepositoryResources(appSettings);
+    app.MapKntLocal();
     app.MapFallbackToFile("index.html", clientStaticFileOptions);
 
     await app.KntConfigureMessageBroker(appSettings, repositories.Default.RepositoryRef);

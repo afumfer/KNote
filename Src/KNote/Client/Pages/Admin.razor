@@ -5,8 +5,10 @@
 @using KNote.Client.Pages.Attributes
 @using KNote.Client.Pages.Types
 @using KNote.Client.Pages.TraceNoteTypes
+@using KNote.Client.Pages.Local
 
 @inject NavigationManager navigationManager
+@inject IStore store
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -41,6 +43,13 @@
                     <AttributesIndex></AttributesIndex>
                 </RadzenTabsItem>
 
+                @if (localAdmin)
+                {
+                    <RadzenTabsItem Text="@TabText(KntSections.ThisComputer)" Icon="@KntSections.ThisComputer.Icon">
+                        <LocalSettingsIndex></LocalSettingsIndex>
+                    </RadzenTabsItem>
+                }
+
             </Tabs>
         </RadzenTabs>
     </CascadingValue>
@@ -52,5 +61,14 @@
 
     // Non-breaking space: separates the tab text from its icon.
     private static string TabText(KntSection section) => $" {section.Text}";
+
+    // KNote Local: the computer's settings (the server says whether it can).
+    private bool localAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var capabilities = await store.Server.GetCapabilitiesAsync();
+        localAdmin = capabilities.IsValid && capabilities.Entity?.LocalAdmin == true;
+    }
 
 }

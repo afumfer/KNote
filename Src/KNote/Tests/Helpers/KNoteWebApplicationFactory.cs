@@ -61,8 +61,16 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
 
     public static string RepositoryNameOf(int repository) => $"KNoteInProcessTests{(repository == 0 ? "" : repository.ToString())}";
 
-    public KNoteWebApplicationFactory(int repositoryCount = 1)
+    /// <summary>
+    /// KNote Local's data folder (localDataPath), or null as a server (every other factory clears it). In local mode
+    /// the host takes its repositories from the data folder's configuration (created the first time), not from the
+    /// factory's.
+    /// </summary>
+    public string? LocalDataPath { get; }
+
+    public KNoteWebApplicationFactory(int repositoryCount = 1, string? localDataPath = null)
     {
+        LocalDataPath = localDataPath;
         if (repositoryCount < 1 || repositoryCount > MaxRepositories)
             throw new ArgumentOutOfRangeException(nameof(repositoryCount));
 
@@ -75,7 +83,8 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
         {
             ["AppSettings__Secret"] = "KNoteTestsOnlySigningSecret_DoNotUseInProduction_1234567890",
             ["AppSettings__ActivateMessageBroker"] = "false",
-            ["AppSettings__MountResourceContainerOnStartup"] = "false"
+            ["AppSettings__MountResourceContainerOnStartup"] = "false",
+            ["Local__DataPath"] = localDataPath
         };
 
         foreach (var field in RepositoryFields)
@@ -140,7 +149,8 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Testing");
+        // In local mode, the Local environment: its appsettings.Local.json too, as KNote Local runs.
+        builder.UseEnvironment(LocalDataPath != null ? "Local" : "Testing");
 
         if (AppConfiguration.Count > 0)
             builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(AppConfiguration));
@@ -152,6 +162,13 @@ public class KNoteWebApplicationFactory : WebApplicationFactory<Program>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
+
+        // Program sends the logs of local mode to the data folder (NLog's global context, for the whole process).
+        if (LocalDataPath != null)
+        {
+            NLog.GlobalDiagnosticsContext.Remove("logDir");
+            Environment.SetEnvironmentVariable("Local__DataPath", null);
+        }
 
         // Microsoft.Data.Sqlite pools connections by default, which can keep the file locked
         // after the host shuts down; clear the pool first so deletion doesn't need to be silently

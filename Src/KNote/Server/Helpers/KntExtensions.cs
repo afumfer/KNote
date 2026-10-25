@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -71,6 +72,35 @@ public static class KntExtensions
         services.AddSingleton<KntPasswordResetMail>();
 
         return services;
+    }
+
+    // KNote Local (AppSettings:ServeRepositoryResources): the resources of each repository from its folder at
+    // /KNote/Resources/{RepositoryId}/... (its ResourcesContainerRootUrl, see KntRepositories). The repository is looked up
+    // in each request, so one linked or unlinked since the server started is served (or not) at once. Anonymous, as the
+    // resources served by IIS or by MountResourceContainerOnStartup; nothing outside the repository's folder.
+    public static WebApplication MapKntRepositoryResources(this WebApplication app, AppSettings appSettings)
+    {
+        if (!appSettings.ServeRepositoryResources)
+            return app;
+
+        var contentTypes = new FileExtensionContentTypeProvider();
+        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        app.MapGet(KntRepositories.ResourcesPath + "/{repositoryId:guid}/{**path}", (Guid repositoryId, string path, KntRepositories repositories) =>
+        {
+            var root = repositories.Find(repositoryId)?.RepositoryRef.ResourcesContainerRootPath;
+            if (string.IsNullOrEmpty(root) || string.IsNullOrEmpty(path))
+                return Results.NotFound();
+
+            var rootFolder = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var file = Path.GetFullPath(Path.Combine(rootFolder, path));
+            if (!file.StartsWith(rootFolder, comparison) || !File.Exists(file))
+                return Results.NotFound();
+
+            if (!contentTypes.TryGetContentType(file, out var contentType))
+                contentType = "application/octet-stream";
+            return Results.File(file, contentType, enableRangeProcessing: true);
+        });
+        return app;
     }
 
     // With MountResourceContainerOnStartup, the resources folder of each repository is served from its url (a path of

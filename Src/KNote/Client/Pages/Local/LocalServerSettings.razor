@@ -1,0 +1,76 @@
+@* The local server of KNote Local: its address and data folder, its port (applied the next time it starts) and stopping
+   it (it is started again from KNote's launcher). *@
+
+@inject IStore store
+@inject DialogService dialogService
+
+<KntFormSection Icon="dns" Title="Local server"
+                Description="KNote Local runs in this computer only. Your notes, settings and logs are in its data folder.">
+    @if (stopped)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+            The local server has stopped. To use KNote again, open it from its launcher (the KNote icon).
+        </RadzenAlert>
+    }
+    else if (server == null)
+    {
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+    }
+    else
+    {
+        <div class="knt-local-fields">
+            <KntField Label="Address">
+                <span class="knt-local-path">@server.Url/KNote</span>
+            </KntField>
+            <KntField Label="Data folder">
+                <span class="knt-local-path">@server.DataPath</span>
+            </KntField>
+            <KntField Label="Version">
+                <span>@server.Version</span>
+            </KntField>
+            <KntField Label="Port" Component="Port" Help="Applies the next time the local server starts.">
+                <RadzenNumeric Name="Port" TValue="int" @bind-Value="@port" Min="1024" Max="65535" ShowUpDown="false" />
+            </KntField>
+        </div>
+        <div class="knt-local-actions">
+            <RadzenButton Text="Save port" Icon="save" Size="ButtonSize.Small" Click="OnSavePort" IsBusy="@saving.IsBusy" Disabled="@(port == server.Port)" />
+            <RadzenButton Text="Stop local server" Icon="power_settings_new" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                          Variant="Variant.Outlined" Click="OnStop" />
+        </div>
+    }
+</KntFormSection>
+
+@code {
+    private LocalServerSettingsDto? server;
+    private int port;
+    private bool stopped;
+    private readonly KntSingleFlight saving = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await store.Local.GetServerAsync();
+        if (result.IsValid)
+        {
+            server = result.Entity;
+            port = server!.Port;
+        }
+    }
+
+    private Task OnSavePort() => saving.RunAsync(async () =>
+    {
+        var result = await store.Local.SavePortAsync(port);
+        if (result.IsValid)
+        {
+            server = result.Entity;
+            port = server!.Port;
+        }
+    });
+
+    private async Task OnStop()
+    {
+        var confirmed = await dialogService.Confirm("Stop the local server? KNote won't work until you open it again from its launcher.",
+            "Stop local server", new ConfirmOptions { OkButtonText = "Stop", CancelButtonText = "Cancel" });
+        if (confirmed == true && (await store.Local.StopAsync()).IsValid)
+            stopped = true;
+    }
+}

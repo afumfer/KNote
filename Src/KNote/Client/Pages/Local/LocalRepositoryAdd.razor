@@ -1,0 +1,84 @@
+@* Adds a repository to KNote Local's computer (LocalRepositories): a new SQLite database in the data folder, an existing
+   SQLite database (e.g. the desktop app's, which both apps can use at the same time) or a SQL Server database. The
+   paths are of the computer where KNote Local runs. The dialog stays open until the server adds it. *@
+
+@inject IStore store
+@inject DialogService dialogService
+
+<KntDialogFrame Icon="database" Title="@TitleOf(Kind)" Subtitle="@SubtitleOf(Kind)" OnClose="() => dialogService.Close(null)">
+    <ChildContent>
+        <KntFormSection Icon="storage" Title="Database">
+            @if (Kind == LocalRepositoryKind.Existing)
+            {
+                <KntField Label="Database file" Component="DatabasePath" Required="true"
+                          Help="The full path of the .db file in this computer, for example the database of the desktop app.">
+                    <RadzenTextBox Name="DatabasePath" @bind-Value="@repository.DatabasePath" Placeholder="C:\Users\me\AppData\Local\KNote\Data\knote.db" />
+                </KntField>
+            }
+            else if (Kind == LocalRepositoryKind.SqlServer)
+            {
+                <KntField Label="Connection string" Component="ConnectionString" Required="true"
+                          Help="As in the desktop app. It is kept encrypted.">
+                    <RadzenPassword Name="ConnectionString" @bind-Value="@repository.ConnectionString" />
+                </KntField>
+            }
+            <KntField Label="Name" Component="Name" Required="@(Kind == LocalRepositoryKind.New)"
+                      Help="@(Kind == LocalRepositoryKind.New ? "As the app shows it." : "Empty: the name kept in the database.")">
+                <RadzenTextBox Name="Name" @bind-Value="@repository.Name" />
+            </KntField>
+            <KntField Label="ORM" Component="Orm" Help="How the database is read. Entity Framework, unless you know you need Dapper.">
+                <RadzenDropDown Name="Orm" @bind-Value="@repository.Orm" Data="@(new[] { "EntityFramework", "Dapper" })" />
+            </KntField>
+        </KntFormSection>
+
+        @if (Kind != LocalRepositoryKind.New)
+        {
+            <KntFormSection Icon="perm_media" Title="Resources" Description="Where the images and attached files of its notes are.">
+                <KntField Label="Resources folder" Component="ResourcesFolder"
+                          Help="In the desktop app, the resources folder of the repository. Empty: a new folder in the data folder.">
+                    <RadzenTextBox Name="ResourcesFolder" @bind-Value="@repository.ResourcesFolder" />
+                </KntField>
+                <KntField Label="Container" Component="ResourcesContainer" Help="The folder inside it (the desktop app's default: KntCntResources).">
+                    <RadzenTextBox Name="ResourcesContainer" @bind-Value="@repository.ResourcesContainer" />
+                </KntField>
+            </KntFormSection>
+        }
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => dialogService.Close(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Disabled="@adding.IsBusy" />
+        <RadzenButton Text="@(Kind == LocalRepositoryKind.New ? "Create" : "Link")" Icon="add" Click="OnAdd" ButtonStyle="ButtonStyle.Primary" IsBusy="@adding.IsBusy" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter] public LocalRepositoryKind Kind { get; set; }
+
+    private readonly LocalRepositoryAddDto repository = new();
+    private readonly KntSingleFlight adding = new();
+
+    public static string TitleOf(LocalRepositoryKind kind) => kind switch
+    {
+        LocalRepositoryKind.Existing => "Link existing database",
+        LocalRepositoryKind.SqlServer => "Link SQL Server database",
+        _ => "New repository"
+    };
+
+    private static string SubtitleOf(LocalRepositoryKind kind) => kind switch
+    {
+        LocalRepositoryKind.Existing => "A SQLite database of this computer.",
+        LocalRepositoryKind.SqlServer => "A database of a SQL Server.",
+        _ => "An empty SQLite database in the data folder."
+    };
+
+    protected override void OnInitialized()
+    {
+        repository.Provider = Kind == LocalRepositoryKind.SqlServer ? "Microsoft.Data.SqlClient" : "Microsoft.Data.Sqlite";
+    }
+
+    private Task OnAdd() => adding.RunAsync(async () =>
+    {
+        var result = await store.Local.AddRepositoryAsync(repository);
+        if (result.IsValid)
+            dialogService.Close(result.Entity);
+    });
+}

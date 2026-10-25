@@ -72,23 +72,29 @@ public class EmailAlarmsService : BackgroundService
         _logger = logger;
     }
 
+    // Whether it is on is read in each round: in KNote Local it is turned on and off from the app (the interval applies
+    // the next time the server starts).
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var config = _config.Value.Email;
-        if (!config.Enabled)
-        {
-            _logger.LogInformation("The Email alarms service is off (Alarms:Email:Enabled).");
-            return;
-        }
-
-        var interval = TimeSpan.FromSeconds(Math.Clamp(config.IntervalSeconds, 15, 3600));
-        _logger.LogInformation("The Email alarms service sends the alarms of every repository every {seconds} seconds, without a user (authorization is not enforced).",
-            interval.TotalSeconds);
+        var interval = TimeSpan.FromSeconds(Math.Clamp(_config.Value.Email.IntervalSeconds, 15, 3600));
+        bool? wasEnabled = null;
 
         using var timer = new PeriodicTimer(interval);
         do
         {
-            await SendDueAlarmsAsync(stoppingToken);
+            var enabled = _config.Value.Email.Enabled;
+            if (enabled != wasEnabled)
+            {
+                if (enabled)
+                    _logger.LogInformation("The Email alarms service sends the alarms of every repository every {seconds} seconds, without a user (authorization is not enforced).",
+                        interval.TotalSeconds);
+                else
+                    _logger.LogInformation("The Email alarms service is off (Alarms:Email:Enabled).");
+                wasEnabled = enabled;
+            }
+
+            if (enabled)
+                await SendDueAlarmsAsync(stoppingToken);
         }
         while (await timer.WaitForNextTickAsync(stoppingToken));
     }

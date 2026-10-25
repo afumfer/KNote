@@ -10,22 +10,33 @@ namespace KNote.Server.Ai;
 
 // The AI providers configured for the Web assistant: section "ai" of the configuration (appsettings.json, with
 // the API keys in user-secrets or environment variables), the same AiProviderRef fields ClientWin keeps in
-// KNoteData.config. Invalid entries are left out and logged. The first valid one is the default.
+// KNoteData.config. Invalid entries are left out and logged. The first valid one is the default. Read when it is
+// created and, in KNote Local, again when the computer's settings change (Reload, KntLocalSettings).
 public class AiProvidersCatalog
 {
-    private readonly List<AiProviderRef> _providers;
+    private readonly IOptions<AiConfig> _aiConfig;
+    private readonly ILogger<AiProvidersCatalog> _logger;
+    private volatile List<AiProviderRef> _providers;
 
     public AiProvidersCatalog(IOptions<AiConfig> aiConfig, ILogger<AiProvidersCatalog> logger)
     {
-        _providers = new List<AiProviderRef>();
-        foreach (var provider in aiConfig.Value?.Providers ?? new List<AiProviderRef>())
+        _aiConfig = aiConfig;
+        _logger = logger;
+        Reload();
+    }
+
+    public void Reload()
+    {
+        var providers = new List<AiProviderRef>();
+        foreach (var provider in _aiConfig.Value?.Providers ?? new List<AiProviderRef>())
         {
             if (provider.IsValid())
-                _providers.Add(provider);
+                providers.Add(provider);
             else
-                logger.LogWarning("AI provider '{alias}' ignored, its configuration is not valid: {errors}",
+                _logger.LogWarning("AI provider '{alias}' ignored, its configuration is not valid: {errors}",
                     provider.Alias, provider.GetErrorMessage());
         }
+        _providers = providers;
     }
 
     public IReadOnlyList<AiProviderRef> Providers => _providers;

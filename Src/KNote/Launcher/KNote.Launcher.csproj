@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- KNote Local's launcher: starts the local server (Server, in the Local environment) if it isn't running and opens
+       the browser. No references to the other projects of KNote: only .NET's APIs (see CLAUDE.md). WinExe: no console
+       window on Windows (on macOS and Linux it is a console application as any other). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>KNote.Launcher</RootNamespace>
+    <AssemblyName>KNote.Launcher</AssemblyName>
+    <ApplicationIcon>..\ClientWin\Resources\Icons\KNote.ico</ApplicationIcon>
+    <Version>0.0.10</Version>
+    <AssemblyVersion>0.0.10.44</AssemblyVersion>
+    <FileVersion>0.0.10.44</FileVersion>
+  </PropertyGroup>
+
+  <!-- KNote Local's package: publishing with the profile LocalServerPackage also publishes the server and the installers. -->
+  <Import Project="..\DeployLocalServer\KNote.LocalServer.targets" />
+
+</Project>

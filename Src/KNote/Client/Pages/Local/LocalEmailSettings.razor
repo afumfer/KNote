@@ -1,0 +1,63 @@
+@* The e-mail account of KNote Local's computer (SMTP) and the switch of the Email alarms, sent by the local server. The
+   password is never shown: empty keeps the saved one. *@
+
+@inject IStore store
+
+<KntFormSection Icon="mail" Title="E-mail"
+                Description="The account the Email alarms are sent from. Gmail needs an app password (see the manual).">
+    @if (email == null)
+    {
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+    }
+    else
+    {
+        <div class="knt-local-fields">
+            <KntField Label="SMTP server" Component="Host">
+                <RadzenTextBox Name="Host" @bind-Value="@email.Host" Placeholder="smtp.gmail.com" />
+            </KntField>
+            <KntField Label="Port" Component="Port">
+                <RadzenNumeric Name="Port" TValue="int" @bind-Value="@email.Port" Min="1" Max="65535" ShowUpDown="false" />
+            </KntField>
+            <KntField Label="Sender's address" Component="FromAddress">
+                <RadzenTextBox Name="FromAddress" @bind-Value="@email.FromAddress" />
+            </KntField>
+            <KntField Label="Sender's name" Component="FromDisplayName">
+                <RadzenTextBox Name="FromDisplayName" @bind-Value="@email.FromDisplayName" />
+            </KntField>
+            <KntField Label="User" Component="Username" Help="Empty: the sender's address.">
+                <RadzenTextBox Name="Username" @bind-Value="@email.Username" />
+            </KntField>
+            <KntField Label="Password" Component="Password" Help="@(email.HasPassword ? "Saved: leave it empty to keep it." : "Kept encrypted.")">
+                <RadzenPassword Name="Password" @bind-Value="@email.Password" AutoCompleteType="AutoCompleteType.Off" />
+            </KntField>
+        </div>
+        <KntField Label="Secure connection (SSL/TLS)" Component="EnableSsl">
+            <RadzenSwitch Name="EnableSsl" @bind-Value="@email.EnableSsl" />
+        </KntField>
+        <KntField Label="Send the Email alarms" Component="SendEmailAlarms"
+                  Help="Off by default: the desktop app can send them too. If you turn it on, uncheck Process Email alarms in the desktop app's options.">
+            <RadzenSwitch Name="SendEmailAlarms" @bind-Value="@email.SendEmailAlarms" />
+        </KntField>
+        <div class="knt-local-actions">
+            <RadzenButton Text="Save e-mail" Icon="save" Size="ButtonSize.Small" Click="OnSave" IsBusy="@saving.IsBusy" />
+        </div>
+    }
+</KntFormSection>
+
+@code {
+    private LocalEmailSettingsDto? email;
+    private readonly KntSingleFlight saving = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await store.Local.GetEmailAsync();
+        email = result.IsValid ? result.Entity : new LocalEmailSettingsDto();
+    }
+
+    private Task OnSave() => saving.RunAsync(async () =>
+    {
+        var result = await store.Local.SaveEmailAsync(email!);
+        if (result.IsValid)
+            email = result.Entity;
+    });
+}

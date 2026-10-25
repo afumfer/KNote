@@ -28,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
     <ProjectReference Include="..\Server\KNote.Server.csproj" />
+    <ProjectReference Include="..\Launcher\KNote.Launcher.csproj" />
     <ProjectReference Include="..\Service\KNote.Service.csproj" />
     <ProjectReference Include="..\Repository\KNote.Repository.csproj" />
     <ProjectReference Include="..\Repository.Dapper\KNote.Repository.Dapper.csproj" />

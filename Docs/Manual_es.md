@@ -337,6 +337,19 @@ Cambiar el modelo de IA de una conversación ya empezada inicia una conversació
 
 **En su propia ventana.** El botón que lo abre en una ventana nueva traslada el asistente, con la sesión en la que estás, a una ventana propia, sin los menús de la aplicación; la ventana principal vuelve a Home. No se puede usar mientras llega una respuesta. Solo hay una ventana del asistente: volver a abrirla la trae al frente. Cerrar esa ventana mientras llega una respuesta, o cuando la conversación no se pudo guardar, pregunta antes.
 
+### KNote Local (la aplicación Web en tu equipo)
+
+KNote Local es la aplicación Web funcionando entera dentro de tu equipo, sin internet, en Windows, macOS y Linux: el mismo servidor y la misma aplicación, escuchando solo en `http://127.0.0.1`, arrancados por el lanzador de KNote. Su guía, desde instalarlo hasta su configuración, es [KNoteLocal_es.md](KNoteLocal_es.md).
+
+En KNote Local el **panel de administración** tiene una pestaña más, **This computer** ("Este equipo"), para un Admin y solo desde el propio equipo:
+
+- **Repositories**: **New repository** (una base de datos SQLite vacía en la carpeta de datos), **Link existing database** (una base de datos SQLite del equipo, por ejemplo la de la aplicación de escritorio: las dos aplicaciones pueden usarla a la vez), **Link SQL Server**, y en cada fila **Rename**, **Make default** (el repositorio de los registros y de los visitantes) y **Unlink** (solo se quita de la lista: la base de datos nunca se borra). Los cambios se aplican al momento.
+- **AI providers** del asistente, con sus claves de acceso guardadas cifradas y que nunca se vuelven a mostrar (vacía conserva la guardada). El primero es el predeterminado.
+- **E-mail**: la cuenta SMTP y **Send the Email alarms** (apagado de serie; si lo activas, desmarca **Process Email alarms** en las opciones de la aplicación de escritorio).
+- **Local server**: su dirección, carpeta de datos y versión, su **Port** (se aplica la próxima vez que arranque) y **Stop local server**.
+
+Para entrar en una base de datos de la aplicación de escritorio necesitas una contraseña: si en la aplicación de escritorio entras con tu cuenta de Windows, ponte una allí antes (**My account → Change password**).
+
 ### Repositorios del servidor Web (configuración del servidor)
 
 Un servidor Web con un repositorio lo configura en la sección `RepositoryRef`, como siempre. Para varios, usa en su lugar la lista `Repositories` (tiene prioridad cuando no está vacía), con los mismos campos e `IsDefault` para el repositorio predeterminado (el de Home sin iniciar sesión y el de los registros nuevos; sin él, el primero):

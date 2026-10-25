@@ -175,6 +175,8 @@ publish/
 # Note: Comment the next line if you want to checkin your web deploy settings,
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
+# KNote Local's package profile (DeployLocalServer/KNote.LocalServer.targets) is part of the build.
+!Src/KNote/Launcher/Properties/PublishProfiles/LocalServerPackage.pubxml
 *.publishproj
 
 # Microsoft Azure Web App publish settings. Comment the next line if you want to

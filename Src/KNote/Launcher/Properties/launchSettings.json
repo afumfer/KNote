@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "KNote.Launcher": {
+      "commandName": "Project"
+    },
+    "KNote.Launcher (app window)": {
+      "commandName": "Project",
+      "commandLineArgs": "--app-window"
+    },
+    "KNote.Launcher (stop)": {
+      "commandName": "Project",
+      "commandLineArgs": "--stop"
+    }
+  }
+}
