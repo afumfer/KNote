@@ -273,6 +273,19 @@ ellas y manteniendo su API pública sin cambios para el resto del código:
   `CanRunScripts` (ver "Autenticación y autorización").
 - Constructor: `Store(IFactoryViews factoryViews)` — la factory se inyecta aquí, no vía DI.
 
+## Alarmas (`MessagesManagementCtrl`)
+
+`MessagesManagementCtrl` comprueba las alarmas de cada repositorio con su temporizador (`General.AlarmSeconds`) y
+`Notes.GetAlarmNotesIdAsync` por tipo de notificación (PostIt, Email, AppInfo, KntScript). Comprobarlas las reprograma o
+desactiva, así que cada alarma la avisa un solo consumidor, también con la Web (`api/alarms/check`) o el servicio de
+correo del `Server` consumiendo a la vez (actualización condicional, ver `CLAUDE.md` raíz). Las de correo
+(`KNoteManagementCtrl.SendEmailAlarm`) se envían con la cuenta SMTP de las Opciones y el correo común
+`Service/Core/KntAlarmEmail` (el mismo que el `Server`); un usuario sin correo deja el fallo en el comentario. La opción
+**"Process Email alarms"** (pestaña Email de las Opciones, `NotificationsConfig.ProcessEmailAlarms`, activada por
+defecto, también en un `KNoteData.config` anterior a ella) decide si esta instalación envía las de correo: se desactiva
+cuando las envía el `Server` (`Alarms:Email:Enabled`, ver `Server/CLAUDE.md`) y entonces se dejan vencidas para él. Va
+en `NotificationsConfig` y no en `EmailConfig`, que el `Server` también lee de su sección `Email`.
+
 ## Configuración persistida (`Settings` / `State`)
 
 La configuración vive en `%LocalAppData%\KNote` (`AppUserDataPath`), en **dos ficheros XML** que `Store`

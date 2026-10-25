@@ -16,11 +16,16 @@ public class FakeEmailSender : IEmailSender
 
     public IReadOnlyCollection<SentEmail> Sent => _sent.ToArray();
 
+    // Sending to this address fails as an SMTP server that is down would.
+    public string? FailTo { get; set; }
+
     public void Send(SmtpSettings settings, string toAddress, string subject, string body, bool isBodyHtml = false)
         => Send(settings, new[] { toAddress }, subject, body, isBodyHtml);
 
     public void Send(SmtpSettings settings, IEnumerable<string> toAddresses, string subject, string body, bool isBodyHtml = false)
     {
+        if (FailTo != null && toAddresses.Contains(FailTo))
+            throw new System.Net.Mail.SmtpException("The SMTP server is not available.");
         foreach (var to in toAddresses)
             _sent.Enqueue(new SentEmail(to, subject, body));
         _signal.Release();

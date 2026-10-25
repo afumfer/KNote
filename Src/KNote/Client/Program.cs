@@ -17,6 +17,7 @@ builder.Services.AddOptions();
 
 builder.Services.AddScoped<IStore, Store>();
 builder.Services.AddScoped<KntWindows>();
+builder.Services.AddScoped<AlarmNotices>();
 
 builder.Services.AddAuthorizationCore();            
 builder.Services.AddScoped<AuthenticationProviderJWT>();

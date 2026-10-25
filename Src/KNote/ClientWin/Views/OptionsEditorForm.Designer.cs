@@ -41,6 +41,7 @@ namespace KNote.ClientWin.Views
             this.labelSmtpPort = new System.Windows.Forms.Label();
             this.textSmtpPort = new System.Windows.Forms.TextBox();
             this.checkSmtpEnableSsl = new System.Windows.Forms.CheckBox();
+            this.checkProcessEmailAlarms = new System.Windows.Forms.CheckBox();
             this.labelSmtpFromAddress = new System.Windows.Forms.Label();
             this.textSmtpFromAddress = new System.Windows.Forms.TextBox();
             this.labelSmtpFromDisplayName = new System.Windows.Forms.Label();
@@ -148,6 +149,7 @@ namespace KNote.ClientWin.Views
             this.tabEmailOptions.Controls.Add(this.labelSmtpPort);
             this.tabEmailOptions.Controls.Add(this.textSmtpPort);
             this.tabEmailOptions.Controls.Add(this.checkSmtpEnableSsl);
+            this.tabEmailOptions.Controls.Add(this.checkProcessEmailAlarms);
             this.tabEmailOptions.Controls.Add(this.labelSmtpFromAddress);
             this.tabEmailOptions.Controls.Add(this.textSmtpFromAddress);
             this.tabEmailOptions.Controls.Add(this.labelSmtpFromDisplayName);
@@ -208,6 +210,16 @@ namespace KNote.ClientWin.Views
             this.checkSmtpEnableSsl.TabIndex = 4;
             this.checkSmtpEnableSsl.Text = "Enable SSL";
             this.checkSmtpEnableSsl.UseVisualStyleBackColor = true;
+            //
+            // checkProcessEmailAlarms
+            //
+            this.checkProcessEmailAlarms.AutoSize = true;
+            this.checkProcessEmailAlarms.Location = new System.Drawing.Point(260, 47);
+            this.checkProcessEmailAlarms.Name = "checkProcessEmailAlarms";
+            this.checkProcessEmailAlarms.Size = new System.Drawing.Size(137, 19);
+            this.checkProcessEmailAlarms.TabIndex = 4;
+            this.checkProcessEmailAlarms.Text = "Process Email alarms";
+            this.checkProcessEmailAlarms.UseVisualStyleBackColor = true;
             //
             // labelSmtpFromAddress
             //
@@ -559,6 +571,7 @@ namespace KNote.ClientWin.Views
         private Label labelSmtpPort;
         private TextBox textSmtpPort;
         private CheckBox checkSmtpEnableSsl;
+        private CheckBox checkProcessEmailAlarms;
         private Label labelSmtpFromAddress;
         private TextBox textSmtpFromAddress;
         private Label labelSmtpFromDisplayName;

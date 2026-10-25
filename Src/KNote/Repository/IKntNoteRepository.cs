@@ -48,6 +48,12 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity);
     Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId);
     Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId, EnumNotificationType? notificationType = null);
+    // The due alarms of a type (activated, AlarmDateTime <= now, of a note) of a user or, with userId null, of every
+    // user, consumed: each one rescheduled or deactivated (ApplyAlarmControl) with a conditional update (still activated
+    // and due), so an alarm is returned once even if several consumers check at the same time (ClientWin, the Server,
+    // two tabs). They are returned as they were when due (with UserFullName), so a caller can put one back as it was
+    // (UpdateMessageAsync), e.g. when its email couldn't be sent.
+    Task<Result<List<KMessageDto>>> ConsumeDueMessagesAsync(Guid? userId, EnumNotificationType notificationType);
     Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId);
     Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag);       
 }

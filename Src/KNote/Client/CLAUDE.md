@@ -53,6 +53,7 @@ Client/
 │     IStore.cs, Store.cs   – estado global + acceso a los servicios Web API + el chat room (ChatRoomHub)
 │     AppState.cs           – estado de la app (usuario, carpeta seleccionada, árbol de carpetas) y eventos
 │     ChatRoomHub.cs        – conexión SignalR del chat room, hilos seguidos y sus mensajes, no leídos
+│     AlarmNotices.cs       – avisos de las alarmas Application info del usuario (panel de la campana, localStorage)
 │     KntWindows.cs         – ventanas de la app (notas, asistente de IA, chat room) y aviso entre ventanas de las notas guardadas
 │     KntSingleFlight.cs, KntLatestRequest.cs – doble envío y peticiones viejas (ver "Peticiones: doble envío y cancelación")
 │     ClientDataServices/
@@ -96,7 +97,9 @@ Client/
   Lo usan las lecturas de las listas de notas (`GetFilter`, `GetSearch`, `GetHomeNotesAsync`), del árbol de carpetas
   (`GetTreeAsync`) y de las carpetas de Home (`GetHomeChildrenAsync`), con
   `BaseService.ListReadTimeout` (60 s; el del `HttpClient` es de 100 s), para que una lista sin respuesta muestre su
-  error y se pueda reintentar.
+  error y se pueda reintentar. Con `notifyErrors: false` no se notifica ningún error (una sesión terminada, sí): para
+  las peticiones que la app hace sola cada cierto tiempo (`IStore.Alarms`), que no avisan cada minuto si el servidor
+  no responde.
 
 ## Peticiones: doble envío y cancelación
 
@@ -266,7 +269,9 @@ Patrones ya establecidos que hay que seguir:
   reglas de validación están en el SmartDTO) con controles de Radzen (`RadzenTextBox`, `RadzenTextArea`,
   `RadzenNumeric`, `RadzenDropDown`, `RadzenSwitch` para los booleanos, `RadzenDatePicker`, `RadzenPassword`,
   `RadzenSelectBar` para elegir entre pocas opciones) enlazados con `@bind-Value` y su
-  `<ValidationMessage For="..." />` después. No se usan `InputText`/`InputNumber`/`InputSelect`... de Blazor ni
+  `<ValidationMessage For="..." />` después. Un `RadzenDropDown` con buscador (`AllowFiltering`) lleva
+  `FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"`: por defecto Radzen distingue mayúsculas, y las
+  búsquedas de KNote no lo hacen (las del servidor tampoco distinguen acentos). No se usan `InputText`/`InputNumber`/`InputSelect`... de Blazor ni
   `RadzenTemplateForm`. **La etiqueta va encima del campo**: `Shared/KntField` (`Label`, `Component` = `Name` del
   control, `Required` pone el asterisco, `Help` una línea de ayuda debajo; el control ocupa el ancho del campo, sin
   `Style="width: 100%"`). Los campos se agrupan en secciones, `Shared/KntFormSection` (icono, título y una línea
@@ -430,6 +435,23 @@ Patrones ya establecidos que hay que seguir:
   `Server` la acepta, como el de las notas trazadas. Los textos de la periodicidad y de los cuatro tipos de notificación
   (con la ayuda de cuáles avisa cada aplicación) están en `Shared/KntAlarmTexts`; los minutos solo se piden con "Every few
   minutes". La pestaña va después de Tasks (`ShowPanel(4)`; las notas trazadas son la 5).
+- **Avisos de alarmas** (`AppStoreService/AlarmNotices`, `Shared/KntAlarmNoticesButton` y `KntAlarmNoticesPanel`,
+  `js/kntAlarms.js`): las alarmas *Application info* del usuario que vencen, como el panel de alarmas de `ClientWin`.
+  `MainLayout` lo arranca para un usuario Staff+ con sesión y lo para al cerrarla (`StartForUserAsync`, como el chat
+  room); `KntWindowLayout` no (solo consulta la ventana principal). Arrancado, consulta `IStore.Alarms.CheckAsync`
+  (`POST api/alarms/check`, ver `Server/CLAUDE.md`) cada `CheckSeconds` que dice el servidor: cada alarma vencida la
+  recibe una sola consulta, aunque haya varias pestañas o `ClientWin` abierto. Los avisos se quedan hasta que el usuario
+  los quita y **se guardan en el navegador** (`localStorage`, clave `KNoteAlarmNotices:{RepositoryId}:{usuario}`: solo
+  el `KMessageId` y cuándo se avisó, como `ClientWin` los guarda en la carpeta del usuario); los demás datos se piden al
+  arrancar (`GetNoticesAsync`, `POST api/alarms/notices`, que omite los que ya no son avisos del usuario y los olvida).
+  Las pestañas comparten los avisos: cada una oye los cambios de las otras (evento `storage`, `watchStorage` de
+  `kntAlarms.js`, que solo llega a las demás pestañas). Uno nuevo se muestra en la pestaña que lo recibió: como
+  notificación del sistema si la app no está en pantalla y el usuario lo permitió (botón Allow del panel,
+  `Notification.requestPermission`), y si no, con una notificación de Radzen (`AlarmNotices.Arrived` → `MainLayout`; un
+  clic abre la nota). La campana de la cabecera (solo con los avisos arrancados) muestra cuántos hay y abre el panel
+  lateral (sin máscara, como Appearance): número y tema de la nota, comentario, fecha de la alarma y del aviso; el tema
+  abre la nota en su ventana de edición (`KntWindows.OpenEditAsync`, en el mismo clic: si no, el navegador bloquea la
+  ventana), y cada aviso se quita con su botón o todos con Remove all (con confirmación).
 - **Notas trazadas** (`NoteTraceNotes`, presentación; `NoteTraceNoteEditor`, diálogo), como en `ClientWin`: dos paneles,
   "Trace notes from" (la nota es `ToId`) y "Trace notes to" (es `FromId`), cada relación descrita por la otra nota y
   su tipo, orden y peso (`IStore.Notes.GetTraceNotesAsync` → `NoteTraceNotesDto`, resuelto en `Server`). A diferencia

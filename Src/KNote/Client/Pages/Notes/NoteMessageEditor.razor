@@ -49,7 +49,7 @@
                 </KntField>
                 <KntField Label="User" Component="UserId">
                     <RadzenDropDown Name="UserId" TValue="Guid?" Value="@alarm.UserId" ValueChanged="OnUserChanged"
-                                    Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" AllowClear="true" Placeholder="No user" />
+                                    Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowClear="true" Placeholder="No user" />
                 </KntField>
                 <KntField Label="Comment" Component="Comment">
                     <RadzenTextArea Name="Comment" @bind-Value="@alarm.Comment" Rows="3" />

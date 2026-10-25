@@ -1,0 +1,78 @@
+.knt-alarm-notices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.knt-alarm-notices-permission {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--rz-border-radius);
+    background-color: var(--rz-primary-lighter);
+    font-size: 0.8125rem;
+}
+
+.knt-alarm-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0.25rem 0.5rem 0.75rem;
+    border-left: 3px solid var(--rz-primary);
+    border-radius: var(--rz-border-radius);
+    background-color: color-mix(in srgb, var(--rz-primary) 6%, transparent);
+}
+
+    .knt-alarm-notice + .knt-alarm-notice {
+        margin-top: 0.375rem;
+    }
+
+.knt-alarm-notice-body {
+    flex: 1;
+    min-width: 0;
+}
+
+/* The note's number and topic: opens it in its edit window. */
+.knt-alarm-notice-title {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--rz-primary);
+    text-align: start;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+    .knt-alarm-notice-title:hover {
+        text-decoration: underline;
+    }
+
+.knt-alarm-notice-comment {
+    margin-top: 0.125rem;
+    overflow-wrap: anywhere;
+}
+
+.knt-alarm-notice-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.125rem 0.875rem;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+    .knt-alarm-notice-meta > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .knt-alarm-notice-meta ::deep .rzi {
+        font-size: 1rem;
+    }

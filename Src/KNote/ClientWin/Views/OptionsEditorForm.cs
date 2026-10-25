@@ -207,6 +207,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         textSmtpFromDisplayName.Text = _ctrl.Model.SmtpFromDisplayName;
         textSmtpUsername.Text = _ctrl.Model.SmtpUsername;
         textSmtpPassword.Text = _ctrl.Model.SmtpPassword;
+        checkProcessEmailAlarms.Checked = _ctrl.Model.ProcessEmailAlarms;
 
         //var x5 = _ctrl.Model.LogActivated;
         //var x6 = _ctrl.Model.LogFile;
@@ -231,6 +232,7 @@ public partial class OptionsEditorForm : KntEditorForm, IViewEditor<OptionsModel
         _ctrl.Model.SmtpFromDisplayName = textSmtpFromDisplayName.Text;
         _ctrl.Model.SmtpUsername = textSmtpUsername.Text;
         _ctrl.Model.SmtpPassword = textSmtpPassword.Text;
+        _ctrl.Model.ProcessEmailAlarms = checkProcessEmailAlarms.Checked;
     }
 
     #endregion

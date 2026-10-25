@@ -32,7 +32,7 @@ public static class KntAlarmTexts
 
     // Which ones each app notifies (the help of the notification's field).
     public const string NotificationsHelp =
-        "The web app notifies Application info alarms and the server sends the Email ones; Post-it and KntScript alarms are only processed by the desktop app.";
+        "The web app notifies Application info alarms (the bell of the header). Email alarms are sent by the server, when it has them on, or by the desktop app. Post-it and KntScript alarms are only processed by the desktop app.";
 
     // "Once", "Every week", "Every 15 minutes".
     public static string Periodicity(KMessageDto alarm) =>

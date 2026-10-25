@@ -25,7 +25,7 @@
                     <RadzenColumn Size="12" SizeSM="5">
                         <KntField Label="User" Component="UserId" Required="true">
                             <RadzenDropDown Name="UserId" TValue="Guid" @bind-Value="@task.UserId"
-                                            Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" Placeholder="Choose a user" />
+                                            Data="@Users" TextProperty="FullName" ValueProperty="UserId" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Choose a user" />
                             <ValidationMessage For="@(() => task.UserId)" />
                         </KntField>
                     </RadzenColumn>

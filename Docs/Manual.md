@@ -281,11 +281,19 @@ A note is edited in its own window. Its header shows the note's number (*New* un
 - **Resources**: the note's files as cards. Click a resource to see it in the note's window, without leaving it: images (click the image to see it at its size), PDF, video, audio and text files; the other files open in a new tab of the main window. Any file can be edited (its description and its order, not the file itself), opened in a new tab, inserted in the description (where its cursor was, in a paragraph of its own; at the end if it wasn't used) or deleted. **Add resource** uploads a file: drop it on the box, paste it or click to choose it.
 - **Tasks**: as in the desktop app, the list of tasks (by priority) and, beside it, the task selected: who it is for, its priority, dates and times, and its description shown as it looks (it may be long, with images). Drag the bar between them to resize them (the browser remembers it); in a narrow window the task goes below the list. A resolved task is marked as such, and its text reads as the others. **Add task**, **Edit** or a double click open the task: its topic, its user, its description (Markdown, with **Preview**), its planning and its progress. A new task is yours, after the others and started now; resolving a task without an end date sets it to now.
 
-- **Alarms**: the note's alarms, the same ones as in the desktop app, by date: when each one is due, how often it repeats, how it is notified, for which user, whether it is activated and its comment. **Add alarm** opens a new one for you, now, notified as *Application info*; **Edit**, a double click or **Enter** open an alarm, and the delete button removes it (it asks first). In the alarm: its **Date and time**, **Repeat** (once, every day, week, month or year, or every few minutes, which asks for the minutes), **Activated** (a deactivated alarm is kept but never notified), **Notification**, **User** and **Comment**. The four notifications of the desktop app are there: the web app notifies *Application info* alarms and the server sends the *Email* ones; *Post-it* and *Run KntScript* alarms are only processed by the desktop app. An alarm is saved at once, without saving the note; the dialog stays open if the server refuses it.
+- **Alarms**: the note's alarms, the same ones as in the desktop app, by date: when each one is due, how often it repeats, how it is notified, for which user, whether it is activated and its comment. **Add alarm** opens a new one for you, now, notified as *Application info*; **Edit**, a double click or **Enter** open an alarm, and the delete button removes it (it asks first). In the alarm: its **Date and time**, **Repeat** (once, every day, week, month or year, or every few minutes, which asks for the minutes), **Activated** (a deactivated alarm is kept but never notified), **Notification**, **User** and **Comment**. The four notifications of the desktop app are there: the web app notifies *Application info* alarms (see *Alarms (web app)*), *Email* alarms are sent by the server when it has them on (see *E-mail alarms sent by the server (server configuration)*) or by the desktop app, and *Post-it* and *Run KntScript* alarms are only processed by the desktop app. An alarm is saved at once, without saving the note; the dialog stays open if the server refuses it.
 
 - **Trace notes**: as in the desktop app, the relations of the note with other notes, in two lists: **Trace notes from** (other notes that lead to this one) and **Trace notes to** (other notes this one leads to). Each relation shows the other note (number, topic and tags), its type, its order and its weight. **Add** opens the relation: the other note, chosen with **Select** (a text search, or browsing the folders tree; the note itself can't be chosen), its **Type** (optional; the types are managed in the admin panel), **Order** and **Weight**; the dialog shows the direction of the relation. The same two notes can be traced only once in the same direction with the same type (with no type too). A relation is saved at once, without saving the note. **Edit**, the button that removes it (it asks first; the other note is not deleted) and the one that opens the other note in its own window are on each row; a double click also opens it.
 
 A new note has to be saved before adding resources, tasks, alarms or trace notes to it, and deleting a resource, a task or an alarm asks first. The dialogs of the admin panel (users, folders, note types, trace note types, attributes) and the sign in and register ones follow the same style: labels above the fields, grouped in sections.
+
+### Alarms (web app)
+
+While you are signed in as Staff or higher, the web app checks your *Application info* alarms every minute (the server decides how often) and tells you when one is due: with a notice at the top right while the app is on screen (clicking it opens the note), or as a notification of your system while it is not, if you allowed it. Each alarm is notified once, in one place: if the desktop app or another tab of the web app gets it first, it is not notified again (another tab of the web app shows it in its panel too).
+
+The notices stay in the **Alarms** panel, opened with the bell of the header, which shows how many there are, until you remove them: each one with the note's number and topic, the alarm's comment, when it was due and when you were told. Clicking the topic opens the note in its edit window; the **×** button removes a notice, and **Remove all** removes them all (it asks first). **Allow** asks the browser to let the web app show notifications of the system (once; if you blocked them, the panel says so and you can allow them again in the browser's settings for the site).
+
+The notices are kept in this browser, one list for each repository and user, like the desktop app keeps the rows of its alarms panel in your user folder: they are shared by the tabs of the app, but not with another browser or computer. A notice of an alarm that was deleted, or changed to another user or another kind of notification, disappears the next time the app is opened. Only the main window checks the alarms, not the windows of the notes, the AI assistant or the chat room.
 
 ### Appearance (web app)
 
@@ -404,5 +412,25 @@ In a server, use environment variables (`ai__providers__0__apiKey`) or your host
 Without `PublicBaseUrl`, `Email:Host` or `Email:FromAddress`, password reset by e-mail is off. A link that can't be sent is written in the server log.
 
 **Gmail.** Gmail doesn't accept the account's password: turn on 2-Step Verification in your Google account, create an *app password* at <https://myaccount.google.com/apppasswords> and use its 16 letters, without spaces, as `Email:Password`. `FromAddress` must be the account's address. Changing the Google password revokes the app passwords. The same app password works in the desktop app (**Options → Email**).
+
+### E-mail alarms sent by the server (server configuration)
+
+The web server can send the *Email* alarms of every user of all its repositories, without anybody having the desktop app or the web app open. It is off by default, as the desktop app sends them too:
+
+```json
+"Alarms:AppInfoCheckSeconds": "60",
+"Alarms:Email:Enabled": "true",
+"Alarms:Email:IntervalSeconds": "60"
+```
+
+| Setting | Meaning |
+|---|---|
+| `Alarms:AppInfoCheckSeconds` | How often the web app checks the *Application info* alarms of its user (15 seconds to an hour; 60 by default). |
+| `Alarms:Email:Enabled` | The server sends the *Email* alarms (`false` by default). |
+| `Alarms:Email:IntervalSeconds` | How often it looks for the ones that are due (15 seconds to an hour; 60 by default). |
+
+The e-mails go through the server's SMTP account (the `Email:*` section of *Password reset by e-mail*; without `Email:Host` or `Email:FromAddress` none is sent) to the e-mail of each alarm's user, with the note's topic as subject and the alarm's comment and the note's description as text, as the desktop app sends them. If the SMTP server fails, the alarm is sent again the next time; if the user has no e-mail, the failure is written in the alarm's comment. Alarm times are the server's local time.
+
+When the server sends them, uncheck **Process Email alarms** in the options of the desktop app (**Options → Email**) on every computer: each alarm is sent only once anyway (by whoever gets it first), but this way they all go out from the server's account.
 
 (This program is under construction and the documentation isn't ready yet. Thanks for your patience!)

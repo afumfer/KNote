@@ -65,6 +65,7 @@ public class CommandAuthorizationMatrixTests
             "KntNotesDeleteResourceInfoAsyncCommand", "KntNotesSaveNoteTaskAsyncCommand", "KntNotesDeleteNoteTaskAsyncCommand",
             "KntNotesNewMessageAsyncCommand", "KntNotesSaveMessageAsyncCommand", "KntNotesDeleteMessageAsyncCommand", "KntNotesSaveTraceNoteAsyncCommand",
             "KntNotesDeleteTraceNoteAsyncCommand", "KntNotesSaveWindowAsyncCommand", "KntNotesGetAlarmNotesIdAsyncCommand",
+            "KntNotesConsumeDueAlarmsAsyncCommand", "KntNotesGetAlarmNoticesAsyncCommand",
             "KntNotesPatchFolderAsyncCommand", "KntNotesPatchChangeTagsAsyncCommand");
 
         // The AI assistant's sessions: notes and tasks of the user's own (Staff, like the assistant), also to
@@ -90,6 +91,10 @@ public class CommandAuthorizationMatrixTests
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand", "KntUsersGetPasswordStampAsyncCommand");
+
+        // The alarms of every user (the Server's alarms services, which run without a user).
+        Add(nameof(EnumRoles.Admin),
+            "KntNotesConsumeAllUsersDueAlarmsAsyncCommand");
 
         return matrix;
     }

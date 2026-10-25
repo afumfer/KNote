@@ -258,6 +258,21 @@ public class OptionsModel : SmartModelDtoBase
         }
     }
 
+    // Off where the KNote Server sends the Email alarms (see NotificationsConfig.ProcessEmailAlarms).
+    private bool _processEmailAlarms = true;
+    public bool ProcessEmailAlarms
+    {
+        get { return _processEmailAlarms; }
+        set
+        {
+            if (_processEmailAlarms != value)
+            {
+                _processEmailAlarms = value;
+                OnPropertyChanged("ProcessEmailAlarms");
+            }
+        }
+    }
+
     public static OptionsModel From(AppUserSettings settings, AppUserState state)
     {
         var email = settings.Notifications.Email;
@@ -280,7 +295,8 @@ public class OptionsModel : SmartModelDtoBase
             SmtpFromAddress = email.FromAddress,
             SmtpFromDisplayName = email.FromDisplayName,
             SmtpUsername = email.Username,
-            SmtpPassword = email.Password
+            SmtpPassword = email.Password,
+            ProcessEmailAlarms = settings.Notifications.ProcessEmailAlarms
         };
         model.SetIsDirty(false);
         return model;
@@ -307,6 +323,7 @@ public class OptionsModel : SmartModelDtoBase
         email.FromDisplayName = SmtpFromDisplayName;
         email.Username = SmtpUsername;
         email.Password = SmtpPassword;
+        settings.Notifications.ProcessEmailAlarms = ProcessEmailAlarms;
     }
 
     // The model and the settings never share the entries (editing one doesn't change the other).

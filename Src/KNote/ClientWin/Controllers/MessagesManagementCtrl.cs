@@ -162,9 +162,13 @@ public class MessagesManagementCtrl : CtrlBase
                     foreach (var id in NoteIdsOrEmpty(resPostIt, serviceRef, "PostIt alarms"))
                         PostItAlarm?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
 
-                    var resEMail = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.Email);
-                    foreach (var id in NoteIdsOrEmpty(resEMail, serviceRef, "Email alarms"))
-                        EMailAlarm?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+                    // Not where the KNote Server sends them (Options: Process Email alarms off): left due for it.
+                    if (Store.Settings.Notifications.ProcessEmailAlarms)
+                    {
+                        var resEMail = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.Email);
+                        foreach (var id in NoteIdsOrEmpty(resEMail, serviceRef, "Email alarms"))
+                            EMailAlarm?.Invoke(this, new ControllerEventArgs<ServiceWithNoteId>(new ServiceWithNoteId { Service = service, NoteId = id }));
+                    }
 
                     var resAppInfo = await service.Notes.GetAlarmNotesIdAsync(Store.AppUserName, EnumNotificationType.AppInfo);
                     foreach (var id in NoteIdsOrEmpty(resAppInfo, serviceRef, "AppInfo alarms"))

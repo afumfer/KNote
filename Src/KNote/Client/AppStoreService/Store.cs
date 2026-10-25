@@ -150,6 +150,17 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private IAlarmWebApiService? _alarms;
+    public IAlarmWebApiService Alarms
+    {
+        get
+        {
+            if (_alarms == null)
+                _alarms = new AlarmWebApiService(AppState, _httpClient);
+            return _alarms;
+        }
+    }
+
     public ChatRoomHub ChatRoom { get; }
 
     #endregion

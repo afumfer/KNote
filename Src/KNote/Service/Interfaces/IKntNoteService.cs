@@ -57,6 +57,11 @@ public interface IKntNoteService
     Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false);
     Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName);
     Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null);
+    // The due alarms of a type, consumed (each one returned once): of the user running the service, or of every user.
+    Task<Result<List<KMessageDto>>> ConsumeDueAlarmsAsync(EnumNotificationType notificationType);
+    Task<Result<List<KMessageDto>>> ConsumeAllUsersDueAlarmsAsync(EnumNotificationType notificationType);
+    // The Application info notices of the user running the service for those alarms (the ones still valid).
+    Task<Result<List<AlarmNoticeDto>>> GetAlarmNoticesAsync(List<Guid> messageIds);
 
     #region Utils 
     Task<Result<bool>> UtilPatchFolderAsync(Guid noteId, Guid folderId);

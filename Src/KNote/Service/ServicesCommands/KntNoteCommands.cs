@@ -1265,6 +1265,89 @@ public class KntNotesGetAlarmNotesIdAsyncCommand : KntCommandServiceBase<Result<
     }
 }
 
+/// <summary>
+/// The due alarms of a type of the user running the service, consumed: each one returned once, however many consumers
+/// check at the same time (see IKntNoteRepository.ConsumeDueMessagesAsync). None for a user not registered here.
+/// </summary>
+[KntAuthorize(EnumRoles.Staff)]
+public class KntNotesConsumeDueAlarmsAsyncCommand : KntCommandServiceBase<EnumNotificationType, Result<List<KMessageDto>>>
+{
+    public KntNotesConsumeDueAlarmsAsyncCommand(IKntService service, EnumNotificationType notificationType) : base(service, notificationType)
+    {
+    }
+
+    public override async Task<Result<List<KMessageDto>>> Execute()
+    {
+        var user = await Service.GetCurrentUserAsync();
+        if (user == null)
+            return new Result<List<KMessageDto>>(new List<KMessageDto>());
+
+        return await Repository.Notes.ConsumeDueMessagesAsync(user.UserId, Param);
+    }
+}
+
+/// <summary>
+/// The due alarms of a type of every user, consumed (as KntNotesConsumeDueAlarmsAsyncCommand): for an alarms service
+/// that works for everybody, such as the Server's EmailAlarmsService (no user; the Server runs with authorization off).
+/// </summary>
+[KntAuthorize(EnumRoles.Admin)]
+public class KntNotesConsumeAllUsersDueAlarmsAsyncCommand : KntCommandServiceBase<EnumNotificationType, Result<List<KMessageDto>>>
+{
+    public KntNotesConsumeAllUsersDueAlarmsAsyncCommand(IKntService service, EnumNotificationType notificationType) : base(service, notificationType)
+    {
+    }
+
+    public override async Task<Result<List<KMessageDto>>> Execute()
+    {
+        return await Repository.Notes.ConsumeDueMessagesAsync(null, Param);
+    }
+}
+
+/// <summary>
+/// The Application info notices of the user running the service for the alarms given (the ones its alarms panel keeps):
+/// only those that still are (KMessageDto.IsAppInfoNoticeFor the user, of a note that exists), with their note's number
+/// and topic and their comment read now. The others are left out, so the panel drops them.
+/// </summary>
+[KntAuthorize(EnumRoles.Staff)]
+public class KntNotesGetAlarmNoticesAsyncCommand : KntCommandServiceBase<List<Guid>, Result<List<AlarmNoticeDto>>>
+{
+    public KntNotesGetAlarmNoticesAsyncCommand(IKntService service, List<Guid> messageIds) : base(service, messageIds)
+    {
+    }
+
+    public override async Task<Result<List<AlarmNoticeDto>>> Execute()
+    {
+        var result = new Result<List<AlarmNoticeDto>>(new List<AlarmNoticeDto>());
+
+        var user = await Service.GetCurrentUserAsync();
+        if (user == null)
+            return result;
+
+        foreach (var messageId in (Param ?? new List<Guid>()).Distinct())
+        {
+            var message = (await Repository.Notes.GetMessageAsync(messageId)).Entity;
+            if (message?.NoteId == null || !message.IsAppInfoNoticeFor(user.UserId))
+                continue;
+
+            var note = (await Repository.Notes.GetAsync(message.NoteId.Value)).Entity;
+            if (note == null)
+                continue;
+
+            result.Entity.Add(new AlarmNoticeDto
+            {
+                KMessageId = message.KMessageId,
+                NoteId = note.NoteId,
+                NoteNumber = note.NoteNumber,
+                NoteTopic = note.Topic,
+                Comment = message.Comment,
+                AlarmDateTime = message.AlarmDateTime
+            });
+        }
+
+        return result;
+    }
+}
+
 [KntAuthorize(EnumRoles.Staff)]
 public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool>>
 {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Repository;
 using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
@@ -62,6 +63,15 @@ public class KntUsersSaveAsyncCommand : KntCommandSaveServiceBase<UserDto, Resul
     public override async Task<Result<UserDto>> Execute()
     {
         Result<UserDto> result;
+
+        var uniquenessError = await KntUserUniqueness.GetErrorAsync(Repository, Param.UserId, Param.UserName, Param.EMail);
+        if (uniquenessError != null)
+        {
+            result = new Result<UserDto>();
+            result.AddErrorMessage(uniquenessError);
+            return result;
+        }
+
         if (Param.UserId == Guid.Empty)
         {
             Param.UserId = Guid.NewGuid();
@@ -196,10 +206,9 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
             return resService;
         }
 
-        if ((await Repository.Users.GetInternalAsync(Param.UserName)).Entity != null)
-            throw new Exception("Username \"" + Param.UserName + "\" is already taken");
-        else if ((await Repository.Users.GetByEMailAsync(Param.EMail)).Entity != null)
-            throw new Exception("Email \"" + Param.EMail + "\" is already in use");
+        var uniquenessError = await KntUserUniqueness.GetErrorAsync(Repository, Guid.Empty, Param.UserName, Param.EMail);
+        if (uniquenessError != null)
+            resService.AddErrorMessage(uniquenessError);
         else
         {
             byte[] passwordHash, passwordSalt;
@@ -499,6 +508,34 @@ public class KntUsersResetPasswordAsyncCommand : KntCommandServiceBase<KntPasswo
 // user has one; a disabled user (no role) is refused by each of them too, also where the role isn't checked
 // (Server, IKntService.EnforceAuthorization off).
 
+/// <summary>
+/// A user's name and email are unique: a user can't take another user's (userId: the user being saved, Guid.Empty for a
+/// new one; null: not checked). A rule of the domain, checked by every command that saves a user, so that the caller gets
+/// it in its own words instead of the error of the database's unique indexes (still there, as the last defense of its
+/// integrity). Compared as each database compares them (Repository.Users), the same as its indexes.
+/// </summary>
+internal static class KntUserUniqueness
+{
+    public static async Task<string> GetErrorAsync(IKntRepository repository, Guid userId, string userName, string eMail)
+    {
+        if (!string.IsNullOrEmpty(userName))
+        {
+            var byName = (await repository.Users.GetInternalAsync(userName)).Entity;
+            if (byName != null && byName.UserId != userId)
+                return $"Username \"{userName}\" is already taken.";
+        }
+
+        if (!string.IsNullOrEmpty(eMail))
+        {
+            var byEMail = (await repository.Users.GetByEMailAsync(eMail)).Entity;
+            if (byEMail != null && byEMail.UserId != userId)
+                return $"Email \"{eMail}\" is already in use.";
+        }
+
+        return null;
+    }
+}
+
 internal static class KntCurrentUserAccount
 {
     public static async Task<(UserInternalDto User, string Error)> GetAsync(IKntService service)
@@ -574,10 +611,10 @@ public class KntUsersSaveProfileAsyncCommand : KntCommandSaveServiceBase<UserPro
                 return result;
             }
 
-            var otherUser = (await Repository.Users.GetByEMailAsync(eMail)).Entity;
-            if (otherUser != null && otherUser.UserId != user.UserId)
+            var uniquenessError = await KntUserUniqueness.GetErrorAsync(Repository, user.UserId, null, eMail);
+            if (uniquenessError != null)
             {
-                result.AddErrorMessage($"Email \"{eMail}\" is already in use.");
+                result.AddErrorMessage(uniquenessError);
                 return result;
             }
         }
