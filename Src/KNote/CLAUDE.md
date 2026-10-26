@@ -209,6 +209,19 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   lista de ids (`KMessageDto.IsAppInfoNoticeFor`). El correo de una alarma *Email* es común
   (`Service/Core/KntAlarmEmail`). Tests en `Tests/ServiceTests/AlarmNoticesServiceTests`. Usos: el panel de alarmas de
   `ClientWin`, la campana de la Web y el servicio de correo del `Server` (ver los `CLAUDE.md` de cada uno).
+- **Calendario de alarmas y panel de tareas de la Web** (`IKntNoteService.GetAlarmsCalendarAsync` y
+  `GetTasksPanelAsync`, Guest, solo lectura). Las reglas son lógica pura de `Model/Core`, comunes al `Server` y a la Web,
+  con sus tests: `AlarmOccurrences.Expand` (las fechas en que salta una alarma en un rango: la periódica desde la creación
+  de su nota, con los mismos pasos que `ApplyAlarmControl`, también la deriva de las mensuales; desactivada o *Once*,
+  solo en su `AlarmDateTime`), `TasksWindow` (la ventana de N días, semanas de lunes a domingo o meses alrededor de una
+  fecha, centrada, con la unidad sobrante al pasado, y la fecha de corte D = min(hoy, fin)) y `TaskPanelRules` (una tarea
+  está resuelta si y solo si tiene `EndDate`; sin `StartDate` empieza en su creación; solape con la ventana, columna en D,
+  indicadores e inconsistencias). Los repositorios hacen la versión SQL de `Overlaps`/`Classify`
+  (`IKntNoteRepository.GetTasksPanelCountsAsync`/`PageAsync`/`NearestAsync`, sin `GREATEST` ni `COALESCE` en el solape
+  para usar los índices de `NoteTasks.StartDate`/`EndDate`, revisión 6 del esquema): **si cambia una regla, cambian las
+  dos** (`TasksPanelServiceTests` compara cada tarea devuelta con `TaskPanelRules`). Las tareas de las notas del sistema
+  (`@ChatSessions`, `@KNoteChatRoom`) nunca salen en el panel. Tests en `Tests/AlarmOccurrencesTests`,
+  `TasksWindowTests`, `TaskPanelRulesTests` y `Tests/ServiceTests/AlarmsCalendarServiceTests`/`TasksPanelServiceTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben
