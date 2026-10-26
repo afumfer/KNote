@@ -311,6 +311,12 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter)
+    {
+        var command = new KntNotesGetAlarmsCalendarAsyncCommand(Service, filter);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null)
     {
         var command = new KntNotesGetAlarmNotesIdAsyncCommand(Service, userName, notificationType);

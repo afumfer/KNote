@@ -1450,6 +1450,57 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<AlarmCalendarItemDto>>> GetCalendarAlarmsAsync(AlarmsCalendarFilterDto filter)
+    {
+        try
+        {
+            var result = new Result<List<AlarmCalendarItemDto>>();
+
+            var db = GetOpenConnection();
+
+            var sql = @"
+                SELECT
+                    KMessages.KMessageId, KMessages.NoteId, KMessages.ActionType, KMessages.NotificationType,
+                    KMessages.AlarmType, KMessages.[Comment], KMessages.AlarmActivated, KMessages.AlarmDateTime,
+                    KMessages.AlarmMinutes, KMessages.UserId, Users.FullName AS UserFullName,
+                    Notes.NoteNumber, Notes.Topic AS NoteTopic, Notes.CreationDateTime AS NoteCreationDateTime
+                FROM  KMessages INNER JOIN
+                    Notes ON KMessages.NoteId = Notes.NoteId LEFT JOIN
+                    Users ON KMessages.UserId = Users.UserId
+                WHERE KMessages.AlarmDateTime IS NOT NULL
+                    AND ((KMessages.AlarmDateTime >= @Start AND KMessages.AlarmDateTime < @End)
+                        OR (KMessages.AlarmActivated = 1 AND KMessages.AlarmType <> @standard))";
+            if (!filter.IncludeDeactivated)
+                sql += " AND KMessages.AlarmActivated = 1";
+            if (filter.UserId != null)
+                sql += " AND KMessages.UserId = @UserId";
+            if (filter.AlarmTypes?.Count > 0)
+                sql += " AND KMessages.AlarmType IN @alarmTypes";
+            if (filter.NotificationTypes?.Count > 0)
+                sql += " AND KMessages.NotificationType IN @notificationTypes";
+            sql += " ORDER BY KMessages.AlarmDateTime;";
+
+            var entity = await db.QueryAsync<AlarmCalendarItemDto>(sql, new
+            {
+                filter.Start,
+                filter.End,
+                filter.UserId,
+                standard = EnumAlarmType.Standard,
+                alarmTypes = filter.AlarmTypes,
+                notificationTypes = filter.NotificationTypes
+            });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
     {
         try

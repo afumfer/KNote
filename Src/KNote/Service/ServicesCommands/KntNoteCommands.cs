@@ -1348,6 +1348,62 @@ public class KntNotesGetAlarmNoticesAsyncCommand : KntCommandServiceBase<List<Gu
     }
 }
 
+/// <summary>
+/// The alarms calendar of the web: the alarms of the filter (read-only, any user's, like the alarms of a note) and the
+/// dates they fire on in its range. A periodic alarm fires from the creation of its note on (AlarmOccurrences); with
+/// GroupFrequentByDay, an alarm of every few minutes is one occurrence per day. At most
+/// KntConst.MaxAlarmsCalendarOccurrences occurrences, the first ones (Truncated says that there were more).
+/// </summary>
+[KntAuthorize(EnumRoles.Guest)]
+public class KntNotesGetAlarmsCalendarAsyncCommand : KntCommandServiceBase<AlarmsCalendarFilterDto, Result<AlarmsCalendarDto>>
+{
+    public KntNotesGetAlarmsCalendarAsyncCommand(IKntService service, AlarmsCalendarFilterDto filter) : base(service, filter)
+    {
+    }
+
+    public override async Task<Result<AlarmsCalendarDto>> Execute()
+    {
+        var result = new Result<AlarmsCalendarDto>(new AlarmsCalendarDto());
+        if (Param == null || Param.End <= Param.Start)
+        {
+            result.AddErrorMessage("The range of dates of the calendar is not valid.");
+            return result;
+        }
+
+        var resAlarms = await Repository.Notes.GetCalendarAlarmsAsync(Param);
+        if (!resAlarms.IsValid)
+        {
+            result.AddListErrorMessage(resAlarms.ListErrorMessage);
+            return result;
+        }
+
+        var occurrences = new List<AlarmOccurrenceDto>();
+        foreach (var alarm in resAlarms.Entity)
+        {
+            var dates = AlarmOccurrences.Expand(alarm, alarm.NoteCreationDateTime, Param.Start, Param.End);
+            if (Param.GroupFrequentByDay && alarm.AlarmType == EnumAlarmType.InMinutes)
+                occurrences.AddRange(dates.GroupBy(d => d.Date)
+                    .Select(day => new AlarmOccurrenceDto { KMessageId = alarm.KMessageId, DateTime = day.First(), Count = day.Count() }));
+            else
+                occurrences.AddRange(dates.Take(KntConst.MaxAlarmsCalendarOccurrences + 1)
+                    .Select(d => new AlarmOccurrenceDto { KMessageId = alarm.KMessageId, DateTime = d }));
+        }
+
+        var calendar = result.Entity;
+        calendar.Occurrences = occurrences.OrderBy(o => o.DateTime).ToList();
+        if (calendar.Occurrences.Count > KntConst.MaxAlarmsCalendarOccurrences)
+        {
+            calendar.Occurrences = calendar.Occurrences.Take(KntConst.MaxAlarmsCalendarOccurrences).ToList();
+            calendar.Truncated = true;
+        }
+
+        var shown = calendar.Occurrences.Select(o => o.KMessageId).ToHashSet();
+        calendar.Alarms = resAlarms.Entity.Where(a => shown.Contains(a.KMessageId)).ToList();
+
+        return result;
+    }
+}
+
 [KntAuthorize(EnumRoles.Staff)]
 public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool>>
 {

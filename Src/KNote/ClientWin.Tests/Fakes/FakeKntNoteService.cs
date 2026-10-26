@@ -97,6 +97,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<List<KMessageDto>>> ConsumeDueAlarmsAsync(EnumNotificationType notificationType) => throw new NotSupportedException();
     public Task<Result<List<KMessageDto>>> ConsumeAllUsersDueAlarmsAsync(EnumNotificationType notificationType) => throw new NotSupportedException();
     public Task<Result<List<AlarmNoticeDto>>> GetAlarmNoticesAsync(List<Guid> messageIds) => throw new NotSupportedException();
+    public Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter) => throw new NotSupportedException();
     public Task<Result<bool>> UtilPatchFolderAsync(Guid noteId, Guid folderId) => throw new NotSupportedException();
     public Task<Result<bool>> UtilPatchChangeTagsAsync(Guid noteId, string oldTag, string newTag) => throw new NotSupportedException();
     public Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null) => throw new NotSupportedException();

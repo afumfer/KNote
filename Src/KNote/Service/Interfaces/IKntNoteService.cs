@@ -62,6 +62,8 @@ public interface IKntNoteService
     Task<Result<List<KMessageDto>>> ConsumeAllUsersDueAlarmsAsync(EnumNotificationType notificationType);
     // The Application info notices of the user running the service for those alarms (the ones still valid).
     Task<Result<List<AlarmNoticeDto>>> GetAlarmNoticesAsync(List<Guid> messageIds);
+    // The alarms calendar of the web: the alarms that fire in the filter's range and their occurrences (AlarmOccurrences).
+    Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter);
 
     #region Utils 
     Task<Result<bool>> UtilPatchFolderAsync(Guid noteId, Guid folderId);

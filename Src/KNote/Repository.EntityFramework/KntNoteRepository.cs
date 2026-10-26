@@ -1048,6 +1048,47 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<AlarmCalendarItemDto>>> GetCalendarAlarmsAsync(AlarmsCalendarFilterDto filter)
+    {
+        try
+        {
+            var result = new Result<List<AlarmCalendarItemDto>>(new List<AlarmCalendarItemDto>());
+
+            var ctx = GetOpenConnection();
+
+            var query = ctx.KMessages.AsNoTracking().Include(m => m.User).Include(m => m.Note)
+                .Where(m => m.NoteId != null && m.AlarmDateTime != null
+                    && ((m.AlarmDateTime >= filter.Start && m.AlarmDateTime < filter.End)
+                        || (m.AlarmActivated == true && m.AlarmType != EnumAlarmType.Standard)));
+            if (!filter.IncludeDeactivated)
+                query = query.Where(m => m.AlarmActivated == true);
+            if (filter.UserId != null)
+                query = query.Where(m => m.UserId == filter.UserId);
+            if (filter.AlarmTypes?.Count > 0)
+                query = query.Where(m => filter.AlarmTypes.Contains(m.AlarmType));
+            if (filter.NotificationTypes?.Count > 0)
+                query = query.Where(m => filter.NotificationTypes.Contains(m.NotificationType));
+
+            foreach (var m in await query.OrderBy(m => m.AlarmDateTime).ToListAsync())
+            {
+                var alarm = m.GetSimpleDto<AlarmCalendarItemDto>();
+                alarm.UserFullName = m.User?.FullName;
+                alarm.NoteNumber = m.Note.NoteNumber;
+                alarm.NoteTopic = m.Note.Topic;
+                alarm.NoteCreationDateTime = m.Note.CreationDateTime;
+                result.Entity.Add(alarm);
+            }
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
     {
         try

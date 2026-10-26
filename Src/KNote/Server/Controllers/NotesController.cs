@@ -615,6 +615,26 @@ public class NotesController : ControllerBase
         }
     }
 
+    // The alarms calendar of the web (read-only, Guest+): the alarms of the filter and their occurrences in its range.
+    [HttpPost("alarms/calendar")]
+    public async Task<IActionResult> AlarmsCalendar([FromBody] AlarmsCalendarFilterDto filter)
+    {
+        try
+        {
+            _logger.LogTrace("AlarmsCalendar {dateTime}.", DateTime.Now);
+
+            var resApi = await _service.Notes.GetAlarmsCalendarAsync(filter);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AlarmsCalendar at {dateTime}.", DateTime.Now);
+            var kresApi = new Result<AlarmsCalendarDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
     #endregion
 
     // The note's trace notes in both directions, each one with the other note of the relation and its type

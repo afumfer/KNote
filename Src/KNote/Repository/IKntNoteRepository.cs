@@ -54,6 +54,10 @@ public interface IKntNoteRepository : IDisposable
     // two tabs). They are returned as they were when due (with UserFullName), so a caller can put one back as it was
     // (UpdateMessageAsync), e.g. when its email couldn't be sent.
     Task<Result<List<KMessageDto>>> ConsumeDueMessagesAsync(Guid? userId, EnumNotificationType notificationType);
+    // The alarms the alarms calendar may show in the filter's range (of a note, with a date, of the filter's user and
+    // types; deactivated ones only if it asks for them): those whose AlarmDateTime is in the range and every activated
+    // periodic one, with their note's number, topic and creation date. The Service expands their occurrences.
+    Task<Result<List<AlarmCalendarItemDto>>> GetCalendarAlarmsAsync(AlarmsCalendarFilterDto filter);
     Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId);
     Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag);       
 }

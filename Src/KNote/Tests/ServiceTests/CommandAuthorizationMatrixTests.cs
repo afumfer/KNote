@@ -45,7 +45,7 @@ public class CommandAuthorizationMatrixTests
             "KntNotesGetResourcesAsyncCommand", "KntNotesGetResourcesInfoAsyncCommand", "KntNotesGetResourceAsyncCommand",
             "KntNotesGetNoteTasksAsyncCommand", "KntNotesGetStartedTasksByDateTimeRageAsyncCommand",
             "KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand", "KntNotesGetNoteTaskAsyncCommand",
-            "KntNotesGetMessagesAsyncCommand", "KntNotesGetMessageAsyncCommand",
+            "KntNotesGetMessagesAsyncCommand", "KntNotesGetMessageAsyncCommand", "KntNotesGetAlarmsCalendarAsyncCommand",
             "KntNotesGetTraceNotesFromAsyncCommand", "KntNotesGetTraceNotesToAsyncCommand",
             "KntNotesGetWindowAsyncCommand", "KntNotesGetVisibleNotesIdAsyncCommand",
             "KntNoteTypeGetAllAsyncCommand", "KntNoteTypeGetAsyncCommand",
