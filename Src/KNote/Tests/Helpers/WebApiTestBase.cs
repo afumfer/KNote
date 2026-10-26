@@ -41,15 +41,36 @@ public class WebApiTestBase
             .Build();
         var urlBase = configuration["testsWebApiUrlBase"] ?? "";
 
+        // The repository to sign in to when the user is valid in several repositories of the Server. The tests create
+        // and delete data, so it is never chosen here: without it, the error lists the repositories to choose from.
+        var repositoryIdText = configuration["testsRepositoryId"];
+        Guid? repositoryId = null;
+        if (!string.IsNullOrWhiteSpace(repositoryIdText))
+        {
+            if (!Guid.TryParse(repositoryIdText, out var id))
+                return new TestSession(configuration, urlBase, null, $"testsRepositoryId is not a valid id: {repositoryIdText}");
+            repositoryId = id;
+        }
+
         try
         {
             using var httpClient = new HttpClient();
-            var credentials = new UserCredentialsDto { UserName = configuration["testsUserName"], Password = configuration["testsUserPwd"] };
+            var credentials = new UserCredentialsDto
+            {
+                UserName = configuration["testsUserName"],
+                Password = configuration["testsUserPwd"],
+                RepositoryId = repositoryId
+            };
             var httpRes = await httpClient.PostAsJsonAsync($"{urlBase}api/users/login", credentials);
             var userToken = await httpRes.Content.ReadFromJsonAsync<UserTokenDto>();
-            return userToken?.success == true
-                ? new TestSession(configuration, urlBase, userToken.token, null)
-                : new TestSession(configuration, urlBase, null, $"{(int)httpRes.StatusCode} {httpRes.StatusCode}: {userToken?.error}");
+            if (userToken?.success == true)
+                return new TestSession(configuration, urlBase, userToken.token, null);
+
+            var error = $"{(int)httpRes.StatusCode} {httpRes.StatusCode}: {userToken?.error}";
+            if (userToken?.Repositories?.Count > 0)
+                error += " Set testsRepositoryId (user secrets) to one of: " +
+                    string.Join(", ", userToken.Repositories.Select(r => $"{r.Name} ({r.RepositoryId})")) + ".";
+            return new TestSession(configuration, urlBase, null, error);
         }
         catch (Exception ex)
         {

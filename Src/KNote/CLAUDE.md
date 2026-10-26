@@ -76,7 +76,9 @@ Hay dos suites de test independientes, en dos `.slnx` distintos, con propósitos
   medias no deje restos que impidan las siguientes, y ningún test depende de datos concretos de la BD salvo las
   búsquedas de `NotesTests` (una nota con "Hopper"). Configura
   `testsUserName`, `testsUserPwd`, `testsWebApiUrlBase` en `Tests/appsettings.json` o en user-secrets (id de
-  secretos `f25fed7b-9b03-406c-8e4a-b98eb14f5579`) — **debe haber una instancia de `Server` en ejecución y
+  secretos `f25fed7b-9b03-406c-8e4a-b98eb14f5579`) y, si el usuario vale en varios repositorios del `Server`,
+  `testsRepositoryId` con el de pruebas (los tests nunca eligen uno: sin él, el error lista los disponibles con su
+  id) — **debe haber una instancia de `Server` en ejecución y
   accesible en esa URL antes de correr el proyecto de tests.** `Tests/InProcessIntegrationTests/*.cs` es la
   variante que no necesita un `Server` externo (usa `WebApplicationFactory` en el mismo proceso, ver
   `Tests/Helpers/KNoteWebApplicationFactory.cs`).
