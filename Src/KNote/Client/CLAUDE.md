@@ -484,9 +484,26 @@ Patrones ya establecidos que hay que seguir:
   `KntSections.TraceNoteTypes`, es también el de la pestaña del editor.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
-- Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (calendarios de tareas y
-  alarmas, `Notes/NotesTasksCalendar` y `NotesAlarmsCalendar`: aún son una prueba de concepto con datos de
-  ejemplo, sin entrada en el menú hasta que se desarrollen), `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
+- **Calendario de alarmas** (`Notes/NotesAlarmsCalendar` + `AlarmDetailPane`, menú "Alarms calendar", Guest+, solo
+  lectura): `RadzenScheduler` con `ShowHeader="false"`, movido desde la barra de la página (`CurrentDate` =
+  `SelectedView.Prev()/Next()` + `Reload()`; la vista con `SelectView`, porque `SelectedIndex` solo fija la inicial) y sus
+  filtros (usuario, que empieza en el conectado; periodicidad; notificación; desactivadas). Cada `LoadData` (también
+  `Reload` tras cambiar un filtro) pide al servidor el rango visible (`IStore.Notes.GetAlarmsCalendarAsync`,
+  `KntLatestRequest`), que devuelve las alarmas y sus ocurrencias; las de cada pocos minutos, una por día fuera de la
+  vista de día (`GroupFrequentByDay`). El estilo de cada cita va en `AppointmentRender` con variables del tema (próxima
+  activación, ya saltada, desactivada, seleccionada) y un `title` que lo dice con palabras; el `Template` lleva el icono
+  y el texto en una línea (si no, el texto se parte y el icono baja). El detalle muestra la nota con `NotePreviewPane`.
+- **Panel de tareas** (`Notes/NotesTasksPanel` + `TasksPanelColumn` + `TasksPanelDetail`, menú "Tasks panel", Guest+,
+  solo lectura; la ruta antigua `notes/taskscalendar` lleva a él): la ventana (unidad, tamaño y fecha de referencia, que
+  mueve `TasksWindow.Shift` de `Model`) se manda al servidor con el hoy del navegador y los filtros
+  (`IStore.Notes.GetTasksPanelAsync`), que devuelve la ventana, la fecha de corte, cada columna (una página de 40 con su
+  total; "Load more" pide la siguiente con `Column`/`Skip`), las tareas fuera y, con la ventana vacía, la fecha de la
+  tarea más cercana. Los indicadores de las tarjetas y del detalle salen de `TaskPanelRules` (`Model`), no de reglas
+  propias. La tarea seleccionada se conserva al mover la ventana (aviso si queda fuera). En una ventana estrecha, una
+  columna cada vez (`RadzenSelectBar` que solo se ve ahí, `data-active` en el contenedor) y el detalle debajo. Unidad y
+  tamaño en `localStorage` (`KNoteTasksPanelWindow`), paneles con `KntPaneSizes`.
+- Otros en uso: `RadzenTabs`, `RadzenSplitter`, `RadzenTree`, `RadzenScheduler` (el calendario de alarmas),
+  `RadzenDatePicker`, `RadzenCheckBoxList`, `RadzenPager`, `RadzenCard`.
 
 **No hay Bootstrap ni otras librerías de iconos o CSS**: la UI usa solo Radzen (tema `software` por defecto)
 más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),

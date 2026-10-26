@@ -1,0 +1,96 @@
+/* The alarm on top and its note below, which scrolls on its own and takes the rest of the pane. */
+.knt-alarm-detail {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.knt-alarm-detail-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.75rem 0.5rem;
+}
+
+.knt-alarm-detail-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    background-color: var(--rz-primary-lighter);
+    color: color-mix(in srgb, var(--rz-primary) 65%, var(--rz-text-color));
+}
+
+    .knt-alarm-detail-icon.knt-alarm-detail-off {
+        background-color: transparent;
+        color: var(--rz-text-disabled-color);
+    }
+
+.knt-alarm-detail-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.knt-alarm-detail-note {
+    font-family: var(--knt-heading-font-family);
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+    overflow-wrap: anywhere;
+}
+
+.knt-alarm-detail-state {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--rz-primary);
+}
+
+.knt-alarm-detail-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0 0.75rem 0.5rem;
+    padding: 0.375rem 0.625rem;
+    border-radius: var(--rz-border-radius);
+    background-color: var(--rz-warning-lighter);
+    font-size: 0.8125rem;
+}
+
+.knt-alarm-detail-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.5rem 1rem;
+    margin: 0;
+    padding: 0 0.75rem 0.5rem;
+}
+
+    .knt-alarm-detail-fields dt {
+        font-size: 0.6875rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--rz-text-secondary-color);
+    }
+
+    .knt-alarm-detail-fields dd {
+        margin: 0.125rem 0 0;
+        font-size: 0.875rem;
+    }
+
+.knt-alarm-detail-comment {
+    margin: 0 0.75rem 0.5rem;
+    padding: 0.5rem 0.625rem;
+    border-left: 3px solid var(--rz-primary);
+    background-color: color-mix(in srgb, var(--rz-primary) 6%, transparent);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.knt-alarm-detail-note-pane {
+    flex: 1;
+    min-height: 0;
+    border-top: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    padding-top: 0.5rem;
+}

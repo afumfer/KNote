@@ -73,8 +73,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId) => throw new NotSupportedException();
     public Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id) => throw new NotSupportedException();
     public Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId) => throw new NotSupportedException();
-    public Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime) => throw new NotSupportedException();
-    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime) => throw new NotSupportedException();
+    public Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter) => throw new NotSupportedException();
     public Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId) => throw new NotSupportedException();
     public Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId) => throw new NotSupportedException();
     public Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId) => throw new NotSupportedException();
@@ -97,6 +96,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<List<KMessageDto>>> ConsumeDueAlarmsAsync(EnumNotificationType notificationType) => throw new NotSupportedException();
     public Task<Result<List<KMessageDto>>> ConsumeAllUsersDueAlarmsAsync(EnumNotificationType notificationType) => throw new NotSupportedException();
     public Task<Result<List<AlarmNoticeDto>>> GetAlarmNoticesAsync(List<Guid> messageIds) => throw new NotSupportedException();
+    public Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter) => throw new NotSupportedException();
     public Task<Result<bool>> UtilPatchFolderAsync(Guid noteId, Guid folderId) => throw new NotSupportedException();
     public Task<Result<bool>> UtilPatchChangeTagsAsync(Guid noteId, string oldTag, string newTag) => throw new NotSupportedException();
     public Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null) => throw new NotSupportedException();

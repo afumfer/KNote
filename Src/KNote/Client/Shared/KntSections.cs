@@ -13,8 +13,8 @@ public static class KntSections
     public static readonly KntSection QuickSearch = new("Quick search", "notes/search", "search");
     public static readonly KntSection TreePanel = new("Tree panel", "notes/tree", "topic");
     public static readonly KntSection NotesFilter = new("Notes filter", "notes/filter", "filter_alt");
-    public static readonly KntSection TasksCalendar = new("Tasks calendar", "notes/taskscalendar", "calendar_today");
-    public static readonly KntSection Alarms = new("Alarms", "notes/alarmscalendar", "alarm");
+    public static readonly KntSection TasksPanel = new("Tasks panel", "notes/taskspanel", "view_kanban");
+    public static readonly KntSection Alarms = new("Alarms calendar", "notes/alarmscalendar", "alarm");
     public static readonly KntSection ChatRoom = new("Chat room", "chat", "chat_bubble");
     public static readonly KntSection AiAssistant = new("AI Assistant", "aiassistant", "smart_toy");
     public static readonly KntSection Admin = new("Admin panel", "admin", "admin_panel_settings");

@@ -25,14 +25,15 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 5;
+    public const int CurrentSchemaRevision = 6;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
         (2, AddTraceNotes),
         (3, UpdateSchemaV3),
         (4, UpdateSchemaV4),
-        (5, AddRepositoryIdentity)
+        (5, AddRepositoryIdentity),
+        (6, AddNoteTasksDateIndexes)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -370,6 +371,28 @@ WHERE UserName = 'owner' AND EMail = 'owner@mydomain.com'
         AddSystemValueIfMissing(ctx, KntConst.RepositoryIdKey, Guid.NewGuid().ToString());
         AddSystemValueIfMissing(ctx, KntConst.RepositoryNameKey, name);
     }
+
+    // Revision 6 - indexes on NoteTasks.StartDate and EndDate, for the query of the time window of the tasks panel
+    // (IKntNoteRepository.GetTasksPanel*), over years of tasks. Must match ModelBuilderExtensions' HasIndex of NoteTask
+    // (the same names EF gives them, so a new database created by EnsureCreated already has them).
+    private static void AddNoteTasksDateIndexes(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        var sql = repositoryRef.Provider == "Microsoft.Data.SqlClient" ? AddNoteTasksDateIndexesSqlServer : AddNoteTasksDateIndexesSqlite;
+        ctx.Database.ExecuteSqlRaw(sql);
+    }
+
+    private const string AddNoteTasksDateIndexesSqlServer = @"
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_NoteTasks_StartDate')
+    CREATE INDEX [IX_NoteTasks_StartDate] ON [NoteTasks] ([StartDate]);
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_NoteTasks_EndDate')
+    CREATE INDEX [IX_NoteTasks_EndDate] ON [NoteTasks] ([EndDate]);
+";
+
+    private const string AddNoteTasksDateIndexesSqlite = @"
+CREATE INDEX IF NOT EXISTS ""IX_NoteTasks_StartDate"" ON ""NoteTasks"" (""StartDate"");
+CREATE INDEX IF NOT EXISTS ""IX_NoteTasks_EndDate"" ON ""NoteTasks"" (""EndDate"");
+";
 
     private static void AddSystemValueIfMissing(KntDbContext ctx, string key, string value)
     {

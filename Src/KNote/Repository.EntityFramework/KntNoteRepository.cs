@@ -485,15 +485,203 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+    #region Tasks panel
+
+    public async Task<Result<TasksPanelCountsDto>> GetTasksPanelCountsAsync(TasksPanelQueryDto query)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var result = new Result<TasksPanelCountsDto>(new TasksPanelCountsDto());
+
+            var ctx = GetOpenConnection();
+
+            var inWindow = await TasksPanelQueryAsync(ctx, query, true);
+            result.Entity.Resolved = await inWindow.Where(TaskPanelColumnCondition(query, EnumTaskPanelColumn.Resolved)).CountAsync();
+            result.Entity.InProgress = await inWindow.Where(TaskPanelColumnCondition(query, EnumTaskPanelColumn.InProgress)).CountAsync();
+            result.Entity.Pending = await inWindow.Where(TaskPanelColumnCondition(query, EnumTaskPanelColumn.Pending)).CountAsync();
+            result.Entity.TotalWithoutWindow = await (await TasksPanelQueryAsync(ctx, query, false)).CountAsync();
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
     }
 
-    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+    public async Task<Result<List<TaskPanelItemDto>>> GetTasksPanelPageAsync(TasksPanelQueryDto query, EnumTaskPanelColumn column, int skip, int take)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var result = new Result<List<TaskPanelItemDto>>();
+
+            var ctx = GetOpenConnection();
+
+            var tasks = (await TasksPanelQueryAsync(ctx, query, true)).Where(TaskPanelColumnCondition(query, column));
+            tasks = column == EnumTaskPanelColumn.Resolved
+                ? tasks.OrderByDescending(t => t.EndDate).ThenBy(t => t.NoteTaskId)
+                : tasks.OrderBy(t => t.StartDate ?? t.CreationDateTime).ThenBy(t => t.CreationDateTime).ThenBy(t => t.NoteTaskId);
+
+            result.Entity = await tasks.Skip(Math.Max(skip, 0)).Take(Math.Max(take, 1))
+                .Select(t => new TaskPanelItemDto
+                {
+                    NoteTaskId = t.NoteTaskId,
+                    NoteId = t.NoteId,
+                    UserId = t.UserId,
+                    CreationDateTime = t.CreationDateTime,
+                    ModificationDateTime = t.ModificationDateTime,
+                    Description = t.Description,
+                    Tags = t.Tags,
+                    Priority = t.Priority,
+                    Resolved = t.Resolved,
+                    EstimatedTime = t.EstimatedTime,
+                    SpentTime = t.SpentTime,
+                    DifficultyLevel = t.DifficultyLevel,
+                    ExpectedStartDate = t.ExpectedStartDate,
+                    ExpectedEndDate = t.ExpectedEndDate,
+                    StartDate = t.StartDate,
+                    EndDate = t.EndDate,
+                    UserFullName = t.User.FullName,
+                    NoteNumber = t.Note.NoteNumber,
+                    NoteTopic = t.Note.Topic,
+                    NoteTags = t.Note.Tags,
+                    FolderId = t.Note.FolderId,
+                    NoteTypeId = t.Note.NoteTypeId,
+                    NoteTypeName = t.Note.NoteType.Name
+                })
+                .ToListAsync();
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
     }
+
+    public async Task<Result<TasksPanelNearestDto>> GetTasksPanelNearestAsync(TasksPanelQueryDto query)
+    {
+        try
+        {
+            var result = new Result<TasksPanelNearestDto>(new TasksPanelNearestDto());
+
+            var ctx = GetOpenConnection();
+
+            var tasks = await TasksPanelQueryAsync(ctx, query, false);
+            var windowStart = query.WindowStart.Date;
+            var windowEndNext = query.WindowEnd.Date.AddDays(1);
+            var lastStart = await tasks.Where(t => (t.StartDate ?? t.CreationDateTime) < windowStart)
+                .MaxAsync(t => (DateTime?)(t.StartDate ?? t.CreationDateTime));
+            var lastEnd = await tasks.Where(t => t.EndDate < windowStart).MaxAsync(t => t.EndDate);
+            result.Entity.LastBefore = lastEnd == null || lastStart > lastEnd ? lastStart : lastEnd;
+            result.Entity.FirstAfter = await tasks.Where(t => (t.StartDate ?? t.CreationDateTime) >= windowEndNext)
+                .MinAsync(t => (DateTime?)(t.StartDate ?? t.CreationDateTime));
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    // The tasks of the panel's filters (and with window, only those that overlap it: TaskPanelRules.Overlaps), as the
+    // Dapper repository's GetTasksPanelFromWhere. Days are compared with the first moment of the next day.
+    private async Task<IQueryable<NoteTask>> TasksPanelQueryAsync(KntDbContext ctx, TasksPanelQueryDto query, bool window)
+    {
+        var isSqlServer = _repositoryRef.Provider == "Microsoft.Data.SqlClient";
+        var tasks = ctx.NoteTasks.AsNoTracking();
+
+        if (query.ExcludeNoteTypeIds?.Count > 0)
+        {
+            var excluded = query.ExcludeNoteTypeIds;
+            tasks = tasks.Where(t => t.Note.NoteTypeId == null || !excluded.Contains(t.Note.NoteTypeId.Value));
+        }
+        if (query.NoteTypeId != null)
+            tasks = tasks.Where(t => t.Note.NoteTypeId == query.NoteTypeId);
+        if (query.UserId != null)
+            tasks = tasks.Where(t => t.UserId == query.UserId);
+        if (query.FolderId != null)
+        {
+            if (query.IncludeChildFolders)
+            {
+                var folderIds = await GetDescendantFolderIdsAsync(ctx, query.FolderId.Value);
+                tasks = tasks.Where(t => folderIds.Contains(t.Note.FolderId));
+            }
+            else
+                tasks = tasks.Where(t => t.Note.FolderId == query.FolderId);
+        }
+
+        Expression<Func<NoteTask, bool>> anyTag = null;
+        foreach (var tag in query.Tags?.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()) ?? Enumerable.Empty<string>())
+        {
+            Expression<Func<NoteTask, bool>> hasTag = isSqlServer
+                ? t => EF.Functions.Collate(t.Note.Tags, AccentInsensitiveCollation).Contains(tag)
+                : t => EF.Functions.Like(t.Note.Tags, $"%{tag}%");
+            anyTag = anyTag == null ? hasTag : OrElse(anyTag, hasTag);
+        }
+        if (anyTag != null)
+            tasks = tasks.Where(anyTag);
+
+        if (!string.IsNullOrWhiteSpace(query.Text))
+        {
+            var text = query.Text.Trim();
+            if (int.TryParse(text.TrimStart('#'), out var noteNumber) && noteNumber > 0)
+                tasks = tasks.Where(t => t.Note.NoteNumber == noteNumber);
+            else if (isSqlServer)
+                tasks = tasks.Where(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(text)
+                    || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(text)
+                    || EF.Functions.Collate(t.Note.Topic, AccentInsensitiveCollation).Contains(text));
+            else
+                tasks = tasks.Where(t => EF.Functions.Like(t.Tags, $"%{text}%")
+                    || EF.Functions.Like(t.Description, $"%{text}%")
+                    || EF.Functions.Like(t.Note.Topic, $"%{text}%"));
+        }
+
+        if (window)
+        {
+            var windowStart = query.WindowStart.Date;
+            var windowEndNext = query.WindowEnd.Date.AddDays(1);
+            // An open task goes on until today: it reaches the window if today does.
+            var openReaches = query.Today.Date >= windowStart;
+            tasks = tasks.Where(t => (t.StartDate ?? t.CreationDateTime) < windowEndNext
+                && ((t.StartDate ?? t.CreationDateTime) >= windowStart || t.EndDate >= windowStart || (openReaches && t.EndDate == null)));
+        }
+
+        return tasks;
+    }
+
+    // TaskPanelRules.Classify on the cut-off date.
+    private static Expression<Func<NoteTask, bool>> TaskPanelColumnCondition(TasksPanelQueryDto query, EnumTaskPanelColumn column)
+    {
+        var cutOffNext = query.CutOff.Date.AddDays(1);
+        return column switch
+        {
+            EnumTaskPanelColumn.Pending => t => (t.StartDate ?? t.CreationDateTime) >= cutOffNext,
+            EnumTaskPanelColumn.Resolved => t => (t.StartDate ?? t.CreationDateTime) < cutOffNext && t.EndDate < cutOffNext,
+            _ => t => (t.StartDate ?? t.CreationDateTime) < cutOffNext && (t.EndDate == null || t.EndDate >= cutOffNext)
+        };
+    }
+
+    // left || right, on the parameter of left.
+    private static Expression<Func<T, bool>> OrElse<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
+    {
+        var right2 = new ReplaceParameterVisitor(right.Parameters[0], left.Parameters[0]).Visit(right.Body);
+        return Expression.Lambda<Func<T, bool>>(Expression.OrElse(left.Body, right2), left.Parameters[0]);
+    }
+
+    private sealed class ReplaceParameterVisitor(ParameterExpression from, ParameterExpression to) : ExpressionVisitor
+    {
+        protected override Expression VisitParameter(ParameterExpression node) => node == from ? to : base.VisitParameter(node);
+    }
+
+    #endregion
 
     public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
     {
@@ -1036,6 +1224,47 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                         .SetProperty(x => x.AlarmActivated, next.AlarmActivated));
                 if (consumed == 1)
                     result.Entity.Add(due);
+            }
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<AlarmCalendarItemDto>>> GetCalendarAlarmsAsync(AlarmsCalendarFilterDto filter)
+    {
+        try
+        {
+            var result = new Result<List<AlarmCalendarItemDto>>(new List<AlarmCalendarItemDto>());
+
+            var ctx = GetOpenConnection();
+
+            var query = ctx.KMessages.AsNoTracking().Include(m => m.User).Include(m => m.Note)
+                .Where(m => m.NoteId != null && m.AlarmDateTime != null
+                    && ((m.AlarmDateTime >= filter.Start && m.AlarmDateTime < filter.End)
+                        || (m.AlarmActivated == true && m.AlarmType != EnumAlarmType.Standard)));
+            if (!filter.IncludeDeactivated)
+                query = query.Where(m => m.AlarmActivated == true);
+            if (filter.UserId != null)
+                query = query.Where(m => m.UserId == filter.UserId);
+            if (filter.AlarmTypes?.Count > 0)
+                query = query.Where(m => filter.AlarmTypes.Contains(m.AlarmType));
+            if (filter.NotificationTypes?.Count > 0)
+                query = query.Where(m => filter.NotificationTypes.Contains(m.NotificationType));
+
+            foreach (var m in await query.OrderBy(m => m.AlarmDateTime).ToListAsync())
+            {
+                var alarm = m.GetSimpleDto<AlarmCalendarItemDto>();
+                alarm.UserFullName = m.User?.FullName;
+                alarm.NoteNumber = m.Note.NoteNumber;
+                alarm.NoteTopic = m.Note.Topic;
+                alarm.NoteCreationDateTime = m.Note.CreationDateTime;
+                result.Entity.Add(alarm);
             }
 
             await CloseIsTempConnection(ctx);

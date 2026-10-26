@@ -802,39 +802,97 @@ public class KntNotesGetNoteTasksAsyncCommand : KntCommandServiceBase<Guid, Resu
     }
 }
 
+/// <summary>
+/// The tasks panel of the web (read-only, any user's tasks, like the tasks of a note): the window of the filter
+/// (TasksWindow, around its reference date, on the user's today) and its tasks by column on the cut-off date
+/// (TaskPanelRules), a page of each column with its total, how many tasks of the filters are out of the window and,
+/// for a window without tasks, a date that shows the nearest one. With Column, only the page asked for of that column.
+/// The tasks of the system notes (AI assistant sessions, chat room threads) are never shown: they only link users to
+/// those notes.
+/// </summary>
 [KntAuthorize(EnumRoles.Guest)]
-public class KntNotesGetStartedTasksByDateTimeRageAsyncCommand : KntCommandServiceBase< Result<List<NoteTaskDto>>>
+public class KntNotesGetTasksPanelAsyncCommand : KntCommandServiceBase<TasksPanelFilterDto, Result<TasksPanelDto>>
 {
-    private readonly DateTime startDateTime;
-    private readonly DateTime endDateTime;
+    private const int MaxPageSize = 200;
 
-    public KntNotesGetStartedTasksByDateTimeRageAsyncCommand(IKntService service, DateTime startDateTime, DateTime endDateTime) : base(service)
+    public KntNotesGetTasksPanelAsyncCommand(IKntService service, TasksPanelFilterDto filter) : base(service, filter)
     {
-        this.startDateTime = startDateTime;
-        this.endDateTime = endDateTime;
     }
 
-    public override async Task<Result<List<NoteTaskDto>>> Execute()
+    public override async Task<Result<TasksPanelDto>> Execute()
     {
-        return await Repository.Notes.GetStartedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        var result = new Result<TasksPanelDto>(new TasksPanelDto());
+        var filter = Param ?? new TasksPanelFilterDto();
+        var panel = result.Entity;
+
+        panel.Today = filter.Today == default ? DateTime.Today : filter.Today.Date;
+        var reference = filter.ReferenceDate == default ? panel.Today : filter.ReferenceDate.Date;
+        (panel.WindowStart, panel.WindowEnd) = TasksWindow.Compute(filter.Unit, filter.Size, reference);
+        panel.CutOff = TasksWindow.CutOff(panel.WindowEnd, panel.Today);
+
+        var query = new TasksPanelQueryDto
+        {
+            WindowStart = panel.WindowStart,
+            WindowEnd = panel.WindowEnd,
+            CutOff = panel.CutOff,
+            Today = panel.Today,
+            NoteTypeId = filter.NoteTypeId,
+            UserId = filter.UserId,
+            Tags = filter.Tags ?? new List<string>(),
+            Text = filter.Text,
+            FolderId = filter.FolderId,
+            IncludeChildFolders = filter.IncludeChildFolders,
+            ExcludeNoteTypeIds = await GetSystemNoteTypeIdsAsync()
+        };
+
+        var counts = await Repository.Notes.GetTasksPanelCountsAsync(query);
+        if (!counts.IsValid)
+        {
+            result.AddListErrorMessage(counts.ListErrorMessage);
+            return result;
+        }
+
+        var pageSize = Math.Clamp(filter.PageSize, 1, MaxPageSize);
+        var columns = filter.Column != null ? new[] { filter.Column.Value } : Enum.GetValues<EnumTaskPanelColumn>();
+        foreach (var column in columns)
+        {
+            var page = await Repository.Notes.GetTasksPanelPageAsync(query, column, filter.Column != null ? filter.Skip : 0, pageSize);
+            if (!page.IsValid)
+            {
+                result.AddListErrorMessage(page.ListErrorMessage);
+                return result;
+            }
+            page.Entity.ForEach(t => t.Column = column);
+            panel.Columns.Add(new TasksPanelColumnDto { Column = column, TotalCount = counts.Entity[column], Tasks = page.Entity });
+        }
+
+        var inWindow = counts.Entity.Resolved + counts.Entity.InProgress + counts.Entity.Pending;
+        panel.OutsideCount = counts.Entity.TotalWithoutWindow - inWindow;
+        if (inWindow == 0 && counts.Entity.TotalWithoutWindow > 0)
+            panel.NearestTaskDate = NearestDate((await Repository.Notes.GetTasksPanelNearestAsync(query)).Entity, panel);
+
+        return result;
     }
-}
 
-[KntAuthorize(EnumRoles.Guest)]
-public class KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand : KntCommandServiceBase<Result<List<NoteTaskDto>>>
-{
-    private readonly DateTime startDateTime;
-    private readonly DateTime endDateTime;
-
-    public KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand(IKntService service, DateTime startDateTime, DateTime endDateTime) : base(service)
+    private async Task<List<Guid>> GetSystemNoteTypeIdsAsync()
     {
-        this.startDateTime = startDateTime;
-        this.endDateTime = endDateTime;
+        var noteTypes = await Repository.NoteTypes.GetAllAsync();
+        return noteTypes.Entity?
+            .Where(t => t.Name == KntConst.ChatSessionsTag || t.Name == KntConst.ChatRoomTag)
+            .Select(t => t.NoteTypeId)
+            .ToList() ?? new List<Guid>();
     }
 
-    public override async Task<Result<List<NoteTaskDto>>> Execute()
+    // The nearer of the last date before the window and the first one after it.
+    private static DateTime? NearestDate(TasksPanelNearestDto nearest, TasksPanelDto panel)
     {
-        return await Repository.Notes.GetEstimatedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        var before = nearest?.LastBefore?.Date;
+        var after = nearest?.FirstAfter?.Date;
+        if (before == null)
+            return after;
+        if (after == null)
+            return before;
+        return (panel.WindowStart - before.Value) <= (after.Value - panel.WindowEnd) ? before : after;
     }
 }
 
@@ -1343,6 +1401,62 @@ public class KntNotesGetAlarmNoticesAsyncCommand : KntCommandServiceBase<List<Gu
                 AlarmDateTime = message.AlarmDateTime
             });
         }
+
+        return result;
+    }
+}
+
+/// <summary>
+/// The alarms calendar of the web: the alarms of the filter (read-only, any user's, like the alarms of a note) and the
+/// dates they fire on in its range. A periodic alarm fires from the creation of its note on (AlarmOccurrences); with
+/// GroupFrequentByDay, an alarm of every few minutes is one occurrence per day. At most
+/// KntConst.MaxAlarmsCalendarOccurrences occurrences, the first ones (Truncated says that there were more).
+/// </summary>
+[KntAuthorize(EnumRoles.Guest)]
+public class KntNotesGetAlarmsCalendarAsyncCommand : KntCommandServiceBase<AlarmsCalendarFilterDto, Result<AlarmsCalendarDto>>
+{
+    public KntNotesGetAlarmsCalendarAsyncCommand(IKntService service, AlarmsCalendarFilterDto filter) : base(service, filter)
+    {
+    }
+
+    public override async Task<Result<AlarmsCalendarDto>> Execute()
+    {
+        var result = new Result<AlarmsCalendarDto>(new AlarmsCalendarDto());
+        if (Param == null || Param.End <= Param.Start)
+        {
+            result.AddErrorMessage("The range of dates of the calendar is not valid.");
+            return result;
+        }
+
+        var resAlarms = await Repository.Notes.GetCalendarAlarmsAsync(Param);
+        if (!resAlarms.IsValid)
+        {
+            result.AddListErrorMessage(resAlarms.ListErrorMessage);
+            return result;
+        }
+
+        var occurrences = new List<AlarmOccurrenceDto>();
+        foreach (var alarm in resAlarms.Entity)
+        {
+            var dates = AlarmOccurrences.Expand(alarm, alarm.NoteCreationDateTime, Param.Start, Param.End);
+            if (Param.GroupFrequentByDay && alarm.AlarmType == EnumAlarmType.InMinutes)
+                occurrences.AddRange(dates.GroupBy(d => d.Date)
+                    .Select(day => new AlarmOccurrenceDto { KMessageId = alarm.KMessageId, DateTime = day.First(), Count = day.Count() }));
+            else
+                occurrences.AddRange(dates.Take(KntConst.MaxAlarmsCalendarOccurrences + 1)
+                    .Select(d => new AlarmOccurrenceDto { KMessageId = alarm.KMessageId, DateTime = d }));
+        }
+
+        var calendar = result.Entity;
+        calendar.Occurrences = occurrences.OrderBy(o => o.DateTime).ToList();
+        if (calendar.Occurrences.Count > KntConst.MaxAlarmsCalendarOccurrences)
+        {
+            calendar.Occurrences = calendar.Occurrences.Take(KntConst.MaxAlarmsCalendarOccurrences).ToList();
+            calendar.Truncated = true;
+        }
+
+        var shown = calendar.Occurrences.Select(o => o.KMessageId).ToHashSet();
+        calendar.Alarms = resAlarms.Entity.Where(a => shown.Contains(a.KMessageId)).ToList();
 
         return result;
     }

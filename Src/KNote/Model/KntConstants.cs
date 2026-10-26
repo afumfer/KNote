@@ -44,6 +44,9 @@ public static class KntConst
     public static string ChatRoomFolderName { get; private set; } = "KNote Chat Room";
     public static string ChatRoomGeneralThreadTopic { get; private set; } = "General";
 
+    // The most occurrences of alarms the alarms calendar of the web receives at once (AlarmsCalendarDto.Truncated).
+    public const int MaxAlarmsCalendarOccurrences = 3000;
+
     // SystemValues rows (scope SYSTEM) kept by KntSchemaUpdater: the schema revision, and the repository's
     // name and id. The id is a Guid given to each database once, which ClientWin uses as its key.
     public static string SystemScope { get; private set; } = "SYSTEM";
@@ -185,6 +188,22 @@ public enum EnumActionType
     UserMessage,
     NoteMessage,
     ScriptExecution
+}
+
+// The unit of the time window of the tasks panel (see TasksWindow).
+public enum EnumTasksWindowUnit
+{
+    Days,
+    Weeks,
+    Months
+}
+
+// The columns of the tasks panel, in the order it shows them (see TaskPanelRules.Classify).
+public enum EnumTaskPanelColumn
+{
+    Resolved,
+    InProgress,
+    Pending
 }
 
 

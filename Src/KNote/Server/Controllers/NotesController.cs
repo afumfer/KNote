@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -460,30 +459,26 @@ public class NotesController : ControllerBase
         }
     }
 
-    [HttpGet("[action]")]
-    [Authorize(Roles = "Admin, Staff, ProjectManager")]
-    public async Task<IActionResult> GetStartedTasksByDateTimeRage([FromQuery] string start, [FromQuery] string end)
+    // The tasks panel of the web (read-only, Guest+): the tasks of a time window by column, or a page of one column.
+    [HttpPost("tasks/panel")]
+    public async Task<IActionResult> TasksPanel([FromBody] TasksPanelFilterDto filter)
     {
         try
         {
-            _logger.LogTrace("GetStartedTasksByDateTimeRage {dateTime}.", DateTime.Now);
+            _logger.LogTrace("TasksPanel {dateTime}.", DateTime.Now);
 
-            var satartDateTime = DateTime.ParseExact(start, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-            var endDateTime = DateTime.ParseExact(end, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-
-            var resApi = await _service.Notes.GetStartedTasksByDateTimeRageAsync(satartDateTime, endDateTime);
-            if (resApi.IsValid)
-            {
-                TasksUpdateResourceInDescriptionForRead(resApi.Entity);
-                return Ok(resApi);
-            }
-            else
+            var resApi = await _service.Notes.GetTasksPanelAsync(filter);
+            if (!resApi.IsValid)
                 return BadRequest(resApi);
+
+            foreach (var column in resApi.Entity.Columns)
+                TasksUpdateResourceInDescriptionForRead(column.Tasks);
+            return Ok(resApi);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "GetStartedTasksByDateTimeRage at {dateTime}.", DateTime.Now);
-            var kresApi = new Result<List<NoteTaskDto>>();
+            _logger.LogError(ex, "TasksPanel at {dateTime}.", DateTime.Now);
+            var kresApi = new Result<TasksPanelDto>();
             kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
@@ -610,6 +605,26 @@ public class NotesController : ControllerBase
         {
             _logger.LogError(ex, "DeleteAlarm {id} at {dateTime}.", id, DateTime.Now);
             var kresApi = new Result<KMessageDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
+    // The alarms calendar of the web (read-only, Guest+): the alarms of the filter and their occurrences in its range.
+    [HttpPost("alarms/calendar")]
+    public async Task<IActionResult> AlarmsCalendar([FromBody] AlarmsCalendarFilterDto filter)
+    {
+        try
+        {
+            _logger.LogTrace("AlarmsCalendar {dateTime}.", DateTime.Now);
+
+            var resApi = await _service.Notes.GetAlarmsCalendarAsync(filter);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AlarmsCalendar at {dateTime}.", DateTime.Now);
+            var kresApi = new Result<AlarmsCalendarDto>();
             kresApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(kresApi);
         }
@@ -742,7 +757,7 @@ public class NotesController : ControllerBase
     }
 
     // A task's description is Markdown like a note's: its resources with their URLs.
-    private void TasksUpdateResourceInDescriptionForRead(List<NoteTaskDto> tasks)
+    private void TasksUpdateResourceInDescriptionForRead(IEnumerable<NoteTaskDto> tasks)
     {
         foreach (var t in tasks)
             t.Description = _service.Notes.UtilUpdateResourceInDescriptionForRead(t.Description);

@@ -3,134 +3,367 @@
 
 @using KNote.Client.Auth
 
-@inject IStore webApiService
-@inject NavigationManager navigationManager
+@implements IDisposable
+
+@inject IStore store
 @inject KntWindows kntWindows
-@inject KntAccess access
-@inject TooltipService tooltipService
-@inject DialogService dialogService
-@inject NotificationService notificationService
+@inject IJSRuntime js
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
+
+@* The alarms calendar (read-only): the alarms of the notes in a day, week or month calendar, with the filters of the
+   toolbar, and the alarm selected, with its note, at the right. A periodic alarm is shown every time it fires, from
+   the creation of its note on (the Server expands them, Notes.GetAlarmsCalendarAsync); in the week and month views,
+   one of every few minutes is shown once a day. The calendar's own header is hidden: the toolbar moves it. *@
 
 <KntIndexHeader Section="KntSections.Alarms">
     <IndexMenu>
         <RadzenMenu>
-            <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
+            <RadzenMenuItem Text="Refresh" Icon="refresh" Click="ReloadAsync" />
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
 
-<div class="rz-pt-2">
-    <RadzenSplitter> 
+<div class="knt-alarms-page">
+    <RadzenCard class="rz-p-2 knt-alarms-toolbar">
+        <RadzenStack Gap="0.5rem">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap" Gap="0.5rem 1rem">
+                <RadzenSelectBar TValue="int" Value="viewIndex" Change="OnViewChanged" Size="ButtonSize.Small" aria-label="Calendar view">
+                    <Items>
+                        <RadzenSelectBarItem Text="Day" Value="0" />
+                        <RadzenSelectBarItem Text="Week" Value="1" />
+                        <RadzenSelectBarItem Text="Month" Value="2" />
+                    </Items>
+                </RadzenSelectBar>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                    <RadzenButton Icon="chevron_left" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => MoveAsync(-1))" aria-label="@($"Previous {ViewName}")" title="@($"Previous {ViewName}")" />
+                    <RadzenButton Text="Today" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="TodayAsync" />
+                    <RadzenButton Icon="chevron_right" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => MoveAsync(1))" aria-label="@($"Next {ViewName}")" title="@($"Next {ViewName}")" />
+                </RadzenStack>
+                <span class="knt-alarms-title" aria-live="polite">@scheduler?.SelectedView?.Title</span>
+                <span class="knt-alarms-summary">
+                    @if (loadFailed)
+                    {
+                        <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The alarms could not be loaded.</span>
+                        <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="ReloadAsync" />
+                    }
+                    else if (calendar != null)
+                    {
+                        @Summary
+                    }
+                </span>
+            </RadzenStack>
 
-         <RadzenSplitterPane Size="60%" Min="500px" Max="80%">   
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap" Gap="0.5rem 0.75rem" class="knt-alarms-filters">
+                <RadzenFormField Text="User" Variant="Variant.Outlined">
+                    <Start><RadzenIcon Icon="person" /></Start>
+                    <ChildContent>
+                        <RadzenDropDown TValue="Guid" @bind-Value="userId" Change="ReloadAsync" Data="@userOptions" TextProperty="Text" ValueProperty="Id"
+                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" InputSize="InputSize.Small" />
+                    </ChildContent>
+                </RadzenFormField>
+                <RadzenFormField Text="Periodicity" Variant="Variant.Outlined">
+                    <Start><RadzenIcon Icon="repeat" /></Start>
+                    <ChildContent>
+                        <RadzenDropDown TValue="IEnumerable<EnumAlarmType>" @bind-Value="alarmTypes" Change="ReloadAsync" Multiple="true" AllowClear="true"
+                                        Data="@KntAlarmTexts.Periodicities" TextProperty="Text" ValueProperty="Value" Placeholder="All"
+                                        MaxSelectedLabels="2" InputSize="InputSize.Small" />
+                    </ChildContent>
+                </RadzenFormField>
+                <RadzenFormField Text="Notification" Variant="Variant.Outlined">
+                    <Start><RadzenIcon Icon="notifications" /></Start>
+                    <ChildContent>
+                        <RadzenDropDown TValue="IEnumerable<EnumNotificationType>" @bind-Value="notificationTypes" Change="ReloadAsync" Multiple="true" AllowClear="true"
+                                        Data="@KntAlarmTexts.Notifications" TextProperty="Text" ValueProperty="Value" Placeholder="All"
+                                        MaxSelectedLabels="2" InputSize="InputSize.Small" />
+                    </ChildContent>
+                </RadzenFormField>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenSwitch @bind-Value="includeDeactivated" Change="@(_ => ReloadAsync())" Name="IncludeDeactivated" />
+                    <RadzenLabel Text="Include deactivated" Component="IncludeDeactivated" />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
 
-            <RadzenScheduler @ref=@scheduler  Data=@appointments LoadData="@OnLoadData" TItem="Appointment" 
-                StartProperty="Start" EndProperty="End" TextProperty="Text" 
-                SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect 
-                AppointmentRender=@OnAppointmentRender SlotRender=@OnSlotRender  
-                SelectedIndex="2" style="height: 640px;" > 
-                <RadzenDayView />
-                <RadzenWeekView />
-                <RadzenMonthView />
-            </RadzenScheduler>
-
-         </RadzenSplitterPane>
-         
-         <RadzenSplitterPane> 
-            <div class="rz-p-2 rz-border">
-                Item details
-            </div>
-            <p>@itemSelected</p>
-            <p>@slotSelected</p>
-            <p>@loadData</p>
-         </RadzenSplitterPane>
-
-    </RadzenSplitter>
+    <RadzenCard class="rz-p-1 knt-alarms-body">
+        <RadzenSplitter Resize="paneSizes.Resized">
+            <RadzenSplitterPane Size="@paneSizes[0]" Min="360px">
+                @if (ready)
+                {
+                    <RadzenScheduler @ref="scheduler" TItem="AlarmAppointment" Data="@appointments" ShowHeader="false"
+                                     StartProperty="Start" EndProperty="End" TextProperty="Text" SelectedIndex="@initialViewIndex"
+                                     LoadData="OnLoadData" AppointmentSelect="OnAppointmentSelect" AppointmentRender="OnAppointmentRender"
+                                     SlotRender="OnSlotRender" DaySelect="OnDaySelect" Style="height: 100%">
+                        <Template Context="appointment">
+                            <span class="knt-alarm-appointment"><RadzenIcon Icon="@KntAlarmTexts.NotificationIcon(appointment.Alarm.NotificationType)" /><span class="knt-alarm-appointment-text">@appointment.Text</span></span>
+                        </Template>
+                        <ChildContent>
+                            <RadzenDayView @ref="dayView" StartTime="TimeSpan.Zero" EndTime="TimeSpan.FromHours(24)" />
+                            <RadzenWeekView @ref="weekView" StartTime="TimeSpan.Zero" EndTime="TimeSpan.FromHours(24)" />
+                            <RadzenMonthView @ref="monthView" />
+                        </ChildContent>
+                    </RadzenScheduler>
+                }
+            </RadzenSplitterPane>
+            <RadzenSplitterPane Size="@paneSizes[1]" Min="260px" Style="overflow: hidden">
+                <AlarmDetailPane Alarm="selectedAlarm" Occurrence="selectedOccurrence" OutOfRange="selectedOutOfRange" CanEdit="canEdit" />
+            </RadzenSplitterPane>
+        </RadzenSplitter>
+    </RadzenCard>
 </div>
 
 @code {
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
-    RadzenScheduler<Appointment> scheduler;
-    
-    string itemSelected = "Item selected: none";
-    string slotSelected = "Slot selected: none";
-    string loadData = "Load data: none";
+    // The view chosen last, kept in the browser.
+    private const string ViewKey = "KNoteAlarmsCalendarView";
+    // "All users" in the user filter.
+    private static readonly Guid AllUsers = Guid.Empty;
 
-    IList<Appointment> appointments = new List<Appointment>
+    private RadzenScheduler<AlarmAppointment>? scheduler;
+    private RadzenDayView? dayView;
+    private RadzenWeekView? weekView;
+    private RadzenMonthView? monthView;
+    private KntPaneSizes paneSizes = null!;
+    // The scheduler is drawn once the user filter is known (it asks for its data as soon as it is drawn).
+    private bool ready;
+    // The view shown; the scheduler starts with the one chosen last (SelectedIndex only sets the first one).
+    private int viewIndex = 2;
+    private int initialViewIndex;
+    private bool canEdit;
+
+    private List<UserOption> userOptions = new() { new(AllUsers, "All users") };
+    private Guid userId = AllUsers;
+    private IEnumerable<EnumAlarmType> alarmTypes = Array.Empty<EnumAlarmType>();
+    private IEnumerable<EnumNotificationType> notificationTypes = Array.Empty<EnumNotificationType>();
+    private bool includeDeactivated;
+
+    // The period shown (the scheduler's LoadData) and what was read for it.
+    private DateTime rangeStart, rangeEnd;
+    private bool groupByDay;
+    private AlarmsCalendarDto? calendar;
+    private List<AlarmAppointment> appointments = new();
+    private bool loadFailed;
+    private readonly KntLatestRequest calendarRequest = new();
+
+    private AlarmCalendarItemDto? selectedAlarm;
+    private AlarmOccurrenceDto? selectedOccurrence;
+    private bool selectedOutOfRange;
+
+    private string ViewName => viewIndex switch { 0 => "day", 1 => "week", _ => "month" };
+
+    private string Summary
     {
-        new Appointment { Start = DateTime.Today.AddDays(-2), End = DateTime.Today.AddDays(-2), Text = "Birthday" },
-        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" },
-        new Appointment { Start = DateTime.Today.AddDays(-10), End = DateTime.Today.AddDays(-8), Text = "Work from home" },
-        new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(12), Text = "Online meeting" },
-        new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(13), Text = "Skype call" },
-        new Appointment { Start = DateTime.Today.AddHours(14), End = DateTime.Today.AddHours(14).AddMinutes(30), Text = "Dentist appointment" },
-        new Appointment { Start = DateTime.Today.AddDays(1), End = DateTime.Today.AddDays(12), Text = "Vacation" },
-    };
-
-    protected override void OnInitialized()
-    {
-
-    }
-
-    void OnLoadData(SchedulerLoadDataEventArgs args)
-    {
-        loadData = $"Load data: {args.Start} - {args.End}";
-
-        // Get the appointments for between the Start and End
-        //data = await MyAppointmentService.GetData(args.Start, args.End);
-    }
-
-    void OnSlotRender(SchedulerSlotRenderEventArgs args) 
-    {
-        // Highlight today in month view
-        if (args.View.Text == "Month" && args.Start.Date == DateTime.Today)
+        get
         {
-            args.Attributes["style"] = "background: var(--rz-warning-lighter);";
-        }
-
-        // Highlight working hours (9-18)
-        if ((args.View.Text == "Week" || args.View.Text == "Day") && args.Start.Hour > 8 && args.Start.Hour < 19)
-        {
-            args.Attributes["style"] = "background: var(--rz-warning-lighter);";
+            if (calendar!.Alarms.Count == 0)
+                return "No alarms in this period";
+            var text = $"{calendar.Alarms.Count} {(calendar.Alarms.Count == 1 ? "alarm" : "alarms")} · {calendar.Occurrences.Count} {(calendar.Occurrences.Count == 1 ? "activation" : "activations")}";
+            return calendar.Truncated ? text + " (too many: only the first ones are shown)" : text;
         }
     }
 
-    async Task OnSlotSelect(SchedulerSlotSelectEventArgs args)
-    {        
-        slotSelected = $"Slot selected: {args.Start.ToString()} - {args.End.ToString()}";
+    protected override async Task OnInitializedAsync()
+    {
+        paneSizes = new KntPaneSizes(js, "KNoteAlarmsCalendarPanes", "65%", "35%");
+        var saved = ((IJSInProcessRuntime)js).Invoke<string?>("localStorage.getItem", ViewKey);
+        if (int.TryParse(saved, out var savedView) && savedView is >= 0 and <= 2)
+            viewIndex = savedView;
+        initialViewIndex = viewIndex;
+
+        canEdit = KntAccess.HasRole((await AuthenticationState).User, EnumRoles.Staff);
+        kntWindows.NoteSaved += OnNoteSaved;
+
+        // The user filter starts with the user signed in (all users if the list can't be read).
+        var users = await store.Users.GetAllAsync();
+        if (users.IsValid)
+        {
+            userOptions.AddRange(users.Entity.OrderBy(u => u.FullName).Select(u => new UserOption(u.UserId, u.FullName ?? u.UserName)));
+            userId = users.Entity.FirstOrDefault(u => u.UserName == store.AppState.UserName)?.UserId ?? AllUsers;
+        }
+        ready = true;
+    }
+
+    public void Dispose()
+    {
+        kntWindows.NoteSaved -= OnNoteSaved;
+        calendarRequest.Dispose();
+    }
+
+    private async Task OnLoadData(SchedulerLoadDataEventArgs args)
+    {
+        rangeStart = args.Start;
+        rangeEnd = args.End;
+        groupByDay = args.View is not RadzenDayView;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var filter = new AlarmsCalendarFilterDto
+        {
+            Start = rangeStart,
+            End = rangeEnd,
+            UserId = userId == AllUsers ? null : userId,
+            AlarmTypes = alarmTypes.ToList(),
+            NotificationTypes = notificationTypes.ToList(),
+            IncludeDeactivated = includeDeactivated,
+            GroupFrequentByDay = groupByDay
+        };
+
+        var request = await calendarRequest.RunAsync(ct => store.Notes.GetAlarmsCalendarAsync(filter, ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
+        loadFailed = !result.IsValid;
+        calendar = result.IsValid ? result.Entity : null;
+        appointments = calendar == null ? new() : Appointments(calendar);
+        SyncSelection();
+    }
+
+    private static List<AlarmAppointment> Appointments(AlarmsCalendarDto calendar)
+    {
+        var alarms = calendar.Alarms.ToDictionary(a => a.KMessageId);
+        return calendar.Occurrences
+            .Where(o => alarms.ContainsKey(o.KMessageId))
+            .Select(o => new AlarmAppointment(alarms[o.KMessageId], o))
+            .ToList();
+    }
+
+    // The alarm selected stays selected (with its new data) while it fires in the period; otherwise its detail stays,
+    // saying that it isn't in the period.
+    private void SyncSelection()
+    {
+        if (selectedAlarm == null)
+            return;
+
+        var fresh = calendar?.Alarms.FirstOrDefault(a => a.KMessageId == selectedAlarm.KMessageId);
+        selectedOutOfRange = fresh == null;
+        if (fresh != null)
+            selectedAlarm = fresh;
+        selectedOccurrence = appointments
+            .Where(a => a.Alarm.KMessageId == selectedAlarm.KMessageId)
+            .Select(a => a.Occurrence)
+            .FirstOrDefault(o => selectedOccurrence == null || o.DateTime.Date == selectedOccurrence.DateTime.Date);
+    }
+
+    // Reads the period shown again (a filter changed, Refresh, Retry): through the scheduler, which calls LoadData.
+    private Task ReloadAsync() => scheduler?.Reload() ?? Task.CompletedTask;
+
+    private async Task MoveAsync(int direction)
+    {
+        if (scheduler?.SelectedView == null)
+            return;
+        scheduler.CurrentDate = direction < 0 ? scheduler.SelectedView.Prev() : scheduler.SelectedView.Next();
         await scheduler.Reload();
     }
 
-    async Task OnAppointmentSelect(SchedulerAppointmentSelectEventArgs<Appointment> args)
+    private async Task TodayAsync()
     {
-        itemSelected = $"Item selected: {args.Data.Text} - {args.Start.ToString()} - {args.End.ToString()}";
+        if (scheduler == null)
+            return;
+        scheduler.CurrentDate = DateTime.Today;
         await scheduler.Reload();
     }
 
-    void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<Appointment> args)
+    private async Task OnViewChanged(int index)
     {
-        // Never call StateHasChanged in AppointmentRender - would lead to infinite loop
+        viewIndex = index;
+        ((IJSInProcessRuntime)js).InvokeVoid("localStorage.setItem", ViewKey, index.ToString());
+        ISchedulerView? view = index switch { 0 => dayView, 1 => weekView, _ => monthView };
+        if (scheduler != null && view != null)
+            await scheduler.SelectView(view);
+    }
 
-        if (args.Data.Text == "Birthday")
+    // The day number of the month view: that day in the day view.
+    private async Task OnDaySelect(SchedulerDaySelectEventArgs args)
+    {
+        if (scheduler == null || dayView == null)
+            return;
+        scheduler.CurrentDate = args.Day;
+        viewIndex = 0;
+        ((IJSInProcessRuntime)js).InvokeVoid("localStorage.setItem", ViewKey, "0");
+        await scheduler.SelectView(dayView);
+    }
+
+    private void OnAppointmentSelect(SchedulerAppointmentSelectEventArgs<AlarmAppointment> args)
+    {
+        if (args.Data == null)
+            return;
+        selectedAlarm = args.Data.Alarm;
+        selectedOccurrence = args.Data.Occurrence;
+        selectedOutOfRange = false;
+    }
+
+    // Each occurrence as it is: already fired (dimmed), the next activation (in the primary color, bold), of a
+    // deactivated alarm (outlined), the others in the scheduler's color, and the selected one framed. The tooltip says
+    // it in words too.
+    private void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<AlarmAppointment> args)
+    {
+        var appointment = args.Data;
+        if (appointment == null)
+            return;
+        var alarm = appointment.Alarm;
+        var style = "";
+        string state;
+        if (alarm.AlarmActivated != true)
         {
-            args.Attributes["style"] = "background: var(--rz-danger); color: var(--rz-on-danger);";
+            style = "background-color: transparent; color: var(--rz-text-secondary-color); border: 1px dashed currentColor;";
+            state = "deactivated";
         }
+        else if (appointment.Start == alarm.AlarmDateTime)
+        {
+            style = "background-color: var(--rz-primary); color: var(--rz-on-primary); font-weight: 700;";
+            state = "next activation";
+        }
+        else if (appointment.Start < DateTime.Now)
+        {
+            style = "opacity: 0.6;";
+            state = "already fired";
+        }
+        else
+            state = "will fire";
+
+        if (selectedAlarm?.KMessageId == alarm.KMessageId && selectedOccurrence?.DateTime == appointment.Start)
+            style += " box-shadow: 0 0 0 2px var(--rz-text-color);";
+
+        args.Attributes["style"] = style;
+        args.Attributes["title"] = $"{appointment.Start:g} · {appointment.Text} · {KntAlarmTexts.Periodicity(alarm)} · {state}";
     }
 
-    // Creating a note needs Staff (KntAccess, checked with no wait before: it opens a window).
-    async Task OnNew()
+    private void OnSlotRender(SchedulerSlotRenderEventArgs args)
     {
-        if (await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Creating notes"))
-            await kntWindows.OpenNewAsync();
+        if (args.View is not RadzenDayView && args.Start.Date == DateTime.Today)
+            args.Attributes["style"] = "background-color: var(--rz-warning-lighter);";
     }
 
-    public class Appointment
+    // A note saved in its window may have changed its alarms.
+    private void OnNoteSaved(Guid noteId) => _ = InvokeAsync(ReloadAsync);
+
+    private sealed record UserOption(Guid Id, string Text);
+
+    // An occurrence of an alarm in the calendar: half an hour long (never past the end of its day, so that the month
+    // view shows it in a single day). Of an alarm of every few minutes grouped by day, the first one and how many.
+    private sealed class AlarmAppointment
     {
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-        public string Text { get; set; }
+        public AlarmAppointment(AlarmCalendarItemDto alarm, AlarmOccurrenceDto occurrence)
+        {
+            Alarm = alarm;
+            Occurrence = occurrence;
+            var end = occurrence.DateTime.AddMinutes(30);
+            End = end.Date > occurrence.DateTime.Date ? occurrence.DateTime.Date.AddDays(1).AddTicks(-1) : end;
+            Text = $"#{alarm.NoteNumber} {alarm.NoteTopic}" +
+                (occurrence.Count > 1 ? $" ({KntAlarmTexts.Periodicity(alarm).ToLowerInvariant()}, {occurrence.Count} times)" : "");
+        }
+
+        public AlarmCalendarItemDto Alarm { get; }
+        public AlarmOccurrenceDto Occurrence { get; }
+        public DateTime Start => Occurrence.DateTime;
+        public DateTime End { get; }
+        public string Text { get; }
     }
 }

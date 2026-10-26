@@ -1,0 +1,194 @@
+@inject KntWindows kntWindows
+
+@* The task selected in the tasks panel (NotesTasksPanel): its column, topic and note; why its data is inconsistent, if it
+   is; its real and expected dates with how long it has been open (or took, or is left to start) and its delay or
+   deviation (only with expected dates); its days against the window shown; its description; and, below, the topic and
+   description of its note (NotePreviewPane) with the buttons to open it. *@
+
+<div class="knt-task-detail">
+    @if (Task == null || Panel == null)
+    {
+        <div class="knt-empty-state rz-m-2">
+            <RadzenIcon Icon="task_alt" />
+            <div class="knt-empty-state-title">Select a task</div>
+            <div class="knt-empty-state-text">Click a task of any of the three columns to see it here, with the note it belongs to.</div>
+        </div>
+    }
+    else
+    {
+        var task = Task;
+        var column = TaskPanelRules.Classify(task, Panel.CutOff);
+        <div class="knt-task-detail-head">
+            <div class="knt-task-detail-caption">
+                <span class="knt-task-detail-pill knt-task-detail-pill-@column.ToString().ToLowerInvariant()">@ColumnName(column)</span>
+                <h2 class="knt-task-detail-title">@TasksPanelColumn.Title(task)</h2>
+                <div class="knt-task-detail-note">#@task.NoteNumber · @task.NoteTopic@(string.IsNullOrEmpty(task.NoteTypeName) ? "" : $" · {task.NoteTypeName}")</div>
+            </div>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                <RadzenButton Icon="visibility" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                              Click="@(() => kntWindows.OpenViewAsync(task.NoteId))" aria-label="View note" title="View note" />
+                @if (CanEdit)
+                {
+                    <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => kntWindows.OpenEditAsync(task.NoteId))" aria-label="Edit note (its tasks)" title="Edit note (its tasks)" />
+                }
+            </RadzenStack>
+        </div>
+
+        <div class="knt-task-detail-body">
+            @if (Notices(task, column) is { Count: > 0 } notices)
+            {
+                <div class="knt-task-detail-notices">
+                    @foreach (var (kind, text) in notices)
+                    {
+                        <div class="knt-task-detail-notice knt-task-detail-notice-@kind">@text</div>
+                    }
+                </div>
+            }
+
+            <dl class="knt-task-detail-fields">
+                <div><dt>User</dt><dd>@(task.UserFullName ?? "-")</dd></div>
+                <div><dt>Start</dt><dd>@TaskPanelRules.EffectiveStart(task).ToString("d")</dd></div>
+                <div><dt>End</dt><dd>@(task.EndDate?.ToString("d") ?? "Open")</dd></div>
+                <div><dt>Expected start</dt><dd class="@(task.ExpectedStartDate == null ? "knt-task-detail-na" : null)">@(task.ExpectedStartDate?.ToString("d") ?? "Not given")</dd></div>
+                <div><dt>Expected end</dt><dd class="@(task.ExpectedEndDate == null ? "knt-task-detail-na" : null)">@(task.ExpectedEndDate?.ToString("d") ?? "Not given")</dd></div>
+                @{ var (metricName, metric) = Metric(task, column); var (deviationName, deviation) = Deviation(task, column); }
+                <div><dt>@metricName</dt><dd>@metric</dd></div>
+                <div><dt>@deviationName</dt><dd class="@(task.ExpectedEndDate == null ? "knt-task-detail-na" : null)">@deviation</dd></div>
+                <div><dt>Priority</dt><dd>@task.Priority@(task.DifficultyLevel != null ? $" · difficulty {task.DifficultyLevel}" : "")</dd></div>
+                @if (task.EstimatedTime != null || task.SpentTime != null)
+                {
+                    <div><dt>Time</dt><dd>@(task.EstimatedTime?.ToString() ?? "-") estimated · @(task.SpentTime?.ToString() ?? "-") spent</dd></div>
+                }
+                @if (!string.IsNullOrWhiteSpace(task.NoteTags))
+                {
+                    <div><dt>Note tags</dt><dd>@task.NoteTags</dd></div>
+                }
+            </dl>
+
+            <section class="knt-task-detail-section knt-task-timeline-@column.ToString().ToLowerInvariant()">
+                <h3 class="knt-task-detail-section-title">Against the period shown</h3>
+                <div class="knt-task-timeline" role="img"
+                     aria-label="@($"The task from {TaskPanelRules.EffectiveStart(task):d} to {(task.EndDate?.ToString("d") ?? "today")}, in the period from {Panel.WindowStart:d} to {Panel.WindowEnd:d}")">
+                    @if (Bar(TaskPanelRules.EffectiveStart(task), TaskPanelRules.EffectiveEnd(task, Panel.Today)) is { } real)
+                    {
+                        <div class="knt-task-timeline-real" style="@real"></div>
+                    }
+                    @if (task.ExpectedStartDate != null && task.ExpectedEndDate != null
+                        && Bar(task.ExpectedStartDate.Value.Date, task.ExpectedEndDate.Value.Date) is { } expected)
+                    {
+                        <div class="knt-task-timeline-expected" style="@expected"></div>
+                    }
+                    @if (Panel.Today >= Panel.WindowStart && Panel.Today <= Panel.WindowEnd)
+                    {
+                        <div class="knt-task-timeline-today" style="@FormattableString.Invariant($"left: {Percent(Panel.Today.AddHours(12)):0.##}%;")"></div>
+                    }
+                </div>
+                <div class="knt-task-timeline-ends"><span>@Panel.WindowStart.ToString("d")</span><span>@Panel.WindowEnd.ToString("d")</span></div>
+                <div class="knt-task-timeline-legend">
+                    <span><i class="knt-task-timeline-swatch-real"></i>Real</span>
+                    @if (task.ExpectedStartDate != null && task.ExpectedEndDate != null)
+                    {
+                        <span><i class="knt-task-timeline-swatch-expected"></i>Expected</span>
+                    }
+                    @if (Panel.Today >= Panel.WindowStart && Panel.Today <= Panel.WindowEnd)
+                    {
+                        <span><i class="knt-task-timeline-swatch-today"></i>Today</span>
+                    }
+                </div>
+            </section>
+
+            <section class="knt-task-detail-section">
+                <h3 class="knt-task-detail-section-title">Description</h3>
+                <ViewMarkdown MarkdownContent="@task.Description">
+                    <TemplateContent>
+                        <span class="knt-task-detail-na">No description.</span>
+                    </TemplateContent>
+                </ViewMarkdown>
+            </section>
+
+            <section class="knt-task-detail-section knt-task-detail-note-pane">
+                <h3 class="knt-task-detail-section-title">Note</h3>
+                <NotePreviewPane NoteId="@task.NoteId" />
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public TaskPanelItemDto? Task { get; set; }
+    // The panel shown (its window, cut-off date and today).
+    [Parameter] public TasksPanelDto? Panel { get; set; }
+    // The task was selected in another window: the panel doesn't show it now.
+    [Parameter] public bool OutOfWindow { get; set; }
+    // Staff and up edit the note (and its tasks) in its window.
+    [Parameter] public bool CanEdit { get; set; }
+
+    public static string ColumnName(EnumTaskPanelColumn column) => column switch
+    {
+        EnumTaskPanelColumn.Resolved => "Resolved",
+        EnumTaskPanelColumn.InProgress => "In progress",
+        _ => "Pending"
+    };
+
+    private List<(string Kind, string Text)> Notices(TaskPanelItemDto task, EnumTaskPanelColumn column)
+    {
+        var notices = new List<(string, string)>();
+        if (OutOfWindow)
+            notices.Add(("info", "This task is out of the period shown now."));
+        foreach (var reason in TaskPanelRules.InconsistencyReasons(task))
+            notices.Add(("inconsistent", reason));
+        if (column == EnumTaskPanelColumn.InProgress && task.EndDate != null)
+            notices.Add(("good", $"Resolved later, on {task.EndDate.Value:d}."));
+        if (task.ExpectedStartDate == null && task.ExpectedEndDate == null)
+            notices.Add(("plain", "Without expected dates: no delay or deviation is worked out."));
+        return notices;
+    }
+
+    // How long it has been open, took, or is left to start, on the cut-off date.
+    private (string, string) Metric(TaskPanelItemDto task, EnumTaskPanelColumn column)
+    {
+        var start = TaskPanelRules.EffectiveStart(task);
+        var cutOff = Panel!.CutOff;
+        return column switch
+        {
+            EnumTaskPanelColumn.Pending => ("Starts in", $"{(start - cutOff).Days} d"),
+            EnumTaskPanelColumn.InProgress => ("Open for", $"{(cutOff - start).Days} d"),
+            _ => ("Took", task.EndDate!.Value.Date >= start ? $"{(task.EndDate.Value.Date - start).Days} d" : "Not valid")
+        };
+    }
+
+    // The delay of a task in progress or the deviation of a resolved one against its expected end.
+    private (string, string) Deviation(TaskPanelItemDto task, EnumTaskPanelColumn column)
+    {
+        var expectedEnd = task.ExpectedEndDate?.Date;
+        var cutOff = Panel!.CutOff;
+        if (column == EnumTaskPanelColumn.InProgress)
+            return ("Delay", expectedEnd == null ? "No reference" : expectedEnd < cutOff ? $"{(cutOff - expectedEnd.Value).Days} d late" : $"On time, due in {(expectedEnd.Value - cutOff).Days} d");
+        if (column == EnumTaskPanelColumn.Resolved)
+        {
+            if (expectedEnd == null)
+                return ("Deviation", "No reference");
+            var days = (task.EndDate!.Value.Date - expectedEnd.Value).Days;
+            return ("Deviation", days > 0 ? $"{days} d over plan" : days < 0 ? $"{-days} d ahead of plan" : "On time");
+        }
+        return ("Deviation", expectedEnd == null ? "No reference" : "Not yet");
+    }
+
+    // The position of a date in the window (0-100).
+    private double Percent(DateTime date)
+    {
+        var span = (Panel!.WindowEnd.AddDays(1) - Panel.WindowStart).TotalDays;
+        return Math.Clamp((date - Panel.WindowStart).TotalDays / span * 100, 0, 100);
+    }
+
+    // The style of a bar of days [from, to] cut to the window, or null if it is out of it.
+    private string? Bar(DateTime from, DateTime to)
+    {
+        if (from > Panel!.WindowEnd || to < Panel.WindowStart)
+            return null;
+        var left = Percent(from);
+        var width = Math.Max(Percent(to.AddDays(1)) - left, 0.6);
+        return FormattableString.Invariant($"left: {left:0.##}%; width: {width:0.##}%;");
+    }
+}

@@ -190,18 +190,11 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
-    public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
-    {     
-        var command = new KntNotesGetStartedTasksByDateTimeRageAsyncCommand(Service, startDateTime, endDateTime);
+    public async Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter)
+    {
+        var command = new KntNotesGetTasksPanelAsyncCommand(Service, filter);
         return await ExecuteCommand(command);
     }
-
-    public async Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
-    {        
-        var command = new KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand(Service, startDateTime, endDateTime);
-        return await ExecuteCommand(command);
-    }
-
 
     public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId)
     {
@@ -308,6 +301,12 @@ public class KntNoteService : KntServiceBase, IKntNoteService
     public async Task<Result<List<AlarmNoticeDto>>> GetAlarmNoticesAsync(List<Guid> messageIds)
     {
         var command = new KntNotesGetAlarmNoticesAsyncCommand(Service, messageIds);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter)
+    {
+        var command = new KntNotesGetAlarmsCalendarAsyncCommand(Service, filter);
         return await ExecuteCommand(command);
     }
 

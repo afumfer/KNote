@@ -38,8 +38,8 @@ public interface IKntNoteService
     Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId);
     Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
-    Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
-    Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
+    // The tasks panel of the web: the tasks of a time window by column (TasksWindow, TaskPanelRules), or a page of one.
+    Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter);
     Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
     Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo, bool forceNew = false);
     Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId);
@@ -62,6 +62,8 @@ public interface IKntNoteService
     Task<Result<List<KMessageDto>>> ConsumeAllUsersDueAlarmsAsync(EnumNotificationType notificationType);
     // The Application info notices of the user running the service for those alarms (the ones still valid).
     Task<Result<List<AlarmNoticeDto>>> GetAlarmNoticesAsync(List<Guid> messageIds);
+    // The alarms calendar of the web: the alarms that fire in the filter's range and their occurrences (AlarmOccurrences).
+    Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter);
 
     #region Utils 
     Task<Result<bool>> UtilPatchFolderAsync(Guid noteId, Guid folderId);

@@ -367,6 +367,15 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
   (la URL, de la petición de la conexión). Con `MountResourceContainerOnStartup` la URL de los recursos puede ser
   relativa (`/Ruta`): la Web la resuelve sola y ClientWin con un `<base href>` del servidor.
 
+## Calendario de alarmas y panel de tareas (`NotesController`)
+
+Dos lecturas para la Web, de cualquier usuario con sesión (Guest+, como las tareas y alarmas de una nota):
+`POST api/notes/alarms/calendar` (`AlarmsCalendarFilterDto` → `AlarmsCalendarDto`: las alarmas del rango y sus
+ocurrencias, como mucho `KntConst.MaxAlarmsCalendarOccurrences`, con `Truncated`) y `POST api/notes/tasks/panel`
+(`TasksPanelFilterDto` → `TasksPanelDto`; las descripciones de las tareas pasan por
+`UtilUpdateResourceInDescriptionForRead`, como las de una nota). Las fechas de las alarmas son la hora del servidor; el
+"hoy" del panel de tareas lo manda el navegador (`Today`). La lógica está en `Service` y `Model` (ver `CLAUDE.md` raíz).
+
 ## Otros endpoints
 
 - `SystemValuesController`: solo Admin. `WeatherForecastController`: restos de la plantilla.

@@ -1,0 +1,94 @@
+/* The toolbar on top and, below, the calendar and the alarm selected, in the height left in the window: the calendar
+   and the detail scroll each on its own, the page doesn't. */
+.knt-alarms-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: calc(100vh - 10rem);
+    margin-top: 0.5rem;
+}
+
+    .knt-alarms-page ::deep .knt-alarms-toolbar {
+        flex: none;
+    }
+
+    .knt-alarms-page ::deep .knt-alarms-body {
+        flex: 1;
+        min-height: 0;
+    }
+
+        .knt-alarms-page ::deep .knt-alarms-body > .rz-splitter {
+            height: 100%;
+        }
+
+.knt-alarms-title {
+    font-family: var(--knt-heading-font-family);
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+    white-space: nowrap;
+}
+
+.knt-alarms-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-alarms-page ::deep .knt-alarms-filters .rz-form-field {
+    width: 13rem;
+}
+
+/* The notification's icon before the note in each alarm of the calendar, in a line (cut with an ellipsis). */
+.knt-alarms-page ::deep .knt-alarm-appointment {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+    .knt-alarms-page ::deep .knt-alarm-appointment > .rzi {
+        flex: none;
+        font-size: 0.875rem;
+    }
+
+.knt-alarms-page ::deep .knt-alarm-appointment-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* A narrow window: the page scrolls, with the calendar above the alarm selected. */
+@media (max-width: 767.98px) {
+    .knt-alarms-page {
+        height: auto;
+    }
+
+        .knt-alarms-page ::deep .knt-alarms-filters .rz-form-field {
+            width: 100%;
+        }
+
+        .knt-alarms-page ::deep .knt-alarms-body > .rz-splitter {
+            flex-direction: column;
+            height: auto;
+        }
+
+            .knt-alarms-page ::deep .knt-alarms-body > .rz-splitter > .rz-splitter-pane {
+                flex: none !important;
+            }
+
+                .knt-alarms-page ::deep .knt-alarms-body > .rz-splitter > .rz-splitter-pane:first-child {
+                    height: 70vh;
+                }
+
+            .knt-alarms-page ::deep .knt-alarms-body > .rz-splitter > .rz-splitter-bar {
+                display: none;
+            }
+
+    .knt-alarms-summary {
+        margin-inline-start: 0;
+        flex-basis: 100%;
+    }
+}
