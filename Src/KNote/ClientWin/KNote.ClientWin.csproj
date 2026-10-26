@@ -20,13 +20,13 @@
     <None Remove="Temp\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="1.4.2" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.13" />
+    <PackageReference Include="Markdig" Version="1.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.14" />
     <PackageReference Include="NLog" Version="6.2.2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.2.2" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
-    <PackageReference Include="System.IO.Ports" Version="10.0.13" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.14" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ai\KNote.Ai.csproj" />

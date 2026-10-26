@@ -9,10 +9,10 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.89" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.14" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
     <!-- Overrides the vulnerable version brought by Microsoft.Data.SqlClient (CVE-2026-84008, CVE-2026-70162) -->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model\KNote.Model.csproj" />
