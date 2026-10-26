@@ -34,6 +34,8 @@ public interface INoteWebApiService
     Task<Result<KMessageDto>> NewAlarmAsync(Guid noteId, CancellationToken cancellationToken = default);
     Task<Result<KMessageDto>> SaveAlarmAsync(KMessageDto alarm, CancellationToken cancellationToken = default);
     Task<Result<KMessageDto>> DeleteAlarmAsync(Guid alarmId, CancellationToken cancellationToken = default);
+    // The alarms calendar: the alarms of the filter and their occurrences in its range.
+    Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter, CancellationToken cancellationToken = default);
 
     Task<Result<List<NoteMinimalDto>>> GetSearch(string queryString, CancellationToken cancellationToken = default);
     Task<Result<List<NoteMinimalDto>>> GetFilter(NotesFilterDto notesFilter, CancellationToken cancellationToken = default);

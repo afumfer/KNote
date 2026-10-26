@@ -12,11 +12,12 @@
                          MouseEnter="@(args => ShowTooltip(args, KntSections.TreePanel.Text))" />
     <RadzenPanelMenuItem Text="@KntSections.NotesFilter.Text" Path="@KntSections.NotesFilter.Path" Icon="@KntSections.NotesFilter.Icon"
                          MouseEnter="@(args => ShowTooltip(args, KntSections.NotesFilter.Text))" />
+    <RadzenPanelMenuItem Text="@KntSections.Alarms.Text" Path="@KntSections.Alarms.Path" Icon="@KntSections.Alarms.Icon"
+                         MouseEnter="@(args => ShowTooltip(args, KntSections.Alarms.Text))" />
     <AuthorizeView Roles="Staff, ProjectManager, Admin">
         <Authorized>
-            @* Hidden until developed: NotesTasksCalendar and NotesAlarmsCalendar still show demo data.
+            @* Hidden until developed: NotesTasksCalendar still shows demo data.
             <RadzenPanelMenuItem Text="@KntSections.TasksCalendar.Text" Path="@KntSections.TasksCalendar.Path" Icon="@KntSections.TasksCalendar.Icon" />
-            <RadzenPanelMenuItem Text="@KntSections.Alarms.Text" Path="@KntSections.Alarms.Path" Icon="@KntSections.Alarms.Icon" />
             *@
             <RadzenPanelMenuItem Text="@KntSections.ChatRoom.Text" Path="@KntSections.ChatRoom.Path" Icon="@KntSections.ChatRoom.Icon"
                                  MouseEnter="@(args => ShowTooltip(args, KntSections.ChatRoom.Text))" />

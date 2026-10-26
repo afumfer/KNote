@@ -115,4 +115,8 @@ public class NoteWebApiService : BaseService, INoteWebApiService
     public Task<Result<KMessageDto>> DeleteAlarmAsync(Guid alarmId, CancellationToken cancellationToken = default) =>
         SendAsync<KMessageDto>(ct => _httpClient.DeleteAsync($"api/notes/alarms/{alarmId}", ct),
             "Delete alarm", true, cancellationToken);
+
+    public Task<Result<AlarmsCalendarDto>> GetAlarmsCalendarAsync(AlarmsCalendarFilterDto filter, CancellationToken cancellationToken = default) =>
+        SendAsync<AlarmsCalendarDto>(ct => _httpClient.PostAsJsonAsync("api/notes/alarms/calendar", filter, ct),
+            "Get alarms calendar", cancellationToken: cancellationToken, timeout: ListReadTimeout);
 }

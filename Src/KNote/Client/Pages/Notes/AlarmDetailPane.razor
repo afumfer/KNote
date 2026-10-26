@@ -1,0 +1,89 @@
+@inject KntWindows kntWindows
+
+@* The alarm selected in the alarms calendar (NotesAlarmsCalendar): when the occurrence chosen fires, its next
+   activation, periodicity, notification, user and comment; below, the topic and description of its note
+   (NotePreviewPane, which reloads it when it is saved in its window) and the buttons to open it. *@
+
+<div class="knt-alarm-detail">
+    @if (Alarm == null)
+    {
+        <div class="knt-empty-state rz-m-2">
+            <RadzenIcon Icon="alarm" />
+            <div class="knt-empty-state-title">Select an alarm</div>
+            <div class="knt-empty-state-text">Click an alarm in the calendar to see it here, with the note it belongs to.</div>
+        </div>
+    }
+    else
+    {
+        <div class="knt-alarm-detail-head">
+            <span class="knt-alarm-detail-icon @(Alarm.AlarmActivated == true ? null : "knt-alarm-detail-off")">
+                <RadzenIcon Icon="@KntAlarmTexts.NotificationIcon(Alarm.NotificationType)" />
+            </span>
+            <div class="knt-alarm-detail-title">
+                <div class="knt-alarm-detail-note">#@Alarm.NoteNumber · @Alarm.NoteTopic</div>
+                <div class="knt-alarm-detail-state">@State</div>
+            </div>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                <RadzenButton Icon="visibility" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                              Click="@(() => kntWindows.OpenViewAsync(Alarm.NoteId!.Value))" aria-label="View note" title="View note" />
+                @if (CanEdit)
+                {
+                    <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => kntWindows.OpenEditAsync(Alarm.NoteId!.Value))" aria-label="Edit note (its alarms)" title="Edit note (its alarms)" />
+                }
+            </RadzenStack>
+        </div>
+
+        @if (OutOfRange)
+        {
+            <div class="knt-alarm-detail-notice"><RadzenIcon Icon="info" /> This alarm doesn't fire in the period shown now.</div>
+        }
+
+        <dl class="knt-alarm-detail-fields">
+            @if (Occurrence != null)
+            {
+                <div><dt>Fires</dt><dd>@Occurrence.DateTime.ToString("f")@(Occurrence.Count > 1 ? $" (and {Occurrence.Count - 1} more times that day)" : "")</dd></div>
+            }
+            <div><dt>Next activation</dt><dd>@(Alarm.AlarmActivated == true ? Alarm.AlarmDateTime?.ToString("f") : "None (deactivated)")</dd></div>
+            <div><dt>Periodicity</dt><dd>@KntAlarmTexts.Periodicity(Alarm)</dd></div>
+            <div><dt>Notification</dt><dd>@KntAlarmTexts.Notification(Alarm.NotificationType)</dd></div>
+            <div><dt>User</dt><dd>@(Alarm.UserFullName ?? "No user")</dd></div>
+            @if (AlarmOccurrences.IsPeriodic(Alarm))
+            {
+                <div><dt>Repeats since</dt><dd>@Alarm.NoteCreationDateTime.ToString("d") (note created)</dd></div>
+            }
+        </dl>
+        @if (!string.IsNullOrWhiteSpace(Alarm.Comment))
+        {
+            <div class="knt-alarm-detail-comment">@Alarm.Comment</div>
+        }
+
+        <div class="knt-alarm-detail-note-pane">
+            <NotePreviewPane NoteId="@Alarm.NoteId" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public AlarmCalendarItemDto? Alarm { get; set; }
+    // The occurrence selected in the calendar (none when the alarm no longer fires in the period shown).
+    [Parameter] public AlarmOccurrenceDto? Occurrence { get; set; }
+    // The alarm was selected in another period: the calendar doesn't show it now.
+    [Parameter] public bool OutOfRange { get; set; }
+    // Staff and up edit the note (and its alarms) in its window.
+    [Parameter] public bool CanEdit { get; set; }
+
+    private string State
+    {
+        get
+        {
+            if (Alarm!.AlarmActivated != true)
+                return "Deactivated";
+            if (Occurrence == null)
+                return "Activated";
+            if (Occurrence.DateTime == Alarm.AlarmDateTime)
+                return "Next activation";
+            return Occurrence.DateTime < Alarm.AlarmDateTime ? "Already fired" : "Will fire";
+        }
+    }
+}
