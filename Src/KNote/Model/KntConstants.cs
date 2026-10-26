@@ -187,5 +187,21 @@ public enum EnumActionType
     ScriptExecution
 }
 
+// The unit of the time window of the tasks panel (see TasksWindow).
+public enum EnumTasksWindowUnit
+{
+    Days,
+    Weeks,
+    Months
+}
+
+// The columns of the tasks panel, in the order it shows them (see TaskPanelRules.Classify).
+public enum EnumTaskPanelColumn
+{
+    Resolved,
+    InProgress,
+    Pending
+}
+
 
 #endregion 

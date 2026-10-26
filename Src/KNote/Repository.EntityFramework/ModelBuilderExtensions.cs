@@ -60,6 +60,9 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<Note>().HasIndex(_ => _.Topic).IsUnique(false);
         modelBuilder.Entity<Note>().HasIndex(_ => new {_.Priority, _.Topic }).IsUnique(false);
         modelBuilder.Entity<Note>().HasIndex(_ => _.InternalTags).IsUnique(false);
+        // The time window of the tasks panel (KntSchemaUpdater revision 6 adds them to existing databases).
+        modelBuilder.Entity<NoteTask>().HasIndex(_ => _.StartDate).IsUnique(false);
+        modelBuilder.Entity<NoteTask>().HasIndex(_ => _.EndDate).IsUnique(false);
         // Allows the same Name to be reused across different NoteTypeId (an attribute scoped to one
         // note type doesn't collide with an equally-named one scoped to another). Duplicate Names
         // among *global* attributes (NoteTypeId == null) are enforced in
