@@ -705,31 +705,33 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+    #region Tasks panel
+
+    // The start of a task in the tasks panel (TaskPanelRules.EffectiveStart): its StartDate or its creation.
+    private const string TaskPanelStart = "COALESCE(NoteTasks.StartDate, NoteTasks.CreationDateTime)";
+
+    public async Task<Result<TasksPanelCountsDto>> GetTasksPanelCountsAsync(TasksPanelQueryDto query)
     {
         try
         {
-            var result = new Result<List<NoteTaskDto>>();
+            var result = new Result<TasksPanelCountsDto>();
 
             var db = GetOpenConnection();
 
-            var sql = @"SELECT
-                        NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime, 
-                        NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved, 
-                        NoteTasks.EstimatedTime, NoteTasks.SpentTime, NoteTasks.DifficultyLevel, NoteTasks.ExpectedStartDate, 
-                        NoteTasks.ExpectedEndDate, NoteTasks.StartDate, NoteTasks.EndDate, Users.FullName as UserFullName
-                FROM  NoteTasks LEFT OUTER JOIN
-                        Users ON NoteTasks.UserId = Users.UserId
-                WHERE ((NoteTasks.StartDate >= @startDateTime AND NoteTasks.StartDate <= @endDateTime) OR 
-                       (NoteTasks.EndDate >= @startDateTime AND NoteTasks.EndDate <= @endDateTime) OR 
-                       (NoteTasks.StartDate < @startDateTime AND NoteTasks.EndDate is null) )
-                ORDER BY [Priority], [CreationDateTime];";
+            var parameters = new DynamicParameters();
+            var sql = $@"SELECT
+                    COALESCE(SUM(CASE WHEN {TaskPanelColumnCondition(EnumTaskPanelColumn.Resolved)} THEN 1 ELSE 0 END), 0) AS Resolved,
+                    COALESCE(SUM(CASE WHEN {TaskPanelColumnCondition(EnumTaskPanelColumn.InProgress)} THEN 1 ELSE 0 END), 0) AS InProgress,
+                    COALESCE(SUM(CASE WHEN {TaskPanelColumnCondition(EnumTaskPanelColumn.Pending)} THEN 1 ELSE 0 END), 0) AS Pending
+                {GetTasksPanelFromWhere(query, db, parameters, true)};";
+            result.Entity = await db.QuerySingleAsync<TasksPanelCountsDto>(sql, parameters);
 
-            var entity = await db.QueryAsync<NoteTaskDto>(sql.ToString(), new { startDateTime, endDateTime });
-            result.Entity = entity.ToList();
+            var totalParameters = new DynamicParameters();
+            var sqlTotal = $"SELECT COUNT(*) {GetTasksPanelFromWhere(query, db, totalParameters, false)};";
+            result.Entity.TotalWithoutWindow = await db.ExecuteScalarAsync<int>(sqlTotal, totalParameters);
 
             await CloseIsTempConnection(db);
-        
+
             return result;
         }
         catch (Exception ex)
@@ -738,10 +740,170 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime)
+    public async Task<Result<List<TaskPanelItemDto>>> GetTasksPanelPageAsync(TasksPanelQueryDto query, EnumTaskPanelColumn column, int skip, int take)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var result = new Result<List<TaskPanelItemDto>>();
+
+            var db = GetOpenConnection();
+
+            var parameters = new DynamicParameters();
+            var sql = $@"SELECT
+                    NoteTasks.NoteTaskId, NoteTasks.NoteId, NoteTasks.UserId, NoteTasks.CreationDateTime,
+                    NoteTasks.ModificationDateTime, NoteTasks.Description, NoteTasks.Tags, NoteTasks.Priority, NoteTasks.Resolved,
+                    NoteTasks.EstimatedTime, NoteTasks.SpentTime, NoteTasks.DifficultyLevel, NoteTasks.ExpectedStartDate,
+                    NoteTasks.ExpectedEndDate, NoteTasks.StartDate, NoteTasks.EndDate, Users.FullName AS UserFullName,
+                    Notes.NoteNumber, Notes.Topic AS NoteTopic, Notes.Tags AS NoteTags, Notes.FolderId, Notes.NoteTypeId,
+                    NoteTypes.Name AS NoteTypeName
+                {GetTasksPanelFromWhere(query, db, parameters, true)}
+                    AND {TaskPanelColumnCondition(column)}
+                ORDER BY {(column == EnumTaskPanelColumn.Resolved
+                    ? "NoteTasks.EndDate DESC, NoteTasks.NoteTaskId"
+                    : $"{TaskPanelStart}, NoteTasks.CreationDateTime, NoteTasks.NoteTaskId")}";
+
+            if (db.GetType().Name == "SqliteConnection")
+                sql += " LIMIT @take OFFSET @skip;";
+            else
+                sql += " OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;";
+            parameters.Add("skip", Math.Max(skip, 0));
+            parameters.Add("take", Math.Max(take, 1));
+
+            var entity = await db.QueryAsync<TaskPanelItemDto>(sql, parameters);
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
     }
+
+    public async Task<Result<TasksPanelNearestDto>> GetTasksPanelNearestAsync(TasksPanelQueryDto query)
+    {
+        try
+        {
+            var result = new Result<TasksPanelNearestDto>(new TasksPanelNearestDto());
+
+            var db = GetOpenConnection();
+
+            var parameters = new DynamicParameters();
+            var fromWhere = GetTasksPanelFromWhere(query, db, parameters, false);
+            var lastStart = await db.ExecuteScalarAsync<DateTime?>($"SELECT MAX({TaskPanelStart}) {fromWhere} AND {TaskPanelStart} < @windowStart;", parameters);
+            var lastEnd = await db.ExecuteScalarAsync<DateTime?>($"SELECT MAX(NoteTasks.EndDate) {fromWhere} AND NoteTasks.EndDate < @windowStart;", parameters);
+            result.Entity.LastBefore = lastEnd == null || lastStart > lastEnd ? lastStart : lastEnd;
+            result.Entity.FirstAfter = await db.ExecuteScalarAsync<DateTime?>($"SELECT MIN({TaskPanelStart}) {fromWhere} AND {TaskPanelStart} >= @windowEndNext;", parameters);
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    // The tasks of the panel's filters (and with window, only those that overlap it: TaskPanelRules.Overlaps): FROM and
+    // WHERE, with the window's and cut-off's parameters (days, compared with the first moment of the next day).
+    private string GetTasksPanelFromWhere(TasksPanelQueryDto query, DbConnection db, DynamicParameters parameters, bool window)
+    {
+        var collate = GetAccentInsensitiveCollateSuffix(db);
+        var sql = @" FROM NoteTasks INNER JOIN
+                    Notes ON NoteTasks.NoteId = Notes.NoteId LEFT JOIN
+                    Users ON NoteTasks.UserId = Users.UserId LEFT JOIN
+                    NoteTypes ON Notes.NoteTypeId = NoteTypes.NoteTypeId
+                WHERE 1 = 1";
+
+        parameters.Add("windowStart", query.WindowStart.Date);
+        parameters.Add("windowEndNext", query.WindowEnd.Date.AddDays(1));
+        parameters.Add("cutOffNext", query.CutOff.Date.AddDays(1));
+
+        if (query.ExcludeNoteTypeIds?.Count > 0)
+        {
+            sql += " AND (Notes.NoteTypeId IS NULL OR Notes.NoteTypeId NOT IN @excludeNoteTypeIds)";
+            parameters.Add("excludeNoteTypeIds", query.ExcludeNoteTypeIds);
+        }
+        if (query.NoteTypeId != null)
+        {
+            sql += " AND Notes.NoteTypeId = @noteTypeId";
+            parameters.Add("noteTypeId", query.NoteTypeId.Value);
+        }
+        if (query.UserId != null)
+        {
+            sql += " AND NoteTasks.UserId = @userId";
+            parameters.Add("userId", query.UserId.Value);
+        }
+        if (query.FolderId != null)
+        {
+            if (query.IncludeChildFolders)
+            {
+                sql += " AND Notes.FolderId IN @folderIds";
+                parameters.Add("folderIds", GetDescendantFolderIds(db, query.FolderId.Value));
+            }
+            else
+            {
+                sql += " AND Notes.FolderId = @folderId";
+                parameters.Add("folderId", query.FolderId.Value);
+            }
+        }
+
+        var tags = TaskPanelTags(query);
+        if (tags.Count > 0)
+        {
+            var conditions = new List<string>();
+            for (var i = 0; i < tags.Count; i++)
+            {
+                conditions.Add($"Notes.Tags{collate} LIKE @tag{i}");
+                parameters.Add($"tag{i}", $"%{tags[i]}%");
+            }
+            sql += $" AND ({string.Join(" OR ", conditions)})";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Text))
+        {
+            var noteNumber = TaskPanelNoteNumber(query.Text);
+            if (noteNumber > 0)
+            {
+                sql += " AND Notes.NoteNumber = @noteNumber";
+                parameters.Add("noteNumber", noteNumber);
+            }
+            else
+            {
+                sql += $" AND (NoteTasks.Tags{collate} LIKE @text OR NoteTasks.Description{collate} LIKE @text OR Notes.Topic{collate} LIKE @text)";
+                parameters.Add("text", $"%{query.Text.Trim()}%");
+            }
+        }
+
+        // An open task goes on until today: it reaches the window if today does.
+        if (window)
+            sql += $@" AND {TaskPanelStart} < @windowEndNext
+                    AND ({TaskPanelStart} >= @windowStart OR NoteTasks.EndDate >= @windowStart"
+                + (query.Today.Date >= query.WindowStart.Date ? " OR NoteTasks.EndDate IS NULL)" : ")");
+
+        return sql;
+    }
+
+    // TaskPanelRules.Classify on the cut-off date.
+    private static string TaskPanelColumnCondition(EnumTaskPanelColumn column) => column switch
+    {
+        EnumTaskPanelColumn.Pending => $"{TaskPanelStart} >= @cutOffNext",
+        EnumTaskPanelColumn.Resolved => $"{TaskPanelStart} < @cutOffNext AND NoteTasks.EndDate < @cutOffNext",
+        _ => $"{TaskPanelStart} < @cutOffNext AND (NoteTasks.EndDate IS NULL OR NoteTasks.EndDate >= @cutOffNext)"
+    };
+
+    // The words of the tags filter.
+    private static List<string> TaskPanelTags(TasksPanelQueryDto query) =>
+        query.Tags?.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()).ToList() ?? new List<string>();
+
+    // The text filter as a note number ("123" or "#123"), or 0.
+    private static int TaskPanelNoteNumber(string text) =>
+        int.TryParse(text.Trim().TrimStart('#'), out var number) && number > 0 ? number : 0;
+
+    #endregion
 
     public async Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid idNoteTask)
     {            

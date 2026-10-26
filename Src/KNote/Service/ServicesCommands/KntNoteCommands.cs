@@ -802,39 +802,97 @@ public class KntNotesGetNoteTasksAsyncCommand : KntCommandServiceBase<Guid, Resu
     }
 }
 
+/// <summary>
+/// The tasks panel of the web (read-only, any user's tasks, like the tasks of a note): the window of the filter
+/// (TasksWindow, around its reference date, on the user's today) and its tasks by column on the cut-off date
+/// (TaskPanelRules), a page of each column with its total, how many tasks of the filters are out of the window and,
+/// for a window without tasks, a date that shows the nearest one. With Column, only the page asked for of that column.
+/// The tasks of the system notes (AI assistant sessions, chat room threads) are never shown: they only link users to
+/// those notes.
+/// </summary>
 [KntAuthorize(EnumRoles.Guest)]
-public class KntNotesGetStartedTasksByDateTimeRageAsyncCommand : KntCommandServiceBase< Result<List<NoteTaskDto>>>
+public class KntNotesGetTasksPanelAsyncCommand : KntCommandServiceBase<TasksPanelFilterDto, Result<TasksPanelDto>>
 {
-    private readonly DateTime startDateTime;
-    private readonly DateTime endDateTime;
+    private const int MaxPageSize = 200;
 
-    public KntNotesGetStartedTasksByDateTimeRageAsyncCommand(IKntService service, DateTime startDateTime, DateTime endDateTime) : base(service)
+    public KntNotesGetTasksPanelAsyncCommand(IKntService service, TasksPanelFilterDto filter) : base(service, filter)
     {
-        this.startDateTime = startDateTime;
-        this.endDateTime = endDateTime;
     }
 
-    public override async Task<Result<List<NoteTaskDto>>> Execute()
+    public override async Task<Result<TasksPanelDto>> Execute()
     {
-        return await Repository.Notes.GetStartedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        var result = new Result<TasksPanelDto>(new TasksPanelDto());
+        var filter = Param ?? new TasksPanelFilterDto();
+        var panel = result.Entity;
+
+        panel.Today = filter.Today == default ? DateTime.Today : filter.Today.Date;
+        var reference = filter.ReferenceDate == default ? panel.Today : filter.ReferenceDate.Date;
+        (panel.WindowStart, panel.WindowEnd) = TasksWindow.Compute(filter.Unit, filter.Size, reference);
+        panel.CutOff = TasksWindow.CutOff(panel.WindowEnd, panel.Today);
+
+        var query = new TasksPanelQueryDto
+        {
+            WindowStart = panel.WindowStart,
+            WindowEnd = panel.WindowEnd,
+            CutOff = panel.CutOff,
+            Today = panel.Today,
+            NoteTypeId = filter.NoteTypeId,
+            UserId = filter.UserId,
+            Tags = filter.Tags ?? new List<string>(),
+            Text = filter.Text,
+            FolderId = filter.FolderId,
+            IncludeChildFolders = filter.IncludeChildFolders,
+            ExcludeNoteTypeIds = await GetSystemNoteTypeIdsAsync()
+        };
+
+        var counts = await Repository.Notes.GetTasksPanelCountsAsync(query);
+        if (!counts.IsValid)
+        {
+            result.AddListErrorMessage(counts.ListErrorMessage);
+            return result;
+        }
+
+        var pageSize = Math.Clamp(filter.PageSize, 1, MaxPageSize);
+        var columns = filter.Column != null ? new[] { filter.Column.Value } : Enum.GetValues<EnumTaskPanelColumn>();
+        foreach (var column in columns)
+        {
+            var page = await Repository.Notes.GetTasksPanelPageAsync(query, column, filter.Column != null ? filter.Skip : 0, pageSize);
+            if (!page.IsValid)
+            {
+                result.AddListErrorMessage(page.ListErrorMessage);
+                return result;
+            }
+            page.Entity.ForEach(t => t.Column = column);
+            panel.Columns.Add(new TasksPanelColumnDto { Column = column, TotalCount = counts.Entity[column], Tasks = page.Entity });
+        }
+
+        var inWindow = counts.Entity.Resolved + counts.Entity.InProgress + counts.Entity.Pending;
+        panel.OutsideCount = counts.Entity.TotalWithoutWindow - inWindow;
+        if (inWindow == 0 && counts.Entity.TotalWithoutWindow > 0)
+            panel.NearestTaskDate = NearestDate((await Repository.Notes.GetTasksPanelNearestAsync(query)).Entity, panel);
+
+        return result;
     }
-}
 
-[KntAuthorize(EnumRoles.Guest)]
-public class KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand : KntCommandServiceBase<Result<List<NoteTaskDto>>>
-{
-    private readonly DateTime startDateTime;
-    private readonly DateTime endDateTime;
-
-    public KntNotesGetEstimatedTasksByDateTimeRageAsyncCommand(IKntService service, DateTime startDateTime, DateTime endDateTime) : base(service)
+    private async Task<List<Guid>> GetSystemNoteTypeIdsAsync()
     {
-        this.startDateTime = startDateTime;
-        this.endDateTime = endDateTime;
+        var noteTypes = await Repository.NoteTypes.GetAllAsync();
+        return noteTypes.Entity?
+            .Where(t => t.Name == KntConst.ChatSessionsTag || t.Name == KntConst.ChatRoomTag)
+            .Select(t => t.NoteTypeId)
+            .ToList() ?? new List<Guid>();
     }
 
-    public override async Task<Result<List<NoteTaskDto>>> Execute()
+    // The nearer of the last date before the window and the first one after it.
+    private static DateTime? NearestDate(TasksPanelNearestDto nearest, TasksPanelDto panel)
     {
-        return await Repository.Notes.GetEstimatedTasksByDateTimeRageAsync(startDateTime, endDateTime);
+        var before = nearest?.LastBefore?.Date;
+        var after = nearest?.FirstAfter?.Date;
+        if (before == null)
+            return after;
+        if (after == null)
+            return before;
+        return (panel.WindowStart - before.Value) <= (after.Value - panel.WindowEnd) ? before : after;
     }
 }
 

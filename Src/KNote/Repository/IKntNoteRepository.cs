@@ -28,8 +28,12 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity);
     Task<Result> DeleteResourceAsync(Guid resourceId);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
-    Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
-    Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeRageAsync(DateTime startDateTime, DateTime endDateTime);
+    // The tasks panel (TaskPanelRules in SQL; never the tasks of the query's ExcludeNoteTypeIds): how many tasks each
+    // column has in the window (and how many the filters have without it), a page of a column in its order (Pending and
+    // In progress by start, Resolved by end, the latest first), and, for a window without tasks, where the nearest are.
+    Task<Result<TasksPanelCountsDto>> GetTasksPanelCountsAsync(TasksPanelQueryDto query);
+    Task<Result<List<TaskPanelItemDto>>> GetTasksPanelPageAsync(TasksPanelQueryDto query, EnumTaskPanelColumn column, int skip, int take);
+    Task<Result<TasksPanelNearestDto>> GetTasksPanelNearestAsync(TasksPanelQueryDto query);
     Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
     Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity);
     Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity);        
