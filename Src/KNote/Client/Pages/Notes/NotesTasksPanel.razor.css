@@ -1,0 +1,174 @@
+/* The toolbar on top and, below, the three columns and the task selected, in the height left in the window: each
+   column and the detail scroll on their own, the page doesn't. */
+.knt-taskspanel-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: calc(100vh - 10rem);
+    margin-top: 0.5rem;
+}
+
+    .knt-taskspanel-page ::deep .knt-taskspanel-toolbar {
+        flex: none;
+    }
+
+    .knt-taskspanel-page ::deep .knt-taskspanel-body {
+        flex: 1;
+        min-height: 0;
+    }
+
+        .knt-taskspanel-page ::deep .knt-taskspanel-body > .rz-splitter {
+            height: 100%;
+        }
+
+.knt-taskspanel-page ::deep .knt-taskspanel-label {
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-taskspanel-range {
+    display: grid;
+    gap: 0.0625rem;
+    min-width: 0;
+    padding: 0 0.375rem;
+}
+
+.knt-taskspanel-range-label {
+    font-family: var(--knt-heading-font-family);
+    font-weight: 600;
+    color: var(--rz-text-title-color);
+    white-space: nowrap;
+}
+
+.knt-taskspanel-range-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-taskspanel-badge {
+    padding: 0.0625rem 0.375rem;
+    border-radius: 0.25rem;
+    background-color: var(--rz-warning-lighter);
+    color: var(--rz-text-color);
+    font-weight: 600;
+}
+
+.knt-taskspanel-outside {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-taskspanel-page ::deep .knt-taskspanel-filters .rz-form-field {
+    width: 12.5rem;
+}
+
+.knt-taskspanel-page ::deep .knt-taskspanel-filters .rz-form-field.knt-folder-picker {
+    width: 17rem;
+}
+
+.knt-taskspanel-left {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    padding: 0.25rem;
+}
+
+.knt-taskspanel-banner {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px dashed color-mix(in srgb, var(--rz-text-color) 35%, transparent);
+    border-radius: var(--rz-border-radius);
+}
+
+    .knt-taskspanel-banner > span {
+        flex: 1 1 12rem;
+    }
+
+/* The tabs of the columns are only for a narrow window. */
+.knt-taskspanel-left ::deep .knt-taskspanel-tabs {
+    display: none;
+}
+
+.knt-taskspanel-columns {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+/* A narrow window: the page scrolls, one column at a time (the tabs), with the task selected below. */
+@media (max-width: 767.98px) {
+    .knt-taskspanel-page {
+        height: auto;
+    }
+
+        .knt-taskspanel-page ::deep .knt-taskspanel-filters .rz-form-field,
+        .knt-taskspanel-page ::deep .knt-taskspanel-filters .rz-form-field.knt-folder-picker,
+        .knt-taskspanel-folder {
+            width: 100%;
+        }
+
+    .knt-taskspanel-range-label {
+        white-space: normal;
+    }
+
+        .knt-taskspanel-page ::deep .knt-taskspanel-body > .rz-splitter {
+            flex-direction: column;
+            height: auto;
+        }
+
+            .knt-taskspanel-page ::deep .knt-taskspanel-body > .rz-splitter > .rz-splitter-pane {
+                flex: none !important;
+            }
+
+                .knt-taskspanel-page ::deep .knt-taskspanel-body > .rz-splitter > .rz-splitter-pane:first-child {
+                    height: 70vh;
+                }
+
+                .knt-taskspanel-page ::deep .knt-taskspanel-body > .rz-splitter > .rz-splitter-pane:last-child {
+                    height: 80vh;
+                }
+
+            .knt-taskspanel-page ::deep .knt-taskspanel-body > .rz-splitter > .rz-splitter-bar {
+                display: none;
+            }
+
+    .knt-taskspanel-left ::deep .knt-taskspanel-tabs {
+        display: flex;
+        margin-bottom: 0.5rem;
+    }
+
+    .knt-taskspanel-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+        .knt-taskspanel-columns > ::deep .knt-tasks-column {
+            display: none;
+        }
+
+        .knt-taskspanel-columns[data-active="Resolved"] > ::deep .knt-tasks-column-resolved,
+        .knt-taskspanel-columns[data-active="InProgress"] > ::deep .knt-tasks-column-inprogress,
+        .knt-taskspanel-columns[data-active="Pending"] > ::deep .knt-tasks-column-pending {
+            display: flex;
+        }
+
+    .knt-taskspanel-outside {
+        margin-inline-start: 0;
+        flex-basis: 100%;
+    }
+}

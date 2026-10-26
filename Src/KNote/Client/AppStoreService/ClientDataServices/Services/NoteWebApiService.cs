@@ -61,18 +61,9 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         SendAsync<List<NoteTaskDto>>(ct => _httpClient.GetAsync($"api/notes/{noteId}/tasks", ct),
             "Get note tasks", cancellationToken: cancellationToken);
 
-    public Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime,
-        CancellationToken cancellationToken = default)
-    {
-        var url = $"api/notes/GetStartedTasksByDateTimeRage?start={startDateTime.ToString("yyyyMMddHHmmss")}&end={endDateTime.ToString("yyyyMMddHHmmss")}";
-        return SendAsync<List<NoteTaskDto>>(ct => _httpClient.GetAsync(url, ct), "Get note tasks by datetime.", cancellationToken: cancellationToken);
-    }
-
-    public Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+    public Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter, CancellationToken cancellationToken = default) =>
+        SendAsync<TasksPanelDto>(ct => _httpClient.PostAsJsonAsync("api/notes/tasks/panel", filter, ct),
+            "Get tasks panel", cancellationToken: cancellationToken, timeout: ListReadTimeout);
 
     public Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto noteTask, CancellationToken cancellationToken = default) =>
         SendAsync<NoteTaskDto>(ct => noteTask.NoteTaskId == Guid.Empty

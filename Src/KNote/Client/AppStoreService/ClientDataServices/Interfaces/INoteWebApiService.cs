@@ -18,8 +18,8 @@ public interface INoteWebApiService
     Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto entity, CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId, CancellationToken cancellationToken = default);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId, CancellationToken cancellationToken = default);
-    Task<Result<List<NoteTaskDto>>> GetStartedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime, CancellationToken cancellationToken = default);
-    Task<Result<List<NoteTaskDto>>> GetEstimatedTasksByDateTimeAsync(DateTime startDateTime, DateTime endDateTime, CancellationToken cancellationToken = default);
+    // The tasks panel: the tasks of a time window by column, or a page of one column.
+    Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter, CancellationToken cancellationToken = default);
     Task<Result<NoteTaskDto>> SaveNoteTaskAsync(NoteTaskDto entityInfo, CancellationToken cancellationToken = default);
     Task<Result<NoteTaskDto>> DeleteNoteTaskAsync(Guid noteTaskId, CancellationToken cancellationToken = default);
 

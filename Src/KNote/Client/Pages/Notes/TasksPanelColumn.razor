@@ -1,0 +1,85 @@
+@* A column of the tasks panel (NotesTasksPanel): its name and how many tasks it has, and their cards, which scroll on
+   their own, with "Load more" while the column has more than those read. A card shows the task's note, topic, dates,
+   user and indicators (TaskPanelRules: with words, not only colors); clicking it (or Enter) selects it. *@
+
+<section class="knt-tasks-column knt-tasks-column-@Css" aria-label="@Name">
+    <header class="knt-tasks-column-head">
+        <RadzenIcon Icon="@Icon" class="knt-tasks-column-icon" />
+        <h2 class="knt-tasks-column-title">@Name</h2>
+        <span class="knt-tasks-column-count" aria-label="@($"{Column?.TotalCount ?? 0} tasks")">@(Column?.TotalCount.ToString("N0") ?? "–")</span>
+    </header>
+    <div class="knt-tasks-column-list">
+        @if (Column == null)
+        {
+            @for (var i = 0; i < 3; i++)
+            {
+                <div class="knt-task-card knt-task-card-ghost" aria-hidden="true"></div>
+            }
+        }
+        else if (Column.Tasks.Count == 0)
+        {
+            <div class="knt-tasks-column-empty">@Empty</div>
+        }
+        else
+        {
+            @foreach (var task in Column.Tasks)
+            {
+                var selected = task.NoteTaskId == SelectedId;
+                <button type="button" class="knt-task-card @(selected ? "knt-task-card-selected" : null)" aria-pressed="@(selected ? "true" : "false")"
+                        @key="task.NoteTaskId" @onclick="() => OnSelect.InvokeAsync(task)">
+                    <span class="knt-task-card-meta">
+                        <span>#@task.NoteNumber@(string.IsNullOrEmpty(task.NoteTypeName) ? "" : $" · {task.NoteTypeName}")</span>
+                        <span class="knt-task-card-note">@task.NoteTopic</span>
+                    </span>
+                    <span class="knt-task-card-title">@Title(task)</span>
+                    <span class="knt-task-card-dates">
+                        <span>Start</span><b>@TaskPanelRules.EffectiveStart(task).ToString("d")</b>
+                        @if (task.EndDate != null)
+                        {
+                            <span>End</span><b>@task.EndDate.Value.ToString("d")</b>
+                        }
+                        @if (task.ExpectedEndDate != null)
+                        {
+                            <span>Expected end</span><b>@task.ExpectedEndDate.Value.ToString("d")</b>
+                        }
+                    </span>
+                    <span class="knt-task-card-foot">
+                        <span class="knt-task-card-user"><RadzenIcon Icon="person" /><span>@(task.UserFullName ?? "-")</span></span>
+                        @foreach (var indicator in TaskPanelRules.Indicators(task, task.Column, CutOff))
+                        {
+                            <span class="knt-task-chip knt-task-chip-@indicator.Kind.ToString().ToLowerInvariant()">@indicator.Text</span>
+                        }
+                    </span>
+                </button>
+            }
+            @if (Column.Tasks.Count < Column.TotalCount)
+            {
+                <RadzenButton Text="@($"Load more ({Column.TotalCount - Column.Tasks.Count:N0} left)")" Icon="expand_more" Variant="Variant.Outlined"
+                              ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="knt-tasks-column-more"
+                              Disabled="@LoadingMore" Click="() => OnLoadMore.InvokeAsync(Column.Column)" />
+            }
+        }
+    </div>
+</section>
+
+@code {
+    // Null while the panel is being read the first time.
+    [Parameter] public TasksPanelColumnDto? Column { get; set; }
+    [Parameter][EditorRequired] public string Name { get; set; } = null!;
+    [Parameter][EditorRequired] public string Icon { get; set; } = null!;
+    [Parameter][EditorRequired] public string Css { get; set; } = null!;
+    [Parameter][EditorRequired] public string Empty { get; set; } = null!;
+    // The panel's cut-off date, for the indicators.
+    [Parameter] public DateTime CutOff { get; set; }
+    [Parameter] public Guid? SelectedId { get; set; }
+    [Parameter] public bool LoadingMore { get; set; }
+    [Parameter] public EventCallback<TaskPanelItemDto> OnSelect { get; set; }
+    [Parameter] public EventCallback<EnumTaskPanelColumn> OnLoadMore { get; set; }
+
+    // The task's topic (Tags, "Topic / Tags" in ClientWin), or the first line of its description.
+    public static string Title(NoteTaskDto task)
+    {
+        var topic = task.GetTopic();
+        return topic.Length > 0 ? topic : "(No topic)";
+    }
+}

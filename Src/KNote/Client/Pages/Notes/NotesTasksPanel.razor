@@ -1,0 +1,460 @@
+﻿@page "/notes/taskspanel"
+@page "/taskspanel"
+@page "/notes/taskscalendar"
+
+@using KNote.Client.Auth
+
+@implements IDisposable
+
+@inject IStore store
+@inject KntWindows kntWindows
+@inject IJSRuntime js
+
+@attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
+
+@* The tasks panel (read-only, CU-TAR-01): the tasks of a time window in three columns, Resolved | In progress |
+   Pending, as they were on the cut-off date (today, or the end of a past window), and the task selected, with its note,
+   at the right. The window (unit, size, reference date) is moved from the toolbar; the Server works out the window, the
+   tasks of each column and their totals (Notes.GetTasksPanelAsync), and each column is read a page at a time. In a
+   narrow window one column is shown at a time (the tabs) and the task goes below. *@
+
+<KntIndexHeader Section="KntSections.TasksPanel">
+    <IndexMenu>
+        <RadzenMenu>
+            <RadzenMenuItem Text="Refresh" Icon="refresh" Click="LoadAsync" />
+        </RadzenMenu>
+    </IndexMenu>
+</KntIndexHeader>
+
+<div class="knt-taskspanel-page">
+    <RadzenCard class="rz-p-2 knt-taskspanel-toolbar">
+        <RadzenStack Gap="0.5rem">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap" Gap="0.5rem 1rem">
+                <RadzenSelectBar TValue="EnumTasksWindowUnit" Value="unit" Change="OnUnitChanged" Size="ButtonSize.Small" aria-label="Unit of the period">
+                    <Items>
+                        <RadzenSelectBarItem Text="Days" Value="EnumTasksWindowUnit.Days" />
+                        <RadzenSelectBarItem Text="Weeks" Value="EnumTasksWindowUnit.Weeks" />
+                        <RadzenSelectBarItem Text="Months" Value="EnumTasksWindowUnit.Months" />
+                    </Items>
+                </RadzenSelectBar>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.375rem">
+                    <RadzenLabel Text="Size" Component="WindowSize" class="knt-taskspanel-label" />
+                    <RadzenDropDown TValue="int" Name="WindowSize" Value="size" Change="@(v => OnSizeChanged((int)v))" Data="@Sizes"
+                                    InputSize="InputSize.Small" Style="width: 4.5rem" />
+                </RadzenStack>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.125rem">
+                    <RadzenButton Icon="keyboard_double_arrow_left" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => MoveAsync(-size))" aria-label="@MoveText(-size)" title="@MoveText(-size)" />
+                    <RadzenButton Icon="chevron_left" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => MoveAsync(-1))" aria-label="@MoveText(-1)" title="@MoveText(-1)" />
+                    <div class="knt-taskspanel-range" aria-live="polite">
+                        <span class="knt-taskspanel-range-label">@RangeText</span>
+                        <span class="knt-taskspanel-range-sub">
+                            @RangeSubText
+                            @if (panel != null && (panel.Today < panel.WindowStart || panel.Today > panel.WindowEnd))
+                            {
+                                <span class="knt-taskspanel-badge">Not including today</span>
+                            }
+                        </span>
+                    </div>
+                    <RadzenButton Icon="chevron_right" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => MoveAsync(1))" aria-label="@MoveText(1)" title="@MoveText(1)" />
+                    <RadzenButton Icon="keyboard_double_arrow_right" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Click="@(() => MoveAsync(size))" aria-label="@MoveText(size)" title="@MoveText(size)" />
+                </RadzenStack>
+                <RadzenButton Text="Today" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="TodayAsync" />
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.375rem">
+                    <RadzenLabel Text="Go to" Component="GoToDate" class="knt-taskspanel-label" />
+                    <RadzenDatePicker TValue="DateTime?" Name="GoToDate" Value="goToDate" Change="OnGoToDate" DateFormat="d" ShowTime="false"
+                                      InputSize="InputSize.Small" Style="width: 9.5rem" />
+                </RadzenStack>
+                <span class="knt-taskspanel-outside">
+                    @if (loadFailed)
+                    {
+                        <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The tasks could not be loaded.</span>
+                        <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="LoadAsync" />
+                    }
+                    else if (panel != null)
+                    {
+                        @(panel.OutsideCount == 0 ? "Every task is in this period" : $"{panel.OutsideCount:N0} {(panel.OutsideCount == 1 ? "task" : "tasks")} out of this period")
+                    }
+                </span>
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap" Gap="0.5rem 0.75rem" class="knt-taskspanel-filters">
+                <RadzenFormField Text="Note type" Variant="Variant.Outlined">
+                    <Start><RadzenIcon Icon="category" /></Start>
+                    <ChildContent>
+                        <RadzenDropDown TValue="Guid?" @bind-Value="noteTypeId" Change="LoadAsync" Data="@noteTypes" TextProperty="Name" ValueProperty="NoteTypeId"
+                                        AllowClear="true" Placeholder="All" InputSize="InputSize.Small" />
+                    </ChildContent>
+                </RadzenFormField>
+                <RadzenFormField Text="User" Variant="Variant.Outlined">
+                    <Start><RadzenIcon Icon="person" /></Start>
+                    <ChildContent>
+                        <RadzenDropDown TValue="Guid" @bind-Value="userId" Change="LoadAsync" Data="@userOptions" TextProperty="Text" ValueProperty="Id"
+                                        AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" InputSize="InputSize.Small" />
+                    </ChildContent>
+                </RadzenFormField>
+                <RadzenFormField Text="Note tags (any)" Variant="Variant.Outlined">
+                    <Start><RadzenIcon Icon="sell" /></Start>
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="tags" Change="@(_ => LoadAsync())" InputSize="InputSize.Small" Placeholder="Words, with spaces or commas" />
+                    </ChildContent>
+                </RadzenFormField>
+                <RadzenFormField Text="Search" Variant="Variant.Outlined">
+                    <Start><RadzenIcon Icon="search" /></Start>
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="text" Change="@(_ => LoadAsync())" InputSize="InputSize.Small" Placeholder="Task, note topic or #number" />
+                    </ChildContent>
+                </RadzenFormField>
+                <div class="knt-taskspanel-folder">
+                    <KntFolderPicker FolderName="@(folder?.Name ?? "All folders")" FolderSelected="OnFolderSelected" FolderReset="OnFolderReset" ResetTitle="All folders" />
+                </div>
+                @if (HasFilters)
+                {
+                    <RadzenButton Text="Clear filters" Icon="filter_alt_off" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="ClearFiltersAsync" />
+                }
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenCard class="rz-p-1 knt-taskspanel-body">
+        <RadzenSplitter Resize="paneSizes.Resized">
+            <RadzenSplitterPane Size="@paneSizes[0]" Min="480px">
+                <div class="knt-taskspanel-left">
+                    @if (EmptyWindow)
+                    {
+                        <div class="knt-taskspanel-banner">
+                            @if (panel!.NearestTaskDate == null && panel.OutsideCount == 0)
+                            {
+                                <span>No task matches the filters.</span>
+                                @if (userId != AllUsers)
+                                {
+                                    <RadzenButton Text="Show every user's tasks" Icon="group" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="AllUsersAsync" />
+                                }
+                                @if (HasFilters)
+                                {
+                                    <RadzenButton Text="Clear filters" Icon="filter_alt_off" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="ClearFiltersAsync" />
+                                }
+                            }
+                            else
+                            {
+                                <span>No tasks in this period.</span>
+                                <RadzenButton Text="Go to today" Icon="today" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="TodayAsync" />
+                                @if (panel.NearestTaskDate != null)
+                                {
+                                    <RadzenButton Text="@($"Go to the nearest task ({panel.NearestTaskDate.Value:d})")" Icon="near_me" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                                  Click="@(() => GoToAsync(panel.NearestTaskDate.Value))" />
+                                }
+                            }
+                        </div>
+                    }
+                    <RadzenSelectBar TValue="EnumTaskPanelColumn" @bind-Value="activeColumn" Size="ButtonSize.Small" class="knt-taskspanel-tabs" aria-label="Column shown">
+                        <Items>
+                            @foreach (var info in Columns)
+                            {
+                                <RadzenSelectBarItem Text="@($"{info.Name} ({ColumnOf(info.Column)?.TotalCount ?? 0})")" Value="info.Column" />
+                            }
+                        </Items>
+                    </RadzenSelectBar>
+                    <div class="knt-taskspanel-columns" data-active="@activeColumn">
+                        @foreach (var info in Columns)
+                        {
+                            <TasksPanelColumn Column="ColumnOf(info.Column)" Name="@info.Name" Icon="@info.Icon" Css="@info.Css" Empty="@info.Empty"
+                                              CutOff="@(panel?.CutOff ?? DateTime.Today)" SelectedId="selected?.NoteTaskId"
+                                              LoadingMore="@(loadingMore == info.Column)" OnSelect="OnSelect" OnLoadMore="LoadMoreAsync" />
+                        }
+                    </div>
+                </div>
+            </RadzenSplitterPane>
+            <RadzenSplitterPane Size="@paneSizes[1]" Min="300px" Style="overflow: hidden">
+                <TasksPanelDetail Task="selected" Panel="panel" OutOfWindow="selectedOutOfWindow" CanEdit="canEdit" />
+            </RadzenSplitterPane>
+        </RadzenSplitter>
+    </RadzenCard>
+</div>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    // The unit and size chosen last, kept in the browser.
+    private const string WindowKey = "KNoteTasksPanelWindow";
+    // "All users" in the user filter.
+    private static readonly Guid AllUsers = Guid.Empty;
+
+    private sealed record ColumnInfo(EnumTaskPanelColumn Column, string Name, string Icon, string Css, string Empty);
+
+    private static readonly ColumnInfo[] Columns =
+    {
+        new(EnumTaskPanelColumn.Resolved, "Resolved", "task_alt", "resolved", "No tasks resolved in this period."),
+        new(EnumTaskPanelColumn.InProgress, "In progress", "pending", "inprogress", "No tasks in progress in this period."),
+        new(EnumTaskPanelColumn.Pending, "Pending", "schedule", "pending", "No tasks pending in this period.")
+    };
+
+    private KntPaneSizes paneSizes = null!;
+    private bool canEdit;
+
+    // The window: unit, size and the reference date it is centered on.
+    private EnumTasksWindowUnit unit = EnumTasksWindowUnit.Months;
+    private int size = TasksWindow.DefaultSize;
+    private DateTime reference = DateTime.Today;
+    private DateTime? goToDate;
+
+    private List<NoteTypeDto> noteTypes = new();
+    private List<UserOption> userOptions = new() { new(AllUsers, "All users") };
+    private Guid? noteTypeId;
+    private Guid userId = AllUsers;
+    private Guid myUserId = AllUsers;
+    private string? tags;
+    private string? text;
+    private FolderDto? folder;
+
+    private TasksPanelDto? panel;
+    private bool loadFailed;
+    private EnumTaskPanelColumn? loadingMore;
+    private readonly KntLatestRequest panelRequest = new();
+    private readonly KntLatestRequest moreRequest = new();
+
+    private TaskPanelItemDto? selected;
+    private bool selectedOutOfWindow;
+    // The column shown in a narrow window.
+    private EnumTaskPanelColumn activeColumn = EnumTaskPanelColumn.InProgress;
+
+    private IEnumerable<int> Sizes => Enumerable.Range(1, TasksWindow.MaxSize(unit));
+
+    private bool HasFilters => noteTypeId != null || userId != myUserId || !string.IsNullOrWhiteSpace(tags) || !string.IsNullOrWhiteSpace(text) || folder != null;
+
+    private bool EmptyWindow => panel != null && panel.Columns.All(c => c.TotalCount == 0);
+
+    private string RangeText => panel == null ? "…" : $"{panel.WindowStart:d MMM yyyy} – {panel.WindowEnd:d MMM yyyy}";
+
+    private string RangeSubText
+    {
+        get
+        {
+            if (panel == null)
+                return "";
+            var days = (panel.WindowEnd - panel.WindowStart).Days + 1;
+            return $"{size} {UnitName(size)} · {days} {(days == 1 ? "day" : "days")}";
+        }
+    }
+
+    private string UnitName(int count) => (unit, count == 1) switch
+    {
+        (EnumTasksWindowUnit.Days, true) => "day",
+        (EnumTasksWindowUnit.Days, false) => "days",
+        (EnumTasksWindowUnit.Weeks, true) => "week",
+        (EnumTasksWindowUnit.Weeks, false) => "weeks",
+        (_, true) => "month",
+        _ => "months"
+    };
+
+    private string MoveText(int units) => $"{(units < 0 ? "Back" : "Forward")} {Math.Abs(units)} {UnitName(Math.Abs(units))}";
+
+    private TasksPanelColumnDto? ColumnOf(EnumTaskPanelColumn column) => panel?.Columns.FirstOrDefault(c => c.Column == column);
+
+    protected override async Task OnInitializedAsync()
+    {
+        paneSizes = new KntPaneSizes(js, "KNoteTasksPanelPanes", "66%", "34%");
+        ReadWindow();
+
+        canEdit = KntAccess.HasRole((await AuthenticationState).User, EnumRoles.Staff);
+        kntWindows.NoteSaved += OnNoteSaved;
+
+        // The filters' lists; the user filter starts with the user signed in (all users if the list can't be read).
+        var types = await store.NoteTypes.GetAllAsync();
+        if (types.IsValid)
+            noteTypes = types.Entity.Where(t => t.Name != KntConst.ChatSessionsTag && t.Name != KntConst.ChatRoomTag).OrderBy(t => t.Name).ToList();
+        var users = await store.Users.GetAllAsync();
+        if (users.IsValid)
+        {
+            userOptions.AddRange(users.Entity.OrderBy(u => u.FullName).Select(u => new UserOption(u.UserId, u.FullName ?? u.UserName)));
+            myUserId = userId = users.Entity.FirstOrDefault(u => u.UserName == store.AppState.UserName)?.UserId ?? AllUsers;
+        }
+
+        await LoadAsync();
+    }
+
+    public void Dispose()
+    {
+        kntWindows.NoteSaved -= OnNoteSaved;
+        panelRequest.Dispose();
+        moreRequest.Dispose();
+    }
+
+    private TasksPanelFilterDto Filter() => new()
+    {
+        Unit = unit,
+        Size = size,
+        ReferenceDate = reference,
+        Today = DateTime.Today,
+        NoteTypeId = noteTypeId,
+        UserId = userId == AllUsers ? null : userId,
+        Tags = (tags ?? "").Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
+        Text = string.IsNullOrWhiteSpace(text) ? null : text.Trim(),
+        FolderId = folder?.FolderId,
+        IncludeChildFolders = true
+    };
+
+    // The window and its columns, read again (a filter or the window changed, Refresh, Retry, a note saved).
+    private async Task LoadAsync()
+    {
+        moreRequest.Cancel();
+        loadingMore = null;
+
+        var filter = Filter();
+        var request = await panelRequest.RunAsync(ct => store.Notes.GetTasksPanelAsync(filter, ct));
+        if (request.Canceled)
+            return;
+
+        var result = request.Value;
+        loadFailed = !result.IsValid;
+        if (!result.IsValid)
+            return;
+
+        panel = result.Entity;
+        SyncSelection();
+    }
+
+    // "Load more": the next page of a column, after the tasks it has.
+    private async Task LoadMoreAsync(EnumTaskPanelColumn column)
+    {
+        var current = ColumnOf(column);
+        if (current == null || loadingMore != null)
+            return;
+
+        loadingMore = column;
+        var filter = Filter();
+        filter.Column = column;
+        filter.Skip = current.Tasks.Count;
+        var request = await moreRequest.RunAsync(ct => store.Notes.GetTasksPanelAsync(filter, ct));
+        loadingMore = null;
+        if (request.Canceled || !request.Value.IsValid)
+            return;
+
+        var page = request.Value.Entity.Columns.Single();
+        current.Tasks.AddRange(page.Tasks.Where(t => current.Tasks.All(c => c.NoteTaskId != t.NoteTaskId)));
+        current.TotalCount = page.TotalCount;
+    }
+
+    // The task selected stays selected (with its new data) while it is in the window; otherwise its detail stays,
+    // saying that it isn't in the period shown.
+    private void SyncSelection()
+    {
+        if (selected == null || panel == null)
+            return;
+
+        var fresh = panel.Columns.SelectMany(c => c.Tasks).FirstOrDefault(t => t.NoteTaskId == selected.NoteTaskId);
+        selectedOutOfWindow = fresh == null && !TaskPanelRules.Overlaps(selected, panel.WindowStart, panel.WindowEnd, panel.Today);
+        if (fresh != null)
+            selected = fresh;
+    }
+
+    private void OnSelect(TaskPanelItemDto task)
+    {
+        selected = task;
+        selectedOutOfWindow = false;
+    }
+
+    private Task MoveAsync(int units)
+    {
+        reference = TasksWindow.Shift(unit, reference, units);
+        return LoadAsync();
+    }
+
+    private Task TodayAsync()
+    {
+        reference = DateTime.Today;
+        goToDate = null;
+        return LoadAsync();
+    }
+
+    private Task GoToAsync(DateTime date)
+    {
+        reference = date.Date;
+        return LoadAsync();
+    }
+
+    private Task OnGoToDate(DateTime? date)
+    {
+        goToDate = date;
+        return date == null ? Task.CompletedTask : GoToAsync(date.Value);
+    }
+
+    // Changing the unit or the size keeps the reference date.
+    private Task OnUnitChanged(EnumTasksWindowUnit value)
+    {
+        unit = value;
+        size = Math.Min(size, TasksWindow.MaxSize(unit));
+        SaveWindow();
+        return LoadAsync();
+    }
+
+    private Task OnSizeChanged(int value)
+    {
+        size = value;
+        SaveWindow();
+        return LoadAsync();
+    }
+
+    private Task OnFolderSelected(FolderDto value)
+    {
+        folder = value;
+        return LoadAsync();
+    }
+
+    private Task OnFolderReset()
+    {
+        folder = null;
+        return LoadAsync();
+    }
+
+    private Task ClearFiltersAsync()
+    {
+        (noteTypeId, userId, tags, text, folder) = (null, myUserId, null, null, null);
+        return LoadAsync();
+    }
+
+    private Task AllUsersAsync()
+    {
+        userId = AllUsers;
+        return LoadAsync();
+    }
+
+    private void ReadWindow()
+    {
+        try
+        {
+            var saved = ((IJSInProcessRuntime)js).Invoke<string?>("localStorage.getItem", WindowKey);
+            var parts = saved?.Split(':');
+            if (parts?.Length == 2 && Enum.TryParse<EnumTasksWindowUnit>(parts[0], out var savedUnit) && int.TryParse(parts[1], out var savedSize)
+                && savedSize >= 1 && savedSize <= TasksWindow.MaxSize(savedUnit))
+                (unit, size) = (savedUnit, savedSize);
+        }
+        catch (JSException)
+        {
+            // Without the browser's storage: the default window.
+        }
+    }
+
+    private void SaveWindow()
+    {
+        try
+        {
+            ((IJSInProcessRuntime)js).InvokeVoid("localStorage.setItem", WindowKey, $"{unit}:{size}");
+        }
+        catch (JSException)
+        {
+        }
+    }
+
+    // A note saved in its window may have changed its tasks.
+    private void OnNoteSaved(Guid noteId) => _ = InvokeAsync(async () =>
+    {
+        await LoadAsync();
+        StateHasChanged();
+    });
+
+    private sealed record UserOption(Guid Id, string Text);
+}
