@@ -685,7 +685,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
             newResource.ResourceId = Guid.NewGuid();
             newResource.NoteId = Model.NoteId;
             newResource.ContentInDB = contentInDB;
-            newResource.Description = "Image inserted from clipboard.";
+            newResource.Description = KntConst.ClipboardImageResourceDescription;
             newResource.Order = 0;
             newResource.Name = "ClipboardImg_" + newResource.ResourceId.ToString() + ".png";
             newResource.FileType = Store.KntTextUtils.ExtensionFileToFileType(".png");

@@ -63,6 +63,10 @@ public static class KntConst
     public static string AiEmbedQueryInstructionKey { get; private set; } = "AI_EMBED_QUERY_INSTRUCTION";
     public static string AiLlmModelKey { get; private set; } = "AI_LLM_MODEL";
 
+    // The description the apps give a resource made from an image pasted from the clipboard. Like the file name, it says
+    // nothing of the resource: the semantic index leaves out the resources without a description of their own.
+    public static string ClipboardImageResourceDescription { get; private set; } = "Image inserted from clipboard.";
+
     // The claim of the web app's tokens with the RepositoryId of the session's repository (the Server resolves the
     // service of each request from it; a session is in one repository).
     public const string RepositoryClaimType = "knt_repo";

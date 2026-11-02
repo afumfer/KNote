@@ -83,6 +83,17 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<User>().HasIndex(_ => _.UserName).IsUnique(true);
         modelBuilder.Entity<User>().HasIndex(u => u.EMail).IsUnique(true);
         modelBuilder.Entity<Resource>().HasIndex(_ => new { _.NoteId, _.Name }).IsUnique(true);
+
+        // The semantic index (KntSchemaUpdater revision 7): its rows go away with their note. SourceId is never null
+        // (Guid.Empty for the note's own fragments), so the unique index applies to every row in both engines. It starts
+        // with NoteId, so it also serves the foreign key and the reads of a note's rows (EF adds no index of its own).
+        modelBuilder.Entity<NoteChunk>()
+            .HasOne<Note>()
+            .WithMany()
+            .HasForeignKey(_ => _.NoteId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NoteChunk>()
+            .HasIndex(_ => new { _.NoteId, _.SourceType, _.SourceId, _.ChunkIndex, _.Model }).IsUnique(true);
     }
 
     public static void Seed(this ModelBuilder modelBuilder)
