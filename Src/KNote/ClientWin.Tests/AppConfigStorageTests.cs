@@ -201,6 +201,41 @@ public class AppConfigStorageTests
     }
 
     [TestMethod]
+    public void SaveThenLoad_KeepsTheKindAndContextSizeOfTheAiProviders()
+    {
+        var (settings, state) = SampleConfig();
+        settings.Ai.Providers.Add(new AiProviderRef { Alias = "Embeddings", Provider = "Ollama", Model = "qwen3-embedding:0.6b",
+            Host = "http://localhost:11434", Kind = EnumAiProviderKind.Embeddings });
+        settings.Ai.Providers.Add(new AiProviderRef { Alias = "Chat", Provider = "Ollama", Model = "qwen3.5:9b",
+            Host = "http://localhost:11434", ContextWindow = 131072 });
+        NewStorage().Save(settings, state);
+
+        var loaded = NewStorage().Load()!.Settings.Ai.Providers;
+
+        Assert.AreEqual(EnumAiProviderKind.Chat, loaded[0].Kind);
+        Assert.IsNull(loaded[0].ContextWindow);
+        Assert.AreEqual(EnumAiProviderKind.Embeddings, loaded[1].Kind);
+        Assert.AreEqual(131072, loaded[2].ContextWindow);
+    }
+
+    [TestMethod]
+    public void Load_AiProvidersSavedBeforeTheirKind_AreChatModelsWithTheModelsContextSize()
+    {
+        var (settings, state) = SampleConfig();
+        NewStorage().Save(settings, state);
+        // A KNoteData.config of a version without Kind and ContextWindow.
+        var xml = System.Xml.Linq.XDocument.Load(_file);
+        System.Xml.Linq.Extensions.Remove(xml.Descendants().Where(e => e.Name.LocalName is "Kind" or "ContextWindow"));
+        xml.Save(_file);
+
+        var provider = NewStorage().Load()!.Settings.Ai.Providers.Single();
+
+        Assert.AreEqual(EnumAiProviderKind.Chat, provider.Kind);
+        Assert.IsNull(provider.ContextWindow);
+        Assert.AreEqual("key-1", provider.ApiKey);
+    }
+
+    [TestMethod]
     public void Save_WhenOnlyTheStateChanged_DoesNotRewriteTheSettingsFile()
     {
         var (settings, state) = SampleConfig();

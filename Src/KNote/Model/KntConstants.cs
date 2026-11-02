@@ -54,6 +54,15 @@ public static class KntConst
     public static string RepositoryNameKey { get; private set; } = "DB_REPOSITORYNAME";
     public static string RepositoryIdKey { get; private set; } = "DB_REPOSITORYID";
 
+    // SystemValues rows (scope AI) with the AI models the repository declares (KNote Atlas, RepositoryAiModelsDto): every
+    // installation working with it must use the same embedding model. Where each model runs is installation settings.
+    // Only SystemValues.SaveRepositoryAiModelsAsync changes them.
+    public static string AiScope { get; private set; } = "AI";
+    public static string AiEmbedModelKey { get; private set; } = "AI_EMBED_MODEL";
+    public static string AiEmbedDimsKey { get; private set; } = "AI_EMBED_DIMS";
+    public static string AiEmbedQueryInstructionKey { get; private set; } = "AI_EMBED_QUERY_INSTRUCTION";
+    public static string AiLlmModelKey { get; private set; } = "AI_LLM_MODEL";
+
     // The claim of the web app's tokens with the RepositoryId of the session's repository (the Server resolves the
     // service of each request from it; a session is in one repository).
     public const string RepositoryClaimType = "knt_repo";

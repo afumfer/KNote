@@ -69,6 +69,12 @@ public class LocalAiProviderDto
 
     public string Model { get; set; }
 
+    // EnumAiProviderKind value: a chat model (the default) or an embedding model.
+    public string Kind { get; set; } = EnumAiProviderKind.Chat;
+
+    // Only for an Ollama chat model: its context size (num_ctx); null, the model's own.
+    public int? ContextWindow { get; set; }
+
     // Only for Ollama.
     public string Host { get; set; }
 

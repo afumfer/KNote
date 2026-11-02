@@ -183,6 +183,17 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private ISemanticSearchWebApiService? _semanticSearch;
+    public ISemanticSearchWebApiService SemanticSearch
+    {
+        get
+        {
+            if (_semanticSearch == null)
+                _semanticSearch = new SemanticSearchWebApiService(AppState, _httpClient);
+            return _semanticSearch;
+        }
+    }
+
     public ChatRoomHub ChatRoom { get; }
 
     #endregion

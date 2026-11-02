@@ -1,3 +1,4 @@
+using KNote.Ai;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Service.Core;
@@ -88,6 +89,21 @@ public class AiProviderEditorCtrl : CtrlEditorBase<IViewEditor<AiProviderRef>, A
         Store.SaveConfig();
         OnDeletedEntity(Model);
         return Task.FromResult(true);
+    }
+
+    #endregion
+
+    #region Test
+
+    // A model that Ollama has to load first can take a while.
+    public static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(120);
+
+    // "Test" of the provider as it is in the view (saved or not): a chat model answers a question, an embedding model
+    // gives a vector. The result says what the model answered or why it failed (AiProviderTester, as KNote Local).
+    public async Task<Result<string>> TestAsync(AiProviderRef candidate)
+    {
+        using var timeout = new CancellationTokenSource(TestTimeout);
+        return await AiProviderTester.TestAsync(candidate, timeout.Token);
     }
 
     #endregion

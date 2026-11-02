@@ -26,6 +26,8 @@ public static class KntSections
     // Also the icon of the note editor's "Trace notes" tab.
     public static readonly KntSection TraceNoteTypes = new("Trace note types", "tracenotetypes", "conversion_path");
     public static readonly KntSection Attributes = new("Attributes management", "attributes", "format_list_bulleted");
+    // KNote Atlas: the repository's AI models and semantic index.
+    public static readonly KntSection Atlas = new("KNote Atlas", "atlas", "hub");
     // Only in KNote Local (the server's capabilities).
     public static readonly KntSection ThisComputer = new("This computer", "local", "computer");
 }

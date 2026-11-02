@@ -55,6 +55,8 @@ public class KntService : IKntService, IDisposable
         get { return _repository; }
     }
 
+    public IKntEmbeddingGenerators EmbeddingGenerators { get; set; }
+
     private IKntUserService _users;
     public IKntUserService Users
     {

@@ -44,6 +44,8 @@ public class ControllerAuthorizationMatrixTests
         ["ReportPreviewCtrl"] = Requirement(EnumRoles.Staff, AuthorizationScope.Repository),
         ["NotesListCsvExportCtrl"] = Requirement(EnumRoles.Staff, AuthorizationScope.Repository),
         ["FolderEditorCtrl"] = Requirement(EnumRoles.ProjectManager, AuthorizationScope.Repository),
+        // KNote Atlas: the AI models a repository declares.
+        ["RepositoryAiModelsCtrl"] = Included,
 
         // Depends on its EditorMode (see RepositoryEditorModes_RequireTheirOwnRole).
         ["RepositoryEditorCtrl"] = Included,

@@ -16,6 +16,21 @@ public static class EnumAiProvider
     public const string Ollama = "Ollama";
 
     public static readonly string[] All = { OpenAI, Anthropic, Ollama };
+
+    // The providers that offer embedding models (Anthropic does not).
+    public static readonly string[] WithEmbeddings = { OpenAI, Ollama };
+}
+
+/// <summary>
+/// What a configured AI provider is used for (AiProviderRef.Kind): a chat model (the assistant and the other LLM
+/// tasks) or an embedding model (KNote Atlas' semantic index). Plain strings, like EnumAiProvider.
+/// </summary>
+public static class EnumAiProviderKind
+{
+    public const string Chat = "Chat";
+    public const string Embeddings = "Embeddings";
+
+    public static readonly string[] All = { Chat, Embeddings };
 }
 
 public class AiProviderRef : SmartModelDtoBase, IAiProviderIdentity
@@ -96,6 +111,48 @@ public class AiProviderRef : SmartModelDtoBase, IAiProviderIdentity
         }
     }
 
+    // A chat model by default, also for the configurations saved before the property existed.
+    private string _kind = EnumAiProviderKind.Chat;
+    [Required(ErrorMessage = KMSG)]
+    public string Kind
+    {
+        get { return _kind; }
+        set
+        {
+            if (_kind != value)
+            {
+                _kind = value;
+                OnPropertyChanged("Kind");
+            }
+        }
+    }
+
+    // Context size (tokens) of an Ollama chat model, sent as num_ctx; null: the model's own. Not used by the other
+    // providers (their context is the provider's) nor by embedding models (they read small pieces of text).
+    private int? _contextWindow;
+    public int? ContextWindow
+    {
+        get { return _contextWindow; }
+        set
+        {
+            if (_contextWindow != value)
+            {
+                _contextWindow = value;
+                OnPropertyChanged("ContextWindow");
+            }
+        }
+    }
+
+    public const int MinContextWindow = 2048;
+    public const int MaxContextWindow = 1048576;
+
+    public bool IsChat => Kind == EnumAiProviderKind.Chat;
+
+    public bool IsEmbeddings => Kind == EnumAiProviderKind.Embeddings;
+
+    // A paid service: the content sent to it leaves this computer's network (KNote marks it wherever models are listed).
+    public bool IsPaid => !string.IsNullOrEmpty(Provider) && Provider != EnumAiProvider.Ollama;
+
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         var results = new List<ValidationResult>();
@@ -132,6 +189,26 @@ public class AiProviderRef : SmartModelDtoBase, IAiProviderIdentity
             results.Add(new ValidationResult
              ("Host is required for the Ollama provider."
              , new[] { "Host" }));
+        }
+
+        if (Array.IndexOf(EnumAiProviderKind.All, Kind) < 0)
+        {
+            results.Add(new ValidationResult
+             ($"Kind is invalid. (Supported kinds are {string.Join(", ", EnumAiProviderKind.All)})."
+             , new[] { "Kind" }));
+        }
+        else if (IsEmbeddings && Array.IndexOf(EnumAiProvider.WithEmbeddings, Provider) < 0 && Array.IndexOf(EnumAiProvider.All, Provider) >= 0)
+        {
+            results.Add(new ValidationResult
+             ($"{Provider} does not offer embedding models. (Providers with embeddings are {string.Join(", ", EnumAiProvider.WithEmbeddings)})."
+             , new[] { "Kind" }));
+        }
+
+        if (ContextWindow is int contextWindow && (contextWindow < MinContextWindow || contextWindow > MaxContextWindow))
+        {
+            results.Add(new ValidationResult
+             ($"The context size must be between {MinContextWindow} and {MaxContextWindow} tokens."
+             , new[] { "ContextWindow" }));
         }
 
         return results;

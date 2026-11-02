@@ -152,8 +152,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // KNoteAIAssistant plan (Phase 3): the configured provider/model collection and the one
     // currently active. AiProviderRefs is exposed live from the settings so the view's picker
     // always reflects whatever is currently in KNoteData.config (Phase 4 will add a maintenance
-    // UI for it; for now entries are added by hand to the config file).
-    public List<AiProviderRef> AiProviderRefs => Store.Settings.Ai.Providers;
+    // UI for it; for now entries are added by hand to the config file). Only the chat models: the embeddings
+    // providers are KNote Atlas' (AiProviderRef.Kind).
+    public List<AiProviderRef> AiProviderRefs => Store.Settings.Ai.Providers.Where(p => p.IsChat).ToList();
 
     private AiProviderRef _currentProviderRef;
     public AiProviderRef CurrentProviderRef => _currentProviderRef;

@@ -14,8 +14,11 @@ public interface ILocalWebApiService
     Task<Result<List<LocalRepositoryDto>>> UnlinkRepositoryAsync(int index);
 
     Task<Result<List<LocalAiProviderDto>>> GetAiProvidersAsync(CancellationToken cancellationToken = default);
-    // The whole list, in its order (the first one is the default).
+    // The whole list, in its order (the first chat one is the default).
     Task<Result<List<LocalAiProviderDto>>> SaveAiProvidersAsync(List<LocalAiProviderDto> providers);
+    // "Test" of a provider being edited (its key or, empty, the saved one): what the model answered or why it failed,
+    // not notified (the dialog shows it).
+    Task<Result<string>> TestAiProviderAsync(LocalAiProviderDto provider, CancellationToken cancellationToken = default);
 
     Task<Result<LocalEmailSettingsDto>> GetEmailAsync(CancellationToken cancellationToken = default);
     Task<Result<LocalEmailSettingsDto>> SaveEmailAsync(LocalEmailSettingsDto email);

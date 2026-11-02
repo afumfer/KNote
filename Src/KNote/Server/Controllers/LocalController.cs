@@ -65,6 +65,10 @@ public class LocalController : ControllerBase
     public Task<IActionResult> SaveAiProviders([FromBody] List<LocalAiProviderDto> providers) =>
         RunAsync("Save AI providers", () => _settings.SaveAiProvidersAsync(providers));
 
+    [HttpPost("ai/test")]
+    public Task<IActionResult> TestAiProvider([FromBody] LocalAiProviderDto provider) =>
+        RunAsync("Test AI provider", () => _settings.TestAiProviderAsync(provider, HttpContext.RequestAborted));
+
     [HttpGet("email")]
     public Task<IActionResult> GetEmail() =>
         RunAsync("Get e-mail", () => Task.FromResult(new Result<LocalEmailSettingsDto>(_settings.GetEmail())));

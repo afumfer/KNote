@@ -1,0 +1,170 @@
+@* The AI models the session's repository declares (CU-02): its embedding model, which every installation working with
+   it must use (a change means building the semantic index again), and the recommended LLM. They are chosen among the
+   server's models (its AI providers); a model declared that the server does not have is shown, marked. *@
+
+@implements IDisposable
+@inject IStore store
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+<KntFormSection Icon="hub" Title="Repository models"
+                Description="The models everyone working with this repository uses: the embedding model of the search by meaning (all its notes are indexed with it) and the LLM recommended for its AI tasks. Where each model runs is set in each installation (its AI providers).">
+    @if (models == null)
+    {
+        @if (loadFailed)
+        {
+            <div class="knt-load-error">
+                <span class="knt-load-error-text">The models could not be read.</span>
+                <RadzenButton Text="Retry" Icon="refresh" Size="ButtonSize.Small" Click="Load" />
+            </div>
+        }
+        else
+        {
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+        }
+    }
+    else
+    {
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeSM="8">
+                <KntField Label="Embedding model" Component="EmbeddingModel" Help="@EmbeddingModelHelp">
+                    <RadzenDropDown Name="EmbeddingModel" TValue="string" @bind-Value="@models.EmbeddingModel" Data="@embeddingOptions"
+                                    TextProperty="Text" ValueProperty="Value" AllowClear="true" Placeholder="None: no search by meaning" />
+                </KntField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeSM="4">
+                <KntField Label="Dimensions" Component="EmbeddingDimensions" Help="Empty: the model's own. Fewer only with models made for it.">
+                    <RadzenNumeric Name="EmbeddingDimensions" TValue="int?" @bind-Value="@models.EmbeddingDimensions"
+                                   Min="RepositoryAiModelsDto.MinEmbeddingDimensions" Max="RepositoryAiModelsDto.MaxEmbeddingDimensions" ShowUpDown="false" />
+                </KntField>
+            </RadzenColumn>
+        </RadzenRow>
+        <KntField Label="Query instruction" Component="QueryInstruction"
+                  Help="Sent before each search, for the models that expect one (Qwen3-Embedding). Empty: the search alone.">
+            <RadzenTextArea Name="QueryInstruction" @bind-Value="@models.QueryInstruction" Rows="2"
+                            Placeholder="Given a search query, retrieve the notes that answer it" />
+        </KntField>
+        <KntField Label="Recommended LLM" Component="LlmModel" Help="@LlmModelHelp">
+            <RadzenDropDown Name="LlmModel" TValue="string" @bind-Value="@models.LlmModel" Data="@chatOptions"
+                            TextProperty="Text" ValueProperty="Value" AllowClear="true" Placeholder="None" />
+        </KntField>
+        @if (!string.IsNullOrEmpty(saved?.EmbeddingModel) && !saved.EmbeddingModelAvailable)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small">
+                This server has no embeddings provider with the model @saved.EmbeddingModel: the search by meaning will not work here.
+            </RadzenAlert>
+        }
+        @if (!string.IsNullOrEmpty(saved?.LlmModel) && !IsInstalled(chatOptions, saved.LlmModel))
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small">
+                This server has no chat provider with the model @saved.LlmModel: the AI tasks will use another one here.
+            </RadzenAlert>
+        }
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Save models" Icon="save" Size="ButtonSize.Small" Click="OnSave" IsBusy="@saving.IsBusy" />
+        </RadzenStack>
+    }
+</KntFormSection>
+
+@code {
+    private record ModelOption(string Value, string Text, bool IsPaid, bool IsInstalled = true);
+
+    private RepositoryAiModelsDto? models;
+    private RepositoryAiModelsDto? saved;
+    private List<ModelOption> embeddingOptions = new();
+    private List<ModelOption> chatOptions = new();
+    private AiInstallationModelsDto installation = new();
+    private bool loadFailed;
+    private readonly KntSingleFlight saving = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    private string EmbeddingModelHelp =>
+        OptionOf(embeddingOptions, models?.EmbeddingModel)?.IsPaid == true
+            ? "A paid model: building the index sends the content of every note to the provider."
+            : "Changing it means building the semantic index again.";
+
+    private string LlmModelHelp =>
+        OptionOf(chatOptions, models?.LlmModel)?.IsPaid == true
+            ? "A paid model: the AI tasks send the content of the notes to the provider."
+            : "Optional: the model the AI tasks of this repository should use.";
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        loadFailed = false;
+        var resModels = await store.SemanticSearch.GetModelsAsync(disposal.Token);
+        var resInstallation = await store.SemanticSearch.GetInstallationModelsAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+
+        loadFailed = !resModels.IsValid;
+        if (!resModels.IsValid)
+            return;
+
+        installation = resInstallation.IsValid && resInstallation.Entity != null ? resInstallation.Entity : new AiInstallationModelsDto();
+        Show(resModels.Entity);
+    }
+
+    private void Show(RepositoryAiModelsDto entity)
+    {
+        saved = entity;
+        models = new RepositoryAiModelsDto
+        {
+            EmbeddingModel = entity.EmbeddingModel,
+            EmbeddingDimensions = entity.EmbeddingDimensions,
+            QueryInstruction = entity.QueryInstruction,
+            LlmModel = entity.LlmModel
+        };
+        embeddingOptions = OptionsOf(installation.EmbeddingModels, entity.EmbeddingModel);
+        chatOptions = OptionsOf(installation.ChatModels, entity.LlmModel);
+    }
+
+    private static ModelOption? OptionOf(List<ModelOption> options, string? model) =>
+        options.FirstOrDefault(o => string.Equals(o.Value, model, StringComparison.OrdinalIgnoreCase));
+
+    // Whether the server has the model: the declared one that it has not is also an option, marked.
+    private static bool IsInstalled(List<ModelOption> options, string model) => OptionOf(options, model)?.IsInstalled == true;
+
+    // The server's models and, if it is not one of them, the one declared (marked).
+    private static List<ModelOption> OptionsOf(List<AiModelInfoDto> available, string? declared)
+    {
+        var options = available
+            .Select(m => new ModelOption(m.Model, $"{m.Model} ({m.Provider}{(m.IsPaid ? ", paid" : "")})", m.IsPaid))
+            .ToList();
+        if (!string.IsNullOrEmpty(declared) && !options.Any(o => string.Equals(o.Value, declared, StringComparison.OrdinalIgnoreCase)))
+            options.Insert(0, new ModelOption(declared, $"{declared} (not available in this server)", false, IsInstalled: false));
+        return options;
+    }
+
+    private Task OnSave() => saving.RunAsync(async () =>
+    {
+        if (models == null || saved == null)
+            return;
+
+        if (!models.IsValid())
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Repository models", Detail = models.GetErrorMessage() });
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(saved.EmbeddingModel) && !models.SameEmbeddingModel(saved))
+        {
+            var confirmed = await dialogService.Confirm(
+                $"The repository uses the embedding model {saved.EmbeddingModel}. With another model or other dimensions its semantic index has to be built again. Change it?",
+                "Change the embedding model", new ConfirmOptions { OkButtonText = "Change", CancelButtonText = "Cancel" });
+            if (confirmed != true)
+                return;
+        }
+
+        var result = await store.SemanticSearch.SaveModelsAsync(models);
+        if (result.IsValid && !disposal.IsCancellationRequested)
+            Show(result.Entity);
+    });
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

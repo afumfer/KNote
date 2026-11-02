@@ -57,6 +57,10 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     private TraceNoteTypesManageCtrl _traceNoteTypesManageCtrl;
     public TraceNoteTypesManageCtrl TraceNoteTypesManageCtrl => _traceNoteTypesManageCtrl ??= new TraceNoteTypesManageCtrl(Store);
 
+    // KNote Atlas tab: the repository's AI models. Saved by its own button; SaveModel asks about the changes not saved.
+    private RepositoryAiModelsCtrl _repositoryAiModelsCtrl;
+    public RepositoryAiModelsCtrl RepositoryAiModelsCtrl => _repositoryAiModelsCtrl ??= new RepositoryAiModelsCtrl(Store);
+
     #endregion
 
     #region Constructor 
@@ -101,6 +105,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 await KAttributesManageCtrl.LoadEntitiesAsync(service);
                 await UsersManageCtrl.LoadEntitiesAsync(service);
                 await TraceNoteTypesManageCtrl.LoadEntitiesAsync(service);
+                await RepositoryAiModelsCtrl.NewModel(service);
             }
 
             if (refreshView)
@@ -125,6 +130,9 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
 
     public async override Task<bool> SaveModel()
     {
+        if (AdministrationAvailable && !await RepositoryAiModelsCtrl.ResolvePendingChangesAsync())
+            return false;
+
         View.RefreshModel();
 
         if (!Model.IsDirty())

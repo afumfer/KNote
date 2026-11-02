@@ -38,6 +38,7 @@ internal class FakeKntService : IKntService
     public void ResetCurrentUser() { }
 
     public IKntRepository Repository => throw new NotSupportedException();
+    public IKntEmbeddingGenerators? EmbeddingGenerators { get; set; }
     public IKntUserService Users => UsersFake;
     public IKntKAttributeService KAttributes => KAttributesFake;
     public IKntSystemValuesService SystemValues => SystemValuesFake;

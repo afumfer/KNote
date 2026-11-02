@@ -21,6 +21,7 @@ public interface IStore
     IAlarmWebApiService Alarms { get; }
     IServerWebApiService Server { get; }
     ILocalWebApiService Local { get; }
+    ISemanticSearchWebApiService SemanticSearch { get; }
 
     ChatRoomHub ChatRoom { get; }
 }

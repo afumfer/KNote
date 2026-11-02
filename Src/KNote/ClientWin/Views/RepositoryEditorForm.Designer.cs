@@ -39,6 +39,7 @@ namespace KNote.ClientWin.Views
             tabPageNoteTypes = new TabPage();
             tabPageTraceNoteTypes = new TabPage();
             tabPageAttributes = new TabPage();
+            tabPageAtlas = new TabPage();
             panelForm = new Panel();
             checkResourceContentInDB = new CheckBox();
             buttonSelectDirectoryResources = new Button();
@@ -71,6 +72,7 @@ namespace KNote.ClientWin.Views
             tabPageNoteTypes.SuspendLayout();
             tabPageTraceNoteTypes.SuspendLayout();
             tabPageAttributes.SuspendLayout();
+            tabPageAtlas.SuspendLayout();
             panelForm.SuspendLayout();
             panelMSSqlServer.SuspendLayout();
             panelSqLite.SuspendLayout();
@@ -108,6 +110,7 @@ namespace KNote.ClientWin.Views
             tabControlMain.Controls.Add(tabPageNoteTypes);
             tabControlMain.Controls.Add(tabPageTraceNoteTypes);
             tabControlMain.Controls.Add(tabPageAttributes);
+            tabControlMain.Controls.Add(tabPageAtlas);
             tabControlMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControlMain.Location = new Point(3, 2);
             tabControlMain.Margin = new Padding(3);
@@ -171,6 +174,17 @@ namespace KNote.ClientWin.Views
             tabPageAttributes.TabIndex = 4;
             tabPageAttributes.Text = "Attributes";
             tabPageAttributes.UseVisualStyleBackColor = true;
+            // 
+            // tabPageAtlas
+            // 
+            tabPageAtlas.Location = new Point(3, 20);
+            tabPageAtlas.Margin = new Padding(3);
+            tabPageAtlas.Name = "tabPageAtlas";
+            tabPageAtlas.Padding = new Padding(3);
+            tabPageAtlas.Size = new Size(634, 564);
+            tabPageAtlas.TabIndex = 5;
+            tabPageAtlas.Text = "KNote Atlas";
+            tabPageAtlas.UseVisualStyleBackColor = true;
             //
             // panelForm
             //
@@ -484,6 +498,8 @@ namespace KNote.ClientWin.Views
             tabPageTraceNoteTypes.PerformLayout();
             tabPageAttributes.ResumeLayout(false);
             tabPageAttributes.PerformLayout();
+            tabPageAtlas.ResumeLayout(false);
+            tabPageAtlas.PerformLayout();
             panelForm.ResumeLayout(false);
             panelForm.PerformLayout();
             panelMSSqlServer.ResumeLayout(false);
@@ -506,6 +522,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TabPage tabPageNoteTypes;
         private System.Windows.Forms.TabPage tabPageTraceNoteTypes;
         private System.Windows.Forms.TabPage tabPageAttributes;
+        private System.Windows.Forms.TabPage tabPageAtlas;
         private System.Windows.Forms.Panel panelForm;
         private System.Windows.Forms.Button buttonFolderSearch;
         private System.Windows.Forms.Label labelName;

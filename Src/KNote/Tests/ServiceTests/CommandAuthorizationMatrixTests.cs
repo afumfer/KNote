@@ -49,6 +49,8 @@ public class CommandAuthorizationMatrixTests
             "KntNotesGetWindowAsyncCommand", "KntNotesGetVisibleNotesIdAsyncCommand",
             "KntNoteTypeGetAllAsyncCommand", "KntNoteTypeGetAsyncCommand",
             "KntSystemValueGetAllAsyncCommand", "KntSystemValueGetByScopeKeyAsyncCommand", "KntSystemValueGetAsyncCommand",
+            // KNote Atlas: the repository's AI models (every installation must use its embedding model).
+            "KntSystemValueGetRepositoryAiModelsAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).
@@ -87,6 +89,7 @@ public class CommandAuthorizationMatrixTests
             "KntKAttributesSaveAsyncCommand", "KntKAttributesDeleteAsyncCommand",
             "KntNoteTypeSaveAsyncCommand", "KntNoteTypeDeleteAsyncCommand",
             "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
+            "KntSystemValueSaveRepositoryAiModelsAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand", "KntUsersGetPasswordStampAsyncCommand");
