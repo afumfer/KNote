@@ -156,6 +156,17 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntSemanticSearchService _semanticSearch;
+    public IKntSemanticSearchService SemanticSearch
+    {
+        get
+        {
+            if (_semanticSearch == null)
+                _semanticSearch = new KntSemanticSearchService(this);
+            return _semanticSearch;
+        }
+    }
+
     public RepositoryRef RepositoryRef
     {
         get { return _repository.RepositoryRef; }

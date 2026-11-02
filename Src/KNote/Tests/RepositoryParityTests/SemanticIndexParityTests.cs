@@ -1,3 +1,4 @@
+using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Repository;
 using KNote.Tests.Helpers;
@@ -14,24 +15,35 @@ public class SemanticIndexParityTests
     private const string ModelA = "qwen3-embedding:0.6b";
     private const string ModelB = "text-embedding-3-small";
 
-    private static async Task<Guid> AddNoteAsync(IKntRepository repo, string topic, Guid? noteTypeId = null)
+    private static async Task<Guid> AddNoteAsync(IKntRepository repo, string topic, Guid? noteTypeId = null,
+        Guid? folderId = null, Guid? kattributeId = null)
     {
-        var folderRes = await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = $"Semantic index parity {Guid.NewGuid():N}" });
-        Assert.IsTrue(folderRes.IsValid, folderRes.ErrorMessage);
+        if (folderId == null)
+            folderId = await AddFolderAsync(repo);
 
         var noteId = Guid.NewGuid();
-        var noteRes = await repo.Notes.AddAsync(new NoteDto
+        var note = new NoteDto
         {
             NoteId = noteId,
             Topic = topic,
-            FolderId = folderRes.Entity.FolderId,
+            FolderId = folderId.Value,
             NoteTypeId = noteTypeId,
             CreationDateTime = DateTime.Now,
             ModificationDateTime = DateTime.Now
-        });
+        };
+        if (kattributeId != null)
+            note.KAttributesDto = new List<NoteKAttributeDto> { new() { KAttributeId = kattributeId.Value, Value = "A value" } };
+        var noteRes = await repo.Notes.AddAsync(note);
         Assert.IsTrue(noteRes.IsValid, noteRes.ErrorMessage);
 
         return noteId;
+    }
+
+    private static async Task<Guid> AddFolderAsync(IKntRepository repo)
+    {
+        var folderRes = await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = $"Semantic index parity {Guid.NewGuid():N}" });
+        Assert.IsTrue(folderRes.IsValid, folderRes.ErrorMessage);
+        return folderRes.Entity.FolderId;
     }
 
     private static NoteChunkDto Chunk(NoteChunkSourceType sourceType, int index, string content, DateTime indexed, Guid? sourceId = null) => new()
@@ -270,5 +282,95 @@ public class SemanticIndexParityTests
         Assert.IsTrue(deleteRes.IsValid, deleteRes.ErrorMessage);
         Assert.AreEqual(0, (await reader.SemanticIndex.GetIndexWatermarkAsync(ModelA)).Entity.Count);
         Assert.AreEqual(1, (await reader.SemanticIndex.GetIndexWatermarkAsync(ModelB)).Entity.Count);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
+    public async Task Summary_AndModels(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+
+        var noteTypeId = Guid.NewGuid();
+        Assert.IsTrue((await writer.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = noteTypeId, Name = "@ExcludedFromTheSummary" })).IsValid);
+        await AddNoteAsync(writer, "Excluded", noteTypeId);
+        var indexed = await AddNoteAsync(writer, "Indexed");
+        var stale = await AddNoteAsync(writer, "Stale");
+        var later = DateTime.Now.AddMinutes(5);
+        await ReplaceAsync(writer, indexed, ModelA, Chunk(NoteChunkSourceType.Data, 0, "data", later), Chunk(NoteChunkSourceType.Text, 0, "text", later));
+        await ReplaceAsync(writer, stale, ModelA, Chunk(NoteChunkSourceType.Data, 0, "data", later));
+        await ReplaceAsync(writer, stale, ModelB, Chunk(NoteChunkSourceType.Data, 0, "data", later));
+        await writer.SemanticIndex.MarkStaleAsync(stale);
+        var excluded = new List<Guid> { noteTypeId };
+
+        var all = (await reader.SemanticIndex.GetIndexSummaryAsync(ModelA)).Entity;
+        var summary = (await reader.SemanticIndex.GetIndexSummaryAsync(ModelA, excluded)).Entity;
+        var models = (await reader.SemanticIndex.GetIndexModelsAsync()).Entity;
+
+        Assert.AreEqual(all.TotalNotes - 1, summary.TotalNotes);
+        Assert.AreEqual(2, summary.IndexedNotes);
+        Assert.AreEqual(summary.TotalNotes - 1, summary.PendingNotes, "all but the indexed one (seeded notes too)");
+        Assert.AreEqual(all.PendingNotes - 1, summary.PendingNotes);
+        Assert.AreEqual(3, summary.Chunks);
+        Assert.AreEqual(2, models.Count);
+        Assert.AreEqual(ModelA, models[0].IndexKey);
+        Assert.AreEqual(3, models[0].Chunks);
+        Assert.AreEqual(2, models[0].Notes);
+        Assert.AreEqual(ModelB, models[1].IndexKey);
+        Assert.AreEqual(1, models[1].Chunks);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
+    public async Task MarkStale_ByModel_Folders_NoteType_AndKAttribute(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+
+        var folderId = await AddFolderAsync(writer);
+        var noteTypeId = Guid.NewGuid();
+        Assert.IsTrue((await writer.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = noteTypeId, Name = "@StaleByType" })).IsValid);
+        var kattributeId = Guid.NewGuid();
+        var attributeRes = await writer.KAttributes.AddAsync(new KAttributeDto
+        {
+            KAttributeId = kattributeId, Name = "Stale by attribute", KAttributeDataType = EnumKAttributeDataType.String
+        });
+        Assert.IsTrue(attributeRes.IsValid, attributeRes.ErrorMessage);
+
+        var inFolder = await AddNoteAsync(writer, "In the folder", folderId: folderId);
+        var ofType = await AddNoteAsync(writer, "Of the type", noteTypeId);
+        var withAttribute = await AddNoteAsync(writer, "With the attribute", kattributeId: kattributeId);
+        var other = await AddNoteAsync(writer, "Other");
+        var later = DateTime.Now.AddMinutes(5);
+        foreach (var noteId in new[] { inFolder, ofType, withAttribute, other })
+        {
+            await ReplaceAsync(writer, noteId, ModelA, Chunk(NoteChunkSourceType.Data, 0, "A", later));
+            await ReplaceAsync(writer, noteId, ModelB, Chunk(NoteChunkSourceType.Data, 0, "B", later));
+        }
+
+        async Task<Guid[]> StaleOfAsync(string model)
+        {
+            var stale = new List<Guid>();
+            foreach (var noteId in new[] { inFolder, ofType, withAttribute, other })
+                if ((await ChunksOfAsync(reader, noteId, model)).Single().Stale)
+                    stale.Add(noteId);
+            return stale.ToArray();
+        }
+
+        Assert.IsTrue((await writer.SemanticIndex.MarkStaleByFoldersAsync(new List<Guid> { folderId })).IsValid);
+        CollectionAssert.AreEquivalent(new[] { inFolder }, await StaleOfAsync(ModelA));
+        CollectionAssert.AreEquivalent(new[] { inFolder }, await StaleOfAsync(ModelB));
+
+        Assert.IsTrue((await writer.SemanticIndex.MarkStaleByNoteTypeAsync(noteTypeId)).IsValid);
+        Assert.IsTrue((await writer.SemanticIndex.MarkStaleByKAttributeAsync(kattributeId)).IsValid);
+        CollectionAssert.AreEquivalent(new[] { inFolder, ofType, withAttribute }, await StaleOfAsync(ModelA));
+
+        Assert.IsTrue((await writer.SemanticIndex.MarkModelStaleAsync(ModelB)).IsValid);
+        CollectionAssert.AreEquivalent(new[] { inFolder, ofType, withAttribute, other }, await StaleOfAsync(ModelB));
+        CollectionAssert.AreEquivalent(new[] { inFolder, ofType, withAttribute }, await StaleOfAsync(ModelA));
     }
 }

@@ -124,6 +124,13 @@ public interface IViewFileExport : IViewBase
     string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName);
 }
 
+// The semantic index of the repository editor (RepositorySemanticIndexCtrl): RefreshView shows its status,
+// RefreshProgress the progress of its run (Store.SemanticIndex).
+public interface IViewSemanticIndex : IViewEmbeddable
+{
+    void RefreshProgress();
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();
@@ -132,6 +139,9 @@ public interface IViewKNoteManagement : IViewBase
     void DeactivateWaitState();
     void ReportProgressKNoteManagement(int porcentaje);
     void SetVisibleProgressBar(bool visible);
+
+    // The run of the semantic index in the status bar (SemanticIndexJob.StatusBarText): null hides it.
+    void ShowSemanticIndexProgress(string text);
 
     // Single-value input prompt (backed by ReadVarForm), used by KNoteManagementCtrl.ChangeTags so the
     // controller doesn't have to reference a concrete WinForms Form to ask the user for the tag text.

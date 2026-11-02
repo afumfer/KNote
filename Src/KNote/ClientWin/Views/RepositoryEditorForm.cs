@@ -32,6 +32,7 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         tabPageAttributes.Controls.Add(_ctrl.KAttributesManageCtrl.View.PanelView());
         tabPageUsers.Controls.Add(_ctrl.UsersManageCtrl.View.PanelView());
         tabPageAtlas.Controls.Add(_ctrl.RepositoryAiModelsCtrl.View.PanelView());
+        tabPageSemanticIndex.Controls.Add(_ctrl.RepositorySemanticIndexCtrl.View.PanelView());
     }
 
     #endregion 
@@ -196,13 +197,14 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
                 break;
         }
 
-        // Users/Note types/Trace note types/Attributes/KNote Atlas administration only makes sense for an
+        // Users/Note types/Trace note types/Attributes/KNote Atlas/Semantic index administration only makes sense for an
         // already-linked repository (Management mode).
         tabPageUsers.Enabled = _ctrl.AdministrationAvailable;
         tabPageNoteTypes.Enabled = _ctrl.AdministrationAvailable;
         tabPageTraceNoteTypes.Enabled = _ctrl.AdministrationAvailable;
         tabPageAttributes.Enabled = _ctrl.AdministrationAvailable;
         tabPageAtlas.Enabled = _ctrl.AdministrationAvailable;
+        tabPageSemanticIndex.Enabled = _ctrl.AdministrationAvailable;
 
         var adminTabsHint = _ctrl.AdministrationAvailable ? "" : "Available once the repository is linked.";
 
@@ -214,6 +216,7 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         toolTipAdminTabs.SetToolTip(tabPageTraceNoteTypes, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageAttributes, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageAtlas, adminTabsHint);
+        toolTipAdminTabs.SetToolTip(tabPageSemanticIndex, adminTabsHint);
 
         // A linked repository is named in its own database.
         labelName.Visible = _ctrl.EditorMode != EnumRepositoryEditorMode.AddLink;

@@ -91,23 +91,30 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
         }
     }
 
-    public async Task<Result> MarkStaleAsync(Guid noteId)
+    public Task<Result> MarkStaleAsync(Guid noteId) =>
+        MarkStaleAsync(ctx => ctx.NoteChunks.Where(c => c.NoteId == noteId));
+
+    public Task<Result> MarkModelStaleAsync(string model) =>
+        MarkStaleAsync(ctx => ctx.NoteChunks.Where(c => c.Model == model));
+
+    public async Task<Result> MarkStaleByFoldersAsync(List<Guid> folderIds)
     {
-        try
+        foreach (var ids in (folderIds ?? new()).Distinct().Chunk(IdsPerQuery))
         {
-            var ctx = GetOpenConnection();
-
-            await ctx.NoteChunks.Where(c => c.NoteId == noteId).ExecuteUpdateAsync(s => s.SetProperty(c => c.Stale, true));
-
-            await CloseIsTempConnection(ctx);
-
-            return new Result();
+            var result = await MarkStaleAsync(ctx => ctx.NoteChunks
+                .Where(c => ctx.Notes.Any(n => n.NoteId == c.NoteId && ids.Contains(n.FolderId))));
+            if (!result.IsValid)
+                return result;
         }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+        return new Result();
     }
+
+    public Task<Result> MarkStaleByNoteTypeAsync(Guid noteTypeId) =>
+        MarkStaleAsync(ctx => ctx.NoteChunks.Where(c => ctx.Notes.Any(n => n.NoteId == c.NoteId && n.NoteTypeId == noteTypeId)));
+
+    public Task<Result> MarkStaleByKAttributeAsync(Guid kattributeId) =>
+        MarkStaleAsync(ctx => ctx.NoteChunks
+            .Where(c => ctx.NoteKAttributes.Any(a => a.NoteId == c.NoteId && a.KAttributeId == kattributeId)));
 
     public async Task<Result> DeleteModelAsync(string model)
     {
@@ -133,14 +140,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
         {
             var ctx = GetOpenConnection();
 
-            var notes = ctx.Notes.AsNoTracking();
-            if (excludedNoteTypeIds?.Count > 0)
-                notes = notes.Where(n => n.NoteTypeId == null || !excludedNoteTypeIds.Contains(n.NoteTypeId.Value));
-
-            var ids = await notes
-                .Where(n => !ctx.NoteChunks.Any(c => c.NoteId == n.NoteId && c.Model == model)
-                    || ctx.NoteChunks.Any(c => c.NoteId == n.NoteId && c.Model == model
-                        && (c.Stale || c.IndexedDateTime < n.ModificationDateTime)))
+            var ids = await Pending(ctx, NotExcluded(ctx, excludedNoteTypeIds), model)
                 .OrderByDescending(n => n.ModificationDateTime).ThenByDescending(n => n.NoteNumber)
                 .Select(n => n.NoteId)
                 .Take(max)
@@ -150,6 +150,58 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
             await CloseIsTempConnection(ctx);
 
             return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<SemanticIndexSummaryDto>> GetIndexSummaryAsync(string model, List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+
+            var notes = NotExcluded(ctx, excludedNoteTypeIds);
+            var summary = new SemanticIndexSummaryDto
+            {
+                TotalNotes = await notes.CountAsync(),
+                IndexedNotes = await notes.CountAsync(n => ctx.NoteChunks.Any(c => c.NoteId == n.NoteId && c.Model == model)),
+                PendingNotes = await Pending(ctx, notes, model).CountAsync(),
+                Chunks = await ctx.NoteChunks.CountAsync(c => c.Model == model)
+            };
+
+            await CloseIsTempConnection(ctx);
+
+            return new Result<SemanticIndexSummaryDto> { Entity = summary };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<SemanticIndexModelDto>>> GetIndexModelsAsync()
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+
+            var models = await ctx.NoteChunks.AsNoTracking()
+                .GroupBy(c => c.Model)
+                .Select(g => new SemanticIndexModelDto
+                {
+                    IndexKey = g.Key,
+                    Chunks = g.Count(),
+                    Notes = g.Select(c => c.NoteId).Distinct().Count()
+                })
+                .OrderBy(m => m.IndexKey)
+                .ToListAsync();
+
+            await CloseIsTempConnection(ctx);
+
+            return new Result<List<SemanticIndexModelDto>> { Entity = models };
         }
         catch (Exception ex)
         {
@@ -255,6 +307,39 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
     }
+
+    private async Task<Result> MarkStaleAsync(Func<KntDbContext, IQueryable<NoteChunk>> rows)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+
+            await rows(ctx).ExecuteUpdateAsync(s => s.SetProperty(c => c.Stale, true));
+
+            await CloseIsTempConnection(ctx);
+
+            return new Result();
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    // The notes not of the excluded note types (the Dapper repository's NotExcluded).
+    private static IQueryable<Note> NotExcluded(KntDbContext ctx, List<Guid> excludedNoteTypeIds)
+    {
+        var notes = ctx.Notes.AsNoTracking();
+        if (excludedNoteTypeIds?.Count > 0)
+            notes = notes.Where(n => n.NoteTypeId == null || !excludedNoteTypeIds.Contains(n.NoteTypeId.Value));
+        return notes;
+    }
+
+    // The notes the index of a model has to calculate (the Dapper repository's Pending).
+    private static IQueryable<Note> Pending(KntDbContext ctx, IQueryable<Note> notes, string model) =>
+        notes.Where(n => !ctx.NoteChunks.Any(c => c.NoteId == n.NoteId && c.Model == model)
+            || ctx.NoteChunks.Any(c => c.NoteId == n.NoteId && c.Model == model
+                && (c.Stale || c.IndexedDateTime < n.ModificationDateTime)));
 
     private static NoteChunkDto ToDto(NoteChunk row, bool withVector) => new()
     {

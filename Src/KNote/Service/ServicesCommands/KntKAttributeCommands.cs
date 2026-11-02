@@ -85,7 +85,12 @@ public class KntKAttributesSaveAsyncCommand : KntCommandSaveServiceBase<KAttribu
         }
         else
         {
-            return await Repository.KAttributes.UpdateAsync(Param);
+            var resOld = await Repository.KAttributes.GetAsync(Param.KAttributeId);
+            var res = await Repository.KAttributes.UpdateAsync(Param);
+            // Its name is in the fragment of data of the notes that have it.
+            if (res.IsValid && resOld.Entity is { } old && old.Name != Param.Name)
+                await KntSemanticIndexer.MarkStaleAsync(Service, r => r.MarkStaleByKAttributeAsync(Param.KAttributeId));
+            return res;
         }
     }
 }

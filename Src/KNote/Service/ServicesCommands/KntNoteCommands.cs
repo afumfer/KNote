@@ -296,6 +296,8 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
             else
             {
                 res = await Repository.Notes.UpdateAsync(Param);
+                if (res.IsValid)
+                    await KntSemanticIndexer.MarkStaleAsync(Service, Param.NoteId);
             }
 
             return res;
@@ -679,6 +681,9 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
 
         (result.Entity.RelativeUrl, result.Entity.FullUrl) = Service.Notes.UtilGetResourceUrls(result.Entity);
 
+        if (result.IsValid)
+            await KntSemanticIndexer.MarkStaleAsync(Service, result.Entity.NoteId);
+
         return result;
     }
 }
@@ -745,6 +750,7 @@ public class KntNotesDeleteResourceAsyncCommand : KntCommandServiceBase<Guid, Re
             if (resDelEntity.IsValid)
             {
                 result.Entity = resGetEntity.Entity;
+                await KntSemanticIndexer.MarkStaleAsync(Service, result.Entity.NoteId);
                 try
                 {
                     var fullPathRec = Service.Notes.UtilGetResourceFilePath(result.Entity);
@@ -842,7 +848,7 @@ public class KntNotesGetTasksPanelAsyncCommand : KntCommandServiceBase<TasksPane
             Text = filter.Text,
             FolderId = filter.FolderId,
             IncludeChildFolders = filter.IncludeChildFolders,
-            ExcludeNoteTypeIds = await GetSystemNoteTypeIdsAsync()
+            ExcludeNoteTypeIds = await KntSystemNotes.GetSystemNoteTypeIdsAsync(Repository)
         };
 
         var counts = await Repository.Notes.GetTasksPanelCountsAsync(query);
@@ -872,15 +878,6 @@ public class KntNotesGetTasksPanelAsyncCommand : KntCommandServiceBase<TasksPane
             panel.NearestTaskDate = NearestDate((await Repository.Notes.GetTasksPanelNearestAsync(query)).Entity, panel);
 
         return result;
-    }
-
-    private async Task<List<Guid>> GetSystemNoteTypeIdsAsync()
-    {
-        var noteTypes = await Repository.NoteTypes.GetAllAsync();
-        return noteTypes.Entity?
-            .Where(t => t.Name == KntConst.ChatSessionsTag || t.Name == KntConst.ChatRoomTag)
-            .Select(t => t.NoteTypeId)
-            .ToList() ?? new List<Guid>();
     }
 
     // The nearer of the last date before the window and the first one after it.
@@ -921,26 +918,26 @@ public class KntNotesSaveNoteTaskAsyncCommand : KntCommandSaveServiceBase<NoteTa
 
     public override async Task<Result<NoteTaskDto>> Execute()
     {
+        Result<NoteTaskDto> result;
         if (Param.NoteTaskId == Guid.Empty)
         {
             Param.NoteTaskId = Guid.NewGuid();
-            return await Repository.Notes.AddNoteTaskAsync(Param);
+            result = await Repository.Notes.AddNoteTaskAsync(Param);
         }
+        else if (!forceNew)
+            result = await Repository.Notes.UpdateNoteTaskAsync(Param);
         else
         {
-            if (!forceNew)
-            {
-                return await Repository.Notes.UpdateNoteTaskAsync(Param);
-            }
+            var checkExist = await Service.Notes.GetNoteTaskAsync(Param.NoteTaskId);
+            if (checkExist.IsValid)
+                result = await Repository.Notes.UpdateNoteTaskAsync(Param);
             else
-            {
-                var checkExist = await Service.Notes.GetNoteTaskAsync(Param.NoteTaskId);
-                if (checkExist.IsValid)
-                    return await Repository.Notes.UpdateNoteTaskAsync(Param);
-                else
-                    return await Repository.Notes.AddNoteTaskAsync(Param);
-            }
+                result = await Repository.Notes.AddNoteTaskAsync(Param);
         }
+
+        if (result.IsValid)
+            await KntSemanticIndexer.MarkStaleAsync(Service, Param.NoteId);
+        return result;
     }
 }
 
@@ -961,7 +958,10 @@ public class KntNotesDeleteNoteTaskAsyncCommand : KntCommandServiceBase<Guid, Re
         {
             var resDelEntity = await Repository.Notes.DeleteNoteTaskAsync(Param);
             if (resDelEntity.IsValid)
+            {
                 result.Entity = resGetEntity.Entity;
+                await KntSemanticIndexer.MarkStaleAsync(Service, result.Entity.NoteId);
+            }
             else
                 result.AddListErrorMessage(resDelEntity.ListErrorMessage);
         }
@@ -1476,7 +1476,10 @@ public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool
 
     public override async Task<Result<bool>> Execute()
     {
-        return await Repository.Notes.PatchFolderAsync(noteId, folderId);
+        var result = await Repository.Notes.PatchFolderAsync(noteId, folderId);
+        if (result.IsValid)
+            await KntSemanticIndexer.MarkStaleAsync(Service, noteId);
+        return result;
     }
 }
 
@@ -1496,6 +1499,9 @@ public class KntNotesPatchChangeTagsAsyncCommand : KntCommandServiceBase<Result<
 
     public override async Task<Result<bool>> Execute()
     {
-        return await Repository.Notes.PatchChangeTagsAsync(noteId, oldTag, newTag);
+        var result = await Repository.Notes.PatchChangeTagsAsync(noteId, oldTag, newTag);
+        if (result.IsValid)
+            await KntSemanticIndexer.MarkStaleAsync(Service, noteId);
+        return result;
     }
 }

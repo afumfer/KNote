@@ -20,7 +20,11 @@ public class NoteChunkSource
     public List<NoteChunkTask> Tasks { get; set; } = new();
     public List<NoteChunkResource> Resources { get; set; } = new();
 
-    public static NoteChunkSource From(NoteExtendedDto note, string folderPath, string description) => new()
+    public static NoteChunkSource From(NoteExtendedDto note, string folderPath, string description) =>
+        From(note, note.Tasks, note.Resources, folderPath, description);
+
+    public static NoteChunkSource From(NoteDto note, IEnumerable<NoteTaskDto> tasks, IEnumerable<ResourceInfoDto> resources,
+        string folderPath, string description) => new()
     {
         Topic = note.Topic,
         NoteType = note.NoteTypeDto?.Name,
@@ -31,10 +35,10 @@ public class NoteChunkSource
             .Select(a => new NoteChunkAttribute(a.Name, a.Value))
             .ToList(),
         Description = description,
-        Tasks = (note.Tasks ?? new())
+        Tasks = (tasks ?? Enumerable.Empty<NoteTaskDto>())
             .Select(t => new NoteChunkTask(t.NoteTaskId, t.GetTopic(200), t.Description, t.Resolved))
             .ToList(),
-        Resources = (note.Resources ?? new())
+        Resources = (resources ?? Enumerable.Empty<ResourceInfoDto>())
             .OrderBy(r => r.Order).ThenBy(r => r.NameOut)
             .Select(r => new NoteChunkResource(r.ResourceId, r.NameOut, r.FileType, r.Description))
             .ToList()

@@ -16,6 +16,15 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
     private const string ChunkColumns = @"NoteChunkId, NoteId, SourceType, SourceId, ChunkIndex, Content, ContentHash,
         SourceHash, Stale, Model, Dimensions, IndexedDateTime";
 
+    // A note (n) the index of @Model has to calculate: without rows, with rows marked as Stale or modified after them.
+    private const string Pending = @"(NOT EXISTS (SELECT 1 FROM NoteChunks c WHERE c.NoteId = n.NoteId AND c.Model = @Model)
+        OR EXISTS (SELECT 1 FROM NoteChunks c WHERE c.NoteId = n.NoteId AND c.Model = @Model
+            AND (c.Stale = 1 OR c.IndexedDateTime < n.ModificationDateTime)))";
+
+    // A note (n) not of the note types in @Excluded.
+    private static string NotExcluded(List<Guid> excludedNoteTypeIds) =>
+        excludedNoteTypeIds?.Count > 0 ? "(n.NoteTypeId IS NULL OR n.NoteTypeId NOT IN @Excluded)" : "1 = 1";
+
     public KntSemanticIndexRepository(DbConnection singletonConnection, RepositoryRef repositoryRef)
         : base(singletonConnection, repositoryRef)
     {
@@ -99,41 +108,34 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
         }
     }
 
-    public async Task<Result> MarkStaleAsync(Guid noteId)
+    public Task<Result> MarkStaleAsync(Guid noteId) =>
+        ExecuteAsync("UPDATE NoteChunks SET Stale = 1 WHERE NoteId = @NoteId", new { NoteId = noteId });
+
+    public Task<Result> MarkModelStaleAsync(string model) =>
+        ExecuteAsync("UPDATE NoteChunks SET Stale = 1 WHERE Model = @Model", new { Model = model });
+
+    public async Task<Result> MarkStaleByFoldersAsync(List<Guid> folderIds)
     {
-        try
+        foreach (var ids in (folderIds ?? new()).Distinct().Chunk(IdsPerQuery))
         {
-            var db = GetOpenConnection();
-
-            await db.ExecuteAsync("UPDATE NoteChunks SET Stale = 1 WHERE NoteId = @NoteId", new { NoteId = noteId });
-
-            await CloseIsTempConnection(db);
-
-            return new Result();
+            var result = await ExecuteAsync(
+                "UPDATE NoteChunks SET Stale = 1 WHERE NoteId IN (SELECT NoteId FROM Notes WHERE FolderId IN @Ids)", new { Ids = ids });
+            if (!result.IsValid)
+                return result;
         }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
+        return new Result();
     }
 
-    public async Task<Result> DeleteModelAsync(string model)
-    {
-        try
-        {
-            var db = GetOpenConnection();
+    public Task<Result> MarkStaleByNoteTypeAsync(Guid noteTypeId) =>
+        ExecuteAsync("UPDATE NoteChunks SET Stale = 1 WHERE NoteId IN (SELECT NoteId FROM Notes WHERE NoteTypeId = @Id)",
+            new { Id = noteTypeId });
 
-            await db.ExecuteAsync("DELETE FROM NoteChunks WHERE Model = @Model", new { Model = model });
+    public Task<Result> MarkStaleByKAttributeAsync(Guid kattributeId) =>
+        ExecuteAsync("UPDATE NoteChunks SET Stale = 1 WHERE NoteId IN (SELECT NoteId FROM NoteKAttributes WHERE KAttributeId = @Id)",
+            new { Id = kattributeId });
 
-            await CloseIsTempConnection(db);
-
-            return new Result();
-        }
-        catch (Exception ex)
-        {
-            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
-        }
-    }
+    public Task<Result> DeleteModelAsync(string model) =>
+        ExecuteAsync("DELETE FROM NoteChunks WHERE Model = @Model", new { Model = model });
 
     public async Task<Result<List<Guid>>> GetPendingNoteIdsAsync(string model, int max, List<Guid> excludedNoteTypeIds = null)
     {
@@ -142,14 +144,8 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
             var db = GetOpenConnection();
 
             var isSqlServer = _repositoryRef.Provider == "Microsoft.Data.SqlClient";
-            var excluded = excludedNoteTypeIds?.Count > 0
-                ? "(n.NoteTypeId IS NULL OR n.NoteTypeId NOT IN @Excluded) AND"
-                : "";
             var sql = $@"SELECT {(isSqlServer ? "TOP (@Max)" : "")} n.NoteId FROM Notes n
-                WHERE {excluded}
-                    (NOT EXISTS (SELECT 1 FROM NoteChunks c WHERE c.NoteId = n.NoteId AND c.Model = @Model)
-                    OR EXISTS (SELECT 1 FROM NoteChunks c WHERE c.NoteId = n.NoteId AND c.Model = @Model
-                        AND (c.Stale = 1 OR c.IndexedDateTime < n.ModificationDateTime)))
+                WHERE {NotExcluded(excludedNoteTypeIds)} AND {Pending}
                 ORDER BY n.ModificationDateTime DESC, n.NoteNumber DESC
                 {(isSqlServer ? "" : "LIMIT @Max")}";
             var ids = await db.QueryAsync<Guid>(sql, new { Model = model, Max = max, Excluded = excludedNoteTypeIds });
@@ -158,6 +154,51 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
             await CloseIsTempConnection(db);
 
             return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<SemanticIndexSummaryDto>> GetIndexSummaryAsync(string model, List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+
+            var notExcluded = NotExcluded(excludedNoteTypeIds);
+            var sql = $@"SELECT
+                (SELECT COUNT(*) FROM Notes n WHERE {notExcluded}) AS TotalNotes,
+                (SELECT COUNT(*) FROM Notes n WHERE {notExcluded}
+                    AND EXISTS (SELECT 1 FROM NoteChunks c WHERE c.NoteId = n.NoteId AND c.Model = @Model)) AS IndexedNotes,
+                (SELECT COUNT(*) FROM Notes n WHERE {notExcluded} AND {Pending}) AS PendingNotes,
+                (SELECT COUNT(*) FROM NoteChunks c WHERE c.Model = @Model) AS Chunks";
+            var summary = await db.QueryFirstAsync<SemanticIndexSummaryDto>(sql, new { Model = model, Excluded = excludedNoteTypeIds });
+
+            await CloseIsTempConnection(db);
+
+            return new Result<SemanticIndexSummaryDto> { Entity = summary };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<SemanticIndexModelDto>>> GetIndexModelsAsync()
+    {
+        try
+        {
+            var db = GetOpenConnection();
+
+            var sql = @"SELECT Model AS IndexKey, COUNT(*) AS Chunks, COUNT(DISTINCT NoteId) AS Notes
+                FROM NoteChunks GROUP BY Model ORDER BY Model";
+            var models = await db.QueryAsync<SemanticIndexModelDto>(sql);
+
+            await CloseIsTempConnection(db);
+
+            return new Result<List<SemanticIndexModelDto>> { Entity = models.ToList() };
         }
         catch (Exception ex)
         {
@@ -239,6 +280,24 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
             await CloseIsTempConnection(db);
 
             return new Result<List<NoteChunkDto>> { Entity = chunks };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private async Task<Result> ExecuteAsync(string sql, object param)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+
+            await db.ExecuteAsync(sql, param);
+
+            await CloseIsTempConnection(db);
+
+            return new Result();
         }
         catch (Exception ex)
         {

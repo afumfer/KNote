@@ -21,6 +21,7 @@ internal class FakeKntService : IKntService
     public FakeKntKAttributeService KAttributesFake { get; } = new();
     public FakeKntFolderService FoldersFake { get; } = new();
     public FakeKntAiSessionService AiSessionsFake { get; } = new();
+    public FakeKntSemanticSearchService SemanticSearchFake { get; } = new();
     public FakeKntSystemValuesService SystemValuesFake { get; } = new();
 
     public ILogger Logger { get; set; }
@@ -48,6 +49,7 @@ internal class FakeKntService : IKntService
     public IKntTraceNoteTypeService TraceNoteTypes => TraceNoteTypesFake;
     public IKntAiSessionService AiSessions => AiSessionsFake;
     public IKntChatRoomService ChatRooms => throw new NotSupportedException();
+    public IKntSemanticSearchService SemanticSearch => SemanticSearchFake;
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();

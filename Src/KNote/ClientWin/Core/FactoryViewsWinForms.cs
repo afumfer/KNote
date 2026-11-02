@@ -51,6 +51,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<KNoteAIAssistantCtrl, IViewBase>(c => new KNoteAIAssistantForm(c));
         Registry.Register<AiProviderEditorCtrl, IViewEditor<AiProviderRef>>(c => new AiProviderEditorForm(c));
         Registry.Register<RepositoryAiModelsCtrl, IViewEditorEmbeddable<RepositoryAiModelsDto>>(c => new RepositoryAiModelsForm(c));
+        Registry.Register<RepositorySemanticIndexCtrl, IViewSemanticIndex>(c => new RepositorySemanticIndexForm(c));
         Registry.Register<AiProvidersManageCtrl, IViewManageList<AiProviderRef>>(c => new AiProvidersManageForm(c));
         Registry.Register<KntChatCtrl, IViewChatRoom>(c => new KntChatForm(c));
         Registry.Register<KntServerCOMCtrl, IViewServerCOM>(c => new KntServerCOMForm(c));

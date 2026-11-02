@@ -93,6 +93,19 @@ public class RepositoryAiModelsDto : SmartModelDtoBase
         string.Equals(Normalize(EmbeddingModel), Normalize(other?.EmbeddingModel), StringComparison.OrdinalIgnoreCase)
         && EmbeddingDimensions == other?.EmbeddingDimensions;
 
+    /// <summary>
+    /// The key of the semantic index of these models (NoteChunks.Model): the embedding model, with "@" and the
+    /// dimensions when the repository asks for other ones than the model's (two indexes of a model with different
+    /// dimensions are two indexes). Null without an embedding model.
+    /// </summary>
+    public string GetIndexKey()
+    {
+        var model = Normalize(EmbeddingModel);
+        if (model == null)
+            return null;
+        return EmbeddingDimensions == null ? model : $"{model}@{EmbeddingDimensions}";
+    }
+
     public static string Normalize(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     #region Validations

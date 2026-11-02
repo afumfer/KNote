@@ -20,4 +20,21 @@ public class SemanticSearchWebApiService : BaseService, ISemanticSearchWebApiSer
 
     public Task<Result<AiInstallationModelsDto>> GetInstallationModelsAsync(CancellationToken cancellationToken = default) =>
         SendAsync<AiInstallationModelsDto>(ct => _httpClient.GetAsync("api/semantic/installation-models", ct), "Get server models", cancellationToken: cancellationToken);
+
+    public Task<Result<SemanticIndexStatusDto>> GetIndexStatusAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<SemanticIndexStatusDto>(ct => _httpClient.GetAsync("api/semantic/status", ct), "Get semantic index status", cancellationToken: cancellationToken);
+
+    public Task<Result<SemanticIndexProgressDto>> RunIndexAsync(bool rebuild) =>
+        SendAsync<SemanticIndexProgressDto>(ct => _httpClient.PostAsJsonAsync("api/semantic/index", new SemanticIndexRunDto { Rebuild = rebuild }, ct),
+            "Semantic index");
+
+    public Task<Result<SemanticIndexProgressDto>> GetIndexProgressAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<SemanticIndexProgressDto>(ct => _httpClient.GetAsync("api/semantic/index/progress", ct), "Semantic index progress",
+            cancellationToken: cancellationToken, notifyErrors: false);
+
+    public Task<Result<bool>> CancelIndexAsync() =>
+        SendAsync<bool>(ct => _httpClient.PostAsync("api/semantic/index/cancel", null, ct), "Cancel the semantic index");
+
+    public Task<Result<bool>> DeleteModelIndexAsync(string indexKey) =>
+        SendAsync<bool>(ct => _httpClient.DeleteAsync($"api/semantic/index?key={Uri.EscapeDataString(indexKey)}", ct), "Remove a semantic index", true);
 }

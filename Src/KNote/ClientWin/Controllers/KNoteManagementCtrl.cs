@@ -135,6 +135,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         Store.Events.Subscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
         Store.Events.Subscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
+        Store.Events.Subscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
     }
 
     private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
@@ -276,6 +277,12 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         View.ShowInfo(null);
     }
 
+    // The run of the semantic index goes on when the repository editor is closed: the status bar shows it.
+    private void SemanticIndex_ProgressChanged(SemanticIndexProgressChanged e)
+    {
+        View.ShowSemanticIndexProgress(e.Job.StatusBarText);
+    }
+
     public override void Dispose()
     {
         Store.ChangedActiveFolderWithServiceRef -= Store_ChangedActiveFolderWithServiceRef;
@@ -293,6 +300,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         Store.Events.Unsubscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
         Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
+        Store.Events.Unsubscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
+
+        // The app closes: the run of the semantic index stops (what is done is kept).
+        Store.SemanticIndex.Cancel();
 
         base.Dispose();
     }
@@ -1258,21 +1269,31 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         {
             View.ShowInfo("There is no repository selected to configure.");
             return;
-        }                        
-        var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
-        repositoryEditorCtrl.EditorMode = EnumRepositoryEditorMode.Management;
-        var serviceRef = SelectedServiceRef;
-        await repositoryEditorCtrl.LoadModelById(serviceRef.Service, serviceRef.IdServiceRef, false);
-        var res = repositoryEditorCtrl.RunModal();
+        }
+        if (_repositoryEditorOpen)
+            return;
 
-        // The users of the repository may have been edited there, the current one included.
-        await Store.RefreshRepositoryRoleAsync(serviceRef.Service);
-        View.ShowInfo(null);
-
-        if (res.Entity == EControllerResult.Executed)
+        _repositoryEditorOpen = true;
+        try
         {
-            // Do action 
-            RefreshRepositoryAndFolderTree();
+            var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
+            repositoryEditorCtrl.EditorMode = EnumRepositoryEditorMode.Management;
+            var serviceRef = SelectedServiceRef;
+            // It reads its users, note types, attributes, AI models and semantic index before it is shown.
+            using (new WaitCursor())
+                await repositoryEditorCtrl.LoadModelById(serviceRef.Service, serviceRef.IdServiceRef, false);
+            var res = repositoryEditorCtrl.RunModal();
+
+            // The users of the repository may have been edited there, the current one included.
+            await Store.RefreshRepositoryRoleAsync(serviceRef.Service);
+            View.ShowInfo(null);
+
+            if (res.Entity == EControllerResult.Executed)
+                RefreshRepositoryAndFolderTree();
+        }
+        finally
+        {
+            _repositoryEditorOpen = false;
         }
     }
 
@@ -2010,15 +2031,28 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             await RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef);
     }
 
+    // The repository editor is modal once it is shown, but it reads its data before: meanwhile the main window still
+    // takes clicks, and a second click of the menu opened a second editor. One at a time, whatever its mode.
+    private bool _repositoryEditorOpen;
+
     private async Task NewRepository(EnumRepositoryEditorMode mode)
     {
-        var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
-        repositoryEditorCtrl.EditorMode = mode;
-        await repositoryEditorCtrl.NewModel();
-        var res = repositoryEditorCtrl.RunModal();
-        if (res.Entity == EControllerResult.Executed)
+        if (_repositoryEditorOpen)
+            return;
+
+        _repositoryEditorOpen = true;
+        try
         {
-            RefreshRepositoryAndFolderTree();
+            var repositoryEditorCtrl = new RepositoryEditorCtrl(Store);
+            repositoryEditorCtrl.EditorMode = mode;
+            await repositoryEditorCtrl.NewModel();
+            var res = repositoryEditorCtrl.RunModal();
+            if (res.Entity == EControllerResult.Executed)
+                RefreshRepositoryAndFolderTree();
+        }
+        finally
+        {
+            _repositoryEditorOpen = false;
         }
     }
     

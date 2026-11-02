@@ -22,6 +22,18 @@ public interface IKntSemanticIndexRepository : IDisposable
     /// <summary>Marks the rows of a note, of every model, to be calculated again (Stale = true).</summary>
     Task<Result> MarkStaleAsync(Guid noteId);
 
+    /// <summary>Marks every row of a model to be calculated again (a rebuild of its index).</summary>
+    Task<Result> MarkModelStaleAsync(string model);
+
+    /// <summary>Marks the rows of the notes of these folders (their path is in the fragment of data).</summary>
+    Task<Result> MarkStaleByFoldersAsync(List<Guid> folderIds);
+
+    /// <summary>Marks the rows of the notes of a note type (its name is in the fragment of data).</summary>
+    Task<Result> MarkStaleByNoteTypeAsync(Guid noteTypeId);
+
+    /// <summary>Marks the rows of the notes that have an attribute (its name is in the fragment of data).</summary>
+    Task<Result> MarkStaleByKAttributeAsync(Guid kattributeId);
+
     /// <summary>Removes the index of a model.</summary>
     Task<Result> DeleteModelAsync(string model);
 
@@ -30,6 +42,15 @@ public interface IKntSemanticIndexRepository : IDisposable
     /// rows, with rows marked as Stale, or modified after they were indexed. Not the ones of the excluded note types.
     /// </summary>
     Task<Result<List<Guid>>> GetPendingNoteIdsAsync(string model, int max, List<Guid> excludedNoteTypeIds = null);
+
+    /// <summary>
+    /// The notes of the repository (not the ones of the excluded note types), those with rows of a model, those
+    /// pending (as GetPendingNoteIdsAsync) and the rows of the model.
+    /// </summary>
+    Task<Result<SemanticIndexSummaryDto>> GetIndexSummaryAsync(string model, List<Guid> excludedNoteTypeIds = null);
+
+    /// <summary>The models with rows in the repository: their rows and their notes.</summary>
+    Task<Result<List<SemanticIndexModelDto>>> GetIndexModelsAsync();
 
     /// <summary>
     /// The vectors of a model, for the search's cache: all, or the ones written since a time (IndexedDateTime equal or

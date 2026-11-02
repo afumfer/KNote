@@ -37,4 +37,29 @@ public class EmbeddingVectorTests
     {
         Assert.ThrowsExactly<ArgumentException>(() => EmbeddingVector.FromBytes(new byte[] { 1, 2, 3 }));
     }
+
+    [TestMethod]
+    public void Normalize_GivesLengthOne_AndCutsToTheDimensionsAskedFor()
+    {
+        var normalized = EmbeddingVector.Normalize(new[] { 3f, 4f, 12f });
+        var cut = EmbeddingVector.Normalize(new[] { 3f, 4f, 12f }, 2);
+
+        Assert.AreEqual(1f, EmbeddingVector.Dot(normalized, normalized), 1e-6f);
+        CollectionAssert.AreEqual(new[] { 3f / 13, 4f / 13, 12f / 13 }, normalized);
+        CollectionAssert.AreEqual(new[] { 0.6f, 0.8f }, cut);
+    }
+
+    [TestMethod]
+    public void Normalize_ZerosStayZeros_AndMoreDimensionsThanTheModelsFail()
+    {
+        CollectionAssert.AreEqual(new[] { 0f, 0f }, EmbeddingVector.Normalize(new[] { 0f, 0f }));
+        Assert.ThrowsExactly<ArgumentException>(() => EmbeddingVector.Normalize(new[] { 1f, 2f }, 3));
+    }
+
+    [TestMethod]
+    public void Dot_OfVectorsOfDifferentSizes_Fails()
+    {
+        Assert.AreEqual(11f, EmbeddingVector.Dot(new[] { 1f, 2f }, new[] { 3f, 4f }));
+        Assert.ThrowsExactly<ArgumentException>(() => EmbeddingVector.Dot(new[] { 1f }, new[] { 1f, 2f }));
+    }
 }

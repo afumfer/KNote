@@ -67,6 +67,9 @@
 </KntFormSection>
 
 @code {
+    // The models were saved (the index section reads its status again: its model may have changed).
+    [Parameter] public EventCallback OnSaved { get; set; }
+
     private record ModelOption(string Value, string Text, bool IsPaid, bool IsInstalled = true);
 
     private RepositoryAiModelsDto? models;
@@ -159,7 +162,10 @@
 
         var result = await store.SemanticSearch.SaveModelsAsync(models);
         if (result.IsValid && !disposal.IsCancellationRequested)
+        {
             Show(result.Entity);
+            await OnSaved.InvokeAsync();
+        }
     });
 
     public void Dispose()

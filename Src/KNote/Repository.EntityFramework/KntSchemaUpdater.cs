@@ -25,7 +25,7 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 7;
+    public const int CurrentSchemaRevision = 8;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
@@ -34,7 +34,8 @@ public static class KntSchemaUpdater
         (4, UpdateSchemaV4),
         (5, AddRepositoryIdentity),
         (6, AddNoteTasksDateIndexes),
-        (7, AddNoteChunks)
+        (7, AddNoteChunks),
+        (8, AddNoteChunksPendingIndex)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -449,6 +450,24 @@ CREATE TABLE IF NOT EXISTS ""NoteChunks"" (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ""IX_NoteChunks_NoteId_SourceType_SourceId_ChunkIndex_Model"" ON ""NoteChunks"" (""NoteId"", ""SourceType"", ""SourceId"", ""ChunkIndex"", ""Model"");
+";
+
+    // Revision 8 - the index of the pending notes of the semantic index (IKntSemanticIndexRepository.GetPendingNoteIdsAsync,
+    // GetIndexSummaryAsync): it covers their query, so it does not read the rows of NoteChunks, which are wide (the vector
+    // is in them). Must match ModelBuilderExtensions' HasIndex of NoteChunk.
+    private static void AddNoteChunksPendingIndex(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        var sql = repositoryRef.Provider == "Microsoft.Data.SqlClient" ? AddNoteChunksPendingIndexSqlServer : AddNoteChunksPendingIndexSqlite;
+        ctx.Database.ExecuteSqlRaw(sql);
+    }
+
+    private const string AddNoteChunksPendingIndexSqlServer = @"
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_NoteChunks_Model_NoteId_Stale_IndexedDateTime')
+    CREATE INDEX [IX_NoteChunks_Model_NoteId_Stale_IndexedDateTime] ON [NoteChunks] ([Model], [NoteId], [Stale], [IndexedDateTime]);
+";
+
+    private const string AddNoteChunksPendingIndexSqlite = @"
+CREATE INDEX IF NOT EXISTS ""IX_NoteChunks_Model_NoteId_Stale_IndexedDateTime"" ON ""NoteChunks"" (""Model"", ""NoteId"", ""Stale"", ""IndexedDateTime"");
 ";
 
     private static void AddSystemValueIfMissing(KntDbContext ctx, string key, string value)

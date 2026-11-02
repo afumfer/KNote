@@ -69,3 +69,9 @@ public record NotesListViewOptionsChanged;
 /// already-open editor of one of these notes shows the new relations without reopening the note.
 /// </summary>
 public record TraceNotesChanged(IReadOnlyCollection<Guid> NoteIds);
+
+/// <summary>
+/// Published by Store.SemanticIndex (on the UI thread) when its run of the semantic index starts, goes on or ends:
+/// the KNote Atlas tab of the repository editor and the status bar of the main window show it.
+/// </summary>
+public record SemanticIndexProgressChanged(SemanticIndexJob Job);

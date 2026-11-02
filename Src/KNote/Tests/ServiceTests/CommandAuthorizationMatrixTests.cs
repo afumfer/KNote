@@ -51,6 +51,8 @@ public class CommandAuthorizationMatrixTests
             "KntSystemValueGetAllAsyncCommand", "KntSystemValueGetByScopeKeyAsyncCommand", "KntSystemValueGetAsyncCommand",
             // KNote Atlas: the repository's AI models (every installation must use its embedding model).
             "KntSystemValueGetRepositoryAiModelsAsyncCommand",
+            // KNote Atlas: the state of the semantic index, and bringing it up to date before a search (derived data).
+            "KntSemanticSearchGetIndexStatusAsyncCommand", "KntSemanticSearchRefreshPendingAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).
@@ -90,6 +92,7 @@ public class CommandAuthorizationMatrixTests
             "KntNoteTypeSaveAsyncCommand", "KntNoteTypeDeleteAsyncCommand",
             "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
             "KntSystemValueSaveRepositoryAiModelsAsyncCommand",
+            "KntSemanticSearchRunIndexAsyncCommand", "KntSemanticSearchDeleteModelIndexAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand", "KntUsersGetPasswordStampAsyncCommand");

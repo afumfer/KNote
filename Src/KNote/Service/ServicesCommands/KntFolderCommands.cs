@@ -128,7 +128,11 @@ public class KntFoldersSaveAsyncCommand : KntCommandSaveServiceBase<FolderDto, R
         }
         else
         {
+            var resOld = await Repository.Folders.GetAsync(Param.FolderId);
             var res = await Repository.Folders.UpdateAsync(Param);
+            // Its path is in the fragment of data of the notes of the folder and of its subfolders.
+            if (res.IsValid && resOld.Entity is { } old && (old.Name != Param.Name || old.ParentId != Param.ParentId))
+                await KntSemanticIndexer.MarkFolderStaleAsync(Service, Param.FolderId);
             return res;
         }
     }

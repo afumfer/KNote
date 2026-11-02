@@ -59,6 +59,10 @@ public class Store
 
     public DomainEventBus Events { get; } = new();
 
+    // The run of the semantic index (KNote Atlas), one at a time in the app (see SemanticIndexJob).
+    private SemanticIndexJob _semanticIndex;
+    public SemanticIndexJob SemanticIndex => _semanticIndex ??= new SemanticIndexJob(Events);
+
     private KntTextUtils _kntTextUtils;
     public KntTextUtils KntTextUtils
     {

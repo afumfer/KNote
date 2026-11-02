@@ -94,6 +94,10 @@ public static class ModelBuilderExtensions
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<NoteChunk>()
             .HasIndex(_ => new { _.NoteId, _.SourceType, _.SourceId, _.ChunkIndex, _.Model }).IsUnique(true);
+        // Which notes are pending (KntSchemaUpdater revision 8): it covers the query, so it does not read the rows, which
+        // are wide (the vector is kept in them). Without it, ~1 s with 600 notes in SQL Server; with it, a few ms.
+        modelBuilder.Entity<NoteChunk>()
+            .HasIndex(_ => new { _.Model, _.NoteId, _.Stale, _.IndexedDateTime }).IsUnique(false);
     }
 
     public static void Seed(this ModelBuilder modelBuilder)
