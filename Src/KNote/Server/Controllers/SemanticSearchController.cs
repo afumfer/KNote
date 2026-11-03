@@ -167,6 +167,67 @@ public class SemanticSearchController : ControllerBase
         }
     }
 
+    // The search evaluation (KNote Atlas): the note of the test queries (created the first time), its queries and the
+    // indexes to evaluate. The Web evaluates the queries one by one (short requests, with progress and cancellation) and
+    // saves the report it builds (SearchEvaluationReport). ProjectManager, as the commands.
+    [HttpGet("evaluation")]
+    [Authorize(Roles = "ProjectManager, Admin")]
+    public async Task<IActionResult> GetSearchEvaluation()
+    {
+        try
+        {
+            var resApi = await _service.SemanticSearch.GetSearchEvaluationAsync();
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetSearchEvaluation at {dateTime}.", DateTime.Now);
+            var resApi = new Result<SearchEvaluationSetupDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    [HttpPost("evaluation/query")]
+    [Authorize(Roles = "ProjectManager, Admin")]
+    public async Task<IActionResult> EvaluateQuery([FromBody] SearchEvaluationQueryRequestDto request)
+    {
+        try
+        {
+            var resApi = await _service.SemanticSearch.EvaluateQueryAsync(request, HttpContext.RequestAborted);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (OperationCanceledException) when (HttpContext.RequestAborted.IsCancellationRequested)
+        {
+            return new EmptyResult();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "EvaluateQuery at {dateTime}.", DateTime.Now);
+            var resApi = new Result<SearchEvaluationQueryResultDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    [HttpPost("evaluation/report")]
+    [Authorize(Roles = "ProjectManager, Admin")]
+    public async Task<IActionResult> SaveSearchEvaluationReport([FromBody] SearchEvaluationReportDto report)
+    {
+        try
+        {
+            var resApi = await _service.SemanticSearch.SaveSearchEvaluationReportAsync(report);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SaveSearchEvaluationReport at {dateTime}.", DateTime.Now);
+            var resApi = new Result<NoteDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     // Removes the index of another model (?key=, the index key: it has ':' and '@').
     [HttpDelete("index")]
     [Authorize(Roles = "Admin")]

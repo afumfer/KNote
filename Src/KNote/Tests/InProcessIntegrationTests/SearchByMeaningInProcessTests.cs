@@ -128,6 +128,25 @@ public class SearchByMeaningInProcessTests
         StringAssert.Contains(result!.ErrorMessage, "The text to search is required.");
     }
 
+    [TestMethod]
+    public async Task AProjectManager_EvaluatesTheSearch_AndSavesTheReport_AGuestCannot()
+    {
+        var setup = await ReadAsync<SearchEvaluationSetupDto>(await _admin.GetAsync("api/semantic/evaluation"));
+        var query = new SearchTestQueryDto { Row = 1, Query = Query, ExpectedNotes = { _note.NoteNumber } };
+        var evaluated = await ReadAsync<SearchEvaluationQueryResultDto>(await _admin.PostAsJsonAsync("api/semantic/evaluation/query",
+            new SearchEvaluationQueryRequestDto { Query = query, IndexKeys = setup.Indexes.Select(i => i.IndexKey).ToList() }));
+        var report = SearchEvaluationReport.Markdown("Tests", DateTime.Now, new[] { evaluated }, setup.QueryInstruction);
+        var saved = await ReadAsync<NoteDto>(await _admin.PostAsJsonAsync("api/semantic/evaluation/report", new SearchEvaluationReportDto { Markdown = report }));
+        using var guest = await GuestClientAsync();
+        var forbidden = await guest.GetAsync("api/semantic/evaluation");
+
+        Assert.AreNotEqual(Guid.Empty, setup.TestQueriesNoteId);
+        Assert.AreEqual(Model, setup.Indexes.Single().IndexKey);
+        Assert.AreEqual(1, evaluated.Runs.Single(r => r.Mode == EnumNotesSearchMode.Meaning).Position);
+        StringAssert.StartsWith(saved.Topic, "Search evaluation · ");
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+    }
+
     // Registered after the class' Admin: a Guest (KntUsersRegisterAsyncCommand).
     private static async Task<HttpClient> GuestClientAsync()
     {

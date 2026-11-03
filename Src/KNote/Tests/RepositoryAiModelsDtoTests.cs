@@ -64,4 +64,13 @@ public class RepositoryAiModelsDtoTests
         Assert.IsFalse(new RepositoryAiModelsDto { EmbeddingModel = "qwen3-embedding:0.6b", EmbeddingDimensions = 512 }.SameEmbeddingModel(saved));
         Assert.IsFalse(new RepositoryAiModelsDto().SameEmbeddingModel(saved));
     }
+
+    [TestMethod]
+    public void ParseIndexKey_GivesTheModelAndTheDimensions()
+    {
+        Assert.AreEqual(("qwen3-embedding:4b", (int?)1024), RepositoryAiModelsDto.ParseIndexKey("qwen3-embedding:4b@1024"));
+        Assert.AreEqual(("qwen3-embedding:0.6b", (int?)null), RepositoryAiModelsDto.ParseIndexKey(" qwen3-embedding:0.6b "));
+        Assert.AreEqual(("hf.co/user/model@main", (int?)null), RepositoryAiModelsDto.ParseIndexKey("hf.co/user/model@main"));
+        Assert.AreEqual(((string)null, (int?)null), RepositoryAiModelsDto.ParseIndexKey(" "));
+    }
 }

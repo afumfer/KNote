@@ -1,0 +1,5 @@
+/* The search evaluation of KNote Atlas. Only theme variables, so it follows any theme. */
+
+.knt-evaluation-muted {
+    color: var(--rz-text-secondary-color);
+}

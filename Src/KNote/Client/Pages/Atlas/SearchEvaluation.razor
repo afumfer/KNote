@@ -1,0 +1,227 @@
+@page "/atlas/evaluation"
+
+@using KNote.Model
+
+@implements IDisposable
+
+@inject IStore store
+@inject KntWindows kntWindows
+
+@attribute [Authorize(Roles = "ProjectManager, Admin")]
+
+@* KNote Atlas' laboratory of the search (CU-06, chapter 18): the test queries of the note «Search test queries»,
+   evaluated one by one (D4: short requests, real progress, cancellation at once) by words and by meaning in the
+   indexes chosen, also without the query instruction (D3), and the report (SearchEvaluationReport) shown and saved as
+   a note. Only in the Web. *@
+
+<KntIndexHeader Section="KntSections.SearchEvaluation" />
+
+<RadzenStack Gap="1rem" class="rz-pt-2">
+    <RadzenCard>
+        <KntFormSection Icon="checklist" Title="Test queries"
+                        Description="The searches to measure, with the notes they should find, in the note «Search test queries» of the folder «KNote Atlas». Write searches you really do, with your own words, without looking at the notes.">
+            @if (setup == null)
+            {
+                @if (loadFailed)
+                {
+                    <div class="knt-load-error">
+                        <span class="knt-load-error-text"><RadzenIcon Icon="error" /> The test queries could not be read.</span>
+                        <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="LoadAsync" />
+                    </div>
+                }
+                else
+                {
+                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+                }
+            }
+            else
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                    <RadzenText TextStyle="TextStyle.Body1" class="rz-m-0">
+                        <b>#@setup.TestQueriesNoteNumber @KntConst.TestQueriesTopic</b> · @setup.Queries.Count @(setup.Queries.Count == 1 ? "query" : "queries")
+                    </RadzenText>
+                    <RadzenButton Text="Open in the editor" Icon="edit" Variant="Variant.Text" Size="ButtonSize.Small"
+                                  Click="() => kntWindows.OpenEditAsync(setup.TestQueriesNoteId)" />
+                    <RadzenButton Text="Read again" Icon="refresh" Variant="Variant.Text" Size="ButtonSize.Small" Click="LoadAsync" Disabled="@evaluating.IsBusy" />
+                </RadzenStack>
+                @if (setup.Issues.Count > 0)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small" class="rz-mt-2 rz-mb-0">
+                        @foreach (var issue in setup.Issues.Take(MaxIssues))
+                        {
+                            <div>@issue</div>
+                        }
+                        @if (setup.Issues.Count > MaxIssues)
+                        {
+                            <div>… and @(setup.Issues.Count - MaxIssues) more.</div>
+                        }
+                    </RadzenAlert>
+                }
+            }
+        </KntFormSection>
+
+        @if (setup != null)
+        {
+            <KntFormSection Icon="hub" Title="Indexes"
+                            Description="The indexes of the repository to compare: the current one and the ones kept of other models (create one by changing the repository's embedding model and going back). An index can be chosen if this server has its model.">
+                @if (setup.Indexes.Count == 0)
+                {
+                    <RadzenText TextStyle="TextStyle.Body2">The repository has no semantic index yet (Admin panel › KNote Atlas).</RadzenText>
+                }
+                @foreach (var index in setup.Indexes)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox TValue="bool" Value="@selected.Contains(index.IndexKey)" Disabled="@(!index.Available || evaluating.IsBusy)"
+                                        ValueChanged="@(on => OnIndexChecked(index.IndexKey, on))" Name="@($"index-{index.IndexKey}")" />
+                        <RadzenLabel Component="@($"index-{index.IndexKey}")" class="rz-m-0">
+                            <b>@index.IndexKey</b>@(index.IsCurrent ? " (current)" : "") · @index.Notes notes · @index.Chunks fragments
+                            @if (!index.Available)
+                            {
+                                <span class="knt-evaluation-muted"> · its model is not in this server</span>
+                            }
+                        </RadzenLabel>
+                    </RadzenStack>
+                }
+                @if (!string.IsNullOrWhiteSpace(setup.QueryInstruction))
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mt-2">
+                        <RadzenCheckBox TValue="bool" @bind-Value="alsoWithoutInstruction" Disabled="@evaluating.IsBusy" Name="without-instruction" />
+                        <RadzenLabel Component="without-instruction" class="rz-m-0">Also without the query instruction («@setup.QueryInstruction»)</RadzenLabel>
+                    </RadzenStack>
+                }
+            </KntFormSection>
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem" class="rz-mt-2">
+                @if (evaluating.IsBusy)
+                {
+                    <RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">Query @(done + 1) of @total…</RadzenText>
+                    <RadzenProgressBar Value="@done" Max="@total" ShowValue="false" Style="width: 12rem; height: 0.5rem" />
+                    <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => evaluation?.Cancel()" />
+                }
+                <RadzenButton Text="Evaluate" Icon="play_arrow" ButtonStyle="ButtonStyle.Primary" IsBusy="@evaluating.IsBusy"
+                              Disabled="@(setup.Queries.Count == 0 || selected.Count == 0)" Click="OnEvaluate" />
+            </RadzenStack>
+        }
+    </RadzenCard>
+
+    @if (report != null)
+    {
+        <RadzenCard>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                @if (savedNote != null)
+                {
+                    <RadzenButton Text="@($"Saved as #{savedNote.NoteNumber}")" Icon="open_in_new" Variant="Variant.Text" Size="ButtonSize.Small"
+                                  Click="() => kntWindows.OpenViewAsync(savedNote.NoteId)" />
+                }
+                <RadzenButton Text="Save as note" Icon="save" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                              IsBusy="@saving.IsBusy" Disabled="@(savedNote != null)" Click="OnSave" />
+            </RadzenStack>
+            <ViewMarkdown MarkdownContent="@report" />
+        </RadzenCard>
+    }
+</RadzenStack>
+
+@code {
+    private const int MaxIssues = 20;
+
+    private SearchEvaluationSetupDto? setup;
+    private bool loadFailed;
+    private readonly HashSet<string> selected = new();
+    private bool alsoWithoutInstruction;
+    private int done;
+    private int total;
+    private string? report;
+    private NoteDto? savedNote;
+    private CancellationTokenSource? evaluation;
+    private readonly KntSingleFlight evaluating = new();
+    private readonly KntSingleFlight saving = new();
+    private readonly KntLatestRequest loading = new();
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    // Also after editing the note of the test queries in its window (Read again).
+    private async Task LoadAsync()
+    {
+        loadFailed = false;
+        var result = await loading.RunAsync(ct => store.SemanticSearch.GetSearchEvaluationAsync(ct));
+        if (result.Canceled)
+            return;
+        if (!result.Value.IsValid)
+        {
+            loadFailed = setup == null;
+            return;
+        }
+
+        setup = result.Value.Entity;
+        // The indexes chosen before, while they can be; the first time, the ones that can be.
+        var available = setup.Indexes.Where(i => i.Available).Select(i => i.IndexKey).ToList();
+        if (selected.Count == 0)
+            selected.UnionWith(available);
+        else
+            selected.IntersectWith(available);
+    }
+
+    private void OnIndexChecked(string indexKey, bool on)
+    {
+        if (on)
+            selected.Add(indexKey);
+        else
+            selected.Remove(indexKey);
+    }
+
+    private Task OnEvaluate() => evaluating.RunAsync(EvaluateAsync);
+
+    private async Task EvaluateAsync()
+    {
+        if (setup == null)
+            return;
+
+        var queries = setup.Queries.ToList();
+        var indexKeys = setup.Indexes.Where(i => selected.Contains(i.IndexKey)).Select(i => i.IndexKey).ToList();
+        var results = new List<SearchEvaluationQueryResultDto>();
+        report = null;
+        savedNote = null;
+        done = 0;
+        total = queries.Count;
+        evaluation?.Dispose();
+        evaluation = new CancellationTokenSource();
+        var token = evaluation.Token;
+
+        foreach (var query in queries)
+        {
+            if (token.IsCancellationRequested)
+                break;
+            var result = await store.SemanticSearch.EvaluateQueryAsync(new SearchEvaluationQueryRequestDto
+            {
+                Query = query,
+                IndexKeys = indexKeys,
+                AlsoWithoutInstruction = alsoWithoutInstruction
+            }, token);
+            if (token.IsCancellationRequested || !result.IsValid)
+                break; // canceled, or the error notified (BaseService): the report has the ones done
+            results.Add(result.Entity);
+            done++;
+            StateHasChanged();
+        }
+
+        if (results.Count > 0)
+            report = SearchEvaluationReport.Markdown(store.AppState.RepositoryName ?? "", DateTime.Now, results, setup.QueryInstruction,
+                canceled: results.Count < queries.Count);
+    }
+
+    private Task OnSave() => saving.RunAsync(async () =>
+    {
+        if (report == null || savedNote != null)
+            return;
+        var result = await store.SemanticSearch.SaveSearchEvaluationReportAsync(new SearchEvaluationReportDto { Markdown = report });
+        if (result.IsValid)
+            savedNote = result.Entity;
+    });
+
+    public void Dispose()
+    {
+        evaluation?.Cancel();
+        evaluation?.Dispose();
+        loading.Dispose();
+    }
+}

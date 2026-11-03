@@ -106,6 +106,18 @@ public class RepositoryAiModelsDto : SmartModelDtoBase
         return EmbeddingDimensions == null ? model : $"{model}@{EmbeddingDimensions}";
     }
 
+    // The model and the dimensions of an index key (GetIndexKey): "qwen3-embedding:4b@1024" or "qwen3-embedding:4b".
+    public static (string Model, int? Dimensions) ParseIndexKey(string indexKey)
+    {
+        indexKey = Normalize(indexKey);
+        if (indexKey == null)
+            return (null, null);
+        var at = indexKey.LastIndexOf('@');
+        return at > 0 && int.TryParse(indexKey[(at + 1)..], out var dimensions)
+            ? (indexKey[..at], dimensions)
+            : (indexKey, null);
+    }
+
     public static string Normalize(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     #region Validations

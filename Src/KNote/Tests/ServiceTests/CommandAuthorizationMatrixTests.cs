@@ -86,7 +86,10 @@ public class CommandAuthorizationMatrixTests
             "KntChatRoomsAddImageAsyncCommand");
 
         Add(nameof(EnumRoles.ProjectManager),
-            "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand");
+            "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",
+            // KNote Atlas: the search evaluation (it measures the repository's search).
+            "KntSemanticSearchGetSearchEvaluationAsyncCommand", "KntSemanticSearchEvaluateQueryAsyncCommand",
+            "KntSemanticSearchSaveSearchEvaluationReportAsyncCommand");
 
         // Repository administration.
         Add(nameof(EnumRoles.Admin),

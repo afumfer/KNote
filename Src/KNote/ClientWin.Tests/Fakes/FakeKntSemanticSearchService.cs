@@ -35,4 +35,12 @@ internal class FakeKntSemanticSearchService : IKntSemanticSearchService
 
     public Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default) =>
         (GetSimilarNotesAsyncImpl ?? throw new NotSupportedException($"{nameof(GetSimilarNotesAsync)} not configured for this test"))(noteId);
+
+    // The search evaluation is only the Web's (KNote Atlas 0.6): not used by ClientWin.
+    public Task<Result<SearchEvaluationSetupDto>> GetSearchEvaluationAsync() => throw new NotSupportedException();
+
+    public Task<Result<SearchEvaluationQueryResultDto>> EvaluateQueryAsync(SearchEvaluationQueryRequestDto request, CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<Result<NoteDto>> SaveSearchEvaluationReportAsync(SearchEvaluationReportDto report) => throw new NotSupportedException();
 }

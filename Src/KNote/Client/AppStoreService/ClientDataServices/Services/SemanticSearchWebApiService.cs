@@ -45,4 +45,15 @@ public class SemanticSearchWebApiService : BaseService, ISemanticSearchWebApiSer
     public Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default) =>
         SendAsync<SemanticSearchResultDto>(ct => _httpClient.GetAsync($"api/semantic/notes/{noteId}/similar", ct), "Similar notes",
             cancellationToken: cancellationToken, notifyErrors: false);
+
+    public Task<Result<SearchEvaluationSetupDto>> GetSearchEvaluationAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<SearchEvaluationSetupDto>(ct => _httpClient.GetAsync("api/semantic/evaluation", ct), "Search evaluation",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<SearchEvaluationQueryResultDto>> EvaluateQueryAsync(SearchEvaluationQueryRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<SearchEvaluationQueryResultDto>(ct => _httpClient.PostAsJsonAsync("api/semantic/evaluation/query", request, ct),
+            "Evaluate a test query", cancellationToken: cancellationToken);
+
+    public Task<Result<NoteDto>> SaveSearchEvaluationReportAsync(SearchEvaluationReportDto report) =>
+        SendAsync<NoteDto>(ct => _httpClient.PostAsJsonAsync("api/semantic/evaluation/report", report, ct), "Save the evaluation report", true);
 }

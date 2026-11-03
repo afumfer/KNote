@@ -58,5 +58,23 @@ public class KntSemanticSearchService : KntServiceBase, IKntSemanticSearchServic
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<SearchEvaluationSetupDto>> GetSearchEvaluationAsync()
+    {
+        var command = new KntSemanticSearchGetSearchEvaluationAsyncCommand(Service);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<SearchEvaluationQueryResultDto>> EvaluateQueryAsync(SearchEvaluationQueryRequestDto request, CancellationToken cancellationToken = default)
+    {
+        var command = new KntSemanticSearchEvaluateQueryAsyncCommand(Service, request, cancellationToken);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<NoteDto>> SaveSearchEvaluationReportAsync(SearchEvaluationReportDto report)
+    {
+        var command = new KntSemanticSearchSaveSearchEvaluationReportAsyncCommand(Service, report);
+        return await ExecuteCommand(command);
+    }
+
     #endregion
 }

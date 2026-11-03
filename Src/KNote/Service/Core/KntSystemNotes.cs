@@ -22,8 +22,11 @@ namespace KNote.Service.Core;
 internal static class KntSystemNotes
 {
     // The note types of KNote's own notes: out of the tasks panel and of the semantic index (they only link users to
-    // those notes, or keep private conversations).
-    public static readonly IReadOnlyList<string> SystemNoteTypeNames = new[] { KntConst.ChatSessionsTag, KntConst.ChatRoomTag };
+    // those notes, keep private conversations, or are KNote Atlas' test queries and reports, which would find themselves).
+    public static readonly IReadOnlyList<string> SystemNoteTypeNames = new[]
+    {
+        KntConst.ChatSessionsTag, KntConst.ChatRoomTag, KntConst.TestQueriesTag, KntConst.SearchEvaluationTag
+    };
 
     public static async Task<List<Guid>> GetSystemNoteTypeIdsAsync(KNote.Repository.IKntRepository repository)
     {
@@ -135,7 +138,7 @@ internal static class KntSystemNotes
 
     // What find finds or, when it is missing, what create makes. Only one caller at a time creates, per database; the
     // ones that waited find what it created. find and create add their errors to result (and give default).
-    private static async Task<T> FindOrCreateAsync<T>(IKntService service, ResultBase result, Func<Task<T>> find,
+    public static async Task<T> FindOrCreateAsync<T>(IKntService service, ResultBase result, Func<Task<T>> find,
         Func<Task<T>> create)
     {
         var found = await find();

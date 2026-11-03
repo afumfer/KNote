@@ -43,6 +43,18 @@ public interface IKntSemanticSearchService
     /// related to it yet. Before, the note is brought up to date if it is pending. Not saved anywhere. Any user.
     /// </summary>
     Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The search evaluation (KNote Atlas): the note of the test queries (created the first time), its queries with
+    /// their problems and the indexes that can be evaluated. ProjectManager.
+    /// </summary>
+    Task<Result<SearchEvaluationSetupDto>> GetSearchEvaluationAsync();
+
+    /// <summary>One test query by words and by meaning in the indexes asked (the app evaluates them one by one). ProjectManager.</summary>
+    Task<Result<SearchEvaluationQueryResultDto>> EvaluateQueryAsync(SearchEvaluationQueryRequestDto request, CancellationToken cancellationToken = default);
+
+    /// <summary>Saves the report of an evaluation as a note of the folder «KNote Atlas». ProjectManager.</summary>
+    Task<Result<NoteDto>> SaveSearchEvaluationReportAsync(SearchEvaluationReportDto report);
 }
 
 public class SemanticIndexRunRequest

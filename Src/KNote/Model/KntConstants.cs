@@ -44,6 +44,13 @@ public static class KntConst
     public static string ChatRoomFolderName { get; private set; } = "KNote Chat Room";
     public static string ChatRoomGeneralThreadTopic { get; private set; } = "General";
 
+    // KNote Atlas keeps its own notes in this folder: the test queries of the search (one note of this NoteType) and the
+    // reports of their evaluations (notes of this other one). Both are system notes: out of the semantic index.
+    public static string AtlasFolderName { get; private set; } = "KNote Atlas";
+    public static string TestQueriesTag { get; private set; } = "@KNoteTestQueries";
+    public static string TestQueriesTopic { get; private set; } = "Search test queries";
+    public static string SearchEvaluationTag { get; private set; } = "@KNoteSearchEvaluation";
+
     // The most occurrences of alarms the alarms calendar of the web receives at once (AlarmsCalendarDto.Truncated).
     public const int MaxAlarmsCalendarOccurrences = 3000;
 

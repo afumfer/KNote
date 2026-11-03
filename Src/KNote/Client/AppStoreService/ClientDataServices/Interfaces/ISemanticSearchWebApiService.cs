@@ -25,4 +25,8 @@ public interface ISemanticSearchWebApiService
     Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default);
     // The notes most similar to a note, not related to it yet (any user). Errors not notified: the list shows them.
     Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default);
+    // The search evaluation (ProjectManager): its test queries and indexes, one query evaluated, the report saved.
+    Task<Result<SearchEvaluationSetupDto>> GetSearchEvaluationAsync(CancellationToken cancellationToken = default);
+    Task<Result<SearchEvaluationQueryResultDto>> EvaluateQueryAsync(SearchEvaluationQueryRequestDto request, CancellationToken cancellationToken = default);
+    Task<Result<NoteDto>> SaveSearchEvaluationReportAsync(SearchEvaluationReportDto report);
 }
