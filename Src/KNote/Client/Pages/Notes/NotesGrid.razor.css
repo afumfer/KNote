@@ -61,3 +61,15 @@
 .knt-notes-grid-muted {
     color: var(--rz-text-secondary-color);
 }
+
+/* The fragment of a note found by meaning, in one line (whole in its tooltip). A RadzenText: ::deep, it is a child
+   component. */
+.knt-notes-grid-host ::deep .knt-notes-grid-fragment {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--rz-text-secondary-color);
+    font-size: inherit;
+    margin: 0;
+}

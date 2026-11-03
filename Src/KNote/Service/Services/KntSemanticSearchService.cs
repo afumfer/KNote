@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -41,6 +42,12 @@ public class KntSemanticSearchService : KntServiceBase, IKntSemanticSearchServic
     public async Task<Result> DeleteModelIndexAsync(string indexKey)
     {
         var command = new KntSemanticSearchDeleteModelIndexAsyncCommand(Service, indexKey);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default)
+    {
+        var command = new KntSemanticSearchSearchAsyncCommand(Service, request, cancellationToken);
         return await ExecuteCommand(command);
     }
 

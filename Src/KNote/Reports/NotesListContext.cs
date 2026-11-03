@@ -34,6 +34,9 @@ public class NotesListContext
 
     public bool SearchInNoteTasks { get; set; }
 
+    // Search by meaning (KNote Atlas): the most similar notes, not the ones with the words.
+    public bool SearchByMeaning { get; set; }
+
     // Filter mode: the criteria actually set, as label/value (e.g. "Note type" / "Meeting").
     public List<ReportMetaItem> FilterCriteria { get; set; } = new();
 
@@ -59,7 +62,7 @@ public class NotesListContext
             if (Source == NotesListSource.Folder && FolderNumber != null)
                 parts.Add($"Folder number {FolderNumber}");
             else if (Source == NotesListSource.Search)
-                parts.Add($"Searched in: {SearchScope}");
+                parts.Add(SearchByMeaning ? "Searched by meaning" : $"Searched in: {SearchScope}");
 
             if (!string.IsNullOrWhiteSpace(TextFilter))
                 parts.Add($"List text filter: {TextFilter.Trim()}");
@@ -121,6 +124,9 @@ public class NotesListContext
 
         foreach (var atr in notesFilter.AttributesFilter ?? new List<AtrFilterDto>())
             criteria.Add(new ReportMetaItem(string.IsNullOrWhiteSpace(atr.AtrName) ? "Attribute" : atr.AtrName, atr.Value ?? ""));
+
+        if (notesFilter.HasMeaningText)
+            criteria.Add(new ReportMetaItem("Talks about", notesFilter.MeaningText.Trim()));
 
         return criteria;
     }

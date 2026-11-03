@@ -1,5 +1,6 @@
 using System.Globalization;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
@@ -115,6 +116,9 @@ public class WebReports
                     OrderAscending = request.OrderAscending
                 });
 
+            case NotesListReportSource.Search when request.SearchMode == EnumNotesSearchMode.Meaning:
+                return await SearchByMeaningAsync(new SemanticSearchRequestDto { Text = request.TextSearch }, request);
+
             case NotesListReportSource.Search:
                 return await _service.Notes.GetSearchMinimalAsync(new NotesSearchDto
                 {
@@ -123,6 +127,9 @@ public class WebReports
                     OrderAscending = request.OrderAscending
                 });
 
+            case NotesListReportSource.Filter when request.NotesFilter?.HasMeaningText == true:
+                return await SearchByMeaningAsync(SemanticSearchRequestDto.ForFilter(request.NotesFilter), request);
+
             default:
                 var filter = (request.NotesFilter ?? new NotesFilterDto()).GetSimpleDto<NotesFilterDto>();
                 filter.PageIdentifier = new PageIdentifier();
@@ -130,6 +137,20 @@ public class WebReports
                 filter.OrderAscending = request.OrderAscending;
                 return await _service.Notes.GetFilterMinimalAsync(filter);
         }
+    }
+
+    // The notes found by meaning (the same search again: the list is not paged), in the list's order.
+    private async Task<Result<List<NoteMinimalDto>>> SearchByMeaningAsync(SemanticSearchRequestDto search, NotesListReportRequestDto request)
+    {
+        var result = new Result<List<NoteMinimalDto>>();
+        var found = await _service.SemanticSearch.SearchAsync(search);
+        if (!found.IsValid)
+        {
+            result.AddListErrorMessage(found.ListErrorMessage);
+            return result;
+        }
+        result.Entity = NoteListSorter.Sort(found.Entity.Notes, request.OrderColumn, request.OrderAscending).Cast<NoteMinimalDto>().ToList();
+        return result;
     }
 
     // Where the list comes from, with every name resolved, for the report's heading and the file name.
@@ -151,6 +172,7 @@ public class WebReports
             case NotesListReportSource.Search:
                 context.Source = NotesListSource.Search;
                 context.SearchText = request.TextSearch?.Trim();
+                context.SearchByMeaning = request.SearchMode == EnumNotesSearchMode.Meaning;
                 break;
 
             default:

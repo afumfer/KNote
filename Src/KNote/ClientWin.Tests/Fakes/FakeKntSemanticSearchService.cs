@@ -15,6 +15,7 @@ internal class FakeKntSemanticSearchService : IKntSemanticSearchService
     public Func<SemanticIndexRunRequest, Task<Result<SemanticIndexProgressDto>>>? RunIndexAsyncImpl { get; set; }
     public Func<SemanticIndexRefreshRequest, Task<Result<SemanticIndexProgressDto>>>? RefreshPendingAsyncImpl { get; set; }
     public Func<string, Task<Result>>? DeleteModelIndexAsyncImpl { get; set; }
+    public Func<SemanticSearchRequestDto, Task<Result<SemanticSearchResultDto>>>? SearchAsyncImpl { get; set; }
 
     public Task<Result<SemanticIndexStatusDto>> GetIndexStatusAsync() =>
         (GetIndexStatusAsyncImpl ?? throw new NotSupportedException($"{nameof(GetIndexStatusAsync)} not configured for this test"))();
@@ -27,4 +28,7 @@ internal class FakeKntSemanticSearchService : IKntSemanticSearchService
 
     public Task<Result> DeleteModelIndexAsync(string indexKey) =>
         (DeleteModelIndexAsyncImpl ?? throw new NotSupportedException($"{nameof(DeleteModelIndexAsync)} not configured for this test"))(indexKey);
+
+    public Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default) =>
+        (SearchAsyncImpl ?? throw new NotSupportedException($"{nameof(SearchAsync)} not configured for this test"))(request);
 }

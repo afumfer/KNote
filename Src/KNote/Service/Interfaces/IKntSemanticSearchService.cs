@@ -7,7 +7,7 @@ using KNote.Model.Dto;
 namespace KNote.Service.Interfaces;
 
 /// <summary>
-/// The semantic index of the repository and, in the next deliveries of KNote Atlas, the search by meaning. The index is
+/// The semantic index of the repository and the search by meaning (KNote Atlas). The index is
 /// of the repository's embedding model (SystemValues.GetRepositoryAiModelsAsync) and is calculated with this
 /// installation's generator of that model (IKntService.EmbeddingGenerators). See KntSemanticIndexer.
 /// </summary>
@@ -30,6 +30,13 @@ public interface IKntSemanticSearchService
 
     /// <summary>Removes the index of another model than the repository's (that one is rebuilt, not removed). Admin.</summary>
     Task<Result> DeleteModelIndexAsync(string indexKey);
+
+    /// <summary>
+    /// Searches by meaning: the notes most similar to the text (at least SemanticSearchRules.MinSimilarity, at most
+    /// SemanticSearchRules.MaxResults), the most similar first, among every note of the index or, with a filter, among
+    /// the ones that meet it. Before, it brings the index up to date (as RefreshPendingAsync). Not paged. Any user.
+    /// </summary>
+    Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default);
 }
 
 public class SemanticIndexRunRequest

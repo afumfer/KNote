@@ -30,6 +30,8 @@ namespace KNote.ClientWin.Views
         private void InitializeComponent()
         {
             this.panelForm = new System.Windows.Forms.Panel();
+            this.labelMeaningText = new System.Windows.Forms.Label();
+            this.textMeaningText = new System.Windows.Forms.TextBox();
             this.listViewAttributes = new System.Windows.Forms.ListView();
             this.columnAttribute = new System.Windows.Forms.ColumnHeader();
             this.columnValue = new System.Windows.Forms.ColumnHeader();
@@ -65,6 +67,8 @@ namespace KNote.ClientWin.Views
             //
             // panelForm
             //
+            this.panelForm.Controls.Add(this.labelMeaningText);
+            this.panelForm.Controls.Add(this.textMeaningText);
             this.panelForm.Controls.Add(this.listViewAttributes);
             this.panelForm.Controls.Add(this.buttonRemoveAttribute);
             this.panelForm.Controls.Add(this.buttonAddAttribute);
@@ -107,10 +111,30 @@ namespace KNote.ClientWin.Views
             this.listViewAttributes.Location = new System.Drawing.Point(7, 434);
             this.listViewAttributes.MultiSelect = false;
             this.listViewAttributes.Name = "listViewAttributes";
-            this.listViewAttributes.Size = new System.Drawing.Size(424, 175);
+            this.listViewAttributes.Size = new System.Drawing.Size(424, 125);
             this.listViewAttributes.TabIndex = 22;
             this.listViewAttributes.UseCompatibleStateImageBehavior = false;
             this.listViewAttributes.View = System.Windows.Forms.View.Details;
+            //
+            // labelMeaningText
+            //
+            this.labelMeaningText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.labelMeaningText.AutoSize = true;
+            this.labelMeaningText.Location = new System.Drawing.Point(7, 567);
+            this.labelMeaningText.Name = "labelMeaningText";
+            this.labelMeaningText.Size = new System.Drawing.Size(80, 15);
+            this.labelMeaningText.TabIndex = 23;
+            this.labelMeaningText.Text = "Talks about…:";
+            //
+            // textMeaningText
+            //
+            this.textMeaningText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textMeaningText.Location = new System.Drawing.Point(7, 585);
+            this.textMeaningText.MaxLength = 1000;
+            this.textMeaningText.Name = "textMeaningText";
+            this.textMeaningText.Size = new System.Drawing.Size(424, 23);
+            this.textMeaningText.TabIndex = 24;
             //
             // columnAttribute
             //
@@ -396,6 +420,8 @@ namespace KNote.ClientWin.Views
         #endregion
 
         private System.Windows.Forms.Panel panelForm;
+        private System.Windows.Forms.Label labelMeaningText;
+        private System.Windows.Forms.TextBox textMeaningText;
         private System.Windows.Forms.Button buttonClean;
         private System.Windows.Forms.Button buttonFilter;
         private System.Windows.Forms.PictureBox pictureBox1;

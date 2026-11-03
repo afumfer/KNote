@@ -25,6 +25,8 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
     private const int PrimaryColumnIndex = 1;
 
     private ListViewColumnSorter _sorter;
+    // «Talks about…» shown (as in the Designer). Not the controls' Visible: false while the form is not shown.
+    private bool _meaningTextShown = true;
 
     #endregion
 
@@ -44,6 +46,9 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
 
         _sorter = ListViewSortHelper.Attach(listViewAttributes);
         listViewAttributes.Resize += (s, e) => ListViewColumnResizer.Resize(listViewAttributes, PrimaryColumnIndex);
+
+        // Until the repository is known to search by meaning (RefreshMeaningTextAsync).
+        SetMeaningTextVisible(false);
     }
 
     #endregion
@@ -101,7 +106,8 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
             NoteTypeId = selectedNoteType == null || selectedNoteType.NoteTypeId == Guid.Empty ? null : selectedNoteType.NoteTypeId,
             FolderId = _folderId,
             IncludeChildFolders = _folderId != null && checkIncludeChildFolders.Checked,
-            AttributesFilter = new List<AtrFilterDto>(_attributesFilter)
+            AttributesFilter = new List<AtrFilterDto>(_attributesFilter),
+            MeaningText = _meaningTextShown && !string.IsNullOrWhiteSpace(textMeaningText.Text) ? textMeaningText.Text.Trim() : null
         };
 
         var filter = new SelectedNotesInServiceRef
@@ -125,6 +131,8 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         ClearFolderSelection();
         _attributesFilter.Clear();
         listViewAttributes.Items.Clear();
+
+        await RefreshMeaningTextAsync(serviceRef);
     }
 
     private void buttonFolderSelect_Click(object sender, EventArgs e)
@@ -218,9 +226,31 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         ListViewSelectionHelper.SelectByKey(listViewAttributes, item.Name, _sorter);
     }
 
+    // «Talks about…» (KNote Atlas: by meaning among the notes of the other criteria) only where the repository chosen can
+    // search by meaning. Hidden, the attributes list takes its room.
+    private async Task RefreshMeaningTextAsync(ServiceRef serviceRef)
+    {
+        var canSearchByMeaning = await _ctrl.Store.CanSearchByMeaningAsync(serviceRef);
+        if (IsDisposed || comboRepositories.SelectedItem != serviceRef)
+            return; // another repository chosen meanwhile
+        SetMeaningTextVisible(canSearchByMeaning);
+    }
+
+    private void SetMeaningTextVisible(bool visible)
+    {
+        if (_meaningTextShown == visible)
+            return;
+        // From where the field is (anchored to the bottom, it moves with the form): above it, or down to its bottom.
+        listViewAttributes.Height = (visible ? labelMeaningText.Top - LogicalToDeviceUnits(8) : textMeaningText.Bottom) - listViewAttributes.Top;
+        labelMeaningText.Visible = visible;
+        textMeaningText.Visible = visible;
+        _meaningTextShown = visible;
+    }
+
     private void CleanView()
     {
         textTopic.Text = "";
+        textMeaningText.Text = "";
         textDescription.Text = "";
         textTags.Text = "";
         comboNoteType.SelectedIndex = comboNoteType.Items.Count > 0 ? 0 : -1;

@@ -3,8 +3,7 @@ using KNote.Model.Dto;
 
 namespace KNote.Client.AppStoreService.ClientDataServices;
 
-// KNote Atlas (api/semantic): the AI models of the session's repository, its semantic index and, in the next deliveries,
-// the search by meaning.
+// KNote Atlas (api/semantic): the AI models of the session's repository, its semantic index and the search by meaning.
 public interface ISemanticSearchWebApiService
 {
     // The repository's models, with whether the server has its embedding model (any user).
@@ -22,4 +21,6 @@ public interface ISemanticSearchWebApiService
     Task<Result<bool>> CancelIndexAsync();
     // Removes the index of another model (Admin).
     Task<Result<bool>> DeleteModelIndexAsync(string indexKey);
+    // The notes most similar to a text, among all of them or the ones of a filter (any user): not paged.
+    Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default);
 }

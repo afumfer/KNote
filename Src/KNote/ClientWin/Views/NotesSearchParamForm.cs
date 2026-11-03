@@ -23,6 +23,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         _ctrl = ctrl;
 
         buttonSearch.SetKntIcon(KntIcon.Search);
+        comboRepositories.SelectedIndexChanged += async (s, e) => await RefreshSearchModeAsync();
     }
 
     #endregion
@@ -78,11 +79,19 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
             {
                 TextSearch = textTextSearch.Text,
                 SearchInDescription = checkSearchInDescription.Checked,
-                SearchInNoteTasks = checkSearchInNoteTasks.Checked
+                SearchInNoteTasks = checkSearchInNoteTasks.Checked,
+                Mode = radioSearchMeaning.Visible && radioSearchMeaning.Checked ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words
             }
         };
 
         _ctrl.NotifySearchApplied(search);
+    }
+
+    // The options of the search by words do not apply to the search by meaning (it reads the whole note).
+    private void radioSearchMode_CheckedChanged(object sender, EventArgs e)
+    {
+        checkSearchInDescription.Enabled = radioSearchWords.Checked;
+        checkSearchInNoteTasks.Enabled = radioSearchWords.Checked;
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
@@ -107,6 +116,21 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         comboRepositories.ValueMember = "IdServiceRef";
         comboRepositories.DisplayMember = "Name";
         comboRepositories.SelectedIndex = comboRepositories.Items.Count > 0 ? 0 : -1;
+    }
+
+    // «Search by» (words or meaning) only where the repository chosen can search by meaning.
+    private async Task RefreshSearchModeAsync()
+    {
+        var serviceRef = comboRepositories.SelectedItem as ServiceRef;
+        var canSearchByMeaning = await _ctrl.Store.CanSearchByMeaningAsync(serviceRef);
+        if (IsDisposed || comboRepositories.SelectedItem != serviceRef)
+            return; // another repository chosen meanwhile
+
+        labelSearchMode.Visible = canSearchByMeaning;
+        radioSearchWords.Visible = canSearchByMeaning;
+        radioSearchMeaning.Visible = canSearchByMeaning;
+        if (!canSearchByMeaning)
+            radioSearchWords.Checked = true;
     }
 
     private void CleanView()

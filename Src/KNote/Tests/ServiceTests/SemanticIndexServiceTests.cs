@@ -14,93 +14,14 @@ namespace KNote.Tests.ServiceTests;
 [TestClass]
 public class SemanticIndexServiceTests
 {
-    private const string Model = "fake-embed";
-
-    private sealed class Fixture : IDisposable
-    {
-        public RepositoryTestDatabase Db { get; } = new();
-        public FakeEmbeddingGenerators Models { get; } = new(Model);
-        public KntService Service { get; private set; } = null!;
-        public Guid HomeId { get; private set; }
-        public Guid UserId { get; private set; }
-
-        public static async Task<Fixture> CreateAsync(string orm = "Dapper", int? dimensions = null, string model = Model)
-        {
-            var fixture = new Fixture();
-            fixture.Service = new KntService(fixture.Db.CreateRepository(orm)) { EmbeddingGenerators = fixture.Models };
-            await fixture.SetModelAsync(model, dimensions);
-            fixture.HomeId = (await fixture.Service.Folders.GetHomeAsync()).Entity.FolderId;
-            fixture.UserId = (await fixture.Service.Users.GetAllAsync()).Entity.First().UserId;
-            return fixture;
-        }
-
-        public async Task SetModelAsync(string model, int? dimensions = null)
-        {
-            var res = await Service.SystemValues.SaveRepositoryAiModelsAsync(new RepositoryAiModelsDto
-            {
-                EmbeddingModel = model, EmbeddingDimensions = dimensions
-            });
-            Assert.IsTrue(res.IsValid, res.ErrorMessage);
-        }
-
-        public async Task<NoteDto> AddNoteAsync(string topic, string description = "", Guid? folderId = null, Guid? noteTypeId = null,
-            string contentType = null!)
-        {
-            var note = (await Service.Notes.NewAsync()).Entity;
-            note.Topic = topic;
-            note.Description = description;
-            note.FolderId = folderId ?? HomeId;
-            note.NoteTypeId = noteTypeId;
-            if (contentType != null)
-                note.ContentType = contentType;
-            var res = await Service.Notes.SaveAsync(note);
-            Assert.IsTrue(res.IsValid, res.ErrorMessage);
-            return res.Entity;
-        }
-
-        public async Task<SemanticIndexProgressDto> RunAsync(bool rebuild = false, Action<SemanticIndexProgressDto>? onProgress = null,
-            CancellationToken cancellationToken = default)
-        {
-            var res = await Service.SemanticSearch.RunIndexAsync(new SemanticIndexRunRequest
-            {
-                Rebuild = rebuild,
-                Progress = onProgress == null ? null : new SyncProgress(onProgress),
-                CancellationToken = cancellationToken
-            });
-            Assert.IsNotNull(res.Entity);
-            return res.Entity;
-        }
-
-        public async Task<SemanticIndexStatusDto> StatusAsync()
-        {
-            var res = await Service.SemanticSearch.GetIndexStatusAsync();
-            Assert.IsTrue(res.IsValid, res.ErrorMessage);
-            return res.Entity;
-        }
-
-        public async Task<List<NoteChunkDto>> ChunksAsync(Guid noteId, string indexKey = Model) =>
-            (await Service.Repository.SemanticIndex.GetNoteChunksAsync(noteId, indexKey)).Entity;
-
-        public async Task<bool> IsPendingAsync(Guid noteId) =>
-            (await Service.Repository.SemanticIndex.GetPendingNoteIdsAsync(Model, 10000)).Entity.Contains(noteId);
-
-        public void Dispose() => Db.Dispose();
-    }
-
-    // Reports in the same call (Progress<T> posts to the thread pool).
-    private sealed class SyncProgress : IProgress<SemanticIndexProgressDto>
-    {
-        private readonly Action<SemanticIndexProgressDto> _report;
-        public SyncProgress(Action<SemanticIndexProgressDto> report) => _report = report;
-        public void Report(SemanticIndexProgressDto value) => _report(value);
-    }
+    private const string Model = SemanticIndexFixture.Model;
 
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
     public async Task RunIndex_IndexesEveryNote_ButTheSystemOnes(string orm)
     {
-        using var fixture = await Fixture.CreateAsync(orm);
+        using var fixture = await SemanticIndexFixture.CreateAsync(orm);
         var note = await fixture.AddNoteAsync("Amstrad CPC 464", "# Restoration\n\nCleaned the case.");
         var sessionsType = (await fixture.Service.NoteTypes.SaveAsync(new NoteTypeDto { Name = KntConst.ChatSessionsTag })).Entity;
         var session = await fixture.AddNoteAsync("A session", "A private conversation.", noteTypeId: sessionsType.NoteTypeId);
@@ -128,7 +49,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task RunIndex_WithoutModel_OrWithoutItsGenerator_Fails()
     {
-        using var fixture = await Fixture.CreateAsync(model: "not-here");
+        using var fixture = await SemanticIndexFixture.CreateAsync(model: "not-here");
 
         var res = await fixture.Service.SemanticSearch.RunIndexAsync(new SemanticIndexRunRequest());
 
@@ -145,7 +66,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task ChangingATask_CalculatesOnlyItsFragment()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         var note = await fixture.AddNoteAsync("Amstrad CPC 464", "Cleaned the case.");
         await fixture.RunAsync();
         fixture.Models.Reset();
@@ -168,7 +89,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task TheCommandsThatChangeANote_LeaveItPending()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         var service = fixture.Service;
         var folder = (await service.Folders.SaveAsync(new FolderDto { Name = "Collection", ParentId = fixture.HomeId })).Entity;
         var subfolder = (await service.Folders.SaveAsync(new FolderDto { Name = "Amstrad", ParentId = folder.FolderId })).Entity;
@@ -248,7 +169,7 @@ public class SemanticIndexServiceTests
     [DataRow("EntityFramework")]
     public async Task SavingANoteAsClientWinDoes_LeavesItPending(string orm)
     {
-        using var fixture = await Fixture.CreateAsync(orm);
+        using var fixture = await SemanticIndexFixture.CreateAsync(orm);
         var note = await fixture.AddNoteAsync("Amstrad CPC 464", "Text.");
         await fixture.RunAsync();
         Assert.AreEqual(0, (await fixture.StatusAsync()).PendingNotes);
@@ -265,7 +186,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task Rebuild_CalculatesEveryVectorAgain()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         await fixture.AddNoteAsync("One", "Text one.");
         await fixture.RunAsync();
         var chunks = (await fixture.StatusAsync()).Chunks;
@@ -285,7 +206,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task ACanceledRebuild_GoesOnWithoutReusingTheOldVectors()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         for (var i = 1; i <= 4; i++)
             await fixture.AddNoteAsync($"Note {i}", $"Text {i}.");
         await fixture.RunAsync();
@@ -312,7 +233,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task ACanceledCreation_KeepsWhatIsDone_AndTheNextRunGoesOn()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         for (var i = 1; i <= 4; i++)
             await fixture.AddNoteAsync($"Note {i}", $"Text {i}.");
         var total = (await fixture.StatusAsync()).TotalNotes;
@@ -336,7 +257,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task ANoteThatFails_IsCounted_AndTriedAgainUpToThreeTimes()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         var broken = await fixture.AddNoteAsync("BROKEN note", "Text.");
         fixture.Models.FailWhen = text => text.Contains("BROKEN");
 
@@ -358,7 +279,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task FewerDimensions_CutAndNormalizeTheVectors_InAnIndexOfTheirOwn()
     {
-        using var fixture = await Fixture.CreateAsync(dimensions: 32);
+        using var fixture = await SemanticIndexFixture.CreateAsync(dimensions: 32);
         var note = await fixture.AddNoteAsync("One", "Text one.");
 
         await fixture.RunAsync();
@@ -375,7 +296,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task AnHtmlNote_IsIndexedAsMarkdown()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         var contentType = ContentTypeExtJsonHelper.Serialize(new ContentTypeExt { ForDescription = "html" });
         var note = await fixture.AddNoteAsync("Html", "<p><strong>Hello</strong> world</p>", contentType: contentType);
 
@@ -389,7 +310,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task RefreshPending_DoesSomeNotes_WithoutTouchingTheState()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         for (var i = 1; i <= 4; i++)
             await fixture.AddNoteAsync($"Note {i}", $"Text {i}.");
         var before = await fixture.StatusAsync();
@@ -407,7 +328,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task RefreshPending_WhileAnotherRunGoesOn_DoesNothing()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         await fixture.AddNoteAsync("One", "Text one.");
         var started = new TaskCompletionSource();
         var release = new TaskCompletionSource();
@@ -432,7 +353,7 @@ public class SemanticIndexServiceTests
     [TestMethod]
     public async Task OtherModelsIndexes_AreListed_AndOnlyTheyCanBeRemoved()
     {
-        using var fixture = await Fixture.CreateAsync();
+        using var fixture = await SemanticIndexFixture.CreateAsync();
         await fixture.AddNoteAsync("One", "Text one.");
         await fixture.RunAsync();
         await fixture.SetModelAsync(Model, 32);

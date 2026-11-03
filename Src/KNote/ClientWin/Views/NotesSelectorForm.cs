@@ -5,6 +5,7 @@ using KNote.Model.Dto;
 using KNote.Reports;
 using System.Data;
 using KNote.ClientWin.Utils;
+using KNote.Model;
 using KntIcons;
 
 namespace KNote.ClientWin.Views;
@@ -25,6 +26,12 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
     private bool _dateColumnsFitted;
     // Widths persisted in State.ManagementWindow.NotesList.ColumnWidths - only used (read and written) when embedded.
     private Dictionary<string, int> _savedColumnWidths = new();
+    // KNote Atlas: the columns of a list found by meaning (not bound: their values come from NoteSearchHitDto, see
+    // dataGridNotes_CellFormatting) and the notice of the notes not up to date, with «Update index».
+    private const string SimilarityColumn = "Similarity";
+    private const string FragmentColumn = "Fragment";
+    private Panel _panelMeaningNotice;
+    private Label _labelMeaningNotice;
 
     #endregion
 
@@ -60,6 +67,9 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
 
         buttonUndoFilter.SetKntIcon(KntIcon.FilterClear);
         buttonUndoFilter.AlignToTextBox(textFilter);
+
+        dataGridNotes.CellFormatting += dataGridNotes_CellFormatting;
+        CreateMeaningNotice();
     }
 
     #endregion 
@@ -87,6 +97,8 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         textFilter.Text = "";
 
         CoonfigureGridStd();
+        ApplyColumnVisibility();
+        FitTopicColumn();
 
         // Folder mode (a specific folder selected in the tree) applies that folder's own default
         // order every time it's opened, taking precedence over the global last-clicked-column state
@@ -101,7 +113,13 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
             OrderColNumber = colIndex >= 0 ? colIndex : 1;
             AscendigOrderNotes = criteria.Ascending;
         }
-        else if (OrderColNumber == 0)
+        else if (_ctrl.ByMeaning)
+        {
+            // Found by meaning: the most similar first (the user can sort by another column afterwards).
+            OrderColNumber = FindColumnIndex(SimilarityColumn);
+            AscendigOrderNotes = false;
+        }
+        else if (OrderColNumber == 0 || IsMeaningColumn(OrderColNumber))
         {
             OrderColNumber = 1;
             AscendigOrderNotes = true;
@@ -111,6 +129,9 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         // Still the note selected before this load: reloading the same list (Refresh notes list, tab switch,
         // after moving notes...) keeps it selected; a different list doesn't contain it and starts at row 0.
         RefreshDataGridNotes(_ctrl.SelectedEntity?.NoteId);
+
+        _labelMeaningNotice.Text = SemanticIndexTexts.PendingInSearch(_ctrl.PendingNotes);
+        _panelMeaningNotice.Visible = _ctrl.ByMeaning && _ctrl.PendingNotes > 0;
 
         // Hack for refresh column 0 in modal form.
         dataGridNotes.Columns[0].Visible = false;
@@ -308,10 +329,13 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         // Always a List<NoteMinimalDto>, never a lazy LINQ query: from an *empty* IEnumerable the
         // BindingSource can't tell the item type, and the grid then replaces all its configured columns
         // with a single "Current" one (FitDateColumns etc. would no longer find them).
+        // The key read from each note's own type: Similarity and Fragment only exist in the notes found by meaning
+        // (NoteSearchHitDto; another note, e.g. one just added to such a list, has none).
+        var orderColumn = dataGridNotes.Columns[OrderColNumber].Name;
         if (_sortOrder == SortOrder.Descending)
-            _source.DataSource = entities.OrderByDescending(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o)).ToList();
+            _source.DataSource = entities.OrderByDescending(o => o.GetType().GetProperty(orderColumn)?.GetValue(o)).ToList();
         else if (_sortOrder == SortOrder.Ascending)
-            _source.DataSource = entities.OrderBy(o => o.GetType().GetProperty(dataGridNotes.Columns[OrderColNumber].Name).GetValue(o)).ToList();
+            _source.DataSource = entities.OrderBy(o => o.GetType().GetProperty(orderColumn)?.GetValue(o)).ToList();
 
         dataGridNotes.Columns[OrderColNumber].HeaderCell.SortGlyphDirection = _sortOrder;
 
@@ -462,6 +486,25 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         dataGridNotes.Columns[8].DataPropertyName = "FolderId";
         dataGridNotes.Columns[8].Visible = false;
 
+        // The columns stay as configured from now on: with AutoGenerateColumns, binding another list generated them
+        // again after the unbound ones below, and their indexes (OrderColNumber, Columns[0]...) moved.
+        dataGridNotes.AutoGenerateColumns = false;
+
+        // Sorted by the code, as the others (Programmatic: the grid cannot sort an unbound column of a bound list).
+        var similarity = new DataGridViewTextBoxColumn
+        {
+            Name = SimilarityColumn, HeaderText = "Similarity", Width = LogicalToDeviceUnits(80),
+            SortMode = DataGridViewColumnSortMode.Programmatic, Visible = false
+        };
+        similarity.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        dataGridNotes.Columns.Add(similarity);
+        similarity.DisplayIndex = dataGridNotes.Columns["Topic"].DisplayIndex + 1;
+        dataGridNotes.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = FragmentColumn, HeaderText = "Fragment", Width = LogicalToDeviceUnits(360),
+            SortMode = DataGridViewColumnSortMode.Programmatic, Visible = false
+        });
+
         foreach (DataGridViewColumn col in dataGridNotes.Columns)
         {
             if (col.Name != "Topic")
@@ -491,6 +534,49 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         dataGridNotes.Columns["InternalTags"].Visible = !IsColumnHidden("InternalTags");
         dataGridNotes.Columns["ModificationDateTime"].Visible = !(compact || IsColumnHidden("ModificationDateTime"));
         dataGridNotes.Columns["CreationDateTime"].Visible = !(compact || IsColumnHidden("CreationDateTime"));
+        dataGridNotes.Columns[SimilarityColumn].Visible = _ctrl.ByMeaning;
+        dataGridNotes.Columns[FragmentColumn].Visible = _ctrl.ByMeaning;
+    }
+
+    private bool IsMeaningColumn(int columnIndex) =>
+        columnIndex >= 0 && columnIndex < dataGridNotes.Columns.Count
+        && dataGridNotes.Columns[columnIndex].Name is SimilarityColumn or FragmentColumn;
+
+    private void dataGridNotes_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0 || !IsMeaningColumn(e.ColumnIndex))
+            return;
+        var hit = dataGridNotes.Rows[e.RowIndex].DataBoundItem as NoteSearchHitDto;
+        e.Value = hit == null ? "" : dataGridNotes.Columns[e.ColumnIndex].Name == SimilarityColumn ? hit.Similarity.ToString("0.00") : hit.Fragment;
+        e.FormattingApplied = true;
+    }
+
+    // Above the list (and its text filter): the notice, and «Update index», which searches again.
+    private void CreateMeaningNotice()
+    {
+        _labelMeaningNotice = new Label { Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true };
+        var linkUpdateIndex = new LinkLabel { Dock = DockStyle.Right, AutoSize = true, Text = SemanticIndexTexts.UpdateIndex, TextAlign = ContentAlignment.MiddleRight };
+        linkUpdateIndex.LinkClicked += async (s, e) =>
+        {
+            linkUpdateIndex.Enabled = false;
+            try
+            {
+                using (new WaitCursor())
+                    await _ctrl.UpdateIndexAsync();
+            }
+            finally
+            {
+                linkUpdateIndex.Enabled = true;
+            }
+        };
+        _panelMeaningNotice = new Panel
+        {
+            Dock = DockStyle.Top, Height = LogicalToDeviceUnits(26), Visible = false,
+            Padding = new Padding(LogicalToDeviceUnits(4), 0, LogicalToDeviceUnits(4), 0)
+        };
+        _panelMeaningNotice.Controls.Add(_labelMeaningNotice);
+        _panelMeaningNotice.Controls.Add(linkUpdateIndex);
+        panelForm.Controls.Add(_panelMeaningNotice);
     }
 
     private void OnNotesListViewOptionsChanged(NotesListViewOptionsChanged message)
@@ -649,8 +735,9 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         if (dataGridNotes.Columns.Count <= 1)
             return snapshot; // grid not configured yet: nothing loaded
 
+        // Not the fragment of the notes found by meaning: each row would be long (as the Web's reports).
         var columns = dataGridNotes.Columns.Cast<DataGridViewColumn>()
-            .Where(c => c.Visible)
+            .Where(c => c.Visible && c.Name != FragmentColumn)
             .OrderBy(c => c.DisplayIndex)
             .ToList();
 

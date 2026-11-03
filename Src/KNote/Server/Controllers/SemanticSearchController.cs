@@ -12,8 +12,8 @@ using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
 
-// KNote Atlas: the repository's AI models, its semantic index and, in the next deliveries of stage 0, the search by
-// meaning. The models are SystemValues of the session's repository (Service: SystemValues.Get/SaveRepositoryAiModelsAsync);
+// KNote Atlas: the repository's AI models, its semantic index and the search by meaning (the most similar notes, not
+// paged). The models are SystemValues of the session's repository (Service: SystemValues.Get/SaveRepositoryAiModelsAsync);
 // which models this Server has are its AI providers (AiProvidersCatalog). Creating, updating or rebuilding the index is
 // a run of SemanticIndexJobs (one queue for the Server), of the session's repository and with its user: each user sees
 // and cancels only the run of the repository of their session.
@@ -121,6 +121,29 @@ public class SemanticSearchController : ControllerBase
     [Authorize(Roles = "Admin")]
     public IActionResult CancelIndex() =>
         Ok(new Result<bool>(_jobs.Cancel(_repositories.ForUser(User).RepositoryId)));
+
+    // Searches by meaning in the session's repository (the search, or the filter with «Talks about…»): the most similar
+    // notes, not paged. It brings the index up to date before, within the request and with its user (D8). Any user.
+    [HttpPost("search")]
+    public async Task<IActionResult> Search([FromBody] SemanticSearchRequestDto request)
+    {
+        try
+        {
+            var resApi = await _service.SemanticSearch.SearchAsync(request, HttpContext.RequestAborted);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (OperationCanceledException) when (HttpContext.RequestAborted.IsCancellationRequested)
+        {
+            return new EmptyResult();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Search at {dateTime}.", DateTime.Now);
+            var resApi = new Result<SemanticSearchResultDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
 
     // Removes the index of another model (?key=, the index key: it has ':' and '@').
     [HttpDelete("index")]

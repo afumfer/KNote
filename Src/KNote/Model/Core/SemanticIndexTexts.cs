@@ -17,6 +17,18 @@ public static class SemanticIndexTexts
         _ => "Not created"
     };
 
+    // Whether the search by meaning can be offered: an index with notes, and this installation with its model. Without
+    // it, only the search by words (CU-04).
+    public static bool CanSearch(SemanticIndexStatusDto status) =>
+        status != null && status.IndexedNotes > 0 && status.EmbeddingModelAvailable;
+
+    // The notice of a search by meaning that left notes not up to date (D8), with «Update index» beside it.
+    public static string PendingInSearch(int pendingNotes) =>
+        $"{pendingNotes} {(pendingNotes == 1 ? "note is" : "notes are")} not up to date in the semantic index: "
+        + "they may be missing from the results or found by their previous content.";
+
+    public const string UpdateIndex = "Update index";
+
     public static string Counts(SemanticIndexStatusDto status) =>
         $"{status.IndexedNotes} of {status.TotalNotes} notes indexed · {status.PendingNotes} pending · {status.Chunks} fragments";
 

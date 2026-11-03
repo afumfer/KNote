@@ -35,8 +35,29 @@
                 <RadzenTextBox @bind-Value="textSearch" Immediate="true" @onkeypress="@((KeyboardEventArgs e) => TopicKeyPress(e))" />
             </ChildContent>
         </RadzenFormField>
+        @* By words (the search of always) or by meaning: only with a semantic index this server can search. *@
+        @if (meaningAvailable)
+        {
+            <RadzenSelectBar @bind-Value="searchMode" TValue="EnumNotesSearchMode" Size="ButtonSize.Medium"
+                             MouseEnter="@(args => tooltipService.Open(args, "Words: the notes with these words. Meaning: the notes that talk about it (the 100 most similar)."))">
+                <Items>
+                    <RadzenSelectBarItem Text="Words" Value="EnumNotesSearchMode.Words" />
+                    <RadzenSelectBarItem Text="Meaning" Value="EnumNotesSearchMode.Meaning" />
+                </Items>
+            </RadzenSelectBar>
+        }
         <RadzenButton Text="Search" Icon="search" Click="OnSearch" ButtonStyle="ButtonStyle.Primary" />
     </RadzenStack>
+
+    @if (meaningPages?.PendingNotes > 0)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Size="AlertSize.Small" class="rz-m-0">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                <span>@SemanticIndexTexts.PendingInSearch(meaningPages.PendingNotes)</span>
+                <RadzenButton Text="@SemanticIndexTexts.UpdateIndex" Icon="sync" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Primary" Click="OnUpdateIndex" />
+            </RadzenStack>
+        </RadzenAlert>
+    }
 
     <RadzenCard class="rz-p-1" Style="flex: 1; min-height: 0">
         @* The list and, at its right, the preview of the selected note (if shown). *@
@@ -44,6 +65,7 @@
             <RadzenSplitterPane Size="@paneSizes[0]" Min="320px" class="knt-notes-list-pane">
                 @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
                 <NotesGrid @ref="notesGrid" CurrentChanged="StateHasChanged" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
+                           ShowSimilarity="@(SearchedMode() == EnumNotesSearchMode.Meaning)"
                            OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
             </RadzenSplitterPane>
             @* Always there, with the sizes of all the panes set from the start (Radzen sizes the panes when they are
@@ -65,39 +87,76 @@
     private NotesGrid? notesGrid;
     private AppState appState = null!;
     private string textSearch = "";
+    // The mode chosen beside the box (the one of the list shown is the search's, SearchedMode).
+    private EnumNotesSearchMode searchMode;
+    // The search by meaning can be offered: a semantic index this server can search (SemanticIndexTexts.CanSearch).
+    private bool meaningAvailable;
+    // The notes found by meaning of the list shown (null: by words, or without text).
+    private KntMeaningSearchPages? meaningPages;
     private int searchVersion;
     // The sizes of the panes the user left, kept in the browser.
     private KntPaneSizes paneSizes = null!;
+    private readonly CancellationTokenSource disposal = new();
+
+    // The list's key (NotesListPosition.ListKey) is the text searched; by meaning, after a mark that can't be typed: it
+    // is another list, with a position of its own.
+    private const string MeaningKeyMark = "\u0001";
 
     protected override void OnInitialized()
     {
         paneSizes = new KntPaneSizes(js, "KNoteNotesSearchPanes", "60%", "40%");
 
-        // The text searched comes in the URL (notes/search?textSearch=...); back from a note, without it, the
-        // last search (with the list where it was, NotesSearchPosition, whose ListKey is the text searched).
+        // The text searched comes in the URL (notes/search?textSearch=...&mode=meaning); back from a note, without it,
+        // the last search (with the list where it was, NotesSearchPosition, whose ListKey is the text and the mode).
         appState = store.AppState;
         var queries = store.GetQueryStrings(store.GetUri());
         if (queries != null && queries.TryGetValue("textSearch", out var text))
-            textSearch = text;
+        {
+            var mode = queries.TryGetValue("mode", out var modeText) && modeText == "meaning" ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words;
+            if (appState.NotesSearchPosition?.ListKey != ListKeyOf(mode, text))
+                appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text) };
+        }
         else
-            textSearch = appState.NotesSearchPosition?.ListKey ?? "";
+            appState.NotesSearchPosition ??= new NotesListPosition { ListKey = "" };
 
-        if (appState.NotesSearchPosition?.ListKey != textSearch)
-            appState.NotesSearchPosition = new NotesListPosition { ListKey = textSearch };
+        textSearch = SearchedText();
+        searchMode = SearchedMode();
+        NewMeaningPages();
 
         kntWindows.NoteSaved += OnNoteSaved;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var status = await store.SemanticSearch.GetIndexStatusAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        meaningAvailable = status.IsValid && SemanticIndexTexts.CanSearch(status.Entity);
+        if (!meaningAvailable)
+            searchMode = EnumNotesSearchMode.Words;
     }
 
     public void Dispose()
     {
         kntWindows.NoteSaved -= OnNoteSaved;
+        DisposeMeaningPages();
+        disposal.Cancel();
+        disposal.Dispose();
     }
 
-    private void OnSearch()
+    private void OnSearch() => Search(searchMode, textSearch);
+
+    // The same search again: before searching, it brings the index up to date (some pending notes).
+    private void OnUpdateIndex() => Search(SearchedMode(), SearchedText());
+
+    private void Search(EnumNotesSearchMode mode, string text)
     {
-        appState.NotesSearchPosition = new NotesListPosition { ListKey = textSearch };
+        appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text) };
+        NewMeaningPages();
         searchVersion++;
-        store.NavigateTo(string.IsNullOrEmpty(textSearch) ? "notes/search" : $"notes/search?textSearch={Uri.EscapeDataString(textSearch)}");
+        store.NavigateTo(string.IsNullOrEmpty(text)
+            ? "notes/search"
+            : $"notes/search?textSearch={Uri.EscapeDataString(text)}{(mode == EnumNotesSearchMode.Meaning ? "&mode=meaning" : "")}");
     }
 
     private void TopicKeyPress(KeyboardEventArgs e)
@@ -108,21 +167,59 @@
 
     private async Task<Result<List<NoteMinimalDto>>> LoadNotesPage(PageIdentifier page, NotesOrder? order, CancellationToken cancellationToken)
     {
-        var search = appState.NotesSearchPosition?.ListKey ?? "";
+        if (SearchedMode() == EnumNotesSearchMode.Meaning)
+            return meaningPages != null
+                ? await meaningPages.LoadPageAsync(page, order, cancellationToken)
+                : new Result<List<NoteMinimalDto>>(new List<NoteMinimalDto>()) { TotalCount = 0 };
+
+        var search = SearchedText();
         var queryString = $"textSearch={Uri.EscapeDataString(search)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}";
         if (order != null)
             queryString += $"&orderColumn={order.Column}&orderAscending={order.Ascending}";
         return await store.Notes.GetSearch(queryString, cancellationToken);
     }
 
-    // The text of the search shown in the list (the box may have been changed without searching it).
-    private string SearchedText() => appState.NotesSearchPosition?.ListKey ?? "";
+    // The search by meaning of the list shown, done when the grid asks for its first page (not paged in the server).
+    private void NewMeaningPages()
+    {
+        DisposeMeaningPages();
+        var text = SearchedText();
+        if (SearchedMode() != EnumNotesSearchMode.Meaning || string.IsNullOrWhiteSpace(text))
+            return;
+        meaningPages = new KntMeaningSearchPages(ct => store.SemanticSearch.SearchAsync(new SemanticSearchRequestDto { Text = text }, ct));
+        meaningPages.Found += OnMeaningFound;
+    }
+
+    private void DisposeMeaningPages()
+    {
+        if (meaningPages == null)
+            return;
+        meaningPages.Found -= OnMeaningFound;
+        meaningPages.Dispose();
+        meaningPages = null;
+    }
+
+    // The notice of the notes not up to date.
+    private void OnMeaningFound() => _ = InvokeAsync(StateHasChanged);
+
+    private string ListKey() => appState.NotesSearchPosition?.ListKey ?? "";
+
+    private static string ListKeyOf(EnumNotesSearchMode mode, string text) =>
+        mode == EnumNotesSearchMode.Meaning ? MeaningKeyMark + text : text;
+
+    // The mode and the text of the search shown in the list (the box may have been changed without searching it).
+    private EnumNotesSearchMode SearchedMode() =>
+        ListKey().StartsWith(MeaningKeyMark, StringComparison.Ordinal) ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words;
+
+    private string SearchedText() =>
+        SearchedMode() == EnumNotesSearchMode.Meaning ? ListKey()[MeaningKeyMark.Length..] : ListKey();
 
     // The notes found, to print or export them (NotesPrintExportMenu adds the list's order and view).
     private NotesListReportRequestDto ReportRequest() => new()
     {
         Source = NotesListReportSource.Search,
-        TextSearch = SearchedText()
+        TextSearch = SearchedText(),
+        SearchMode = SearchedMode()
     };
 
     // Creating a note needs Staff (KntAccess, checked with no wait before: it opens a window).
@@ -139,7 +236,12 @@
     // A note saved in its window: the list shows it changed (or moved, or gone from it).
     private void OnNoteSaved(Guid noteId)
     {
-        _ = InvokeAsync(() => notesGrid?.RefreshAsync() ?? Task.CompletedTask);
+        _ = InvokeAsync(() =>
+        {
+            // By meaning, the search again (the note saved may be found, or not, by its new content).
+            NewMeaningPages();
+            return notesGrid?.RefreshAsync() ?? Task.CompletedTask;
+        });
     }
 
     // One delete at a time: a click or the Delete key repeated asks and deletes once.

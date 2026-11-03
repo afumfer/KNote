@@ -224,7 +224,9 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         var isFilter = selectedNotesInServiceRef?.NotesFilter != null;
         var description = isFilter
             ? await BuildFilterDescription(selectedNotesInServiceRef.ServiceRef, selectedNotesInServiceRef.NotesFilter)
-            : selectedNotesInServiceRef?.NotesSearch?.TextSearch;
+            : selectedNotesInServiceRef?.NotesSearch?.Mode == EnumNotesSearchMode.Meaning
+                ? $"{selectedNotesInServiceRef.NotesSearch.TextSearch} (by meaning)"
+                : selectedNotesInServiceRef?.NotesSearch?.TextSearch;
 
         NotifyMessage($"Loading notes filter: {description}");
 
@@ -1805,6 +1807,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             context.SearchText = notesSearch?.TextSearch?.Trim();
             context.SearchInDescription = notesSearch?.SearchInDescription ?? false;
             context.SearchInNoteTasks = notesSearch?.SearchInNoteTasks ?? false;
+            context.SearchByMeaning = notesSearch?.Mode == EnumNotesSearchMode.Meaning;
         }
 
         return context;

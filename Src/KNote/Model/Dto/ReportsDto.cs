@@ -32,10 +32,15 @@ public class NotesListReportRequestDto
     // Search.
     public string TextSearch { get; set; }
 
-    // Filter (its paging and order are ignored: the whole list is printed, in OrderColumn/OrderAscending).
+    // By words (the search of always) or by meaning (the most similar notes, see SemanticSearchRequestDto).
+    public EnumNotesSearchMode SearchMode { get; set; }
+
+    // Filter (its paging and order are ignored: the whole list is printed, in OrderColumn/OrderAscending). With a
+    // MeaningText, the notes found by meaning among the filter's.
     public NotesFilterDto NotesFilter { get; set; }
 
-    // The list's order: one of NoteOrderCriteria.SortableColumns, or null for the query's own order.
+    // The list's order: one of NoteOrderCriteria.SortableColumns (or Similarity, by meaning), or null for the query's
+    // own order (by meaning, the most similar first).
     public string OrderColumn { get; set; }
 
     public bool OrderAscending { get; set; } = true;

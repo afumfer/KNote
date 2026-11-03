@@ -4,7 +4,8 @@ namespace KNote.Reports;
 
 // The columns of the web app's notes list (Client's NotesGrid), in its order, and each cell as the list shows
 // it (dates with the current culture): the web's notes list printed or exported as it is seen. The compact
-// view shows the number, topic, priority and tags.
+// view shows the number, topic, priority and tags. A list found by meaning (NoteSearchHitDto) also has the
+// similarity, after the topic (not the fragment, which would make each row long).
 public static class NotesGridColumns
 {
     private record Column(NotesListColumn Definition, bool InCompactView, Func<NoteMinimalDto, string> Text);
@@ -21,15 +22,21 @@ public static class NotesGridColumns
         new(new NotesListColumn("CreationDateTime", "Created", true, 100), false, n => n.CreationDateTime.ToShortDateString())
     };
 
+    private static readonly Column SimilarityColumn =
+        new(new NotesListColumn("Similarity", "Similarity", true, 80), true, n => n is NoteSearchHitDto hit ? hit.Similarity.ToString("0.00") : "");
+
     public static NotesListSnapshot Snapshot(IEnumerable<NoteMinimalDto> notes, bool compact)
     {
         ArgumentNullException.ThrowIfNull(notes);
 
+        var list = notes.ToList();
         var columns = Columns.Where(c => !compact || c.InCompactView).ToList();
+        if (list.Any(n => n is NoteSearchHitDto))
+            columns.Insert(columns.FindIndex(c => c.Definition.Name == "Topic") + 1, SimilarityColumn);
 
         var snapshot = new NotesListSnapshot();
         snapshot.Columns.AddRange(columns.Select(c => c.Definition));
-        foreach (var note in notes)
+        foreach (var note in list)
         {
             snapshot.Rows.Add(columns.Select(c => c.Text(note)).ToArray());
             snapshot.NoteIds.Add(note.NoteId);

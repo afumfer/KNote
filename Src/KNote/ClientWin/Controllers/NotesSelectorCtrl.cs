@@ -33,6 +33,21 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
         get; set;
     }
 
+    // KNote Atlas: the list was found by meaning (its notes are NoteSearchHitDto, with Similarity and Fragment), and
+    // the notes of the index not up to date after that search (D8), for the notice with «Update index».
+    public bool ByMeaning
+    {
+        get; private set;
+    }
+
+    public int PendingNotes
+    {
+        get; private set;
+    }
+
+    // The search by meaning of the list, to do it again («Update index»).
+    private Func<Task<bool>> _searchByMeaningAgain;
+
     public string ViewTitle
     {
         get; set;
@@ -99,6 +114,7 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
             if (response.IsValid)
             {
                 ListEntities = response.Entity;
+                SetByMeaning(null);
 
                 if(refreshView)
                     View.RefreshView();
@@ -131,10 +147,15 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
             Folder = null;
 
             Result<List<NoteMinimalDto>> response;
+            SemanticSearchResultDto found = null;
             if (string.IsNullOrEmpty(notesSearch?.TextSearch.Trim()) || service == null || notesSearch == null)
             {
                 response = new Result<List<NoteMinimalDto>>();
                 response.Entity = new List<NoteMinimalDto>();                    
+            }
+            else if (notesSearch.Mode == EnumNotesSearchMode.Meaning)
+            {
+                (response, found) = await SearchByMeaningAsync(new SemanticSearchRequestDto { Text = notesSearch.TextSearch });
             }
             else
             {
@@ -145,6 +166,7 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
             {
                 ListEntities = response.Entity;
                 NotesSearch = notesSearch;
+                SetByMeaning(found, () => LoadSearchEntities(service, notesSearch, refreshView));
 
                 if (refreshView)
                     View.RefreshView();
@@ -181,10 +203,15 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
             Folder = null;
 
             Result<List<NoteMinimalDto>> response;
+            SemanticSearchResultDto found = null;
             if (service == null || notesFilter == null)
             {
                 response = new Result<List<NoteMinimalDto>>();
                 response.Entity = new List<NoteMinimalDto>();
+            }
+            else if (notesFilter.HasMeaningText)
+            {
+                (response, found) = await SearchByMeaningAsync(SemanticSearchRequestDto.ForFilter(notesFilter));
             }
             else
             {
@@ -195,6 +222,7 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
             {
                 ListEntities = response.Entity;
                 NotesFilter = notesFilter;
+                SetByMeaning(found, () => LoadFilteredEntities(service, notesFilter, refreshView));
 
                 if (refreshView)
                     View.RefreshView();
@@ -218,6 +246,34 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
         }
 
         return resLoad;
+    }
+
+    /// <summary>
+    /// «Update index»: the same search by meaning again (before searching, it brings the index up to date: some pending
+    /// notes).
+    /// </summary>
+    public Task<bool> UpdateIndexAsync() =>
+        ByMeaning && _searchByMeaningAgain != null ? _searchByMeaningAgain() : Task.FromResult(false);
+
+    // The notes most similar to a text (the search, or the filter with «Talks about…»), the most similar first.
+    private async Task<(Result<List<NoteMinimalDto>> Response, SemanticSearchResultDto Found)> SearchByMeaningAsync(SemanticSearchRequestDto request)
+    {
+        var response = new Result<List<NoteMinimalDto>>();
+        var found = await Service.SemanticSearch.SearchAsync(request);
+        if (!found.IsValid)
+        {
+            response.AddListErrorMessage(found.ListErrorMessage);
+            return (response, null);
+        }
+        response.Entity = found.Entity.Notes.Cast<NoteMinimalDto>().ToList();
+        return (response, found.Entity);
+    }
+
+    private void SetByMeaning(SemanticSearchResultDto found, Func<Task<bool>> searchAgain = null)
+    {
+        ByMeaning = found != null;
+        PendingNotes = found?.PendingNotes ?? 0;
+        _searchByMeaningAgain = found != null ? searchAgain : null;
     }
 
     public override void SelectItem(NoteMinimalDto item)

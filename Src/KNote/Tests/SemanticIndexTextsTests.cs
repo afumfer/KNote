@@ -54,4 +54,20 @@ public class SemanticIndexTextsTests
         Assert.AreEqual("qwen3-embedding:4b", new RepositoryAiModelsDto { EmbeddingModel = " qwen3-embedding:4b " }.GetIndexKey());
         Assert.AreEqual("qwen3-embedding:4b@1024", new RepositoryAiModelsDto { EmbeddingModel = "qwen3-embedding:4b", EmbeddingDimensions = 1024 }.GetIndexKey());
     }
+
+    [TestMethod]
+    public void TheSearchByMeaning_NeedsAnIndexWithNotes_AndTheModel()
+    {
+        Assert.IsFalse(SemanticIndexTexts.CanSearch(null!));
+        Assert.IsFalse(SemanticIndexTexts.CanSearch(new SemanticIndexStatusDto { IndexedNotes = 0, EmbeddingModelAvailable = true }));
+        Assert.IsFalse(SemanticIndexTexts.CanSearch(new SemanticIndexStatusDto { IndexedNotes = 5, EmbeddingModelAvailable = false }));
+        Assert.IsTrue(SemanticIndexTexts.CanSearch(new SemanticIndexStatusDto { IndexedNotes = 5, EmbeddingModelAvailable = true }));
+    }
+
+    [TestMethod]
+    public void PendingInSearch_SaysHowManyNotes()
+    {
+        StringAssert.StartsWith(SemanticIndexTexts.PendingInSearch(1), "1 note is not up to date");
+        StringAssert.StartsWith(SemanticIndexTexts.PendingInSearch(7), "7 notes are not up to date");
+    }
 }

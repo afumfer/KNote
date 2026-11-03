@@ -24,7 +24,7 @@ public static class NotesListReport
 
     private const double DefaultMinPercent = 6;
 
-    private static readonly HashSet<string> NoWrapColumns = new() { "NoteNumber", "Priority", "ModificationDateTime", "CreationDateTime" };
+    private static readonly HashSet<string> NoWrapColumns = new() { "NoteNumber", "Priority", "Similarity", "ModificationDateTime", "CreationDateTime" };
 
     private static readonly HashSet<string> MutedColumns = new() { "Tags", "InternalTags" };
 

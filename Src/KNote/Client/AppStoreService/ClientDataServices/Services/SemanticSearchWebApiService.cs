@@ -37,4 +37,8 @@ public class SemanticSearchWebApiService : BaseService, ISemanticSearchWebApiSer
 
     public Task<Result<bool>> DeleteModelIndexAsync(string indexKey) =>
         SendAsync<bool>(ct => _httpClient.DeleteAsync($"api/semantic/index?key={Uri.EscapeDataString(indexKey)}", ct), "Remove a semantic index", true);
+
+    public Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<SemanticSearchResultDto>(ct => _httpClient.PostAsJsonAsync("api/semantic/search", request, ct), "Search by meaning",
+            cancellationToken: cancellationToken);
 }
