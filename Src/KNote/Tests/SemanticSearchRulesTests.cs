@@ -78,4 +78,41 @@ public class SemanticSearchRulesTests
     {
         Assert.AreEqual("ab abcdefghijkl…", SemanticSearchRules.Fragment("ab abcdefghijklmnopq", 15));
     }
+
+    [TestMethod]
+    public void RankSimilar_IsTheMeanOfTheBestMatchOfEachFragment_NeverTheNoteItself()
+    {
+        var own = new[] { Chunk(NoteA, 1, 0), Chunk(NoteA, 0, 1) };
+        var bothSides = Chunk(NoteB, 1, 0);
+        var chunks = own.Concat(new[]
+        {
+            bothSides, Chunk(NoteB, 0, 1),      // B has both: similarity 1
+            Chunk(NoteC, 1, 0)                  // C only one: (1 + 0) / 2
+        }).ToList();
+
+        var ranked = SemanticSearchRules.RankSimilar(own, chunks, minSimilarity: 0.4f);
+
+        CollectionAssert.AreEqual(new[] { NoteB, NoteC }, ranked.Select(m => m.NoteId).ToList());
+        Assert.AreEqual(1f, ranked[0].Similarity, 1e-6f);
+        Assert.AreEqual(0.5f, ranked[1].Similarity, 1e-6f);
+        Assert.AreEqual(bothSides.NoteChunkId, ranked[0].NoteChunkId, "the other note's most similar fragment (the first one at a tie)");
+    }
+
+    [TestMethod]
+    public void RankSimilar_LeavesOutTheNotesUnderTheMinimum_TheOnesNotAllowed_AndOtherDimensions()
+    {
+        var own = new[] { Chunk(NoteA, 1, 0) };
+        var chunks = new[] { Chunk(NoteB, 1, 0), Chunk(NoteC, 1, 0, 0), Chunk(NoteC, 0, 1) };
+
+        Assert.AreEqual(0, SemanticSearchRules.RankSimilar(own, chunks, allowed: id => id != NoteB).Count);
+        CollectionAssert.AreEqual(new[] { NoteB }, SemanticSearchRules.RankSimilar(own, chunks).Select(m => m.NoteId).ToList());
+        Assert.AreEqual(0, SemanticSearchRules.RankSimilar(Array.Empty<NoteChunkVectorDto>(), chunks).Count);
+    }
+
+    [TestMethod]
+    public void APossibleDuplicate_IsFrom095()
+    {
+        Assert.IsFalse(SemanticSearchRules.IsPossibleDuplicate(0.949f));
+        Assert.IsTrue(SemanticSearchRules.IsPossibleDuplicate(0.95f));
+    }
 }

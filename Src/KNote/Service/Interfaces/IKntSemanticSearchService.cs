@@ -37,6 +37,12 @@ public interface IKntSemanticSearchService
     /// the ones that meet it. Before, it brings the index up to date (as RefreshPendingAsync). Not paged. Any user.
     /// </summary>
     Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The notes most similar to a note (at least SemanticSearchRules.MinSimilarNotes, at most MaxSimilarNotes), not
+    /// related to it yet. Before, the note is brought up to date if it is pending. Not saved anywhere. Any user.
+    /// </summary>
+    Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default);
 }
 
 public class SemanticIndexRunRequest

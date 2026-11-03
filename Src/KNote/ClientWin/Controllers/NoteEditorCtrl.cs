@@ -544,7 +544,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
     // Model.TraceNotesTo - matches the "Trace node to:" list. False: this note is the ToId side
     // (an incoming relation), staged into Model.TraceNotesFrom - the "Trace node from:" list.
     // See KntNotesSaveExtendedAsyncCommand's matching comments for the same convention.
-    public async Task<TraceNoteDto> NewTraceNote(bool ownerIsFromSide)
+    // relatedNoteId: the other note already chosen (a similar note related from the Trace notes tab).
+    public async Task<TraceNoteDto> NewTraceNote(bool ownerIsFromSide, Guid? relatedNoteId = null)
     {
         var traceEditor = new TraceNoteEditorCtrl(Store);
 
@@ -558,6 +559,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
             traceEditor.Model.ToId = Model.NoteId;
         traceEditor.Model.SetIsNew(true);
         await traceEditor.LoadTraceNoteTypeOptionsAsync();
+        if (relatedNoteId != null)
+            await traceEditor.SetRelatedNoteAsync(relatedNoteId.Value);
 
         var res = traceEditor.RunModal();
         if (res.Entity == EControllerResult.Executed)
@@ -604,10 +607,14 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         if (traceNote == null)
             return false;
 
-        var relatedNoteId = ownerIsFromSide ? traceNote.ToId : traceNote.FromId;
+        return await OpenNoteAsync(ownerIsFromSide ? traceNote.ToId : traceNote.FromId);
+    }
 
+    // Another note of this repository in its own note editor window.
+    public async Task<bool> OpenNoteAsync(Guid noteId)
+    {
         var noteEditorCtrl = new NoteEditorCtrl(Store);
-        if (!await noteEditorCtrl.LoadModelById(Service, relatedNoteId, false))
+        if (!await noteEditorCtrl.LoadModelById(Service, noteId, false))
         {
             noteEditorCtrl.Finalize();
             return false;
@@ -616,6 +623,33 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         noteEditorCtrl.Run();
         return true;
     }
+
+    /// <summary>
+    /// KNote Atlas: the notes most similar to this one (IKntSemanticSearchService.GetSimilarNotesAsync), for the Trace
+    /// notes tab. The relations added in this editor and not saved yet leave their notes out too. Null when there is
+    /// nothing to show: a new note, or a repository that can't search by meaning.
+    /// </summary>
+    public async Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync()
+    {
+        if (Service == null || Model == null || Model.IsNew() || !await Store.CanSearchByMeaningAsync(Service))
+            return null;
+
+        var result = await Service.SemanticSearch.GetSimilarNotesAsync(Model.NoteId);
+        if (result.IsValid)
+        {
+            var related = Model.TraceNotesFrom.Concat(Model.TraceNotesTo)
+                .Where(t => !t.IsDeleted())
+                .Select(t => t.FromId == Model.NoteId ? t.ToId : t.FromId)
+                .ToHashSet();
+            result.Entity.Notes = result.Entity.Notes.Where(n => !related.Contains(n.NoteId)).ToList();
+        }
+        return result;
+    }
+
+    // A relation from this note to a similar one, in the editor of relations with that note already chosen (saved with
+    // the note, as the others).
+    public Task<TraceNoteDto> RelateSimilarNoteAsync(NoteSearchHitDto note) =>
+        NewTraceNote(ownerIsFromSide: true, relatedNoteId: note.NoteId);
 
     public bool DeleteTraceNote(Guid traceNoteId, bool ownerIsFromSide)
     {

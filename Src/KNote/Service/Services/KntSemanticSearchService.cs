@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
@@ -48,6 +49,12 @@ public class KntSemanticSearchService : KntServiceBase, IKntSemanticSearchServic
     public async Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default)
     {
         var command = new KntSemanticSearchSearchAsyncCommand(Service, request, cancellationToken);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default)
+    {
+        var command = new KntSemanticSearchGetSimilarNotesAsyncCommand(Service, noteId, cancellationToken);
         return await ExecuteCommand(command);
     }
 

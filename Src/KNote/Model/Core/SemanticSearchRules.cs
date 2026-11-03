@@ -18,6 +18,14 @@ public static class SemanticSearchRules
     public const int MaxResults = 100;
     public const int MaxFragmentLength = 300;
 
+    // The similar notes of a note (delivery 0.5): a short list, from a higher similarity than the search's (two whole
+    // notes are compared, not a short text with a note), and the mark of a possible duplicate. Initial values.
+    public const float MinSimilarNotes = 0.60f;
+    public const int MaxSimilarNotes = 10;
+    public const float PossibleDuplicateSimilarity = 0.95f;
+
+    public static bool IsPossibleDuplicate(float similarity) => similarity >= PossibleDuplicateSimilarity;
+
     public readonly record struct NoteMatch(Guid NoteId, float Similarity, Guid NoteChunkId, NoteChunkSourceType SourceType);
 
     /// <summary>
@@ -60,6 +68,67 @@ public static class SemanticSearchRules
             .OrderByDescending(m => m.Similarity)
             .ThenBy(m => m.NoteId)
             .ToList();
+    }
+
+    /// <summary>
+    /// The notes most similar to a note (D1 of delivery 0.5): for each fragment of the note, the most similar fragment of
+    /// the other note; the similarity is the mean of those, so what counts is what they have in common as a whole (two
+    /// notes are not similar just because one fragment is, e.g. their data of the same folder and type). The fragment
+    /// returned is the other note's most similar one. At least minSimilarity, the most similar first; never the note
+    /// itself, and only the notes allowed, if given.
+    /// </summary>
+    public static List<NoteMatch> RankSimilar(IReadOnlyList<NoteChunkVectorDto> noteChunks, IEnumerable<NoteChunkVectorDto> chunks,
+        float minSimilarity = MinSimilarNotes, Func<Guid, bool> allowed = null)
+    {
+        var own = (noteChunks ?? Array.Empty<NoteChunkVectorDto>()).Where(c => c?.Vector != null).ToList();
+        if (own.Count == 0)
+            return new List<NoteMatch>();
+        var noteId = own[0].NoteId;
+        var dimensions = own[0].Vector.Length;
+        own = own.Where(c => c.Vector.Length == dimensions).ToList();
+
+        var notes = new Dictionary<Guid, SimilarNote>();
+        foreach (var chunk in chunks ?? Enumerable.Empty<NoteChunkVectorDto>())
+        {
+            if (chunk?.Vector == null || chunk.Vector.Length != dimensions || chunk.NoteId == noteId)
+                continue;
+            if (allowed != null && !allowed(chunk.NoteId))
+                continue;
+
+            if (!notes.TryGetValue(chunk.NoteId, out var note))
+                notes[chunk.NoteId] = note = new SimilarNote(own.Count);
+            for (var i = 0; i < own.Count; i++)
+            {
+                var similarity = EmbeddingVector.Dot(own[i].Vector, chunk.Vector);
+                if (similarity > note.Best[i])
+                    note.Best[i] = similarity;
+                if (similarity > note.BestChunkSimilarity)
+                {
+                    note.BestChunkSimilarity = similarity;
+                    note.BestChunk = chunk;
+                }
+            }
+        }
+
+        return notes
+            .Select(n => new NoteMatch(n.Key, n.Value.Best.Average(), n.Value.BestChunk.NoteChunkId, n.Value.BestChunk.SourceType))
+            .Where(m => m.Similarity >= minSimilarity)
+            .OrderByDescending(m => m.Similarity)
+            .ThenBy(m => m.NoteId)
+            .ToList();
+    }
+
+    private sealed class SimilarNote
+    {
+        public SimilarNote(int ownChunks)
+        {
+            Best = Enumerable.Repeat(-1f, ownChunks).ToArray();
+        }
+
+        // For each fragment of the note, its best similarity with this note's fragments.
+        public float[] Best { get; }
+        public float BestChunkSimilarity { get; set; } = float.MinValue;
+        public NoteChunkVectorDto BestChunk { get; set; }
     }
 
     /// <summary>

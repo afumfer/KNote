@@ -145,6 +145,28 @@ public class SemanticSearchController : ControllerBase
         }
     }
 
+    // The notes most similar to a note, not related to it yet (calculated, not saved). Any user.
+    [HttpGet("notes/{noteId}/similar")]
+    public async Task<IActionResult> GetSimilarNotes(Guid noteId)
+    {
+        try
+        {
+            var resApi = await _service.SemanticSearch.GetSimilarNotesAsync(noteId, HttpContext.RequestAborted);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (OperationCanceledException) when (HttpContext.RequestAborted.IsCancellationRequested)
+        {
+            return new EmptyResult();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetSimilarNotes at {dateTime}.", DateTime.Now);
+            var resApi = new Result<SemanticSearchResultDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     // Removes the index of another model (?key=, the index key: it has ':' and '@').
     [HttpDelete("index")]
     [Authorize(Roles = "Admin")]

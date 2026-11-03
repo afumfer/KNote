@@ -54,7 +54,7 @@ public class CommandAuthorizationMatrixTests
             // KNote Atlas: the state of the semantic index, bringing it up to date before a search (derived data) and the
             // search by meaning.
             "KntSemanticSearchGetIndexStatusAsyncCommand", "KntSemanticSearchRefreshPendingAsyncCommand",
-            "KntSemanticSearchSearchAsyncCommand",
+            "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).

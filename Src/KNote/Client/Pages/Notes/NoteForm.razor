@@ -221,6 +221,16 @@
                                         OnDelete="t => tabsSaving.RunAsync(() => OnDeleteTraceNote(t))"
                                         OnOpenNote="OnOpenTraceNote">
                         </NoteTraceNotes>
+                        @* KNote Atlas: calculated when the tab is shown (this content is drawn only then), not when the
+                           note is opened. *@
+                        @if (!Note.IsNew())
+                        {
+                            <div class="rz-mt-4">
+                                <NoteSimilarNotes @ref="similarNotes" NoteId="Note.NoteId" Busy="tabsSaving.IsBusy"
+                                                  OnRelate="hit => tabsSaving.RunAsync(() => OnRelateSimilarNote(hit))"
+                                                  OnOpenNote="OnOpenSimilarNote" />
+                            </div>
+                        }
                     }
                 </ChildContent>
             </RadzenTabsItem>
@@ -253,6 +263,7 @@
     private List<UserDto>? users;
     private List<KMessageDto>? alarms;
     private NoteTraceNotesDto? traceNotes;
+    private NoteSimilarNotes? similarNotes;
     // Read the first time a trace note is added or edited.
     private List<TraceNoteTypeDto>? traceNoteTypes;
 
@@ -742,8 +753,29 @@
                KntDialogs.Framed(KntDialogs.Medium()));
 
         if (result != null)
-            await ShowPanel(5);
+            await ReloadTraceNotesAsync();
     }
+
+    // The relations and, as a note related is not offered as similar any more (or is again, if no longer related), the
+    // similar notes.
+    private async Task ReloadTraceNotesAsync()
+    {
+        await ShowPanel(5);
+        if (similarNotes != null)
+            await similarNotes.ReloadAsync();
+    }
+
+    // KNote Atlas: a new relation from this note to the similar one, already chosen in the editor of relations.
+    private Task OnRelateSimilarNote(NoteSearchHitDto note) =>
+        OpenTraceNoteEditor(new TraceNoteInfoDto
+        {
+            Weight = 1,
+            RelatedNoteId = note.NoteId,
+            RelatedNoteNumber = $"#{note.NoteNumber}",
+            RelatedNoteTopic = note.Topic
+        }, outgoing: true);
+
+    private Task OnOpenSimilarNote(NoteSearchHitDto note) => kntWindows.OpenEditAsync(note.NoteId);
 
     private async Task<bool> SaveTraceNote(TraceNoteDto traceNote)
     {
@@ -762,7 +794,7 @@
 
         var result = await webApiService.Notes.DeleteTraceNoteAsync(traceNote.TraceNoteId);
         if (result.IsValid)
-            await ShowPanel(5);
+            await ReloadTraceNotesAsync();
     }
 
     // The other note of the relation, in its own window (as ClientWin opens it in its note editor). Nothing is awaited

@@ -229,6 +229,55 @@ internal static class KntSemanticIndexer
         }
     }
 
+    /// <summary>
+    /// Brings one note up to date before its similar notes are calculated (D3 of delivery 0.5): only if it is pending
+    /// (no rows of the index, rows marked as Stale or the note modified after them) and no other run goes on in its
+    /// database. A failure is logged and its previous vectors serve; false then, or if nothing was done.
+    /// </summary>
+    public static async Task<bool> RefreshNoteAsync(IKntService service, Guid noteId, CancellationToken cancellationToken = default)
+    {
+        var resModels = await service.SystemValues.GetRepositoryAiModelsAsync();
+        var indexKey = resModels.IsValid ? resModels.Entity.GetIndexKey() : null;
+        var generator = indexKey == null ? null : service.EmbeddingGenerators?.Find(resModels.Entity.EmbeddingModel);
+        if (generator == null)
+            return false;
+
+        var runLock = RunLocks.GetOrAdd(service.RepositoryRef?.ConnectionString ?? "", _ => new SemaphoreSlim(1, 1));
+        if (!await runLock.WaitAsync(0, cancellationToken))
+            return false;
+        try
+        {
+            var repository = service.Repository.SemanticIndex;
+            var resNote = await service.Notes.GetAsync(noteId);
+            var note = resNote.Entity;
+            if (note == null)
+                return false;
+            var excluded = await KntSystemNotes.GetSystemNoteTypeIdsAsync(service.Repository);
+            if (note.NoteTypeId != null && excluded.Contains(note.NoteTypeId.Value))
+                return false;
+
+            var rows = (await repository.GetNoteChunksAsync(noteId, indexKey)).Entity ?? new List<NoteChunkDto>();
+            var pending = rows.Count == 0 || rows.Any(r => r.Stale) || note.ModificationDateTime > rows.Min(r => r.IndexedDateTime);
+            if (!pending)
+                return false;
+
+            var state = await KntSemanticIndexState.ReadAsync(service);
+            var rebuildSince = state?.IndexKey == indexKey ? state.RebuildSince : null;
+            var run = new Run(service, repository, generator, indexKey, resModels.Entity.EmbeddingDimensions, rebuildSince);
+            await run.IndexNoteAsync(noteId, cancellationToken);
+            return true;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            service.Logger?.LogWarning(ex, "Semantic index of the note {noteId} of {repository}", noteId, service.RepositoryRef?.Name);
+            return false;
+        }
+        finally
+        {
+            runLock.Release();
+        }
+    }
+
     #region Marking notes as changed
 
     /// <summary>

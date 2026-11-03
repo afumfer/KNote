@@ -226,18 +226,21 @@ public class Store
     /// Whether the search by meaning can be offered in a repository (KNote Atlas): a semantic index with notes and this
     /// installation with its model (SemanticIndexTexts.CanSearch). Without it, the search panels only search by words.
     /// </summary>
-    public async Task<bool> CanSearchByMeaningAsync(ServiceRef serviceRef)
+    public Task<bool> CanSearchByMeaningAsync(ServiceRef serviceRef) =>
+        serviceRef == null ? Task.FromResult(false) : CanSearchByMeaningAsync(serviceRef.Service);
+
+    public async Task<bool> CanSearchByMeaningAsync(IKntService service)
     {
-        if (serviceRef == null)
+        if (service == null)
             return false;
         try
         {
-            var status = await serviceRef.Service.SemanticSearch.GetIndexStatusAsync();
+            var status = await service.SemanticSearch.GetIndexStatusAsync();
             return status.IsValid && SemanticIndexTexts.CanSearch(status.Entity);
         }
         catch (Exception ex)
         {
-            Logger?.LogWarning(ex, "The semantic index of {repository} could not be read.", serviceRef.Name);
+            Logger?.LogWarning(ex, "The semantic index of {repository} could not be read.", service.RepositoryRef?.Name);
             return false;
         }
     }

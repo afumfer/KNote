@@ -16,6 +16,7 @@ internal class FakeKntSemanticSearchService : IKntSemanticSearchService
     public Func<SemanticIndexRefreshRequest, Task<Result<SemanticIndexProgressDto>>>? RefreshPendingAsyncImpl { get; set; }
     public Func<string, Task<Result>>? DeleteModelIndexAsyncImpl { get; set; }
     public Func<SemanticSearchRequestDto, Task<Result<SemanticSearchResultDto>>>? SearchAsyncImpl { get; set; }
+    public Func<Guid, Task<Result<SemanticSearchResultDto>>>? GetSimilarNotesAsyncImpl { get; set; }
 
     public Task<Result<SemanticIndexStatusDto>> GetIndexStatusAsync() =>
         (GetIndexStatusAsyncImpl ?? throw new NotSupportedException($"{nameof(GetIndexStatusAsync)} not configured for this test"))();
@@ -31,4 +32,7 @@ internal class FakeKntSemanticSearchService : IKntSemanticSearchService
 
     public Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default) =>
         (SearchAsyncImpl ?? throw new NotSupportedException($"{nameof(SearchAsync)} not configured for this test"))(request);
+
+    public Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default) =>
+        (GetSimilarNotesAsyncImpl ?? throw new NotSupportedException($"{nameof(GetSimilarNotesAsync)} not configured for this test"))(noteId);
 }

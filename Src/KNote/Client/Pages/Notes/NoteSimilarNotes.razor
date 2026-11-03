@@ -1,0 +1,159 @@
+@using KNote.Model
+
+@implements IDisposable
+
+@inject IStore store
+@inject TooltipService tooltipService
+
+@* The notes most similar to a note (KNote Atlas): calculated when shown (the Trace notes tab of the editor, the dialog
+   of the viewers), not saved. Nothing at all where the server can't search by meaning (SemanticIndexTexts.CanSearch).
+   Each one with its similarity, the mark of a possible duplicate and the start of its most similar fragment (whole in
+   the tooltip); a click (or Enter) opens it and, in the editor, «Relate» relates it to the note. *@
+
+@if (available)
+{
+    <section class="knt-similar-panel" aria-label="Similar notes">
+        @if (ShowHeader)
+        {
+            <div class="knt-similar-panel-head">
+                <span class="knt-similar-panel-icon"><RadzenIcon Icon="@Icon" /></span>
+                <div>
+                    <h3 class="knt-similar-panel-title">Similar notes</h3>
+                    <div class="knt-similar-panel-description">The notes that talk about the same, not related to this one yet.</div>
+                </div>
+            </div>
+        }
+
+        @if (loading)
+        {
+            <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" ShowValue="false" Style="height: 0.25rem" />
+            <div class="knt-similar-panel-description rz-pt-2">Looking for similar notes…</div>
+        }
+        else if (error != null)
+        {
+            <div class="knt-load-error">
+                <span class="knt-load-error-text"><RadzenIcon Icon="error" /> @error</span>
+                <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="ReloadAsync" />
+            </div>
+        }
+        else if (notes.Count == 0)
+        {
+            <div class="knt-empty-state">
+                <RadzenIcon Icon="@Icon" />
+                <div class="knt-empty-state-title">No similar notes</div>
+                <div class="knt-empty-state-text">No other note not related to this one is @SemanticSearchRules.MinSimilarNotes.ToString("0.00") or more similar.</div>
+            </div>
+        }
+        else
+        {
+            <div class="knt-similar-list" role="list">
+                @foreach (var note in notes)
+                {
+                    <div class="knt-similar" role="listitem" tabindex="0"
+                         @ondblclick="() => OnOpenNote.InvokeAsync(note)" @onkeydown="@(e => OnKey(e, note))">
+                        <span class="knt-similar-value">@note.Similarity.ToString("0.00")</span>
+                        <div class="knt-similar-body">
+                            <div class="knt-similar-title">
+                                <span class="knt-similar-number">#@note.NoteNumber</span> @note.Topic
+                                @if (SemanticSearchRules.IsPossibleDuplicate(note.Similarity))
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" Text="Possible duplicate" class="rz-ms-2" />
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(note.Fragment))
+                            {
+                                <RadzenText TagName="TagName.Div" class="knt-similar-fragment"
+                                            MouseEnter="@(args => tooltipService.Open(args, note.Fragment, FragmentTooltip))">@note.Fragment</RadzenText>
+                            }
+                        </div>
+                        <div class="knt-similar-actions">
+                            <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                          Click="() => OnOpenNote.InvokeAsync(note)" MouseEnter="@(args => tooltipService.Open(args, "Open note"))" />
+                            @if (OnRelate.HasDelegate)
+                            {
+                                <RadzenButton Text="Relate" Icon="add_link" Variant="Variant.Text" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                              Click="() => OnRelate.InvokeAsync(note)" Disabled="@Busy"
+                                              MouseEnter="@(args => tooltipService.Open(args, "Relate it to this note"))" />
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+}
+
+@code {
+    public const string Icon = "join_inner";
+
+    [Parameter][EditorRequired] public Guid NoteId { get; set; }
+    // The title and the line of what it is (not in the dialog, which has its own).
+    [Parameter] public bool ShowHeader { get; set; } = true;
+    // Opens the note (its editor or its viewer).
+    [Parameter] public EventCallback<NoteSearchHitDto> OnOpenNote { get; set; }
+    // Relates the note to this one (only where this note can be edited: the editor).
+    [Parameter] public EventCallback<NoteSearchHitDto> OnRelate { get; set; }
+    // A change being saved (NoteForm): relating waits for it.
+    [Parameter] public bool Busy { get; set; }
+
+    private static readonly TooltipOptions FragmentTooltip = new() { Position = TooltipPosition.Bottom, Style = "max-width: 32rem; white-space: normal" };
+
+    private bool? canSearch;
+    private bool available;
+    private bool loading;
+    private string? error;
+    private List<NoteSearchHitDto> notes = new();
+    private Guid loadedNoteId;
+    private readonly KntLatestRequest similar = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (NoteId == loadedNoteId)
+            return;
+        loadedNoteId = NoteId;
+        await ReloadAsync();
+    }
+
+    /// <summary>Calculates them again (e.g. after relating one: it is not similar-and-unrelated any more).</summary>
+    public async Task ReloadAsync()
+    {
+        if (canSearch == null)
+        {
+            var status = await store.SemanticSearch.GetIndexStatusAsync(disposal.Token);
+            if (disposal.IsCancellationRequested)
+                return;
+            canSearch = status.IsValid && SemanticIndexTexts.CanSearch(status.Entity);
+        }
+        available = canSearch == true && NoteId != Guid.Empty;
+        if (!available)
+            return;
+
+        loading = true;
+        error = null;
+        StateHasChanged();
+        var noteId = NoteId;
+        var result = await similar.RunAsync(ct => store.SemanticSearch.GetSimilarNotesAsync(noteId, ct));
+        if (result.Canceled)
+            return;
+        loading = false;
+        if (result.Value.IsValid)
+            notes = result.Value.Entity.Notes;
+        else
+            error = result.Value.ErrorMessage;
+        StateHasChanged();
+    }
+
+    private async Task OnKey(KeyboardEventArgs e, NoteSearchHitDto note)
+    {
+        if (e.Key == "Enter")
+            await OnOpenNote.InvokeAsync(note);
+    }
+
+    public void Dispose()
+    {
+        similar.Dispose();
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

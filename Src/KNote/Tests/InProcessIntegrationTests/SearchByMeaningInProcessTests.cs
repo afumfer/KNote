@@ -11,9 +11,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace KNote.Tests.InProcessIntegrationTests;
 
 /// <summary>
-/// The search by meaning through the API (POST api/semantic/search, KNote Atlas 0.4), with a fake embedding model in the
-/// Server: any user searches, also with a filter, and gets the notes with their similarity and fragment. A host of its
-/// own: the index is created here (SemanticIndexInProcessTests starts from a repository without one).
+/// The search by meaning through the API (POST api/semantic/search, KNote Atlas 0.4) and the similar notes of a note (GET
+/// api/semantic/notes/{id}/similar, 0.5), with a fake embedding model in the Server: any user searches, also with a
+/// filter, and gets the notes with their similarity and fragment, and the similar notes. A host of its own: the index is
+/// created here (SemanticIndexInProcessTests starts from a repository without one).
 /// </summary>
 [TestClass]
 public class SearchByMeaningInProcessTests
@@ -66,6 +67,33 @@ public class SearchByMeaningInProcessTests
         Assert.IsTrue(hit.Similarity >= SemanticSearchRules.MinSimilarity);
         StringAssert.Contains(hit.Fragment, "keyboard membrane");
         Assert.AreEqual(0, filtered.Notes.Count, "only among the notes of the filter");
+    }
+
+    [TestMethod]
+    public async Task AGuest_GetsTheSimilarNotesOfANote()
+    {
+        // Their own words: the searches of the other tests do not find them.
+        var service = _factory.CreateServiceForRepository(0);
+        service.EmbeddingGenerators = new FakeEmbeddingGenerators(Model);
+        var homeId = (await service.Folders.GetHomeAsync()).Entity.FolderId;
+        var notes = new List<NoteDto>();
+        foreach (var topic in new[] { "Amstrad cassette deck", "Amstrad cassette deck again" })
+        {
+            var note = (await service.Notes.NewAsync()).Entity;
+            note.Topic = topic;
+            note.Description = "Cleaned the cassette head and replaced the drive belt of the datacorder.";
+            note.FolderId = homeId;
+            notes.Add((await service.Notes.SaveAsync(note)).Entity);
+        }
+        Assert.IsTrue((await service.SemanticSearch.RunIndexAsync(new SemanticIndexRunRequest())).IsValid);
+        using var guest = await GuestClientAsync();
+
+        var similar = await ReadAsync<SemanticSearchResultDto>(await guest.GetAsync($"api/semantic/notes/{notes[0].NoteId}/similar"));
+        var unknown = await guest.GetAsync($"api/semantic/notes/{Guid.NewGuid()}/similar");
+
+        Assert.AreEqual(notes[1].NoteId, similar.Notes.First().NoteId);
+        Assert.IsTrue(similar.Notes.All(n => n.NoteId != notes[0].NoteId));
+        Assert.AreEqual(HttpStatusCode.BadRequest, unknown.StatusCode);
     }
 
     [TestMethod]

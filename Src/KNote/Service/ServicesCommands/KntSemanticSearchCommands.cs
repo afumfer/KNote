@@ -196,38 +196,10 @@ public class KntSemanticSearchSearchAsyncCommand : KntCommandServiceBase<Semanti
     public override async Task<Result<SemanticSearchResultDto>> Execute()
     {
         var result = new Result<SemanticSearchResultDto>();
-        var index = Repository.SemanticIndex;
 
-        var resModels = await Service.SystemValues.GetRepositoryAiModelsAsync();
-        if (!resModels.IsValid)
-        {
-            result.AddListErrorMessage(resModels.ListErrorMessage);
+        var index = await KntSemanticSearcher.OpenAsync(Service, result);
+        if (index == null)
             return result;
-        }
-        var models = resModels.Entity;
-        var indexKey = models.GetIndexKey();
-        if (indexKey == null)
-        {
-            result.AddErrorMessage("The repository has no embedding model (KNote Atlas, repository's AI models).");
-            return result;
-        }
-        var generator = Service.EmbeddingGenerators?.Find(models.EmbeddingModel);
-        if (generator == null)
-        {
-            result.AddErrorMessage($"This installation has no embeddings provider with the model {models.EmbeddingModel} (AI providers).");
-            return result;
-        }
-        var resWatermark = await index.GetIndexWatermarkAsync(indexKey);
-        if (!resWatermark.IsValid)
-        {
-            result.AddListErrorMessage(resWatermark.ListErrorMessage);
-            return result;
-        }
-        if (resWatermark.Entity.Count == 0)
-        {
-            result.AddErrorMessage("The repository has no semantic index yet (KNote Atlas, semantic index).");
-            return result;
-        }
 
         // D8. Its failures (a note, the provider) do not stop the search: the vectors there are serve.
         await KntSemanticIndexer.RunAsync(Service, new KntSemanticIndexer.Options
@@ -241,63 +213,95 @@ public class KntSemanticSearchSearchAsyncCommand : KntCommandServiceBase<Semanti
         float[] query;
         try
         {
-            var vectors = await generator.GenerateAsync(new[] { SemanticSearchRules.QueryText(models.QueryInstruction, Param.Text) }, _cancellationToken);
+            var models = index.Models;
+            var vectors = await index.Generator.GenerateAsync(new[] { SemanticSearchRules.QueryText(models.QueryInstruction, Param.Text) }, _cancellationToken);
             if (vectors == null || vectors.Count != 1)
                 throw new KntServiceException($"The model gave {vectors?.Count ?? 0} vectors for 1 text.");
             query = EmbeddingVector.Normalize(vectors[0], models.EmbeddingDimensions);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            result.AddErrorMessage($"The model {models.EmbeddingModel} could not calculate the vector of the search: {ex.Message}");
+            result.AddErrorMessage($"The model {index.Models.EmbeddingModel} could not calculate the vector of the search: {ex.Message}");
             return result;
         }
 
-        var snapshot = await KntSemanticIndexCache.For(Service.RepositoryRef?.ConnectionString ?? "", indexKey)
-            .GetAsync(index, indexKey, _cancellationToken);
-
-        var filter = Param.Filter?.GetSimpleDto<NotesFilterDto>() ?? new NotesFilterDto();
-        filter.PageIdentifier = new PageIdentifier();
-        filter.OrderColumn = null;
-        var resNotes = await Service.Notes.GetFilterMinimalAsync(filter);
-        if (!resNotes.IsValid)
-        {
-            result.AddListErrorMessage(resNotes.ListErrorMessage);
+        var snapshot = await KntSemanticSearcher.VectorsAsync(Service, index, _cancellationToken);
+        var notes = await KntSemanticSearcher.AllowedNotesAsync(Service, Param.Filter, result);
+        if (notes == null)
             return result;
-        }
-        var notes = resNotes.Entity.GroupBy(n => n.NoteId).ToDictionary(g => g.Key, g => g.First());
 
         var matches = SemanticSearchRules.Rank(snapshot.Chunks, query, SemanticSearchRules.MinSimilarity, notes.ContainsKey)
             .Take(SemanticSearchRules.MaxResults)
             .ToList();
 
-        var contents = new Dictionary<Guid, string>();
-        if (matches.Count > 0)
+        result.Entity = await KntSemanticSearcher.ResultAsync(Service, index, matches, notes, result);
+        return result;
+    }
+}
+
+// The notes similar to a note (delivery 0.5, decisions D1-D4): its fragments compared with the other notes' ones in the
+// cache of vectors (SemanticSearchRules.RankSimilar), at most MaxSimilarNotes from MinSimilarNotes. Before, only this
+// note is brought up to date if it is pending (not 50 others: the Trace notes tab opens fast). The note itself, the
+// notes already related to it (both ways) and the system ones never come out; the notes that can come out are the
+// filter's of always, as in the search.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntSemanticSearchGetSimilarNotesAsyncCommand : KntCommandServiceBase<Guid, Result<SemanticSearchResultDto>>
+{
+    private readonly CancellationToken _cancellationToken;
+
+    public KntSemanticSearchGetSimilarNotesAsyncCommand(IKntService service, Guid noteId, CancellationToken cancellationToken)
+        : base(service, noteId)
+    {
+        _cancellationToken = cancellationToken;
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == Guid.Empty)
+            result.AddErrorMessage("The note is required.");
+        return result;
+    }
+
+    public override async Task<Result<SemanticSearchResultDto>> Execute()
+    {
+        var result = new Result<SemanticSearchResultDto>();
+
+        var index = await KntSemanticSearcher.OpenAsync(Service, result);
+        if (index == null)
+            return result;
+
+        var resNote = await Service.Notes.GetAsync(Param);
+        if (resNote.Entity == null)
         {
-            var resContents = await index.GetChunkContentsAsync(matches.Select(m => m.NoteChunkId).ToList());
-            if (!resContents.IsValid)
-            {
-                result.AddListErrorMessage(resContents.ListErrorMessage);
-                return result;
-            }
-            contents = resContents.Entity.ToDictionary(c => c.NoteChunkId, c => c.Content);
+            result.AddErrorMessage("The note does not exist.");
+            return result;
         }
 
-        var found = new SemanticSearchResultDto();
-        foreach (var match in matches)
+        await KntSemanticIndexer.RefreshNoteAsync(Service, Param, _cancellationToken);
+
+        var snapshot = await KntSemanticSearcher.VectorsAsync(Service, index, _cancellationToken);
+        if (!snapshot.Notes.TryGetValue(Param, out var noteChunks))
         {
-            var hit = notes[match.NoteId].GetSimpleDto<NoteSearchHitDto>();
-            hit.Similarity = match.Similarity;
-            hit.Fragment = SemanticSearchRules.Fragment(contents.GetValueOrDefault(match.NoteChunkId));
-            hit.FragmentSource = match.SourceType;
-            found.Notes.Add(hit);
+            result.AddErrorMessage("This note is not in the semantic index yet.");
+            return result;
         }
 
-        var excluded = await KntSystemNotes.GetSystemNoteTypeIdsAsync(Repository);
-        var resSummary = await index.GetIndexSummaryAsync(indexKey, excluded);
-        if (resSummary.IsValid)
-            found.PendingNotes = resSummary.Entity.PendingNotes;
+        var related = new HashSet<Guid>();
+        foreach (var traceNotes in new[] { await Service.Notes.GetTraceNotesFromAsync(Param), await Service.Notes.GetTraceNotesToAsync(Param) })
+            foreach (var traceNote in traceNotes.Entity ?? new List<TraceNoteDto>())
+                related.Add(traceNote.FromId == Param ? traceNote.ToId : traceNote.FromId);
 
-        result.Entity = found;
+        var notes = await KntSemanticSearcher.AllowedNotesAsync(Service, null, result);
+        if (notes == null)
+            return result;
+
+        var matches = SemanticSearchRules.RankSimilar(noteChunks, snapshot.Chunks, SemanticSearchRules.MinSimilarNotes,
+                id => notes.ContainsKey(id) && !related.Contains(id))
+            .Take(SemanticSearchRules.MaxSimilarNotes)
+            .ToList();
+
+        result.Entity = await KntSemanticSearcher.ResultAsync(Service, index, matches, notes, result);
         return result;
     }
 }

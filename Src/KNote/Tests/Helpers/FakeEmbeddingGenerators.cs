@@ -5,13 +5,14 @@ namespace KNote.Tests.Helpers;
 
 /// <summary>
 /// The embedding models of a test "installation" (IKntService.EmbeddingGenerators), without any AI provider: the
-/// models it has, by name, whose generators give a deterministic vector derived from the words of each text (Vector),
+/// models it has, by name, whose generators give a deterministic vector derived from the words of each text (Vector;
+/// 1024 dimensions, as qwen3-embedding:0.6b: with fewer, long texts with different words came out similar by collisions),
 /// not normalized. It keeps the texts it was asked for, can fail with some of them (FailWhen) and can wait before
 /// answering (BeforeGenerate), for the tests of the semantic index.
 /// </summary>
 internal sealed class FakeEmbeddingGenerators : IKntEmbeddingGenerators
 {
-    public const int Dimensions = 64;
+    public const int Dimensions = 1024;
 
     private readonly List<string> _models;
 

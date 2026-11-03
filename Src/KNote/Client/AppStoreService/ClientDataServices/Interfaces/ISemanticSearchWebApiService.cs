@@ -23,4 +23,6 @@ public interface ISemanticSearchWebApiService
     Task<Result<bool>> DeleteModelIndexAsync(string indexKey);
     // The notes most similar to a text, among all of them or the ones of a filter (any user): not paged.
     Task<Result<SemanticSearchResultDto>> SearchAsync(SemanticSearchRequestDto request, CancellationToken cancellationToken = default);
+    // The notes most similar to a note, not related to it yet (any user). Errors not notified: the list shows them.
+    Task<Result<SemanticSearchResultDto>> GetSimilarNotesAsync(Guid noteId, CancellationToken cancellationToken = default);
 }
