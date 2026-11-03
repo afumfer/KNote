@@ -337,7 +337,40 @@ Proveedores: sección `ai.providers` de `appsettings.json`, con los mismos campo
 predefinido. Las `apiKey` no van en `appsettings.json`: user-secrets (`ai:providers:0:apiKey`, por posición) o,
 si están vacías, las variables `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (`AiChatClientFactory.ResolveApiKey`).
 `Ai/IAiChatClientProvider` construye el `IChatClient` (`AiChatClientFactory` de `KNote.Ai`); existe para que los
-tests lo sustituyan.
+tests lo sustituyan. Los proveedores con `kind` = `Embeddings` no son del asistente (`AiProvidersCatalog.Default/Find/
+GetInfo` solo ven los de chat): son los modelos de embeddings del Server (ver la sección siguiente); `contextWindow` es el
+`num_ctx` del chat de Ollama.
+
+## Índice semántico y búsqueda por significado (`SemanticSearchController`, `api/semantic`)
+
+KNote Atlas, etapa 0 (la lógica está en `Service`, ver «Índice semántico» en el `CLAUDE.md` raíz). Todo actúa sobre el
+repositorio de la sesión.
+
+- **Modelos de embeddings del Server**: `KntAddAiAssistant` registra un `IKntEmbeddingGenerators` singleton
+  (`AiEmbeddingGenerators` de `KNote.Ai` sobre `AiProvidersCatalog.EmbeddingProviders`, leído cada vez: en KNote Local
+  cambian al guardar) y `KntAddServices` lo pone en el `IKntService` de cada petición. Sin proveedores de embeddings no hay búsqueda por
+  significado (los endpoints responden con un error claro).
+- **Endpoints**: `GET models` (los modelos del repositorio, con si esta instalación los tiene) y `POST models` (Admin);
+  `GET installation-models` (Admin: los modelos de chat y de embeddings del Server, para el editor); `GET status`;
+  `POST index` (Admin: crear / actualizar o, con `rebuild`, rehacer, en segundo plano), `GET index/progress`,
+  `POST index/cancel` y `DELETE index?key=` (Admin: borra el índice de otro modelo); `POST search`
+  (`SemanticSearchRequestDto`, cualquier usuario, cancelada con la petición) y `GET notes/{id}/similar` (cualquier
+  usuario); `GET evaluation`, `POST evaluation/query` y `POST evaluation/report` (ProjectManager y Admin: el
+  laboratorio de evaluación, una consulta por petición). `NotesController.Search`/`Filter` no cambian. Los informes
+  (`api/reports`) de una lista por significado repiten la búsqueda (`NotesListReportRequestDto.SearchMode`) y llevan la
+  columna Similarity.
+- **Trabajos de índice** (`Helpers/SemanticIndexJobs`, `KntAddSemanticIndex`, `BackgroundService` singleton): **una cola
+  para todo el Server y un trabajo a la vez**, sea del repositorio que sea (con un solo Ollama, dos a la vez solo
+  compiten por el modelo), y un trabajo por repositorio, en marcha o en cola (pedir otro devuelve el que hay; los que
+  esperan salen «Queued» con su posición). Cada trabajo crea **su propio** `IKntService` del repositorio con el usuario
+  que lo pidió (el de la petición se libera al terminarla) y los modelos del Server. El progreso del último trabajo de
+  cada repositorio se guarda en memoria; cada usuario ve y cancela solo el del repositorio de su sesión. Un trabajo que
+  falla no para la cola. Mientras un repositorio tiene un trabajo, su búsqueda no pone pendientes al día.
+- **KNote Local**: `api/local` guarda `kind` y `contextWindow` de los proveedores y `POST api/local/ai/test` prueba uno
+  (`AiProviderTester`; sin clave, con la guardada).
+- Tests: `Tests/InProcessIntegrationTests/SemanticIndexInProcessTests`, `SemanticIndexJobsTests`,
+  `SemanticSearchInProcessTests` (modelos) y `SearchByMeaningInProcessTests` (búsqueda, parecidas, informes y
+  evaluación), con un generador falso (`TestServices` de `KNoteWebApplicationFactory`).
 
 ## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
 

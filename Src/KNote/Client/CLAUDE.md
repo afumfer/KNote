@@ -220,10 +220,43 @@ validación que ambas UIs usan directamente:
   SQL Server, y `LocalRepositoryRename`), `LocalAiProviders` (la lista entera se guarda en cada cambio; el primero es el
   predeterminado; diálogo `LocalAiProviderEdit`, la clave nunca vuelve y vacía la conserva), `LocalEmailSettings` (SMTP y
   el interruptor de las alarmas Email) y `LocalServerSettings` (dirección, carpeta de datos, versión, puerto y "Stop
-  local server"). El servidor responde con la lista tal como queda tras cada cambio de repositorios.
+  local server"). El servidor responde con la lista tal como queda tras cada cambio de repositorios. Cada proveedor de
+  IA tiene `Kind` («Chat» / «Embeddings», KNote Atlas), «Context size» (solo el chat de Ollama) y el botón «Test»
+  (`POST api/local/ai/test`).
 - **Instalable como app** (Chrome, Edge, Safari, también en modo servidor): `wwwroot/manifest.webmanifest`,
   `icons/icon-192.png`/`icon-512.png` (dibujados con la forma de `KntLogo` y `--knt-brand`) e `icon.svg`, enlazados en
   `index.html` (con `theme-color` y `apple-touch-icon`). Sin *service worker*: no hace falta para instalarla.
+
+## KNote Atlas: búsqueda por significado (`Pages/Atlas`, `IStore.SemanticSearch`)
+
+Etapa 0 de KNote Atlas (la lógica está en `Service`, ver «Índice semántico» en el `CLAUDE.md` raíz; la API en
+`Server/CLAUDE.md`). Todo llama a `api/semantic` a través de `ISemanticSearchWebApiService`, con las reglas de
+`KntSingleFlight`/`KntLatestRequest`. **Lo que depende del índice solo aparece si se puede usar**
+(`SemanticIndexTexts.CanSearch` sobre `GetIndexStatusAsync`: hay filas y el Server tiene su modelo); los textos del
+estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexTexts`, comunes con `ClientWin`.
+
+- **Administración** (pestaña **KNote Atlas** de `Admin.razor`, `KntSections.Atlas`, Admin): `AtlasIndex` con dos
+  secciones que leen y guardan cada una lo suyo: `AtlasRepositoryModels` (los modelos del repositorio, con los avisos de
+  modelo que el Server no tiene o que es de pago, de `installation-models`) y `AtlasSemanticIndex` (estado, «Create
+  index» / «Update now», «Rebuild», «Cancel», el progreso con sus errores, que se consulta mientras dura, y los índices
+  de otros modelos con su botón para borrarlos). Guardar los modelos vuelve a leer el estado del índice.
+- **Búsqueda** (`NotesSearch.razor`): selector «Words / Meaning» (`RadzenSelectBar`); el modo va en la URL
+  (`mode=meaning`) y en la posición de la lista. Por significado no hay paginación en el Server: `KntMeaningSearchPages`
+  hace la búsqueda con la primera página que pide `NotesGrid` y le da las demás en memoria, ordenadas con
+  `NoteListSorter` (sin orden, de más a menos parecida). `NotesGrid.ShowSimilarity` añade las columnas «Similarity» y
+  «Fragment» (no se ordenan con su cabecera). Encima, el aviso de las notas sin poner al día con «Update index» (la
+  misma búsqueda otra vez). **Filtro** (`NotesFilterCriteria.razor`): campo «Talks about…» (`NotesFilterDto.MeaningText`);
+  con texto, la lista es la de la búsqueda por significado entre las notas del filtro. Imprimir y exportar repiten la
+  búsqueda en el Server.
+- **Notas parecidas**: `Pages/Notes/NoteSimilarNotes.razor` (parecido, número, tema, «Possible duplicate», fragmento; doble
+  clic o Enter la abre). En `NoteForm`, debajo de las relaciones de la pestaña «Trace notes» (se calcula al abrir la
+  pestaña), con «Relate», que abre `NoteTraceNoteEditor` con la nota ya elegida y al guardar vuelve a calcular. En
+  `NoteViewer`, el botón «Similar notes» abre `NoteSimilarNotesDialog` (sin «Relate»).
+- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, ruta `atlas/evaluation`, `KntSections.SearchEvaluation`, entrada
+  del menú solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
+  «Read again»), las casillas de los índices cuyo modelo tiene el Server y «Also without the query instruction»,
+  «Evaluate» (una petición por consulta, con progreso y «Cancel», que deja el informe de las hechas), el informe
+  (`SearchEvaluationReport.Markdown`, mostrado con `ViewMarkdown`) y «Save as note». No existe en `ClientWin`.
 
 ## Interfaz de usuario: Radzen.Blazor
 

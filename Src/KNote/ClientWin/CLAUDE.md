@@ -646,6 +646,46 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
   (WebView2 incluido). Termínalo con `Environment.Exit`: `Store.SaveConfig()` escribe siempre en
   `%LocalAppData%\KNote`, así que cerrar la ventana como un usuario sobrescribiría la configuración real.
 
+## KNote Atlas: búsqueda por significado
+
+Etapa 0 de KNote Atlas (la lógica está en `Service`, ver «Índice semántico» en el `CLAUDE.md` raíz). Los textos del
+estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexTexts`, comunes con la Web.
+
+- **Proveedores de IA** (`AiProviderEditorCtrl` y su vista, **Tools → Manage AI providers**): «Kind» (chat o embeddings,
+  `AiProviderRef.Kind`), «Context size» (solo el chat de Ollama) y «Test» para los dos tipos (`AiProviderTester` de
+  `KNote.Ai`). Las listas de modelos de chat (asistente, `KntServerCOM`) solo usan los de tipo `Chat`. El generador de
+  embeddings de la app es `Store.EmbeddingGenerators` (`AiEmbeddingGenerators` sobre `Settings.Ai.Providers`, leídos
+  cada vez), que `Store.AddServiceRef` pone en cada servicio.
+- **Editor de repositorio** (`RepositoryEditorCtrl`, modo Management, Admin), dos pestañas, desactivadas al crear o
+  enlazar un repositorio: **KNote Atlas** (`RepositoryAiModelsCtrl`, editor incluido, sin `[KntAuthorize]`: los
+  modelos del repositorio con sus avisos y su propio «Save models»; con cambios sin guardar, «Accept» pregunta si
+  guardarlos y «Cancel» si descartarlos) y **Semantic index** (`RepositorySemanticIndexCtrl`, incluido: estado,
+  «Create index» / «Update now», «Rebuild», «Cancel run», progreso con errores, índices de otros modelos con «Remove
+  index»). Van en pestañas separadas porque el editor no tiene alto para los dos.
+- **Indexado** (`Core/SemanticIndexJob`, `Store.SemanticIndex`): un trabajo a la vez en la app, del `Store` y no del
+  editor (el editor se puede cerrar), en el thread pool con el `ServiceRef` del repositorio (el usuario y el rol de la
+  app; la autorización de comandos está activa). Publica el progreso en `Store.Events`
+  (`SemanticIndexProgressChanged`, en el hilo de la UI, unas pocas veces por segundo) para la pestaña y la barra de
+  estado de la ventana principal. Al cerrar la app se cancela (lo hecho se conserva). Mientras dura, la búsqueda de ese
+  repositorio no pone pendientes al día.
+- **Búsqueda** (`NotesSearchParamCtrl`): «Search by: Words / Meaning», solo si el repositorio elegido puede
+  (`Store.CanSearchByMeaningAsync`: índice con filas y su modelo en esta instalación); con «Meaning» se desactivan las
+  opciones de la búsqueda por palabras. `NotesSelectorCtrl` carga la lista con `SemanticSearch.SearchAsync`
+  (`ByMeaning`, `PendingNotes`, `UpdateIndexAsync`); `NotesSelectorForm` muestra «Similarity» y «Fragment» (columnas no
+  enlazadas, con `CellFormatting`; **`AutoGenerateColumns = false` después de configurarlas**: si no, el grid las
+  regeneraba y movía los índices), ordenada por parecido, con el aviso de las notas sin poner al día y «Update index».
+  **Filtro** (`NotesFilterParamCtrl`): «Talks about…», solo si el repositorio puede (oculto, los atributos ocupan su
+  sitio). Imprimir y exportar no llevan el fragmento.
+- **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las
+  relaciones (creada en código, envuelve el `SplitContainer` del Designer), plegada si no hay índice utilizable o la nota
+  es nueva; se calcula al abrir la pestaña y al cambiar de nota o de relaciones con ella abierta.
+  `NoteEditorCtrl.GetSimilarNotesAsync` quita también las relaciones añadidas y aún sin guardar; doble clic abre la nota;
+  «Relate» (no en el editor incrustado ni en modo consulta) abre el editor de relaciones con la nota elegida. Sin botón
+  aparte en la vista previa: es el editor incrustado, que ya tiene la pestaña.
+- **Sin evaluación de la búsqueda**: el laboratorio («Search evaluation») es solo de la Web.
+- Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
+  `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
+
 ## Tests (`ClientWin.Tests`)
 
 Proyecto MSTest hermano (parte de `KNote.slnx`, referencia `ClientWin.csproj` directamente), con su propio

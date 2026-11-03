@@ -99,7 +99,7 @@ En el panel de administración hay una pestaña, **This computer** ("Este equipo
 Desde ella se gestionan:
 
 - **Los repositorios**, como se explica arriba.
-- **Los proveedores de inteligencia artificial**: los servicios (OpenAI, Anthropic u Ollama) que usa el asistente de KNote, con sus **claves de acceso**. Una clave de acceso es como la contraseña que te da uno de esos servicios para que puedas usarlo (y, a menudo, para cobrarte). Una vez guardada, la clave nunca se vuelve a mostrar.
+- **Los proveedores de inteligencia artificial**: los servicios (OpenAI, Anthropic u Ollama) que usa el asistente de KNote y, con el tipo **Embeddings**, la búsqueda por significado (ver *Búsqueda por significado (KNote Atlas)* en el [manual](Manual_es.md)), con sus **claves de acceso** y un botón **Test** que comprueba cada uno. Una clave de acceso es como la contraseña que te da uno de esos servicios para que puedas usarlo (y, a menudo, para cobrarte). Una vez guardada, la clave nunca se vuelve a mostrar.
 - **La cuenta de correo** (el servidor de envío, llamado **SMTP**) para que KNote pueda enviar las alarmas por correo, y el interruptor que activa ese envío.
 - **El puerto**, por si necesitas cambiarlo (se aplica la próxima vez que arranque el servidor).
 - Un botón para **detener el servidor local** si quieres apagarlo del todo.
