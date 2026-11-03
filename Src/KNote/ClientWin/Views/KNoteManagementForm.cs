@@ -16,6 +16,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 
     // The user's details, above the status bar (see ToolStripItemToolTip: the bar's own tooltip flashed there).
     private readonly ToolStripItemToolTip _userToolTip;
+    private readonly ToolStripStatusLabel _statusLabelSemanticIndex;
 
     #endregion
 
@@ -51,6 +52,15 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         _userToolTip = new ToolStripItemToolTip(statusLabelUser, () => _ctrl.SessionUserDetail);
         statusLabelUser.DoubleClickEnabled = true;
         statusLabelUser.DoubleClick += async (s, e) => { _userToolTip.Hide(); await _ctrl.UserProfile(); };
+
+        // The run of the semantic index (KNote Atlas), before the user, only while it goes on.
+        _statusLabelSemanticIndex = new ToolStripStatusLabel
+        {
+            BorderSides = ToolStripStatusLabelBorderSides.Left,
+            Visible = false,
+            ToolTipText = "Its progress, in the Semantic index tab of the repository editor (Tools > Repositories)."
+        };
+        statusBarManagement.Items.Insert(statusBarManagement.Items.IndexOf(statusLabelUser), _statusLabelSemanticIndex);
     }
 
     private void SetIcons()
@@ -155,6 +165,12 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
     public void SetVisibleProgressBar(bool visible)
     {
         progressBar.Visible = visible;
+    }
+
+    public void ShowSemanticIndexProgress(string text)
+    {
+        _statusLabelSemanticIndex.Text = text ?? "";
+        _statusLabelSemanticIndex.Visible = !string.IsNullOrEmpty(text);
     }
 
     public string PromptForValue(string label, string caption)

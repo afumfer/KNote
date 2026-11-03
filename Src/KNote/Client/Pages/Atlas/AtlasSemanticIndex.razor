@@ -1,0 +1,220 @@
+@* The semantic index of the session's repository (CU-03): its status, and creating, updating or rebuilding it in the
+   server's queue (one run at a time for the whole server), with its progress, its cancellation and the indexes of other
+   models kept in the repository. A run goes on when the page is left; coming back shows its progress again. *@
+
+@implements IDisposable
+@inject IStore store
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+
+<KntFormSection Icon="travel_explore" Title="Semantic index"
+                Description="The meaning of every note (its data, text, tasks and described resources), calculated with the repository's embedding model, that the search by meaning uses. The notes that change are updated before each search by meaning or with Update now.">
+    @if (status == null)
+    {
+        @if (loadFailed)
+        {
+            <div class="knt-load-error">
+                <span class="knt-load-error-text">The status of the index could not be read.</span>
+                <RadzenButton Text="Retry" Icon="refresh" Size="ButtonSize.Small" Click="RefreshAsync" />
+            </div>
+        }
+        else
+        {
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+        }
+    }
+    else if (status.IndexKey == null)
+    {
+        <RadzenText TextStyle="TextStyle.Body2">The repository has no embedding model: choose one above to create its index.</RadzenText>
+    }
+    else
+    {
+        <RadzenStack Gap="0.25rem">
+            <RadzenText TextStyle="TextStyle.Body2"><b>@SemanticIndexTexts.Status(status)</b> · model @status.IndexKey</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2">@SemanticIndexTexts.Counts(status)</RadzenText>
+            @if (SemanticIndexTexts.LastCreation(status) is string lastCreation)
+            {
+                <RadzenText TextStyle="TextStyle.Body2">@lastCreation</RadzenText>
+            }
+        </RadzenStack>
+        @if (!status.EmbeddingModelAvailable)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small">
+                This server has no embeddings provider with the model @status.EmbeddingModel: the index cannot be created or updated here.
+            </RadzenAlert>
+        }
+
+        @if (progress != null && (Running || progress.Phase is EnumSemanticIndexPhase.Failed || progress.ErrorsCount > 0))
+        {
+            <div class="rz-mt-2">
+                <RadzenText TextStyle="TextStyle.Body2">@SemanticIndexTexts.Progress(progress)</RadzenText>
+                @if (progress.Phase == EnumSemanticIndexPhase.Indexing)
+                {
+                    <RadzenProgressBar Value="@progress.NotesDone" Max="@Math.Max(1, progress.NotesTotal)" ShowValue="false" Style="height: 0.5rem;" />
+                }
+                else if (Running)
+                {
+                    <RadzenProgressBar Value="100" Mode="ProgressBarMode.Indeterminate" ShowValue="false" Style="height: 0.5rem;" />
+                }
+                @if (progress.Errors.Count > 0)
+                {
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-mt-1">@SemanticIndexTexts.Errors(progress)</RadzenText>
+                    <ul class="rz-mt-0 rz-mb-0">
+                        @foreach (var error in progress.Errors)
+                        {
+                            <li><RadzenText TextStyle="TextStyle.Caption">@error</RadzenText></li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem" class="rz-mt-2">
+            @if (Running)
+            {
+                <RadzenButton Text="Cancel" Icon="stop" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="OnCancel" IsBusy="@acting.IsBusy" />
+            }
+            else
+            {
+                @if (status.Status != EnumSemanticIndexStatus.None)
+                {
+                    <RadzenButton Text="Rebuild" Icon="restart_alt" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                  Disabled="@(!status.EmbeddingModelAvailable)" Click="@(() => OnRun(true))" IsBusy="@acting.IsBusy" />
+                }
+                <RadzenButton Text="@(status.Status == EnumSemanticIndexStatus.None ? "Create index" : "Update now")" Icon="play_arrow" Size="ButtonSize.Small"
+                              Disabled="@(!status.EmbeddingModelAvailable || status.Status == EnumSemanticIndexStatus.Ready && status.PendingNotes == 0)"
+                              Click="@(() => OnRun(false))" IsBusy="@acting.IsBusy" />
+            }
+        </RadzenStack>
+    }
+
+    @if (status?.OtherIndexes.Count > 0)
+    {
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-3"><b>Indexes of other models</b> (kept to compare them)</RadzenText>
+        @foreach (var other in status.OtherIndexes)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenText TextStyle="TextStyle.Body2" Style="flex: 1;">@other.IndexKey · @other.Notes notes · @other.Chunks fragments</RadzenText>
+                <RadzenButton Icon="delete" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Text"
+                              MouseEnter="@(args => tooltipService.Open(args, "Remove this index"))"
+                              Click="@(() => OnDelete(other))" Disabled="@acting.IsBusy" />
+            </RadzenStack>
+        }
+    }
+</KntFormSection>
+
+@code {
+    private SemanticIndexStatusDto? status;
+    private SemanticIndexProgressDto? progress;
+    private AiInstallationModelsDto installation = new();
+    private bool loadFailed;
+    private bool polling;
+    private readonly KntSingleFlight acting = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    private bool Running => progress != null && !progress.IsFinished;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var resInstallation = await store.SemanticSearch.GetInstallationModelsAsync(disposal.Token);
+        if (resInstallation.IsValid && resInstallation.Entity != null)
+            installation = resInstallation.Entity;
+        await RefreshAsync();
+        var resProgress = await store.SemanticSearch.GetIndexProgressAsync(disposal.Token);
+        if (resProgress.IsValid && resProgress.Entity != null)
+        {
+            progress = resProgress.Entity;
+            StartPolling();
+        }
+    }
+
+    // Reads the status again (after the repository's models are saved, too).
+    public async Task RefreshAsync()
+    {
+        loadFailed = false;
+        var res = await store.SemanticSearch.GetIndexStatusAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        loadFailed = !res.IsValid;
+        if (res.IsValid)
+            status = res.Entity;
+        StateHasChanged();
+    }
+
+    private Task OnRun(bool rebuild) => acting.RunAsync(async () =>
+    {
+        if (status == null || !await ConfirmRunAsync(rebuild))
+            return;
+
+        var res = await store.SemanticSearch.RunIndexAsync(rebuild);
+        if (res.IsValid && res.Entity != null)
+        {
+            progress = res.Entity;
+            StartPolling();
+        }
+    });
+
+    private async Task<bool> ConfirmRunAsync(bool rebuild)
+    {
+        var paid = installation.EmbeddingModels.Any(m => m.IsPaid && string.Equals(m.Model, status!.EmbeddingModel, StringComparison.OrdinalIgnoreCase));
+        return await dialogService.Confirm(SemanticIndexTexts.RunConfirmation(status!, rebuild, paid), SemanticIndexTexts.RunTitle(status!, rebuild),
+            new ConfirmOptions { OkButtonText = "Start", CancelButtonText = "Cancel" }) == true;
+    }
+
+    private Task OnCancel() => acting.RunAsync(async () =>
+    {
+        await store.SemanticSearch.CancelIndexAsync();
+        await PollOnceAsync();
+    });
+
+    private Task OnDelete(SemanticIndexModelDto index) => acting.RunAsync(async () =>
+    {
+        var confirmed = await dialogService.Confirm($"Remove the index of the model {index.IndexKey} ({index.Chunks} fragments)?",
+            "Remove an index", new ConfirmOptions { OkButtonText = "Remove", CancelButtonText = "Cancel" });
+        if (confirmed != true)
+            return;
+        if ((await store.SemanticSearch.DeleteModelIndexAsync(index.IndexKey)).IsValid)
+            await RefreshAsync();
+    });
+
+    // Asks for the progress every second while the run goes on; at its end, the status again.
+    private async void StartPolling()
+    {
+        if (polling || !Running)
+            return;
+        polling = true;
+        try
+        {
+            while (Running && !disposal.IsCancellationRequested)
+            {
+                StateHasChanged();
+                await Task.Delay(1000, disposal.Token);
+                await PollOnceAsync();
+            }
+            if (!disposal.IsCancellationRequested)
+                await RefreshAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            polling = false;
+        }
+    }
+
+    private async Task PollOnceAsync()
+    {
+        var res = await store.SemanticSearch.GetIndexProgressAsync(disposal.Token);
+        if (res.IsValid && res.Entity != null)
+            progress = res.Entity;
+    }
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

@@ -83,6 +83,21 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<User>().HasIndex(_ => _.UserName).IsUnique(true);
         modelBuilder.Entity<User>().HasIndex(u => u.EMail).IsUnique(true);
         modelBuilder.Entity<Resource>().HasIndex(_ => new { _.NoteId, _.Name }).IsUnique(true);
+
+        // The semantic index (KntSchemaUpdater revision 7): its rows go away with their note. SourceId is never null
+        // (Guid.Empty for the note's own fragments), so the unique index applies to every row in both engines. It starts
+        // with NoteId, so it also serves the foreign key and the reads of a note's rows (EF adds no index of its own).
+        modelBuilder.Entity<NoteChunk>()
+            .HasOne<Note>()
+            .WithMany()
+            .HasForeignKey(_ => _.NoteId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NoteChunk>()
+            .HasIndex(_ => new { _.NoteId, _.SourceType, _.SourceId, _.ChunkIndex, _.Model }).IsUnique(true);
+        // Which notes are pending (KntSchemaUpdater revision 8): it covers the query, so it does not read the rows, which
+        // are wide (the vector is kept in them). Without it, ~1 s with 600 notes in SQL Server; with it, a few ms.
+        modelBuilder.Entity<NoteChunk>()
+            .HasIndex(_ => new { _.Model, _.NoteId, _.Stale, _.IndexedDateTime }).IsUnique(false);
     }
 
     public static void Seed(this ModelBuilder modelBuilder)

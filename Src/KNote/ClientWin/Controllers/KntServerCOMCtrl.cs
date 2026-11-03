@@ -89,8 +89,8 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
     public int RetroDelay { get; set; }
 
     // AI providers/models the requests received through the port can be answered with (the same
-    // collection the KNoteAIAssistant view offers).
-    public List<AiProviderRef> AiProviderRefs => Store.Settings.Ai.Providers;
+    // collection the KNoteAIAssistant view offers: the chat ones).
+    public List<AiProviderRef> AiProviderRefs => Store.Settings.Ai.Providers.Where(p => p.IsChat).ToList();
 
     public AiProviderRef CurrentAiProviderRef => _aiAssistant?.CurrentProviderRef;
 
@@ -125,7 +125,7 @@ public class KntServerCOMCtrl : CtrlBase, IDisposable
         _aiAssistant = new KNoteAIAssistantCtrl(store);
         // Without configured providers Run() would pop up an error dialog from inside this constructor;
         // the requests are answered with an explanatory message instead (see ExecuteAiRequest).
-        if (store.Settings.Ai.Providers.Count > 0)
+        if (store.Settings.Ai.Providers.Any(p => p.IsChat))
             _aiAssistant.Run();
     }
 

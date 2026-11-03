@@ -196,16 +196,108 @@ public class KntSystemValueSaveRepositoryNameAsyncCommand : KntCommandServiceBas
     }
 }
 
-// SystemValues rows that only KntSchemaUpdater and the repository identity commands above may change: the
-// generic save/delete commands (also reachable from KntScript) leave them alone.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntSystemValueGetRepositoryAiModelsAsyncCommand : KntCommandServiceBase<Result<RepositoryAiModelsDto>>
+{
+    public KntSystemValueGetRepositoryAiModelsAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<RepositoryAiModelsDto>> Execute()
+    {
+        var models = new RepositoryAiModelsDto
+        {
+            EmbeddingModel = await ReadAsync(KntConst.AiEmbedModelKey),
+            EmbeddingDimensions = int.TryParse(await ReadAsync(KntConst.AiEmbedDimsKey), out var dimensions) ? dimensions : null,
+            QueryInstruction = await ReadAsync(KntConst.AiEmbedQueryInstructionKey),
+            LlmModel = await ReadAsync(KntConst.AiLlmModelKey)
+        };
+        models.EmbeddingModelAvailable = models.EmbeddingModel != null && Service.EmbeddingGenerators?.Find(models.EmbeddingModel) != null;
+        models.SetIsDirty(false);
+        return new Result<RepositoryAiModelsDto>(models);
+    }
+
+    // A missing row is an empty value.
+    private async Task<string> ReadAsync(string key)
+    {
+        var res = await Repository.SystemValues.GetAsync(KntConst.AiScope, key);
+        return res.IsValid ? RepositoryAiModelsDto.Normalize(res.Entity?.Value) : null;
+    }
+}
+
+[KntAuthorize(EnumRoles.Admin)]
+public class KntSystemValueSaveRepositoryAiModelsAsyncCommand : KntCommandSaveServiceBase<RepositoryAiModelsDto, Result<RepositoryAiModelsDto>>
+{
+    public KntSystemValueSaveRepositoryAiModelsAsyncCommand(IKntService service, RepositoryAiModelsDto models) : base(service, models)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        if (Param != null)
+            return base.ValidateParam();
+
+        var result = new Result();
+        result.AddErrorMessage("The repository's AI models are required.");
+        return result;
+    }
+
+    public override async Task<Result<RepositoryAiModelsDto>> Execute()
+    {
+        var values = new (string Key, string Value)[]
+        {
+            (KntConst.AiEmbedModelKey, RepositoryAiModelsDto.Normalize(Param.EmbeddingModel)),
+            (KntConst.AiEmbedDimsKey, Param.EmbeddingDimensions?.ToString()),
+            (KntConst.AiEmbedQueryInstructionKey, RepositoryAiModelsDto.Normalize(Param.QueryInstruction)),
+            (KntConst.AiLlmModelKey, RepositoryAiModelsDto.Normalize(Param.LlmModel))
+        };
+
+        foreach (var (key, value) in values)
+        {
+            var resSave = await WriteAsync(key, value);
+            if (!resSave.IsValid)
+            {
+                var result = new Result<RepositoryAiModelsDto>();
+                result.AddListErrorMessage(resSave.ListErrorMessage);
+                return result;
+            }
+        }
+
+        return await new KntSystemValueGetRepositoryAiModelsAsyncCommand(Service).Execute();
+    }
+
+    // An empty value has no row.
+    private async Task<Result> WriteAsync(string key, string value)
+    {
+        var resStored = await Repository.SystemValues.GetAsync(KntConst.AiScope, key);
+        var stored = resStored.IsValid ? resStored.Entity : null;
+
+        if (value == null)
+            return stored == null ? new Result() : await Repository.SystemValues.DeleteAsync(stored.SystemValueId);
+
+        if (stored != null && stored.Value == value)
+            return new Result();
+
+        return stored != null
+            ? await Repository.SystemValues.UpdateAsync(new SystemValueDto { SystemValueId = stored.SystemValueId, Scope = KntConst.AiScope, Key = key, Value = value })
+            : await Repository.SystemValues.AddAsync(new SystemValueDto { SystemValueId = Guid.NewGuid(), Scope = KntConst.AiScope, Key = key, Value = value });
+    }
+}
+
+// SystemValues rows that only KntSchemaUpdater and the repository commands above may change (the identity, and the AI
+// models: changing the embedding model must go through its command): the generic save/delete commands (also
+// reachable from KntScript) leave them alone.
 internal static class KntSystemValueProtectedKeys
 {
     public static bool IsProtected(SystemValueDto value) =>
         value != null
-        && string.Equals(value.Scope, KntConst.SystemScope, StringComparison.OrdinalIgnoreCase)
-        && (string.Equals(value.Key, KntConst.DbVersionKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(value.Key, KntConst.RepositoryIdKey, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(value.Key, KntConst.RepositoryNameKey, StringComparison.OrdinalIgnoreCase));
+        && ((string.Equals(value.Scope, KntConst.SystemScope, StringComparison.OrdinalIgnoreCase)
+            && (string.Equals(value.Key, KntConst.DbVersionKey, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(value.Key, KntConst.RepositoryIdKey, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(value.Key, KntConst.RepositoryNameKey, StringComparison.OrdinalIgnoreCase)))
+            || string.Equals(value.Scope, KntConst.AiScope, StringComparison.OrdinalIgnoreCase));
 
     public static string ErrorMessage(SystemValueDto value) =>
         $"The system value {value.Scope}/{value.Key} is managed by {KntConst.AppName} and cannot be changed or deleted this way.";

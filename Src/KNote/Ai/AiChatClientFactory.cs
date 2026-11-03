@@ -2,6 +2,7 @@ using Anthropic;
 using KNote.Model;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
+using OllamaSharp.Models;
 
 namespace KNote.Ai;
 
@@ -59,6 +60,11 @@ public static class AiChatClientFactory
                 if (providerRef.Provider == EnumAiProvider.OpenAI)
                     o.RawRepresentationFactory = _ => new OpenAI.Responses.CreateResponseOptions { StoredOutputEnabled = false };
 #pragma warning restore OPENAI001
+
+                // The context size of an Ollama model (num_ctx); without it, the model's own. Each change makes Ollama
+                // load the model again. The paid providers decide theirs.
+                if (providerRef.Provider == EnumAiProvider.Ollama && providerRef.ContextWindow is int contextWindow)
+                    o.AddOllamaOption(OllamaOption.NumCtx, contextWindow);
 
                 if (toolList.Count > 0)
                     o.Tools = [.. toolList];

@@ -33,6 +33,10 @@ public class LocalWebApiService : BaseService, ILocalWebApiService
     public Task<Result<List<LocalAiProviderDto>>> SaveAiProvidersAsync(List<LocalAiProviderDto> providers) =>
         SendAsync<List<LocalAiProviderDto>>(ct => _httpClient.PutAsJsonAsync("api/local/ai", providers, ct), "Save AI providers", true);
 
+    public Task<Result<string>> TestAiProviderAsync(LocalAiProviderDto provider, CancellationToken cancellationToken = default) =>
+        SendAsync<string>(ct => _httpClient.PostAsJsonAsync("api/local/ai/test", provider, ct), "Test AI provider",
+            cancellationToken: cancellationToken, notifyErrors: false);
+
     public Task<Result<LocalEmailSettingsDto>> GetEmailAsync(CancellationToken cancellationToken = default) =>
         SendAsync<LocalEmailSettingsDto>(ct => _httpClient.GetAsync("api/local/email", ct), "Get e-mail settings", cancellationToken: cancellationToken);
 

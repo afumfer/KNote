@@ -49,6 +49,12 @@ public class CommandAuthorizationMatrixTests
             "KntNotesGetWindowAsyncCommand", "KntNotesGetVisibleNotesIdAsyncCommand",
             "KntNoteTypeGetAllAsyncCommand", "KntNoteTypeGetAsyncCommand",
             "KntSystemValueGetAllAsyncCommand", "KntSystemValueGetByScopeKeyAsyncCommand", "KntSystemValueGetAsyncCommand",
+            // KNote Atlas: the repository's AI models (every installation must use its embedding model).
+            "KntSystemValueGetRepositoryAiModelsAsyncCommand",
+            // KNote Atlas: the state of the semantic index, bringing it up to date before a search (derived data) and the
+            // search by meaning.
+            "KntSemanticSearchGetIndexStatusAsyncCommand", "KntSemanticSearchRefreshPendingAsyncCommand",
+            "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).
@@ -80,13 +86,18 @@ public class CommandAuthorizationMatrixTests
             "KntChatRoomsAddImageAsyncCommand");
 
         Add(nameof(EnumRoles.ProjectManager),
-            "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand");
+            "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",
+            // KNote Atlas: the search evaluation (it measures the repository's search).
+            "KntSemanticSearchGetSearchEvaluationAsyncCommand", "KntSemanticSearchEvaluateQueryAsyncCommand",
+            "KntSemanticSearchSaveSearchEvaluationReportAsyncCommand");
 
         // Repository administration.
         Add(nameof(EnumRoles.Admin),
             "KntKAttributesSaveAsyncCommand", "KntKAttributesDeleteAsyncCommand",
             "KntNoteTypeSaveAsyncCommand", "KntNoteTypeDeleteAsyncCommand",
             "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
+            "KntSystemValueSaveRepositoryAiModelsAsyncCommand",
+            "KntSemanticSearchRunIndexAsyncCommand", "KntSemanticSearchDeleteModelIndexAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand", "KntUsersGetPasswordStampAsyncCommand");

@@ -19,4 +19,10 @@ public interface IKntSystemValuesService
     // its public Home. The id never changes; the name only through SaveRepositoryNameAsync (Admin).
     Task<Result<RepositoryInfoDto>> GetRepositoryInfoAsync();
     Task<Result<RepositoryInfoDto>> SaveRepositoryNameAsync(string name);
+
+    // The AI models the repository declares (KNote Atlas, scope KntConst.AiScope), with whether this installation has
+    // its embedding model (IKntService.EmbeddingGenerators). Read by any user; saved only by an Admin and only here
+    // (the generic Save/Delete leave those rows alone).
+    Task<Result<RepositoryAiModelsDto>> GetRepositoryAiModelsAsync();
+    Task<Result<RepositoryAiModelsDto>> SaveRepositoryAiModelsAsync(RepositoryAiModelsDto models);
 }

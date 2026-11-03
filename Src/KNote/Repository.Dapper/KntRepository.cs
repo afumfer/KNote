@@ -145,6 +145,20 @@ public class KntRepository : IKntRepository
         }
     }
 
+    private IKntSemanticIndexRepository _semanticIndex;
+    public IKntSemanticIndexRepository SemanticIndex
+    {
+        get
+        {
+            if (_semanticIndex == null)
+                if (_db != null)
+                    _semanticIndex = new KntSemanticIndexRepository(_db, _repositoryRef);
+                else
+                    _semanticIndex = new KntSemanticIndexRepository(_repositoryRef);
+            return _semanticIndex;
+        }
+    }
+
     public RepositoryRef RepositoryRef
     {
         get { return _repositoryRef; }
@@ -205,6 +219,8 @@ public class KntRepository : IKntRepository
             _traceNotes.Dispose();
         if (_traceNoteTypes != null)
             _traceNoteTypes.Dispose();
+        if (_semanticIndex != null)
+            _semanticIndex.Dispose();
 
         //if (_kEvents != null)
         //    _kEvents.Dispose();
@@ -223,6 +239,7 @@ public class KntRepository : IKntRepository
         _noteTypes = null;
         _traceNotes = null;
         _traceNoteTypes = null;
+        _semanticIndex = null;
 
         if (_db != null)
             _db.Dispose();

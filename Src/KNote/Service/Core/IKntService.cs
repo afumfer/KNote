@@ -47,6 +47,12 @@ public interface IKntService : IDisposable
 
     IKntRepository Repository { get; }
 
+    /// <summary>
+    /// The embedding models of this installation (KNote Atlas), given by the host from its AI providers: ClientWin in
+    /// Store.AddServiceRef, Server in KntAddServices. Null: this installation has no embedding models.
+    /// </summary>
+    IKntEmbeddingGenerators EmbeddingGenerators { get; set; }
+
     IKntUserService Users { get; }
     IKntKAttributeService KAttributes { get; }
     IKntSystemValuesService SystemValues { get; }
@@ -56,6 +62,7 @@ public interface IKntService : IDisposable
     IKntTraceNoteTypeService TraceNoteTypes { get; }
     IKntAiSessionService AiSessions { get; }
     IKntChatRoomService ChatRooms { get; }
+    IKntSemanticSearchService SemanticSearch { get; }
     IKntMessageBroker MessageBroker { get; }
 
     string GetSystemVariable(string scope, string variable);

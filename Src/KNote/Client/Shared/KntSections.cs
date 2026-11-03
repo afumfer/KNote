@@ -17,6 +17,8 @@ public static class KntSections
     public static readonly KntSection Alarms = new("Alarms calendar", "notes/alarmscalendar", "alarm");
     public static readonly KntSection ChatRoom = new("Chat room", "chat", "chat_bubble");
     public static readonly KntSection AiAssistant = new("AI Assistant", "aiassistant", "smart_toy");
+    // KNote Atlas: the laboratory of the search by meaning (ProjectManager), only in the Web.
+    public static readonly KntSection SearchEvaluation = new("Search evaluation", "atlas/evaluation", "query_stats");
     public static readonly KntSection Admin = new("Admin panel", "admin", "admin_panel_settings");
 
     // Admin panel tabs
@@ -26,6 +28,8 @@ public static class KntSections
     // Also the icon of the note editor's "Trace notes" tab.
     public static readonly KntSection TraceNoteTypes = new("Trace note types", "tracenotetypes", "conversion_path");
     public static readonly KntSection Attributes = new("Attributes management", "attributes", "format_list_bulleted");
+    // KNote Atlas: the repository's AI models and semantic index.
+    public static readonly KntSection Atlas = new("KNote Atlas", "atlas", "hub");
     // Only in KNote Local (the server's capabilities).
     public static readonly KntSection ThisComputer = new("This computer", "local", "computer");
 }

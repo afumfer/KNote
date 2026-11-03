@@ -64,5 +64,17 @@ public class KntSystemValuesService : KntServiceBase, IKntSystemValuesService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<RepositoryAiModelsDto>> GetRepositoryAiModelsAsync()
+    {
+        var command = new KntSystemValueGetRepositoryAiModelsAsyncCommand(Service);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<RepositoryAiModelsDto>> SaveRepositoryAiModelsAsync(RepositoryAiModelsDto models)
+    {
+        var command = new KntSystemValueSaveRepositoryAiModelsAsyncCommand(Service, models);
+        return await ExecuteCommand(command);
+    }
+
     #endregion
 }

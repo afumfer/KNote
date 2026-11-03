@@ -20,7 +20,7 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
 
     // Primary/growing column for ListViewColumnResizer - "Model" is the most variable-length column
     // (model ids can be long); "Alias"/"Provider" stay at their designer width.
-    private const int PrimaryColumnIndex = 2;
+    private const int PrimaryColumnIndex = 3;
 
     private ListViewColumnSorter _sorter;
 
@@ -61,6 +61,7 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
         listViewProviders.Clear();
 
         listViewProviders.Columns.Add("Alias", LogicalToDeviceUnits(160), HorizontalAlignment.Left);
+        listViewProviders.Columns.Add("Kind", LogicalToDeviceUnits(90), HorizontalAlignment.Left);
         listViewProviders.Columns.Add("Provider", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
         listViewProviders.Columns.Add("Model", -2, HorizontalAlignment.Left);
 
@@ -159,7 +160,8 @@ public partial class AiProvidersManageForm : KntForm, IViewManageList<AiProvider
     private ListViewItem AiProviderRefToListViewItem(AiProviderRef providerRef)
     {
         var item = new ListViewItem(providerRef.Alias) { Name = providerRef.Alias };
-        item.SubItems.Add(providerRef.Provider);
+        item.SubItems.Add(providerRef.IsEmbeddings ? "Embeddings" : "Chat");
+        item.SubItems.Add(providerRef.IsPaid ? $"{providerRef.Provider} (paid)" : providerRef.Provider);
         item.SubItems.Add(providerRef.Model);
         return item;
     }

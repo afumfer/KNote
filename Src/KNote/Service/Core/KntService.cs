@@ -55,6 +55,8 @@ public class KntService : IKntService, IDisposable
         get { return _repository; }
     }
 
+    public IKntEmbeddingGenerators EmbeddingGenerators { get; set; }
+
     private IKntUserService _users;
     public IKntUserService Users
     {
@@ -151,6 +153,17 @@ public class KntService : IKntService, IDisposable
             if (_chatRooms == null)
                 _chatRooms = new KntChatRoomService(this);
             return _chatRooms;
+        }
+    }
+
+    private IKntSemanticSearchService _semanticSearch;
+    public IKntSemanticSearchService SemanticSearch
+    {
+        get
+        {
+            if (_semanticSearch == null)
+                _semanticSearch = new KntSemanticSearchService(this);
+            return _semanticSearch;
         }
     }
 

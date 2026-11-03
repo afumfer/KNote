@@ -179,6 +179,37 @@ public class RepositoryEditorCtrlTests
         Assert.AreEqual("Home", serviceRef.Name);
     }
 
+    [TestMethod]
+    [DataRow(DialogResult.Cancel, false)]
+    [DataRow(DialogResult.No, true)]
+    public async Task Edit_WithAiModelsNotSaved_AsksFirst_AndCancelKeepsTheEditorOpen(DialogResult answer, bool goesOn)
+    {
+        var (ctrl, _, store) = CreateCtrl(EnumRepositoryEditorMode.Management);
+        var (service, _) = LinkFake(store, "Home");
+        var modelsView = new FakeEditorView<RepositoryAiModelsDto>();
+        store.FactoryViews.Registry.Register<RepositoryAiModelsCtrl, IViewEditorEmbeddable<RepositoryAiModelsDto>>(c => modelsView);
+        service.SystemValuesFake.GetRepositoryAiModelsAsyncImpl = () => Task.FromResult(new Result<RepositoryAiModelsDto>(new RepositoryAiModelsDto()));
+        // Refused, so that an accepted edition stops before Store.SaveConfig (the real configuration).
+        string? savedName = null;
+        service.SystemValuesFake.SaveRepositoryNameAsyncImpl = name =>
+        {
+            savedName = name;
+            var refused = new Result<RepositoryInfoDto>();
+            refused.AddErrorMessage("Not saved in this test.");
+            return Task.FromResult(refused);
+        };
+        await ctrl.LoadModelById(service, service.IdServiceRef, refreshView: false);
+        await ctrl.RepositoryAiModelsCtrl.NewModel(service);
+        modelsView.RefreshModelImpl = () => ctrl.RepositoryAiModelsCtrl.Model.LlmModel = "qwen3.5:9b";
+        modelsView.ShowInfoImpl = (_, buttons) => buttons == MessageBoxButtons.YesNoCancel ? answer : DialogResult.OK;
+        ctrl.Model.Name = "Home renamed";
+
+        await ctrl.SaveModel();
+
+        StringAssert.Contains(modelsView.ShownInfo.Single(), "not saved");
+        Assert.AreEqual(goesOn ? "Home renamed" : null, savedName, "Cancel: the repository is not saved either.");
+    }
+
     private (RepositoryEditorCtrl ctrl, FakeRepositoryEditorView view, Store store) CreateCtrl(EnumRepositoryEditorMode mode)
     {
         var factoryViews = new TestFactoryViews();

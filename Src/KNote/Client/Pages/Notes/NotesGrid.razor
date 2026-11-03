@@ -70,6 +70,23 @@
                     <span class="knt-notes-grid-title">@note.Topic</span>
                 </Template>
             </RadzenDataGridColumn>
+            @* Found by meaning: how similar each note is and the start of its most similar fragment. Not sortable with
+               its header (not a property of NoteMinimalDto): removing another column's sort goes back to it. *@
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Title="Similarity" Width="96px" TextAlign="TextAlign.Right" Sortable="false"
+                                  Visible="@ShowSimilarity">
+                <Template Context="note">
+                    <span class="knt-notes-grid-muted">@((note as NoteSearchHitDto)?.Similarity.ToString("0.00"))</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NoteMinimalDto" Title="Fragment" MinWidth="220px" Sortable="false" Visible="@ShowSimilarity">
+                <Template Context="note">
+                    @if (note is NoteSearchHitDto { Fragment.Length: > 0 } hit)
+                    {
+                        <RadzenText TagName="TagName.Span" class="knt-notes-grid-muted knt-notes-grid-fragment"
+                                    MouseEnter="@(args => tooltipService.Open(args, hit.Fragment, FragmentTooltip))">@hit.Fragment</RadzenText>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Priority" Title="Priority" Width="96px" TextAlign="TextAlign.Center"
                                   SortOrder="@SortOrderOf("Priority")" />
             <RadzenDataGridColumn TItem="NoteMinimalDto" Property="Tags" Title="Tags" Width="120px" SortOrder="@SortOrderOf("Tags")">
@@ -105,6 +122,9 @@
     [Parameter] public NotesListPosition? Position { get; set; }
     // Compact view: number, topic, priority and tags (NotesListViewToggle).
     [Parameter] public bool Compact { get; set; } = true;
+    // A list found by meaning (its notes are NoteSearchHitDto): the Similarity and Fragment columns. Set when the grid
+    // is created (a new search is a new grid).
+    [Parameter] public bool ShowSimilarity { get; set; }
     // The order the list starts with, unless Position remembers another one.
     [Parameter] public NotesOrder? Order { get; set; }
     // The user sorted the list with a header (null: removed the sort, back to the list's own order).
@@ -136,6 +156,8 @@
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     private enum NoteAction { View, Edit, Delete }
+
+    private static readonly TooltipOptions FragmentTooltip = new() { Position = TooltipPosition.Bottom, Style = "max-width: 32rem; white-space: normal" };
 
     // Notes are requested from the API in blocks of this size, whatever rows the grid asks for, and kept
     // until the next reload: scrolling back does not repeat requests. The pending request is what is kept,

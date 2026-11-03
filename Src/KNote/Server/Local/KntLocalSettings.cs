@@ -8,6 +8,7 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
+using KNote.Ai;
 using KNote.Model.Dto;
 using KNote.Server.Ai;
 using KNote.Server.Helpers;
@@ -315,11 +316,15 @@ public class KntLocalSettings
             Alias = Text(node, "alias"),
             Provider = Text(node, "provider"),
             Model = Text(node, "model"),
+            Kind = Text(node, "kind") ?? EnumAiProviderKind.Chat,
+            ContextWindow = node["contextWindow"] is JsonValue contextWindow && contextWindow.TryGetValue<int>(out var tokens) ? tokens : null,
             Host = Text(node, "host"),
             HasApiKey = !string.IsNullOrEmpty(Text(node, "apiKey"))
         }).ToList();
 
-    /// <summary>The whole list (in its order: the first is the default one). An empty API key keeps the one it had.</summary>
+    /// <summary>
+    /// The whole list (in its order: the first chat one is the default one). An empty API key keeps the one it had.
+    /// </summary>
     public async Task<Result<List<LocalAiProviderDto>>> SaveAiProvidersAsync(List<LocalAiProviderDto> providers)
     {
         var result = new Result<List<LocalAiProviderDto>>();
@@ -327,7 +332,7 @@ public class KntLocalSettings
 
         foreach (var provider in providers)
         {
-            var check = new AiProviderRef { Alias = provider.Alias?.Trim(), Provider = provider.Provider, Model = provider.Model?.Trim(), Host = provider.Host?.Trim() };
+            var check = ToProviderRef(provider, provider.ApiKey);
             if (!check.IsValid())
                 return Failed(result, $"{provider.Alias}: {check.GetErrorMessage()}");
         }
@@ -351,6 +356,8 @@ public class KntLocalSettings
                     ["alias"] = provider.Alias.Trim(),
                     ["provider"] = provider.Provider,
                     ["model"] = provider.Model.Trim(),
+                    ["kind"] = provider.Kind ?? EnumAiProviderKind.Chat,
+                    ["contextWindow"] = ContextWindowOf(provider),
                     ["host"] = provider.Provider == EnumAiProvider.Ollama ? provider.Host?.Trim() : null,
                     ["apiKey"] = apiKey
                 });
@@ -367,6 +374,48 @@ public class KntLocalSettings
         result.Entity = GetAiProviders();
         return result;
     }
+
+    /// <summary>
+    /// Tests a provider as it is being edited ("Test" of its dialog), with its API key or, when empty, the one it has
+    /// (Index): a chat model answers a question, an embedding model gives a vector (AiProviderTester).
+    /// </summary>
+    public async Task<Result<string>> TestAiProviderAsync(LocalAiProviderDto provider, CancellationToken cancellationToken)
+    {
+        if (provider == null)
+            return Failed(new Result<string>(), "There is no AI provider to test.");
+
+        var apiKey = provider.ApiKey?.Trim();
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            var current = AiProvidersOf(_localData.ReadConfig());
+            var stored = provider.Index >= 0 && provider.Index < current.Count ? Text(current[provider.Index], "apiKey") : null;
+            apiKey = KntSecretProtector.IsProtected(stored) ? _protector.Unprotect(stored) : stored;
+        }
+
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(AiProviderTestTimeout);
+        return await AiProviderTester.TestAsync(ToProviderRef(provider, apiKey), timeout.Token);
+    }
+
+    // A model that Ollama has to load first can take a while.
+    public static readonly TimeSpan AiProviderTestTimeout = TimeSpan.FromSeconds(90);
+
+    private static AiProviderRef ToProviderRef(LocalAiProviderDto provider, string apiKey) => new()
+    {
+        Alias = provider.Alias?.Trim(),
+        Provider = provider.Provider,
+        Model = provider.Model?.Trim(),
+        Kind = provider.Kind ?? EnumAiProviderKind.Chat,
+        ContextWindow = ContextWindowOf(provider),
+        Host = provider.Host?.Trim(),
+        ApiKey = apiKey
+    };
+
+    // Only an Ollama chat model has its own context size.
+    private static int? ContextWindowOf(LocalAiProviderDto provider) =>
+        provider.Provider == EnumAiProvider.Ollama && (provider.Kind ?? EnumAiProviderKind.Chat) == EnumAiProviderKind.Chat
+            ? provider.ContextWindow
+            : null;
 
     private static List<JsonObject> AiProvidersOf(JsonObject file) =>
         (file["Local"]?["ai"]?["providers"] as JsonArray)?.OfType<JsonObject>().ToList() ?? new();

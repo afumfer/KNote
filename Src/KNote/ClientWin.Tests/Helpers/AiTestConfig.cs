@@ -70,6 +70,25 @@ internal static class AiTestConfig
         };
     }
 
+    // The embedding model of KNote Atlas' smoke test (AiProviderSmokeTests:Ollama:EmbeddingModel, by default the one
+    // recommended for a repository), on the same host as the chat one.
+    public static AiProviderRef? TryGetOllamaEmbeddingsProviderRef()
+    {
+        var chat = TryGetOllamaProviderRef();
+        if (chat == null)
+            return null;
+
+        var model = Configuration.GetSection("AiProviderSmokeTests:Ollama")["EmbeddingModel"];
+        return new AiProviderRef
+        {
+            Alias = "Test Ollama embeddings",
+            Provider = EnumAiProvider.Ollama,
+            Kind = EnumAiProviderKind.Embeddings,
+            Model = string.IsNullOrEmpty(model) ? "qwen3-embedding:0.6b" : model,
+            Host = chat.Host
+        };
+    }
+
     /// <summary>
     /// Ollama has no API key to "not be configured" - a Host can be set but point at nothing
     /// listening. Checked separately (with a short timeout) so an unreachable/not-installed local

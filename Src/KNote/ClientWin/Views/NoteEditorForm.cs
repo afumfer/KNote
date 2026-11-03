@@ -38,6 +38,16 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     private ListViewColumnSorter _traceNoteFromSorter;
     private ListViewColumnSorter _traceNoteToSorter;
 
+    // KNote Atlas: the similar notes, under the relations of the Trace notes tab (CreateSimilarNotesSection), calculated
+    // each time the tab is shown; the last request wins (_similarNotesVersion).
+    private const int SimilarNotesPrimaryColumnIndex = 3;   // Fragment (columns: Similarity, Number, Topic, Fragment)
+    private SplitContainer splitContainerTraceSimilar;
+    private ListView listViewSimilarNotes;
+    private Label labelSimilarNotesStatus;
+    private Button buttonRelateSimilarNote;
+    private List<NoteSearchHitDto> _similarNotes = new();
+    private int _similarNotesVersion;
+
     #endregion
 
     #region Constructor
@@ -71,6 +81,13 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _alarmsSorter = ListViewSortHelper.Attach(listViewAlarms);
         _traceNoteFromSorter = ListViewSortHelper.Attach(listViewTraceNoteFrom);
         _traceNoteToSorter = ListViewSortHelper.Attach(listViewTraceNoteTo);
+
+        CreateSimilarNotesSection();
+        tabNoteData.SelectedIndexChanged += async (s, e) =>
+        {
+            if (tabNoteData.SelectedTab == tabTraceNotes)
+                await RefreshSimilarNotesAsync();
+        };
 
         foreach (var scriptType in Store.ScriptTypes)
             comboScriptType.Items.Add(scriptType.Text);
@@ -228,6 +245,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         listViewAlarms.Clear();
         listViewTraceNoteFrom.Clear();
         listViewTraceNoteTo.Clear();
+        _similarNotesVersion++;
+        _similarNotes = new();
+        listViewSimilarNotes.Items.Clear();
+        labelSimilarNotesStatus.Text = "";
     }
 
     public void RefreshViewOnlyRequiredCtrl()
@@ -1229,7 +1250,133 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         listViewTraceNote_Resize(listViewTraceNoteFrom, EventArgs.Empty);
         listViewTraceNote_Resize(listViewTraceNoteTo, EventArgs.Empty);
+
+        // Another note, or its relations changed (a related note is not offered as similar any more).
+        if (tabNoteData.SelectedTab == tabTraceNotes)
+            await RefreshSimilarNotesAsync();
     }
+
+    #region Similar notes (KNote Atlas)
+
+    // Under the two lists of relations, with a splitter: hidden (Panel2Collapsed) where the repository can't search by
+    // meaning or the note is new. Built here and not in the Designer: it wraps the Designer's splitContainerTraceNotes.
+    private void CreateSimilarNotesSection()
+    {
+        listViewSimilarNotes = new ListView { Dock = DockStyle.Fill, MultiSelect = false, HideSelection = false, ShowItemToolTips = true };
+        ListViewStyle.ApplyStandard(listViewSimilarNotes);
+        listViewSimilarNotes.Columns.Add("Similarity", LogicalToDeviceUnits(70), HorizontalAlignment.Right);
+        listViewSimilarNotes.Columns.Add("Number", LogicalToDeviceUnits(60), HorizontalAlignment.Left);
+        listViewSimilarNotes.Columns.Add("Topic", LogicalToDeviceUnits(300), HorizontalAlignment.Left);
+        listViewSimilarNotes.Columns.Add("Fragment", LogicalToDeviceUnits(300), HorizontalAlignment.Left);
+        listViewSimilarNotes.Resize += (s, e) => ListViewColumnResizer.Resize(listViewSimilarNotes, SimilarNotesPrimaryColumnIndex);
+        listViewSimilarNotes.DoubleClick += async (s, e) => await OpenSimilarNoteAsync();
+        listViewSimilarNotes.KeyDown += async (s, e) =>
+        {
+            if (e.KeyCode == Keys.Enter)
+                await OpenSimilarNoteAsync();
+        };
+
+        var labelSimilarNotes = new Label { AutoSize = true, Text = "Similar notes:", Location = new Point(LogicalToDeviceUnits(5), LogicalToDeviceUnits(12)) };
+        labelSimilarNotesStatus = new Label
+        {
+            AutoSize = true, ForeColor = SystemColors.GrayText,
+            Location = new Point(labelSimilarNotes.Right + LogicalToDeviceUnits(12), LogicalToDeviceUnits(12))
+        };
+        buttonRelateSimilarNote = new Button { Text = "Relate", Dock = DockStyle.Right, AutoSize = true, UseVisualStyleBackColor = true };
+        buttonRelateSimilarNote.Click += async (s, e) => await RelateSimilarNoteAsync();
+        var panelSimilarHeader = new Panel { Dock = DockStyle.Top, Height = LogicalToDeviceUnits(34), Padding = new Padding(0, LogicalToDeviceUnits(4), LogicalToDeviceUnits(4), LogicalToDeviceUnits(4)) };
+        panelSimilarHeader.Controls.Add(labelSimilarNotes);
+        panelSimilarHeader.Controls.Add(labelSimilarNotesStatus);
+        panelSimilarHeader.Controls.Add(buttonRelateSimilarNote);
+        new ToolTip().SetToolTip(buttonRelateSimilarNote, "Relate the selected note to this one");
+
+        splitContainerTraceSimilar = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal, Size = tabTraceNotes.ClientSize };
+        tabTraceNotes.Controls.Remove(splitContainerTraceNotes);
+        splitContainerTraceSimilar.Panel1.Controls.Add(splitContainerTraceNotes);
+        splitContainerTraceSimilar.Panel2.Controls.Add(listViewSimilarNotes);
+        splitContainerTraceSimilar.Panel2.Controls.Add(panelSimilarHeader);
+        tabTraceNotes.Controls.Add(splitContainerTraceSimilar);
+        splitContainerTraceSimilar.SplitterDistance = splitContainerTraceSimilar.Height * 62 / 100;
+        splitContainerTraceSimilar.Panel2Collapsed = true;
+    }
+
+    private async Task RefreshSimilarNotesAsync()
+    {
+        var version = ++_similarNotesVersion;
+        _similarNotes = new();
+        listViewSimilarNotes.Items.Clear();
+        labelSimilarNotesStatus.Text = "Looking for similar notes…";
+        buttonRelateSimilarNote.Visible = _ctrl.EditMode && !_ctrl.ConsultMode;
+
+        Result<SemanticSearchResultDto> result;
+        try
+        {
+            result = await _ctrl.GetSimilarNotesAsync();
+        }
+        catch (Exception ex)
+        {
+            result = new Result<SemanticSearchResultDto>();
+            result.AddErrorMessage(ex.Message);
+        }
+        if (IsDisposed || version != _similarNotesVersion)
+            return; // another note, or asked again meanwhile
+
+        splitContainerTraceSimilar.Panel2Collapsed = result == null;
+        if (result == null)
+            return;
+        if (!result.IsValid)
+        {
+            labelSimilarNotesStatus.Text = result.ErrorMessage;
+            return;
+        }
+
+        _similarNotes = result.Entity.Notes;
+        foreach (var note in _similarNotes)
+        {
+            var topic = SemanticSearchRules.IsPossibleDuplicate(note.Similarity) ? $"{note.Topic}   ⚠ Possible duplicate" : note.Topic;
+            var item = new ListViewItem(note.Similarity.ToString("0.00")) { Name = note.NoteId.ToString(), ToolTipText = note.Fragment };
+            item.SubItems.Add($"#{note.NoteNumber}");
+            item.SubItems.Add(topic);
+            item.SubItems.Add(note.Fragment);
+            listViewSimilarNotes.Items.Add(item);
+        }
+        labelSimilarNotesStatus.Text = _similarNotes.Count == 0
+            ? $"None {SemanticSearchRules.MinSimilarNotes:0.00} or more similar, not related to this note yet."
+            : "";
+        ListViewColumnResizer.Resize(listViewSimilarNotes, SimilarNotesPrimaryColumnIndex);
+    }
+
+    private NoteSearchHitDto SelectedSimilarNote() =>
+        listViewSimilarNotes.SelectedItems.Count == 0
+            ? null
+            : _similarNotes.FirstOrDefault(n => n.NoteId.ToString() == listViewSimilarNotes.SelectedItems[0].Name);
+
+    // Not gated on _ctrl.EditMode: it navigates, it doesn't edit this note (as the relations' double click).
+    private async Task OpenSimilarNoteAsync()
+    {
+        var note = SelectedSimilarNote();
+        if (note != null)
+            await _ctrl.OpenNoteAsync(note.NoteId);
+    }
+
+    private async Task RelateSimilarNoteAsync()
+    {
+        var note = SelectedSimilarNote();
+        if (note == null)
+        {
+            ShowInfo("Select the similar note to relate to this one.");
+            return;
+        }
+
+        var added = await _ctrl.RelateSimilarNoteAsync(note);
+        if (added != null)
+        {
+            await ModelToControlsTraceNotes();
+            ListViewSelectionHelper.SelectByKey(listViewTraceNoteTo, added.TraceNoteId.ToString(), _traceNoteToSorter);
+        }
+    }
+
+    #endregion
 
     // Each row shows the OTHER note in the relation (Number/Topic/Tags), not the TraceNoteDto's own
     // fields, plus Order/Weight/Type, which DO belong to the TraceNoteDto itself - see TraceNoteRows.

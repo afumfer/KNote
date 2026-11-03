@@ -52,7 +52,12 @@ public class KntNoteTypeSaveAsyncCommand : KntCommandSaveServiceBase<NoteTypeDto
         }
         else
         {
-            return await Repository.NoteTypes.UpdateAsync(Param);
+            var resOld = await Repository.NoteTypes.GetAsync(Param.NoteTypeId);
+            var res = await Repository.NoteTypes.UpdateAsync(Param);
+            // Its name is in the fragment of data of its notes.
+            if (res.IsValid && resOld.Entity is { } old && old.Name != Param.Name)
+                await KntSemanticIndexer.MarkStaleAsync(Service, r => r.MarkStaleByNoteTypeAsync(Param.NoteTypeId));
+            return res;
         }
     }
 }

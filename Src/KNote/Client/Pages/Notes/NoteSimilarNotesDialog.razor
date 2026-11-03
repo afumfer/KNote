@@ -1,0 +1,25 @@
+@inject DialogService dialogService
+@inject KntWindows kntWindows
+
+@* The similar notes of a note from its viewers (the preview of the notes lists, the note's window), when the user asks
+   for them: a short list, without «Relate» (that is the editor's). A note opens in its viewer window. *@
+
+<KntDialogFrame Icon="@NoteSimilarNotes.Icon" Title="Similar notes" Subtitle="@Subtitle" OnClose="() => dialogService.Close(null)">
+    <ChildContent>
+        <NoteSimilarNotes NoteId="NoteId" ShowHeader="false" OnOpenNote="OnOpenNote" />
+    </ChildContent>
+    <Footer>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => dialogService.Close(null)" />
+        </RadzenStack>
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public Guid NoteId { get; set; }
+    // The note's "#123 · Topic".
+    [Parameter] public string? Subtitle { get; set; }
+
+    // In the same click (no wait before): the browser only opens a window right after a click or a key.
+    private Task OnOpenNote(NoteSearchHitDto note) => kntWindows.OpenViewAsync(note.NoteId);
+}

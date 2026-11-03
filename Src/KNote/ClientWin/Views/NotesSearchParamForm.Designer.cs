@@ -34,6 +34,9 @@ namespace KNote.ClientWin.Views
             this.labelHelp = new System.Windows.Forms.Label();
             this.checkSearchInDescription = new System.Windows.Forms.CheckBox();
             this.checkSearchInNoteTasks = new System.Windows.Forms.CheckBox();
+            this.labelSearchMode = new System.Windows.Forms.Label();
+            this.radioSearchWords = new System.Windows.Forms.RadioButton();
+            this.radioSearchMeaning = new System.Windows.Forms.RadioButton();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.buttonClean = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
@@ -53,6 +56,9 @@ namespace KNote.ClientWin.Views
             // 
             this.panelForm.Controls.Add(this.checkSearchInDescription);
             this.panelForm.Controls.Add(this.checkSearchInNoteTasks);
+            this.panelForm.Controls.Add(this.labelSearchMode);
+            this.panelForm.Controls.Add(this.radioSearchWords);
+            this.panelForm.Controls.Add(this.radioSearchMeaning);
             this.panelForm.Controls.Add(this.pictureBox1);
             this.panelForm.Controls.Add(this.labelHelp);
             this.panelForm.Controls.Add(this.buttonClean);
@@ -99,6 +105,42 @@ namespace KNote.ClientWin.Views
             this.checkSearchInNoteTasks.TabIndex = 9;
             this.checkSearchInNoteTasks.Text = "Search in note tasks";
             this.checkSearchInNoteTasks.UseVisualStyleBackColor = true;
+            //
+            // labelSearchMode
+            //
+            this.labelSearchMode.AutoSize = true;
+            this.labelSearchMode.Location = new System.Drawing.Point(7, 236);
+            this.labelSearchMode.Name = "labelSearchMode";
+            this.labelSearchMode.Size = new System.Drawing.Size(58, 15);
+            this.labelSearchMode.TabIndex = 10;
+            this.labelSearchMode.Text = "Search by:";
+            this.labelSearchMode.Visible = false;
+            //
+            // radioSearchWords
+            //
+            this.radioSearchWords.AutoSize = true;
+            this.radioSearchWords.Checked = true;
+            this.radioSearchWords.Location = new System.Drawing.Point(84, 234);
+            this.radioSearchWords.Name = "radioSearchWords";
+            this.radioSearchWords.Size = new System.Drawing.Size(59, 19);
+            this.radioSearchWords.TabIndex = 11;
+            this.radioSearchWords.TabStop = true;
+            this.radioSearchWords.Text = "Words";
+            this.radioSearchWords.UseVisualStyleBackColor = true;
+            this.radioSearchWords.Visible = false;
+            this.radioSearchWords.CheckedChanged += new System.EventHandler(this.radioSearchMode_CheckedChanged);
+            //
+            // radioSearchMeaning
+            //
+            this.radioSearchMeaning.AutoSize = true;
+            this.radioSearchMeaning.Location = new System.Drawing.Point(152, 234);
+            this.radioSearchMeaning.Name = "radioSearchMeaning";
+            this.radioSearchMeaning.Size = new System.Drawing.Size(69, 19);
+            this.radioSearchMeaning.TabIndex = 12;
+            this.radioSearchMeaning.Text = "Meaning";
+            this.radioSearchMeaning.UseVisualStyleBackColor = true;
+            this.radioSearchMeaning.Visible = false;
+            this.radioSearchMeaning.CheckedChanged += new System.EventHandler(this.radioSearchMode_CheckedChanged);
             //
             // pictureBox1
             //
@@ -235,6 +277,9 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkSearchInDescription;
         private System.Windows.Forms.CheckBox checkSearchInNoteTasks;
+        private System.Windows.Forms.Label labelSearchMode;
+        private System.Windows.Forms.RadioButton radioSearchWords;
+        private System.Windows.Forms.RadioButton radioSearchMeaning;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonAccept;

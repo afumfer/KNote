@@ -80,6 +80,19 @@
             }
         </RadzenStack>
 
+        @* KNote Atlas: by meaning among the notes that meet the other criteria (only with a semantic index). *@
+        @if (MeaningAvailable)
+        {
+            <RadzenFormField Text="Talks about…" Variant="Variant.Outlined" Component="MeaningText"
+                             MouseEnter="@(args => tooltipService.Open(args, "The 100 notes most similar to this text, among the ones that meet the other criteria"))">
+                <Start><RadzenIcon Icon="manage_search" /></Start>
+                <ChildContent>
+                    <RadzenTextBox Name="MeaningText" @bind-Value="@notesFilter.MeaningText" InputSize="InputSize.Small"
+                                   MaxLength="@SemanticSearchRequestDto.MaxTextLength" />
+                </ChildContent>
+            </RadzenFormField>
+        }
+
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
             <RadzenButton Text="Clean" Icon="filter_alt_off" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                           Click="() => ClearFilter(formContext)" />
@@ -98,6 +111,8 @@
     [Parameter] public NotesFilterDto? Filter { get; set; }
     [Parameter] public string? FolderName { get; set; }
     [Parameter] public EventCallback<string?> FolderNameChanged { get; set; }
+    // The search by meaning can be offered (the field «Talks about…»).
+    [Parameter] public bool MeaningAvailable { get; set; }
 
     private NotesFilterDto notesFilter = new NotesFilterDto();
     private List<NoteTypeDto> noteTypes = new List<NoteTypeDto>();
@@ -152,6 +167,7 @@
         notesFilter.Tags = null;
         notesFilter.FolderId = null;
         notesFilter.Description = null;
+        notesFilter.MeaningText = null;
         notesFilter.AttributesFilter = new List<AtrFilterDto>();             
         folderName = "";
 

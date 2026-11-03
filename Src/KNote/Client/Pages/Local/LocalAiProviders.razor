@@ -1,12 +1,13 @@
-@* The AI providers of the assistant in KNote Local's computer (the first one is the default). Their API keys are kept
-   encrypted and never come back: the list only says whether each one has one. Each change saves the whole list. *@
+@* The AI providers of KNote Local's computer: chat models for the assistant (the first one is the default) and embedding
+   models for KNote Atlas. Their API keys are kept encrypted and never come back: the list only says whether each one has
+   one. Each change saves the whole list. *@
 
 @inject IStore store
 @inject DialogService dialogService
 @inject ContextMenuService contextMenuService
 
 <KntFormSection Icon="smart_toy" Title="AI providers"
-                Description="The services the AI assistant uses (OpenAI, Anthropic or Ollama). The first one is the default.">
+                Description="The AI models this computer uses (OpenAI, Anthropic or Ollama): chat models for the AI assistant (the first one is the default) and embedding models for the search by meaning.">
     <div class="knt-local-actions">
         <RadzenButton Text="Add provider" Icon="add" Size="ButtonSize.Small" Click="OnAdd" Disabled="@(providers == null)" />
     </div>
@@ -19,13 +20,18 @@
                     <RadzenDataGridColumn TItem="LocalAiProviderDto" Title="Alias">
                         <Template Context="provider">
                             @provider.Alias
-                            @if (provider == providers!.FirstOrDefault())
+                            @if (provider == DefaultProvider)
                             {
                                 <RadzenBadge Text="Default" BadgeStyle="BadgeStyle.Primary" Shade="Shade.Lighter" IsPill="true" class="knt-local-badge" />
                             }
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Property="Provider" Title="Provider" />
+                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Title="Kind">
+                        <Template Context="provider">@(provider.Kind == EnumAiProviderKind.Embeddings ? "Embeddings" : "Chat")</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LocalAiProviderDto" Title="Provider">
+                        <Template Context="provider">@provider.Provider@(provider.Provider != EnumAiProvider.Ollama ? " (paid)" : "")</Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="LocalAiProviderDto" Property="Model" Title="Model" />
                     <RadzenDataGridColumn TItem="LocalAiProviderDto" Title="API key">
                         <Template Context="provider">@(provider.Provider == EnumAiProvider.Ollama ? "-" : provider.HasApiKey ? "Saved" : "None")</Template>
@@ -56,10 +62,13 @@
             providers = result.Entity;
     }
 
+    // The assistant's default: the first chat one.
+    private LocalAiProviderDto? DefaultProvider => providers?.FirstOrDefault(p => p.Kind != EnumAiProviderKind.Embeddings);
+
     private List<KntAction> ActionsOf(LocalAiProviderDto provider)
     {
         var actions = new List<KntAction> { new("Edit", "edit", () => OnEdit(provider)) };
-        if (provider != providers!.FirstOrDefault())
+        if (provider.Kind != EnumAiProviderKind.Embeddings && provider != DefaultProvider)
             actions.Add(new("Make default", "star", () => Save(providers!.Where(p => p != provider).Prepend(provider).ToList())));
         actions.Add(new("Remove", "delete", () => OnRemove(provider), Danger: true));
         return actions;

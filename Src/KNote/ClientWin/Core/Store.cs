@@ -1,4 +1,5 @@
 ﻿using KNote.ClientWin.Controllers;
+using KNote.Ai;
 using KNote.ClientWin.Views;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -32,6 +33,10 @@ public class Store
     // itself between sessions (window positions, last active repository...).
     public AppUserSettings Settings { get; protected set; }
 
+    // The embedding models of this installation (KNote Atlas): its embeddings providers. Given to each repository's
+    // service in AddServiceRef (IKntService.EmbeddingGenerators).
+    public IKntEmbeddingGenerators EmbeddingGenerators { get; }
+
     public AppUserState State { get; protected set; }
 
     // The user of this session: the Windows account, or the KNote user name typed in the sign-in dialog
@@ -53,6 +58,10 @@ public class Store
     public readonly IFactoryViews FactoryViews;
 
     public DomainEventBus Events { get; } = new();
+
+    // The run of the semantic index (KNote Atlas), one at a time in the app (see SemanticIndexJob).
+    private SemanticIndexJob _semanticIndex;
+    public SemanticIndexJob SemanticIndex => _semanticIndex ??= new SemanticIndexJob(Events);
 
     private KntTextUtils _kntTextUtils;
     public KntTextUtils KntTextUtils
@@ -120,6 +129,8 @@ public class Store
         _controllerRegistry = new ControllerRegistry();
         _serviceRefRegistry = new ServiceRefRegistry();
         FactoryViews = factoryViews; //
+        // Read from the settings each time: the user edits the AI providers while the app runs.
+        EmbeddingGenerators = new AiEmbeddingGenerators(() => Settings?.Ai?.Providers);
     }
 
     public Store(AppUserSettings settings, AppUserState state, IFactoryViews factoryViews) : this (factoryViews)
@@ -165,6 +176,7 @@ public class Store
         if(serviceRef is null)
             throw new ArgumentNullException(nameof(serviceRef));
 
+        serviceRef.Service.EmbeddingGenerators = EmbeddingGenerators;
         serviceRef.Service.CommandExecuting += ServiceRef_CommandExecuting;
         serviceRef.Service.CommandExecuted += ServiceRef_CommandExecuted;
 
@@ -208,6 +220,29 @@ public class Store
     public List<ServiceRef> GetAllServiceRef()
     {
         return _serviceRefRegistry.GetAll();
+    }
+
+    /// <summary>
+    /// Whether the search by meaning can be offered in a repository (KNote Atlas): a semantic index with notes and this
+    /// installation with its model (SemanticIndexTexts.CanSearch). Without it, the search panels only search by words.
+    /// </summary>
+    public Task<bool> CanSearchByMeaningAsync(ServiceRef serviceRef) =>
+        serviceRef == null ? Task.FromResult(false) : CanSearchByMeaningAsync(serviceRef.Service);
+
+    public async Task<bool> CanSearchByMeaningAsync(IKntService service)
+    {
+        if (service == null)
+            return false;
+        try
+        {
+            var status = await service.SemanticSearch.GetIndexStatusAsync();
+            return status.IsValid && SemanticIndexTexts.CanSearch(status.Entity);
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogWarning(ex, "The semantic index of {repository} could not be read.", service.RepositoryRef?.Name);
+            return false;
+        }
     }
 
     public ServiceRef GetServiceRef(Guid id)

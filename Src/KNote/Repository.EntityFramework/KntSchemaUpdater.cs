@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,7 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 6;
+    public const int CurrentSchemaRevision = 8;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
@@ -33,7 +33,9 @@ public static class KntSchemaUpdater
         (3, UpdateSchemaV3),
         (4, UpdateSchemaV4),
         (5, AddRepositoryIdentity),
-        (6, AddNoteTasksDateIndexes)
+        (6, AddNoteTasksDateIndexes),
+        (7, AddNoteChunks),
+        (8, AddNoteChunksPendingIndex)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -392,6 +394,80 @@ IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_NoteTasks_EndDate')
     private const string AddNoteTasksDateIndexesSqlite = @"
 CREATE INDEX IF NOT EXISTS ""IX_NoteTasks_StartDate"" ON ""NoteTasks"" (""StartDate"");
 CREATE INDEX IF NOT EXISTS ""IX_NoteTasks_EndDate"" ON ""NoteTasks"" (""EndDate"");
+";
+
+    // Revision 7 - the NoteChunks table of the semantic index (KNote Atlas): the fragments of each note with their
+    // vector, per embedding model. Generated with GenerateCreateScript() from the EF model (Entities/NoteChunk.cs and
+    // ModelBuilderExtensions' NoteChunk configuration) and made idempotent by hand.
+    private static void AddNoteChunks(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        var sql = repositoryRef.Provider == "Microsoft.Data.SqlClient" ? AddNoteChunksSqlServer : AddNoteChunksSqlite;
+        ctx.Database.ExecuteSqlRaw(sql);
+    }
+
+    private const string AddNoteChunksSqlServer = @"
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'NoteChunks')
+BEGIN
+    CREATE TABLE [NoteChunks] (
+        [NoteChunkId] uniqueidentifier NOT NULL,
+        [NoteId] uniqueidentifier NOT NULL,
+        [SourceType] int NOT NULL,
+        [SourceId] uniqueidentifier NOT NULL,
+        [ChunkIndex] int NOT NULL,
+        [Content] nvarchar(max) NOT NULL,
+        [ContentHash] nvarchar(64) NOT NULL,
+        [SourceHash] nvarchar(64) NOT NULL,
+        [Stale] bit NOT NULL,
+        [Model] nvarchar(256) NOT NULL,
+        [Dimensions] int NOT NULL,
+        [Vector] varbinary(max) NOT NULL,
+        [IndexedDateTime] datetime2 NOT NULL,
+        CONSTRAINT [PK_NoteChunks] PRIMARY KEY ([NoteChunkId]),
+        CONSTRAINT [FK_NoteChunks_Notes_NoteId] FOREIGN KEY ([NoteId]) REFERENCES [Notes] ([NoteId]) ON DELETE CASCADE
+    );
+END;
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_NoteChunks_NoteId_SourceType_SourceId_ChunkIndex_Model')
+    CREATE UNIQUE INDEX [IX_NoteChunks_NoteId_SourceType_SourceId_ChunkIndex_Model] ON [NoteChunks] ([NoteId], [SourceType], [SourceId], [ChunkIndex], [Model]);
+";
+
+    private const string AddNoteChunksSqlite = @"
+CREATE TABLE IF NOT EXISTS ""NoteChunks"" (
+    ""NoteChunkId"" TEXT NOT NULL CONSTRAINT ""PK_NoteChunks"" PRIMARY KEY,
+    ""NoteId"" TEXT NOT NULL,
+    ""SourceType"" INTEGER NOT NULL,
+    ""SourceId"" TEXT NOT NULL,
+    ""ChunkIndex"" INTEGER NOT NULL,
+    ""Content"" TEXT NOT NULL,
+    ""ContentHash"" TEXT NOT NULL,
+    ""SourceHash"" TEXT NOT NULL,
+    ""Stale"" INTEGER NOT NULL,
+    ""Model"" TEXT NOT NULL,
+    ""Dimensions"" INTEGER NOT NULL,
+    ""Vector"" BLOB NOT NULL,
+    ""IndexedDateTime"" TEXT NOT NULL,
+    CONSTRAINT ""FK_NoteChunks_Notes_NoteId"" FOREIGN KEY (""NoteId"") REFERENCES ""Notes"" (""NoteId"") ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_NoteChunks_NoteId_SourceType_SourceId_ChunkIndex_Model"" ON ""NoteChunks"" (""NoteId"", ""SourceType"", ""SourceId"", ""ChunkIndex"", ""Model"");
+";
+
+    // Revision 8 - the index of the pending notes of the semantic index (IKntSemanticIndexRepository.GetPendingNoteIdsAsync,
+    // GetIndexSummaryAsync): it covers their query, so it does not read the rows of NoteChunks, which are wide (the vector
+    // is in them). Must match ModelBuilderExtensions' HasIndex of NoteChunk.
+    private static void AddNoteChunksPendingIndex(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        var sql = repositoryRef.Provider == "Microsoft.Data.SqlClient" ? AddNoteChunksPendingIndexSqlServer : AddNoteChunksPendingIndexSqlite;
+        ctx.Database.ExecuteSqlRaw(sql);
+    }
+
+    private const string AddNoteChunksPendingIndexSqlServer = @"
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_NoteChunks_Model_NoteId_Stale_IndexedDateTime')
+    CREATE INDEX [IX_NoteChunks_Model_NoteId_Stale_IndexedDateTime] ON [NoteChunks] ([Model], [NoteId], [Stale], [IndexedDateTime]);
+";
+
+    private const string AddNoteChunksPendingIndexSqlite = @"
+CREATE INDEX IF NOT EXISTS ""IX_NoteChunks_Model_NoteId_Stale_IndexedDateTime"" ON ""NoteChunks"" (""Model"", ""NoteId"", ""Stale"", ""IndexedDateTime"");
 ";
 
     private static void AddSystemValueIfMissing(KntDbContext ctx, string key, string value)

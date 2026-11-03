@@ -146,7 +146,9 @@ public static class ContentTypeExtJsonHelper
     public static bool TryDeserialize(string json, out ContentTypeExt result)
     {
         result = null;
-        if (string.IsNullOrWhiteSpace(json)) return false;
+        // The old format is plain text (markdown, html, navigation#...): not JSON, so not even tried (an exception
+        // thrown and caught for every old note, e.g. while the semantic index reads them all).
+        if (string.IsNullOrWhiteSpace(json) || !json.TrimStart().StartsWith('{')) return false;
         try
         {
             result = JsonSerializer.Deserialize<ContentTypeExt>(json, Options);

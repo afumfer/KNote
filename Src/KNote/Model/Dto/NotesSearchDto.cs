@@ -15,6 +15,10 @@ public class NotesSearchDto : SmartModelDtoBase
     // NoteTasks (1-to-n), not just the note's own Topic/Tags/Description.
     public bool SearchInNoteTasks { get; set; }
 
+    // By words (this search) or by meaning (KNote Atlas, IKntSemanticSearchService.SearchAsync with TextSearch): who
+    // searches chooses which one to call. The repository's search by words ignores it.
+    public EnumNotesSearchMode Mode { get; set; }
+
     // Leaves out the notes of these NoteTypes (e.g. the AI assistant's own sessions and the chat room threads, see
     // KntConst.ChatSessionsTag and KntConst.ChatRoomTag).
     public List<Guid> ExcludeNoteTypeIds { get; set; }

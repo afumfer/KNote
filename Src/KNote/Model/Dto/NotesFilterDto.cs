@@ -23,6 +23,12 @@ public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
     // Only notes with at least one NoteTask assigned to this user.
     public Guid? TaskUserId { get; set; }
 
+    // «Talks about…» (KNote Atlas): with a text, the filter is a search by meaning among the notes that meet the other
+    // criteria (IKntSemanticSearchService.SearchAsync), not paged. The query of the filter (the repository) ignores it.
+    public string MeaningText { get; set; }
+
+    public bool HasMeaningText => !string.IsNullOrWhiteSpace(MeaningText);
+
     // Order of the notes: one of NoteOrderCriteria.SortableColumns (the note number breaks ties). Null, or
     // any other value, keeps the query's own order.
     public string OrderColumn { get; set; }

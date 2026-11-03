@@ -78,7 +78,8 @@
     {
         traceNote = TraceNote.GetSimpleDto<TraceNoteInfoDto>();
         relatedNoteId = TraceNote.RelatedNoteId;
-        if (!IsNew)
+        // Also a new one with the other note already chosen (a similar note related from the Trace notes tab).
+        if (!IsNew || relatedNoteId != Guid.Empty)
             relatedDisplay = $"{TraceNote.RelatedNoteNumber} · {TraceNote.RelatedNoteTopic}";
     }
 

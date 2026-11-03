@@ -150,6 +150,57 @@ public class LocalSettingsInProcessTests
     }
 
     [TestMethod]
+    public async Task AiProviders_KindAndContextSize_Saved_TheDefaultIsTheFirstChatOne()
+    {
+        var saved = await ReadAsync<List<LocalAiProviderDto>>(await _admin.PutAsJsonAsync("api/local/ai", new List<LocalAiProviderDto>
+        {
+            new() { Alias = "Embeddings", Provider = EnumAiProvider.Ollama, Model = "qwen3-embedding:0.6b", Host = "http://localhost:11434",
+                Kind = EnumAiProviderKind.Embeddings, ContextWindow = 8192 },
+            new() { Alias = "Local chat", Provider = EnumAiProvider.Ollama, Model = "qwen3.5:9b", Host = "http://localhost:11434", ContextWindow = 131072 },
+            new() { Alias = "Paid chat", Provider = EnumAiProvider.OpenAI, Model = "gpt-test", ContextWindow = 131072 }
+        }));
+
+        Assert.AreEqual(EnumAiProviderKind.Embeddings, saved[0].Kind);
+        Assert.IsNull(saved[0].ContextWindow, "Not for an embedding model.");
+        Assert.AreEqual(EnumAiProviderKind.Chat, saved[1].Kind);
+        Assert.AreEqual(131072, saved[1].ContextWindow);
+        Assert.IsNull(saved[2].ContextWindow, "Not for a paid provider.");
+
+        var providers = await ReadAsync<List<AiProviderInfoDto>>(await _admin.GetAsync("api/aiassistant/providers"));
+        Assert.IsFalse(providers.Any(p => p.Alias == "Embeddings"), "The assistant only sees the chat models.");
+        Assert.AreEqual("Local chat", providers.Single(p => p.IsDefault).Alias);
+
+        var installation = await ReadAsync<AiInstallationModelsDto>(await _admin.GetAsync("api/semantic/installation-models"));
+        Assert.AreEqual("qwen3-embedding:0.6b", installation.EmbeddingModels.Single().Model);
+        Assert.HasCount(2, installation.ChatModels);
+        Assert.IsTrue(installation.ChatModels.Single(m => m.Model == "gpt-test").IsPaid);
+
+        var anthropicEmbeddings = await _admin.PutAsJsonAsync("api/local/ai", new List<LocalAiProviderDto>
+        {
+            new() { Alias = "Claude", Provider = EnumAiProvider.Anthropic, Model = "claude-haiku-4-5", Kind = EnumAiProviderKind.Embeddings }
+        });
+        Assert.AreEqual(HttpStatusCode.BadRequest, anthropicEmbeddings.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task AiProviders_Test_SaysWhyItFailed()
+    {
+        // Nothing listens on port 9 (discard) of this computer.
+        var httpRes = await _admin.PostAsJsonAsync("api/local/ai/test", new LocalAiProviderDto
+        {
+            Alias = "Unreachable", Provider = EnumAiProvider.Ollama, Model = "qwen3-embedding:0.6b", Host = "http://127.0.0.1:9",
+            Kind = EnumAiProviderKind.Embeddings
+        });
+        var res = await httpRes.Content.ReadFromJsonAsync<Result<string>>();
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, httpRes.StatusCode);
+        StringAssert.Contains(res!.ErrorMessage, "Ollama does not answer");
+
+        var invalid = await _admin.PostAsJsonAsync("api/local/ai/test", new LocalAiProviderDto { Alias = "No host", Provider = EnumAiProvider.Ollama, Model = "m" });
+        Assert.AreEqual(HttpStatusCode.BadRequest, invalid.StatusCode);
+    }
+
+    [TestMethod]
     public async Task Email_PasswordEncrypted_AndTheAlarmsSwitch_AppliedAtOnce()
     {
         var saved = await ReadAsync<LocalEmailSettingsDto>(await _admin.PutAsJsonAsync("api/local/email", new LocalEmailSettingsDto

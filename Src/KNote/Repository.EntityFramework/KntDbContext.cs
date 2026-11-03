@@ -28,6 +28,7 @@ public class KntDbContext: DbContext
     public DbSet<KLog> KLogs { get; set; }        
     public DbSet<NoteType> NoteTypes { get; set; }
     public DbSet<TraceNoteType> TraceNoteTypes { get; set; }
+    public DbSet<NoteChunk> NoteChunks { get; set; }
 
     public KntDbContext()
        : base()

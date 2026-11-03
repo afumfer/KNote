@@ -1,5 +1,6 @@
 ﻿using KNote.Model;
 using KNote.Repository;
+using KNote.Ai;
 using KNote.Server.Ai;
 using KNote.Service.Core;
 using Microsoft.AspNetCore.Http;
@@ -35,14 +36,17 @@ public static class KntExtensions
         services.AddScoped<IKntService>(provider =>
         {
             var httpContext = provider.GetRequiredService<IHttpContextAccessor>().HttpContext;
-            return repositories.CreateService(repositories.ForUser(httpContext?.User), null, httpContext?.Request);
+            var service = repositories.CreateService(repositories.ForUser(httpContext?.User), null, httpContext?.Request);
+            service.EmbeddingGenerators = provider.GetService<IKntEmbeddingGenerators>();
+            return service;
         });
 
         return services;
     }
 
     // The Web AI assistant (AiAssistantController): the providers of the "ai" configuration section, bound when
-    // first used (so the in-process tests can still override them), and how their chat clients are built.
+    // first used (so the in-process tests can still override them), and how their chat clients are built. Its
+    // embeddings providers are the Server's embedding models (KNote Atlas), given to the service of each request.
     public static IServiceCollection KntAddAiAssistant(this IServiceCollection services, IConfiguration configuration)
     {
         if (services == null)
@@ -53,6 +57,11 @@ public static class KntExtensions
         services.Configure<AiConfig>(configuration.GetSection("ai"));
         services.AddSingleton<AiProvidersCatalog>();
         services.AddSingleton<IAiChatClientProvider, AiChatClientProvider>();
+        services.AddSingleton<IKntEmbeddingGenerators>(provider =>
+        {
+            var catalog = provider.GetRequiredService<AiProvidersCatalog>();
+            return new AiEmbeddingGenerators(() => catalog.EmbeddingProviders);
+        });
 
         return services;
     }

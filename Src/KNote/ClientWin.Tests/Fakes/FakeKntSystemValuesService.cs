@@ -13,6 +13,8 @@ internal class FakeKntSystemValuesService : IKntSystemValuesService
 {
     public Func<Task<Result<RepositoryInfoDto>>>? GetRepositoryInfoAsyncImpl { get; set; }
     public Func<string, Task<Result<RepositoryInfoDto>>>? SaveRepositoryNameAsyncImpl { get; set; }
+    public Func<Task<Result<RepositoryAiModelsDto>>>? GetRepositoryAiModelsAsyncImpl { get; set; }
+    public Func<RepositoryAiModelsDto, Task<Result<RepositoryAiModelsDto>>>? SaveRepositoryAiModelsAsyncImpl { get; set; }
 
     public Task<Result<List<SystemValueDto>>> GetAllAsync() => throw new NotSupportedException();
     public Task<Result<SystemValueDto>> GetAsync(KeyValuePair<string, string> scopeKey) => throw new NotSupportedException();
@@ -25,4 +27,10 @@ internal class FakeKntSystemValuesService : IKntSystemValuesService
 
     public Task<Result<RepositoryInfoDto>> SaveRepositoryNameAsync(string name) =>
         (SaveRepositoryNameAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRepositoryNameAsync)} not configured for this test"))(name);
+
+    public Task<Result<RepositoryAiModelsDto>> GetRepositoryAiModelsAsync() =>
+        (GetRepositoryAiModelsAsyncImpl ?? throw new NotSupportedException($"{nameof(GetRepositoryAiModelsAsync)} not configured for this test"))();
+
+    public Task<Result<RepositoryAiModelsDto>> SaveRepositoryAiModelsAsync(RepositoryAiModelsDto models) =>
+        (SaveRepositoryAiModelsAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRepositoryAiModelsAsync)} not configured for this test"))(models);
 }
