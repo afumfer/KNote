@@ -15,6 +15,7 @@ Funcionalidades principales:
 - Varios repositorios (bases de datos) abiertos a la vez en la aplicación de escritorio, cada uno con sus propios usuarios y roles (Guest, Staff, Project manager, Admin).
 - Informes imprimibles (lista de notas, libro, detalle de una nota) y exportación a CSV.
 - Un asistente de IA (OpenAI, Anthropic u Ollama) que puede buscar en tus notas y crear tareas, con sus conversaciones guardadas como notas.
+- Búsqueda por significado (con un modelo de embeddings de Ollama u OpenAI): encuentra las notas por lo que cuentan y muestra las notas parecidas a cada nota.
 - Un chat room compartido por la aplicación de escritorio y la aplicación Web.
 - KntScript, un lenguaje minimalista de automatización, y una consola de scripts.
 

@@ -148,6 +148,13 @@ Ejecútalos explícitamente **después de subir de versión** `OpenAI`, `Anthrop
 `Microsoft.Extensions.AI`/`Microsoft.Extensions.AI.OpenAI` en `Ai/KNote.Ai.csproj`, antes de
 dar el bump por bueno.
 
+**Embeddings (KNote Atlas)**: `OllamaEmbeddingsSmokeTests.cs`, en la misma categoría, pide vectores reales a Ollama a
+través de `AiEmbeddingGeneratorFactory` (el camino de producción): un vector por texto con las dimensiones del modelo
+y la prueba del botón «Test» (`AiProviderTester`). Usa el host de Ollama de los tests de chat y el modelo
+`AiProviderSmokeTests:Ollama:EmbeddingModel` (por defecto `qwen3-embedding:0.6b`, que tiene que estar descargado:
+`ollama pull qwen3-embedding:0.6b`); sin host o con el host caído, `Inconclusive`. Los tests de servicio no usan
+modelos reales: tienen un generador falso y determinista (`Tests/Helpers/FakeEmbeddingGenerators`).
+
 ## Cómo configurar las ApiKeys para correr la Capa 2
 
 `Helpers/AiTestConfig.cs` resuelve cada proveedor con la misma precedencia que usa producción

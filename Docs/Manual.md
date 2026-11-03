@@ -190,6 +190,79 @@ Every conversation with the AI assistant is kept as a **session**, so you can co
 
 **Desktop app.** Sessions are kept only when you open the assistant from the menu. When a KntScript script or a note's natural-language code (`ln`) uses the assistant, nothing is saved (a script can turn it on with `PersistSession = true`). The **Sessions** panel is hidden then.
 
+### Search by meaning (KNote Atlas)
+
+Besides searching by words, KNote can find notes by **what they talk about**, even when they don't use the words you remember. It works with an **embedding model**: an AI model that turns a text into a list of numbers that represents its meaning, so that texts that say similar things get similar numbers. KNote calculates those numbers for every note once (the repository's **semantic index**) and compares them with the ones of what you search.
+
+To use it you need three things, in this order: an embedding model in your installation, the repository's models declared by an Admin, and the semantic index created by an Admin. Until then, the options of this section don't appear: everything works as always.
+
+**1. The embedding model of your installation.** An embedding model is configured as an AI provider whose **Kind** is **Embeddings** (the AI assistant's models are of the kind **Chat**). Only Ollama and OpenAI have embedding models; Anthropic doesn't.
+
+- Desktop app: **Tools → Manage AI providers**.
+- Web server: the `ai` section of the server (see *AI providers of the web app (server configuration)*).
+- KNote Local: **Admin panel → This computer → AI providers**.
+
+The **Test** button of each provider checks it: with an embedding model it calculates a test vector and shows its dimensions and the time it took, and it explains the usual errors (the model is not downloaded, the host doesn't answer, the API key is not valid). With Ollama, download the model first, for example `ollama pull qwen3-embedding:0.6b`. Local models are recommended for privacy: with a paid model (OpenAI) the content of your notes is sent to its provider. The **Context size** field is only for the chat models of Ollama (empty: the model's own).
+
+**2. The repository's models (Admin).** They are the same for everybody who works with the repository, in either app:
+
+- Desktop app: **File → Repositories → Edit repository properties**, tab **KNote Atlas**, and **Save models**.
+- Web app: **Admin panel → KNote Atlas**, section **Repository models**, and **Save models**.
+
+| Field | Meaning |
+|---|---|
+| **Embedding model** | The model all its notes are indexed with (e.g. `qwen3-embedding:0.6b`). Empty: no search by meaning in this repository. Every installation that works with the repository needs a provider with this model. |
+| **Dimensions** | Empty: the model's own (recommended). Fewer make the index smaller, only with models made for it (Qwen3-Embedding, OpenAI `text-embedding-3`). |
+| **Query instruction** | A sentence that tells the model that what it receives is a search, for models that expect one, like Qwen3-Embedding (e.g. *Given a search query, retrieve the notes that talk about it*). Leave it empty with OpenAI. |
+| **Recommended LLM** | Optional: the chat model recommended for the AI tasks of the repository. |
+
+Each model warns if this installation doesn't have it and if it is a paid one.
+
+**3. The semantic index (Admin).** In the desktop app, tab **Semantic index** of the same window; in the web app, section **Semantic index** of the **KNote Atlas** tab. It shows how the index is (notes indexed, pending and fragments; when it was last created and how long it took). **Create index** calculates the meaning of every note: KNote tells you first how many notes it will send to the model and, after the first time, how long it should take. You can go on working (in the desktop app you can even close the window: the status bar shows the progress); **Cancel** (**Cancel run** in the desktop app) keeps what is done, and the next run goes on from there. The notes that fail are listed and tried again in the next run. In the web server one index is created at a time, whatever the repository: the others wait, **Queued**.
+
+- Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, and each resource that has a description. The notes of the assistant's sessions, the chat room and the search evaluation are left out.
+- A note you change becomes *pending*. The pending notes are brought up to date before each search by meaning (a few at a time: up to 50 notes or about 10 seconds) or with **Update now**.
+- **Rebuild** calculates every vector again (after changing the dimensions, for example); meanwhile the search goes on with the old ones.
+- **Changing the embedding model** needs the index of the new model. The index of the previous model is kept (to compare them, see *Search evaluation (web app)*) and listed below; an Admin can remove it.
+
+**Searching by meaning.** In the desktop app's **Search panel**, choose **Search by: Meaning**; in the web app's **Quick search**, the **Meaning** button next to **Words**. The two ways are separate, and **Words** works exactly as always:
+
+- By meaning you get the **100 most similar notes** at most (with a similarity of 0.45 or more), the most similar first, all at once. The list has two more columns: **Similarity**, from 0 to 1 (1 would be the same text), and **Fragment**, the part of the note that matched. You can sort it by any column, as always.
+- Write what you are looking for as you would tell it to somebody: *how to connect the computer to a modern screen* finds better than a list of loose words. `#123` and `!word` are only for **Words**.
+- If some notes are not up to date yet, a notice above the list says so, with **Update index**: they may be missing or found by their previous content.
+- In the **notes filter** of both apps, the field **Talks about…** does the same among the notes that meet the rest of the filter.
+- Printing and exporting a list found by meaning include its **Similarity**.
+
+**Similar notes.** The **Trace notes** tab of the note editor (in both apps) shows, below the note's relations, the notes that talk about the same as this one: up to 10, with a similarity of 0.60 or more, leaving out the notes already related to it. A note marked **Possible duplicate** (0.95 or more) is almost the same. Double click a note to open it; **Relate** relates it to the note you are editing. In the web app, the **Similar notes** button of the note viewer and of the lists' preview shows them too. They are calculated each time: nothing is saved.
+
+### Search evaluation (web app)
+
+**Search evaluation**, in the side menu (ProjectManager role or higher), measures how well the search works in a repository: whether the search by meaning finds what you look for better than the search by words, and which embedding model finds it better. It is a laboratory: use it when you choose a model or after changing how the search works.
+
+1. **The test queries.** They are kept in the note **Search test queries**, in the folder **KNote Atlas** (created the first time you open the page). **Open in the editor** opens it: write a table with one search per row, the notes it should find, and, optionally, the words you would use to search by words:
+
+   ```markdown
+   | Query | Expected notes | Words (optional) |
+   |---|---|---|
+   | how to connect the computer to a modern screen | #151, #158 | VGA |
+   ```
+
+   Write searches you really do, with your own words, without looking at the notes; about 30 are enough. **Read again** reads the note after saving it, and lists the rows with problems (no query, a note that doesn't exist...).
+2. **The indexes.** Choose the indexes to compare (only those whose model this server has). To compare two models, create the index of each one: change the repository's embedding model, create its index and change it back (both indexes are kept). **Also without the query instruction** measures each index without it too.
+3. **Evaluate** runs every search by words and by meaning in each index; **Cancel** stops it and shows the report of the searches done.
+
+**The report.** For each kind of search, a summary:
+
+| Column | Meaning |
+|---|---|
+| **In the first 10** | In how many searches an expected note is among the first 10 results: what you see without scrolling. The main measure. |
+| **Found** | In how many searches an expected note is found, in any position. |
+| **Mean position** | The average position of the first expected note: the lower, the better (1 is "always the first one"). |
+| **Mean results** | How many notes each search gives, on average. By meaning, many results mean that the similarity it starts from lets in notes that have nothing to do with the search. |
+| **Errors** | Searches that failed. |
+
+Below, each search shows the position of its first expected note in each kind of search (in bold if it is beyond the first 10; «—» if it wasn't found). Keep in mind that the search by words orders its list by topic, not by how much each note has to do with the search. **Save as note** keeps the report as a note of the folder **KNote Atlas**.
+
 ### Chat room
 
 The chat room lets the users of a KNote web server talk in **threads**: each thread is a conversation about one topic, and every user with the Staff role or a higher one in that server can read it, join it and write in it. The web app and the desktop app share the same chat room, the one of the web server: a message written in one appears at once in the other.
@@ -366,7 +439,7 @@ KNote Local is the web app running entirely in your computer, without internet, 
 In KNote Local the **Admin panel** has one more tab, **This computer**, for an Admin and only from the computer itself:
 
 - **Repositories**: **New repository** (an empty SQLite database in the data folder), **Link existing database** (a SQLite database of the computer, for example the desktop app's: both apps can use it at the same time), **Link SQL Server**, and in each row **Rename**, **Make default** (the repository of the sign-ups and of the visitors) and **Unlink** (it is only removed from the list: the database is never deleted). The changes apply at once.
-- **AI providers** of the assistant, with their API keys kept encrypted and never shown again (empty keeps the saved one). The first one is the default.
+- **AI providers** of the assistant (**Kind** **Chat**; the first one is the default) and of the search by meaning (**Kind** **Embeddings**), with their API keys kept encrypted and never shown again (empty keeps the saved one), and **Test** to check each one.
 - **E-mail**: the SMTP account and **Send the Email alarms** (off by default; if you turn it on, uncheck **Process Email alarms** in the desktop app's options).
 - **Local server**: its address, data folder and version, its **Port** (applies the next time it starts) and **Stop local server**.
 
@@ -408,8 +481,14 @@ The AI models offered by the web app are configured in the server, in the `ai` s
 | `model` | The model of that provider. |
 | `apiKey` | The API key (OpenAI and Anthropic). Leave it empty in `appsettings.json`: see below. |
 | `host` | The address of the Ollama server (Ollama only). |
+| `kind` | `Chat` (the default) for the models of the assistant, or `Embeddings` for the models of the search by meaning (Ollama and OpenAI only; see *Search by meaning (KNote Atlas)*). |
+| `contextWindow` | Optional, Ollama chat models only: the context size in tokens (empty: the model's own). |
 
-The first valid provider is the default one. A provider whose configuration is not valid is left out (the server log says why).
+The first valid provider is the default one (of the `Chat` kind: the `Embeddings` ones are not offered to the assistant). A provider whose configuration is not valid is left out (the server log says why). An embedding model is added the same way:
+
+```json
+{ "alias": "Ollama qwen3-embedding", "provider": "Ollama", "kind": "Embeddings", "model": "qwen3-embedding:0.6b", "host": "http://localhost:11434" }
+```
 
 **API keys.** Never write them in `appsettings.json`. In development, keep them in the server's user secrets, by the position of the provider in the list (`ai:providers:0:apiKey`, `ai:providers:1:apiKey`...):
 

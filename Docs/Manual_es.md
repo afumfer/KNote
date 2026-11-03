@@ -190,6 +190,79 @@ Cada conversación con el asistente de IA se conserva como una **sesión**, para
 
 **Aplicación de escritorio.** Las sesiones solo se guardan cuando abres el asistente desde el menú. Cuando un script de KntScript o el código en lenguaje natural de una nota (`ln`) usa el asistente, no se guarda nada (un script puede activarlo con `PersistSession = true`). Entonces el panel **Sessions** se oculta.
 
+### Búsqueda por significado (KNote Atlas)
+
+Además de buscar por palabras, KNote puede encontrar las notas por **lo que cuentan**, aunque no usen las palabras que recuerdas. Funciona con un **modelo de embeddings**: un modelo de IA que convierte un texto en una lista de números que representa su significado, de modo que los textos que dicen cosas parecidas reciben números parecidos. KNote calcula esos números de cada nota una vez (el **índice semántico** del repositorio) y los compara con los de lo que buscas.
+
+Para usarla hacen falta tres cosas, en este orden: un modelo de embeddings en tu instalación, los modelos del repositorio declarados por un Admin y el índice semántico creado por un Admin. Mientras tanto, las opciones de este apartado no aparecen: todo funciona como siempre.
+
+**1. El modelo de embeddings de tu instalación.** Un modelo de embeddings se configura como un proveedor de IA cuyo **Kind** es **Embeddings** (los modelos del asistente de IA son del tipo **Chat**). Solo Ollama y OpenAI tienen modelos de embeddings; Anthropic no.
+
+- Aplicación de escritorio: **Tools → Manage AI providers**.
+- Servidor Web: la sección `ai` del servidor (ver *Proveedores de IA de la aplicación Web (configuración del servidor)*).
+- KNote Local: **Admin panel → This computer → AI providers**.
+
+El botón **Test** de cada proveedor lo comprueba: con un modelo de embeddings calcula un vector de prueba y muestra sus dimensiones y el tiempo que tardó, y explica los errores habituales (el modelo no está descargado, el host no responde, la clave de API no es válida). Con Ollama, descarga antes el modelo, por ejemplo `ollama pull qwen3-embedding:0.6b`. Se recomiendan los modelos locales por privacidad: con un modelo de pago (OpenAI) el contenido de tus notas se envía a su proveedor. El campo **Context size** es solo para los modelos de chat de Ollama (vacío: el del modelo).
+
+**2. Los modelos del repositorio (Admin).** Son los mismos para todos los que trabajan con el repositorio, en cualquiera de las dos aplicaciones:
+
+- Aplicación de escritorio: **File → Repositories → Edit repository properties**, pestaña **KNote Atlas**, y **Save models**.
+- Aplicación Web: **Admin panel → KNote Atlas**, sección **Repository models**, y **Save models**.
+
+| Campo | Significado |
+|---|---|
+| **Embedding model** | El modelo con el que se indexan todas sus notas (p. ej. `qwen3-embedding:0.6b`). Vacío: sin búsqueda por significado en este repositorio. Cada instalación que trabaje con el repositorio necesita un proveedor con este modelo. |
+| **Dimensions** | Vacío: las del modelo (lo recomendado). Menos hacen el índice más pequeño, solo con modelos preparados para ello (Qwen3-Embedding, OpenAI `text-embedding-3`). |
+| **Query instruction** | Una frase que explica al modelo que lo que recibe es una búsqueda, para los modelos que la esperan, como Qwen3-Embedding (p. ej. *Given a search query, retrieve the notes that talk about it*). Déjala vacía con OpenAI. |
+| **Recommended LLM** | Opcional: el modelo de chat recomendado para las tareas de IA del repositorio. |
+
+Cada modelo avisa si esta instalación no lo tiene y si es de pago.
+
+**3. El índice semántico (Admin).** En la aplicación de escritorio, pestaña **Semantic index** de la misma ventana; en la aplicación Web, sección **Semantic index** de la pestaña **KNote Atlas**. Muestra cómo está el índice (notas indexadas, pendientes y fragmentos; cuándo se creó por última vez y cuánto tardó). **Create index** calcula el significado de todas las notas: KNote dice antes cuántas notas enviará al modelo y, a partir de la primera vez, cuánto debería tardar. Puedes seguir trabajando (en la aplicación de escritorio puedes incluso cerrar la ventana: la barra de estado muestra el progreso); **Cancel** (**Cancel run** en la aplicación de escritorio) conserva lo hecho, y la siguiente ejecución sigue desde ahí. Las notas que fallan se listan y se reintentan en la siguiente ejecución. En el servidor Web se crea un índice a la vez, sea del repositorio que sea: los demás esperan, **Queued**.
+
+- Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea y cada recurso que tiene descripción. Las notas de las sesiones del asistente, del chat room y de la evaluación de la búsqueda quedan fuera.
+- Una nota que cambias queda *pendiente*. Las pendientes se ponen al día antes de cada búsqueda por significado (unas pocas cada vez: hasta 50 notas o unos 10 segundos) o con **Update now**.
+- **Rebuild** calcula otra vez todos los vectores (tras cambiar las dimensiones, por ejemplo); mientras tanto la búsqueda sigue con los anteriores.
+- **Cambiar el modelo de embeddings** necesita el índice del modelo nuevo. El índice del modelo anterior se conserva (para compararlos, ver *Evaluación de la búsqueda (aplicación Web)*) y aparece en la lista de abajo; un Admin lo puede borrar.
+
+**Buscar por significado.** En el **Search panel** de la aplicación de escritorio, elige **Search by: Meaning**; en **Quick search** de la aplicación Web, el botón **Meaning** junto a **Words**. Las dos formas son independientes, y **Words** funciona exactamente como siempre:
+
+- Por significado salen como mucho las **100 notas más parecidas** (con un parecido de 0,45 o más), la más parecida primero, todas a la vez. La lista tiene dos columnas más: **Similarity**, de 0 a 1 (1 sería el mismo texto), y **Fragment**, la parte de la nota que se ha encontrado. Se puede ordenar por cualquier columna, como siempre.
+- Escribe lo que buscas como se lo contarías a alguien: *cómo conectar el ordenador a una pantalla actual* encuentra mejor que una lista de palabras sueltas. `#123` y `!palabra` son solo de **Words**.
+- Si algunas notas aún no están al día, un aviso encima de la lista lo dice, con **Update index**: pueden faltar o encontrarse por su contenido anterior.
+- En el **filtro de notas** de las dos aplicaciones, el campo **Talks about…** hace lo mismo entre las notas que cumplen el resto del filtro.
+- Imprimir y exportar una lista encontrada por significado incluyen su **Similarity**.
+
+**Notas parecidas.** La pestaña **Trace notes** del editor de notas (en las dos aplicaciones) muestra, debajo de las relaciones de la nota, las notas que hablan de lo mismo que esta: hasta 10, con un parecido de 0,60 o más, sin las que ya están relacionadas con ella. Una nota marcada **Possible duplicate** (0,95 o más) es casi la misma. Doble clic en una nota la abre; **Relate** la relaciona con la nota que editas. En la aplicación Web, el botón **Similar notes** del visor de notas y de la vista previa de las listas también las muestra. Se calculan cada vez: no se guarda nada.
+
+### Evaluación de la búsqueda (aplicación Web)
+
+**Search evaluation**, en el menú lateral (rol ProjectManager o superior), mide cómo funciona la búsqueda en un repositorio: si la búsqueda por significado encuentra lo que buscas mejor que la búsqueda por palabras, y qué modelo de embeddings lo encuentra mejor. Es un laboratorio: úsalo al elegir un modelo o después de cambiar cómo funciona la búsqueda.
+
+1. **Las consultas de prueba.** Se guardan en la nota **Search test queries**, en la carpeta **KNote Atlas** (se crea la primera vez que abres la página). **Open in the editor** la abre: escribe una tabla con una búsqueda por fila, las notas que debería encontrar y, si quieres, las palabras que usarías para buscar por palabras:
+
+   ```markdown
+   | Query | Expected notes | Words (optional) |
+   |---|---|---|
+   | cómo conectar el ordenador a una pantalla actual | #151, #158 | VGA |
+   ```
+
+   Escribe búsquedas que de verdad haces, con tus palabras, sin mirar las notas; con unas 30 basta. **Read again** lee la nota después de guardarla y lista las filas con problemas (sin consulta, una nota que no existe...).
+2. **Los índices.** Elige los índices que quieres comparar (solo los de los modelos que tiene este servidor). Para comparar dos modelos, crea el índice de cada uno: cambia el modelo de embeddings del repositorio, crea su índice y vuelve a dejarlo como estaba (los dos índices se conservan). **Also without the query instruction** mide además cada índice sin ella.
+3. **Evaluate** lanza cada búsqueda por palabras y por significado en cada índice; **Cancel** la detiene y muestra el informe de las búsquedas hechas.
+
+**El informe.** Para cada forma de buscar, un resumen:
+
+| Columna | Significado |
+|---|---|
+| **In the first 10** | En cuántas búsquedas una nota esperada sale entre los 10 primeros resultados: lo que ves sin bajar por la lista. Es la medida principal. |
+| **Found** | En cuántas búsquedas sale una nota esperada, en cualquier puesto. |
+| **Mean position** | El puesto medio de la primera nota esperada: cuanto más bajo, mejor (1 es «siempre la primera»). |
+| **Mean results** | Cuántas notas da cada búsqueda, de media. Por significado, muchos resultados indican que el parecido desde el que empieza deja entrar notas que no tienen que ver con la búsqueda. |
+| **Errors** | Búsquedas que fallaron. |
+
+Debajo, cada búsqueda muestra el puesto de su primera nota esperada en cada forma de buscar (en negrita si queda fuera de los 10 primeros; «—» si no se encontró). Ten en cuenta que la búsqueda por palabras ordena su lista por el tema, no por lo que cada nota tiene que ver con la búsqueda. **Save as note** guarda el informe como una nota de la carpeta **KNote Atlas**.
+
 ### Chat room
 
 El chat room permite a los usuarios de un servidor Web de KNote hablar en **hilos**: cada hilo es una conversación sobre un tema, y cualquier usuario con rol Staff o superior en ese servidor puede leerlo, unirse y escribir en él. La aplicación Web y la de escritorio comparten el mismo chat room, el del servidor Web: un mensaje escrito en una aparece al momento en la otra.
@@ -366,7 +439,7 @@ KNote Local es la aplicación Web funcionando entera dentro de tu equipo, sin in
 En KNote Local el **panel de administración** tiene una pestaña más, **This computer** ("Este equipo"), para un Admin y solo desde el propio equipo:
 
 - **Repositories**: **New repository** (una base de datos SQLite vacía en la carpeta de datos), **Link existing database** (una base de datos SQLite del equipo, por ejemplo la de la aplicación de escritorio: las dos aplicaciones pueden usarla a la vez), **Link SQL Server**, y en cada fila **Rename**, **Make default** (el repositorio de los registros y de los visitantes) y **Unlink** (solo se quita de la lista: la base de datos nunca se borra). Los cambios se aplican al momento.
-- **AI providers** del asistente, con sus claves de acceso guardadas cifradas y que nunca se vuelven a mostrar (vacía conserva la guardada). El primero es el predeterminado.
+- **AI providers** del asistente (**Kind** **Chat**; el primero es el predeterminado) y de la búsqueda por significado (**Kind** **Embeddings**), con sus claves de acceso guardadas cifradas y que nunca se vuelven a mostrar (vacía conserva la guardada), y **Test** para comprobar cada uno.
 - **E-mail**: la cuenta SMTP y **Send the Email alarms** (apagado de serie; si lo activas, desmarca **Process Email alarms** en las opciones de la aplicación de escritorio).
 - **Local server**: su dirección, carpeta de datos y versión, su **Port** (se aplica la próxima vez que arranque) y **Stop local server**.
 
@@ -408,8 +481,14 @@ Los modelos de IA que ofrece la aplicación Web se configuran en el servidor, en
 | `model` | El modelo de ese proveedor. |
 | `apiKey` | La clave de API (OpenAI y Anthropic). Déjala vacía en `appsettings.json`: ver más abajo. |
 | `host` | La dirección del servidor de Ollama (solo Ollama). |
+| `kind` | `Chat` (por defecto) para los modelos del asistente, o `Embeddings` para los modelos de la búsqueda por significado (solo Ollama y OpenAI; ver *Búsqueda por significado (KNote Atlas)*). |
+| `contextWindow` | Opcional, solo modelos de chat de Ollama: el tamaño de contexto en tokens (vacío: el del modelo). |
 
-El primer proveedor válido es el predefinido. Un proveedor cuya configuración no es válida se descarta (el log del servidor indica por qué).
+El primer proveedor válido es el predefinido (del tipo `Chat`: los de `Embeddings` no se ofrecen al asistente). Un proveedor cuya configuración no es válida se descarta (el log del servidor indica por qué). Un modelo de embeddings se añade igual:
+
+```json
+{ "alias": "Ollama qwen3-embedding", "provider": "Ollama", "kind": "Embeddings", "model": "qwen3-embedding:0.6b", "host": "http://localhost:11434" }
+```
 
 **Claves de API.** No las escribas nunca en `appsettings.json`. En desarrollo, guárdalas en los secretos de usuario (user secrets) del servidor, según la posición del proveedor en la lista (`ai:providers:0:apiKey`, `ai:providers:1:apiKey`...):
 

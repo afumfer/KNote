@@ -100,7 +100,7 @@ Model  (hoja: DTOs en Model/Dto, tipos compartidos, RepositoryRef/AppUserSetting
   ├─ MessageBroker
   │    └─ MessageBroker.RabbitMQ
   ├─ Service                          (→ Repository, Repository.Dapper, Repository.EntityFramework, MessageBroker*)
-  │    ├─ KNote.Ai (carpeta Ai/)      (IChatClient por proveedor de IA, turno con streaming + tools sobre IKntService; todos los paquetes NuGet de IA)
+  │    ├─ KNote.Ai (carpeta Ai/)      (IChatClient e IEmbeddingGenerator por proveedor de IA, turno con streaming + tools sobre IKntService; todos los paquetes NuGet de IA)
   │    ├─ KNote.Reports (carpeta Reports/) (informes imprimibles en HTML y exportación CSV de las notas, comunes a las dos apps)
   │    └─ ClientWin                   (→ también KNote.Ai, KNote.Reports, HtmlEditorControl, KntEditViewControl, KntIcons, KntScript)
   └─ Client                           (Blazor WASM; habla con Server por HTTP, no con Service/Repository)
@@ -119,7 +119,14 @@ que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`
 `IChatClient` de `Microsoft.Extensions.AI` para OpenAI (Responses API), Anthropic u Ollama, y `KNoteAiTools`
 expone a los modelos `search_notes`, `get_note_details` y `create_task` sobre la capa `Service`. Lo que
 `create_task` hace distinto en cada aplicación (dónde guarda la nota y cómo se la muestra al usuario) lo
-aporta un `IKNoteAiToolsHost` (el de `ClientWin` es `Core/KNoteAiToolsHost`). Las versiones de los paquetes de
+aporta un `IKNoteAiToolsHost` (el de `ClientWin` es `Core/KNoteAiToolsHost`). Para KNote Atlas (ver «Índice
+semántico» más abajo) da también los modelos de embeddings: `AiEmbeddingGeneratorFactory` (Ollama y OpenAI;
+Anthropic no tiene) y `AiEmbeddingGenerators`, el resolvedor por nombre de modelo (`IKntEmbeddingGenerators` de
+`Service/Core`) común a los dos hosts, construido sobre una función que da la lista de proveedores; y
+`AiProviderTester.TestAsync`, el botón «Test» de los proveedores de las dos apps (chat: una petición mínima;
+embeddings: un vector, sus dimensiones y el tiempo). Un proveedor es de chat o de embeddings por
+`AiProviderRef.Kind` (`EnumAiProviderKind`; los ficheros anteriores cargan como `Chat`) y todas las listas de modelos
+de chat solo ven los de tipo `Chat`; `ContextWindow` es el `num_ctx` del chat de Ollama. Las versiones de los paquetes de
 IA se suben solo aquí; tras subirlas, pasa los smoke tests `RequiresRealAiProvider` (ver
 `ClientWin.Tests/CLAUDE.md`).
 
@@ -272,6 +279,52 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   y reescribe la nota, así que el que llama las serializa por hilo (el hub del Server, ver `Server/CLAUDE.md`).
   Los clientes son `KntChatCtrl` (ClientWin, a través del hub) y la página `ChatRoom` (Web); el contrato del hub
   está en `Model/Dto/ChatRoomHubContract`.
+- **Índice semántico y búsqueda por significado (KNote Atlas, etapa 0)** (`IKntService.SemanticSearch`, comandos en
+  `KntSemanticSearchCommands.cs` y `KntSemanticSearchEvaluationCommands.cs`). La especificación y sus decisiones están
+  fuera del repositorio, en `C:\Dev\KNote-Atlas` (`03-Etapa-0.md`).
+  - **Modelos del repositorio** (`RepositoryAiModelsDto`: modelo de embeddings, dimensiones, instrucción de consulta y
+    LLM recomendado), en `SystemValues` ámbito `AI` (`IKntSystemValuesService.Get/SaveRepositoryAiModelsAsync`, Guest /
+    Admin). Esas claves están protegidas: los comandos genéricos de `SystemValues` no las tocan. Dónde corre cada
+    modelo lo dice cada instalación (sus proveedores de embeddings, ver `KNote.Ai`). `Service` no referencia
+    `KNote.Ai`: recibe el resolvedor en `IKntService.EmbeddingGenerators` (nulo = sin embeddings), que fija un único
+    punto de cada host (`Store.AddServiceRef` en `ClientWin`, la fábrica por petición de `KntAddServices` y los
+    trabajos de índice en `Server`).
+  - **Fragmentos** (tabla `NoteChunks`, revisiones 7 y 8 del esquema; `IKntSemanticIndexRepository` en Dapper y EF, con
+    paridad en `Tests/RepositoryParityTests`): `NoteChunkBuilder` (`Model/Core`, regla pura) parte cada nota en un
+    fragmento de datos (tema, tipo, carpeta, etiquetas, atributos, recursos), los de su texto por apartados de Markdown
+    (limpio con `NoteTextCleaner`, sin solapamiento), uno por tarea y uno por recurso con descripción. Cada fila lleva su
+    vector (`EmbeddingVector`, float32), su `ContentHash` (un vector se reutiliza si el texto no cambia) y la clave del
+    índice en `Model` (`RepositoryAiModelsDto.GetIndexKey()`: el modelo, o `modelo@dimensiones`), así que conviven los
+    índices de varios modelos (la evaluación los compara; un Admin borra los que no son el actual).
+  - **Indexado** (`Service/Core/KntSemanticIndexer`, independiente del host, con progreso y cancelación entre notas; lo
+    hecho se conserva): *crear / actualizar* procesa las notas pendientes, *rehacer* recalcula todos los vectores
+    mientras la búsqueda sigue con los anteriores, ambos Admin; *poner al día* (antes de cada búsqueda: 50 notas o unos
+    10 s, nada si hay otra ejecución en marcha) es Guest. Estado en `AI_INDEX_STATE` (`KntSemanticIndexState`). El
+    índice contiene **todas** las notas salvo las de los tipos del sistema (`KntSystemNotes.SystemNoteTypeNames`:
+    sesiones, chat room, consultas de prueba, informes): los permisos se aplican al buscar. Los comandos que cambian una
+    nota (guardar, carpeta, etiquetas, recursos, tareas) y los que cambian su fragmento de datos sin tocarla (renombrar
+    o mover una carpeta, renombrar un tipo o un atributo) llaman a `MarkStaleAsync`; un fallo al marcar no hace fallar
+    el guardado. **Un comando nuevo que cambie lo que se indexa de una nota tiene que marcarla.**
+  - **Búsqueda** (`SearchAsync`): **Palabras y Significado son excluyentes**; la de palabras no cambia (código,
+    paginación y API). Por significado, sin paginar: las 100 notas más parecidas desde 0,45, de más a menos parecida
+    (`SemanticSearchRules`, `Model/Core`), entre todas o entre las del filtro (`NotesFilterDto.MeaningText`, «Talks
+    about…»), cruzadas con las que da el filtro de siempre leído por el servicio. Los vectores se leen de
+    `KntSemanticIndexCache` (uno por base de datos y clave del índice en el proceso, con delta por marca de agua y 5
+    minutos de margen); `KntSemanticSearcher` es lo común de la búsqueda y de las parecidas. El resultado
+    (`NoteSearchHitDto : NoteMinimalDto`, con parecido y fragmento) lo muestran las listas de siempre; `NoteListSorter`
+    ordena en memoria como el repositorio. Sin modelo, sin su generador o sin índice, un error claro: una búsqueda no
+    crea el índice.
+  - **Notas parecidas** (`GetSimilarNotesAsync`): `SemanticSearchRules.RankSimilar` (media de los mejores parecidos de
+    cada fragmento), desde 0,60, 10 como mucho, sin las ya relacionadas; «Possible duplicate» desde 0,95. Al vuelo, no se
+    guarda nada; solo esa nota se pone al día.
+  - **Evaluación de la búsqueda** (ProjectManager, solo en la Web): la nota del sistema «Search test queries»
+    (`@KNoteTestQueries`, tabla `SearchTestQueries`) en la carpeta «KNote Atlas», una consulta por petición
+    (`EvaluateQueryAsync`: palabras y significado en cada índice, con y sin la instrucción) y el informe
+    (`SearchEvaluationReport`), que se guarda como nota `@KNoteSearchEvaluation` (`KntSearchEvaluationNotes`).
+  - Tests: reglas puras en `Tests/*` (`NoteChunkBuilderTests`, `SemanticSearchRulesTests`...), servicio en
+    `Tests/ServiceTests/Semantic*`, `SimilarNotesServiceTests` y `SearchEvaluationServiceTests` con un generador falso y
+    determinista (`Tests/Helpers/FakeEmbeddingGenerators`, 1024 dimensiones: con menos, textos sin relación salían
+    parecidos), y la API en `Tests/InProcessIntegrationTests/Semantic*` y `SearchByMeaningInProcessTests`.
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 

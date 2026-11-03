@@ -99,7 +99,7 @@ In the admin panel there is a tab, **This computer**, that only appears when KNo
 From it you manage:
 
 - **The repositories**, as explained above.
-- **The artificial intelligence providers**: the services (OpenAI, Anthropic or Ollama) used by KNote's assistant, with their **API keys**. An API key is like the password one of those services gives you so that you can use it (and, often, so that it can charge you). Once saved, a key is never shown again.
+- **The artificial intelligence providers**: the services (OpenAI, Anthropic or Ollama) used by KNote's assistant and, with the kind **Embeddings**, by the search by meaning (see *Search by meaning (KNote Atlas)* in the [manual](Manual.md)), with their **API keys** and a **Test** button that checks each one. An API key is like the password one of those services gives you so that you can use it (and, often, so that it can charge you). Once saved, a key is never shown again.
 - **The e-mail account** (the sending server, called **SMTP**) so that KNote can send the alarms by e-mail, and the switch that turns that sending on.
 - **The port**, in case you need to change it (it applies the next time the server starts).
 - A button to **stop the local server** if you want to turn it off completely.
