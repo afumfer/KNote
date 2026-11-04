@@ -299,7 +299,10 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   - **Indexado** (`Service/Core/KntSemanticIndexer`, independiente del host, con progreso y cancelación entre notas; lo
     hecho se conserva): *crear / actualizar* procesa las notas pendientes, *rehacer* recalcula todos los vectores
     mientras la búsqueda sigue con los anteriores, ambos Admin; *poner al día* (antes de cada búsqueda: 50 notas o unos
-    10 s, nada si hay otra ejecución en marcha) es Guest. Estado en `AI_INDEX_STATE` (`KntSemanticIndexState`). El
+    10 s, nada si hay otra ejecución en marcha) es Guest. Los vectores de una nota se piden en lotes de 32 fragmentos
+    (`EmbeddingBatchSize`: una nota de cientos en una llamada superaba el tiempo máximo del proveedor) y sus filas se
+    sustituyen una vez al final; las puestas al día rápidas (antes de una búsqueda y de las parecidas) dejan para la
+    indexación completa las notas con más de 64 fragmentos por calcular (`QuickRefreshMaxChunks`). Estado en `AI_INDEX_STATE` (`KntSemanticIndexState`). El
     índice contiene **todas** las notas salvo las de los tipos del sistema (`KntSystemNotes.SystemNoteTypeNames`:
     sesiones, chat room, consultas de prueba, informes): los permisos se aplican al buscar. Los comandos que cambian una
     nota (guardar, carpeta, etiquetas, recursos, tareas) y los que cambian su fragmento de datos sin tocarla (renombrar
@@ -319,8 +322,9 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
     guarda nada; solo esa nota se pone al día.
   - **Evaluación de la búsqueda** (ProjectManager, solo en la Web): la nota del sistema «Search test queries»
     (`@KNoteTestQueries`, tabla `SearchTestQueries`) en la carpeta «KNote Atlas», una consulta por petición
-    (`EvaluateQueryAsync`: palabras y significado en cada índice, con y sin la instrucción) y el informe
-    (`SearchEvaluationReport`), que se guarda como nota `@KNoteSearchEvaluation` (`KntSearchEvaluationNotes`).
+    (`EvaluateQueryAsync`: palabras y significado en cada índice, con y sin la instrucción; por cada una, posición,
+    esperadas entre las 10 primeras, el parecido de cada resultado y el tiempo) y el informe (`SearchEvaluationReport`,
+    con el parecido de la primera esperada y del resultado 10 y la tabla «si el corte fuera…», `Cutoffs`), que se guarda como nota `@KNoteSearchEvaluation` (`KntSearchEvaluationNotes`).
   - Tests: reglas puras en `Tests/*` (`NoteChunkBuilderTests`, `SemanticSearchRulesTests`...), servicio en
     `Tests/ServiceTests/Semantic*`, `SimilarNotesServiceTests` y `SearchEvaluationServiceTests` con un generador falso y
     determinista (`Tests/Helpers/FakeEmbeddingGenerators`, 1024 dimensiones: con menos, textos sin relación salían

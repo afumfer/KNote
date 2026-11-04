@@ -221,7 +221,7 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 **3. El índice semántico (Admin).** En la aplicación de escritorio, pestaña **Semantic index** de la misma ventana; en la aplicación Web, sección **Semantic index** de la pestaña **KNote Atlas**. Muestra cómo está el índice (notas indexadas, pendientes y fragmentos; cuándo se creó por última vez y cuánto tardó). **Create index** calcula el significado de todas las notas: KNote dice antes cuántas notas enviará al modelo y, a partir de la primera vez, cuánto debería tardar. Puedes seguir trabajando (en la aplicación de escritorio puedes incluso cerrar la ventana: la barra de estado muestra el progreso); **Cancel** (**Cancel run** en la aplicación de escritorio) conserva lo hecho, y la siguiente ejecución sigue desde ahí. Las notas que fallan se listan y se reintentan en la siguiente ejecución. En el servidor Web se crea un índice a la vez, sea del repositorio que sea: los demás esperan, **Queued**.
 
 - Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea y cada recurso que tiene descripción. Las notas de las sesiones del asistente, del chat room y de la evaluación de la búsqueda quedan fuera.
-- Una nota que cambias queda *pendiente*. Las pendientes se ponen al día antes de cada búsqueda por significado (unas pocas cada vez: hasta 50 notas o unos 10 segundos) o con **Update now**.
+- Una nota que cambias queda *pendiente*. Las pendientes se ponen al día antes de cada búsqueda por significado (unas pocas cada vez: hasta 50 notas o unos 10 segundos) o con **Update now**. Una nota muy larga (con más de 64 fragmentos por calcular) se deja para **Update now**: hasta entonces, la búsqueda usa su contenido anterior.
 - **Rebuild** calcula otra vez todos los vectores (tras cambiar las dimensiones, por ejemplo); mientras tanto la búsqueda sigue con los anteriores.
 - **Cambiar el modelo de embeddings** necesita el índice del modelo nuevo. El índice del modelo anterior se conserva (para compararlos, ver *Evaluación de la búsqueda (aplicación Web)*) y aparece en la lista de abajo; un Admin lo puede borrar.
 
@@ -256,12 +256,18 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 | Columna | Significado |
 |---|---|
 | **In the first 10** | En cuántas búsquedas una nota esperada sale entre los 10 primeros resultados: lo que ves sin bajar por la lista. Es la medida principal. |
+| **Expected notes in the first 10** | Cuántas de todas las notas esperadas salen entre los 10 primeros resultados (no solo la primera). |
 | **Found** | En cuántas búsquedas sale una nota esperada, en cualquier puesto. |
 | **Mean position** | El puesto medio de la primera nota esperada: cuanto más bajo, mejor (1 es «siempre la primera»). |
+| **Similarity of the first expected** | Por significado, el parecido medio de la primera nota esperada, en las búsquedas en que se encuentra. |
+| **Similarity of the result 10** | Por significado, el parecido medio del décimo resultado: donde terminan los 10 primeros. Si está cerca del anterior, las notas esperadas no se parecen mucho más que el resto. |
 | **Mean results** | Cuántas notas da cada búsqueda, de media. Por significado, muchos resultados indican que el parecido desde el que empieza deja entrar notas que no tienen que ver con la búsqueda. |
+| **Mean time** | Cuánto tarda cada búsqueda, de media (por significado, el vector de la búsqueda y la ordenación). |
 | **Errors** | Búsquedas que fallaron. |
 
-Debajo, cada búsqueda muestra el puesto de su primera nota esperada en cada forma de buscar (en negrita si queda fuera de los 10 primeros; «—» si no se encontró). Ten en cuenta que la búsqueda por palabras ordena su lista por el tema, no por lo que cada nota tiene que ver con la búsqueda. **Save as note** guarda el informe como una nota de la carpeta **KNote Atlas**.
+**If the minimum similarity were…** muestra, para cada índice, lo que daría la búsqueda por significado si empezara en un parecido mayor (0,50, 0,55, 0,60): en cuántas búsquedas seguiría saliendo una nota esperada entre los 10 primeros resultados y cuántos resultados daría cada búsqueda de media. Sirve para elegir un mínimo que deje fuera las notas que no tienen que ver con la búsqueda sin perder las que buscas.
+
+Debajo, cada búsqueda muestra el puesto de su primera nota esperada en cada forma de buscar y, por significado, su parecido, por ejemplo «3 (0.62)» (en negrita si queda fuera de los 10 primeros; «—» si no se encontró). Ten en cuenta que la búsqueda por palabras ordena su lista por el tema, no por lo que cada nota tiene que ver con la búsqueda. **Save as note** guarda el informe como una nota de la carpeta **KNote Atlas**.
 
 ### Chat room
 

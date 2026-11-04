@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -157,6 +158,7 @@ public class KntSemanticSearchEvaluateQueryAsyncCommand : KntCommandServiceBase<
                 try
                 {
                     snapshot ??= await KntSemanticSearcher.VectorsAsync(Service, new KntSemanticSearcher.Index(models, indexKey, generator), _cancellationToken);
+                    var clock = Stopwatch.StartNew();
                     var text = SemanticSearchRules.QueryText(withInstruction ? models.QueryInstruction : null, query.Query);
                     var vectors = await generator.GenerateAsync(new[] { text }, _cancellationToken);
                     if (vectors == null || vectors.Count != 1)
@@ -165,8 +167,9 @@ public class KntSemanticSearchEvaluateQueryAsyncCommand : KntCommandServiceBase<
                     var matches = SemanticSearchRules.Rank(snapshot.Chunks, vector, SemanticSearchRules.MinSimilarity, notes.ContainsKey)
                         .Take(SemanticSearchRules.MaxResults)
                         .ToList();
-                    run.Results = matches.Count;
-                    run.Position = PositionOf(matches.Select(m => notes[m.NoteId].NoteNumber), expected);
+                    run.Milliseconds = (int)clock.ElapsedMilliseconds;
+                    Measure(run, matches.Select(m => notes[m.NoteId].NoteNumber).ToList(), expected);
+                    run.Similarities = matches.Select(m => m.Similarity).ToList();
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
@@ -184,19 +187,18 @@ public class KntSemanticSearchEvaluateQueryAsyncCommand : KntCommandServiceBase<
         var run = new SearchEvaluationRunDto { Variant = SearchEvaluationReport.VariantName(EnumNotesSearchMode.Words), Mode = EnumNotesSearchMode.Words };
         try
         {
+            var clock = Stopwatch.StartNew();
             var resWords = await Service.Notes.GetSearchMinimalAsync(new NotesSearchDto
             {
                 TextSearch = query.QueryByWords,
                 SearchInDescription = true,
                 ExcludeNoteTypeIds = excluded
             });
+            run.Milliseconds = (int)clock.ElapsedMilliseconds;
             if (!resWords.IsValid)
                 run.Error = resWords.ErrorMessage;
             else
-            {
-                run.Results = resWords.Entity.Count;
-                run.Position = PositionOf(resWords.Entity.Select(n => n.NoteNumber), expected);
-            }
+                Measure(run, resWords.Entity.Select(n => n.NoteNumber).ToList(), expected);
         }
         catch (Exception ex)
         {
@@ -205,17 +207,13 @@ public class KntSemanticSearchEvaluateQueryAsyncCommand : KntCommandServiceBase<
         return run;
     }
 
-    // From 1; null, none of the expected notes.
-    private static int? PositionOf(IEnumerable<int> noteNumbers, HashSet<int> expected)
+    // The results, the position (from 1) of the first expected note (null, none) and the expected notes in the first ones.
+    private static void Measure(SearchEvaluationRunDto run, List<int> noteNumbers, HashSet<int> expected)
     {
-        var position = 0;
-        foreach (var number in noteNumbers)
-        {
-            position++;
-            if (expected.Contains(number))
-                return position;
-        }
-        return null;
+        run.Results = noteNumbers.Count;
+        var index = noteNumbers.FindIndex(expected.Contains);
+        run.Position = index < 0 ? null : index + 1;
+        run.ExpectedInTop = noteNumbers.Take(SearchEvaluationReport.TopResults).Where(expected.Contains).Distinct().Count();
     }
 }
 

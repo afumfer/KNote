@@ -221,7 +221,7 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 **3. The semantic index (Admin).** In the desktop app, tab **Semantic index** of the same window; in the web app, section **Semantic index** of the **KNote Atlas** tab. It shows how the index is (notes indexed, pending and fragments; when it was last created and how long it took). **Create index** calculates the meaning of every note: KNote tells you first how many notes it will send to the model and, after the first time, how long it should take. You can go on working (in the desktop app you can even close the window: the status bar shows the progress); **Cancel** (**Cancel run** in the desktop app) keeps what is done, and the next run goes on from there. The notes that fail are listed and tried again in the next run. In the web server one index is created at a time, whatever the repository: the others wait, **Queued**.
 
 - Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, and each resource that has a description. The notes of the assistant's sessions, the chat room and the search evaluation are left out.
-- A note you change becomes *pending*. The pending notes are brought up to date before each search by meaning (a few at a time: up to 50 notes or about 10 seconds) or with **Update now**.
+- A note you change becomes *pending*. The pending notes are brought up to date before each search by meaning (a few at a time: up to 50 notes or about 10 seconds) or with **Update now**. A very long note (with more than 64 fragments to calculate) is left for **Update now**: until then, the search uses its previous content.
 - **Rebuild** calculates every vector again (after changing the dimensions, for example); meanwhile the search goes on with the old ones.
 - **Changing the embedding model** needs the index of the new model. The index of the previous model is kept (to compare them, see *Search evaluation (web app)*) and listed below; an Admin can remove it.
 
@@ -256,12 +256,18 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 | Column | Meaning |
 |---|---|
 | **In the first 10** | In how many searches an expected note is among the first 10 results: what you see without scrolling. The main measure. |
+| **Expected notes in the first 10** | How many of all the expected notes are among the first 10 results (not only the first one). |
 | **Found** | In how many searches an expected note is found, in any position. |
 | **Mean position** | The average position of the first expected note: the lower, the better (1 is "always the first one"). |
+| **Similarity of the first expected** | By meaning, the average similarity of the first expected note, in the searches where it is found. |
+| **Similarity of the result 10** | By meaning, the average similarity of the tenth result: where the first 10 end. If it is close to the one above, the expected notes are not much more similar than the rest. |
 | **Mean results** | How many notes each search gives, on average. By meaning, many results mean that the similarity it starts from lets in notes that have nothing to do with the search. |
+| **Mean time** | How long each search takes, on average (by meaning, the vector of the search and the ranking). |
 | **Errors** | Searches that failed. |
 
-Below, each search shows the position of its first expected note in each kind of search (in bold if it is beyond the first 10; «—» if it wasn't found). Keep in mind that the search by words orders its list by topic, not by how much each note has to do with the search. **Save as note** keeps the report as a note of the folder **KNote Atlas**.
+**If the minimum similarity were…** shows, for each index, what the search by meaning would give if it started from a higher similarity (0.50, 0.55, 0.60): in how many searches an expected note would still be among the first 10, and how many results each search would give on average. It helps to choose a minimum that leaves out the notes that have nothing to do with the search without losing the ones you look for.
+
+Below, each search shows the position of its first expected note in each kind of search and, by meaning, its similarity, for example «3 (0.62)» (in bold if it is beyond the first 10; «—» if it wasn't found). Keep in mind that the search by words orders its list by topic, not by how much each note has to do with the search. **Save as note** keeps the report as a note of the folder **KNote Atlas**.
 
 ### Chat room
 

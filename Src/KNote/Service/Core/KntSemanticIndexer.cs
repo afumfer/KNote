@@ -20,10 +20,12 @@ namespace KNote.Service.Core;
 /// <list type="bullet">
 /// <item>Per note: read through the Service (the note with its attributes, its tasks and its resources without their
 /// content), HTML converted to Markdown, the vectors of the previous rows of the same source and hash reused (not the
-/// ones written before a rebuild started), the others asked to the provider in one call, cut and normalized
-/// (EmbeddingVector.Normalize). IndexedDateTime is when the note was read: a change while it is indexed leaves it
-/// pending.</item>
-/// <item>Canceled between notes: what is done is kept. A note that fails is counted, its error goes to the progress
+/// ones written before a rebuild started), the others asked to the provider in batches of EmbeddingBatchSize, cut and
+/// normalized (EmbeddingVector.Normalize), and its rows replaced once at the end. IndexedDateTime is when the note was
+/// read: a change while it is indexed leaves it pending.</item>
+/// <item>The quick updates (before a search, before the similar notes of a note) leave pending the notes with more than
+/// QuickRefreshMaxChunks fragments to calculate: a full run (RunIndexAsync) indexes them.</item>
+/// <item>Canceled between notes and between batches: what is done is kept (a note half done, not written). A note that fails is counted, its error goes to the progress
 /// and it is tried again in the next run, MaxFailuresPerProcess times per process.</item>
 /// <item>One run at a time per database in a process: a run waits for the one in progress; a refresh (before a search)
 /// does nothing while another one runs.</item>
@@ -33,12 +35,21 @@ namespace KNote.Service.Core;
 internal static class KntSemanticIndexer
 {
     public const int MaxFailuresPerProcess = 3;
+    // The vectors of a note are asked to the provider in batches of this many texts: a very long note (hundreds of
+    // fragments) in one call took longer than the provider's HTTP timeout with a big model.
+    public const int EmbeddingBatchSize = 32;
+    // The updates before a search (and before the similar notes of a note) leave for a full run the notes with more
+    // fragments to calculate than this: a search does not wait minutes for one huge note (its previous vectors serve).
+    public const int QuickRefreshMaxChunks = 64;
     private const int PendingPerQuery = 200;
     // A pace is measured from this many notes on.
     private const int NotesForPace = 5;
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> RunLocks = new();
     private static readonly ConcurrentDictionary<string, int> Failures = new();
+    // The notes left by a quick update for having too many fragments, with the modification they had: they are not read
+    // again by the next quick updates until they change or a full run indexes them.
+    private static readonly ConcurrentDictionary<string, DateTime> TooLong = new();
 
     public sealed class Options
     {
@@ -47,6 +58,8 @@ internal static class KntSemanticIndexer
         public bool SkipIfBusy { get; init; }
         public int? MaxNotes { get; init; }
         public TimeSpan? MaxDuration { get; init; }
+        // A note with more fragments to calculate is left pending (QuickRefreshMaxChunks in the updates before a search).
+        public int? MaxChunksPerNote { get; init; }
         public IProgress<SemanticIndexProgressDto> Progress { get; init; }
         public CancellationToken CancellationToken { get; init; }
     }
@@ -178,7 +191,7 @@ internal static class KntSemanticIndexer
                 }
 
                 processed.Add(noteId);
-                var failureKey = $"{service.RepositoryRef?.ConnectionString}|{indexKey}|{noteId}";
+                var failureKey = NoteKey(service, indexKey, noteId);
                 if (Failures.TryGetValue(failureKey, out var failures) && failures >= MaxFailuresPerProcess)
                 {
                     progress.NotesTotal = Math.Max(progress.NotesDone, progress.NotesTotal - 1);
@@ -187,7 +200,12 @@ internal static class KntSemanticIndexer
 
                 try
                 {
-                    var (embedded, reused) = await run.IndexNoteAsync(noteId, options.CancellationToken);
+                    var (embedded, reused, tooLong) = await run.IndexNoteAsync(noteId, options.CancellationToken, options.MaxChunksPerNote);
+                    if (tooLong)
+                    {
+                        progress.NotesTotal = Math.Max(progress.NotesDone, progress.NotesTotal - 1);
+                        continue;
+                    }
                     progress.ChunksEmbedded += embedded;
                     progress.ChunksReused += reused;
                     Failures.TryRemove(failureKey, out _);
@@ -264,8 +282,7 @@ internal static class KntSemanticIndexer
             var state = await KntSemanticIndexState.ReadAsync(service);
             var rebuildSince = state?.IndexKey == indexKey ? state.RebuildSince : null;
             var run = new Run(service, repository, generator, indexKey, resModels.Entity.EmbeddingDimensions, rebuildSince);
-            await run.IndexNoteAsync(noteId, cancellationToken);
-            return true;
+            return !(await run.IndexNoteAsync(noteId, cancellationToken, QuickRefreshMaxChunks)).TooLong;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -327,6 +344,9 @@ internal static class KntSemanticIndexer
         result.AddErrorMessage(message);
     }
 
+    private static string NoteKey(IKntService service, string indexKey, Guid noteId) =>
+        $"{service.RepositoryRef?.ConnectionString}|{indexKey}|{noteId}";
+
     private static void Check(ResultBase result)
     {
         if (!result.IsValid)
@@ -372,16 +392,21 @@ internal static class KntSemanticIndexer
 
         public string Describe(Guid noteId) => _topics.TryGetValue(noteId, out var topic) ? topic : noteId.ToString();
 
-        // The fragments of the note calculated and reused.
-        public async Task<(int Embedded, int Reused)> IndexNoteAsync(Guid noteId, CancellationToken cancellationToken)
+        // The fragments of the note calculated and reused; TooLong, it was left pending for having more than maxChunks
+        // fragments to calculate (nothing written).
+        public async Task<(int Embedded, int Reused, bool TooLong)> IndexNoteAsync(Guid noteId, CancellationToken cancellationToken,
+            int? maxChunks = null)
         {
             var readAt = DateTime.Now;
             var resNote = await _service.Notes.GetAsync(noteId);
             if (resNote.Entity == null)
-                return (0, 0); // Deleted meanwhile: its rows went with it.
+                return (0, 0, false); // Deleted meanwhile: its rows went with it.
             Check(resNote);
             var note = resNote.Entity;
             _topics[noteId] = $"#{note.NoteNumber} {note.Topic}";
+            var noteKey = NoteKey(_service, _indexKey, noteId);
+            if (maxChunks != null && TooLong.TryGetValue(noteKey, out var leftAt) && leftAt == note.ModificationDateTime)
+                return (0, 0, true);
 
             var resTasks = await _service.Notes.GetNoteTasksAsync(noteId);
             Check(resTasks);
@@ -403,14 +428,24 @@ internal static class KntSemanticIndexer
                 .ToDictionary(g => g.Key, g => g.First().Vector);
 
             var missing = set.Chunks.Where(c => !reusable.ContainsKey((c.SourceType, c.SourceId, c.ContentHash))).ToList();
-            var vectors = new Dictionary<NoteChunkDraft, float[]>();
-            if (missing.Count > 0)
+            if (maxChunks != null && missing.Count > maxChunks)
             {
-                var generated = await _generator.GenerateAsync(missing.Select(c => c.TextForEmbedding).ToList(), cancellationToken);
-                if (generated == null || generated.Count != missing.Count)
-                    throw new KntServiceException($"The model {_generator.Model} gave {generated?.Count ?? 0} vectors for {missing.Count} texts.");
-                for (var i = 0; i < missing.Count; i++)
-                    vectors[missing[i]] = EmbeddingVector.Normalize(generated[i], _dimensions);
+                TooLong[noteKey] = note.ModificationDateTime;
+                _service.Logger?.LogInformation("Semantic index: the note {note} has {count} fragments to calculate, left for a full run.",
+                    _topics[noteId], missing.Count);
+                return (0, 0, true);
+            }
+
+            // In batches, canceled between them; the rows are replaced once, with every vector.
+            var vectors = new Dictionary<NoteChunkDraft, float[]>();
+            foreach (var batch in missing.Chunk(EmbeddingBatchSize))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var generated = await _generator.GenerateAsync(batch.Select(c => c.TextForEmbedding).ToList(), cancellationToken);
+                if (generated == null || generated.Count != batch.Length)
+                    throw new KntServiceException($"The model {_generator.Model} gave {generated?.Count ?? 0} vectors for {batch.Length} texts.");
+                for (var i = 0; i < batch.Length; i++)
+                    vectors[batch[i]] = EmbeddingVector.Normalize(generated[i], _dimensions);
             }
 
             var rows = set.Chunks.Select(c => new NoteChunkDto
@@ -425,8 +460,9 @@ internal static class KntSemanticIndexer
                 IndexedDateTime = readAt
             }).ToList();
             Check(await _repository.ReplaceNoteChunksAsync(noteId, _indexKey, rows));
+            TooLong.TryRemove(noteKey, out _);
 
-            return (missing.Count, set.Chunks.Count - missing.Count);
+            return (missing.Count, set.Chunks.Count - missing.Count, false);
         }
 
         private async Task<string> FolderPathAsync(Guid folderId)

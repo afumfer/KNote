@@ -350,6 +350,87 @@ public class SemanticIndexServiceTests
         Assert.IsNotNull(refresh.Entity.Message);
     }
 
+    // KntSemanticIndexer.EmbeddingBatchSize (internal).
+    private const int BatchSize = 32;
+
+    // A note of many sections, each one of its own words: a fragment per section.
+    private static string LongText(int sections) =>
+        string.Join("\n\n", Enumerable.Range(1, sections).Select(i =>
+            $"## Part {i}\n\n" + string.Join(" ", Enumerable.Range(1, 60).Select(j => $"p{i}w{j}"))));
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task ALongNote_IsCalculatedInBatches_EachVectorWithItsFragment(string orm)
+    {
+        using var fixture = await SemanticIndexFixture.CreateAsync(orm);
+        await fixture.RunAsync(); // the notes the repository starts with
+        var note = await fixture.AddNoteAsync("Long manual", LongText(80));
+        var batches = new List<int>();
+        fixture.Models.BeforeGenerate = (texts, _) => { batches.Add(texts.Count); return Task.CompletedTask; };
+
+        var progress = await fixture.RunAsync();
+
+        Assert.AreEqual(0, progress.ErrorsCount);
+        var chunks = await fixture.ChunksAsync(note.NoteId);
+        Assert.IsTrue(chunks.Count > BatchSize * 2, $"{chunks.Count} fragments");
+        Assert.AreEqual(chunks.Count, batches.Sum());
+        Assert.AreEqual((chunks.Count + BatchSize - 1) / BatchSize, batches.Count);
+        Assert.IsTrue(batches.All(b => b <= BatchSize));
+        foreach (var chunk in chunks)
+        {
+            var own = EmbeddingVector.Normalize(FakeEmbeddingGenerators.Vector(chunk.Content), null);
+            var closest = chunks.OrderByDescending(c => EmbeddingVector.Dot(c.Vector, own)).First();
+            Assert.AreEqual(chunk.NoteChunkId, closest.NoteChunkId, $"the vector of «{chunk.Content[..20]}» is its own");
+        }
+    }
+
+    [TestMethod]
+    public async Task ACanceledLongNote_IsNotWritten()
+    {
+        using var fixture = await SemanticIndexFixture.CreateAsync();
+        await fixture.RunAsync();
+        var note = await fixture.AddNoteAsync("Long manual", LongText(80));
+        fixture.Models.Reset();
+        using var cancel = new CancellationTokenSource();
+        fixture.Models.BeforeGenerate = (_, _) => { cancel.Cancel(); return Task.CompletedTask; };
+
+        var progress = await fixture.RunAsync(cancellationToken: cancel.Token);
+
+        Assert.AreEqual(EnumSemanticIndexPhase.Canceled, progress.Phase);
+        Assert.AreEqual(1, fixture.Models.Calls, "canceled between batches");
+        Assert.AreEqual(0, (await fixture.ChunksAsync(note.NoteId)).Count);
+        Assert.IsTrue(await fixture.IsPendingAsync(note.NoteId));
+    }
+
+    [TestMethod]
+    public async Task RefreshPending_LeavesAHugeNoteForAFullRun()
+    {
+        using var fixture = await SemanticIndexFixture.CreateAsync();
+        await fixture.RunAsync();
+        var huge = await fixture.AddNoteAsync("Long manual", LongText(80));
+        var small = await fixture.AddNoteAsync("Small", "Text.");
+
+        var first = await fixture.Service.SemanticSearch.RefreshPendingAsync(new SemanticIndexRefreshRequest());
+
+        Assert.IsTrue(first.IsValid, first.ErrorMessage);
+        Assert.AreEqual(1, first.Entity.NotesDone);
+        Assert.AreEqual(0, first.Entity.ErrorsCount);
+        Assert.IsFalse(await fixture.IsPendingAsync(small.NoteId));
+        Assert.IsTrue(await fixture.IsPendingAsync(huge.NoteId));
+        Assert.IsFalse(fixture.Models.GeneratedTexts.Any(t => t.Contains("p1w1")), "nothing of the huge note was calculated");
+
+        fixture.Models.Reset();
+        var second = await fixture.Service.SemanticSearch.RefreshPendingAsync(new SemanticIndexRefreshRequest());
+        Assert.AreEqual(0, second.Entity.NotesDone);
+        Assert.AreEqual(0, fixture.Models.Calls);
+        Assert.AreEqual(0, (await fixture.Service.SemanticSearch.GetSimilarNotesAsync(small.NoteId)).Entity.Notes.Count(n => n.NoteId == huge.NoteId),
+            "not in the index yet");
+
+        await fixture.RunAsync();
+        Assert.IsFalse(await fixture.IsPendingAsync(huge.NoteId), "a full run indexes it");
+    }
+
     [TestMethod]
     public async Task OtherModelsIndexes_AreListed_AndOnlyTheyCanBeRemoved()
     {

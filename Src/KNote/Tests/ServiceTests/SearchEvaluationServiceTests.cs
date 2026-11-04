@@ -86,7 +86,14 @@ public class SearchEvaluationServiceTests
         }, runs.Select(r => r.Variant).ToList());
         Assert.AreEqual(1, runs[0].Position, "by words, «membrane» finds it (the test queries note is left out)");
         Assert.AreEqual(1, runs[0].Results);
+        Assert.AreEqual(1, runs[0].ExpectedInTop);
+        Assert.AreEqual(0, runs[0].Similarities.Count, "by words there are no similarities");
         Assert.AreEqual(1, runs[1].Position);
+        Assert.AreEqual(1, runs[1].ExpectedInTop);
+        Assert.AreEqual(runs[1].Results, runs[1].Similarities.Count, "a similarity per result");
+        CollectionAssert.AreEqual(runs[1].Similarities.OrderByDescending(s => s).ToList(), runs[1].Similarities, "the most similar first");
+        Assert.IsTrue(SearchEvaluationReport.FirstExpectedSimilarity(runs[1]) >= SemanticSearchRules.MinSimilarity);
+        Assert.IsTrue(runs.All(r => r.Milliseconds >= 0));
         Assert.AreEqual(1, runs[2].Position);
         StringAssert.Contains(runs[3].Error, "not-here");
         Assert.IsTrue(fixture.Models.GeneratedTexts.Contains($"Instruct: Find the notes\nQuery:{query.Query}"));

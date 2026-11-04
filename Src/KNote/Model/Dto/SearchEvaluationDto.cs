@@ -69,6 +69,13 @@ public class SearchEvaluationRunDto
     // Position (from 1) of the first expected note among the results; null, not found.
     public int? Position { get; set; }
     public int Results { get; set; }
+    // How many of the expected notes are among the first SearchEvaluationReport.TopResults results.
+    public int ExpectedInTop { get; set; }
+    // By meaning: the similarity of each result, in their order (the one of the first expected note is the one at
+    // Position); by words, empty.
+    public List<float> Similarities { get; set; } = new();
+    // The time of the query (by meaning, its vector and the ranking; not the load of the index's vectors).
+    public int Milliseconds { get; set; }
     // Why it could not be done (e.g. the model of the index did not answer).
     public string Error { get; set; }
 }
