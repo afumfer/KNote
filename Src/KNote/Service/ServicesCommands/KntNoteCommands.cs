@@ -275,6 +275,15 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
     {
         Result<NoteDto> res;
 
+        // KNote Atlas: the notes of its context only by ProjectManager and Admin (the type it gets and the one it had).
+        var previousTypeId = Param.NoteId == Guid.Empty ? null : (await Repository.Notes.GetAsync(Param.NoteId)).Entity?.NoteTypeId;
+        if (!await KntAtlasNotes.CanWriteAsync(Service, Param.NoteTypeId, previousTypeId))
+        {
+            res = new Result<NoteDto>();
+            res.AddErrorMessage(KntAtlasNotes.NotAllowedMessage);
+            return res;
+        }
+
         if (Param.NoteId == Guid.Empty)
         {
             Param.NoteId = Guid.NewGuid();
@@ -466,6 +475,11 @@ public class KntNotesDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<Not
     public override async Task<Result<NoteDto>> Execute()
     {
         var result = new Result<NoteDto>();
+        if (!await KntAtlasNotes.CanWriteNoteAsync(Service, Param))
+        {
+            result.AddErrorMessage(KntAtlasNotes.NotAllowedMessage);
+            return result;
+        }
 
         var resGetEntity = await Service.Notes.GetAsync(Param);
 
@@ -497,6 +511,12 @@ public class KntNotesDeleteExtendedAsyncCommand : KntCommandServiceBase<Guid, Re
     public override async Task<Result<NoteExtendedDto>> Execute()
     {
         var result = new Result<NoteExtendedDto>();
+        // Before its tasks, resources... are deleted (KntNotesDeleteAsyncCommand checks it again).
+        if (!await KntAtlasNotes.CanWriteNoteAsync(Service, Param))
+        {
+            result.AddErrorMessage(KntAtlasNotes.NotAllowedMessage);
+            return result;
+        }
 
         var neForDelete = (await Service.Notes.GetExtendedAsync(Param)).Entity;
 
@@ -1476,6 +1496,12 @@ public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool
 
     public override async Task<Result<bool>> Execute()
     {
+        if (!await KntAtlasNotes.CanWriteNoteAsync(Service, noteId))
+        {
+            var denied = new Result<bool>();
+            denied.AddErrorMessage(KntAtlasNotes.NotAllowedMessage);
+            return denied;
+        }
         var result = await Repository.Notes.PatchFolderAsync(noteId, folderId);
         if (result.IsValid)
             await KntSemanticIndexer.MarkStaleAsync(Service, noteId);
@@ -1499,6 +1525,12 @@ public class KntNotesPatchChangeTagsAsyncCommand : KntCommandServiceBase<Result<
 
     public override async Task<Result<bool>> Execute()
     {
+        if (!await KntAtlasNotes.CanWriteNoteAsync(Service, noteId))
+        {
+            var denied = new Result<bool>();
+            denied.AddErrorMessage(KntAtlasNotes.NotAllowedMessage);
+            return denied;
+        }
         var result = await Repository.Notes.PatchChangeTagsAsync(noteId, oldTag, newTag);
         if (result.IsValid)
             await KntSemanticIndexer.MarkStaleAsync(Service, noteId);

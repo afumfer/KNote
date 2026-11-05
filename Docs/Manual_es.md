@@ -237,7 +237,7 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 
 ### Evaluación de la búsqueda (aplicación Web)
 
-**Search evaluation**, en el menú lateral (rol ProjectManager o superior), mide cómo funciona la búsqueda en un repositorio: si la búsqueda por significado encuentra lo que buscas mejor que la búsqueda por palabras, y qué modelo de embeddings lo encuentra mejor. Es un laboratorio: úsalo al elegir un modelo o después de cambiar cómo funciona la búsqueda.
+**Search evaluation**, un botón de la página **KNote Atlas** (rol ProjectManager o superior), mide cómo funciona la búsqueda en un repositorio: si la búsqueda por significado encuentra lo que buscas mejor que la búsqueda por palabras, y qué modelo de embeddings lo encuentra mejor. Es un laboratorio: úsalo al elegir un modelo o después de cambiar cómo funciona la búsqueda.
 
 1. **Las consultas de prueba.** Se guardan en la nota **Search test queries**, en la carpeta **KNote Atlas** (se crea la primera vez que abres la página). **Open in the editor** la abre: escribe una tabla con una búsqueda por fila, las notas que debería encontrar y, si quieres, las palabras que usarías para buscar por palabras:
 
@@ -268,6 +268,23 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 **If the minimum similarity were…** muestra, para cada índice, lo que daría la búsqueda por significado si empezara en un parecido mayor (0,50, 0,55, 0,60): en cuántas búsquedas seguiría saliendo una nota esperada entre los 10 primeros resultados y cuántos resultados daría cada búsqueda de media. Sirve para elegir un mínimo que deje fuera las notas que no tienen que ver con la búsqueda sin perder las que buscas.
 
 Debajo, cada búsqueda muestra el puesto de su primera nota esperada en cada forma de buscar y, por significado, su parecido, por ejemplo «3 (0.62)» (en negrita si queda fuera de los 10 primeros; «—» si no se encontró). Ten en cuenta que la búsqueda por palabras ordena su lista por el tema, no por lo que cada nota tiene que ver con la búsqueda. **Save as note** guarda el informe como una nota de la carpeta **KNote Atlas**.
+
+### El contexto de la IA: perfil, glosario e instrucciones de las tareas (KNote Atlas)
+
+El asistente de IA de las dos aplicaciones responde mejor si sabe de qué trata tu repositorio. Tres notas de la carpeta **KNote Atlas** se lo cuentan, y las recibe en cada pregunta:
+
+- **Repository profile** (perfil del repositorio): para qué sirve, quién lo usa, qué hay en cada carpeta y en cada tipo de nota, vuestras convenciones... con palabras sencillas y en tu idioma.
+- **Glossary** (glosario): una tabla con los términos, siglas y nombres propios del repositorio, qué significan y otras formas de escribirlos (`| Term | Meaning | Also written as |`). La IA solo recibe los términos que aparecen en la conversación.
+- **Task instructions** (instrucciones de las tareas): cómo quieres que la IA haga una tarea en este repositorio (por ahora, la tarea **Assistant**). Con el modo **Add**, se suman a las instrucciones de KNote (y sigues aprovechando las mejoras de las versiones nuevas de KNote); con **Replace**, las sustituyen. Las reglas fijas de KNote (citar las notas con `#123`, no inventar, los permisos del usuario) se mantienen siempre.
+
+Todo está junto en **KNote Atlas**: **Tools › KNote Atlas** en la aplicación de escritorio, una ventana con una pestaña para cada parte y una lista para elegir el repositorio (empieza en el de la carpeta activa; el asistente tiene el suyo), y **KNote Atlas** en el menú lateral de la aplicación Web, una página con las mismas partes, para el repositorio de tu sesión:
+
+- La primera vez, **Create the profile** / **Create the glossary** (o **Customize** en las instrucciones de las tareas) crea la nota con una plantilla y la abre en el editor de notas de siempre. Después, **Open in the editor** la abre. Las ayudas de las plantillas son comentarios ocultos (`<!-- ... -->`): los ves al editar, no aparecen en los visores y la IA nunca los recibe; tampoco los apartados que dejes vacíos.
+- **Fill in folders and types** (perfil) añade a sus apartados *Folders* y *Note types* las carpetas de los dos primeros niveles y los tipos de nota que tienen notas, para que solo tengas que escribir qué es cada uno. Solo añade lo que falta: no borra nada de lo escrito.
+- **What the AI receives** muestra el texto que recibe la IA para una tarea, con su tamaño (cuántas palabras y tokens, aproximadamente) y sus partes (rol Staff o superior). Escribe un texto de prueba y pulsa **Show its terms** para ver qué términos del glosario entrarían. En el asistente de la aplicación de escritorio, **View › What the AI receives** lo muestra para la conversación en curso.
+- En la aplicación de escritorio, un prompt elegido con **Select prompt** (o el que fija un script) sustituye solo las instrucciones del asistente en esa conversación: las reglas fijas, el perfil y el glosario se mantienen.
+
+Cualquiera puede abrir KNote Atlas y leer las notas; solo un **ProjectManager** o un **Admin** puede crearlas, guardarlas, borrarlas, moverlas o cambiar sus etiquetas (también la nota **Search test queries**). El perfil se recorta a unas 2.000 palabras: KNote Atlas avisa si es más largo.
 
 ### Chat room
 

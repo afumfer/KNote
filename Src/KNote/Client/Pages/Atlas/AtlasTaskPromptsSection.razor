@@ -1,0 +1,118 @@
+@implements IDisposable
+
+@inject IStore store
+@inject DialogService dialogService
+@inject KntWindows kntWindows
+
+@* KNote Atlas › Task instructions (chapter 21): the tasks of KNote Atlas with their state (KNote's, Added, Replaced). See
+   KNote's instructions of a task and customize it (its note of instructions, created the first time in the mode Add, in
+   the note editor of always). *@
+
+<RadzenCard>
+    <KntFormSection Icon="tune" Title="Task instructions" Description="Each task of KNote Atlas has KNote's instructions. A note of instructions adds to them or replaces them in this repository (KNote's fixed rules always stay).">
+        @if (tasks == null)
+        {
+            @if (loadFailed)
+            {
+                <AtlasLoadError Text="The task instructions could not be read." Retry="RefreshAsync" />
+            }
+            else
+            {
+                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+            }
+        }
+        else
+        {
+            <RadzenDataGrid TItem="AtlasTaskPromptStatusDto" Data="tasks" @bind-Value="selected" SelectionMode="DataGridSelectionMode.Single"
+                            Density="Density.Compact" AllowSorting="false">
+                <Columns>
+                    <RadzenDataGridColumn TItem="AtlasTaskPromptStatusDto" Property="TaskName" Title="Task" />
+                    <RadzenDataGridColumn TItem="AtlasTaskPromptStatusDto" Title="State">
+                        <Template Context="task">@State(task)</Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+            @foreach (var notice in tasks.SelectMany(t => t.Notices))
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small">@notice</RadzenAlert>
+            }
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap" class="rz-mt-2">
+                <AuthorizeView Roles="ProjectManager, Admin">
+                    <RadzenButton Text="Customize" Icon="edit" IsBusy="saving.IsBusy" Disabled="Current == null" Click="CustomizeAsync" />
+                </AuthorizeView>
+                <RadzenButton Text="See KNote's" Icon="info" ButtonStyle="ButtonStyle.Secondary" Disabled="Current == null"
+                              Click="ShowKNoteAsync" />
+            </RadzenStack>
+        }
+    </KntFormSection>
+</RadzenCard>
+
+@code {
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private readonly KntLatestRequest reading = new();
+    private readonly KntSingleFlight saving = new();
+    private List<AtlasTaskPromptStatusDto>? tasks;
+    private IList<AtlasTaskPromptStatusDto>? selected;
+    private bool loadFailed;
+
+    private AtlasTaskPromptStatusDto? Current => selected?.FirstOrDefault() ?? tasks?.FirstOrDefault();
+
+    protected override Task OnInitializedAsync() => RefreshAsync();
+
+    public async Task RefreshAsync()
+    {
+        var key = Current?.TaskKey;
+        var read = await reading.RunAsync(ct => store.Atlas.GetTaskPromptsAsync(ct));
+        if (read.Canceled)
+            return;
+        loadFailed = !read.Value.IsValid;
+        tasks = loadFailed ? null : read.Value.Entity;
+        var current = tasks?.FirstOrDefault(t => t.TaskKey == key) ?? tasks?.FirstOrDefault();
+        selected = current == null ? null : new List<AtlasTaskPromptStatusDto> { current };
+        StateHasChanged();
+    }
+
+    private static string State(AtlasTaskPromptStatusDto task) => task.State switch
+    {
+        EnumAtlasTaskPromptState.Added => $"Added (#{task.Note?.NoteNumber})",
+        EnumAtlasTaskPromptState.Replaced => $"Replaced (#{task.Note?.NoteNumber})",
+        _ => "KNote's"
+    };
+
+    private Task ShowKNoteAsync()
+    {
+        var task = AiTaskCatalog.Find(Current?.TaskKey);
+        if (task == null)
+            return Task.CompletedTask;
+        return dialogService.OpenAsync<AtlasKNoteInstructionsDialog>($"KNote's instructions · {task.Name}",
+            new Dictionary<string, object?> { { nameof(AtlasKNoteInstructionsDialog.AiTask), task } },
+            KntDialogs.Framed(KntDialogs.Large()));
+    }
+
+    // With a note, it is opened in the same click; without one, it is created first (Mode Add) and then opened.
+    private async Task CustomizeAsync()
+    {
+        var task = Current;
+        if (task == null)
+            return;
+        if (task.Note != null)
+        {
+            await kntWindows.OpenEditAsync(task.Note.NoteId);
+            return;
+        }
+
+        await saving.RunAsync(async () =>
+        {
+            var res = await store.Atlas.CustomizeTaskAsync(task.TaskKey);
+            if (!res.IsValid)
+                return;
+            if (res.Entity != null)
+                await kntWindows.OpenEditAsync(res.Entity.NoteId);
+            await RefreshAsync();
+            await Changed.InvokeAsync();
+        });
+    }
+
+    public void Dispose() => reading.Dispose();
+}

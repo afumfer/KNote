@@ -51,6 +51,18 @@ public static class KntConst
     public static string TestQueriesTopic { get; private set; } = "Search test queries";
     public static string SearchEvaluationTag { get; private set; } = "@KNoteSearchEvaluation";
 
+    // The context KNote Atlas gives the AI (stage 1, chapters 19–21), in the same folder: the repository's profile and
+    // glossary (one note of each type) and the customized instructions of each task (notes of this type, with these
+    // attributes). Only ProjectManager and Admin save them (KntAtlasNotes.ProtectedNoteTypeNames).
+    public static string ProfileTag { get; private set; } = "@KNoteProfile";
+    public static string ProfileTopic { get; private set; } = "Repository profile";
+    public static string GlossaryTag { get; private set; } = "@KNoteGlossary";
+    public static string GlossaryTopic { get; private set; } = "Glossary";
+    public static string TaskPromptTag { get; private set; } = "@KNoteTaskPrompt";
+    public static string TaskPromptTaskAttributeName { get; private set; } = "Task";
+    public static string TaskPromptModeAttributeName { get; private set; } = "Mode";
+    public static string TaskPromptActiveAttributeName { get; private set; } = "Active";
+
     // The most occurrences of alarms the alarms calendar of the web receives at once (AlarmsCalendarDto.Truncated).
     public const int MaxAlarmsCalendarOccurrences = 3000;
 

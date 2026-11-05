@@ -15,17 +15,20 @@ public class ScriptedAiChatClientProvider : IAiChatClientProvider
     // One list of updates per call to the model, in order; an exception thrown by Script fails the call.
     public Func<List<List<ChatResponseUpdate>>> Script { get; set; } = () => [];
 
+    // The messages of the last call to the model (the system message first).
+    public List<ChatMessage> LastMessages { get; private set; } = [];
+
     public IChatClient Create(AiProviderRef providerRef, IEnumerable<AITool> tools)
     {
         var toolList = tools.ToList();
-        return new ScriptedChatClient(Script)
+        return new ScriptedChatClient(Script, messages => LastMessages = messages.ToList())
             .AsBuilder()
             .ConfigureOptions(o => o.Tools = [.. toolList])
             .UseFunctionInvocation()
             .Build();
     }
 
-    private sealed class ScriptedChatClient(Func<List<List<ChatResponseUpdate>>> script) : IChatClient
+    private sealed class ScriptedChatClient(Func<List<List<ChatResponseUpdate>>> script, Action<IEnumerable<ChatMessage>> received) : IChatClient
     {
         private List<List<ChatResponseUpdate>>? _responses;
         private int _calls;
@@ -36,6 +39,7 @@ public class ScriptedAiChatClientProvider : IAiChatClientProvider
         public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages,
             ChatOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
+            received(messages);
             _responses ??= script();
             if (_calls >= _responses.Count)
                 throw new InvalidOperationException("The test script has no more responses.");

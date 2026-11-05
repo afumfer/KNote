@@ -338,9 +338,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         SelectCurrentSession();
     }
 
-    private void menuViewSystem_Click(object sender, EventArgs e)
+    private async void menuViewSystem_Click(object sender, EventArgs e)
     {
-        ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat ");
+        var composed = await _ctrl.GetSystemPromptAsync();
+        new AiPromptViewForm($"{KntConst.AppName} - what the AI receives", composed).ShowDialog(this);
     }
 
     private void menuShowModelInfo_Click(object sender, EventArgs e)

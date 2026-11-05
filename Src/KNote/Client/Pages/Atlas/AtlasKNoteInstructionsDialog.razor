@@ -1,0 +1,18 @@
+@inject DialogService dialogService
+
+@* «See KNote's» (chapter 21): the fixed rules and the default instructions of a task, as the AI receives them. *@
+
+<KntDialogFrame Icon="info" Title="@($"KNote's instructions · {AiTask.Name}")" OnClose="() => dialogService.Close(null)">
+    <ChildContent>
+        <AtlasPromptText Text="@($"# {AiPromptComposer.RulesLayer}\n\n{AiTask.FixedRules}\n\n# {AiPromptComposer.InstructionsLayer}\n\n{AiTask.DefaultInstructions}")" />
+    </ChildContent>
+    <Footer>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => dialogService.Close(null)" />
+        </RadzenStack>
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public AiTask AiTask { get; set; } = null!;
+}

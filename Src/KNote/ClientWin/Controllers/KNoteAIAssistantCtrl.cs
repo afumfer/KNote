@@ -110,7 +110,16 @@ public class KNoteAIAssistantCtrl : CtrlBase
     public List<ServiceRef> Repositories =>
         Store.GetAllServiceRef().Where(s => Store.Security.IsAuthorized(typeof(KntAiSessionsSaveAsyncCommand), s.Service)).ToList();
 
+    // The instructions of the conversation (KNote Atlas, D6): KNote's default one, or the System of a @Prompt of the
+    // catalog or the one a script gives, which replace the task's instructions (layer 2) and nothing else: the fixed
+    // rules, the profile and the glossary of the repository always go (AiAssistantContext).
     public string RootSystemChat { get; set; }
+
+    // The system message of the last turn, put together (or of the next one, GetSystemPromptAsync).
+    public AiComposedPromptDto LastSystemPrompt { get; private set; }
+
+    private string InstructionsOverride =>
+        string.IsNullOrWhiteSpace(RootSystemChat) || RootSystemChat == KntConst.DefaultRootSystemChat ? null : RootSystemChat;
 
     // Default response mode the view should preselect (Get Stream / Get Completion radios) when
     // it's shown - Stream matches the pre-existing manual-use default (KNoteManagement menu). A
@@ -459,7 +468,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
         var history = _chatTurns.ToList();
         AiChatTurnDto completed = null;
 
-        await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, RootSystemChat, history, prompt))
+        LastSystemPrompt = await AiAssistantContext.ComposeAsync(ServiceRef?.Service, InstructionsOverride, history, prompt);
+        await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, LastSystemPrompt.Text, history, prompt))
         {
             if (e.Type == AiChatStreamEventTypes.Delta)
                 onText?.Invoke(e.Text);
@@ -616,6 +626,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
     }
 
     #endregion
+
+    /// <summary>What the AI receives in this conversation (View › System): the rules, the instructions, the profile and the glossary.</summary>
+    public async Task<AiComposedPromptDto> GetSystemPromptAsync() =>
+        await AiAssistantContext.ComposeAsync(ServiceRef?.Service, InstructionsOverride, _chatTurns.ToList(), null);
 
     public async Task<KntAssistantInfo> GetCatalogPrompt()
     {

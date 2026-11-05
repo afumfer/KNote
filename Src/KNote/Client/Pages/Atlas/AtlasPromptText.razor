@@ -1,0 +1,12 @@
+@* A text for the AI, as it is sent (raw text), with its summary, if it has one. *@
+
+@if (!string.IsNullOrEmpty(Summary))
+{
+    <p class="knt-atlas-summary">@Summary</p>
+}
+<pre class="knt-atlas-prompt">@Text</pre>
+
+@code {
+    [Parameter] public string? Summary { get; set; }
+    [Parameter] public string? Text { get; set; }
+}

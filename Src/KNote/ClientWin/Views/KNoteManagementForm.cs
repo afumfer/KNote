@@ -466,6 +466,10 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         {
             _ctrl.ShowKNoteAIAssistantConsole();
         }
+        else if (menuSel == menuAtlas)
+        {
+            await _ctrl.ShowAtlasContextAsync();
+        }
         else if (menuSel == menuAppInfoAlarms)
         {
             _ctrl.ShowAppInfoAlarms();

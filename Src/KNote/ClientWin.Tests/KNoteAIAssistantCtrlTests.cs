@@ -233,6 +233,36 @@ public class KNoteAIAssistantCtrlTests
         Assert.AreEqual("partial", ctrl.StreamingResult);
     }
 
+    // KNote Atlas (D6): the instructions of a @Prompt (or of a script) replace only the task's instructions; KNote's
+    // fixed rules always go first. Without a repository (here) the assistant still has them.
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("You are a translator.")]
+    public async Task TheSystemMessage_HasKNotesRules_AndTheInstructionsOfTheConversation(string? rootSystemChat)
+    {
+        List<ChatMessage>? sent = null;
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) =>
+            {
+                sent = messages.ToList();
+                return AnswerStream("Done", new UsageDetails { TotalTokenCount = 1 });
+            }
+        };
+        var ctrl = CreateCtrl(chatClient);
+        if (rootSystemChat != null)
+            ctrl.RootSystemChat = rootSystemChat;
+
+        await ctrl.GetCompletionAsync("Hello");
+
+        var system = sent!.First();
+        Assert.AreEqual(ChatRole.System, system.Role);
+        StringAssert.StartsWith(system.Text, $"# {AiPromptComposer.RulesLayer}");
+        StringAssert.Contains(system.Text, $"# {AiPromptComposer.InstructionsLayer}\n\n{rootSystemChat ?? AiTaskCatalog.Assistant.DefaultInstructions}");
+        Assert.AreEqual(system.Text, ctrl.LastSystemPrompt.Text);
+        Assert.AreEqual(system.Text, (await ctrl.GetSystemPromptAsync()).Text, "View › System shows it");
+    }
+
     [TestMethod]
     public void RestartAIAssistant_ClearsHistoryAndCounters()
     {

@@ -139,7 +139,9 @@ public class AiAssistantController : ControllerBase
     private async IAsyncEnumerable<SseItem<AiChatStreamEventDto>> StreamChatAsync(IChatClient chatClient, AiChatRequestDto request,
         ServerAiToolsHost toolsHost, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var events = AiChatTurnStreamer.StreamAsync(chatClient, KntConst.DefaultRootSystemChat, request.History, request.Prompt, cancellationToken)
+        // KNote Atlas: the rules, the instructions, the profile and the glossary of the session's repository.
+        var context = await AiAssistantContext.ComposeAsync(_service, null, request.History, request.Prompt, _logger);
+        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
         try
         {

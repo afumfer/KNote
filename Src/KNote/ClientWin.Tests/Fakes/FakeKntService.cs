@@ -22,6 +22,7 @@ internal class FakeKntService : IKntService
     public FakeKntFolderService FoldersFake { get; } = new();
     public FakeKntAiSessionService AiSessionsFake { get; } = new();
     public FakeKntSemanticSearchService SemanticSearchFake { get; } = new();
+    public FakeKntAtlasContextService AtlasContextFake { get; } = new();
     public FakeKntSystemValuesService SystemValuesFake { get; } = new();
 
     public ILogger Logger { get; set; }
@@ -50,6 +51,7 @@ internal class FakeKntService : IKntService
     public IKntAiSessionService AiSessions => AiSessionsFake;
     public IKntChatRoomService ChatRooms => throw new NotSupportedException();
     public IKntSemanticSearchService SemanticSearch => SemanticSearchFake;
+    public IKntAtlasContextService AtlasContext => AtlasContextFake;
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();

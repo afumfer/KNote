@@ -329,6 +329,25 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
     `Tests/ServiceTests/Semantic*`, `SimilarNotesServiceTests` y `SearchEvaluationServiceTests` con un generador falso y
     determinista (`Tests/Helpers/FakeEmbeddingGenerators`, 1024 dimensiones: con menos, textos sin relación salían
     parecidos), y la API en `Tests/InProcessIntegrationTests/Semantic*` y `SearchByMeaningInProcessTests`.
+- **Contexto de la IA (KNote Atlas, etapa 1)** (`IKntService.AtlasContext`, comandos en `KntAtlasContextCommands.cs`;
+  especificación en `C:\Dev\KNote-Atlas\03-Etapa-1.md`). Tres notas del sistema en la carpeta «KNote Atlas»
+  (`Service/Core/KntAtlasNotes`, creadas con `KntSystemNotes`): el perfil (`@KNoteProfile`) y el glosario
+  (`@KNoteGlossary`, tabla `Term | Meaning | Also written as`), uno de cada uno (con varios, el más antiguo), y las
+  instrucciones de cada tarea (`@KNoteTaskPrompt`, atributos `Task`, `Mode` = `Add`/`Replace` y `Active`, una activa por
+  tarea). Las ventanas (Guest) no crean nada; crear las notas es de ProjectManager. Lo que recibe la IA lo monta
+  `Model/Core/AiPromptComposer` en capas (reglas fijas de `AiTaskCatalog` con el usuario, su rol, el repositorio y la
+  fecha → instrucciones de la tarea, de serie más o en lugar de la nota → perfil recortado a 2.000 palabras → términos
+  del glosario de la conversación), sin los comentarios HTML (las ayudas de las plantillas, `AtlasTemplates`) ni los
+  apartados vacíos (`AtlasMarkdown.Clean`). Los términos (`GlossaryTable.Find`: sin mayúsculas ni acentos, por palabra
+  completa y por sus variantes) se ordenan por su primera aparición en la conversación: un término nuevo solo se añade
+  al final, para no romper la caché del proveedor. `ComposeAsync` es Staff; `KNote.Ai/AiAssistantContext` lo usa en el
+  asistente de las dos apps y, si falla, monta solo las reglas y las instrucciones de serie. **Regla de guardado**: las
+  notas del perfil, el glosario, las instrucciones y las consultas de prueba (`KntAtlasNotes.ProtectedNoteTypeNames`)
+  solo las guardan, borran, mueven o reetiquetan ProjectManager y Admin, también con la autorización de comandos
+  apagada (el `Server`): lo comprueban `KntNotesSaveAsyncCommand` (tipo nuevo y anterior), `Delete*` y los `Patch*`;
+  sin usuario, permitido. Los tres tipos son del sistema (`KntSystemNotes.SystemNoteTypeNames`). Tests en
+  `Tests/AtlasContextRulesTests`, `Tests/ServiceTests/AtlasContextServiceTests` y
+  `Tests/InProcessIntegrationTests/AtlasInProcessTests`.
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 

@@ -252,11 +252,21 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   clic o Enter la abre). En `NoteForm`, debajo de las relaciones de la pestaña «Trace notes» (se calcula al abrir la
   pestaña), con «Relate», que abre `NoteTraceNoteEditor` con la nota ya elegida y al guardar vuelve a calcular. En
   `NoteViewer`, el botón «Similar notes» abre `NoteSimilarNotesDialog` (sin «Relate»).
-- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, ruta `atlas/evaluation`, `KntSections.SearchEvaluation`, entrada
-  del menú solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
+- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, ruta `atlas/evaluation`, `KntSections.SearchEvaluation`, botón
+  de la cabecera de la página KNote Atlas, solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
   «Read again»), las casillas de los índices cuyo modelo tiene el Server y «Also without the query instruction»,
   «Evaluate» (una petición por consulta, con progreso y «Cancel», que deja el informe de las hechas), el informe
   (`SearchEvaluationReport.Markdown`, mostrado con `ViewMarkdown`) y «Save as note». No existe en `ClientWin`.
+- **Contexto de la IA** (etapa 1, `IStore.Atlas` = `AtlasWebApiService`, `api/atlas`): la página `Pages/Atlas/AtlasContext`
+  (ruta `atlas`, `KntSections.AtlasContext`, una entrada del menú lateral para cualquier usuario con sesión), con una
+  sección por parte que lee lo suyo (`KntLatestRequest`, Retry con `AtlasLoadError`): `AtlasProfileSection` y
+  `AtlasGlossarySection` lado a lado, `AtlasTaskPromptsSection` y `AtlasPromptSection` («What the AI receives», Staff+: la
+  tarea, un texto de prueba y el texto tal cual se envía, `AtlasPromptText`, con su resumen, `AiPromptComposer.Summary`).
+  La nota se edita en el editor de siempre en su propia ventana (`KntWindows.OpenEditAsync`); crearla abre esa ventana
+  justo después de la respuesta. Tras crear o rellenar una nota, la sección avisa a la página (`Changed`), que recalcula
+  «What the AI receives»; con `KntWindows.NoteSaved` la página vuelve a leer todas las secciones. Los botones de crear y
+  personalizar se ven con `AuthorizeView` (ProjectManager, Admin). «See KNote's» es `AtlasKNoteInstructionsDialog`. Si la
+  página crece con las etapas siguientes, se pasa a pestañas como las de `Admin`.
 
 ## Interfaz de usuario: Radzen.Blazor
 

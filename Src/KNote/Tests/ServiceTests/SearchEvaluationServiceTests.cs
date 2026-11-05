@@ -38,6 +38,7 @@ public class SearchEvaluationServiceTests
         await fixture.RunAsync();
 
         var first = await SetupAsync(fixture);
+        Assert.AreEqual(AtlasTemplates.NoteText(SearchTestQueries.Template), (await fixture.Service.Notes.GetAsync(first.TestQueriesNoteId)).Entity.Description);
         await WriteQueriesAsync(fixture, first.TestQueriesNoteId, $"| keyboard membrane | #{note.NoteNumber}, #9999 | membrane |\n| nothing | |\n");
         var second = await SetupAsync(fixture);
 

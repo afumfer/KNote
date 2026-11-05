@@ -459,7 +459,7 @@ namespace KNote.ClientWin.Views
             //
             menuViewSystem.Name = "menuViewSystem";
             menuViewSystem.Size = new Size(260, 22);
-            menuViewSystem.Text = "&View system root ...";
+            menuViewSystem.Text = "&What the AI receives ...";
             menuViewSystem.Click += menuViewSystem_Click;
             //
             // menuOptionsSeparator2

@@ -994,6 +994,20 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         kNoteAIAssistantCtrl.ShowAIAssistantView(autoCloseCtrlOnViewExit: true, persistSession: true);
     }
 
+    // KNote Atlas: the context of the AI, starting in the active repository.
+    public async Task ShowAtlasContextAsync()
+    {
+        var atlasCtrl = new AtlasContextCtrl(Store);
+        if (atlasCtrl.Service == null)
+        {
+            View.ShowInfo("There is no repository to work in.");
+            atlasCtrl.Dispose();
+            return;
+        }
+        atlasCtrl.Run();
+        await atlasCtrl.LoadAsync();
+    }
+
     // KNoteAIAssistant plan (Phase 4): maintenance screen for the AI provider/model collection
     // consumed by KNoteAIAssistantCtrl's picker.
     public async Task ManageAiProviders()

@@ -55,6 +55,9 @@ public class CommandAuthorizationMatrixTests
             // search by meaning.
             "KntSemanticSearchGetIndexStatusAsyncCommand", "KntSemanticSearchRefreshPendingAsyncCommand",
             "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
+            // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
+            "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
+            "KntAtlasContextGetTaskPromptsAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).
@@ -85,11 +88,17 @@ public class CommandAuthorizationMatrixTests
             "KntChatRoomsGetGeneralAsyncCommand", "KntChatRoomsJoinAsyncCommand", "KntChatRoomsAddMessageAsyncCommand",
             "KntChatRoomsAddImageAsyncCommand");
 
+        // KNote Atlas: what the AI receives, put together for the assistant (Staff, like the assistant).
+        Add(nameof(EnumRoles.Staff), "KntAtlasContextComposeAsyncCommand");
+
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",
             // KNote Atlas: the search evaluation (it measures the repository's search).
             "KntSemanticSearchGetSearchEvaluationAsyncCommand", "KntSemanticSearchEvaluateQueryAsyncCommand",
-            "KntSemanticSearchSaveSearchEvaluationReportAsyncCommand");
+            "KntSemanticSearchSaveSearchEvaluationReportAsyncCommand",
+            // KNote Atlas: creating the notes of the context of the AI (who saves them, too).
+            "KntAtlasContextCreateProfileAsyncCommand", "KntAtlasContextFillProfileFoldersAndTypesAsyncCommand",
+            "KntAtlasContextCreateGlossaryAsyncCommand", "KntAtlasContextCustomizeTaskAsyncCommand");
 
         // Repository administration.
         Add(nameof(EnumRoles.Admin),

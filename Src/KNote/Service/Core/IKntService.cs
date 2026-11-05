@@ -63,6 +63,7 @@ public interface IKntService : IDisposable
     IKntAiSessionService AiSessions { get; }
     IKntChatRoomService ChatRooms { get; }
     IKntSemanticSearchService SemanticSearch { get; }
+    IKntAtlasContextService AtlasContext { get; }
     IKntMessageBroker MessageBroker { get; }
 
     string GetSystemVariable(string scope, string variable);

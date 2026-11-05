@@ -237,7 +237,7 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 
 ### Search evaluation (web app)
 
-**Search evaluation**, in the side menu (ProjectManager role or higher), measures how well the search works in a repository: whether the search by meaning finds what you look for better than the search by words, and which embedding model finds it better. It is a laboratory: use it when you choose a model or after changing how the search works.
+**Search evaluation**, a button of the **KNote Atlas** page (ProjectManager role or higher), measures how well the search works in a repository: whether the search by meaning finds what you look for better than the search by words, and which embedding model finds it better. It is a laboratory: use it when you choose a model or after changing how the search works.
 
 1. **The test queries.** They are kept in the note **Search test queries**, in the folder **KNote Atlas** (created the first time you open the page). **Open in the editor** opens it: write a table with one search per row, the notes it should find, and, optionally, the words you would use to search by words:
 
@@ -268,6 +268,23 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 **If the minimum similarity were…** shows, for each index, what the search by meaning would give if it started from a higher similarity (0.50, 0.55, 0.60): in how many searches an expected note would still be among the first 10, and how many results each search would give on average. It helps to choose a minimum that leaves out the notes that have nothing to do with the search without losing the ones you look for.
 
 Below, each search shows the position of its first expected note in each kind of search and, by meaning, its similarity, for example «3 (0.62)» (in bold if it is beyond the first 10; «—» if it wasn't found). Keep in mind that the search by words orders its list by topic, not by how much each note has to do with the search. **Save as note** keeps the report as a note of the folder **KNote Atlas**.
+
+### The context of the AI: profile, glossary and task instructions (KNote Atlas)
+
+The AI assistant of both apps answers better when it knows what your repository is about. Three notes of the folder **KNote Atlas** tell it, and it receives them in every question:
+
+- **Repository profile**: what the repository is for, who uses it, what there is in each folder and each note type, your conventions... in plain words and in your own language.
+- **Glossary**: a table with the terms, acronyms and proper names of the repository, what they mean and other ways of writing them (`| Term | Meaning | Also written as |`). The AI only receives the terms that appear in the conversation.
+- **Task instructions**: how you want the AI to do a task in this repository (for now, the task **Assistant**). With the mode **Add**, they are added to KNote's instructions (and you keep the improvements of new versions of KNote); with **Replace**, they take their place. KNote's fixed rules (citing the notes with `#123`, not inventing, the user's permissions) always stay.
+
+Everything is together in **KNote Atlas**: **Tools › KNote Atlas** in the desktop app, a window with a tab for each part and a list to choose the repository (it starts in the one of the active folder; the assistant has its own), and **KNote Atlas** in the side menu of the web app, a page with the same parts, for the repository of your session:
+
+- The first time, **Create the profile** / **Create the glossary** (or **Customize** in the task instructions) creates the note with a template and opens it in the note editor of always. Afterwards, **Open in the editor** opens it. The help of the templates are hidden comments (`<!-- ... -->`): you see them while editing, they are not shown in the viewers and the AI never receives them; neither the sections left empty.
+- **Fill in folders and types** (profile) adds to its sections *Folders* and *Note types* the folders of the first two levels and the note types that have notes, so that you only write what each one is. It only adds what is missing: nothing written is removed.
+- **What the AI receives** shows the text the AI gets for a task, with its size (about how many words and tokens) and its parts (Staff role or higher). Write a test text and press **Show its terms** to see which glossary terms would go in. In the desktop app's assistant, **View › What the AI receives** shows it for the current conversation.
+- In the desktop app, a prompt chosen with **Select prompt** (or given by a script) replaces only the assistant's instructions in that conversation: the fixed rules, the profile and the glossary stay.
+
+Anyone can open KNote Atlas and read the notes; only a **ProjectManager** or an **Admin** can create, save, delete, move or retag them (also the note **Search test queries**). The profile is cut to about 2,000 words: KNote Atlas tells you if it is longer.
 
 ### Chat room
 

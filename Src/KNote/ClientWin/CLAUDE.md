@@ -646,6 +646,25 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
   (WebView2 incluido). Termínalo con `Environment.Exit`: `Store.SaveConfig()` escribe siempre en
   `%LocalAppData%\KNote`, así que cerrar la ventana como un usuario sobrescribiría la configuración real.
 
+## KNote Atlas: contexto de la IA
+
+Etapa 1 (lógica en `Service`, ver «Contexto de la IA» en el `CLAUDE.md` raíz). **Tools › KNote Atlas** (debajo de «AI
+Assistant»): una sola ventana no modal, `AtlasContextCtrl` (`[KntAuthorize(Guest)]`) y `AtlasContextForm`, con las
+pestañas «Repository profile», «Glossary», «Task instructions» y «What the AI receives» (la tarea, un texto de prueba y
+el mensaje montado; un Guest no lo ve). Empieza en el repositorio activo y la lista de arriba elige otro entre los
+enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
+otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»
+abre el `NoteEditorCtrl` de siempre y la ventana se refresca con su `SavedEntity` (el editor puede seguir abierto después
+de cerrarla: entonces no hace nada). `Views/AiPromptViewForm` (texto de solo lectura) es «See KNote's» y, en el asistente,
+**View › What the AI receives**. Una parte nueva (la política de ruido, etapa 2) es otra pestaña; si tiene lógica propia,
+un `Ctrl` embebido como las pestañas del editor de repositorio. Tests en `AtlasContextCtrlTests`.
+
+**El asistente** (`KNoteAIAssistantCtrl`): antes de cada turno monta el mensaje de sistema con `AiAssistantContext`
+(`KNote.Ai`) y el `ServiceRef` de la conversación (`LastSystemPrompt`). `RootSystemChat` es solo la capa de
+instrucciones (D6): con su valor de serie (`KntConst.DefaultRootSystemChat`) van las de KNote; con el `System` de un
+`@Prompt` del catálogo o el que fija un script (también el motor «ln»), sustituyen solo esas, y las reglas fijas, el
+perfil y el glosario se mantienen. Sin repositorio o si falla, van las reglas y las instrucciones de serie.
+
 ## KNote Atlas: búsqueda por significado
 
 Etapa 0 de KNote Atlas (la lógica está en `Service`, ver «Índice semántico» en el `CLAUDE.md` raíz). Los textos del

@@ -194,6 +194,17 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private IAtlasWebApiService? _atlas;
+    public IAtlasWebApiService Atlas
+    {
+        get
+        {
+            if (_atlas == null)
+                _atlas = new AtlasWebApiService(AppState, _httpClient);
+            return _atlas;
+        }
+    }
+
     public ChatRoomHub ChatRoom { get; }
 
     #endregion

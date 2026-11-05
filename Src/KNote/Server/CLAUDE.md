@@ -327,9 +327,20 @@ Staff, ProjectManager y Admin (como `KNoteAIAssistantCtrl` en `ClientWin` y los 
   siempre; lo que falla después, un evento `error`. La lógica del turno es la común de `KNote.Ai`
   (`AiChatTurnStreamer`), con las tools de `KNoteAiTools`; su host en el Server (`Ai/ServerAiToolsHost`)
   guarda las notas de `create_task` en la carpeta Home y las anuncia con eventos `noteCreated`. Cancelar la
-  petición (`RequestAborted`) corta la llamada al proveedor.
+  petición (`RequestAborted`) corta la llamada al proveedor. El mensaje de sistema lo monta
+  `KNote.Ai/AiAssistantContext` con el servicio de la petición (reglas, instrucciones, perfil y glosario de KNote Atlas,
+  ver «Contexto de la IA» en el `CLAUDE.md` raíz), con las preguntas y respuestas de la conversación para el glosario.
 - `GET sessions`, `GET sessions/{noteId}`, `POST sessions` — las sesiones del usuario
   (`IKntService.AiSessions`, ver `CLAUDE.md` raíz). El cliente guarda la sesión tras cada respuesta.
+
+## KNote Atlas: contexto de la IA (`AtlasController`, `api/atlas`)
+
+El perfil, el glosario y las instrucciones de las tareas de la página KNote Atlas (`IKntService.AtlasContext`): `GET profile`,
+`GET glossary` y `GET tasks` para cualquier usuario; `POST profile`, `POST profile/fill`, `POST glossary` y
+`POST tasks/{taskKey}/customize` (crean la nota con su plantilla, o la devuelven si ya existe) para ProjectManager y
+Admin; `POST compose` («What the AI receives», `AiComposeRequestDto` con un texto de prueba para el glosario) para
+Staff+. Las notas se guardan con la API de notas de siempre: la regla de guardado está en el `Service`, así que un
+Staff recibe un 400 con su motivo aunque `api/notes` acepte Staff. Tests en `Tests/InProcessIntegrationTests/AtlasInProcessTests`.
 
 Proveedores: sección `ai.providers` de `appsettings.json`, con los mismos campos que `AiProviderRef` en
 `ClientWin` (`alias`, `provider` = `OpenAI`/`Anthropic`/`Ollama`, `model`, `apiKey`, `host` solo para Ollama).
