@@ -101,6 +101,12 @@ body {
   color: var(--chat-failed);
 }
 
+/* ---------- The tool the model is using ---------- */
+.tool-in-use {
+  font-size: 0.85em;
+  color: var(--chat-muted);
+}
+
 /* ---------- Typing indicator, until the first text of an answer ---------- */
 .typing {
   padding: 6px 0;

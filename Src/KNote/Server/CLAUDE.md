@@ -325,7 +325,8 @@ Staff, ProjectManager y Admin (como `KNoteAIAssistantCtrl` en `ClientWin` y los 
   turno y su uso, `error`). El servidor no guarda la conversación: la manda entera el cliente en cada
   pregunta. Lo que falla antes de empezar (pregunta vacía, proveedor desconocido) es un 400 con `Result`, como
   siempre; lo que falla después, un evento `error`. La lógica del turno es la común de `KNote.Ai`
-  (`AiChatTurnStreamer`), con las tools de `KNoteAiTools`; su host en el Server (`Ai/ServerAiToolsHost`)
+  (`AiChatTurnStreamer`), con las tools que `KNoteAiTools.GetToolsAsync` da para cada petición (dependen del índice y del
+  glosario del repositorio de la sesión); su host en el Server (`Ai/ServerAiToolsHost`)
   guarda las notas de `create_task` en la carpeta Home y las anuncia con eventos `noteCreated`. Cancelar la
   petición (`RequestAborted`) corta la llamada al proveedor. El mensaje de sistema lo monta
   `KNote.Ai/AiAssistantContext` con el servicio de la petición (reglas, instrucciones, perfil y glosario de KNote Atlas,

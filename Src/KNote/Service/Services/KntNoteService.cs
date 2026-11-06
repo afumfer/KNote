@@ -57,6 +57,12 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<NoteMinimalDto>> GetCitedNoteAsync(int noteNumber)
+    {
+        var command = new KntNotesGetCitedNoteAsyncCommand(Service, noteNumber);
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<NoteDto>> GetAsync(int noteNumber)
     {        
         var command = new KntNotesGetByNumberAsyncCommand(Service, noteNumber);

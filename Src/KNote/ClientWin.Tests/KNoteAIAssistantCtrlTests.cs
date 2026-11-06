@@ -23,6 +23,45 @@ public class KNoteAIAssistantCtrlTests
     }
 
     [TestMethod]
+    public async Task StreamCompletionAsync_SaysWhichToolTheModelIsUsing_UntilItWritesAgain()
+    {
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("1", "search_notes")]);
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("2", "get_note_details")]);
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "Found it");
+        }
+
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
+        var tools = new List<string>();
+        ctrl.ToolInUseChanged += (_, e) => tools.Add(e.Entity);
+
+        await ctrl.StreamCompletionAsync("Hello");
+
+        CollectionAssert.AreEqual(new[] { "search_notes", "get_note_details", null }, tools);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_AFailureWhileUsingATool_LeavesNoToolInUse()
+    {
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("1", "search_notes")]);
+            await Task.Yield();
+            throw new InvalidOperationException("simulated provider failure");
+        }
+
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
+        var tools = new List<string>();
+        ctrl.ToolInUseChanged += (_, e) => tools.Add(e.Entity);
+
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => ctrl.StreamCompletionAsync("Hello"));
+
+        CollectionAssert.AreEqual(new[] { "search_notes", null }, tools);
+    }
+
+    [TestMethod]
     public async Task GetCompletionAsync_Success_AppendsUserAndAssistantMessages()
     {
         var chatClient = new FakeChatClient

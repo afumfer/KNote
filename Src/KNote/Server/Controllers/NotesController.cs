@@ -171,6 +171,24 @@ public class NotesController : ControllerBase
         }
     }
 
+    // The note of a citation (#123): no entity when it does not exist or is a system note.
+    [HttpGet("cited/{noteNumber:int}")]
+    public async Task<IActionResult> GetCited(int noteNumber)
+    {
+        try
+        {
+            var resApi = await _service.Notes.GetCitedNoteAsync(noteNumber);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetCited {noteNumber} at {dateTime}.", noteNumber, DateTime.Now);
+            var kresApi = new Result<NoteMinimalDto>();
+            kresApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(kresApi);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {

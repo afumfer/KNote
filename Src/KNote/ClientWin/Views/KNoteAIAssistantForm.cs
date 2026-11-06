@@ -57,6 +57,9 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             .ToDictionary(item => AiChatHtml.ShortcutText(item.ShortcutKeys));
         _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys);
         _chatView.ShortcutPressed += ChatView_ShortcutPressed;
+        _ctrl.ToolInUseChanged += Ctrl_ToolInUseChanged;
+        // The citations of notes (#123) of the answers: notes of the assistant's repository.
+        kntEditViewResult.LinkHandler = url => NoteCitations.TryOpen(url, this, _ctrl.Store, _ctrl.ServiceRef?.Service, message => ShowInfo(message));
         kntEditViewResult.NavigationBorder = true;
         _chatView.ShowModelInfo(_ctrl.ShowModelInfo);
 
@@ -662,6 +665,26 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
         kntEditViewResult.MarkdownContentControl.SelectionStart = kntEditViewResult.MarkdownContentControl.Text.Length;
         kntEditViewResult.MarkdownContentControl.ScrollToCaret();
+    }
+
+    // The ctrl can also run a turn out of the UI thread (the "ln" script engine).
+    private void Ctrl_ToolInUseChanged(object sender, ControllerEventArgs<string> e)
+    {
+        if (IsDisposed || !IsHandleCreated)
+            return;
+        if (InvokeRequired)
+            BeginInvoke(() => ShowToolInUse(e.Entity));
+        else
+            ShowToolInUse(e.Entity);
+    }
+
+    private void ShowToolInUse(string tool)
+    {
+        if (!_processing)
+            return;
+        toolStripStatusLabelProcessing.Text = tool == null ? " Processing ..." : $" Using {tool} ...";
+        if (ChatView)
+            _chatView.ShowToolInUse(tool);
     }
 
     private void StatusProcessing(bool processing = false)

@@ -2,6 +2,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using KNote.Model;
 using KNote.Model.Dto;
 using Markdig;
 
@@ -24,8 +25,9 @@ public static class AiChatHtml
 
     // append(html): adds turns at the end and scrolls to them. replaceLast(html): replaces the last message
     // (the answer arriving), following it down only if the user had not scrolled up to read.
-    // showModelInfo(visible): shows or hides the usage line of the answers. Links other than web, mail and
-    // in-page ones do nothing; the host opens web and mail links outside the view. The host's shortcuts
+    // showModelInfo(visible): shows or hides the usage line of the answers. Links other than web, mail, citations of
+    // notes and in-page ones do nothing; the host opens web and mail links outside the view and takes the citations
+    // (NoteCitations). The host's shortcuts
     // (window.kntChatShortcuts, written as ShortcutText does) are posted to it: while the page has the focus,
     // the keys reach the browser, not the window's menu.
     private const string Script = """
@@ -48,7 +50,7 @@ public static class AiChatHtml
           });
           document.addEventListener('click', e => {
             const a = e.target.closest('a[href]');
-            if (a && !a.getAttribute('href').startsWith('#') && !/^(https?|mailto):$/.test(a.protocol))
+            if (a && !a.getAttribute('href').startsWith('#') && !/^(https?|mailto|knt-note):$/.test(a.protocol))
               e.preventDefault();
           });
           toBottom();
@@ -121,17 +123,22 @@ public static class AiChatHtml
         => Assistant("", providerAlias, MarkdownToHtml(turn.Answer), turn.UsageSummary(),
             turn.Truncated ? AiChatTurnDto.TruncatedNotice : null);
 
-    // An answer still arriving: the text received so far, or the typing indicator until the first of it.
-    public static string PendingAnswer(string providerAlias, string answerSoFar)
-        => Assistant("pending", providerAlias,
-            string.IsNullOrWhiteSpace(answerSoFar) ? TypingIndicator : MarkdownToHtml(answerSoFar), "");
+    // An answer still arriving: the text received so far, or the typing indicator until the first of it, and the tool
+    // the model is using, if any.
+    public static string PendingAnswer(string providerAlias, string answerSoFar, string toolInUse = null)
+    {
+        var content = string.IsNullOrWhiteSpace(answerSoFar) ? TypingIndicator : MarkdownToHtml(answerSoFar);
+        if (!string.IsNullOrEmpty(toolInUse))
+            content += $"<div class=\"tool-in-use\">Using {WebUtility.HtmlEncode(toolInUse)}</div>";
+        return Assistant("pending", providerAlias, content, "");
+    }
 
     // An answer cut by an error: whatever arrived of it, marked as not part of the conversation.
     public static string FailedAnswer(string providerAlias, string answerSoFar)
         => Assistant("failed", providerAlias, MarkdownToHtml(answerSoFar), "The request failed: this answer is not part of the conversation.");
 
     public static string MarkdownToHtml(string markdown)
-        => string.IsNullOrEmpty(markdown) ? "" : Markdown.ToHtml(markdown, Pipeline);
+        => string.IsNullOrEmpty(markdown) ? "" : NoteCitationLinker.LinkForDesktop(Markdown.ToHtml(markdown, Pipeline));
 
     // A call to one of window.kntChat's functions with a text argument: serialized as JSON, which is a
     // JavaScript string literal with everything that could break out of it escaped.

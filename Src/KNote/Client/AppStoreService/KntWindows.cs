@@ -22,6 +22,7 @@ public class KntWindows : IAsyncDisposable
     private IJSObjectReference? _module;
     private IJSObjectReference? _listener;
     private IJSObjectReference? _sessionListener;
+    private IJSObjectReference? _noteLinksListener;
     private DotNetObjectReference<KntWindows>? _dotNetRef;
 
     public KntWindows(IJSRuntime js, NavigationManager navigationManager, IStore store)
@@ -48,7 +49,17 @@ public class KntWindows : IAsyncDisposable
         _dotNetRef = DotNetObjectReference.Create(this);
         _listener = await module.InvokeAsync<IJSObjectReference>("listenNoteSaved", _dotNetRef);
         _sessionListener = await module.InvokeAsync<IJSObjectReference>("listenSessionChanged", _dotNetRef);
+        _noteLinksListener = await module.InvokeAsync<IJSObjectReference>("listenNoteLinks", _dotNetRef);
     }
+
+    /// <summary>The window of the note cited as #number (NoteCitationLinker). A click on the link opens it: the script hears
+    /// the clicks of the whole window, because the link is part of an HTML, and it opens it at once so that the browser does
+    /// not block it; that window tells if there is no such note.</summary>
+    public static string NoteViewByNumberPath(int noteNumber) => $"notes/number/{noteNumber}";
+
+    [JSInvokable]
+    public void OnNoteLinkBlocked() =>
+        _store.AppState.NotifyError("Note window", "The browser blocked the window: allow pop-ups for this site.");
 
     public Task<bool> OpenViewAsync(Guid noteId) =>
         OpenAsync($"notes/view/{noteId}", $"knt-note-view-{noteId}", 900, 800);
@@ -146,7 +157,7 @@ public class KntWindows : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        foreach (var listener in new[] { _listener, _sessionListener })
+        foreach (var listener in new[] { _listener, _sessionListener, _noteLinksListener })
         {
             if (listener == null)
                 continue;

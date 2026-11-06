@@ -21,20 +21,11 @@ namespace KNote.Service.Core;
 // per process: when another process using the same database creates one first, the failed creation finds it.
 internal static class KntSystemNotes
 {
-    // The note types of KNote's own notes: out of the tasks panel and of the semantic index (they only link users to
-    // those notes, keep private conversations, or are KNote Atlas' test queries and reports, which would find themselves,
-    // or the context it gives the AI: profile, glossary and task instructions).
-    public static readonly IReadOnlyList<string> SystemNoteTypeNames = new[]
-    {
-        KntConst.ChatSessionsTag, KntConst.ChatRoomTag, KntConst.TestQueriesTag, KntConst.SearchEvaluationTag,
-        KntConst.ProfileTag, KntConst.GlossaryTag, KntConst.TaskPromptTag
-    };
-
     public static async Task<List<Guid>> GetSystemNoteTypeIdsAsync(KNote.Repository.IKntRepository repository)
     {
         var noteTypes = await repository.NoteTypes.GetAllAsync();
         return noteTypes.Entity?
-            .Where(t => SystemNoteTypeNames.Contains(t.Name))
+            .Where(t => KntConst.IsSystemNoteType(t.Name))
             .Select(t => t.NoteTypeId)
             .ToList() ?? new List<Guid>();
     }

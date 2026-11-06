@@ -17,6 +17,8 @@ public interface IKntNoteService
     Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid folderId);
     Task<Result<NoteDto>> GetAsync(Guid noteId);
     Task<Result<NoteDto>> GetAsync(int noteNumber);
+    // The note a citation (#123) opens: none if it does not exist or is a system note (KntConst.IsSystemNoteType).
+    Task<Result<NoteMinimalDto>> GetCitedNoteAsync(int noteNumber);
     Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId);
     Task<Result<List<NoteInfoDto>>> GetByFolderAsync(Guid folderId);
     Task<Result<List<NoteMinimalDto>>> GetByFolderMinimalAsync(Guid folderId);

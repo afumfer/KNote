@@ -23,6 +23,15 @@ public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
     // Only notes with at least one NoteTask assigned to this user.
     public Guid? TaskUserId { get; set; }
 
+    // Created or modified between these days, both included (their time is ignored). Any of them can be missing.
+    public DateTime? CreatedFrom { get; set; }
+    public DateTime? CreatedTo { get; set; }
+    public DateTime? ModifiedFrom { get; set; }
+    public DateTime? ModifiedTo { get; set; }
+
+    // Note types left out (the tools of the AI: the system notes).
+    public List<Guid> ExcludeNoteTypeIds { get; set; }
+
     // «Talks about…» (KNote Atlas): with a text, the filter is a search by meaning among the notes that meet the other
     // criteria (IKntSemanticSearchService.SearchAsync), not paged. The query of the filter (the repository) ignores it.
     public string MeaningText { get; set; }

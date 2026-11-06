@@ -66,7 +66,8 @@ public static class AiChatClientFactory
                 if (providerRef.Provider == EnumAiProvider.Ollama && providerRef.ContextWindow is int contextWindow)
                     o.AddOllamaOption(OllamaOption.NumCtx, contextWindow);
 
-                if (toolList.Count > 0)
+                // The tools of a turn (AiChatTurnStreamer.StreamAsync), if given, are the ones that count.
+                if (o.Tools == null && toolList.Count > 0)
                     o.Tools = [.. toolList];
             })
             .UseFunctionInvocation()

@@ -30,6 +30,8 @@ internal sealed class AiChatWebRenderer : IDisposable
     private string _providerAlias;
     private Func<string> _answerSoFar;
     private string _paintedAnswer;
+    private string _toolInUse;
+    private bool _turnRunning;
     private bool _showModelInfo = true;
 
     // shortcuts: the host's keyboard shortcuts (AiChatHtml.ShortcutText), raised by ShortcutPressed when they
@@ -85,6 +87,8 @@ internal sealed class AiChatWebRenderer : IDisposable
         _providerAlias = providerAlias;
         _answerSoFar = answerSoFar;
         _paintedAnswer = null;
+        _toolInUse = null;
+        _turnRunning = true;
 
         Run(AiChatHtml.ScriptCall("append", AiChatHtml.UserMessage(prompt) + AiChatHtml.PendingAnswer(providerAlias, null)));
 
@@ -92,9 +96,18 @@ internal sealed class AiChatWebRenderer : IDisposable
             _repaintTimer.Start();
     }
 
+    // The tool the model is using (null: none) under the answer arriving.
+    public void ShowToolInUse(string tool)
+    {
+        _toolInUse = tool;
+        if (_turnRunning)
+            Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, _answerSoFar?.Invoke(), tool)));
+    }
+
     public void EndTurn(AiChatTurnDto turn)
     {
         _repaintTimer.Stop();
+        _turnRunning = false;
         _answerSoFar = null;
         Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.AssistantMessage(turn, _providerAlias)));
     }
@@ -104,6 +117,7 @@ internal sealed class AiChatWebRenderer : IDisposable
     public void FailTurn()
     {
         _repaintTimer.Stop();
+        _turnRunning = false;
         Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.FailedAnswer(_providerAlias, _answerSoFar?.Invoke())));
         _answerSoFar = null;
         _pageInSync = false;
@@ -134,7 +148,7 @@ internal sealed class AiChatWebRenderer : IDisposable
             return;
 
         _paintedAnswer = answer;
-        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, answer)));
+        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, answer, _toolInUse)));
     }
 
     // Not awaited: WebView2 runs the scripts in the order they are sent, and awaiting them would resume the

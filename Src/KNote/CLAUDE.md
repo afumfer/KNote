@@ -117,7 +117,8 @@ que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`
 
 `KNote.Ai` es lo común del asistente de IA: `AiChatClientFactory.Create(AiProviderRef, tools)` construye el
 `IChatClient` de `Microsoft.Extensions.AI` para OpenAI (Responses API), Anthropic u Ollama, y `KNoteAiTools`
-expone a los modelos `search_notes`, `get_note_details` y `create_task` sobre la capa `Service`. Lo que
+expone a los modelos sus herramientas sobre la capa `Service`: `search_notes`, `get_note_details` y `create_task`, y las
+de solo lectura de KNote Atlas (`KNoteAiQueryTools.cs`, ver «Herramientas de consulta del asistente» más abajo). Lo que
 `create_task` hace distinto en cada aplicación (dónde guarda la nota y cómo se la muestra al usuario) lo
 aporta un `IKNoteAiToolsHost` (el de `ClientWin` es `Core/KNoteAiToolsHost`). Para KNote Atlas (ver «Índice
 semántico» más abajo) da también los modelos de embeddings: `AiEmbeddingGeneratorFactory` (Ollama y OpenAI;
@@ -263,8 +264,8 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   con `Model/Dto/AiChatSessionTranscript`: Markdown legible con un comentario HTML oculto por mensaje (el del
   asistente lleva el uso en JSON), del que se recuperan los turnos (`AiChatTurnDto`) exactamente; es el
   formato común de `ClientWin` y la Web, que se retoman las sesiones la una a la otra (con su proveedor y
-  modelo si siguen configurados: `AiProviderSelection.ForSession`). `search_notes` deja fuera estas notas y los
-  hilos del chat room (`NotesSearchDto.ExcludeNoteTypeIds`). Usos: `KNoteAIAssistantCtrl` (ver
+  modelo si siguen configurados: `AiProviderSelection.ForSession`). Las herramientas del asistente dejan fuera estas
+  notas y las demás del sistema. Usos: `KNoteAIAssistantCtrl` (ver
   `ClientWin/CLAUDE.md`) y `AiAssistantController` + página `AIAssistant` (ver `Server/CLAUDE.md` y
   `Client/CLAUDE.md`).
 - **Hilos del chat room** (`IKntService.ChatRooms`, comandos en `KntChatRoomCommands.cs`, Staff). Cada hilo es una
@@ -348,6 +349,23 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   sin usuario, permitido. Los tres tipos son del sistema (`KntSystemNotes.SystemNoteTypeNames`). Tests en
   `Tests/AtlasContextRulesTests`, `Tests/ServiceTests/AtlasContextServiceTests` y
   `Tests/InProcessIntegrationTests/AtlasInProcessTests`.
+
+- **Herramientas de consulta del asistente (KNote Atlas, etapa 1)** (`Ai/KNoteAiQueryTools.cs`, parte de `KNoteAiTools`):
+  `find_notes_about`, `filter_notes`, `get_folder_tree`, `get_note_items`, `get_tasks` y `lookup_glossary`, además de
+  `search_notes` y `get_note_details`. La lista se calcula **en cada turno** (`GetToolsAsync`: `find_notes_about` solo con
+  índice utilizable y `lookup_glossary` solo con términos; `AiChatTurnStreamer.StreamAsync` recibe las del turno). El
+  modelo escribe nombres: `AiFolders` y los `Find*` los traducen (sin mayúsculas ni acentos) y, si faltan o podrían ser
+  varios, devuelven las opciones. Las notas del sistema (`KntConst.IsSystemNoteType`, `SystemFolderNames`) quedan fuera de
+  todas; `filter_notes` lo hace con `NotesFilterDto.ExcludeNoteTypeIds`, en la consulta, para que la paginación y el total
+  sean correctos. `get_note_details` corta la descripción en `MaxNoteTextLength` con un aviso y añade los términos del
+  glosario de la nota (`IKntAtlasContextService.FindGlossaryTermsAsync`). `get_tasks` usa `TasksPanelFilterDto.WindowFrom/To`,
+  una ventana exacta. `get_note_items` no da el texto de las alarmas *Execute KntScript*. Tests con repositorio real en
+  `Tests/ServiceTests/AiQueryToolsTests`, llamando a las herramientas por nombre como el modelo.
+- **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
+  existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
+  nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del
+  sistema: los números son consecutivos y probarlos no debe llevar a las conversaciones de IA de otros. Web: ver
+  `Client/CLAUDE.md`; `ClientWin`: ver `ClientWin/CLAUDE.md`.
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 

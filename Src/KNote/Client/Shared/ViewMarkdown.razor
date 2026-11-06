@@ -35,6 +35,9 @@ else
     // here, with its raw HTML shown as text and only safe links (http, https, mailto or relative).
     [Parameter] public bool DisableHtml { get; set; }
 
+    // The citations of notes (#123) as links (NoteCitationLinker): a click opens the note's viewer (KntWindows hears it).
+    [Parameter] public bool LinkCitations { get; set; } = true;
+
     private static readonly MarkdownPipeline PipelineWithoutHtml =
         new MarkdownPipelineBuilder().UseAdvancedExtensions().DisableHtml().Build();
 
@@ -45,6 +48,7 @@ else
 
     private string? htmlContent;
     private string? renderedMarkdown;
+    private string? renderedSafeHtml;
     // The HTML of the content shown last: new content (or leaving) cancels the one being made; until it arrives the
     // content shown so far stays.
     private readonly KntLatestRequest htmlRequest = new();
@@ -55,7 +59,11 @@ else
     {
         if (SafeHtml != null)
         {
-            htmlContent = SafeHtml;
+            if (SafeHtml != renderedSafeHtml)
+            {
+                renderedSafeHtml = SafeHtml;
+                htmlContent = WithCitations(SafeHtml);
+            }
             return;
         }
 
@@ -67,13 +75,13 @@ else
         if (string.IsNullOrEmpty(MarkdownContent))
             htmlContent = null;
         else if (DisableHtml)
-            htmlContent = RenderWithoutHtml(MarkdownContent);
+            htmlContent = WithCitations(RenderWithoutHtml(MarkdownContent));
         else
         {
             var markdown = MarkdownContent;
             var request = await htmlRequest.RunAsync(ct => store.Notes.HtmlAsync(markdown, ct));
             if (!request.Canceled)
-                htmlContent = request.Value.IsValid ? request.Value.Entity : null;
+                htmlContent = request.Value.IsValid ? WithCitations(request.Value.Entity) : null;
         }
     }
 
@@ -97,6 +105,9 @@ else
             // The diagrams are shown as their text.
         }
     }
+
+    private string? WithCitations(string? html) =>
+        LinkCitations ? NoteCitationLinker.Link(html ?? "", KntWindows.NoteViewByNumberPath) : html;
 
     private static string RenderWithoutHtml(string markdown)
     {

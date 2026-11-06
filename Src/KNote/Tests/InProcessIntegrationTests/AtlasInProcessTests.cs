@@ -70,6 +70,28 @@ public class AtlasInProcessTests
     }
 
     [TestMethod]
+    public async Task TheNoteOfACitation_IsNotFoundForTheSystemNotesAndThoseThatDoNotExist()
+    {
+        var glossary = await ReadAsync<NoteDto>(await _admin.PostAsync("api/atlas/glossary", null));
+        NoteDto note;
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            note = (await service.Notes.GetAsync((await service.Notes.HomeNotesAsync()).Entity.First().NoteId)).Entity;
+        }
+
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+        var cited = await ReadAsync<NoteMinimalDto>(await guest.GetAsync($"api/notes/cited/{note.NoteNumber}"));
+        var system = await guest.GetAsync($"api/notes/cited/{glossary.NoteNumber}");
+        var missing = await guest.GetAsync("api/notes/cited/999999");
+
+        Assert.AreEqual(note.NoteId, cited.NoteId);
+        Assert.IsTrue(system.IsSuccessStatusCode);
+        Assert.IsNull((await system.Content.ReadFromJsonAsync<Result<NoteMinimalDto>>(_json))!.Entity);
+        Assert.IsTrue(missing.IsSuccessStatusCode);
+        Assert.IsNull((await missing.Content.ReadFromJsonAsync<Result<NoteMinimalDto>>(_json))!.Entity);
+    }
+
+    [TestMethod]
     public async Task Compose_AndTheChat_HaveTheProfileAndTheGlossaryTerms()
     {
         var profile = await ReadAsync<NoteDto>(await _admin.PostAsync("api/atlas/profile", null));

@@ -105,6 +105,28 @@ public class KntNotesGetByNumberAsyncCommand : KntCommandServiceBase<int, Result
     }
 }
 
+// The note a citation (#123) points to: its number is all there is, and the numbers are consecutive, so going through them
+// must not lead to the system notes (other users' AI conversations). No entity: the note does not exist or is one of them.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntNotesGetCitedNoteAsyncCommand : KntCommandServiceBase<int, Result<NoteMinimalDto>>
+{
+    public KntNotesGetCitedNoteAsyncCommand(IKntService service, int noteNumber) : base(service, noteNumber)
+    {
+
+    }
+
+    public override async Task<Result<NoteMinimalDto>> Execute()
+    {
+        var result = new Result<NoteMinimalDto>();
+
+        // The repositories answer "Entity not found" as an error (a failure of the database is an exception).
+        var resNote = await Repository.Notes.GetAsync(Param);
+        if (resNote.IsValid && resNote.Entity != null && !KntConst.IsSystemNoteType(resNote.Entity.NoteTypeDto?.Name))
+            result.Entity = resNote.Entity.GetSimpleDto<NoteMinimalDto>();
+        return result;
+    }
+}
+
 [KntAuthorize(EnumRoles.Guest)]
 public class KntNotesGetExtendedAsyncCommand : KntCommandServiceBase<Guid, Result<NoteExtendedDto>>
 {
@@ -853,7 +875,9 @@ public class KntNotesGetTasksPanelAsyncCommand : KntCommandServiceBase<TasksPane
 
         panel.Today = filter.Today == default ? DateTime.Today : filter.Today.Date;
         var reference = filter.ReferenceDate == default ? panel.Today : filter.ReferenceDate.Date;
-        (panel.WindowStart, panel.WindowEnd) = TasksWindow.Compute(filter.Unit, filter.Size, reference);
+        (panel.WindowStart, panel.WindowEnd) = filter.WindowFrom is DateTime from && filter.WindowTo is DateTime to
+            ? (from.Date, to.Date)
+            : TasksWindow.Compute(filter.Unit, filter.Size, reference);
         panel.CutOff = TasksWindow.CutOff(panel.WindowEnd, panel.Today);
 
         var query = new TasksPanelQueryDto

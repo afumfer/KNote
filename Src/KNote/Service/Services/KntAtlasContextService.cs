@@ -27,6 +27,9 @@ public class KntAtlasContextService : KntServiceBase, IKntAtlasContextService
     public async Task<Result<AtlasGlossaryInfoDto>> GetGlossaryInfoAsync() =>
         await ExecuteCommand(new KntAtlasContextGetGlossaryInfoAsyncCommand(Service));
 
+    public async Task<Result<List<GlossaryTermDto>>> FindGlossaryTermsAsync(List<string> texts) =>
+        await ExecuteCommand(new KntAtlasContextFindGlossaryTermsAsyncCommand(Service, texts));
+
     public async Task<Result<NoteDto>> CreateGlossaryAsync() =>
         await ExecuteCommand(new KntAtlasContextCreateGlossaryAsyncCommand(Service));
 

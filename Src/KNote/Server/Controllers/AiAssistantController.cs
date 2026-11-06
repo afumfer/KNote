@@ -50,7 +50,7 @@ public class AiAssistantController : ControllerBase
     // The answer comes as server-sent events (AiChatStreamEventDto, event type = its Type). Anything wrong
     // before it starts is a 400 with a Result, as in every endpoint; once streaming, an Error event.
     [HttpPost("chat")]
-    public IResult Chat([FromBody] AiChatRequestDto request, CancellationToken cancellationToken)
+    public async Task<IResult> Chat([FromBody] AiChatRequestDto request, CancellationToken cancellationToken)
     {
         var resApi = new Result<AiChatTurnDto>();
 
@@ -73,7 +73,7 @@ public class AiAssistantController : ControllerBase
         {
             var toolsHost = new ServerAiToolsHost(_service);
             var tools = new KNoteAiTools(_service, toolsHost);
-            var chatClient = _chatClients.Create(providerRef, tools.GetTools());
+            var chatClient = _chatClients.Create(providerRef, await tools.GetToolsAsync());
 
             return TypedResults.ServerSentEvents(StreamChatAsync(chatClient, request, toolsHost, cancellationToken));
         }
@@ -141,7 +141,7 @@ public class AiAssistantController : ControllerBase
     {
         // KNote Atlas: the rules, the instructions, the profile and the glossary of the session's repository.
         var context = await AiAssistantContext.ComposeAsync(_service, null, request.History, request.Prompt, _logger);
-        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, cancellationToken)
+        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
         try
         {

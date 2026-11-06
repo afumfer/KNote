@@ -39,7 +39,7 @@ public class CommandAuthorizationMatrixTests
             "KntKAttributesGetAllAsyncCommand", "KntKAttributesGetAllByTypeAsyncCommand", "KntKAttributesGetAsyncCommand",
             "KntKAttributesTabulatedValuesAsyncCommand",
             "KntNotesGetAllAsyncCommand", "KntNotesGetMinimalAllAsyncCommand", "KntNotesHomeAllAsyncCommand", "KntNotesHomeFolderAsyncCommand",
-            "KntNotesGetAsyncCommand", "KntNotesGetByNumberAsyncCommand", "KntNotesGetExtendedAsyncCommand",
+            "KntNotesGetAsyncCommand", "KntNotesGetByNumberAsyncCommand", "KntNotesGetCitedNoteAsyncCommand", "KntNotesGetExtendedAsyncCommand",
             "KntNotesGetByFolderAsyncCommand", "KntNotesGetMinimalByFolderAsyncCommand", "KntNotesGetFilterAsyncCommand",
             "KntNotesGetMinimalFilterAsyncCommand", "KntNotesGetSearchAsyncCommand", "KntNotesGetMinimalSearchAsyncCommand",
             "KntNotesGetResourcesAsyncCommand", "KntNotesGetResourcesInfoAsyncCommand", "KntNotesGetResourceAsyncCommand",
@@ -57,6 +57,7 @@ public class CommandAuthorizationMatrixTests
             "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
             // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
+            "KntAtlasContextFindGlossaryTermsAsyncCommand",
             "KntAtlasContextGetTaskPromptsAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",

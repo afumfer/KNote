@@ -53,6 +53,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
         // the ones that draw its Mermaid diagrams (see KntDiagrams).
         kntEditView.ContentScriptsEnabled = false;
         kntEditView.RenderDiagrams = true;
+        kntEditView.LinkHandler = url => NoteCitations.TryOpen(url, this, _ctrl.Store, _ctrl.Service, message => ShowInfo(message));
 
         // In navigation mode picMenu is placed from the URL box's bounds, first while this form is still being
         // built: the URL box keeps moving and growing afterwards (kntEditView finishes its own scaling later,
@@ -383,7 +384,7 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
                     kntEditView.TextUrl = "";
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
+                    await kntEditView.ShowNavigationContent(NoteCitationLinker.LinkForDesktop(htmlContent) + _ctrl.Store.KNoteWebViewStyle);
                 }
             }
             kntEditView.BorderStyle = BorderStyle.None;

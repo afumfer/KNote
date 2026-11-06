@@ -9,6 +9,8 @@ public interface INoteWebApiService
     // The notes of Home, or of one of the folders directly inside it (folderId).
     Task<Result<List<NoteInfoDto>>> GetHomeNotesAsync(Guid? folderId = null, CancellationToken cancellationToken = default);
     Task<Result<NoteDto>> GetAsync(Guid noteId, CancellationToken cancellationToken = default);
+    // The note of a citation (#123): no entity when it does not exist or is a system note.
+    Task<Result<NoteMinimalDto>> GetCitedAsync(int noteNumber, CancellationToken cancellationToken = default);
     Task<Result<string>> HtmlAsync(string markdown, CancellationToken cancellationToken = default);
     Task<Result<NoteDto>> NewAsync(CancellationToken cancellationToken = default);
     Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true, CancellationToken cancellationToken = default);

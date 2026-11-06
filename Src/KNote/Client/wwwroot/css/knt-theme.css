@@ -220,6 +220,14 @@
 
 /* Tables in a note's content (Markdown or the HTML of ClientWin's editor, Shared/ViewMarkdown): lines and room, as
    in the editor; a wide one scrolls sideways by itself. */
+/* A citation of a note (#123), different from the links to the web. */
+.knt-markdown a.knt-note-link {
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 1px dotted currentColor;
+}
+
 .knt-markdown table {
     display: block;
     width: max-content;

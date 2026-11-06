@@ -286,6 +286,25 @@ Todo está junto en **KNote Atlas**: **Tools › KNote Atlas** en la aplicación
 
 Cualquiera puede abrir KNote Atlas y leer las notas; solo un **ProjectManager** o un **Admin** puede crearlas, guardarlas, borrarlas, moverlas o cambiar sus etiquetas (también la nota **Search test queries**). El perfil se recorta a unas 2.000 palabras: KNote Atlas avisa si es más largo.
 
+### Qué puede consultar el asistente de IA (KNote Atlas)
+
+El asistente de las dos aplicaciones lee el repositorio por su cuenta, sin pedir permiso, porque solo lee. Además de buscar notas por palabras y leer una nota, puede:
+
+- **buscar por significado** (solo si el repositorio tiene índice semántico): «¿tengo algo sobre la Revolución francesa?»;
+- **filtrar** por carpeta, tipo de nota, etiqueta, usuario con una tarea, fechas de creación o modificación y el valor de un atributo: «las notas de la carpeta Facturación modificadas en septiembre»;
+- ver el **árbol de carpetas**;
+- ver las **tareas, alarmas, recursos y relaciones** de una nota;
+- listar las **tareas de un periodo**, de todos o de una persona: «¿qué tareas tiene Marta esta semana?»;
+- consultar términos del **glosario** (solo si tiene términos).
+
+Mientras responde, las dos aplicaciones muestran la herramienta que está usando (por ejemplo, **Using find_notes_about**), hasta que empieza a escribir.
+
+Las carpetas, los tipos de nota, los usuarios y los atributos se nombran como siempre: si un nombre no existe o podría ser varios, el asistente recibe las opciones y puede preguntarte cuál es. Las notas propias de KNote (sesiones de IA de cualquier usuario, hilos del chat room, perfil, glosario, instrucciones y consultas de prueba) nunca están a su alcance. De una nota muy larga lee los primeros 40.000 caracteres, y sabe que falta el resto. Los modelos locales pequeños pueden elegir mal alguna vez: suele bastar con volver a preguntar de forma más concreta.
+
+**Citas.** Un `#123` en una nota, en una tarea o en una respuesta del asistente es un enlace a esa nota, que se ve distinto de los enlaces a Internet. En la aplicación Web abre el visor de la nota en una ventana; en la de escritorio, el editor de notas. Todo `#` seguido de un número es un enlace, sin comprobar que la nota existe: si no existe, o es una nota propia de KNote, aparece **Note #123 not found**. No son enlaces dentro del código, en el editor HTML de la aplicación de escritorio ni en el chat room.
+
+**Modified between.** El filtro de notas de las dos aplicaciones tiene esta línea: las notas modificadas entre dos fechas, ambas incluidas. Cualquiera de ellas se puede dejar vacía.
+
 ### Chat room
 
 El chat room permite a los usuarios de un servidor Web de KNote hablar en **hilos**: cada hilo es una conversación sobre un tema, y cualquier usuario con rol Staff o superior en ese servidor puede leerlo, unirse y escribir en él. La aplicación Web y la de escritorio comparten el mismo chat room, el del servidor Web: un mensaje escrito en una aparece al momento en la otra.

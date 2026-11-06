@@ -21,6 +21,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
     #region Private fields
 
     private IChatClient _chatClient;
+    private KNoteAiTools _tools;
+    private string _toolInUse;
 
     #endregion
 
@@ -185,6 +187,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public event EventHandler<ControllerEventArgs<string>> StreamToken;
 
+    // The tool the model is using in the running turn, until it writes again (null: none), as the web shows it.
+    public event EventHandler<ControllerEventArgs<string>> ToolInUseChanged;
+
     #endregion
 
     #region Protected methods
@@ -294,8 +299,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
             throw new ArgumentNullException(nameof(providerRef));
 
         _currentProviderRef = providerRef;
-        var tools = new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
-        _chatClient = AiChatClientFactory.Create(providerRef, tools.GetTools());
+        _tools = new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
+        _chatClient = AiChatClientFactory.Create(providerRef, _tools.GetTools());
         RestartAIAssistant();
     }
 
@@ -362,6 +367,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     internal void SetChatClientForTesting(IChatClient chatClient, AiProviderRef providerRef = null)
     {
         _chatClient = chatClient;
+        _tools = null;
         _currentProviderRef = providerRef;
     }
 
@@ -463,18 +469,40 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // far are sent with the prompt, and the answer comes back piece by piece (onText) and then whole, with its
     // usage. Nothing is added to the conversation here: an unanswered prompt (the provider failed) leaves no
     // orphaned user message behind to be resent with the next one.
+    private void SetToolInUse(string tool)
+    {
+        if (_toolInUse == tool)
+            return;
+        _toolInUse = tool;
+        ToolInUseChanged?.Invoke(this, new ControllerEventArgs<string>(tool));
+    }
+
     private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText)
     {
         var history = _chatTurns.ToList();
         AiChatTurnDto completed = null;
 
         LastSystemPrompt = await AiAssistantContext.ComposeAsync(ServiceRef?.Service, InstructionsOverride, history, prompt);
-        await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, LastSystemPrompt.Text, history, prompt))
+        // The tools are the repository's of this moment: an index or a glossary can appear during a conversation.
+        var tools = _tools != null ? await _tools.GetToolsAsync() : null;
+        try
         {
-            if (e.Type == AiChatStreamEventTypes.Delta)
-                onText?.Invoke(e.Text);
-            else if (e.Type == AiChatStreamEventTypes.Completed)
-                completed = e.Turn;
+            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, LastSystemPrompt.Text, history, prompt, tools))
+            {
+                if (e.Type == AiChatStreamEventTypes.Delta)
+                {
+                    SetToolInUse(null);
+                    onText?.Invoke(e.Text);
+                }
+                else if (e.Type == AiChatStreamEventTypes.Tool)
+                    SetToolInUse(e.Text);
+                else if (e.Type == AiChatStreamEventTypes.Completed)
+                    completed = e.Turn;
+            }
+        }
+        finally
+        {
+            SetToolInUse(null);
         }
 
         return completed ?? throw new InvalidOperationException("The AI provider ended the answer unexpectedly.");

@@ -28,8 +28,10 @@ public static class AiChatTurnStreamer
         return messages;
     }
 
+    // tools: the ones of this turn (KNoteAiTools.GetToolsAsync), when they are not the ones the client was built with.
     public static async IAsyncEnumerable<AiChatStreamEventDto> StreamAsync(IChatClient chatClient, string systemPrompt,
-        IEnumerable<AiChatTurnDto> history, string prompt, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        IEnumerable<AiChatTurnDto> history, string prompt, IList<AITool> tools = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var messages = BuildMessages(systemPrompt, history, prompt);
         var answer = new StringBuilder();
@@ -38,7 +40,9 @@ public static class AiChatTurnStreamer
         long inputTokens = 0, outputTokens = 0, totalTokens = 0;
         var usageReported = false;
 
-        await foreach (var update in chatClient.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken))
+        var options = tools != null ? new ChatOptions { Tools = tools } : null;
+
+        await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
             // The last one given: the intermediate steps of a tool call carry their own.
             finishReason = update.FinishReason ?? finishReason;

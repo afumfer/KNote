@@ -86,8 +86,7 @@ public class KntAtlasContextFillProfileFoldersAndTypesAsyncCommand : KntCommandS
         }
 
         // The folders of the first two levels, in the order of the tree, without KNote's own ones.
-        var systemFolders = new[] { KntConst.AtlasFolderName, KntConst.AiSessionsFolderName, KntConst.ChatRoomFolderName };
-        var folders = resFolders.Entity.Where(f => !systemFolders.Contains(f.Name)).ToList();
+        var folders = resFolders.Entity.Where(f => !KntConst.SystemFolderNames.Contains(f.Name)).ToList();
         var children = folders.ToLookup(f => f.ParentId);
         var folderLines = new List<string>();
         foreach (var root in children[null].OrderBy(f => f.Order).ThenBy(f => f.Name))
@@ -150,6 +149,24 @@ public class KntAtlasContextGetGlossaryInfoAsyncCommand : KntCommandServiceBase<
         info.Issues = issues;
         if (notes.Count > 1)
             info.Notices.Add($"There are {notes.Count} glossaries: KNote uses the oldest one, #{notes[0].NoteNumber}.");
+        return result;
+    }
+}
+
+// The terms of the glossary that appear in some texts (GlossaryTable.Find): a note the AI reads, or the terms it looks up.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntAtlasContextFindGlossaryTermsAsyncCommand : KntCommandServiceBase<List<string>, Result<List<GlossaryTermDto>>>
+{
+    public KntAtlasContextFindGlossaryTermsAsyncCommand(IKntService service, List<string> texts) : base(service, texts)
+    {
+    }
+
+    public override async Task<Result<List<GlossaryTermDto>>> Execute()
+    {
+        var result = new Result<List<GlossaryTermDto>>(new List<GlossaryTermDto>());
+        var glossary = await KntAtlasNotes.FindFirstAsync(Service, KntConst.GlossaryTag, result);
+        if (result.IsValid && glossary != null)
+            result.Entity = GlossaryTable.Find(GlossaryTable.Parse(KntAtlasNotes.Text(Service, glossary)).Terms, Param);
         return result;
     }
 }

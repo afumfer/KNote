@@ -460,6 +460,10 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   (`KntEditView.ContentScriptsEnabled = false`, solo para el HTML mostrado con `ShowNavigationContent`; una URL
   navegada sí los ejecuta). El chat de IA (`AiChatHtml`) y el chat room (`ChatRoomHtml`) tienen su propia página
   con scripts y escapan el HTML.
+- **Citas `#123`**: las vistas WebView2 de la nota, de sus tareas, del post-it y las respuestas del asistente pasan el
+  HTML por `NoteCitationLinker.LinkForDesktop` (enlaces `knt-note:123`) y `KntEditView.LinkHandler` para la navegación:
+  `Core/NoteCitations` abre el editor de la nota fuera del callback del WebView2 (la página del asistente deja pasar ese
+  esquema en su script). **No** se aplica al editor HTML: el enlace acabaría guardado en la nota.
   La excepción son los **diagramas Mermaid** (`KntEditView.RenderDiagrams`, activo en las vistas de la nota, de su
   tarea y del post-it): solo si el HTML tiene `class="mermaid"`, esa navegación activa los scripts y la página
   (`KntEditViewControl/KntDiagrams.Page`) empieza con una CSP `script-src https://knote.diagrams/` y acaba con
@@ -720,6 +724,9 @@ La construcción del `IChatClient` por proveedor (`AiChatClientFactory`) y las t
 `Ai/`), que usa también `Server`; ahí están además todos los paquetes NuGet de IA (`ClientWin` los recibe por
 la referencia al proyecto). `KNoteAIAssistantCtrl.ApplyProvider` los combina:
 `AiChatClientFactory.Create(providerRef, new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef)).GetTools())`.
+Cada turno envía las tools de ese momento (`KNoteAiTools.GetToolsAsync`, que dependen del índice y del glosario).
+La tool en uso se ve como en la Web, hasta que el modelo vuelve a escribir (`ToolInUseChanged`): en la barra de estado y
+en la vista de chat, bajo la respuesta que llega (`AiChatWebRenderer.ShowToolInUse`).
 
 - `KNoteAiTools` recibe `IKntService` (no `ServiceRef`), así que sus tests corren contra los fakes de
   servicio (`Fakes/FakeKntService.cs`) sin base de datos real. Lo que `create_task` hace distinto en cada

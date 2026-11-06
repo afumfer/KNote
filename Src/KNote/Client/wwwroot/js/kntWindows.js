@@ -75,6 +75,23 @@ export function notifySessionChanged(repositoryId) {
 }
 
 // dotNet.OnSessionChanged(repositoryId) when another window signs in or out.
+// The citations of notes (#123, a.knt-note-link in the HTML of a note or of an answer of the AI) open the note's window.
+// In the capture phase, before Blazor takes the click as a navigation of this window. With a modifier key, what the
+// browser does with any link.
+export function listenNoteLinks(dotNet) {
+    const onClick = e => {
+        const link = e.target.closest?.('a.knt-note-link');
+        if (!link || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey)
+            return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!openWindow(link.href, `knt-note-view-n${link.dataset.noteNumber}`, 900, 800))
+            dotNet.invokeMethodAsync('OnNoteLinkBlocked');
+    };
+    document.addEventListener('click', onClick, true);
+    return { dispose: () => document.removeEventListener('click', onClick, true) };
+}
+
 export function listenSessionChanged(dotNet) {
     const onMessage = e => dotNet.invokeMethodAsync('OnSessionChanged', e.data.repositoryId);
     sessionChannel.addEventListener('message', onMessage);

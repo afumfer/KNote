@@ -15,6 +15,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Func<NoteExtendedDto, Task<Result<NoteExtendedDto>>>? SaveExtendedAsyncImpl { get; set; }
     public Func<Guid, Task<Result<NoteExtendedDto>>>? DeleteExtendedAsyncImpl { get; set; }
     public Func<Guid, Task<Result<NoteExtendedDto>>>? GetExtendedAsyncImpl { get; set; }
+    public Func<int, Task<Result<NoteMinimalDto>>>? GetCitedNoteAsyncImpl { get; set; }
     public Func<NoteTaskDto, bool, Task<Result<NoteTaskDto>>>? SaveNoteTaskAsyncImpl { get; set; }
     public Func<NotesSearchDto, Task<Result<List<NoteMinimalDto>>>>? GetSearchMinimalAsyncImpl { get; set; }
     public Func<NotesFilterDto, Task<Result<List<NoteMinimalDto>>>>? GetFilterMinimalAsyncImpl { get; set; }
@@ -48,6 +49,9 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<List<NoteInfoDto>>> HomeNotesAsync(Guid folderId) => throw new NotSupportedException();
     public Task<Result<NoteDto>> GetAsync(Guid noteId) =>
         (GetByIdAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAsync)}(Guid) not configured for this test"))(noteId);
+    public Task<Result<NoteMinimalDto>> GetCitedNoteAsync(int noteNumber) =>
+        (GetCitedNoteAsyncImpl ?? throw new NotSupportedException($"{nameof(GetCitedNoteAsync)} not configured for this test"))(noteNumber);
+
     public Task<Result<NoteDto>> GetAsync(int noteNumber) =>
         (GetByNumberAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAsync)}(int) not configured for this test"))(noteNumber);
     public Task<Result<NoteExtendedDto>> GetExtendedAsync(Guid noteId) =>

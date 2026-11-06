@@ -565,6 +565,11 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Rutas relativas**: la app se sirve bajo `/KNote/` (`<base href="/KNote/" />` en `index.html`, a juego con
   `app.UsePathBase("/KNote")` en `Server`). Navega con rutas sin `/` inicial (`store.NavigateTo("notes/tree")`,
   `Path="index"`), o se saldrá de la base.
+- **Citas `#123`**: `ViewMarkdown` las enlaza (`NoteCitationLinker`, con `LinkCitations`, apagado en el chat room) a
+  `notes/number/{n}`, la misma `NoteView` por número (**no** `notes/view/{n}`: con `notes/view/{id:guid}` son rutas ambiguas
+  y Blazor rompe el enrutador de toda la app). El enlace es parte de un HTML, así que el clic lo oye `js/kntWindows.js`
+  (`listenNoteLinks`, en la fase de captura, antes que Blazor), que abre la ventana en el mismo clic para que el navegador
+  no la bloquee; el aviso «Note #n not found» sale en esa ventana.
 - **Ventanas de la app** (`AppStoreService/KntWindows`). **De nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`), editarla
   (`notes/edit/{id}`, `NoteEdit`) y crearla (`notes/new?folderId=...`, la misma `NoteEdit`) se hace en una
   ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/KntWindows`

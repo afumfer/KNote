@@ -16,6 +16,11 @@ public class TasksPanelFilterDto
     public DateTime ReferenceDate { get; set; }
     public DateTime Today { get; set; }
 
+    // An exact window, both days included, instead of the one of Unit, Size and ReferenceDate (the tool get_tasks of the
+    // AI, which is asked about any period; the panel of the web works in whole units).
+    public DateTime? WindowFrom { get; set; }
+    public DateTime? WindowTo { get; set; }
+
     // The type of the task's note, the task's user.
     public Guid? NoteTypeId { get; set; }
     public Guid? UserId { get; set; }

@@ -60,6 +60,16 @@
         </RadzenFormField>
 
         <RadzenStack Gap="0.25rem">
+            <RadzenText TextStyle="TextStyle.Overline" class="rz-m-0">Modified between</RadzenText>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@notesFilter.ModifiedFrom" Name="ModifiedFrom" DateFormat="d" ShowTime="false"
+                                  AllowClear="true" Placeholder="From" Style="width: 100%; min-width: 0;" />
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@notesFilter.ModifiedTo" Name="ModifiedTo" DateFormat="d" ShowTime="false"
+                                  AllowClear="true" Placeholder="To" Style="width: 100%; min-width: 0;" />
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenStack Gap="0.25rem">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                 <RadzenText TextStyle="TextStyle.Overline" class="rz-m-0">Attributes</RadzenText>
                 <RadzenButton Icon="add" Text="Add" Variant="Variant.Text" Size="ButtonSize.ExtraSmall"
@@ -168,6 +178,8 @@
         notesFilter.FolderId = null;
         notesFilter.Description = null;
         notesFilter.MeaningText = null;
+        notesFilter.ModifiedFrom = null;
+        notesFilter.ModifiedTo = null;
         notesFilter.AttributesFilter = new List<AtrFilterDto>();             
         folderName = "";
 

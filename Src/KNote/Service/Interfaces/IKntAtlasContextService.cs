@@ -28,6 +28,9 @@ public interface IKntAtlasContextService
     /// <summary>The window of the glossary: its note, its terms and the problems of its rows. Any user.</summary>
     Task<Result<AtlasGlossaryInfoDto>> GetGlossaryInfoAsync();
 
+    /// <summary>The terms of the glossary that appear in the texts, in the order they first appear in them. Any user.</summary>
+    Task<Result<List<GlossaryTermDto>>> FindGlossaryTermsAsync(List<string> texts);
+
     /// <summary>The glossary: the one there is or a new one with its empty table. ProjectManager.</summary>
     Task<Result<NoteDto>> CreateGlossaryAsync();
 

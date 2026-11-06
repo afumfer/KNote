@@ -1,4 +1,5 @@
 ﻿@page "/notes/view/{NoteId:guid}"
+@page "/notes/number/{NoteNumber:int}"
 @layout KntWindowLayout
 
 @implements IDisposable
@@ -9,8 +10,8 @@
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
-@* The window where a note is read (KntWindows.OpenViewAsync), apart from the main window. It shows the note
-   again when it is saved in another window. *@
+@* The window where a note is read (KntWindows.OpenViewAsync), apart from the main window, also by its number (a citation,
+   #123, opened with a click: see KntWindows). It shows the note again when it is saved in another window. *@
 
 <PageTitle>@(note?.Topic ?? KntConst.AppName)</PageTitle>
 
@@ -27,7 +28,7 @@
 }
 else if (notFound)
 {
-    <text>The note could not be loaded.</text>
+    <text>@(NoteNumber != null ? $"Note #{NoteNumber} not found." : "The note could not be loaded.")</text>
 }
 else
 {
@@ -37,6 +38,7 @@ else
 
 @code {
     [Parameter] public Guid NoteId { get; set; }
+    [Parameter] public int? NoteNumber { get; set; }
 
     private NoteDto? note;
     private bool notFound;
@@ -58,6 +60,19 @@ else
 
     private async Task LoadNote()
     {
+        if (NoteId == Guid.Empty && NoteNumber is int noteNumber)
+        {
+            var cited = await noteRequest.RunAsync(ct => store.Notes.GetCitedAsync(noteNumber, ct));
+            if (cited.Canceled)
+                return;
+            if (cited.Value.Entity == null)
+            {
+                notFound = true;
+                return;
+            }
+            NoteId = cited.Value.Entity.NoteId;
+        }
+
         var request = await noteRequest.RunAsync(ct => store.Notes.GetAsync(NoteId, ct));
         if (request.Canceled)
             return;

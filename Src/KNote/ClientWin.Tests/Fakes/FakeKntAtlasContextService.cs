@@ -15,12 +15,16 @@ internal class FakeKntAtlasContextService : IKntAtlasContextService
     public Func<Task<Result<List<AtlasTaskPromptStatusDto>>>>? GetTaskPromptsAsyncImpl { get; set; }
     public Func<AiComposeRequestDto, Task<Result<AiComposedPromptDto>>>? ComposeAsyncImpl { get; set; }
     public Func<Task<Result<NoteDto>>>? CreateProfileAsyncImpl { get; set; }
+    public Func<List<string>, Task<Result<List<GlossaryTermDto>>>>? FindGlossaryTermsAsyncImpl { get; set; }
 
     public Task<Result<AtlasProfileInfoDto>> GetProfileInfoAsync() =>
         (GetProfileInfoAsyncImpl ?? throw new NotSupportedException($"{nameof(GetProfileInfoAsync)} not configured for this test"))();
 
     public Task<Result<AtlasGlossaryInfoDto>> GetGlossaryInfoAsync() =>
         (GetGlossaryInfoAsyncImpl ?? throw new NotSupportedException($"{nameof(GetGlossaryInfoAsync)} not configured for this test"))();
+
+    public Task<Result<List<GlossaryTermDto>>> FindGlossaryTermsAsync(List<string> texts) =>
+        (FindGlossaryTermsAsyncImpl ?? throw new NotSupportedException($"{nameof(FindGlossaryTermsAsync)} not configured for this test"))(texts);
 
     public Task<Result<List<AtlasTaskPromptStatusDto>>> GetTaskPromptsAsync() =>
         (GetTaskPromptsAsyncImpl ?? throw new NotSupportedException($"{nameof(GetTaskPromptsAsync)} not configured for this test"))();

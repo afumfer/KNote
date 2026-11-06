@@ -27,6 +27,9 @@ public class NoteWebApiService : BaseService, INoteWebApiService
     public Task<Result<NoteDto>> GetAsync(Guid noteId, CancellationToken cancellationToken = default) =>
         SendAsync<NoteDto>(ct => _httpClient.GetAsync($"api/notes/{noteId}", ct), "Get note", cancellationToken: cancellationToken);
 
+    public Task<Result<NoteMinimalDto>> GetCitedAsync(int noteNumber, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteMinimalDto>(ct => _httpClient.GetAsync($"api/notes/cited/{noteNumber}", ct), "Get note", cancellationToken: cancellationToken);
+
     // The HTML of a note's description made safe to show (by Server, the same rules as ClientWin).
     public Task<Result<string>> HtmlAsync(string markdown, CancellationToken cancellationToken = default) =>
         SendAsync<string>(ct => _httpClient.PostAsJsonAsync("api/notes/html", markdown, ct), "Show note", cancellationToken: cancellationToken);

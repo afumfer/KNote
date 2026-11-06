@@ -286,6 +286,25 @@ Everything is together in **KNote Atlas**: **Tools › KNote Atlas** in the desk
 
 Anyone can open KNote Atlas and read the notes; only a **ProjectManager** or an **Admin** can create, save, delete, move or retag them (also the note **Search test queries**). The profile is cut to about 2,000 words: KNote Atlas tells you if it is longer.
 
+### What the AI assistant can look up (KNote Atlas)
+
+The assistant of both apps reads the repository on its own, without asking, because it only reads. Besides searching notes by words and reading a note, it can:
+
+- **search by meaning** (only if the repository has a semantic index): "do I have anything about the French Revolution?";
+- **filter** by folder, note type, tag, user with a task, creation or modification dates and the value of an attribute: "the notes of the Invoices folder modified in September";
+- see the **folders tree**;
+- see the **tasks, alarms, resources and relations** of a note;
+- list the **tasks of a period**, of everyone or of one person: "what tasks does Marta have this week?";
+- look up terms in the **glossary** (only if it has terms).
+
+While it answers, both apps show the tool it is using (**Using find_notes_about**, for instance), until it starts writing.
+
+You name folders, note types, users and attributes as usual: if a name doesn't exist or could be several, the assistant gets the options and can ask you which one. KNote's own notes (AI sessions of any user, chat room threads, profile, glossary, instructions and test queries) are never within its reach. Of a very long note it reads the first 40,000 characters, and it knows the rest is missing. Small local models may choose the wrong tool now and then: asking again more concretely usually helps.
+
+**Citations.** A `#123` in a note, in a task or in an answer of the assistant is a link to that note, shown differently from web links. In the web app it opens the note's viewer in a window; in the desktop app, the note editor. Any `#` followed by a number is a link, without checking that the note exists: when it doesn't, or it is one of KNote's own notes, you get **Note #123 not found**. They aren't links inside code, in the desktop app's HTML editor or in the chat room.
+
+**Modified between.** The notes filter of both apps has this line: the notes modified between two dates, both included. Either of them can be left empty.
+
 ### Chat room
 
 The chat room lets the users of a KNote web server talk in **threads**: each thread is a conversation about one topic, and every user with the Staff role or a higher one in that server can read it, join it and write in it. The web app and the desktop app share the same chat room, the one of the web server: a message written in one appears at once in the other.
