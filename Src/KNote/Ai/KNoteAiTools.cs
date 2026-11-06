@@ -73,6 +73,9 @@ public partial class KNoteAiTools
 
         foreach (var tool in GetQueryTools())
             yield return tool;
+
+        foreach (var tool in GetActionTools())
+            yield return tool;
     }
 
     [Description("Full-text search over the notes in the user's active KNote repository (topic, tags, and optionally the note body).")]
@@ -234,6 +237,16 @@ public partial class KNoteAiTools
             return $"Error saving note: {saveResponse.ErrorMessage}";
 
         _host.OnNoteCreated(service, saveResponse.Entity);
+
+        TurnActions.Add(new AiActionDto
+        {
+            Kind = AiActionRules.CreateTask,
+            Status = EnumAiActionStatus.Done,
+            Text = $"Created the note #{saveResponse.Entity.NoteNumber} ({topic})",
+            NoteId = saveResponse.Entity.NoteId,
+            NoteNumber = saveResponse.Entity.NoteNumber
+        });
+        _newNoteIds.Add(saveResponse.Entity.NoteId);
 
         return $"Created and saved a new note titled \"{topic}\" (note #{saveResponse.Entity.NoteNumber}), " +
             "and showed it to the user. From here it is entirely the user's responsibility to modify and " +

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using KNote.Model;
 using KNote.Model.Dto;
 using Microsoft.Extensions.AI;
 
@@ -21,7 +22,20 @@ public static class AiChatTurnStreamer
         foreach (var turn in history ?? [])
         {
             messages.Add(new ChatMessage(ChatRole.User, turn.Prompt ?? ""));
-            messages.Add(new ChatMessage(ChatRole.Assistant, turn.Answer ?? ""));
+
+            // What happened, as it happened: the call to the tool and how it ended. With only the text of the answers, the
+            // model learns that doing something is saying so, and stops calling the tools (measured with qwen3.5:9b).
+            foreach (var action in turn.Actions)
+            {
+                var callId = action.ActionId.ToString("N");
+                var arguments = new Dictionary<string, object> { ["noteNumber"] = action.NoteNumber };
+                messages.Add(new ChatMessage(ChatRole.Assistant, [new FunctionCallContent(callId, action.Kind, arguments)]));
+                messages.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(callId, AiActionRules.Outcome(action))]));
+            }
+
+            // A turn can end in the card, with no text: an empty message is not sent, some providers refuse it.
+            if (turn.Actions.Count == 0 || !string.IsNullOrEmpty(turn.Answer))
+                messages.Add(new ChatMessage(ChatRole.Assistant, turn.Answer ?? ""));
         }
 
         messages.Add(new ChatMessage(ChatRole.User, prompt ?? ""));

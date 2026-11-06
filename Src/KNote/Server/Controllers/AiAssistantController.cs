@@ -71,17 +71,40 @@ public class AiAssistantController : ControllerBase
 
         try
         {
+            // What the tools do goes through the roles of the commands, as in ClientWin (D4): the rest of the API has its own.
+            _service.EnforceAuthorization = true;
             var toolsHost = new ServerAiToolsHost(_service);
             var tools = new KNoteAiTools(_service, toolsHost);
+            tools.BeginTurn(request.History, request.AutoApprovedActionKinds);
             var chatClient = _chatClients.Create(providerRef, await tools.GetToolsAsync());
 
-            return TypedResults.ServerSentEvents(StreamChatAsync(chatClient, request, toolsHost, cancellationToken));
+            return TypedResults.ServerSentEvents(StreamChatAsync(chatClient, request, tools, toolsHost, cancellationToken));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Chat with {provider} at {dateTime}.", providerRef.Alias, DateTime.Now);
             resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return TypedResults.BadRequest(resApi);
+        }
+    }
+
+    // What the user accepted in the card of an answer (Server keeps nothing between requests: they come back with their data).
+    // Each one, run as KntAiActionExecutor does, with the roles of its commands; what happened comes in them.
+    [HttpPost("actions")]
+    public async Task<IActionResult> RunActions([FromBody] List<AiActionDto> actions)
+    {
+        try
+        {
+            _service.EnforceAuthorization = true;
+            await new KNoteAiTools(_service, new ServerAiToolsHost(_service)).ExecuteActionsAsync(actions ?? new());
+            return Ok(new Result<List<AiActionDto>>(actions ?? new()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "RunActions at {dateTime}.", DateTime.Now);
+            var resApi = new Result<List<AiActionDto>>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
         }
     }
 
@@ -137,7 +160,7 @@ public class AiAssistantController : ControllerBase
     }
 
     private async IAsyncEnumerable<SseItem<AiChatStreamEventDto>> StreamChatAsync(IChatClient chatClient, AiChatRequestDto request,
-        ServerAiToolsHost toolsHost, [EnumeratorCancellation] CancellationToken cancellationToken)
+        KNoteAiTools tools, ServerAiToolsHost toolsHost, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // KNote Atlas: the rules, the instructions, the profile and the glossary of the session's repository.
         var context = await AiAssistantContext.ComposeAsync(_service, null, request.History, request.Prompt, _logger);
@@ -181,6 +204,9 @@ public class AiAssistantController : ControllerBase
                     yield return Event(new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Error, Text = error });
                     break;
                 }
+
+                if (current.Turn != null)
+                    current.Turn.Actions = tools.TurnActions;
 
                 yield return Event(current);
             }

@@ -18,6 +18,10 @@ public class AiAssistantWebApiService : BaseService, IAiAssistantWebApiService
 
     }
 
+    public Task<Result<List<AiActionDto>>> RunActionsAsync(List<AiActionDto> actions, CancellationToken cancellationToken = default) =>
+        SendAsync<List<AiActionDto>>(ct => _httpClient.PostAsJsonAsync("api/aiassistant/actions", actions, ct), "Run the actions of the AI assistant",
+            cancellationToken: cancellationToken);
+
     public Task<Result<List<AiProviderInfoDto>>> GetProvidersAsync(CancellationToken cancellationToken = default) =>
         SendAsync<List<AiProviderInfoDto>>(ct => _httpClient.GetAsync("api/aiassistant/providers", ct), "Get AI providers",
             cancellationToken: cancellationToken);

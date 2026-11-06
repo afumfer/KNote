@@ -97,7 +97,7 @@ public class AiQueryToolsTests
         CollectionAssert.IsSubsetOf(new[] { "search_notes", "get_note_details", "create_task", "filter_notes", "get_folder_tree", "get_note_items", "get_tasks" }, before);
         CollectionAssert.Contains(after, "find_notes_about");
         CollectionAssert.Contains(after, "lookup_glossary");
-        Assert.AreEqual(9, after.Count);
+        Assert.AreEqual(12, after.Count);
     }
 
     [TestMethod]

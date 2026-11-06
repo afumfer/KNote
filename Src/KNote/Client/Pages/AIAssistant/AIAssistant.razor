@@ -48,6 +48,7 @@
             <RadzenSplitterPane Size="calc(100% - 90px)" Min="40%">
                 <AiChatView Turns="@session.Turns" PendingPrompt="@pendingPrompt" PendingAnswer="@pendingAnswer.ToString()"
                             PendingReasoning="@pendingReasoning.ToString()" Thinking="@thinking"
+                            PendingAutomatic="@pendingAutomatic" ActionsAnswered="OnActionsAnswered" ActionsDisabled="@(streaming || runningActions)"
                             ToolInUse="@toolInUse" CreatedNotes="@createdNotes" ContainerId="@ChatContainerId" />
             </RadzenSplitterPane>
             <RadzenSplitterPane Size="82px" Min="62px">
@@ -104,6 +105,10 @@
     private readonly StringBuilder pendingReasoning = new();
     private bool thinking;
     private string? toolInUse;
+    private bool pendingAutomatic;
+    private bool runningActions;
+    // The kinds of action not to ask about again in this conversation.
+    private readonly HashSet<string> autoApprovedKinds = new();
     private CancellationTokenSource? answerCancellation;
     private DateTime lastRefresh;
     private bool scrollToBottom;
@@ -233,19 +238,33 @@
     private async Task Send()
     {
         var prompt = promptInput;
+        if (streaming || runningActions || currentProvider == null || string.IsNullOrWhiteSpace(prompt))
+            return;
+
+        // A new message without answering the card rejects what it proposed: the model is told.
+        AiActionRules.RejectPending(session.Turns);
+        await SendTurnAsync(prompt!, automatic: false);
+    }
+
+    // automatic: the turn the app sends after a card, not a question of the user.
+    private async Task SendTurnAsync(string prompt, bool automatic)
+    {
         var provider = currentProvider;
-        if (streaming || provider == null || string.IsNullOrWhiteSpace(prompt))
+        if (provider == null)
             return;
 
         var request = new AiChatRequestDto
         {
             ProviderAlias = provider.Alias,
             History = session.Turns.ToList(),
-            Prompt = prompt
+            Prompt = prompt,
+            AutoApprovedActionKinds = autoApprovedKinds.ToList()
         };
 
         streaming = true;
-        promptInput = "";
+        pendingAutomatic = automatic;
+        if (!automatic)
+            promptInput = "";
         pendingPrompt = prompt;
         pendingAnswer.Clear();
         pendingReasoning.Clear();
@@ -314,7 +333,9 @@
             // The session is held with the provider of its last answer (see AiProviderSelection).
             session.Provider = provider.Provider;
             session.Model = provider.Model;
+            completedTurn.Automatic = automatic;
             session.Turns.Add(completedTurn);
+            await NotifyChangedNotesAsync(completedTurn.Actions);
             pendingSave = true;
             scrollToBottom = true;
             StateHasChanged();
@@ -323,7 +344,8 @@
         else
         {
             // Not answered (stopped or failed): the question is back in the box, to send it again.
-            promptInput = prompt;
+            if (!automatic)
+                promptInput = prompt;
             createdNotes.Remove(session.Turns.Count);
         }
 
@@ -331,6 +353,49 @@
     }
 
     private void StopAnswer() => answerCancellation?.Cancel();
+
+    // The card of the last turn: what is not accepted is rejected, the rest is run and, if anything was accepted, the assistant
+    // goes on by itself (D3): what was asked may depend on it.
+    private async Task OnActionsAnswered(AiActionsCard.AiActionsAnswer answer)
+    {
+        if (streaming || runningActions || session.Turns.Count == 0)
+            return;
+
+        var proposed = session.Turns[^1].Actions.Where(a => a.Status == EnumAiActionStatus.Proposed).ToList();
+        var accepted = proposed.Where(a => answer.Accepted.Contains(a.ActionId)).ToList();
+        proposed.Except(accepted).ToList().ForEach(a => a.Status = EnumAiActionStatus.Rejected);
+
+        if (accepted.Count > 0)
+        {
+            runningActions = true;
+            var res = await store.AiAssistant.RunActionsAsync(accepted);
+            runningActions = false;
+            foreach (var action in accepted)
+            {
+                var ran = res.Entity?.FirstOrDefault(a => a.ActionId == action.ActionId);
+                action.Status = ran?.Status ?? EnumAiActionStatus.Failed;
+                action.Result = ran != null ? ran.Result : res.ErrorMessage;
+            }
+            if (answer.DontAskAgain)
+                autoApprovedKinds.UnionWith(accepted.Select(a => a.Kind));
+            await NotifyChangedNotesAsync(accepted);
+        }
+
+        pendingSave = true;
+        scrollToBottom = true;
+        StateHasChanged();
+        await SaveSessionAsync();
+
+        if (accepted.Count > 0)
+            await SendTurnAsync(AiActionRules.ContinuePrompt, automatic: true);
+    }
+
+    // The lists and the windows of the notes show them changed.
+    private async Task NotifyChangedNotesAsync(IEnumerable<AiActionDto> actions)
+    {
+        foreach (var noteId in actions.Where(a => a.Status == EnumAiActionStatus.Done && a.NoteId != null).Select(a => a.NoteId!.Value).Distinct())
+            await kntWindows.NotifyNoteSavedAsync(noteId);
+    }
 
     private void RefreshWhileStreaming(bool force = false)
     {
@@ -480,6 +545,7 @@
         pendingSave = false;
         promptInput = "";
         createdNotes.Clear();
+        autoApprovedKinds.Clear();
         scrollToBottom = true;
     }
 

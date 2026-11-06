@@ -1,0 +1,17 @@
+.ai-actions-card {
+    margin-top: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    border: var(--rz-border-normal);
+    border-radius: var(--rz-border-radius);
+}
+
+.ai-action {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.375rem;
+}
+
+    .ai-action ::deep p {
+        margin: 0;
+    }

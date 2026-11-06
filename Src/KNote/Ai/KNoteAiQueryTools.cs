@@ -45,6 +45,8 @@ public partial class KNoteAiTools
             hidden.Add(FindNotesAboutName);
         if (!await HasGlossaryTermsAsync())
             hidden.Add(LookupGlossaryName);
+        if (!await CanActAsync())
+            hidden.AddRange(AiActionRules.Kinds);
         return GetTools().Where(t => !hidden.Contains(t.Name)).ToList();
     }
 

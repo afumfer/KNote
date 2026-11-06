@@ -361,6 +361,23 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   glosario de la nota (`IKntAtlasContextService.FindGlossaryTermsAsync`). `get_tasks` usa `TasksPanelFilterDto.WindowFrom/To`,
   una ventana exacta. `get_note_items` no da el texto de las alarmas *Execute KntScript*. Tests con repositorio real en
   `Tests/ServiceTests/AiQueryToolsTests`, llamando a las herramientas por nombre como el modelo.
+- **Acciones del asistente (KNote Atlas, etapa 1)** (`Ai/KNoteAiActionTools.cs`, `Model/Core/AiActionRules`,
+  `Service/Core/KntAiActionExecutor`). `create_note` se hace al momento; `append_to_note` y `set_tags` solo se proponen: la
+  herramienta añade un `AiActionDto` a `TurnActions` y le dice al modelo que está pendiente. El turno lleva sus acciones
+  (`AiChatTurnDto.Actions`) y la app muestra la tarjeta: lo aceptado lo ejecuta `KNoteAiTools.ExecuteActionsAsync`, no el
+  modelo, con los comandos de siempre y los roles del usuario (el `Server` pone `EnforceAuthorization` en `chat` y `actions`).
+  El ejecutor vuelve a mirar la nota: no se fía de lo que llega. Un tipo aprobado para la conversación
+  (`AutoApprovedActionKinds`) y un cambio en una nota creada en ella se hacen al momento. `BeginTurn` recibe eso en cada turno:
+  el `Server` no guarda nada entre peticiones. **El historial que recibe el modelo lleva cada acción como lo que fue: la
+  llamada a la herramienta y su resultado** (`BuildMessages`). Con solo el texto de las respuestas, `qwen3.5:9b` aprendía que
+  proponer era escribirlo y dejaba de llamar a las herramientas (1 de 9; con las llamadas, 25 de 27). Una línea de estado en
+  sus respuestas la copiaba tal cual. Que no pregunte lo que ya pregunta la tarjeta se le dice en el resultado de la herramienta,
+  no en las reglas fijas: ahí se lee antes de llamar y hablaba de la tarjeta sin llamar a la herramienta (2 de 9) o daba lo
+  propuesto por hecho. Una acción repetida (`AiActionRules.IsRepeated`) no se hace: los modelos pequeños repiten llamadas, y
+  con el tipo aprobado el texto se añadía varias veces sin preguntar. La casilla de la tarjeta solo aprueba los tipos aceptados
+  en ella y lo dice (`DontAskAgainText`). Se guarda en el comentario oculto de la conversación sin los datos para ejecutarla, y
+  lo propuesto sin responder se lee como `NotConfirmed`. Tests en `Tests/AiActionRulesTests`,
+  `Tests/ServiceTests/AiActionToolsTests` y `Tests/InProcessIntegrationTests/AiActionsInProcessTests`.
 - **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
   `reasoning` y da el texto, el tiempo y los tokens (si el proveedor los distingue; Ollama no, y no se estiman) en el turno.
   `AiChatTurnDto.Reasoning` va con `[JsonIgnore]`: no se guarda ni viaja con el historial, y la Web lo monta con los eventos.

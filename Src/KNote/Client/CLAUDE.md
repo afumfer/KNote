@@ -565,6 +565,10 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Rutas relativas**: la app se sirve bajo `/KNote/` (`<base href="/KNote/" />` en `index.html`, a juego con
   `app.UsePathBase("/KNote")` en `Server`). Navega con rutas sin `/` inicial (`store.NavigateTo("notes/tree")`,
   `Path="index"`), o se saldrá de la base.
+- **Acciones del asistente**: `AiChatView` muestra las líneas del registro y, en el último turno, `AiActionsCard` con lo
+  propuesto; `AIAssistant.OnActionsAnswered` rechaza lo no aceptado, ejecuta lo demás (`IStore.AiAssistant.RunActionsAsync`),
+  guarda la sesión y, si se aceptó algo, envía el turno de continuación (`SendTurnAsync` con `automatic`, cuya pregunta no se
+  muestra). Enviar un mensaje con la tarjeta abierta la rechaza. Las notas cambiadas se avisan con `NotifyNoteSavedAsync`.
 - **Razonamiento del asistente**: `AIAssistant` lo acumula con los eventos `reasoning` y lo pone en el turno al terminar
   (`AiChatTurnDto.Reasoning` no viaja en el JSON); `AiChatView` lo muestra plegado, como texto plano, en un `<details>`.
 - **Citas `#123`**: `ViewMarkdown` las enlaza (`NoteCitationLinker`, con `LinkCitations`, apagado en el chat room) a

@@ -1,0 +1,42 @@
+@* The card of the actions the assistant proposes (KNote Atlas, chapter 25): they can be unmarked one by one, and asked not
+   to be asked again in this conversation. The page runs what is accepted (see AIAssistant). *@
+
+<div class="ai-actions-card">
+    <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-my-0">The assistant wants to do this:</RadzenText>
+    @foreach (var action in Actions)
+    {
+        <div class="ai-action">
+            <RadzenCheckBox TValue="bool" Value="@(!unmarked.Contains(action.ActionId))" Change="@(marked => Mark(action, marked))" />
+            <ViewMarkdown MarkdownContent="@action.Text" DisableHtml="true" />
+        </div>
+    }
+    <div class="ai-action">
+        <RadzenCheckBox TValue="bool" @bind-Value="dontAskAgain" Name="DontAskAgain" />
+        <RadzenLabel Text="@AiActionRules.DontAskAgainText(Actions)" Component="DontAskAgain" />
+    </div>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Text="Reject" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Disabled="@Disabled"
+                      Click="@(() => Answered.InvokeAsync(new AiActionsAnswer(new List<Guid>(), false)))" />
+        <RadzenButton Text="Accept" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@(Disabled || unmarked.Count == Actions.Count)"
+                      Click="@(() => Answered.InvokeAsync(new AiActionsAnswer(Actions.Select(a => a.ActionId).Except(unmarked).ToList(), dontAskAgain)))" />
+    </RadzenStack>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public IReadOnlyList<AiActionDto> Actions { get; set; } = null!;
+    [Parameter] public EventCallback<AiActionsAnswer> Answered { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    private readonly HashSet<Guid> unmarked = new();
+    private bool dontAskAgain;
+
+    private void Mark(AiActionDto action, bool marked)
+    {
+        if (marked)
+            unmarked.Remove(action.ActionId);
+        else
+            unmarked.Add(action.ActionId);
+    }
+
+    public sealed record AiActionsAnswer(List<Guid> Accepted, bool DontAskAgain);
+}

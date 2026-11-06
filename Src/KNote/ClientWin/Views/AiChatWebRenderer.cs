@@ -51,6 +51,9 @@ internal sealed class AiChatWebRenderer : IDisposable
     // Raised outside the WebView2 callback, so its handler may open a modal dialog.
     public event EventHandler<string> ShortcutPressed;
 
+    // The answer to a card of actions. Raised outside the WebView2 callback, as ShortcutPressed.
+    public event EventHandler<AiChatHtml.ActionsAnswer> ActionsAnswered;
+
     // Shows the whole conversation, replacing whatever the view had. providerAlias: the provider of its answers.
     public async Task LoadAsync(IEnumerable<AiChatTurnDto> turns, string providerAlias)
     {
@@ -93,11 +96,19 @@ internal sealed class AiChatWebRenderer : IDisposable
         _activity = null;
         _turnRunning = true;
 
-        Run(AiChatHtml.ScriptCall("append", AiChatHtml.UserMessage(prompt) + AiChatHtml.PendingAnswer(providerAlias, null)));
+        // Without a prompt, a turn the app sends by itself.
+        Run(AiChatHtml.ScriptCall("append", (prompt == null ? "" : AiChatHtml.UserMessage(prompt)) + AiChatHtml.PendingAnswer(providerAlias, null)));
 
         if (answerSoFar != null || reasoningSoFar != null)
             _repaintTimer.Start();
     }
+
+    // The conversation changed in what is already painted (a card rejected by a new message): the next turn loads it again.
+    public void Invalidate() => _pageInSync = false;
+
+    // The last answer again, once its card is answered.
+    public void ReplaceLastTurn(AiChatTurnDto turn) =>
+        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.AssistantMessage(turn, _providerAlias)));
 
     // What the model is doing (null: nothing to say) under the answer arriving.
     public void ShowActivity(string activity)
@@ -192,7 +203,7 @@ internal sealed class AiChatWebRenderer : IDisposable
         core.WebMessageReceived += Core_WebMessageReceived;
     }
 
-    // The page only posts the host's shortcuts (see AiChatHtml); anything else is ignored.
+    // The page only posts the host's shortcuts and the answer to a card (see AiChatHtml); anything else is ignored.
     private void Core_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         string shortcut;
@@ -205,7 +216,9 @@ internal sealed class AiChatWebRenderer : IDisposable
             return;  // Not a string.
         }
 
-        if (_shortcuts.Contains(shortcut))
+        if (AiChatHtml.TryReadActionsAnswer(shortcut, out var answer))
+            _editView.BeginInvoke(() => ActionsAnswered?.Invoke(this, answer));
+        else if (_shortcuts.Contains(shortcut))
             _editView.BeginInvoke(() => ShortcutPressed?.Invoke(this, shortcut));
     }
 

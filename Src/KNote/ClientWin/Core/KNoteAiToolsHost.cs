@@ -60,6 +60,26 @@ public class KNoteAiToolsHost : IKNoteAiToolsHost
             Show();
     }
 
+    public bool CanChangeNote(Guid noteId) => !_store.IsNoteBeingEdited(noteId);
+
+    // As if it had been saved in its editor: the lists and the preview show it changed.
+    public void OnNoteChanged(IKntService service, Guid noteId)
+    {
+        void Publish() => _ = PublishNoteSavedAsync(service, noteId);
+
+        if (_uiContext != null)
+            _uiContext.Post(_ => Publish(), null);
+        else
+            Publish();
+    }
+
+    private async Task PublishNoteSavedAsync(IKntService service, Guid noteId)
+    {
+        var note = await service.Notes.GetExtendedAsync(noteId);
+        if (note.IsValid && note.Entity != null)
+            _store.Events.Publish(new EntitySaved<NoteExtendedDto>(note.Entity));
+    }
+
     private async Task ShowNoteForEditingAsync(IKntService service, Guid noteId)
     {
         // The same LoadModelById(service, id) + Run() the rest of the app uses to open an existing

@@ -22,6 +22,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     private IChatClient _chatClient;
     private KNoteAiTools _tools;
+    // The kinds of action not to ask about again in this conversation.
+    private readonly HashSet<string> _autoApprovedKinds = new();
     private string _activity;
 
     #endregion
@@ -376,8 +378,12 @@ public class KNoteAIAssistantCtrl : CtrlBase
         _currentProviderRef = providerRef;
     }
 
+    // Test seam (ClientWin.Tests): a turn of the conversation, as if it had been answered.
+    internal void AddTurnForTesting(AiChatTurnDto turn) => AddTurn(turn);
+
     public void RestartAIAssistant()
     {
+        _autoApprovedKinds.Clear();
         _prompt = "";
         _result = "";
 
@@ -394,13 +400,15 @@ public class KNoteAIAssistantCtrl : CtrlBase
         SessionPendingSave = false;
     }
 
-    public async Task GetCompletionAsync(string prompt)
+    // automatic: the turn the app sends after a card, not a question of the user.
+    public async Task GetCompletionAsync(string prompt, bool automatic = false)
     {
         // Streamed and put together (RunTurnAsync) rather than one GetResponseAsync call: the answer then comes
         // in as it is written, so a long one can't run into the HTTP timeout of a single response (10 minutes in
         // the Anthropic SDK). It is still shown all at once.
         var turn = await RunTurnAsync(prompt, null);
         turn.Answer = turn.Answer.Replace("\n", "\r\n");
+        turn.Automatic = automatic;
         AddTurn(turn);
 
         _chatTextMessages.Append($"\r\n");
@@ -431,7 +439,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     }
     // --------------------------------------------------------------------------
 
-    public async Task StreamCompletionAsync(string prompt)
+    public async Task StreamCompletionAsync(string prompt, bool automatic = false)
     {
         // Cleared before the first await, so a view repainting StreamingResult never shows the previous answer.
         StringBuilder resAssistant = _streamingResult;
@@ -461,6 +469,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
         }
 
         turn.Answer = resAssistant.ToString();
+        turn.Automatic = automatic;
         AddTurn(turn);
         _chatTextMessages.Append(resAssistant.ToString());
         _chatTextMessages.Append($"\r\n\r\n");
@@ -474,6 +483,34 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // far are sent with the prompt, and the answer comes back piece by piece (onText) and then whole, with its
     // usage. Nothing is added to the conversation here: an unanswered prompt (the provider failed) leaves no
     // orphaned user message behind to be resent with the next one.
+    // What the last answer proposes, waiting for the user.
+    public IReadOnlyList<AiActionDto> PendingActions =>
+        _chatTurns.LastOrDefault()?.Actions.Where(a => a.Status == EnumAiActionStatus.Proposed).ToList() ?? new List<AiActionDto>();
+
+    // A new message without answering the card rejects what it proposed. True if there was something.
+    public bool RejectPendingActions() => AiActionRules.RejectPending(_chatTurns);
+
+    // The card: what is not accepted is rejected, the rest is run with the permissions of the user. True if anything was
+    // accepted: the view then lets the assistant go on (D3).
+    public async Task<bool> AnswerActionsAsync(IReadOnlyCollection<Guid> accepted, bool dontAskAgain)
+    {
+        var proposed = PendingActions;
+        var toRun = proposed.Where(a => accepted.Contains(a.ActionId)).ToList();
+        foreach (var action in proposed.Except(toRun))
+            action.Status = EnumAiActionStatus.Rejected;
+
+        if (toRun.Count > 0)
+        {
+            var tools = _tools ?? new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
+            await tools.ExecuteActionsAsync(toRun);
+            if (dontAskAgain)
+                _autoApprovedKinds.UnionWith(toRun.Select(a => a.Kind));
+        }
+
+        await SaveAnsweredTurnAsync();
+        return toRun.Count > 0;
+    }
+
     private void SetActivity(string activity)
     {
         if (_activity == activity)
@@ -485,12 +522,14 @@ public class KNoteAIAssistantCtrl : CtrlBase
     private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText)
     {
         _streamingReasoning.Clear();
+        RejectPendingActions();
         var history = _chatTurns.ToList();
         AiChatTurnDto completed = null;
 
         LastSystemPrompt = await AiAssistantContext.ComposeAsync(ServiceRef?.Service, InstructionsOverride, history, prompt);
         // The tools are the repository's of this moment: an index or a glossary can appear during a conversation.
         var tools = _tools != null ? await _tools.GetToolsAsync() : null;
+        _tools?.BeginTurn(history, _autoApprovedKinds);
         try
         {
             await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, LastSystemPrompt.Text, history, prompt, tools))
@@ -515,6 +554,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
         {
             SetActivity(null);
         }
+
+        if (completed != null && _tools != null)
+            completed.Actions = _tools.TurnActions;
 
         return completed ?? throw new InvalidOperationException("The AI provider ended the answer unexpectedly.");
     }
@@ -613,6 +655,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
     {
         if (noteId == _session.NoteId || !await LeaveSessionAsync())
             return false;
+
+        _autoApprovedKinds.Clear();
 
         Result<AiChatSessionDto> res;
         try

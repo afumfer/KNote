@@ -49,6 +49,16 @@ public static class AiChatHtml
             window.chrome.webview.postMessage(shortcut);
           });
           document.addEventListener('click', e => {
+            const answer = e.target.closest('[data-answer]');
+            if (answer && window.chrome?.webview) {
+              const card = answer.closest('.actions-card');
+              const accepted = answer.dataset.answer === 'accept'
+                ? [...card.querySelectorAll('input[data-action]:checked')].map(i => i.dataset.action) : [];
+              const dontAsk = answer.dataset.answer === 'accept' && card.querySelector('input.dont-ask').checked;
+              card.querySelectorAll('input, button').forEach(c => c.disabled = true);
+              window.chrome.webview.postMessage('knt-actions:' + JSON.stringify({ accepted, dontAsk }));
+              return;
+            }
             const a = e.target.closest('a[href]');
             if (a && !a.getAttribute('href').startsWith('#') && !/^(https?|mailto|knt-note):$/.test(a.protocol))
               e.preventDefault();
@@ -103,7 +113,7 @@ public static class AiChatHtml
         html.Append(showModelInfo ? "<body>" : "<body class=\"hide-model-info\">");
         html.Append("<main id=\"chat\">");
         foreach (var turn in turns)
-            html.Append(UserMessage(turn.Prompt)).Append(AssistantMessage(turn, providerAlias));
+            html.Append(turn.Automatic ? "" : UserMessage(turn.Prompt)).Append(AssistantMessage(turn, providerAlias));
         html.Append("</main><script>");
         html.Append("window.kntChatShortcuts = ").Append(JsonSerializer.Serialize(hostShortcuts ?? Array.Empty<string>())).Append(';');
         html.Append(Script).Append("</script></body></html>");
@@ -132,7 +142,7 @@ public static class AiChatHtml
     // The usage line is model info (hidden by the page's hide-model-info class); the notice of a cut answer
     // is shown always.
     public static string AssistantMessage(AiChatTurnDto turn, string providerAlias)
-        => Assistant("", providerAlias, Reasoning(turn.ReasoningTitle(), turn.Reasoning) + MarkdownToHtml(turn.Answer), turn.UsageSummary(),
+        => Assistant("", providerAlias, Reasoning(turn.ReasoningTitle(), turn.Reasoning) + MarkdownToHtml(turn.Answer) + Actions(turn), turn.UsageSummary(),
             turn.Truncated ? AiChatTurnDto.TruncatedNotice : null);
 
     // An answer still arriving: what has arrived of its reasoning, the text received so far (or the typing indicator until
@@ -144,6 +154,50 @@ public static class AiChatHtml
         if (!string.IsNullOrEmpty(activity))
             content += $"<div class=\"activity\">{WebUtility.HtmlEncode(activity)}</div>";
         return Assistant("pending", providerAlias, content, "");
+    }
+
+    // What the assistant did, and the card of what it proposes. Its text comes from the model: Markdown without HTML.
+    private static string Actions(AiChatTurnDto turn)
+    {
+        var html = new StringBuilder();
+        foreach (var action in turn.Actions.Where(a => a.Status != EnumAiActionStatus.Proposed))
+            html.Append($"<div class=\"action-line\">{MarkdownToHtml(AiActionRules.Line(action))}</div>");
+
+        var proposed = turn.Actions.Where(a => a.Status == EnumAiActionStatus.Proposed).ToList();
+        if (proposed.Count == 0)
+            return html.ToString();
+
+        html.Append("<div class=\"actions-card\"><div class=\"card-title\">The assistant wants to do this:</div>");
+        foreach (var action in proposed)
+            html.Append($"<div class=\"action\"><input type=\"checkbox\" checked data-action=\"{action.ActionId}\"><div>{MarkdownToHtml(action.Text)}</div></div>");
+        html.Append($"<label class=\"action\"><input type=\"checkbox\" class=\"dont-ask\"><span>{AiActionRules.DontAskAgainText(proposed)}</span></label>");
+        html.Append("<div class=\"card-buttons\"><button data-answer=\"reject\">Reject</button><button data-answer=\"accept\" class=\"primary\">Accept</button></div></div>");
+        return html.ToString();
+    }
+
+    // What the page posts when a card is answered.
+    public sealed class ActionsAnswer
+    {
+        public List<Guid> Accepted { get; set; } = new();
+        public bool DontAsk { get; set; }
+    }
+
+    private const string ActionsMessagePrefix = "knt-actions:";
+
+    public static bool TryReadActionsAnswer(string message, out ActionsAnswer answer)
+    {
+        answer = null;
+        if (message == null || !message.StartsWith(ActionsMessagePrefix, StringComparison.Ordinal))
+            return false;
+        try
+        {
+            answer = JsonSerializer.Deserialize<ActionsAnswer>(message.Substring(ActionsMessagePrefix.Length), new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            return answer != null;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
     // Folded above the answer, as plain text: it is written by the model and it can be long.

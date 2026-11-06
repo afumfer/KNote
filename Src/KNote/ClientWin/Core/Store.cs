@@ -293,6 +293,11 @@ public class Store
         return _assistantServiceRef ;
     }
 
+    // A note open in an editor window (the preview of the main window does not count): what is changed elsewhere would be
+    // overwritten when that editor saves it.
+    public bool IsNoteBeingEdited(Guid noteId) => _controllerRegistry.All.Any(c => !c.EmbededMode
+        && ((c is NoteEditorCtrl editor && editor.Model?.NoteId == noteId) || (c is PostItEditorCtrl postIt && postIt.Model?.NoteId == noteId)));
+
     public void AddController(CtrlBase controller)
     {
         controller.StateControllerChanged += Controller_StateCtrlChanged;

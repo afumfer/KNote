@@ -95,6 +95,11 @@
     }
 
 /* What the answer cost (or what the assistant is doing), at the foot of its bubble. */
+.ai-action-line {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+
 .ai-reasoning {
     margin-bottom: 0.5rem;
     font-size: 0.8125rem;

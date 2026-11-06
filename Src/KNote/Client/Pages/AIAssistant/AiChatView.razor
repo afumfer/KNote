@@ -18,7 +18,10 @@
     @for (var i = 0; i < Turns.Count; i++)
     {
         var turn = Turns[i];
-        @UserMessage(turn.Prompt)
+        if (!turn.Automatic)
+        {
+            @UserMessage(turn.Prompt)
+        }
         <div class="ai-row">
             <span class="ai-avatar ai-avatar-assistant"><RadzenIcon Icon="smart_toy" /></span>
             <div class="ai-msg ai-assistant">
@@ -28,6 +31,15 @@
                 {
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-warning rz-my-0">@AiChatTurnDto.TruncatedNotice</RadzenText>
                 }
+                @foreach (var action in turn.Actions.Where(a => a.Status != EnumAiActionStatus.Proposed))
+                {
+                    <div class="ai-action-line"><ViewMarkdown MarkdownContent="@AiActionRules.Line(action)" DisableHtml="true" /></div>
+                }
+                @if (PendingPrompt == null && i == Turns.Count - 1 && turn.Actions.Any(a => a.Status == EnumAiActionStatus.Proposed))
+                {
+                    <AiActionsCard Actions="@turn.Actions.Where(a => a.Status == EnumAiActionStatus.Proposed).ToList()"
+                                   Answered="ActionsAnswered" Disabled="@ActionsDisabled" />
+                }
                 <div class="ai-usage">@turn.UsageSummary()</div>
             </div>
         </div>
@@ -36,7 +48,10 @@
 
     @if (PendingPrompt != null)
     {
-        @UserMessage(PendingPrompt)
+        if (!PendingAutomatic)
+        {
+            @UserMessage(PendingPrompt)
+        }
         <div class="ai-row">
             @* While it answers: a ring turning round the avatar and dots bouncing in the bubble. *@
             <span class="ai-avatar ai-avatar-assistant ai-avatar-thinking"><RadzenIcon Icon="smart_toy" /></span>
@@ -66,6 +81,13 @@
     [Parameter] public string? PendingPrompt { get; set; }
     [Parameter] public string? PendingAnswer { get; set; }
     [Parameter] public string? ToolInUse { get; set; }
+
+    // The turn being answered was sent by the app after a card, not by the user: its prompt is not shown.
+    [Parameter] public bool PendingAutomatic { get; set; }
+
+    // The answer to the card of the last turn.
+    [Parameter] public EventCallback<AiActionsCard.AiActionsAnswer> ActionsAnswered { get; set; }
+    [Parameter] public bool ActionsDisabled { get; set; }
 
     // What has arrived of the reasoning, and whether the model is reasoning now.
     [Parameter] public string? PendingReasoning { get; set; }

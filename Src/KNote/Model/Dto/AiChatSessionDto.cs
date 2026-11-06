@@ -32,6 +32,12 @@ public class AiChatTurnDto
     // How long it reasoned before writing or using its tools. Not saved.
     public TimeSpan? ReasoningTime { get; set; }
 
+    // What the assistant did or proposed in this turn (the record of the conversation, D13).
+    public List<AiActionDto> Actions { get; set; } = new();
+
+    // Sent by the app after a card, not by the user (D3): its prompt is not shown.
+    public bool Automatic { get; set; }
+
     // The tokens were estimated, not reported by the provider.
     public bool TokensEstimated { get; set; }
 

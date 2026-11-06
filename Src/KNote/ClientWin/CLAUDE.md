@@ -728,6 +728,10 @@ Cada turno envía las tools de ese momento (`KNoteAiTools.GetToolsAsync`, que de
 Lo que hace el modelo («Thinking…», «Using search_notes») se ve como en la Web, hasta que vuelve a escribir
 (`ActivityChanged`): en la barra de estado y en la vista de chat, bajo la respuesta que llega (`AiChatWebRenderer.ShowActivity`).
 El razonamiento va plegado encima de la respuesta (`AiChatHtml`); `replaceLast` lo deja abierto entre repintados.
+Las acciones: la tarjeta es HTML de `AiChatHtml` y responde con `postMessage('knt-actions:...')`, que `AiChatWebRenderer`
+convierte en `ActionsAnswered`; `KNoteAIAssistantCtrl.AnswerActionsAsync` ejecuta lo aceptado. En la vista Markdown, sin
+tarjeta, se pregunta con un cuadro de diálogo (todo o nada). `KNoteAiToolsHost.CanChangeNote` no deja cambiar una nota abierta
+en un editor (`Store.IsNoteBeingEdited`: al guardar pisaría el cambio) y `OnNoteChanged` publica `EntitySaved<NoteExtendedDto>`.
 
 - `KNoteAiTools` recibe `IKntService` (no `ServiceRef`), así que sus tests corren contra los fakes de
   servicio (`Fakes/FakeKntService.cs`) sin base de datos real. Lo que `create_task` hace distinto en cada

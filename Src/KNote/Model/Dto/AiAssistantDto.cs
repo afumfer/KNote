@@ -28,6 +28,9 @@ public class AiChatRequestDto
     public List<AiChatTurnDto> History { get; set; } = new();
 
     public string Prompt { get; set; }
+
+    // The kinds of action the user does not want to be asked about again in this conversation.
+    public List<string> AutoApprovedActionKinds { get; set; } = new();
 }
 
 // Each server-sent event of a streamed answer (its SSE event type is Type, see AiChatStreamEventTypes).

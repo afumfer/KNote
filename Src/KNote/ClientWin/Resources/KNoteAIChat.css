@@ -101,6 +101,66 @@ body {
   color: var(--chat-failed);
 }
 
+/* ---------- What the assistant did, and the card of what it proposes ---------- */
+.action-line {
+  margin-top: 4px;
+  font-size: 0.95em;
+}
+
+.action-line p,
+.actions-card p {
+  margin: 0;
+}
+
+.actions-card {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--chat-muted);
+  border-radius: 8px;
+}
+
+.actions-card .card-title {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.actions-card .action {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.actions-card .action input {
+  margin-top: 3px;
+}
+
+.actions-card .card-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.actions-card button {
+  padding: 4px 14px;
+  border: 1px solid var(--chat-muted);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.actions-card button.primary {
+  background-color: var(--chat-user-bg);
+  color: var(--chat-user-fg);
+}
+
+.actions-card button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* ---------- What the model is doing, and its reasoning ---------- */
 .activity {
   font-size: 0.85em;

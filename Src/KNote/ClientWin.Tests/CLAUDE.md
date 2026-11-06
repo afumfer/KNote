@@ -74,6 +74,7 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
   perezosa). `AiChatClientFactory` y `KNoteAiTools` viven en el proyecto compartido `KNote.Ai` (`Ai/`), que
   declara su propio `InternalsVisibleTo("KNote.ClientWin.Tests")` para `ResolveApiKey`; sus tests siguen
   aquí porque aquí están los fakes de servicio.
+- `AiActionsTests.cs` — la tarjeta y el registro en la página del chat, la respuesta que envía y `AnswerActionsAsync`.
 - `AiReasoningTests.cs` — el razonamiento: eventos, tiempo, tokens, que no se guarda ni viaja en el JSON, y su HTML.
 - `NoteCitationsTests.cs` — las citas `#123` del asistente y lo que hace un clic si la nota no se puede abrir, y las
   tools de cada turno. Las herramientas de consulta se prueban contra un repositorio real en

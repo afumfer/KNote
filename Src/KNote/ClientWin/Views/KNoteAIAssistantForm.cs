@@ -57,6 +57,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             .ToDictionary(item => AiChatHtml.ShortcutText(item.ShortcutKeys));
         _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys);
         _chatView.ShortcutPressed += ChatView_ShortcutPressed;
+        _chatView.ActionsAnswered += ChatView_ActionsAnswered;
         _ctrl.ActivityChanged += Ctrl_ActivityChanged;
         // The citations of notes (#123) of the answers: notes of the assistant's repository.
         kntEditViewResult.LinkHandler = url => NoteCitations.TryOpen(url, this, _ctrl.Store, _ctrl.ServiceRef?.Service, message => ShowInfo(message));
@@ -198,14 +199,11 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             StatusProcessing(true);
 
-            if (_ctrl.ResponseMode == EAiResponseMode.Completion)
-                await GoGetCompletion(textPrompt.Text);
-            else
-                await GoStreamCompletion(textPrompt.Text);
+            // A new message without answering the card rejects what it proposed: the page shows it.
+            if (_ctrl.RejectPendingActions())
+                _chatView.Invalidate();
 
-            // The answer has just saved the session: a new one, or moved to the top of the list.
-            if (_ctrl.PersistSession)
-                await LoadSessionsAsync();
+            await SendAsync(textPrompt.Text, automatic: false);
         }
         catch (Exception ex)
         {
@@ -215,6 +213,59 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             StatusProcessing(false);
         }
+    }
+
+    private async Task SendAsync(string prompt, bool automatic)
+    {
+        if (_ctrl.ResponseMode == EAiResponseMode.Completion)
+            await GoGetCompletion(prompt, automatic);
+        else
+            await GoStreamCompletion(prompt, automatic);
+
+        // The answer has just saved the session: a new one, or moved to the top of the list.
+        if (_ctrl.PersistSession)
+            await LoadSessionsAsync();
+
+        // The Markdown view has no card: the same question, all or nothing.
+        if (!ChatView && _ctrl.PendingActions.Count > 0)
+        {
+            var actions = _ctrl.PendingActions;
+            var answer = ShowInfo($"The assistant wants to do this:\n\n{string.Join("\n", actions.Select(a => a.Text))}", "AI assistant", MessageBoxButtons.YesNo);
+            await AnswerActionsAsync(answer == DialogResult.Yes ? actions.Select(a => a.ActionId).ToList() : new List<Guid>(), false);
+        }
+    }
+
+    private async void ChatView_ActionsAnswered(object sender, AiChatHtml.ActionsAnswer answer)
+    {
+        if (_processing)
+            return;
+
+        try
+        {
+            StatusProcessing(true);
+            await AnswerActionsAsync(answer.Accepted, answer.DontAsk);
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
+        finally
+        {
+            StatusProcessing(false);
+        }
+    }
+
+    private async Task AnswerActionsAsync(IReadOnlyCollection<Guid> accepted, bool dontAsk)
+    {
+        var goOn = await _ctrl.AnswerActionsAsync(accepted, dontAsk);
+
+        if (ChatView)
+            _chatView.ReplaceLastTurn(_ctrl.ChatTurns[^1]);
+        else
+            kntEditViewResult.ShowMarkdownContent(ChatTranscript());
+
+        if (goOn)
+            await SendAsync(AiActionRules.ContinuePrompt, automatic: true);
     }
 
     // A new conversation (the current one is already saved, see KNoteAIAssistantCtrl.NewSessionAsync).
@@ -721,16 +772,16 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         }
     }
 
-    private async Task GoGetCompletion(string prompt)
+    private async Task GoGetCompletion(string prompt, bool automatic)
     {
         // The view can't change while sending (StatusProcessing disables its buttons).
         var chatView = ChatView;
         if (chatView)
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, null, () => _ctrl.StreamingReasoning);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, null, () => _ctrl.StreamingReasoning);
 
         try
         {
-            await _ctrl.GetCompletionAsync(prompt);
+            await _ctrl.GetCompletionAsync(prompt, automatic);
         }
         catch
         {
@@ -744,17 +795,18 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         else
             kntEditViewResult.ShowMarkdownContent(ChatTranscript());
 
-        textPrompt.Text = "";
+        if (!automatic)
+            textPrompt.Text = "";
         UpdateStatusInfo();
     }
 
-    private async Task GoStreamCompletion(string prompt)
+    private async Task GoStreamCompletion(string prompt, bool automatic)
     {
         var chatView = ChatView;
         if (chatView)
         {
             // Repainted from the ctrl's StreamingResult while it streams in: no StreamToken handler needed.
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult, () => _ctrl.StreamingReasoning);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult, () => _ctrl.StreamingReasoning);
         }
         else
         {
@@ -770,7 +822,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
         try
         {
-            await _ctrl.StreamCompletionAsync(prompt);
+            await _ctrl.StreamCompletionAsync(prompt, automatic);
         }
         catch
         {
@@ -792,7 +844,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             // The whole conversation in the saved format: the new turn now with its markers and usage.
             kntEditViewResult.ShowMarkdownContent(ChatTranscript());
 
-        textPrompt.Text = "";
+        if (!automatic)
+            textPrompt.Text = "";
         UpdateStatusInfo();
     }
 

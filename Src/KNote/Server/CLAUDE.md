@@ -327,7 +327,9 @@ Staff, ProjectManager y Admin (como `KNoteAIAssistantCtrl` en `ClientWin` y los 
   siempre; lo que falla después, un evento `error`. La lógica del turno es la común de `KNote.Ai`
   (`AiChatTurnStreamer`), con las tools que `KNoteAiTools.GetToolsAsync` da para cada petición (dependen del índice y del
   glosario del repositorio de la sesión); su host en el Server (`Ai/ServerAiToolsHost`)
-  guarda las notas de `create_task` en la carpeta Home y las anuncia con eventos `noteCreated`. Cancelar la
+  guarda las notas de `create_task` y `create_note` en la carpeta Home y las anuncia con eventos `noteCreated`. `chat` y
+  `POST actions` (lo aceptado en la tarjeta) activan `EnforceAuthorization` en el servicio de la petición: las herramientas
+  pasan por los roles de los comandos, como en `ClientWin`. El turno completado lleva sus `Actions`. Cancelar la
   petición (`RequestAborted`) corta la llamada al proveedor. El mensaje de sistema lo monta
   `KNote.Ai/AiAssistantContext` con el servicio de la petición (reglas, instrucciones, perfil y glosario de KNote Atlas,
   ver «Contexto de la IA» en el `CLAUDE.md` raíz), con las preguntas y respuestas de la conversación para el glosario.

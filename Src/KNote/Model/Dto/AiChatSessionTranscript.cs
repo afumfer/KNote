@@ -19,12 +19,18 @@ namespace KNote.Model.Dto;
 //   **Assistant:**
 //   (the answer)
 //
-// The assistant marker carries the usage of the answer as JSON. A message line that is itself exactly one of
+//   <!-- knt-ai:actions -->
+//   - ✔ What the assistant did
+//
+// The assistant marker carries the usage of the answer as JSON, and what it did (the lines below the actions marker are for
+// who reads the note: they are written from that JSON, and ignored when reading). A proposal left without an answer is read
+// as not confirmed: nothing runs it afterwards. A message line that is itself exactly one of
 // these markers would split the turn there; text before the first marker is ignored.
 public static class AiChatSessionTranscript
 {
     private const string UserMarker = "<!-- knt-ai:user -->";
     private const string AssistantMarkerStart = "<!-- knt-ai:assistant";
+    private const string ActionsMarker = "<!-- knt-ai:actions -->";
     private const string MarkerEnd = "-->";
     private const string UserHeader = "**User:**";
     private const string AssistantHeader = "**Assistant:**";
@@ -46,6 +52,8 @@ public static class AiChatSessionTranscript
                 OutputTokens = turn.OutputTokens,
                 TotalTokens = turn.TotalTokens,
                 ReasoningTokens = turn.ReasoningTokens,
+                Automatic = turn.Automatic ? true : null,
+                Actions = turn.Actions?.Count > 0 ? turn.Actions.Select(Saved).ToList() : null,
                 TokensEstimated = turn.TokensEstimated,
                 Truncated = turn.Truncated,
                 ProcessingTime = turn.ProcessingTime
@@ -53,6 +61,14 @@ public static class AiChatSessionTranscript
 
             text.Append($"{UserMarker}\r\n{UserHeader} \r\n{Content(turn.Prompt)}\r\n\r\n");
             text.Append($"{AssistantMarkerStart} {usage} {MarkerEnd}\r\n{AssistantHeader} \r\n{Content(turn.Answer)}\r\n\r\n");
+
+            if (turn.Actions?.Count > 0)
+            {
+                text.Append($"{ActionsMarker}\r\n");
+                foreach (var action in turn.Actions)
+                    text.Append($"- {Content(AiActionRules.Line(action))}\r\n");
+                text.Append("\r\n");
+            }
         }
         return text.ToString();
     }
@@ -80,7 +96,12 @@ public static class AiChatSessionTranscript
         var inAnswer = false;
         foreach (var line in transcript.ReplaceLineEndings("\n").Split('\n'))
         {
-            if (line == UserMarker)
+            if (line == ActionsMarker)
+            {
+                CloseSection(inAnswer);
+                section = null;
+            }
+            else if (line == UserMarker)
             {
                 CloseSection(inAnswer);
                 turn = new AiChatTurnDto();
@@ -128,6 +149,10 @@ public static class AiChatSessionTranscript
             turn.OutputTokens = usage.OutputTokens;
             turn.TotalTokens = usage.TotalTokens;
             turn.ReasoningTokens = usage.ReasoningTokens;
+            turn.Automatic = usage.Automatic == true;
+            turn.Actions = usage.Actions ?? new List<AiActionDto>();
+            foreach (var action in turn.Actions.Where(a => a.Status == EnumAiActionStatus.Proposed))
+                action.Status = EnumAiActionStatus.NotConfirmed;
             turn.TokensEstimated = usage.TokensEstimated;
             turn.Truncated = usage.Truncated;
             turn.ProcessingTime = usage.ProcessingTime;
@@ -138,8 +163,22 @@ public static class AiChatSessionTranscript
         }
     }
 
+    // Without the data to run it: it is not run again.
+    private static AiActionDto Saved(AiActionDto action) => new()
+    {
+        ActionId = action.ActionId,
+        Kind = action.Kind,
+        Status = action.Status,
+        Text = action.Text,
+        Result = action.Result,
+        NoteId = action.NoteId,
+        NoteNumber = action.NoteNumber
+    };
+
     private class TurnUsage
     {
+        public bool? Automatic { get; set; }
+        public List<AiActionDto> Actions { get; set; }
         public long? InputTokens { get; set; }
         public long? OutputTokens { get; set; }
         public long TotalTokens { get; set; }
