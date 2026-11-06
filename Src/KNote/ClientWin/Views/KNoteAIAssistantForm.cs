@@ -57,7 +57,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             .ToDictionary(item => AiChatHtml.ShortcutText(item.ShortcutKeys));
         _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys);
         _chatView.ShortcutPressed += ChatView_ShortcutPressed;
-        _ctrl.ToolInUseChanged += Ctrl_ToolInUseChanged;
+        _ctrl.ActivityChanged += Ctrl_ActivityChanged;
         // The citations of notes (#123) of the answers: notes of the assistant's repository.
         kntEditViewResult.LinkHandler = url => NoteCitations.TryOpen(url, this, _ctrl.Store, _ctrl.ServiceRef?.Service, message => ShowInfo(message));
         kntEditViewResult.NavigationBorder = true;
@@ -668,23 +668,23 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     }
 
     // The ctrl can also run a turn out of the UI thread (the "ln" script engine).
-    private void Ctrl_ToolInUseChanged(object sender, ControllerEventArgs<string> e)
+    private void Ctrl_ActivityChanged(object sender, ControllerEventArgs<string> e)
     {
         if (IsDisposed || !IsHandleCreated)
             return;
         if (InvokeRequired)
-            BeginInvoke(() => ShowToolInUse(e.Entity));
+            BeginInvoke(() => ShowActivity(e.Entity));
         else
-            ShowToolInUse(e.Entity);
+            ShowActivity(e.Entity);
     }
 
-    private void ShowToolInUse(string tool)
+    private void ShowActivity(string activity)
     {
         if (!_processing)
             return;
-        toolStripStatusLabelProcessing.Text = tool == null ? " Processing ..." : $" Using {tool} ...";
+        toolStripStatusLabelProcessing.Text = $" {activity ?? "Processing ..."}";
         if (ChatView)
-            _chatView.ShowToolInUse(tool);
+            _chatView.ShowActivity(activity);
     }
 
     private void StatusProcessing(bool processing = false)
@@ -726,7 +726,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         // The view can't change while sending (StatusProcessing disables its buttons).
         var chatView = ChatView;
         if (chatView)
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, null);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, null, () => _ctrl.StreamingReasoning);
 
         try
         {
@@ -754,7 +754,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (chatView)
         {
             // Repainted from the ctrl's StreamingResult while it streams in: no StreamToken handler needed.
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult, () => _ctrl.StreamingReasoning);
         }
         else
         {

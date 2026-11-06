@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.AI;
 
@@ -35,11 +36,11 @@ public class KNoteAIAssistantCtrlTests
 
         var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
         var tools = new List<string>();
-        ctrl.ToolInUseChanged += (_, e) => tools.Add(e.Entity);
+        ctrl.ActivityChanged += (_, e) => tools.Add(e.Entity);
 
         await ctrl.StreamCompletionAsync("Hello");
 
-        CollectionAssert.AreEqual(new[] { "search_notes", "get_note_details", null }, tools);
+        CollectionAssert.AreEqual(new[] { "Using search_notes", "Using get_note_details", null }, tools);
     }
 
     [TestMethod]
@@ -54,11 +55,35 @@ public class KNoteAIAssistantCtrlTests
 
         var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
         var tools = new List<string>();
-        ctrl.ToolInUseChanged += (_, e) => tools.Add(e.Entity);
+        ctrl.ActivityChanged += (_, e) => tools.Add(e.Entity);
 
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => ctrl.StreamCompletionAsync("Hello"));
 
-        CollectionAssert.AreEqual(new[] { "search_notes", null }, tools);
+        CollectionAssert.AreEqual(new[] { "Using search_notes", null }, tools);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_TheReasoning_IsApartFromTheAnswer_AndKeptWithTheTurn()
+    {
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new TextReasoningContent("Let me ")]);
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new TextReasoningContent("think.")]);
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "Four");
+        }
+
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
+        var activity = new List<string>();
+        ctrl.ActivityChanged += (_, e) => activity.Add(e.Entity);
+
+        await ctrl.StreamCompletionAsync("2 + 2?");
+
+        CollectionAssert.AreEqual(new[] { AiChatTurnDto.ThinkingText, null }, activity);
+        Assert.AreEqual("Let me think.", ctrl.StreamingReasoning);
+        var turn = ctrl.ChatTurns.Single();
+        Assert.AreEqual("Four", turn.Answer);
+        Assert.AreEqual("Let me think.", turn.Reasoning);
     }
 
     [TestMethod]

@@ -61,10 +61,22 @@ public static class AiChatHtml
             },
             replaceLast(html) {
               const follow = atBottom();
+              const reasoningOf = () => chat.lastElementChild?.querySelector('details.reasoning');
+              // The reasoning stays as the user left it: open, following what arrives if it was at its end.
+              const before = reasoningOf();
+              const text = before?.open ? before.querySelector('.reasoning-text') : null;
+              const top = text?.scrollTop;
+              const atEnd = text && text.scrollTop + text.clientHeight >= text.scrollHeight - 8;
               if (chat.lastElementChild)
                 chat.lastElementChild.outerHTML = html;
               else
                 chat.insertAdjacentHTML('beforeend', html);
+              const after = reasoningOf();
+              if (text && after) {
+                after.open = true;
+                const newText = after.querySelector('.reasoning-text');
+                newText.scrollTop = atEnd ? newText.scrollHeight : top;
+              }
               if (follow)
                 toBottom();
             },
@@ -120,18 +132,23 @@ public static class AiChatHtml
     // The usage line is model info (hidden by the page's hide-model-info class); the notice of a cut answer
     // is shown always.
     public static string AssistantMessage(AiChatTurnDto turn, string providerAlias)
-        => Assistant("", providerAlias, MarkdownToHtml(turn.Answer), turn.UsageSummary(),
+        => Assistant("", providerAlias, Reasoning(turn.ReasoningTitle(), turn.Reasoning) + MarkdownToHtml(turn.Answer), turn.UsageSummary(),
             turn.Truncated ? AiChatTurnDto.TruncatedNotice : null);
 
-    // An answer still arriving: the text received so far, or the typing indicator until the first of it, and the tool
-    // the model is using, if any.
-    public static string PendingAnswer(string providerAlias, string answerSoFar, string toolInUse = null)
+    // An answer still arriving: what has arrived of its reasoning, the text received so far (or the typing indicator until
+    // the first of it) and what the model is doing, if anything to say.
+    public static string PendingAnswer(string providerAlias, string answerSoFar, string activity = null, string reasoningSoFar = null)
     {
-        var content = string.IsNullOrWhiteSpace(answerSoFar) ? TypingIndicator : MarkdownToHtml(answerSoFar);
-        if (!string.IsNullOrEmpty(toolInUse))
-            content += $"<div class=\"tool-in-use\">Using {WebUtility.HtmlEncode(toolInUse)}</div>";
+        var content = Reasoning(AiChatTurnDto.ReasoningText, reasoningSoFar)
+            + (string.IsNullOrWhiteSpace(answerSoFar) ? TypingIndicator : MarkdownToHtml(answerSoFar));
+        if (!string.IsNullOrEmpty(activity))
+            content += $"<div class=\"activity\">{WebUtility.HtmlEncode(activity)}</div>";
         return Assistant("pending", providerAlias, content, "");
     }
+
+    // Folded above the answer, as plain text: it is written by the model and it can be long.
+    private static string Reasoning(string title, string reasoning) => string.IsNullOrEmpty(reasoning) ? "" :
+        $"<details class=\"reasoning\"><summary>{WebUtility.HtmlEncode(title)}</summary><div class=\"reasoning-text\">{WebUtility.HtmlEncode(reasoning)}</div></details>";
 
     // An answer cut by an error: whatever arrived of it, marked as not part of the conversation.
     public static string FailedAnswer(string providerAlias, string answerSoFar)

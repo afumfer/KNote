@@ -101,10 +101,30 @@ body {
   color: var(--chat-failed);
 }
 
-/* ---------- The tool the model is using ---------- */
-.tool-in-use {
+/* ---------- What the model is doing, and its reasoning ---------- */
+.activity {
   font-size: 0.85em;
   color: var(--chat-muted);
+}
+
+details.reasoning {
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  color: var(--chat-muted);
+}
+
+details.reasoning summary {
+  cursor: pointer;
+}
+
+.reasoning-text {
+  margin-top: 4px;
+  padding: 6px 8px;
+  max-height: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-left: 2px solid var(--chat-muted);
 }
 
 /* ---------- Typing indicator, until the first text of an answer ---------- */

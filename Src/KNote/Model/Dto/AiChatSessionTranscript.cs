@@ -45,6 +45,7 @@ public static class AiChatSessionTranscript
                 InputTokens = turn.InputTokens,
                 OutputTokens = turn.OutputTokens,
                 TotalTokens = turn.TotalTokens,
+                ReasoningTokens = turn.ReasoningTokens,
                 TokensEstimated = turn.TokensEstimated,
                 Truncated = turn.Truncated,
                 ProcessingTime = turn.ProcessingTime
@@ -126,6 +127,7 @@ public static class AiChatSessionTranscript
             turn.InputTokens = usage.InputTokens;
             turn.OutputTokens = usage.OutputTokens;
             turn.TotalTokens = usage.TotalTokens;
+            turn.ReasoningTokens = usage.ReasoningTokens;
             turn.TokensEstimated = usage.TokensEstimated;
             turn.Truncated = usage.Truncated;
             turn.ProcessingTime = usage.ProcessingTime;
@@ -141,6 +143,7 @@ public static class AiChatSessionTranscript
         public long? InputTokens { get; set; }
         public long? OutputTokens { get; set; }
         public long TotalTokens { get; set; }
+        public long? ReasoningTokens { get; set; }
         public bool TokensEstimated { get; set; }
         public bool Truncated { get; set; }
         public TimeSpan ProcessingTime { get; set; }

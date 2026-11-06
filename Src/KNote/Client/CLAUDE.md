@@ -565,6 +565,8 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Rutas relativas**: la app se sirve bajo `/KNote/` (`<base href="/KNote/" />` en `index.html`, a juego con
   `app.UsePathBase("/KNote")` en `Server`). Navega con rutas sin `/` inicial (`store.NavigateTo("notes/tree")`,
   `Path="index"`), o se saldrá de la base.
+- **Razonamiento del asistente**: `AIAssistant` lo acumula con los eventos `reasoning` y lo pone en el turno al terminar
+  (`AiChatTurnDto.Reasoning` no viaja en el JSON); `AiChatView` lo muestra plegado, como texto plano, en un `<details>`.
 - **Citas `#123`**: `ViewMarkdown` las enlaza (`NoteCitationLinker`, con `LinkCitations`, apagado en el chat room) a
   `notes/number/{n}`, la misma `NoteView` por número (**no** `notes/view/{n}`: con `notes/view/{id:guid}` son rutas ambiguas
   y Blazor rompe el enrutador de toda la app). El enlace es parte de un HTML, así que el clic lo oye `js/kntWindows.js`

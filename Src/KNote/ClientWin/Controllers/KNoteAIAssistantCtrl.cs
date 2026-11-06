@@ -22,7 +22,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     private IChatClient _chatClient;
     private KNoteAiTools _tools;
-    private string _toolInUse;
+    private string _activity;
 
     #endregion
 
@@ -51,6 +51,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     // The answer received so far by the running StreamCompletionAsync (or by the last one, until the next
     // starts), so a view can repaint it while it streams in.
+    // What has arrived of the reasoning of the running turn.
+    private readonly StringBuilder _streamingReasoning = new StringBuilder();
+    public string StreamingReasoning => _streamingReasoning.ToString();
+
     private readonly StringBuilder _streamingResult = new StringBuilder();
     public string StreamingResult
     {
@@ -187,8 +191,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     public event EventHandler<ControllerEventArgs<string>> StreamToken;
 
-    // The tool the model is using in the running turn, until it writes again (null: none), as the web shows it.
-    public event EventHandler<ControllerEventArgs<string>> ToolInUseChanged;
+    // What the model is doing in the running turn, as the web shows it: "Thinking…" or "Using search_notes", until it
+    // writes (null).
+    public event EventHandler<ControllerEventArgs<string>> ActivityChanged;
 
     #endregion
 
@@ -469,16 +474,17 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // far are sent with the prompt, and the answer comes back piece by piece (onText) and then whole, with its
     // usage. Nothing is added to the conversation here: an unanswered prompt (the provider failed) leaves no
     // orphaned user message behind to be resent with the next one.
-    private void SetToolInUse(string tool)
+    private void SetActivity(string activity)
     {
-        if (_toolInUse == tool)
+        if (_activity == activity)
             return;
-        _toolInUse = tool;
-        ToolInUseChanged?.Invoke(this, new ControllerEventArgs<string>(tool));
+        _activity = activity;
+        ActivityChanged?.Invoke(this, new ControllerEventArgs<string>(activity));
     }
 
     private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText)
     {
+        _streamingReasoning.Clear();
         var history = _chatTurns.ToList();
         AiChatTurnDto completed = null;
 
@@ -491,18 +497,23 @@ public class KNoteAIAssistantCtrl : CtrlBase
             {
                 if (e.Type == AiChatStreamEventTypes.Delta)
                 {
-                    SetToolInUse(null);
+                    SetActivity(null);
                     onText?.Invoke(e.Text);
                 }
+                else if (e.Type == AiChatStreamEventTypes.Reasoning)
+                {
+                    _streamingReasoning.Append(e.Text);
+                    SetActivity(AiChatTurnDto.ThinkingText);
+                }
                 else if (e.Type == AiChatStreamEventTypes.Tool)
-                    SetToolInUse(e.Text);
+                    SetActivity($"Using {e.Text}");
                 else if (e.Type == AiChatStreamEventTypes.Completed)
                     completed = e.Turn;
             }
         }
         finally
         {
-            SetToolInUse(null);
+            SetActivity(null);
         }
 
         return completed ?? throw new InvalidOperationException("The AI provider ended the answer unexpectedly.");

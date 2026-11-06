@@ -37,8 +37,21 @@ public static class AiChatTurnStreamer
         var answer = new StringBuilder();
         var stopwatch = Stopwatch.StartNew();
         ChatFinishReason? finishReason = null;
-        long inputTokens = 0, outputTokens = 0, totalTokens = 0;
+        long inputTokens = 0, outputTokens = 0, totalTokens = 0, reasoningTokens = 0;
         var usageReported = false;
+        var reasoningTokensReported = false;
+
+        // The reasoning of the whole turn: a tool call makes the model reason again, after what it thought before.
+        var reasoning = new StringBuilder();
+        var reasoningTime = TimeSpan.Zero;
+        TimeSpan? reasoningStart = null;
+
+        void EndReasoning()
+        {
+            if (reasoningStart is TimeSpan start)
+                reasoningTime += stopwatch.Elapsed - start;
+            reasoningStart = null;
+        }
 
         var options = tools != null ? new ChatOptions { Tools = tools } : null;
 
@@ -58,9 +71,22 @@ public static class AiChatTurnStreamer
                         outputTokens += usage.Details.OutputTokenCount ?? 0;
                         totalTokens += usage.Details.TotalTokenCount
                             ?? (usage.Details.InputTokenCount ?? 0) + (usage.Details.OutputTokenCount ?? 0);
+                        if (usage.Details.ReasoningTokenCount is long tokens)
+                        {
+                            reasoningTokensReported = true;
+                            reasoningTokens += tokens;
+                        }
                         break;
                     case FunctionCallContent call:
+                        EndReasoning();
                         yield return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Tool, Text = call.Name };
+                        break;
+                    // Some providers only send it encrypted, without a text.
+                    case TextReasoningContent thought when !string.IsNullOrEmpty(thought.Text):
+                        var piece = reasoningStart == null && reasoning.Length > 0 ? "\n\n" + thought.Text : thought.Text;
+                        reasoningStart ??= stopwatch.Elapsed;
+                        reasoning.Append(piece);
+                        yield return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Reasoning, Text = piece };
                         break;
                 }
             }
@@ -68,16 +94,21 @@ public static class AiChatTurnStreamer
             var text = update.Text;
             if (string.IsNullOrEmpty(text))
                 continue;
+            EndReasoning();
             answer.Append(text);
             yield return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Delta, Text = text };
         }
 
+        EndReasoning();
         stopwatch.Stop();
 
         var turn = new AiChatTurnDto
         {
             Prompt = prompt ?? "",
             Answer = answer.ToString(),
+            Reasoning = reasoning.Length > 0 ? reasoning.ToString().Trim() : null,
+            ReasoningTime = reasoning.Length > 0 ? reasoningTime : null,
+            ReasoningTokens = reasoningTokensReported ? reasoningTokens : null,
             Truncated = finishReason == ChatFinishReason.Length,
             ProcessingTime = stopwatch.Elapsed
         };

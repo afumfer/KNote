@@ -725,8 +725,9 @@ La construcción del `IChatClient` por proveedor (`AiChatClientFactory`) y las t
 la referencia al proyecto). `KNoteAIAssistantCtrl.ApplyProvider` los combina:
 `AiChatClientFactory.Create(providerRef, new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef)).GetTools())`.
 Cada turno envía las tools de ese momento (`KNoteAiTools.GetToolsAsync`, que dependen del índice y del glosario).
-La tool en uso se ve como en la Web, hasta que el modelo vuelve a escribir (`ToolInUseChanged`): en la barra de estado y
-en la vista de chat, bajo la respuesta que llega (`AiChatWebRenderer.ShowToolInUse`).
+Lo que hace el modelo («Thinking…», «Using search_notes») se ve como en la Web, hasta que vuelve a escribir
+(`ActivityChanged`): en la barra de estado y en la vista de chat, bajo la respuesta que llega (`AiChatWebRenderer.ShowActivity`).
+El razonamiento va plegado encima de la respuesta (`AiChatHtml`); `replaceLast` lo deja abierto entre repintados.
 
 - `KNoteAiTools` recibe `IKntService` (no `ServiceRef`), así que sus tests corren contra los fakes de
   servicio (`Fakes/FakeKntService.cs`) sin base de datos real. Lo que `create_task` hace distinto en cada

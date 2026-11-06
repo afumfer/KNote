@@ -81,14 +81,14 @@ public class NoteCitationsTests
     [TestMethod]
     public void PendingAnswer_ShowsTheToolInUse()
     {
-        StringAssert.Contains(AiChatHtml.PendingAnswer("Provider", null, "find_notes_about"), "Using find_notes_about");
-        StringAssert.Contains(AiChatHtml.PendingAnswer("Provider", "Some text", "get_tasks"), "Using get_tasks");
+        StringAssert.Contains(AiChatHtml.PendingAnswer("Provider", null, "Using find_notes_about"), "Using find_notes_about");
+        StringAssert.Contains(AiChatHtml.PendingAnswer("Provider", "Some text", "Using get_tasks"), "Using get_tasks");
         Assert.IsFalse(AiChatHtml.PendingAnswer("Provider", "Some text").Contains("Using"));
     }
 
     [TestMethod]
     public void AssistantForm_Page_HasTheStyleOfTheToolInUse() =>
-        StringAssert.Contains(AiChatHtml.Page(Array.Empty<AiChatTurnDto>(), "Provider", ""), ".tool-in-use");
+        StringAssert.Contains(AiChatHtml.Page(Array.Empty<AiChatTurnDto>(), "Provider", ""), ".activity");
 
     [TestMethod]
     public async Task Tools_WithoutAnIndexOrAGlossary_AreOfferedWithoutThoseTwo_EvenIfTheyFail()

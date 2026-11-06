@@ -361,6 +361,14 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   glosario de la nota (`IKntAtlasContextService.FindGlossaryTermsAsync`). `get_tasks` usa `TasksPanelFilterDto.WindowFrom/To`,
   una ventana exacta. `get_note_items` no da el texto de las alarmas *Execute KntScript*. Tests con repositorio real en
   `Tests/ServiceTests/AiQueryToolsTests`, llamando a las herramientas por nombre como el modelo.
+- **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
+  `reasoning` y da el texto, el tiempo y los tokens (si el proveedor los distingue; Ollama no, y no se estiman) en el turno.
+  `AiChatTurnDto.Reasoning` va con `[JsonIgnore]`: no se guarda ni viaja con el historial, y la Web lo monta con los eventos.
+  Solo `ReasoningTokens` queda en el comentario oculto de la conversación. Ollama no necesita `think`: los modelos que
+  razonan lo envían aparte por su cuenta. `AiChatClientFactory` no pide nada a ningún proveedor: OpenAI responde 400 a
+  `reasoning.summary` con los modelos que no razonan (`gpt-4o-mini`, comprobado con una llamada real), así que con OpenAI
+  no hay texto de razonamiento, solo sus tokens.
+  Tests en `ClientWin.Tests/AiReasoningTests`.
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

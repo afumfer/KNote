@@ -35,7 +35,8 @@ public class AiChatStreamEventDto
 {
     public string Type { get; set; }
 
-    // Delta: the next piece of the answer. Tool: the name of the tool being called. Error: the message.
+    // Delta: the next piece of the answer. Reasoning: the next piece of the reasoning. Tool: the name of the tool being
+    // called. Error: the message.
     public string Text { get; set; }
 
     // NoteCreated: the note the create_task tool has just saved.
@@ -50,6 +51,7 @@ public class AiChatStreamEventDto
 public static class AiChatStreamEventTypes
 {
     public const string Delta = "delta";
+    public const string Reasoning = "reasoning";
     public const string Tool = "tool";
     public const string NoteCreated = "noteCreated";
     public const string Completed = "completed";

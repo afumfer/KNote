@@ -29,8 +29,9 @@ internal sealed class AiChatWebRenderer : IDisposable
 
     private string _providerAlias;
     private Func<string> _answerSoFar;
-    private string _paintedAnswer;
-    private string _toolInUse;
+    private Func<string> _reasoningSoFar;
+    private string _painted;
+    private string _activity;
     private bool _turnRunning;
     private bool _showModelInfo = true;
 
@@ -78,31 +79,36 @@ internal sealed class AiChatWebRenderer : IDisposable
     // A new turn: the question and, below it, the place of its answer (a typing indicator until it arrives).
     // turns is the conversation before this turn, to reload the page first if it is not in step with it
     // (after a failed turn). answerSoFar, for a streamed answer, returns the text received so far: it is
-    // repainted periodically until EndTurn/FailTurn.
-    public async Task BeginTurnAsync(IEnumerable<AiChatTurnDto> turns, string prompt, string providerAlias, Func<string> answerSoFar)
+    // repainted periodically until EndTurn/FailTurn, as reasoningSoFar, with what has arrived of the reasoning.
+    public async Task BeginTurnAsync(IEnumerable<AiChatTurnDto> turns, string prompt, string providerAlias, Func<string> answerSoFar,
+        Func<string> reasoningSoFar = null)
     {
         if (!_pageInSync)
             await LoadAsync(turns, providerAlias);
 
         _providerAlias = providerAlias;
         _answerSoFar = answerSoFar;
-        _paintedAnswer = null;
-        _toolInUse = null;
+        _reasoningSoFar = reasoningSoFar;
+        _painted = null;
+        _activity = null;
         _turnRunning = true;
 
         Run(AiChatHtml.ScriptCall("append", AiChatHtml.UserMessage(prompt) + AiChatHtml.PendingAnswer(providerAlias, null)));
 
-        if (answerSoFar != null)
+        if (answerSoFar != null || reasoningSoFar != null)
             _repaintTimer.Start();
     }
 
-    // The tool the model is using (null: none) under the answer arriving.
-    public void ShowToolInUse(string tool)
+    // What the model is doing (null: nothing to say) under the answer arriving.
+    public void ShowActivity(string activity)
     {
-        _toolInUse = tool;
+        _activity = activity;
         if (_turnRunning)
-            Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, _answerSoFar?.Invoke(), tool)));
+            PaintPending(_answerSoFar?.Invoke(), _reasoningSoFar?.Invoke());
     }
+
+    private void PaintPending(string answer, string reasoning) =>
+        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, answer, _activity, reasoning)));
 
     public void EndTurn(AiChatTurnDto turn)
     {
@@ -144,11 +150,13 @@ internal sealed class AiChatWebRenderer : IDisposable
     private void RepaintAnswer()
     {
         var answer = _answerSoFar?.Invoke();
-        if (string.IsNullOrEmpty(answer) || answer == _paintedAnswer)
+        var reasoning = _reasoningSoFar?.Invoke();
+        var painted = answer + "\0" + reasoning;
+        if ((string.IsNullOrEmpty(answer) && string.IsNullOrEmpty(reasoning)) || painted == _painted)
             return;
 
-        _paintedAnswer = answer;
-        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, answer, _toolInUse)));
+        _painted = painted;
+        PaintPending(answer, reasoning);
     }
 
     // Not awaited: WebView2 runs the scripts in the order they are sent, and awaiting them would resume the

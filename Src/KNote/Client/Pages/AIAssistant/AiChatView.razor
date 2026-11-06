@@ -22,6 +22,7 @@
         <div class="ai-row">
             <span class="ai-avatar ai-avatar-assistant"><RadzenIcon Icon="smart_toy" /></span>
             <div class="ai-msg ai-assistant">
+                @ReasoningOf(turn.ReasoningTitle(), turn.Reasoning, open: i == Turns.Count - 1 && reasoningOpen, pending: false)
                 <ViewMarkdown MarkdownContent="@turn.Answer" DisableHtml="true" />
                 @if (turn.Truncated)
                 {
@@ -40,15 +41,16 @@
             @* While it answers: a ring turning round the avatar and dots bouncing in the bubble. *@
             <span class="ai-avatar ai-avatar-assistant ai-avatar-thinking"><RadzenIcon Icon="smart_toy" /></span>
             <div class="ai-msg ai-assistant">
+                @ReasoningOf(AiChatTurnDto.ReasoningText, PendingReasoning, open: reasoningOpen, pending: true)
                 @if (!string.IsNullOrEmpty(PendingAnswer))
                 {
                     <ViewMarkdown MarkdownContent="@PendingAnswer" DisableHtml="true" />
                 }
-                <div class="ai-usage ai-thinking" role="status" aria-label="@(string.IsNullOrEmpty(ToolInUse) ? "Writing" : $"Using {ToolInUse}")">
+                <div class="ai-usage ai-thinking" role="status" aria-label="@(Activity ?? "Writing")">
                     <span class="ai-dots"><span></span><span></span><span></span></span>
-                    @if (!string.IsNullOrEmpty(ToolInUse))
+                    @if (Activity != null)
                     {
-                        <span>Using @ToolInUse</span>
+                        <span>@Activity</span>
                     }
                 </div>
             </div>
@@ -65,10 +67,41 @@
     [Parameter] public string? PendingAnswer { get; set; }
     [Parameter] public string? ToolInUse { get; set; }
 
+    // What has arrived of the reasoning, and whether the model is reasoning now.
+    [Parameter] public string? PendingReasoning { get; set; }
+    [Parameter] public bool Thinking { get; set; }
+
+    private string? Activity => !string.IsNullOrEmpty(ToolInUse) ? $"Using {ToolInUse}" : Thinking ? AiChatTurnDto.ThinkingText : null;
+
     // The notes created by the assistant (create_task), by the index of the turn they were created in.
     [Parameter] public IReadOnlyDictionary<int, List<AiChatStreamEventDto>>? CreatedNotes { get; set; }
 
     [Parameter] public string ContainerId { get; set; } = "aichatcontainer";
+
+    // The reasoning of the answer arriving was opened: it stays open when the answer is complete, in the turn.
+    private bool reasoningOpen;
+    private string? lastPendingPrompt;
+
+    protected override void OnParametersSet()
+    {
+        if (PendingPrompt != null && lastPendingPrompt == null)
+            reasoningOpen = false;
+        lastPendingPrompt = PendingPrompt;
+    }
+
+    // Folded above the answer, as plain text: it is written by the model and it can be long. Open while it arrives, the
+    // text follows its end (ai-reasoning-live).
+    private RenderFragment ReasoningOf(string title, string? reasoning, bool open, bool pending) => __builder =>
+    {
+        if (!string.IsNullOrEmpty(reasoning))
+        {
+            <details class="ai-reasoning" open="@open">
+                @* While it arrives, this state opens and closes it, not the browser: both would cancel each other. *@
+                <summary @onclick="@(() => { if (pending) reasoningOpen = !reasoningOpen; })" @onclick:preventDefault="pending">@title</summary>
+                <div class="@(pending ? "ai-reasoning-text ai-reasoning-live" : "ai-reasoning-text")"><span>@reasoning</span></div>
+            </details>
+        }
+    };
 
     private static RenderFragment UserMessage(string prompt) => __builder =>
     {

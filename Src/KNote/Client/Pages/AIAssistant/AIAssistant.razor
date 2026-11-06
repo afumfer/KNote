@@ -47,6 +47,7 @@
         <RadzenSplitter Orientation="Orientation.Vertical" class="ai-chat-split">
             <RadzenSplitterPane Size="calc(100% - 90px)" Min="40%">
                 <AiChatView Turns="@session.Turns" PendingPrompt="@pendingPrompt" PendingAnswer="@pendingAnswer.ToString()"
+                            PendingReasoning="@pendingReasoning.ToString()" Thinking="@thinking"
                             ToolInUse="@toolInUse" CreatedNotes="@createdNotes" ContainerId="@ChatContainerId" />
             </RadzenSplitterPane>
             <RadzenSplitterPane Size="82px" Min="62px">
@@ -100,6 +101,8 @@
     private bool streaming;
     private string? pendingPrompt;
     private readonly StringBuilder pendingAnswer = new();
+    private readonly StringBuilder pendingReasoning = new();
+    private bool thinking;
     private string? toolInUse;
     private CancellationTokenSource? answerCancellation;
     private DateTime lastRefresh;
@@ -245,6 +248,8 @@
         promptInput = "";
         pendingPrompt = prompt;
         pendingAnswer.Clear();
+        pendingReasoning.Clear();
+        thinking = false;
         toolInUse = null;
         answerCancellation = new CancellationTokenSource();
         scrollToBottom = true;
@@ -260,10 +265,19 @@
                     case AiChatStreamEventTypes.Delta:
                         pendingAnswer.Append(e.Text);
                         toolInUse = null;
+                        thinking = false;
                         RefreshWhileStreaming();
+                        break;
+                    case AiChatStreamEventTypes.Reasoning:
+                        var started = !thinking;
+                        pendingReasoning.Append(e.Text);
+                        toolInUse = null;
+                        thinking = true;
+                        RefreshWhileStreaming(force: started);
                         break;
                     case AiChatStreamEventTypes.Tool:
                         toolInUse = e.Text;
+                        thinking = false;
                         RefreshWhileStreaming(force: true);
                         break;
                     case AiChatStreamEventTypes.NoteCreated:
@@ -271,6 +285,9 @@
                         break;
                     case AiChatStreamEventTypes.Completed:
                         completedTurn = e.Turn;
+                        // It does not travel with the turn: it is not saved, nor sent back with the history.
+                        if (completedTurn != null && pendingReasoning.Length > 0)
+                            completedTurn.Reasoning = pendingReasoning.ToString().Trim();
                         break;
                     // Error: already notified by the service; the turn stays unanswered.
                 }
@@ -285,6 +302,8 @@
             streaming = false;
             pendingPrompt = null;
             pendingAnswer.Clear();
+            pendingReasoning.Clear();
+            thinking = false;
             toolInUse = null;
             answerCancellation?.Dispose();
             answerCancellation = null;
