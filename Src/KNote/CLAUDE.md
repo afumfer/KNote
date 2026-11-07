@@ -390,6 +390,17 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   script. Una acción nueva necesita su caso en el ejecutor, su `KindName` y entrar en `Kinds`. Se guarda en el comentario oculto de la conversación sin los datos para ejecutarla, y
   lo propuesto sin responder se lee como `NotConfirmed`. Tests en `Tests/AiActionRulesTests`,
   `Tests/ServiceTests/AiActionToolsTests` y `Tests/InProcessIntegrationTests/AiActionsInProcessTests`.
+- **Imágenes y archivos del asistente (KNote Atlas, etapa 1)** (`IKntAiSessionService.AddAttachmentAsync`/`GetAttachmentAsync`,
+  `Model/Core/AiAttachmentRules`, `Ai/AiTurnAttachments`, `Ai/AiImageReducer`, `Ai/AiModelCapabilities`). Al enviar, cada archivo se
+  guarda como recurso de la nota de la sesión (la crea si no existe) y `AiChatRequestDto` solo lleva su referencia; `AiTurnAttachments`
+  lee las imágenes, las reduce (lado mayor 1.600 px, EXIF aplicado) y `AiChatTurnStreamer` las pone como `DataContent` **solo en ese
+  turno**. Del historial el modelo solo recibe los nombres (`AiChatTurnDto.Attachments`, guardados en el comentario oculto). **Las
+  imágenes no se muestran por la URL del recurso**: se sirven sin sesión y su fichero puede estar en otra instalación; cada app pide
+  una vista reducida que comprueba al dueño (`GetAttachmentAsync`) y la dibuja como `data:`. `AiModelCapabilities`: Ollama lo dice en
+  `/api/show`; OpenAI y Anthropic se dan por buenos. SkiaSharp va en `KNote.Ai`, y `Directory.Build.targets` quita sus símbolos y los
+  sistemas que KNote no usa (sin eso, el `Server` publicado pesa casi el triple); una versión nueva hay que probarla también
+  publicada. Tests en `Tests/AiAttachmentRulesTests`, `AiImageReducerTests`, `ServiceTests/AiSessionsServiceTests`,
+  `InProcessIntegrationTests/AiActionsInProcessTests` y `ClientWin.Tests/KNoteAIAssistantCtrlAttachmentsTests`.
 - **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
   `reasoning` y da el texto, el tiempo y los tokens (si el proveedor los distingue; Ollama no, y no se estiman) en el turno.
   `AiChatTurnDto.Reasoning` va con `[JsonIgnore]`: no se guarda ni viaja con el historial, y la Web lo monta con los eventos.

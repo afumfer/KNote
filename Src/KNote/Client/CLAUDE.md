@@ -573,6 +573,11 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   propuesto; `AIAssistant.OnActionsAnswered` rechaza lo no aceptado, ejecuta lo demás (`IStore.AiAssistant.RunActionsAsync`),
   guarda la sesión y, si se aceptó algo, envía el turno de continuación (`SendTurnAsync` con `automatic`, cuya pregunta no se
   muestra). Enviar un mensaje con la tarjeta abierta la rechaza. Las notas cambiadas se avisan con `NotifyNoteSavedAsync`.
+- **Archivos del asistente**: `js/aiAttachments.js` (pegar, soltar y elegir) los da a `AIAssistant.OnAttachment`; quedan en `pendingFiles`
+  hasta que el turno se responde, y `SaveFilesAsync` los sube antes de enviar (`Saved`: si el modelo falla no se suben otra vez).
+  `AiAttachmentsView` pide las imágenes por `GetAttachmentPreviewAsync` y las dibuja como `data:`: la URL de un recurso se sirve sin
+  sesión. Sin vista previa, el nombre. Las vistas previas son de `AiChatView` (`Previews`), porque un mensaje pasa del que se responde a
+  los respondidos y es otro componente; al cargarse una imagen la conversación vuelve al final (`AttachmentShown`).
 - **Razonamiento del asistente**: `AIAssistant` lo acumula con los eventos `reasoning` y lo pone en el turno al terminar
   (`AiChatTurnDto.Reasoning` no viaja en el JSON); `AiChatView` lo muestra plegado, como texto plano, en un `<details>`.
 - **Citas `#123`**: `ViewMarkdown` las enlaza (`NoteCitationLinker`, con `LinkCitations`, apagado en el chat room) a

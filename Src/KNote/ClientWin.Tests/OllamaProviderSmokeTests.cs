@@ -39,6 +39,20 @@ public class OllamaProviderSmokeTests
         Assert.IsNotNull(turn.ReasoningTime);
     }
 
+    // KNote Atlas 1.5. With a model that does not see images, say so: it is not the wiring.
+    [TestMethod]
+    public async Task Image_IsReadByTheModel()
+    {
+        var providerRef = await GetReachableProviderRefOrInconclusiveAsync();
+        if (providerRef == null)
+            return;
+
+        if (!await KNote.Ai.AiModelCapabilities.SupportsImagesAsync(providerRef))
+            Assert.Inconclusive($"{providerRef.Model} does not see images: try with a model that does.");
+
+        await AiImageSmokeCheck.AssertTheModelReadsAnImageAsync(TestAiChatClientFactory.Create(providerRef));
+    }
+
     private static async Task<KNote.Model.AiProviderRef> GetReachableProviderRefOrInconclusiveAsync()
     {
         var providerRef = AiTestConfig.TryGetOllamaProviderRef();

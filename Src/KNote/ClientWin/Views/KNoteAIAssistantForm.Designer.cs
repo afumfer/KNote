@@ -48,6 +48,7 @@ namespace KNote.ClientWin.Views
             labelResult = new Label();
             panelSeparator = new Panel();
             buttonNewSession = new Button();
+            buttonAttach = new Button();
             labelPrompt = new Label();
             comboProviders = new ComboBox();
             textPrompt = new TextBox();
@@ -286,6 +287,7 @@ namespace KNote.ClientWin.Views
             panelPromptHeader.Controls.Add(comboProviders);
             panelPromptHeader.Controls.Add(buttonSend);
             panelPromptHeader.Controls.Add(buttonNewSession);
+            panelPromptHeader.Controls.Add(buttonAttach);
             panelPromptHeader.Controls.Add(panelSeparator);
             panelPromptHeader.Dock = DockStyle.Top;
             panelPromptHeader.Location = new Point(0, 0);
@@ -312,6 +314,18 @@ namespace KNote.ClientWin.Views
             buttonNewSession.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonNewSession.UseVisualStyleBackColor = true;
             buttonNewSession.Click += buttonNewSession_Click;
+            //
+            // buttonAttach
+            //
+            buttonAttach.Font = new Font("Segoe UI", 8.25F);
+            buttonAttach.Location = new Point(130, 4);
+            buttonAttach.Name = "buttonAttach";
+            buttonAttach.Size = new Size(84, 26);
+            buttonAttach.TabIndex = 5;
+            buttonAttach.Text = "A&ttach";
+            buttonAttach.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonAttach.UseVisualStyleBackColor = true;
+            buttonAttach.Click += buttonAttach_Click;
             //
             // labelPrompt
             //
@@ -539,6 +553,7 @@ namespace KNote.ClientWin.Views
         private ListView listViewSessions;
         private Label labelResult;
         private Button buttonNewSession;
+        private Button buttonAttach;
         private Label labelPrompt;
         private ComboBox comboProviders;
         private TextBox textPrompt;

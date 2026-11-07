@@ -31,6 +31,8 @@ public class AiActionsInProcessTests
     {
         (_factory, _admin) = await InProcessTestHost.CreateAuthenticatedClientAsync(factory =>
         {
+            // Several tests need more than one user, and each one signs in.
+            factory.AppConfiguration["RateLimits:SignInPerMinute"] = "1000";
             factory.AppConfiguration["ai:providers:0:alias"] = "Fake provider";
             factory.AppConfiguration["ai:providers:0:provider"] = EnumAiProvider.OpenAI;
             factory.AppConfiguration["ai:providers:0:model"] = "fake-model";
@@ -215,6 +217,116 @@ public class AiActionsInProcessTests
         Assert.AreEqual(when, alarm.AlarmDateTime);
         Assert.AreEqual(EnumNotificationType.AppInfo, alarm.NotificationType);
         Assert.AreNotEqual(other, alarm.UserId);
+    }
+
+    private static byte[] Png()
+    {
+        using var bitmap = new SkiaSharp.SKBitmap(64, 48);
+        bitmap.Erase(SkiaSharp.SKColors.Blue);
+        using var image = SkiaSharp.SKImage.FromBitmap(bitmap);
+        using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Png, 100);
+        return data.ToArray();
+    }
+
+    private static async Task<AiChatAttachmentDto> AttachAsync(HttpClient client, string fileName, string contentType, byte[] content)
+    {
+        var response = await client.PostAsJsonAsync("api/aiassistant/sessions/attachments", new AiChatAttachmentUploadDto
+        {
+            Provider = EnumAiProvider.OpenAI, Model = "fake-model", Topic = "Look", FileName = fileName, ContentType = contentType,
+            ContentBase64 = Convert.ToBase64String(content)
+        });
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.IsTrue(response.IsSuccessStatusCode, body);
+        return JsonSerializer.Deserialize<Result<AiChatAttachmentDto>>(body, _json)!.Entity;
+    }
+
+    private static List<List<ChatResponseUpdate>> ScriptAnswer() =>
+    [[
+        new ChatResponseUpdate(ChatRole.Assistant, "A blue square."),
+        new ChatResponseUpdate { Role = ChatRole.Assistant, FinishReason = ChatFinishReason.Stop }
+    ]];
+
+    [TestMethod]
+    public async Task AnImage_ReachesTheModelOnlyInItsTurn_AndComesBackInTheTurn()
+    {
+        _chatClients.Script = ScriptAnswer;
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        var image = await AttachAsync(staff, "square.png", "image/png", Png());
+        var pdf = await AttachAsync(staff, "manual.pdf", "application/pdf", new byte[] { 1, 2, 3 });
+
+        var turn = await ChatAsync(staff, new AiChatRequestDto
+        {
+            Prompt = "What is it?", SessionNoteId = image.SessionNoteId, Attachments = { image, pdf }
+        });
+
+        var message = _chatClients.LastMessages.Last(m => m.Role == ChatRole.User);
+        Assert.AreEqual(1, message.Contents.OfType<DataContent>().Count(), "The image, and not the PDF.");
+        StringAssert.Contains(message.Text, "[Images attached, which you can see: square.png]");
+        StringAssert.Contains(message.Text, "[Files attached, whose content you cannot see: manual.pdf]");
+        Assert.AreEqual("What is it?", turn.Prompt);
+        Assert.AreEqual(2, turn.Attachments.Count);
+
+        _chatClients.Script = ScriptAnswer;
+        await ChatAsync(staff, new AiChatRequestDto { Prompt = "And now?", History = { turn } });
+
+        Assert.IsFalse(_chatClients.LastMessages.SelectMany(m => m.Contents).OfType<DataContent>().Any());
+    }
+
+    [TestMethod]
+    public async Task ThePreviewOfAnImage_IsOnlyForTheUserOfTheSession()
+    {
+        using var owner = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var other = await NewClientAsync(nameof(EnumRoles.Staff));
+        var image = await AttachAsync(owner, "square.png", "image/png", Png());
+        var path = $"api/aiassistant/sessions/{image.SessionNoteId}/attachments/{image.ResourceId}/preview";
+
+        var mine = await owner.GetAsync(path);
+        var theirs = await other.GetAsync(path);
+
+        Assert.IsTrue(mine.IsSuccessStatusCode, await mine.Content.ReadAsStringAsync());
+        var preview = JsonSerializer.Deserialize<Result<AiChatAttachmentContentDto>>(await mine.Content.ReadAsStringAsync(), _json)!.Entity;
+        StringAssert.StartsWith(preview.ContentType, "image/");
+        Assert.AreEqual(HttpStatusCode.BadRequest, theirs.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task AnImageOfAnotherUser_DoesNotReachTheModel()
+    {
+        _chatClients.Script = ScriptAnswer;
+        using var owner = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var other = await NewClientAsync(nameof(EnumRoles.Staff));
+        var image = await AttachAsync(owner, "private.png", "image/png", Png());
+
+        await ChatAsync(other, new AiChatRequestDto { Prompt = "Look", SessionNoteId = image.SessionNoteId, Attachments = { image } });
+
+        var message = _chatClients.LastMessages.Last(m => m.Role == ChatRole.User);
+        Assert.IsFalse(message.Contents.OfType<DataContent>().Any());
+    }
+
+    [TestMethod]
+    public async Task AMessage_WithTooManyFiles_IsRefused()
+    {
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        var request = new AiChatRequestDto { Prompt = "Look" };
+        for (var i = 0; i <= AiAttachmentRules.MaxPerMessage; i++)
+            request.Attachments.Add(new AiChatAttachmentDto { ResourceId = Guid.NewGuid(), FileName = "a.png", ContentType = "image/png" });
+
+        var response = await staff.PostAsJsonAsync("api/aiassistant/chat", request);
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task Capabilities_SayIfTheModelSeesImages_AndAnUnknownProviderIsAnError()
+    {
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+
+        var known = await staff.GetAsync($"api/aiassistant/providers/{Uri.EscapeDataString("Fake provider")}/capabilities");
+        var unknown = await staff.GetAsync("api/aiassistant/providers/Nobody/capabilities");
+
+        var capabilities = JsonSerializer.Deserialize<Result<AiModelCapabilitiesDto>>(await known.Content.ReadAsStringAsync(), _json)!.Entity;
+        Assert.IsTrue(capabilities.SupportsImages);
+        Assert.AreEqual(HttpStatusCode.BadRequest, unknown.StatusCode);
     }
 
     [TestMethod]

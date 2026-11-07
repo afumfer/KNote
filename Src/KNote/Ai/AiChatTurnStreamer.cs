@@ -13,7 +13,9 @@ namespace KNote.Ai;
 // kept here: the caller owns it (and persists it, see IKntAiSessionService).
 public static class AiChatTurnStreamer
 {
-    public static List<ChatMessage> BuildMessages(string systemPrompt, IEnumerable<AiChatTurnDto> history, string prompt)
+    // attachments: the ones of this message. The images go only in it: in the next turns the model works with what it answered.
+    public static List<ChatMessage> BuildMessages(string systemPrompt, IEnumerable<AiChatTurnDto> history, string prompt,
+        AiTurnAttachments attachments = null)
     {
         var messages = new List<ChatMessage>();
         if (!string.IsNullOrWhiteSpace(systemPrompt))
@@ -21,7 +23,7 @@ public static class AiChatTurnStreamer
 
         foreach (var turn in history ?? [])
         {
-            messages.Add(new ChatMessage(ChatRole.User, turn.Prompt ?? ""));
+            messages.Add(new ChatMessage(ChatRole.User, AiAttachmentRules.PromptWithAttachments(turn.Prompt ?? "", turn.Attachments)));
 
             // What happened, as it happened: the call to the tool and how it ended. With only the text of the answers, the
             // model learns that doing something is saying so, and stops calling the tools (measured with qwen3.5:9b).
@@ -37,7 +39,8 @@ public static class AiChatTurnStreamer
                 messages.Add(new ChatMessage(ChatRole.Assistant, turn.Answer ?? ""));
         }
 
-        messages.Add(new ChatMessage(ChatRole.User, prompt ?? ""));
+        var text = AiAttachmentRules.PromptWithAttachments(prompt ?? "", attachments?.All, attachments?.Seen ?? []);
+        messages.Add(new ChatMessage(ChatRole.User, [new TextContent(text), .. attachments?.Images ?? []]));
         return messages;
     }
 
@@ -62,10 +65,10 @@ public static class AiChatTurnStreamer
 
     // tools: the ones of this turn (KNoteAiTools.GetToolsAsync), when they are not the ones the client was built with.
     public static async IAsyncEnumerable<AiChatStreamEventDto> StreamAsync(IChatClient chatClient, string systemPrompt,
-        IEnumerable<AiChatTurnDto> history, string prompt, IList<AITool> tools = null,
+        IEnumerable<AiChatTurnDto> history, string prompt, IList<AITool> tools = null, AiTurnAttachments attachments = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var messages = BuildMessages(systemPrompt, history, prompt);
+        var messages = BuildMessages(systemPrompt, history, prompt, attachments);
         var answer = new StringBuilder();
         var stopwatch = Stopwatch.StartNew();
         ChatFinishReason? finishReason = null;
@@ -137,6 +140,7 @@ public static class AiChatTurnStreamer
         var turn = new AiChatTurnDto
         {
             Prompt = prompt ?? "",
+            Attachments = attachments?.All.ToList() ?? new(),
             Answer = answer.ToString(),
             Reasoning = reasoning.Length > 0 ? reasoning.ToString().Trim() : null,
             ReasoningTime = reasoning.Length > 0 ? reasoningTime : null,

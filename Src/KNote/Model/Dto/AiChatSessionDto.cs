@@ -35,6 +35,9 @@ public class AiChatTurnDto
     // What the assistant did or proposed in this turn (the record of the conversation, D13).
     public List<AiActionDto> Actions { get; set; } = new();
 
+    // The files of the message of the user (D12): what is kept of them, their content is in the resources of the session.
+    public List<AiChatAttachmentDto> Attachments { get; set; } = new();
+
     // Sent by the app after a card, not by the user (D3): its prompt is not shown.
     public bool Automatic { get; set; }
 

@@ -20,6 +20,7 @@ internal sealed class AiChatWebRenderer : IDisposable
     private readonly KntEditView _editView;
     private readonly string _markdownStyle;
     private readonly IReadOnlyCollection<string> _shortcuts;
+    private readonly Func<Guid, string> _previewOf;
     private readonly System.Windows.Forms.Timer _repaintTimer;
 
     private CoreWebView2 _core;
@@ -37,8 +38,9 @@ internal sealed class AiChatWebRenderer : IDisposable
 
     // shortcuts: the host's keyboard shortcuts (AiChatHtml.ShortcutText), raised by ShortcutPressed when they
     // are pressed while the chat has the focus.
-    public AiChatWebRenderer(KntEditView editView, string markdownStyle, IReadOnlyCollection<string> shortcuts)
+    public AiChatWebRenderer(KntEditView editView, string markdownStyle, IReadOnlyCollection<string> shortcuts, Func<Guid, string> previewOf = null)
     {
+        _previewOf = previewOf;
         _editView = editView;
         _markdownStyle = markdownStyle;
         _shortcuts = shortcuts;
@@ -64,7 +66,7 @@ internal sealed class AiChatWebRenderer : IDisposable
         // Completed from the NavigationCompleted callback of WebView2: what follows must not run inside it.
         var pageLoaded = _pageLoaded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        await _editView.ShowNavigationContent(AiChatHtml.Page(turns, providerAlias, _markdownStyle, _showModelInfo, _shortcuts));
+        await _editView.ShowNavigationContent(AiChatHtml.Page(turns, providerAlias, _markdownStyle, _showModelInfo, _shortcuts, _previewOf));
 
         // Out of a possible WebView2 callback before going on: the caller may show a message box (see the
         // WebView2 notes of ClientWin/CLAUDE.md).
@@ -84,7 +86,7 @@ internal sealed class AiChatWebRenderer : IDisposable
     // (after a failed turn). answerSoFar, for a streamed answer, returns the text received so far: it is
     // repainted periodically until EndTurn/FailTurn, as reasoningSoFar, with what has arrived of the reasoning.
     public async Task BeginTurnAsync(IEnumerable<AiChatTurnDto> turns, string prompt, string providerAlias, Func<string> answerSoFar,
-        Func<string> reasoningSoFar = null)
+        Func<string> reasoningSoFar = null, IEnumerable<AiChatAttachmentDto> attachments = null)
     {
         if (!_pageInSync)
             await LoadAsync(turns, providerAlias);
@@ -97,7 +99,7 @@ internal sealed class AiChatWebRenderer : IDisposable
         _turnRunning = true;
 
         // Without a prompt, a turn the app sends by itself.
-        Run(AiChatHtml.ScriptCall("append", (prompt == null ? "" : AiChatHtml.UserMessage(prompt)) + AiChatHtml.PendingAnswer(providerAlias, null)));
+        Run(AiChatHtml.ScriptCall("append", (prompt == null ? "" : AiChatHtml.UserMessage(prompt, attachments, _previewOf)) + AiChatHtml.PendingAnswer(providerAlias, null)));
 
         if (answerSoFar != null || reasoningSoFar != null)
             _repaintTimer.Start();

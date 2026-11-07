@@ -71,6 +71,32 @@ public class AiActionsTests
     }
 
     [TestMethod]
+    public void UserMessage_ShowsAnImageByItsPreview_AndAFileByItsName()
+    {
+        var image = new AiChatAttachmentDto { ResourceId = Guid.NewGuid(), FileName = "photo.jpg", ContentType = "image/jpeg" };
+        var pdf = new AiChatAttachmentDto { ResourceId = Guid.NewGuid(), FileName = "manual.pdf", ContentType = "application/pdf" };
+
+        var html = AiChatHtml.UserMessage("Look", new[] { image, pdf }, id => id == image.ResourceId ? "data:image/jpeg;base64,AAAA" : null);
+
+        StringAssert.Contains(html, "<img class=\"attachment-image\" src=\"data:image/jpeg;base64,AAAA\" alt=\"photo.jpg\">");
+        StringAssert.Contains(html, "<span class=\"attachment-file\">manual.pdf</span>");
+    }
+
+    [TestMethod]
+    public void UserMessage_EscapesTheNameOfAFile()
+    {
+        var file = new AiChatAttachmentDto { ResourceId = Guid.NewGuid(), FileName = "<script>.pdf", ContentType = "application/pdf" };
+
+        var html = AiChatHtml.UserMessage("Look", new[] { file });
+
+        Assert.IsFalse(html.Contains("<script>"), html);
+    }
+
+    [TestMethod]
+    public void UserMessage_WithoutFiles_IsTheBubbleOfAlways() =>
+        Assert.AreEqual("<div class=\"msg user\"><div class=\"bubble\">Look</div></div>", AiChatHtml.UserMessage("Look"));
+
+    [TestMethod]
     public void AReplacement_ShowsTheNewTextInTheCard_WithTheDontAskBox()
     {
         var action = new AiActionDto { Kind = AiActionRules.ReplaceNoteText, Text = "Replace the whole text of #1", Content = "The new text." };

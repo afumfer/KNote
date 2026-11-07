@@ -307,7 +307,7 @@ public partial class KntChatForm : KntForm, IViewChatRoom
     {
         if (e.KeyCode == Keys.V && e.Control && !e.Alt && buttonSendImage.Enabled)
         {
-            var images = ClipboardImages();
+            var images = KntClipboardFiles.Read(f => ChatRoomImageDto.ContentTypeOf(f) != null);
             if (images.Count == 0)
                 return;
             e.SuppressKeyPress = true;
@@ -468,29 +468,6 @@ public partial class KntChatForm : KntForm, IViewChatRoom
         buttonUnfollow.Enabled = connected && thread;
         buttonUnfollow.Visible = thread;
         menuReconnect.Enabled = _ctrl.ConnectionState is ChatRoomConnectionState.Disconnected or ChatRoomConnectionState.NotAuthorized;
-    }
-
-    // The images in the clipboard: a picture (a screenshot, as PNG) or image files copied in the file explorer.
-    private static List<(string Name, Func<byte[]> Content)> ClipboardImages()
-    {
-        var images = new List<(string, Func<byte[]>)>();
-        if (Clipboard.ContainsImage())
-        {
-            using var picture = Clipboard.GetImage();
-            if (picture != null)
-            {
-                using var png = new MemoryStream();
-                picture.Save(png, System.Drawing.Imaging.ImageFormat.Png);
-                var content = png.ToArray();
-                images.Add(($"image-{DateTime.Now:yyyyMMdd-HHmmss}.png", () => content));
-            }
-        }
-        else if (Clipboard.ContainsFileDropList())
-        {
-            foreach (var file in Clipboard.GetFileDropList().Cast<string>().Where(f => ChatRoomImageDto.ContentTypeOf(f) != null))
-                images.Add((Path.GetFileName(file), () => File.ReadAllBytes(file)));
-        }
-        return images;
     }
 
     // One after the other, in the thread shown (KntChatCtrl.SendImageAsync reports what can't be sent).

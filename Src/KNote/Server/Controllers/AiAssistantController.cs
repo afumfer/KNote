@@ -47,6 +47,22 @@ public class AiAssistantController : ControllerBase
         return Ok(new Result<List<AiProviderInfoDto>> { Entity = _providers.GetInfo() });
     }
 
+    // What the apps offer depends on it: an image is not sent to a model that does not see it.
+    [HttpGet("providers/{alias}/capabilities")]
+    public async Task<IActionResult> GetCapabilities(string alias, CancellationToken cancellationToken)
+    {
+        var resApi = new Result<AiModelCapabilitiesDto>();
+        var providerRef = _providers.Find(alias);
+        if (providerRef == null)
+        {
+            resApi.AddErrorMessage($"The AI provider '{alias}' is not configured in the server.");
+            return BadRequest(resApi);
+        }
+
+        resApi.Entity = new AiModelCapabilitiesDto { SupportsImages = await AiModelCapabilities.SupportsImagesAsync(providerRef, cancellationToken) };
+        return Ok(resApi);
+    }
+
     // The answer comes as server-sent events (AiChatStreamEventDto, event type = its Type). Anything wrong
     // before it starts is a 400 with a Result, as in every endpoint; once streaming, an Error event.
     [HttpPost("chat")]
@@ -69,6 +85,12 @@ public class AiAssistantController : ControllerBase
             return TypedResults.BadRequest(resApi);
         }
 
+        if (request.Attachments?.Count > AiAttachmentRules.MaxPerMessage)
+        {
+            resApi.AddErrorMessage($"A message can have {AiAttachmentRules.MaxPerMessage} files at most.");
+            return TypedResults.BadRequest(resApi);
+        }
+
         try
         {
             // What the tools do goes through the roles of the commands, as in ClientWin (D4): the rest of the API has its own.
@@ -78,7 +100,11 @@ public class AiAssistantController : ControllerBase
             tools.BeginTurn(request.History, request.AutoApprovedActionKinds);
             var chatClient = _chatClients.Create(providerRef, await tools.GetToolsAsync());
 
-            return TypedResults.ServerSentEvents(StreamChatAsync(chatClient, request, tools, toolsHost, cancellationToken));
+            var attachments = request.Attachments?.Count > 0
+                ? await AiTurnAttachments.LoadAsync(_service, providerRef, request.SessionNoteId, request.Attachments, cancellationToken)
+                : null;
+
+            return TypedResults.ServerSentEvents(StreamChatAsync(chatClient, request, attachments, tools, toolsHost, cancellationToken));
         }
         catch (Exception ex)
         {
@@ -125,6 +151,54 @@ public class AiAssistantController : ControllerBase
         }
     }
 
+    // A file of a message: saved before the message is sent, to reach the model.
+    [HttpPost("sessions/attachments")]
+    public async Task<IActionResult> PostAttachment([FromBody] AiChatAttachmentUploadDto attachment)
+    {
+        try
+        {
+            var resApi = await _service.AiSessions.AddAttachmentAsync(attachment);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "PostAttachment at {dateTime}.", DateTime.Now);
+            var resApi = new Result<AiChatAttachmentDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // An image of a message, reduced, for the user of the session: the url of a resource is open to anybody who has it.
+    [HttpGet("sessions/{noteId:guid}/attachments/{resourceId:guid}/preview")]
+    public async Task<IActionResult> GetAttachmentPreview(Guid noteId, Guid resourceId)
+    {
+        try
+        {
+            var file = await _service.AiSessions.GetAttachmentAsync(noteId, resourceId);
+            if (!file.IsValid)
+                return BadRequest(file);
+
+            var resApi = new Result<AiChatAttachmentContentDto>();
+            var preview = AiImageReducer.Preview(Convert.FromBase64String(file.Entity.ContentBase64), file.Entity.ContentType);
+            if (preview == null)
+            {
+                resApi.AddErrorMessage("The attachment is not an image that can be shown.");
+                return BadRequest(resApi);
+            }
+
+            resApi.Entity = new AiChatAttachmentContentDto { FileName = file.Entity.FileName, ContentType = preview.ContentType, ContentBase64 = preview.ContentBase64 };
+            return Ok(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetAttachmentPreview {noteId} at {dateTime}.", noteId, DateTime.Now);
+            var resApi = new Result<AiChatAttachmentContentDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     [HttpGet("sessions/{noteId:guid}")]
     public async Task<IActionResult> GetSession(Guid noteId)
     {
@@ -160,11 +234,11 @@ public class AiAssistantController : ControllerBase
     }
 
     private async IAsyncEnumerable<SseItem<AiChatStreamEventDto>> StreamChatAsync(IChatClient chatClient, AiChatRequestDto request,
-        KNoteAiTools tools, ServerAiToolsHost toolsHost, [EnumeratorCancellation] CancellationToken cancellationToken)
+        AiTurnAttachments attachments, KNoteAiTools tools, ServerAiToolsHost toolsHost, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // KNote Atlas: the rules, the instructions, the profile and the glossary of the session's repository.
         var context = await AiAssistantContext.ComposeAsync(_service, null, request.History, request.Prompt, _logger);
-        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, cancellationToken: cancellationToken)
+        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, attachments: attachments, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
         try
         {

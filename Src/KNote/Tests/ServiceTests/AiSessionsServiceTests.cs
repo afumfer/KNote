@@ -14,6 +14,8 @@ namespace KNote.Tests.ServiceTests;
 [TestClass]
 public class AiSessionsServiceTests
 {
+    private readonly HashSet<string> _resourceFolders = new();
+
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
@@ -176,6 +178,127 @@ public class AiSessionsServiceTests
         CollectionAssert.AreEqual(new[] { older.NoteId, newer.NoteId }, sessions.Entity.Select(s => s.NoteId).ToList());
     }
 
+    private static AiChatAttachmentUploadDto Upload(string name, Guid sessionNoteId = default, byte[] content = null) => new()
+    {
+        SessionNoteId = sessionNoteId,
+        Provider = EnumAiProvider.Ollama,
+        Model = "qwen",
+        Topic = "What is in the photo?\r\nBe brief",
+        FileName = name,
+        ContentType = AiAttachmentRules.ContentTypeOf(name),
+        ContentBase64 = Convert.ToBase64String(content ?? new byte[] { 1, 2, 3 })
+    };
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AddAttachment_WithoutASession_CreatesItsNote_AndTheNextOneGoesInTheSameNote(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        var service = await StaffWithResourcesAsync(db, orm, "staff1");
+
+        var first = await service.AiSessions.AddAttachmentAsync(Upload("photo.jpg"));
+        Assert.IsTrue(first.IsValid, first.ErrorMessage);
+        var noteId = first.Entity.SessionNoteId;
+        var second = await service.AiSessions.AddAttachmentAsync(Upload("manual.pdf", noteId));
+
+        Assert.IsTrue(second.IsValid, second.ErrorMessage);
+        Assert.AreEqual(noteId, second.Entity.SessionNoteId);
+        Assert.AreEqual("photo.jpg", first.Entity.FileName);
+        Assert.AreEqual("image/jpeg", first.Entity.ContentType);
+        var session = (await service.AiSessions.GetUserSessionsAsync()).Entity.Single();
+        Assert.AreEqual(noteId, session.NoteId);
+        Assert.AreEqual("What is in the photo?", session.Topic);
+        Assert.AreEqual(2, (await service.Notes.GetResourcesAsync(noteId)).Entity.Count);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AnAttachment_IsReadWithItsContent_AndSurvivesSavingTheSession(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        var service = await StaffWithResourcesAsync(db, orm, "staff1");
+        var attachment = (await service.AiSessions.AddAttachmentAsync(Upload("photo.jpg", content: new byte[] { 9, 8, 7 }))).Entity;
+
+        var session = NewSession("Question", "Answer");
+        session.NoteId = attachment.SessionNoteId;
+        session.Turns[0].Attachments.Add(attachment);
+        var saved = await service.AiSessions.SaveAsync(session);
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+
+        var file = await service.AiSessions.GetAttachmentAsync(attachment.SessionNoteId, attachment.ResourceId);
+
+        Assert.IsTrue(file.IsValid, file.ErrorMessage);
+        CollectionAssert.AreEqual(new byte[] { 9, 8, 7 }, Convert.FromBase64String(file.Entity.ContentBase64));
+        Assert.AreEqual("image/jpeg", file.Entity.ContentType);
+        var read = (await service.AiSessions.GetAsync(attachment.SessionNoteId)).Entity;
+        Assert.AreEqual(attachment.ResourceId, read.Turns.Single().Attachments.Single().ResourceId);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AnAttachment_OfAnotherUsersSession_CannotBeReadNorAdded(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        var owner = await StaffWithResourcesAsync(db, orm, "owner");
+        var other = await StaffWithResourcesAsync(db, orm, "other");
+        var attachment = (await owner.AiSessions.AddAttachmentAsync(Upload("private.jpg"))).Entity;
+
+        var read = await other.AiSessions.GetAttachmentAsync(attachment.SessionNoteId, attachment.ResourceId);
+        var add = await other.AiSessions.AddAttachmentAsync(Upload("mine.jpg", attachment.SessionNoteId));
+
+        Assert.IsFalse(read.IsValid);
+        StringAssert.Contains(read.ErrorMessage, "another user");
+        Assert.IsFalse(add.IsValid);
+        Assert.AreEqual(1, (await owner.Notes.GetResourcesAsync(attachment.SessionNoteId)).Entity.Count);
+    }
+
+    [TestMethod]
+    public async Task GetAttachment_OnlyGivesTheResourcesOfThatSession()
+    {
+        using var db = new RepositoryTestDatabase();
+        var service = await StaffWithResourcesAsync(db, "Dapper", "staff1");
+        var mine = (await service.AiSessions.AddAttachmentAsync(Upload("a.jpg"))).Entity;
+        var other = (await service.AiSessions.AddAttachmentAsync(Upload("b.jpg"))).Entity;
+
+        var res = await service.AiSessions.GetAttachmentAsync(mine.SessionNoteId, other.ResourceId);
+
+        Assert.AreNotEqual(mine.SessionNoteId, other.SessionNoteId);
+        Assert.IsFalse(res.IsValid);
+        StringAssert.Contains(res.ErrorMessage, "does not exist");
+    }
+
+    [TestMethod]
+    public async Task AddAttachment_RefusesAnEmptyFile_OneTooBig_AndCreatesNoSession()
+    {
+        using var db = new RepositoryTestDatabase();
+        var service = await StaffWithResourcesAsync(db, "Dapper", "staff1");
+
+        var empty = await service.AiSessions.AddAttachmentAsync(Upload("a.jpg", content: Array.Empty<byte>()));
+        var big = await service.AiSessions.AddAttachmentAsync(Upload("a.jpg", content: new byte[KntConst.MaxLenResourceFile + 1]));
+        var notBase64 = Upload("a.jpg");
+        notBase64.ContentBase64 = "not base64!";
+        var broken = await service.AiSessions.AddAttachmentAsync(notBase64);
+
+        Assert.IsFalse(empty.IsValid);
+        Assert.IsFalse(big.IsValid);
+        Assert.IsFalse(broken.IsValid);
+        Assert.AreEqual(0, (await service.AiSessions.GetUserSessionsAsync()).Entity.Count);
+    }
+
+    [TestMethod]
+    public async Task AddAttachment_KeepsNoFoldersInTheNameOfTheFile()
+    {
+        using var db = new RepositoryTestDatabase();
+        var service = await StaffWithResourcesAsync(db, "Dapper", "staff1");
+
+        var res = await service.AiSessions.AddAttachmentAsync(Upload("../../evil.png"));
+
+        Assert.AreEqual("evil.png", res.Entity.FileName);
+    }
+
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
@@ -245,6 +368,26 @@ public class AiSessionsServiceTests
         Model = "gpt-test",
         Turns = { new AiChatTurnDto { Prompt = prompt, Answer = answer } }
     };
+
+    // The files of the attachments, in a folder of this database: every user of it has to find them.
+    private async Task<KntService> StaffWithResourcesAsync(RepositoryTestDatabase db, string orm, string userName)
+    {
+        var service = await StaffServiceAsync(db, orm, userName);
+        var root = Path.ChangeExtension(db.DatabaseFilePath, null) + "-resources";
+        Directory.CreateDirectory(root);
+        _resourceFolders.Add(root);
+        service.Repository.RepositoryRef.ResourcesContainer = "AiSessionTestResources";
+        service.Repository.RepositoryRef.ResourcesContainerRootPath = root;
+        return service;
+    }
+
+    [TestCleanup]
+    public void DeleteResourceFolders()
+    {
+        foreach (var folder in _resourceFolders.Where(Directory.Exists))
+            Directory.Delete(folder, recursive: true);
+        _resourceFolders.Clear();
+    }
 
     private static async Task<KntService> StaffServiceAsync(RepositoryTestDatabase db, string orm, string userName)
     {

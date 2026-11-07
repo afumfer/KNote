@@ -41,6 +41,12 @@ public static class AiChatHtml
             const key = c.startsWith('Key') ? c.slice(3) : c.startsWith('Digit') ? 'D' + c.slice(5) : c === 'NumpadEnter' ? 'Enter' : c;
             return (e.ctrlKey ? 'Ctrl+' : '') + (e.shiftKey ? 'Shift+' : '') + (e.altKey ? 'Alt+' : '') + key;
           };
+          // An image takes its height once it is loaded, after the page has gone to its end, and then the answer would not be
+          // followed. They only load with their message or with the page, so this does not move what the user is reading.
+          document.addEventListener('load', e => {
+            if (e.target.classList?.contains('attachment-image'))
+              toBottom();
+          }, true);
           document.addEventListener('keydown', e => {
             const shortcut = shortcutOf(e);
             if (!window.chrome?.webview || !(window.kntChatShortcuts || []).includes(shortcut))
@@ -103,8 +109,9 @@ public static class AiChatHtml
     // markdownStyle: the <style> element of the app's Markdown viewer (Store.KNoteWebViewStyle), for the
     // answers' text; the chat layout goes on top of it. showModelInfo: the usage line of each answer.
     // hostShortcuts: the keys the page passes on to the host (see ShortcutText).
+    // previewOf: an image of a message as a data: url, or null (see UserMessage).
     public static string Page(IEnumerable<AiChatTurnDto> turns, string providerAlias, string markdownStyle, bool showModelInfo = true,
-        IEnumerable<string> hostShortcuts = null)
+        IEnumerable<string> hostShortcuts = null, Func<Guid, string> previewOf = null)
     {
         var html = new StringBuilder();
         html.Append("<!DOCTYPE html><html><head><meta charset=\"utf-8\">");
@@ -113,7 +120,7 @@ public static class AiChatHtml
         html.Append(showModelInfo ? "<body>" : "<body class=\"hide-model-info\">");
         html.Append("<main id=\"chat\">");
         foreach (var turn in turns)
-            html.Append(turn.Automatic ? "" : UserMessage(turn.Prompt)).Append(AssistantMessage(turn, providerAlias));
+            html.Append(turn.Automatic ? "" : UserMessage(turn.Prompt, turn.Attachments, previewOf)).Append(AssistantMessage(turn, providerAlias));
         html.Append("</main><script>");
         html.Append("window.kntChatShortcuts = ").Append(JsonSerializer.Serialize(hostShortcuts ?? Array.Empty<string>())).Append(';');
         html.Append(Script).Append("</script></body></html>");
@@ -135,9 +142,23 @@ public static class AiChatHtml
         return text;
     }
 
-    // The question as typed: plain text, line breaks kept by the style sheet.
-    public static string UserMessage(string prompt)
-        => $"<div class=\"msg user\"><div class=\"bubble\">{WebUtility.HtmlEncode(prompt?.Trim() ?? "")}</div></div>";
+    // The question as typed: plain text, line breaks kept by the style sheet. Its images come as data: urls, never by the url of
+    // the resource: it may be in another installation, and those are open to anybody who has them. Without one, its name.
+    public static string UserMessage(string prompt, IEnumerable<AiChatAttachmentDto> attachments = null, Func<Guid, string> previewOf = null)
+    {
+        var files = new StringBuilder();
+        foreach (var attachment in attachments ?? Enumerable.Empty<AiChatAttachmentDto>())
+        {
+            var name = WebUtility.HtmlEncode(attachment.FileName);
+            var preview = previewOf?.Invoke(attachment.ResourceId);
+            files.Append(preview != null
+                ? $"<img class=\"attachment-image\" src=\"{WebUtility.HtmlEncode(preview)}\" alt=\"{name}\">"
+                : $"<span class=\"attachment-file\">{name}</span>");
+        }
+
+        var attached = files.Length > 0 ? $"<div class=\"attachments\">{files}</div>" : "";
+        return $"<div class=\"msg user\"><div class=\"bubble\">{WebUtility.HtmlEncode(prompt?.Trim() ?? "")}{attached}</div></div>";
+    }
 
     // The usage line is model info (hidden by the page's hide-model-info class); the notice of a cut answer
     // is shown always.

@@ -1,0 +1,56 @@
+@* The files of a message of the AI assistant: the images, reduced, and the name of the others. They are asked for through the
+   session, not by the url of the resource: those are served to anybody who has them, and a conversation is private. An image
+   that can't be shown (its file is in another installation) is left as its name. *@
+
+@inject IStore store
+
+@implements IDisposable
+
+@if (Attachments.Count > 0)
+{
+    <div class="ai-attachments">
+        @foreach (var attachment in Attachments)
+        {
+            if (Previews.TryGetValue(attachment.ResourceId, out var url) && url != null)
+            {
+                <img class="ai-attachment-image" src="@url" alt="@attachment.FileName" @onload="@(() => ImageShown.InvokeAsync())" />
+            }
+            else
+            {
+                <span class="ai-attachment-file"><RadzenIcon Icon="attach_file" />@attachment.FileName</span>
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter] [EditorRequired] public IReadOnlyList<AiChatAttachmentDto> Attachments { get; set; } = null!;
+    [Parameter] [EditorRequired] public Guid SessionNoteId { get; set; }
+
+    // Of the whole conversation: a message goes from the one being answered to the answered ones, and this is another component.
+    [Parameter] [EditorRequired] public Dictionary<Guid, string?> Previews { get; set; } = null!;
+
+    // An image takes its height when it is loaded, after the conversation has gone to its end.
+    [Parameter] public EventCallback ImageShown { get; set; }
+
+    private readonly CancellationTokenSource disposal = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        foreach (var attachment in Attachments.Where(a => a.IsImage && !Previews.ContainsKey(a.ResourceId)).ToList())
+        {
+            Previews[attachment.ResourceId] = null;
+            var res = await store.AiAssistant.GetAttachmentPreviewAsync(SessionNoteId, attachment.ResourceId, disposal.Token);
+            if (disposal.IsCancellationRequested)
+                return;
+            if (res.IsValid && res.Entity != null)
+                Previews[attachment.ResourceId] = $"data:{res.Entity.ContentType};base64,{res.Entity.ContentBase64}";
+        }
+    }
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

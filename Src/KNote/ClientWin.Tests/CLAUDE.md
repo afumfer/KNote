@@ -120,8 +120,8 @@ dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "TestCategory!
 `AiChatClientFactory.Create` con las tools de `KNoteAiTools`, igual que `KNoteAIAssistantCtrl.ApplyProvider`), para
 detectar roturas de comportamiento en tiempo de ejecución que un `dotnet build` no puede ver — por ejemplo,
 un paquete NuGet (`OpenAI`, `Anthropic`, `OllamaSharp`, `Microsoft.Extensions.AI*`) que cambia de versión y
-rompe la llamada real, aunque el código siga compilando sin problema. Por proveedor, 3 tests: completion,
-streaming, y un round-trip de function-calling contra `search_notes`.
+rompe la llamada real, aunque el código siga compilando sin problema. Por proveedor: completion, streaming, un
+round-trip de function-calling contra `search_notes` y una imagen que el modelo tiene que leer (`Helpers/AiImageSmokeCheck`).
 
 **Por qué existen — precedente real**: esta suite ya encontró y ayudó a corregir dos bugs reales de
 producción en `AiChatClientFactory` el mismo día en que se escribió, cuando OpenAI se llamaba por Chat

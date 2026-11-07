@@ -31,6 +31,7 @@ public static class AiChatSessionTranscript
     private const string UserMarker = "<!-- knt-ai:user -->";
     private const string AssistantMarkerStart = "<!-- knt-ai:assistant";
     private const string ActionsMarker = "<!-- knt-ai:actions -->";
+    private const string AttachmentsMarker = "<!-- knt-ai:attachments -->";
     private const string MarkerEnd = "-->";
     private const string UserHeader = "**User:**";
     private const string AssistantHeader = "**Assistant:**";
@@ -54,12 +55,22 @@ public static class AiChatSessionTranscript
                 ReasoningTokens = turn.ReasoningTokens,
                 Automatic = turn.Automatic ? true : null,
                 Actions = turn.Actions?.Count > 0 ? turn.Actions.Select(Saved).ToList() : null,
+                Attachments = turn.Attachments?.Count > 0 ? turn.Attachments.Select(Saved).ToList() : null,
                 TokensEstimated = turn.TokensEstimated,
                 Truncated = turn.Truncated,
                 ProcessingTime = turn.ProcessingTime
             }, UsageJsonOptions);
 
             text.Append($"{UserMarker}\r\n{UserHeader} \r\n{Content(turn.Prompt)}\r\n\r\n");
+
+            if (turn.Attachments?.Count > 0)
+            {
+                text.Append($"{AttachmentsMarker}\r\n");
+                foreach (var attachment in turn.Attachments)
+                    text.Append($"- {Content(attachment.FileName)}\r\n");
+                text.Append("\r\n");
+            }
+
             text.Append($"{AssistantMarkerStart} {usage} {MarkerEnd}\r\n{AssistantHeader} \r\n{Content(turn.Answer)}\r\n\r\n");
 
             if (turn.Actions?.Count > 0)
@@ -96,7 +107,7 @@ public static class AiChatSessionTranscript
         var inAnswer = false;
         foreach (var line in transcript.ReplaceLineEndings("\n").Split('\n'))
         {
-            if (line == ActionsMarker)
+            if (line == ActionsMarker || line == AttachmentsMarker)
             {
                 CloseSection(inAnswer);
                 section = null;
@@ -151,6 +162,7 @@ public static class AiChatSessionTranscript
             turn.ReasoningTokens = usage.ReasoningTokens;
             turn.Automatic = usage.Automatic == true;
             turn.Actions = usage.Actions ?? new List<AiActionDto>();
+            turn.Attachments = usage.Attachments ?? new List<AiChatAttachmentDto>();
             foreach (var action in turn.Actions.Where(a => a.Status == EnumAiActionStatus.Proposed))
                 action.Status = EnumAiActionStatus.NotConfirmed;
             turn.TokensEstimated = usage.TokensEstimated;
@@ -175,10 +187,18 @@ public static class AiChatSessionTranscript
         NoteNumber = action.NoteNumber
     };
 
+    private static AiChatAttachmentDto Saved(AiChatAttachmentDto attachment) => new()
+    {
+        ResourceId = attachment.ResourceId,
+        FileName = attachment.FileName,
+        ContentType = attachment.ContentType
+    };
+
     private class TurnUsage
     {
         public bool? Automatic { get; set; }
         public List<AiActionDto> Actions { get; set; }
+        public List<AiChatAttachmentDto> Attachments { get; set; }
         public long? InputTokens { get; set; }
         public long? OutputTokens { get; set; }
         public long TotalTokens { get; set; }

@@ -7,8 +7,39 @@
 }
 
 /* The prompt fills its pane: taller or shorter with the bar. */
-.ai-assistant ::deep .ai-prompt {
+.ai-assistant ::deep .ai-prompt-area {
+    display: flex;
+    flex-direction: column;
     height: 100%;
+}
+
+.ai-assistant ::deep .ai-prompt-dropping {
+    outline: 2px dashed var(--rz-primary);
+    outline-offset: -2px;
+    border-radius: var(--rz-border-radius);
+}
+
+.ai-assistant ::deep .ai-prompt-files {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    padding-top: 0.375rem;
+}
+
+.ai-assistant ::deep .ai-prompt-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding-left: 0.5rem;
+    border: var(--rz-border-normal);
+    border-radius: var(--rz-border-radius);
+    font-size: 0.875em;
+}
+
+.ai-assistant ::deep .ai-prompt {
+    flex: 1;
+    min-height: 0;
     padding: 0.375rem 0.5rem 0 0;
 }
 

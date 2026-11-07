@@ -40,5 +40,17 @@ public class KntAiSessionService : KntServiceBase, IKntAiSessionService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<AiChatAttachmentDto>> AddAttachmentAsync(AiChatAttachmentUploadDto attachment)
+    {
+        var command = new KntAiSessionsAddAttachmentAsyncCommand(Service, attachment);
+        return await ExecuteCommand(command);
+    }
+
+    public async Task<Result<AiChatAttachmentContentDto>> GetAttachmentAsync(Guid sessionNoteId, Guid resourceId)
+    {
+        var command = new KntAiSessionsGetAttachmentAsyncCommand(Service, new AiChatAttachmentDto { SessionNoteId = sessionNoteId, ResourceId = resourceId });
+        return await ExecuteCommand(command);
+    }
+
     #endregion
 }

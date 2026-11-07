@@ -81,6 +81,7 @@ internal static class KntIconCatalog
         [KntIcon.Markdown] = new(0xF0C2A, 0xE7DB, Neutral),           // markdown
         [KntIcon.UploadResource] = new(0xE131, 0xF1A4, Neutral),      // arrow_upload
         [KntIcon.PasteFromClipboard] = new(0xE35A, 0xF2D5, Neutral),  // clipboard_paste
+        [KntIcon.Attach] = new(0xF1A8, 0xF1A9, Neutral),              // attach
 
         // Scripts and devices
         [KntIcon.NewDocument] = new(0xE4DA, 0xE4DB, Neutral),         // document_add

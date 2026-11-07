@@ -15,6 +15,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private readonly KNoteAIAssistantCtrl _ctrl;
     private readonly AiChatWebRenderer _chatView;
+    // The files of the message being written.
+    private readonly FlowLayoutPanel _attachmentsBar;
     // The menu items with a keyboard shortcut, by its text (AiChatHtml.ShortcutText).
     private readonly Dictionary<string, ToolStripMenuItem> _menuShortcuts;
     private int _countNRres;
@@ -40,6 +42,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
         buttonSend.SetKntIcon(KntIcon.Send);
         buttonNewSession.SetKntIcon(KntIcon.Restart);
+        buttonAttach.SetKntIcon(KntIcon.Attach);
         buttonMarkDown.SetKntIcon(KntIcon.Markdown);
         buttonNavigate.SetKntIcon(KntIcon.Navigate);
 
@@ -55,7 +58,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         _menuShortcuts = MenuItems(menuAssistant.Items)
             .Where(item => item.ShortcutKeys != Keys.None)
             .ToDictionary(item => AiChatHtml.ShortcutText(item.ShortcutKeys));
-        _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys);
+        _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys, _ctrl.PreviewOf);
         _chatView.ShortcutPressed += ChatView_ShortcutPressed;
         _chatView.ActionsAnswered += ChatView_ActionsAnswered;
         _ctrl.ActivityChanged += Ctrl_ActivityChanged;
@@ -63,6 +66,15 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         kntEditViewResult.LinkHandler = url => NoteCitations.TryOpen(url, this, _ctrl.Store, _ctrl.ServiceRef?.Service, message => ShowInfo(message));
         kntEditViewResult.NavigationBorder = true;
         _chatView.ShowModelInfo(_ctrl.ShowModelInfo);
+
+        // Between the header and the box: its place among the docked controls of the panel.
+        _attachmentsBar = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Visible = false };
+        splitChat.Panel2.Controls.Add(_attachmentsBar);
+        splitChat.Panel2.Controls.SetChildIndex(_attachmentsBar, 1);
+        textPrompt.AllowDrop = true;
+        textPrompt.KeyDown += textPrompt_KeyDown;
+        textPrompt.DragEnter += textPrompt_DragEnter;
+        textPrompt.DragDrop += textPrompt_DragDrop;
 
         // The Actions menu repeats the buttons and the model list, running the same handlers: its items
         // follow their enabled state, which also keeps the shortcuts off while they are off.
@@ -90,7 +102,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         buttonNavigate, buttonMarkDown);
 
     private void AlignPromptHeader() => AlignControlsRight(panelPromptHeader, 6, 6,
-        buttonSend, buttonNewSession, panelSeparator, comboProviders);
+        buttonAttach, buttonSend, buttonNewSession, panelSeparator, comboProviders);
 
     private static IEnumerable<ToolStripMenuItem> MenuItems(ToolStripItemCollection items)
         => items.OfType<ToolStripMenuItem>().SelectMany(item => MenuItems(item.DropDownItems).Prepend(item));
@@ -131,6 +143,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         }
         else
         {
+            buttonAttach.Visible = false;
             splitSessions.Panel2Collapsed = true;
             ClientSize = new Size(ClientSize.Width - LogicalToDeviceUnits(DesignerClientWidth - WidthWithoutSessions), ClientSize.Height);
         }
@@ -199,11 +212,15 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             StatusProcessing(true);
 
+            if (!await _ctrl.SaveAttachmentsAsync(textPrompt.Text))
+                return;
+
             // A new message without answering the card rejects what it proposed: the page shows it.
             if (_ctrl.RejectPendingActions())
                 _chatView.Invalidate();
 
             await SendAsync(textPrompt.Text, automatic: false);
+            ShowAttachments();
         }
         catch (Exception ex)
         {
@@ -234,6 +251,90 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             await AnswerActionsAsync(answer == DialogResult.Yes ? actions.Select(a => a.ActionId).ToList() : new List<Guid>(), false);
         }
     }
+
+    #region Attachments
+
+    private bool CanAttachNow => _ctrl.CanAttach && !_processing;
+
+    private async void buttonAttach_Click(object sender, EventArgs e)
+    {
+        using var dialog = new OpenFileDialog { Title = "Attach files to the message", Multiselect = true };
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+            return;
+        await AddFilesAsync(dialog.FileNames.Select(f => (Path.GetFileName(f), (Func<byte[]>)(() => File.ReadAllBytes(f)))).ToList());
+    }
+
+    // Ctrl+V with a picture or files in the clipboard attaches them; with text, pastes it as always.
+    private async void textPrompt_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode != Keys.V || !e.Control || e.Alt || !CanAttachNow)
+            return;
+
+        var files = KntClipboardFiles.Read();
+        if (files.Count == 0)
+            return;
+
+        e.SuppressKeyPress = true;
+        await AddFilesAsync(files);
+    }
+
+    private void textPrompt_DragEnter(object sender, DragEventArgs e)
+    {
+        e.Effect = CanAttachNow && e.Data?.GetDataPresent(DataFormats.FileDrop) == true ? DragDropEffects.Copy : DragDropEffects.None;
+    }
+
+    private async void textPrompt_DragDrop(object sender, DragEventArgs e)
+    {
+        if (e.Data?.GetData(DataFormats.FileDrop) is string[] files)
+            await AddFilesAsync(files.Select(f => (Path.GetFileName(f), (Func<byte[]>)(() => File.ReadAllBytes(f)))).ToList());
+    }
+
+    private async Task AddFilesAsync(IReadOnlyList<(string Name, Func<byte[]> Content)> files)
+    {
+        foreach (var (name, content) in files)
+        {
+            try
+            {
+                var error = _ctrl.AddAttachment(name, content());
+                if (error != null)
+                    ShowInfo(error);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                ShowInfo($"{name} could not be read: {ex.Message}");
+            }
+        }
+        ShowAttachments();
+
+        if (files.Any(f => AiAttachmentRules.IsImage(AiAttachmentRules.ContentTypeOf(f.Name))) && !await _ctrl.SupportsImagesAsync())
+            ShowInfo($"{_ctrl.CurrentProviderRef?.Alias} does not see images: they are only saved with the conversation.");
+    }
+
+    private void ShowAttachments()
+    {
+        _attachmentsBar.SuspendLayout();
+        foreach (var control in _attachmentsBar.Controls.Cast<Control>().ToList())
+            control.Dispose();
+
+        foreach (var attachment in _ctrl.PendingAttachments)
+        {
+            var button = new Button { Text = $"{attachment.FileName}  ✕", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, UseVisualStyleBackColor = true };
+            button.Click += (s, e) =>
+            {
+                _ctrl.RemoveAttachment(attachment);
+                ShowAttachments();
+            };
+            _attachmentsBar.Controls.Add(button);
+        }
+
+        if (_ctrl.ImagesSentTo is { } provider)
+            _attachmentsBar.Controls.Add(new Label { Text = $"Images are sent to {provider}.", AutoSize = true, Margin = new Padding(LogicalToDeviceUnits(3), LogicalToDeviceUnits(8), LogicalToDeviceUnits(3), LogicalToDeviceUnits(3)) });
+
+        _attachmentsBar.Visible = _ctrl.PendingAttachments.Count > 0;
+        _attachmentsBar.ResumeLayout();
+    }
+
+    #endregion
 
     private async void ChatView_ActionsAnswered(object sender, AiChatHtml.ActionsAnswer answer)
     {
@@ -743,11 +844,15 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (processing)
         {
             toolStripStatusLabelProcessing.Text = " Processing ...";
+            // Without this, disabling the box passes the focus on to the chat. At the end of the turn it would go into the page,
+            // to its first control (the reasoning of the first answer), and the browser would scroll up to show it.
+            ActiveControl = null;
             textPrompt.Enabled = false;
             comboProviders.Enabled = false;
             comboRepositories.Enabled = false;
             menuOptions.Enabled = false;
             buttonSend.Enabled = false;
+            buttonAttach.Enabled = false;
             buttonNewSession.Enabled = false;
             buttonMarkDown.Enabled = false;
             buttonNavigate.Enabled = false;
@@ -763,6 +868,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             comboRepositories.Enabled = comboRepositories.Items.Count > 1;
             menuOptions.Enabled = true;
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
+            buttonAttach.Enabled = _ctrl.CurrentProviderRef != null;
             buttonNewSession.Enabled = true;
             _processing = false;
             // Sending keeps the current mode: the chat view adds the turn as it arrives.
@@ -777,7 +883,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         // The view can't change while sending (StatusProcessing disables its buttons).
         var chatView = ChatView;
         if (chatView)
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, null, () => _ctrl.StreamingReasoning);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, null, () => _ctrl.StreamingReasoning, _ctrl.TurnAttachments);
 
         try
         {
@@ -806,7 +912,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (chatView)
         {
             // Repainted from the ctrl's StreamingResult while it streams in: no StreamToken handler needed.
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult, () => _ctrl.StreamingReasoning);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult, () => _ctrl.StreamingReasoning, _ctrl.TurnAttachments);
         }
         else
         {

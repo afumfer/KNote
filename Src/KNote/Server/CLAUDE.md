@@ -333,6 +333,7 @@ Staff, ProjectManager y Admin (como `KNoteAIAssistantCtrl` en `ClientWin` y los 
   petición (`RequestAborted`) corta la llamada al proveedor. El mensaje de sistema lo monta
   `KNote.Ai/AiAssistantContext` con el servicio de la petición (reglas, instrucciones, perfil y glosario de KNote Atlas,
   ver «Contexto de la IA» en el `CLAUDE.md` raíz), con las preguntas y respuestas de la conversación para el glosario.
+- `POST sessions/attachments` y `GET sessions/{noteId}/attachments/{resourceId}/preview` — los archivos de un mensaje: se guardan antes de enviarlo (`POST chat` lleva `SessionNoteId` y `Attachments`) y sus imágenes se ven por esa vista reducida, que comprueba al dueño de la sesión: la URL de un recurso se sirve sin sesión. `GET providers/{alias}/capabilities` dice si el modelo ve imágenes.
 - `GET sessions`, `GET sessions/{noteId}`, `POST sessions` — las sesiones del usuario
   (`IKntService.AiSessions`, ver `CLAUDE.md` raíz). El cliente guarda la sesión tras cada respuesta.
 

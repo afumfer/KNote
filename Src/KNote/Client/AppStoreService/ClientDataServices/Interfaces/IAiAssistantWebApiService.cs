@@ -20,4 +20,10 @@ public interface IAiAssistantWebApiService
     Task<Result<AiChatSessionDto>> GetSessionAsync(Guid noteId, CancellationToken cancellationToken = default);
 
     Task<Result<AiChatSessionDto>> SaveSessionAsync(AiChatSessionDto session, CancellationToken cancellationToken = default);
+
+    Task<Result<AiModelCapabilitiesDto>> GetCapabilitiesAsync(string providerAlias, CancellationToken cancellationToken = default);
+
+    Task<Result<AiChatAttachmentDto>> AddAttachmentAsync(AiChatAttachmentUploadDto attachment, CancellationToken cancellationToken = default);
+
+    Task<Result<AiChatAttachmentContentDto>> GetAttachmentPreviewAsync(Guid sessionNoteId, Guid resourceId, CancellationToken cancellationToken = default);
 }

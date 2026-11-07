@@ -47,12 +47,34 @@
         <RadzenSplitter Orientation="Orientation.Vertical" class="ai-chat-split">
             <RadzenSplitterPane Size="calc(100% - 90px)" Min="40%">
                 <AiChatView Turns="@session.Turns" PendingPrompt="@pendingPrompt" PendingAnswer="@pendingAnswer.ToString()"
+                            PendingAttachments="@sentAttachments" SessionNoteId="@session.NoteId" AttachmentShown="OnAttachmentShown"
                             PendingReasoning="@pendingReasoning.ToString()" Thinking="@thinking"
                             PendingAutomatic="@pendingAutomatic" ActionsAnswered="OnActionsAnswered" ActionsDisabled="@(streaming || runningActions)"
                             ToolInUse="@toolInUse" CreatedNotes="@createdNotes" ContainerId="@ChatContainerId" />
             </RadzenSplitterPane>
             <RadzenSplitterPane Size="82px" Min="62px">
+                <div @ref="promptArea" class="ai-prompt-area">
+                @if (!streaming && pendingFiles.Count > 0)
+                {
+                    <div class="ai-prompt-files">
+                        @foreach (var file in pendingFiles)
+                        {
+                            <span class="ai-prompt-file">
+                                @file.Upload.FileName
+                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.ExtraSmall"
+                                              Click="@(() => pendingFiles.Remove(file))" />
+                            </span>
+                        }
+                        @if (SentToProvider != null)
+                        {
+                            <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">Images are sent to @SentToProvider.</RadzenText>
+                        }
+                    </div>
+                }
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Gap="0.5rem" class="ai-prompt">
+                    <RadzenButton Icon="attach_file" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="PickFiles"
+                                  Disabled="@(streaming || uploadingFiles || currentProvider == null)"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Attach files (you can also paste or drop them here)", new TooltipOptions { Position = TooltipPosition.Top }))" />
                     <RadzenTextArea @bind-Value="promptInput" Immediate="true" class="ai-prompt-input"
                                     Placeholder="Ask the assistant ... (Ctrl+Enter to send)" Disabled="@(streaming || currentProvider == null)"
                                     @onkeydown="OnPromptKeyDown" />
@@ -68,6 +90,7 @@
                                       MouseEnter="@(args => tooltipService.Open(args, "Send (Ctrl+Enter)", new TooltipOptions { Position = TooltipPosition.Left }))" />
                     }
                 </RadzenStack>
+                </div>
             </RadzenSplitterPane>
         </RadzenSplitter>
     </RadzenSplitterPane>
@@ -119,6 +142,25 @@
     private DotNetObjectReference<AIAssistant>? selfReference;
     private IJSObjectReference? unsavedChangesWatch;
 
+    // A file of the message being written. Saved: already in the note of the session, if the message has to be sent again.
+    private sealed class PendingFile
+    {
+        public required AiChatAttachmentUploadDto Upload { get; init; }
+        public AiChatAttachmentDto? Saved { get; set; }
+    }
+
+    private readonly List<PendingFile> pendingFiles = new();
+    private IReadOnlyList<AiChatAttachmentDto> sentAttachments = Array.Empty<AiChatAttachmentDto>();
+    private bool uploadingFiles;
+    private ElementReference promptArea;
+    private IJSObjectReference? attachmentsModule;
+    private IJSObjectReference? attachments;
+
+    // A paid provider: the images leave the computer, and KNote says so.
+    private string? SentToProvider => pendingFiles.Any(f => AiAttachmentRules.IsImage(f.Upload.ContentType)) && currentProvider?.Provider != EnumAiProvider.Ollama
+        ? currentProvider?.Provider
+        : null;
+
     private long TotalTokens => session.Turns.Sum(t => t.TotalTokens);
 
     private string Height => InWindow ? "calc(100vh - 5rem)" : "calc(100vh - 10rem)";
@@ -150,10 +192,16 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && InWindow)
+        if (firstRender)
         {
             selfReference = DotNetObjectReference.Create(this);
-            unsavedChangesWatch = await kntWindows.WatchUnsavedChangesAsync(selfReference);
+            if (InWindow)
+                unsavedChangesWatch = await kntWindows.WatchUnsavedChangesAsync(selfReference);
+
+            // Without its script (the server not reachable, already notified) files can't be attached.
+            attachmentsModule = await jsRuntime.ImportModuleAsync("./js/aiAttachments.js", store.AppState);
+            if (attachmentsModule != null)
+                attachments = await attachmentsModule.InvokeAsync<IJSObjectReference>("init", promptArea, selfReference, KntConst.MaxLenResourceFile);
         }
 
         if (!scrollToBottom)
@@ -181,6 +229,13 @@
                 await unsavedChangesWatch.InvokeVoidAsync("dispose");
                 await unsavedChangesWatch.DisposeAsync();
             }
+            if (attachments != null)
+            {
+                await attachments.InvokeVoidAsync("dispose");
+                await attachments.DisposeAsync();
+            }
+            if (attachmentsModule != null)
+                await attachmentsModule.DisposeAsync();
         }
         catch (JSDisconnectedException)
         {
@@ -238,13 +293,87 @@
     private async Task Send()
     {
         var prompt = promptInput;
-        if (streaming || runningActions || currentProvider == null || string.IsNullOrWhiteSpace(prompt))
+        if (streaming || runningActions || uploadingFiles || currentProvider == null || string.IsNullOrWhiteSpace(prompt))
+            return;
+
+        if (!await SaveFilesAsync(prompt!))
             return;
 
         // A new message without answering the card rejects what it proposed: the model is told.
         AiActionRules.RejectPending(session.Turns);
+        sentAttachments = pendingFiles.Select(f => f.Saved!).ToList();
         await SendTurnAsync(prompt!, automatic: false);
     }
+
+    // The files of the message go to the note of the session first: from there they reach the model and the conversation.
+    private async Task<bool> SaveFilesAsync(string prompt)
+    {
+        uploadingFiles = true;
+        try
+        {
+            foreach (var file in pendingFiles.Where(f => f.Saved == null))
+            {
+                file.Upload.SessionNoteId = session.NoteId;
+                file.Upload.Provider = currentProvider!.Provider;
+                file.Upload.Model = currentProvider.Model;
+                file.Upload.Topic = prompt;
+
+                var res = await store.AiAssistant.AddAttachmentAsync(file.Upload);
+                if (!res.IsValid)
+                    return false;
+
+                file.Saved = res.Entity;
+                session.NoteId = res.Entity.SessionNoteId;
+            }
+            return true;
+        }
+        finally
+        {
+            uploadingFiles = false;
+        }
+    }
+
+    private async Task PickFiles()
+    {
+        if (attachments != null)
+            await attachments.InvokeVoidAsync("pick");
+    }
+
+    // A file pasted, dropped or chosen (js/aiAttachments.js). A pasted screenshot comes without a name.
+    [JSInvokable]
+    public async Task OnAttachment(string fileName, string contentType, string contentBase64)
+    {
+        if (pendingFiles.Count >= AiAttachmentRules.MaxPerMessage)
+        {
+            NotifyFile("Too many files", $"A message can have {AiAttachmentRules.MaxPerMessage} files at most.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+            fileName = $"image-{DateTime.Now:yyyyMMdd-HHmmss}.{contentType.Split('/')[^1].Replace("jpeg", "jpg")}";
+        if (string.IsNullOrWhiteSpace(contentType))
+            contentType = AiAttachmentRules.ContentTypeOf(fileName);
+
+        pendingFiles.Add(new PendingFile
+        {
+            Upload = new AiChatAttachmentUploadDto { FileName = fileName, ContentType = contentType, ContentBase64 = contentBase64 }
+        });
+        StateHasChanged();
+
+        if (AiAttachmentRules.IsImage(contentType) && currentProvider != null)
+        {
+            var capabilities = await store.AiAssistant.GetCapabilitiesAsync(currentProvider.Alias);
+            if (capabilities.IsValid && capabilities.Entity?.SupportsImages == false)
+                NotifyFile("This model does not see images", $"{currentProvider.Alias} will not receive {fileName}: it is only saved with the conversation.");
+        }
+    }
+
+    [JSInvokable]
+    public void OnAttachmentTooBig(string fileName) =>
+        NotifyFile("File too big", $"{fileName}: {KntConst.MaxLenResourceFile / 1_000_000.0:0.#} MB at most.");
+
+    private void NotifyFile(string summary, string detail) =>
+        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = summary, Detail = detail, Duration = 8000 });
 
     // automatic: the turn the app sends after a card, not a question of the user.
     private async Task SendTurnAsync(string prompt, bool automatic)
@@ -258,7 +387,9 @@
             ProviderAlias = provider.Alias,
             History = session.Turns.ToList(),
             Prompt = prompt,
-            AutoApprovedActionKinds = autoApprovedKinds.ToList()
+            AutoApprovedActionKinds = autoApprovedKinds.ToList(),
+            SessionNoteId = session.NoteId,
+            Attachments = automatic ? new() : sentAttachments.ToList()
         };
 
         streaming = true;
@@ -323,6 +454,7 @@
         {
             streaming = false;
             pendingPrompt = null;
+            sentAttachments = Array.Empty<AiChatAttachmentDto>();
             pendingAnswer.Clear();
             pendingReasoning.Clear();
             thinking = false;
@@ -338,6 +470,8 @@
             session.Model = provider.Model;
             completedTurn.Automatic = automatic;
             session.Turns.Add(completedTurn);
+            if (!automatic)
+                pendingFiles.Clear();
             await NotifyChangedNotesAsync(completedTurn.Actions);
             pendingSave = true;
             scrollToBottom = true;
@@ -356,6 +490,9 @@
     }
 
     private void StopAnswer() => answerCancellation?.Cancel();
+
+    // They only load with their message or on opening the session, so this does not move what the user is reading.
+    private void OnAttachmentShown() => scrollToBottom = true;
 
     // The card of the last turn: what is not accepted is rejected, the rest is run and, if anything was accepted, the assistant
     // goes on by itself (D3): what was asked may depend on it.
@@ -560,6 +697,7 @@
         session = newSession;
         pendingSave = false;
         promptInput = "";
+        pendingFiles.Clear();
         createdNotes.Clear();
         autoApprovedKinds.Clear();
         scrollToBottom = true;

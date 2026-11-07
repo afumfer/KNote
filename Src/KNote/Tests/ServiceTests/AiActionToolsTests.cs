@@ -551,6 +551,20 @@ public class AiActionToolsTests
     }
 
     [TestMethod]
+    public void History_NamesTheFilesOfAMessage_AndSendsNoImages()
+    {
+        var history = new[]
+        {
+            new AiChatTurnDto { Prompt = "What is it?", Answer = "A QL", Attachments = { new AiChatAttachmentDto { FileName = "photo.jpg", ContentType = "image/jpeg" } } }
+        };
+
+        var messages = AiChatTurnStreamer.BuildMessages(null, history, "Next");
+
+        StringAssert.Contains(messages[0].Text, "[Attached to this message: photo.jpg]");
+        Assert.IsFalse(messages.SelectMany(m => m.Contents).OfType<DataContent>().Any(), "An image only goes in its own turn.");
+    }
+
+    [TestMethod]
     public void History_ATurnThatEndsInTheCard_SendsNoEmptyMessage()
     {
         var action = new AiActionDto { Kind = AiActionRules.SetTags, Status = EnumAiActionStatus.Done, Text = "Tags of #1", NoteNumber = 1 };

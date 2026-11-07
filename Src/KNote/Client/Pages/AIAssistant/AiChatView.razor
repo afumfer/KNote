@@ -20,7 +20,7 @@
         var turn = Turns[i];
         if (!turn.Automatic)
         {
-            @UserMessage(turn.Prompt)
+            @UserMessage(turn.Prompt, turn.Attachments)
         }
         <div class="ai-row">
             <span class="ai-avatar ai-avatar-assistant"><RadzenIcon Icon="smart_toy" /></span>
@@ -50,7 +50,7 @@
     {
         if (!PendingAutomatic)
         {
-            @UserMessage(PendingPrompt)
+            @UserMessage(PendingPrompt, PendingAttachments)
         }
         <div class="ai-row">
             @* While it answers: a ring turning round the avatar and dots bouncing in the bubble. *@
@@ -79,6 +79,16 @@
 
     // The question being answered and what has arrived of its answer (null when there is none).
     [Parameter] public string? PendingPrompt { get; set; }
+    [Parameter] public IReadOnlyList<AiChatAttachmentDto> PendingAttachments { get; set; } = Array.Empty<AiChatAttachmentDto>();
+
+    // The note of the session, where its attachments are.
+    [Parameter] public Guid SessionNoteId { get; set; }
+
+    // An image of a message has taken its place: the conversation has grown.
+    [Parameter] public EventCallback AttachmentShown { get; set; }
+
+    private readonly Dictionary<Guid, string?> attachmentPreviews = new();
+
     [Parameter] public string? PendingAnswer { get; set; }
     [Parameter] public string? ToolInUse { get; set; }
 
@@ -125,10 +135,13 @@
         }
     };
 
-    private static RenderFragment UserMessage(string prompt) => __builder =>
+    private RenderFragment UserMessage(string prompt, IReadOnlyList<AiChatAttachmentDto> attachments) => __builder =>
     {
         <div class="ai-row ai-row-user">
-            <div class="ai-msg ai-user">@prompt</div>
+            <div class="ai-msg ai-user">
+                @prompt
+                <AiAttachmentsView Attachments="@attachments" SessionNoteId="@SessionNoteId" Previews="@attachmentPreviews" ImageShown="AttachmentShown" />
+            </div>
             <span class="ai-avatar ai-avatar-user"><RadzenIcon Icon="person" /></span>
         </div>
     };

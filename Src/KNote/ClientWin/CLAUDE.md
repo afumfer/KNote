@@ -733,6 +733,16 @@ convierte en `ActionsAnswered`; `KNoteAIAssistantCtrl.AnswerActionsAsync` ejecut
 tarjeta, se pregunta con un cuadro de diálogo (todo o nada). `KNoteAiToolsHost.CanChangeNote` no deja cambiar una nota abierta
 en un editor (`Store.IsNoteBeingEdited`: al guardar pisaría el cambio) y `OnNoteChanged` publica `EntitySaved<NoteExtendedDto>`.
 
+- **Archivos del mensaje** (`KNoteAIAssistantCtrl.PendingAttachments`, solo con `PersistSession`): el botón **Attach**, Ctrl+V
+  (`Utils/KntClipboardFiles`, común con el chat room) o soltarlos en la caja; `KNoteAIAssistantForm` los muestra en `_attachmentsBar`.
+  `SaveAttachmentsAsync` los guarda antes de enviar y deja `TurnAttachments`, que `RunTurnAsync` pasa a `AiTurnAttachments`; si el
+  modelo falla, se quedan. Las imágenes de la conversación van como `data:` (`PreviewOf`, cargadas al abrir una sesión): la URL de un
+  recurso puede ser de otra instalación.
+- **Foco y scroll del chat**: al desactivar la caja del mensaje, WinForms pasa el foco al siguiente control, el WebView2. Al terminar el
+  turno entraba en la página, en su primer elemento enfocable (el `<summary>` del razonamiento de la primera respuesta), y el navegador
+  subía a mostrarlo. `StatusProcessing` deja `ActiveControl = null` antes de desactivarla. Una imagen del mensaje toma su altura al
+  cargarse, después de bajar al final: la página vuelve a bajar en su `load` (si no, deja de seguir la respuesta y el indicador de
+  espera queda fuera de la vista). Con imágenes lisas no se ve: se decodifican al instante; hay que probarlo con una tipo foto.
 - `KNoteAiTools` recibe `IKntService` (no `ServiceRef`), así que sus tests corren contra los fakes de
   servicio (`Fakes/FakeKntService.cs`) sin base de datos real. Lo que `create_task` hace distinto en cada
   aplicación lo pide a un `IKNoteAiToolsHost`; el de `ClientWin` es **`Core/KNoteAiToolsHost`**:

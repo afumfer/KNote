@@ -80,7 +80,8 @@ public class CommandAuthorizationMatrixTests
         // The AI assistant's sessions: notes and tasks of the user's own (Staff, like the assistant), also to
         // read them, since the assistant itself requires Staff.
         Add(nameof(EnumRoles.Staff),
-            "KntAiSessionsGetUserSessionsAsyncCommand", "KntAiSessionsGetAsyncCommand", "KntAiSessionsSaveAsyncCommand");
+            "KntAiSessionsGetUserSessionsAsyncCommand", "KntAiSessionsGetAsyncCommand", "KntAiSessionsSaveAsyncCommand",
+            "KntAiSessionsAddAttachmentAsyncCommand", "KntAiSessionsGetAttachmentAsyncCommand");
 
         // The chat room threads: public to every Staff user (the chat room requires Staff), who reads them, creates
         // them, joins them and writes in them (notes, tasks and the resources of its images).
