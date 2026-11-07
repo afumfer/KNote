@@ -28,8 +28,7 @@ public static class AiChatTurnStreamer
             foreach (var action in turn.Actions)
             {
                 var callId = action.ActionId.ToString("N");
-                var arguments = new Dictionary<string, object> { ["noteNumber"] = action.NoteNumber };
-                messages.Add(new ChatMessage(ChatRole.Assistant, [new FunctionCallContent(callId, action.Kind, arguments)]));
+                messages.Add(new ChatMessage(ChatRole.Assistant, [new FunctionCallContent(callId, action.Kind, CallArguments(action))]));
                 messages.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(callId, AiActionRules.Outcome(action))]));
             }
 
@@ -40,6 +39,25 @@ public static class AiChatTurnStreamer
 
         messages.Add(new ChatMessage(ChatRole.User, prompt ?? ""));
         return messages;
+    }
+
+    // A model repeats the calls it sees: with only the note, set_tags has nothing required left and it called it without tags
+    // (measured with qwen3.5:9b). The tags come with the turns of the running conversation; a saved one does not keep them.
+    private static Dictionary<string, object> CallArguments(AiActionDto action)
+    {
+        var arguments = new Dictionary<string, object>();
+        if (action.NoteNumber is int number)
+            arguments["noteNumber"] = number;
+
+        if (action.Kind == AiActionRules.SetTags)
+        {
+            if (action.AddTags?.Count > 0)
+                arguments["add"] = action.AddTags;
+            if (action.RemoveTags?.Count > 0)
+                arguments["remove"] = action.RemoveTags;
+        }
+
+        return arguments;
     }
 
     // tools: the ones of this turn (KNoteAiTools.GetToolsAsync), when they are not the ones the client was built with.

@@ -302,6 +302,9 @@
                     case AiChatStreamEventTypes.NoteCreated:
                         AddCreatedNote(session.Turns.Count, e);
                         break;
+                    case AiChatStreamEventTypes.OpenNote:
+                        await OpenNoteAsync(session.Turns.Count, e);
+                        break;
                     case AiChatStreamEventTypes.Completed:
                         completedTurn = e.Turn;
                         // It does not travel with the turn: it is not saved, nor sent back with the history.
@@ -406,11 +409,24 @@
         StateHasChanged();
     }
 
-    private void AddCreatedNote(int turnIndex, AiChatStreamEventDto note)
+    private void AddNoteLink(int turnIndex, AiChatStreamEventDto note)
     {
         if (!createdNotes.TryGetValue(turnIndex, out var notes))
             createdNotes[turnIndex] = notes = new();
         notes.Add(note);
+    }
+
+    // No click opens this window, so a browser may block it: the link stays in the conversation for that.
+    private async Task OpenNoteAsync(int turnIndex, AiChatStreamEventDto note)
+    {
+        AddNoteLink(turnIndex, note);
+        StateHasChanged();
+        await kntWindows.OpenEditAsync(note.NoteId!.Value);
+    }
+
+    private void AddCreatedNote(int turnIndex, AiChatStreamEventDto note)
+    {
+        AddNoteLink(turnIndex, note);
 
         notificationService.Notify(new NotificationMessage
         {

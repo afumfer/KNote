@@ -7,7 +7,7 @@
     {
         <div class="ai-action">
             <RadzenCheckBox TValue="bool" Value="@(!unmarked.Contains(action.ActionId))" Change="@(marked => Mark(action, marked))" />
-            <ViewMarkdown MarkdownContent="@action.Text" DisableHtml="true" />
+            <ViewMarkdown MarkdownContent="@AiActionRules.CardText(action)" DisableHtml="true" />
         </div>
     }
     <div class="ai-action">

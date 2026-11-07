@@ -42,7 +42,7 @@ public class AiChatStreamEventDto
     // called. Error: the message.
     public string Text { get; set; }
 
-    // NoteCreated: the note the create_task tool has just saved.
+    // NoteCreated: the note the create_task tool has just saved. OpenNote: the note to show in its edit form.
     public Guid? NoteId { get; set; }
 
     public int? NoteNumber { get; set; }
@@ -57,6 +57,7 @@ public static class AiChatStreamEventTypes
     public const string Reasoning = "reasoning";
     public const string Tool = "tool";
     public const string NoteCreated = "noteCreated";
+    public const string OpenNote = "openNote";
     public const string Completed = "completed";
     public const string Error = "error";
 }

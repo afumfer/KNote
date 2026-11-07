@@ -565,6 +565,10 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Rutas relativas**: la app se sirve bajo `/KNote/` (`<base href="/KNote/" />` en `index.html`, a juego con
   `app.UsePathBase("/KNote")` en `Server`). Navega con rutas sin `/` inicial (`store.NavigateTo("notes/tree")`,
   `Path="index"`), o se saldrá de la base.
+- **Nota cambiada en otra ventana**: `NoteEdit` oye `KntWindows.NoteSaved` y, si es su nota, avisa de que guardar puede reemplazar
+  esos cambios (las acciones del asistente, otra ventana de edición). Solo avisa: ni bloquea ni mezcla.
+- **Abrir una nota desde el asistente**: el evento `openNote` abre la ventana del editor y deja un enlace en la conversación: como no
+  la abre un clic, el navegador puede bloquearla.
 - **Acciones del asistente**: `AiChatView` muestra las líneas del registro y, en el último turno, `AiActionsCard` con lo
   propuesto; `AIAssistant.OnActionsAnswered` rechaza lo no aceptado, ejecuta lo demás (`IStore.AiAssistant.RunActionsAsync`),
   guarda la sesión y, si se aceptó algo, envía el turno de continuación (`SendTurnAsync` con `automatic`, cuya pregunta no se

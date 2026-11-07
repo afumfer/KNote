@@ -20,7 +20,7 @@ public class AiQueryToolsTests
     private sealed class NoHost : IKNoteAiToolsHost
     {
         public Task<AiNoteDestination> GetNewNoteDestinationAsync() => Task.FromResult<AiNoteDestination>(null!);
-        public void OnNoteCreated(IKntService service, NoteExtendedDto note) { }
+        public void OnNoteCreated(IKntService service, NoteExtendedDto note, bool openEditor = true) { }
     }
 
     private static async Task<SemanticIndexFixture> FixtureAsync(string orm = "Dapper")
@@ -97,7 +97,7 @@ public class AiQueryToolsTests
         CollectionAssert.IsSubsetOf(new[] { "search_notes", "get_note_details", "create_task", "filter_notes", "get_folder_tree", "get_note_items", "get_tasks" }, before);
         CollectionAssert.Contains(after, "find_notes_about");
         CollectionAssert.Contains(after, "lookup_glossary");
-        Assert.AreEqual(12, after.Count);
+        Assert.AreEqual(21, after.Count);
     }
 
     [TestMethod]

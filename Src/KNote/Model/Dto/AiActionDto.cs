@@ -40,6 +40,23 @@ public class AiActionDto
     public Guid? FolderId { get; set; }
     public string Topic { get; set; }
     public string Content { get; set; }
+
+    // A replacement: the text of the note it was proposed for (AiActionRules.TextStamp).
+    public string TextStamp { get; set; }
     public List<string> AddTags { get; set; }
     public List<string> RemoveTags { get; set; }
+
+    // The user of a task. An alarm has none here: it is always for the user who runs it.
+    public Guid? UserId { get; set; }
+
+    // When an alarm goes off, or when a task should end.
+    public DateTime? Date { get; set; }
+    public EnumAlarmType? AlarmType { get; set; }
+
+    public Guid? AttributeId { get; set; }
+    public string Value { get; set; }
+
+    // The other note of a relation, and its type if it has one.
+    public Guid? TargetNoteId { get; set; }
+    public Guid? TraceNoteTypeId { get; set; }
 }

@@ -165,6 +165,93 @@ public class AiActionsInProcessTests
         Assert.IsFalse((await ReadAsync(glossary.NoteId)).Description.Contains("Forged"));
     }
 
+    [TestMethod]
+    public async Task CreatingAFolder_AStaffIsToldWhy_AndAForgedOneFails_AProjectManagerCan()
+    {
+        Guid homeId;
+        using (var service = _factory.CreateServiceForRepository(0))
+            homeId = (await service.Folders.GetHomeAsync()).Entity.FolderId;
+        var name = $"Folder {Guid.NewGuid():N}";
+        _chatClients.Script = () => ScriptCalling(AiActionRules.CreateFolder, new() { ["name"] = name });
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var manager = await NewClientAsync(nameof(EnumRoles.ProjectManager));
+        AiActionDto Forged() => new() { Kind = AiActionRules.CreateFolder, FolderId = homeId, Topic = name, Text = "Forged" };
+
+        var refused = await ChatAsync(staff, new AiChatRequestDto { Prompt = "Create it" });
+        var forged = (await RunAsync(staff, new List<AiActionDto> { Forged() })).Single();
+        var proposed = await ChatAsync(manager, new AiChatRequestDto { Prompt = "Create it" });
+
+        Assert.AreEqual(0, refused.Actions.Count, "No card for what the role does not allow.");
+        Assert.AreEqual(EnumAiActionStatus.Failed, forged.Status);
+        Assert.AreEqual(EnumAiActionStatus.Proposed, proposed.Actions.Single().Status);
+
+        var ran = (await RunAsync(manager, proposed.Actions)).Single();
+
+        Assert.AreEqual(EnumAiActionStatus.Done, ran.Status, ran.Result);
+        using (var service = _factory.CreateServiceForRepository(0))
+            Assert.AreEqual(homeId, (await service.Folders.GetAllAsync()).Entity.Single(f => f.Name == name).ParentId);
+    }
+
+    [TestMethod]
+    public async Task AnAlarm_ThroughTheApi_KeepsItsDate_AndCannotBeForTheUserItSays()
+    {
+        var note = await FirstNoteAsync();
+        var comment = $"Alarm {Guid.NewGuid():N}";
+        var when = DateTime.Now.AddDays(2).Date.AddHours(9);
+        _chatClients.Script = () => ScriptCalling(AiActionRules.AddAlarm, new()
+        {
+            ["noteNumber"] = note.NoteNumber, ["message"] = comment, ["when"] = when.ToString("yyyy-MM-dd HH:mm")
+        });
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+
+        var turn = await ChatAsync(staff, new AiChatRequestDto { Prompt = "Remind me" });
+        var other = Guid.NewGuid();
+        turn.Actions.Single().UserId = other;
+        var ran = (await RunAsync(staff, turn.Actions)).Single();
+
+        Assert.AreEqual(EnumAiActionStatus.Done, ran.Status, ran.Result);
+        using var service = _factory.CreateServiceForRepository(0);
+        var alarm = (await service.Notes.GetMessagesAsync(note.NoteId)).Entity.Single(m => m.Comment == comment);
+        Assert.AreEqual(when, alarm.AlarmDateTime);
+        Assert.AreEqual(EnumNotificationType.AppInfo, alarm.NotificationType);
+        Assert.AreNotEqual(other, alarm.UserId);
+    }
+
+    [TestMethod]
+    public async Task AskingToOpenANote_TellsTheWebClient()
+    {
+        var note = await FirstNoteAsync();
+        _chatClients.Script = () => ScriptCalling(AiActionRules.OpenNoteEditor, new() { ["noteNumber"] = note.NoteNumber });
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+
+        var response = await staff.PostAsJsonAsync("api/aiassistant/chat", new AiChatRequestDto { Prompt = "Open it" });
+        var events = (await response.Content.ReadAsStringAsync()).Split('\n').Where(l => l.StartsWith("data:"))
+            .Select(l => JsonSerializer.Deserialize<AiChatStreamEventDto>(l[5..], _json)!).ToList();
+
+        var open = events.Single(e => e.Type == AiChatStreamEventTypes.OpenNote);
+        Assert.AreEqual(note.NoteId, open.NoteId);
+        Assert.AreEqual(note.NoteNumber, open.NoteNumber);
+    }
+
+    [TestMethod]
+    public async Task ReplacingTheText_ThroughTheApi_AsksFirst_AndRunsOnceAccepted()
+    {
+        var note = await FirstNoteAsync();
+        var content = $"Text {Guid.NewGuid():N}";
+        _chatClients.Script = () => ScriptCalling(AiActionRules.ReplaceNoteText, new() { ["noteNumber"] = note.NoteNumber, ["content"] = content });
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+
+        var turn = await ChatAsync(staff, new AiChatRequestDto { Prompt = "Replace it" });
+
+        Assert.AreEqual(EnumAiActionStatus.Proposed, turn.Actions.Single().Status);
+        Assert.AreNotEqual(content, (await ReadAsync(note.NoteId)).Description);
+
+        var ran = (await RunAsync(staff, turn.Actions)).Single();
+
+        Assert.AreEqual(EnumAiActionStatus.Done, ran.Status, ran.Result);
+        Assert.AreEqual(content, (await ReadAsync(note.NoteId)).Description);
+    }
+
     private static async Task<HttpClient> NewClientAsync(string role)
     {
         var id = Guid.NewGuid();

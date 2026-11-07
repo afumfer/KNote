@@ -21,11 +21,19 @@ public class AiActionToolsTests
         public List<Guid> Created { get; } = new();
         public List<Guid> Changed { get; } = new();
         public HashSet<Guid> InEditor { get; } = new();
+        public List<Guid> Opened { get; } = new();
 
         public Task<AiNoteDestination> GetNewNoteDestinationAsync() => Task.FromResult(Destination);
-        public void OnNoteCreated(IKntService service, NoteExtendedDto note) => Created.Add(note.NoteId);
+        public void OnNoteCreated(IKntService service, NoteExtendedDto note, bool openEditor = true)
+        {
+            Created.Add(note.NoteId);
+            if (openEditor)
+                Opened.Add(note.NoteId);
+        }
+
         public bool CanChangeNote(Guid noteId) => !InEditor.Contains(noteId);
         public void OnNoteChanged(IKntService service, Guid noteId) => Changed.Add(noteId);
+        public void OpenNoteEditor(IKntService service, NoteMinimalDto note) => Opened.Add(note.NoteId);
     }
 
     private sealed record Setup(SemanticIndexFixture Fixture, KNoteAiTools Tools, Host Host) : IDisposable
@@ -74,6 +82,7 @@ public class AiActionToolsTests
         Assert.AreEqual(folder.FolderId, note.FolderId);
         Assert.AreEqual("ql hardware", note.Tags);
         CollectionAssert.Contains(setup.Host.Created, note.NoteId);
+        Assert.AreEqual(0, setup.Host.Opened.Count, "A note open in an editor could not be completed: it opens when it is asked for.");
     }
 
     [TestMethod]
@@ -111,6 +120,264 @@ public class AiActionToolsTests
         Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
         Assert.AreEqual("First text.\r\n\r\nSecond text.", (await setup.ReadAsync(note.NoteId)).Description);
         CollectionAssert.Contains(setup.Host.Changed, note.NoteId);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task Replace_ChangesNothingUntilItIsAccepted_AndThenOnlyTheText(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        var note = await setup.Fixture.AddNoteAsync("QL", "First text.");
+        var read = await setup.ReadAsync(note.NoteId);
+        read.Tags = "ql";
+        await setup.Service.Notes.SaveAsync(read);
+
+        var result = await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", note.NoteNumber), ("content", "All new."));
+
+        StringAssert.Contains(result, "NOT done");
+        var action = setup.Tools.TurnActions.Single();
+        Assert.AreEqual(EnumAiActionStatus.Proposed, action.Status);
+        Assert.AreEqual($"Replace the whole text of #{note.NoteNumber} (QL), 11 → 8 characters", action.Text);
+        Assert.AreEqual("First text.", (await setup.ReadAsync(note.NoteId)).Description);
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        var replaced = await setup.ReadAsync(note.NoteId);
+        Assert.AreEqual("All new.", replaced.Description);
+        Assert.AreEqual("QL", replaced.Topic);
+        Assert.AreEqual("ql", replaced.Tags);
+        CollectionAssert.Contains(setup.Host.Changed, note.NoteId);
+    }
+
+    [TestMethod]
+    public async Task Replace_InAnHtmlNote_WritesHtml_AndALockedOneIsRefused()
+    {
+        using var setup = await SetupAsync();
+        var html = await setup.Fixture.AddNoteAsync("Html", "<p>Old</p>", contentType: "html");
+        var locked = await setup.Fixture.AddNoteAsync("Locked", "Text");
+        var read = await setup.ReadAsync(locked.NoteId);
+        var type = read.GetContentTypeExt();
+        type.DescriptionBlocked = true;
+        read.SetContentTypeExt(type);
+        await setup.Service.Notes.SaveAsync(read);
+
+        await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", html.NoteNumber), ("content", "**New**"));
+        var refused = await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", locked.NoteNumber), ("content", "More"));
+
+        await setup.Tools.ExecuteActionsAsync(setup.Tools.TurnActions);
+
+        var description = (await setup.ReadAsync(html.NoteId)).Description;
+        StringAssert.Contains(description, "<strong>New</strong>");
+        Assert.IsFalse(description.Contains("Old"), description);
+        StringAssert.Contains(refused, KntAiActionExecutor.NoteLocked);
+        Assert.AreEqual(1, setup.Tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    public async Task Replace_AsksInANoteOfTheConversation_AndNotWithItsKindApproved()
+    {
+        using var setup = await SetupAsync();
+        await setup.CallAsync(AiActionRules.CreateNote, ("topic", "New one"), ("content", "Text"));
+        var created = setup.Tools.TurnActions.Single();
+        var old = await setup.Fixture.AddNoteAsync("Old one", "Text");
+
+        setup.Tools.BeginTurn(new[] { new AiChatTurnDto { Actions = { created } } }, null);
+        var onNew = await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", created.NoteNumber!.Value), ("content", "Other"));
+
+        setup.Tools.BeginTurn(null, new[] { AiActionRules.ReplaceNoteText });
+        var approved = await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", old.NoteNumber), ("content", "Other"));
+
+        StringAssert.Contains(onNew, "NOT done");
+        Assert.AreEqual("Text", (await setup.ReadAsync(created.NoteId!.Value)).Description);
+        StringAssert.StartsWith(approved, "Done:");
+        Assert.AreEqual("Other", (await setup.ReadAsync(old.NoteId)).Description);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task Move_ChangesNothingUntilItIsAccepted_AndThenOnlyTheFolder(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        var folder = (await setup.Service.Folders.SaveAsync(new FolderDto { Name = "Sinclair", ParentId = setup.Fixture.HomeId })).Entity;
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var from = (await setup.ReadAsync(note.NoteId)).FolderId;
+
+        var result = await setup.CallAsync(AiActionRules.MoveNote, ("noteNumber", note.NoteNumber), ("folder", "Sinclair"));
+
+        StringAssert.Contains(result, "NOT done");
+        var action = setup.Tools.TurnActions.Single();
+        StringAssert.Contains(action.Text, $"Move #{note.NoteNumber} (QL)");
+        StringAssert.Contains(action.Text, "Sinclair");
+        Assert.AreEqual(from, (await setup.ReadAsync(note.NoteId)).FolderId);
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        var moved = await setup.ReadAsync(note.NoteId);
+        Assert.AreEqual(folder.FolderId, moved.FolderId);
+        Assert.AreEqual("Text", moved.Description);
+        CollectionAssert.Contains(setup.Host.Changed, note.NoteId);
+    }
+
+    [TestMethod]
+    public async Task Move_ToTheFolderItIsIn_OrToOneThatDoesNotExist_IsNotProposed()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var folderName = (await setup.Service.Folders.GetAsync((await setup.ReadAsync(note.NoteId)).FolderId)).Entity.Name;
+
+        var same = await setup.CallAsync(AiActionRules.MoveNote, ("noteNumber", note.NoteNumber), ("folder", folderName));
+        var wrong = await setup.CallAsync(AiActionRules.MoveNote, ("noteNumber", note.NoteNumber), ("folder", "Nowhere"));
+
+        StringAssert.Contains(same, "is already in");
+        StringAssert.Contains(wrong, "there is no folder 'Nowhere'");
+        Assert.AreEqual(0, setup.Tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    public async Task Move_ForgedToAFolderOfTheSystem_ChangesNothing()
+    {
+        using var setup = await SetupAsync();
+        var system = (await setup.Service.Folders.SaveAsync(new FolderDto { Name = KntConst.SystemFolderNames.First(), ParentId = setup.Fixture.HomeId })).Entity;
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var from = (await setup.ReadAsync(note.NoteId)).FolderId;
+        var forged = new AiActionDto { Kind = AiActionRules.MoveNote, NoteId = note.NoteId, FolderId = system.FolderId, Text = "Forged" };
+
+        await setup.Tools.ExecuteActionsAsync(new[] { forged });
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, forged.Status);
+        Assert.AreEqual(from, (await setup.ReadAsync(note.NoteId)).FolderId);
+    }
+
+    [TestMethod]
+    public async Task OpenNoteEditor_ShowsTheNote_WithoutACardOrARecord()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+
+        var result = await setup.CallAsync(AiActionRules.OpenNoteEditor, ("noteNumber", note.NoteNumber));
+
+        StringAssert.StartsWith(result, "Done:");
+        CollectionAssert.AreEqual(new[] { note.NoteId }, setup.Host.Opened);
+        Assert.AreEqual(0, setup.Tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    public async Task OpenNoteEditor_ANoteOfTheSystem_IsNotFound()
+    {
+        using var setup = await SetupAsync();
+        var glossary = (await setup.Service.AtlasContext.CreateGlossaryAsync()).Entity;
+
+        var result = await setup.CallAsync(AiActionRules.OpenNoteEditor, ("noteNumber", glossary.NoteNumber));
+
+        StringAssert.Contains(result, KntAiActionExecutor.NoteNotFound);
+        Assert.AreEqual(0, setup.Host.Opened.Count);
+    }
+
+    [TestMethod]
+    public async Task AnActionDoneWithoutACard_TellsTheModelThatNothingIsWaiting()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        setup.Tools.BeginTurn(null, new[] { AiActionRules.SetTags });
+
+        var result = await setup.CallAsync(AiActionRules.SetTags, ("noteNumber", note.NoteNumber), ("add", new[] { "ql" }));
+
+        Assert.AreEqual(EnumAiActionStatus.Done, setup.Tools.TurnActions.Single().Status);
+        StringAssert.StartsWith(result, "Done:");
+        StringAssert.Contains(result, "nothing is waiting for the user");
+    }
+
+    [TestMethod]
+    public async Task SetTags_WithoutTags_SaysWhatIsMissing_AndNotThatTheyAreThere()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+
+        var result = await setup.CallAsync(AiActionRules.SetTags, ("noteNumber", note.NoteNumber));
+
+        StringAssert.Contains(result, "this call has no tags");
+        Assert.AreEqual(0, setup.Tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    public void TheHistory_ShowsTheTagsOfACall_WhenTheTurnHasThem()
+    {
+        var withTags = new AiActionDto { Kind = AiActionRules.SetTags, Status = EnumAiActionStatus.Done, Text = "Tags", NoteNumber = 7, AddTags = new() { "ql" }, RemoveTags = new() { "old" } };
+        var saved = new AiActionDto { Kind = AiActionRules.SetTags, Status = EnumAiActionStatus.Done, Text = "Tags", NoteNumber = 7 };
+        var history = new[] { new AiChatTurnDto { Prompt = "Tag it", Answer = "Done", Actions = { withTags, saved } } };
+
+        var calls = AiChatTurnStreamer.BuildMessages(null, history, "Next").SelectMany(m => m.Contents).OfType<FunctionCallContent>().ToList();
+
+        CollectionAssert.AreEqual(new[] { "ql" }, (List<string>)calls[0].Arguments!["add"]!);
+        CollectionAssert.AreEqual(new[] { "old" }, (List<string>)calls[0].Arguments!["remove"]!);
+        Assert.AreEqual(7, calls[1].Arguments!["noteNumber"]);
+        Assert.IsFalse(calls[1].Arguments!.ContainsKey("add"));
+    }
+
+    [TestMethod]
+    public async Task Replace_WithNoTextOrTheSameOne_IsNotProposed()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Same text.\r\n");
+
+        var empty = await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", note.NoteNumber), ("content", "  "));
+        var same = await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", note.NoteNumber), ("content", "Same text."));
+
+        StringAssert.StartsWith(empty, "Error:");
+        StringAssert.Contains(same, "already has that text");
+        Assert.AreEqual(0, setup.Tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    public async Task Replace_IfTheNoteChangedWhileTheCardWaited_LeavesWhatWasWritten()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "First text.");
+        await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", note.NoteNumber), ("content", "All new."));
+        var action = setup.Tools.TurnActions.Single();
+
+        var read = await setup.ReadAsync(note.NoteId);
+        read.Description = "Written meanwhile.";
+        await setup.Service.Notes.SaveAsync(read);
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, action.Status);
+        Assert.AreEqual(KntAiActionExecutor.NoteChanged, action.Result);
+        Assert.AreEqual("Written meanwhile.", (await setup.ReadAsync(note.NoteId)).Description);
+    }
+
+    [TestMethod]
+    public async Task Replace_ThatArrivesWithoutItsData_ChangesNothing()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "First text.");
+        var noStamp = new AiActionDto { Kind = AiActionRules.ReplaceNoteText, NoteId = note.NoteId, Content = "Forged", Text = "Forged" };
+        var noText = new AiActionDto { Kind = AiActionRules.ReplaceNoteText, NoteId = note.NoteId, TextStamp = AiActionRules.TextStamp("First text."), Text = "Forged" };
+
+        await setup.Tools.ExecuteActionsAsync(new[] { noStamp, noText });
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, noStamp.Status);
+        Assert.AreEqual(EnumAiActionStatus.Failed, noText.Status);
+        Assert.AreEqual("First text.", (await setup.ReadAsync(note.NoteId)).Description);
+    }
+
+    [TestMethod]
+    public async Task Replace_ANoteOpenInAnEditor_IsNotDone()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "First text.");
+        await setup.CallAsync(AiActionRules.ReplaceNoteText, ("noteNumber", note.NoteNumber), ("content", "All new."));
+        var action = setup.Tools.TurnActions.Single();
+        setup.Host.InEditor.Add(note.NoteId);
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, action.Status);
+        Assert.AreEqual("First text.", (await setup.ReadAsync(note.NoteId)).Description);
     }
 
     [TestMethod]
@@ -317,5 +584,367 @@ public class AiActionToolsTests
         StringAssert.StartsWith(other, "Done:");
         var description = (await setup.ReadAsync(note.NoteId)).Description;
         Assert.AreEqual(1, description.Split("More").Length - 1, description);
+    }
+
+    // The tools of a user of that role, with the commands asking for it as in the Server's chat.
+    private static async Task<(KNoteAiTools Tools, KntService Service)> ToolsOfAsync(Setup setup, EnumRoles role)
+    {
+        var name = $"action-{role}".ToLowerInvariant();
+        var user = (await setup.Service.Repository.Users.AddAsync(new UserDto
+        {
+            UserId = Guid.NewGuid(), UserName = name, EMail = $"{name}@knote.tests", FullName = $"Action {role}", RoleDefinition = role.ToString()
+        })).Entity;
+        var service = new KntService(setup.Fixture.Db.CreateRepository("Dapper")) { UserIdentityName = user.UserName, EnforceAuthorization = true };
+        var tools = new KNoteAiTools(service, setup.Host);
+        tools.BeginTurn(null, null);
+        return (tools, service);
+    }
+
+    private static async Task<string> CallAsync(KNoteAiTools tools, string tool, params (string Name, object Value)[] arguments)
+    {
+        var function = tools.GetTools().OfType<AIFunction>().Single(t => t.Name == tool);
+        var result = await function.InvokeAsync(new AIFunctionArguments(arguments.ToDictionary(a => a.Name, a => (object?)a.Value)));
+        return result is System.Text.Json.JsonElement json ? json.GetString()! : result?.ToString()!;
+    }
+
+    private static async Task<UserDto> CurrentUserAsync(Setup setup) => await setup.Service.GetCurrentUserAsync();
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AddTask_IsDoneWhenAccepted_WithItsUserAndDate_AndTheStatusOfTheNote(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var before = (await setup.ReadAsync(note.NoteId)).InternalTags;
+
+        var result = await setup.CallAsync(AiActionRules.AddTask, ("noteNumber", note.NoteNumber), ("description", "Check the PSU"), ("dueDate", "2026-11-13"));
+
+        StringAssert.Contains(result, "NOT done");
+        var action = setup.Tools.TurnActions.Single();
+        StringAssert.Contains(action.Text, "Friday, 2026-11-13");
+        Assert.AreEqual(0, (await setup.Service.Notes.GetNoteTasksAsync(note.NoteId)).Entity.Count);
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        var task = (await setup.Service.Notes.GetNoteTasksAsync(note.NoteId)).Entity.Single();
+        Assert.AreEqual("Check the PSU", task.Description);
+        Assert.AreEqual((await CurrentUserAsync(setup)).UserId, task.UserId);
+        Assert.AreEqual(new DateTime(2026, 11, 13), task.ExpectedEndDate);
+        Assert.AreEqual(1, task.Priority);
+        Assert.IsNotNull(task.StartDate);
+        Assert.AreNotEqual(before, (await setup.ReadAsync(note.NoteId)).InternalTags, "The status of the note says it has a task to do.");
+    }
+
+    [TestMethod]
+    public async Task AddTask_ForSomebodyElse_ByName_AndOneWhoIsNotThereGivesTheUsers()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var luis = (await setup.Service.Repository.Users.AddAsync(new UserDto
+        {
+            UserId = Guid.NewGuid(), UserName = "luis", EMail = "luis@knote.tests", FullName = "Luis Pérez", RoleDefinition = "Staff"
+        })).Entity;
+
+        await setup.CallAsync(AiActionRules.AddTask, ("noteNumber", note.NoteNumber), ("description", "Review"), ("user", "luis perez"));
+        var missing = await setup.CallAsync(AiActionRules.AddTask, ("noteNumber", note.NoteNumber), ("description", "Review"), ("user", "Marta"));
+
+        var action = setup.Tools.TurnActions.Single();
+        Assert.AreEqual(luis.UserId, action.UserId);
+        StringAssert.Contains(action.Text, "Luis Pérez");
+        StringAssert.Contains(missing, "there is no user 'Marta'");
+        StringAssert.Contains(missing, "Luis Pérez");
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AddAlarm_IsAnAppInfoNotice_ForTheUserWhoRunsIt(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var when = DateTime.Now.AddDays(3).ToString("yyyy-MM-dd") + " 09:00";
+
+        await setup.CallAsync(AiActionRules.AddAlarm, ("noteNumber", note.NoteNumber), ("message", "Review topic 3"), ("when", when), ("repeat", "weekly"));
+        var action = setup.Tools.TurnActions.Single();
+        StringAssert.Contains(action.Text, "(every week)");
+        Assert.AreEqual(0, (await setup.Service.Notes.GetMessagesAsync(note.NoteId)).Entity.Count);
+
+        // What comes back from the Web cannot choose who gets it.
+        action.UserId = Guid.NewGuid();
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        var alarm = (await setup.Service.Notes.GetMessagesAsync(note.NoteId)).Entity.Single();
+        Assert.AreEqual(EnumNotificationType.AppInfo, alarm.NotificationType);
+        Assert.AreEqual(EnumAlarmType.Weekly, alarm.AlarmType);
+        Assert.AreEqual("Review topic 3", alarm.Comment);
+        Assert.AreEqual(true, alarm.AlarmActivated);
+        Assert.AreEqual((await CurrentUserAsync(setup)).UserId, alarm.UserId);
+    }
+
+    [TestMethod]
+    public async Task AddEmailAlarm_IsAnotherKind_AndAsksEvenWithAlarmsApproved_AndOnANewNote()
+    {
+        using var setup = await SetupAsync();
+        await setup.CallAsync(AiActionRules.CreateNote, ("topic", "New"), ("content", "Text"));
+        var created = setup.Tools.TurnActions.Single();
+        var number = created.NoteNumber!.Value;
+
+        setup.Tools.BeginTurn(new[] { new AiChatTurnDto { Actions = { created } } }, new[] { AiActionRules.AddAlarm });
+        var notice = await setup.CallAsync(AiActionRules.AddAlarm, ("noteNumber", number), ("message", "Notice"), ("minutesFromNow", 60));
+        var email = await setup.CallAsync(AiActionRules.AddEmailAlarm, ("noteNumber", number), ("message", "Mail"), ("minutesFromNow", 60));
+
+        StringAssert.StartsWith(notice, "Done:");
+        StringAssert.Contains(email, "NOT done");
+        var action = setup.Tools.TurnActions.Single(a => a.Kind == AiActionRules.AddEmailAlarm);
+        StringAssert.Contains(action.Text, "email alarms are on");
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        var alarms = (await setup.Service.Notes.GetMessagesAsync(created.NoteId!.Value)).Entity;
+        Assert.AreEqual(EnumNotificationType.Email, alarms.Single(a => a.Comment == "Mail").NotificationType);
+    }
+
+    [TestMethod]
+    public async Task AddAlarm_WithAWrongDate_ProposesNothing()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+
+        var past = await setup.CallAsync(AiActionRules.AddAlarm, ("noteNumber", note.NoteNumber), ("message", "M"), ("when", "2020-01-01 09:00"));
+
+        StringAssert.Contains(past, "has passed");
+        Assert.AreEqual(0, setup.Tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task SetAttribute_ShowsTheChange_AndIsDoneWhenAccepted(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        var type = (await setup.Service.Repository.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = "Machine" })).Entity;
+        var id = Guid.NewGuid();
+        var attribute = new KAttributeDto
+        {
+            KAttributeId = id, Name = "Estado", NoteTypeId = type.NoteTypeId, KAttributeDataType = EnumKAttributeDataType.TabulatedValue,
+            KAttributeValues = new[] { "Funciona", "En reparación" }.Select((v, i) => new KAttributeTabulatedValueDto
+            {
+                KAttributeTabulatedValueId = Guid.NewGuid(), KAttributeId = id, Value = v, Order = i
+            }).ToList()
+        };
+        Assert.IsTrue((await setup.Service.Repository.KAttributes.AddAsync(attribute)).IsValid);
+        var note = await setup.Fixture.AddNoteAsync("MSX", "Text", noteTypeId: type.NoteTypeId);
+
+        var wrong = await setup.CallAsync(AiActionRules.SetAttribute, ("noteNumber", note.NoteNumber), ("attribute", "Estado"), ("value", "Roto"));
+        var noName = await setup.CallAsync(AiActionRules.SetAttribute, ("noteNumber", note.NoteNumber), ("attribute", "Color"), ("value", "Rojo"));
+        await setup.CallAsync(AiActionRules.SetAttribute, ("noteNumber", note.NoteNumber), ("attribute", "estado"), ("value", "en reparacion"));
+
+        StringAssert.Contains(wrong, "Funciona, En reparación");
+        StringAssert.Contains(noName, "Estado");
+        var action = setup.Tools.TurnActions.Single();
+        StringAssert.Contains(action.Text, "(empty) → En reparación");
+        Assert.IsTrue(string.IsNullOrEmpty((await setup.ReadAsync(note.NoteId)).KAttributesDto.Single().Value));
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        Assert.AreEqual("En reparación", (await setup.ReadAsync(note.NoteId)).KAttributesDto.Single().Value);
+        StringAssert.Contains(await setup.CallAsync(AiActionRules.SetAttribute, ("noteNumber", note.NoteNumber), ("attribute", "Estado"), ("value", "En reparación")), "already has that value");
+    }
+
+    [TestMethod]
+    public async Task SetAttribute_InANoteWithoutThem_SaysSo()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+
+        StringAssert.Contains(await setup.CallAsync(AiActionRules.SetAttribute, ("noteNumber", note.NoteNumber), ("attribute", "Estado"), ("value", "X")), "has no attributes");
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task RelateNotes_IsDoneWhenAccepted_InItsDirection_WithItsType(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        var ticket = await setup.Fixture.AddNoteAsync("Ticket", "Text");
+        var decision = await setup.Fixture.AddNoteAsync("Decision", "Text");
+        var type = (await setup.Service.TraceNoteTypes.SaveAsync(new TraceNoteTypeDto { Name = "Depende de" })).Entity;
+
+        var wrongType = await setup.CallAsync(AiActionRules.RelateNotes, ("noteNumber", ticket.NoteNumber), ("relatedNoteNumber", decision.NoteNumber), ("relationType", "Otro"));
+        await setup.CallAsync(AiActionRules.RelateNotes, ("noteNumber", ticket.NoteNumber), ("relatedNoteNumber", decision.NoteNumber), ("relationType", "depende de"));
+
+        StringAssert.Contains(wrongType, "Depende de");
+        var action = setup.Tools.TurnActions.Single();
+        StringAssert.Contains(action.Text, $"Relate #{ticket.NoteNumber} (Ticket) to #{decision.NoteNumber} (Decision), as Depende de");
+        Assert.AreEqual(0, (await setup.Service.Notes.GetTraceNotesToAsync(ticket.NoteId)).Entity.Count);
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        var trace = (await setup.Service.Notes.GetTraceNotesToAsync(ticket.NoteId)).Entity.Single();
+        Assert.AreEqual(decision.NoteId, trace.ToId);
+        Assert.AreEqual(type.TraceNoteTypeId, trace.TraceNoteTypeId);
+    }
+
+    [TestMethod]
+    public async Task RelateNotes_NotWithItself_NorWithASystemNote_ButALockedOneCanBeTheDestination()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var locked = await setup.Fixture.AddNoteAsync("Locked", "Text");
+        var read = await setup.ReadAsync(locked.NoteId);
+        var content = read.GetContentTypeExt();
+        content.DescriptionBlocked = true;
+        read.SetContentTypeExt(content);
+        Assert.IsTrue((await setup.Service.Notes.SaveAsync(read)).IsValid);
+        var glossary = (await setup.Service.AtlasContext.CreateGlossaryAsync()).Entity;
+
+        var itself = await setup.CallAsync(AiActionRules.RelateNotes, ("noteNumber", note.NoteNumber), ("relatedNoteNumber", note.NoteNumber));
+        var system = await setup.CallAsync(AiActionRules.RelateNotes, ("noteNumber", note.NoteNumber), ("relatedNoteNumber", glossary.NoteNumber));
+        var fromLocked = await setup.CallAsync(AiActionRules.RelateNotes, ("noteNumber", locked.NoteNumber), ("relatedNoteNumber", note.NoteNumber));
+        var toLocked = await setup.CallAsync(AiActionRules.RelateNotes, ("noteNumber", note.NoteNumber), ("relatedNoteNumber", locked.NoteNumber));
+
+        StringAssert.Contains(itself, "itself");
+        StringAssert.Contains(system, KntAiActionExecutor.NoteNotFound);
+        StringAssert.Contains(fromLocked, KntAiActionExecutor.NoteLocked);
+        StringAssert.Contains(toLocked, "NOT done");
+    }
+
+    [TestMethod]
+    public async Task CreateFolder_AStaffIsToldWhy_WithoutACard()
+    {
+        using var setup = await SetupAsync();
+        var (tools, _) = await ToolsOfAsync(setup, EnumRoles.Staff);
+
+        var names = (await tools.GetToolsAsync()).Select(t => t.Name).ToList();
+        var result = await CallAsync(tools, AiActionRules.CreateFolder, ("name", "Tema 5"));
+
+        CollectionAssert.Contains(names, AiActionRules.CreateFolder);
+        StringAssert.Contains(result, "does not allow it");
+        StringAssert.Contains(result, nameof(EnumRoles.ProjectManager));
+        Assert.AreEqual(0, tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    public async Task CreateFolder_AForgedOneOfAStaff_IsStoppedByTheCommand()
+    {
+        using var setup = await SetupAsync();
+        var (tools, _) = await ToolsOfAsync(setup, EnumRoles.Staff);
+        var forged = new AiActionDto { Kind = AiActionRules.CreateFolder, Topic = "Forged", FolderId = setup.Fixture.HomeId, Text = "Forged" };
+
+        await tools.ExecuteActionsAsync(new[] { forged });
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, forged.Status);
+        Assert.IsFalse((await setup.Service.Folders.GetAllAsync()).Entity.Any(f => f.Name == "Forged"));
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    public async Task CreateFolder_AProjectManager_InTheParentAsked_WhenAccepted(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        var history = (await setup.Service.Folders.SaveAsync(new FolderDto { Name = "Historia", ParentId = setup.Fixture.HomeId })).Entity;
+        var (tools, service) = await ToolsOfAsync(setup, EnumRoles.ProjectManager);
+
+        var result = await CallAsync(tools, AiActionRules.CreateFolder, ("name", "Tema 5"), ("parent", "Historia"));
+        var again = await CallAsync(tools, AiActionRules.CreateFolder, ("name", "Tema 5"), ("parent", "Historia"));
+
+        StringAssert.Contains(result, "NOT done");
+        StringAssert.StartsWith(again, "Nothing to do");
+        var action = tools.TurnActions.Single();
+        StringAssert.EndsWith(action.Text, @"in Home\Historia");
+        Assert.IsFalse((await service.Folders.GetAllAsync()).Entity.Any(f => f.Name == "Tema 5"));
+
+        await tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        Assert.AreEqual(history.FolderId, (await service.Folders.GetAllAsync()).Entity.Single(f => f.Name == "Tema 5").ParentId);
+
+        tools.BeginTurn(null, null);
+        StringAssert.Contains(await CallAsync(tools, AiActionRules.CreateFolder, ("name", "tema 5"), ("parent", "Historia")), "already a folder");
+    }
+
+    [TestMethod]
+    public async Task CreateFolder_NotInTheFoldersOfTheSystem()
+    {
+        using var setup = await SetupAsync();
+        var system = (await setup.Service.Folders.SaveAsync(new FolderDto { Name = KntConst.AtlasFolderName, ParentId = setup.Fixture.HomeId })).Entity;
+        var (tools, _) = await ToolsOfAsync(setup, EnumRoles.ProjectManager);
+        var forged = new AiActionDto { Kind = AiActionRules.CreateFolder, Topic = "Inside", FolderId = system.FolderId, Text = "Forged" };
+
+        var result = await CallAsync(tools, AiActionRules.CreateFolder, ("name", "Inside"), ("parent", KntConst.AtlasFolderName));
+        await tools.ExecuteActionsAsync(new[] { forged });
+
+        StringAssert.Contains(result, "there is no folder");
+        Assert.AreEqual(EnumAiActionStatus.Failed, forged.Status);
+        Assert.IsFalse((await setup.Service.Folders.GetAllAsync()).Entity.Any(f => f.Name == "Inside"));
+    }
+
+    [TestMethod]
+    public async Task AStaff_CanRunTheActionsOnNotes_WithTheCommandsAskingForItsRole()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var other = await setup.Fixture.AddNoteAsync("Other", "Text");
+        var (tools, service) = await ToolsOfAsync(setup, EnumRoles.Staff);
+
+        await CallAsync(tools, AiActionRules.AddTask, ("noteNumber", note.NoteNumber), ("description", "Do it"));
+        await CallAsync(tools, AiActionRules.AddAlarm, ("noteNumber", note.NoteNumber), ("message", "Notice"), ("minutesFromNow", 30));
+        await CallAsync(tools, AiActionRules.AddEmailAlarm, ("noteNumber", note.NoteNumber), ("message", "Mail"), ("minutesFromNow", 30));
+        await CallAsync(tools, AiActionRules.RelateNotes, ("noteNumber", note.NoteNumber), ("relatedNoteNumber", other.NoteNumber));
+
+        Assert.AreEqual(4, tools.TurnActions.Count);
+        await tools.ExecuteActionsAsync(tools.TurnActions);
+
+        foreach (var action in tools.TurnActions)
+            Assert.AreEqual(EnumAiActionStatus.Done, action.Status, $"{action.Kind}: {action.Result}");
+        Assert.AreEqual(2, (await service.Notes.GetMessagesAsync(note.NoteId)).Entity.Count);
+    }
+
+    [TestMethod]
+    public async Task ANewNote_IsCompletedWithoutACard_ButARepeatedTaskIsNotAddedAgain()
+    {
+        using var setup = await SetupAsync();
+        await setup.CallAsync(AiActionRules.CreateNote, ("topic", "New"), ("content", "Text"));
+        var created = setup.Tools.TurnActions.Single();
+        var number = created.NoteNumber!.Value;
+
+        var again = await setup.CallAsync(AiActionRules.CreateNote, ("topic", "New"), ("content", "Text"));
+        var task = await setup.CallAsync(AiActionRules.AddTask, ("noteNumber", number), ("description", "Do it"));
+        var repeated = await setup.CallAsync(AiActionRules.AddTask, ("noteNumber", number), ("description", "Do it"));
+
+        StringAssert.StartsWith(again, "Nothing to do");
+        StringAssert.StartsWith(repeated, "Nothing to do");
+        StringAssert.StartsWith(task, "Done:", "A note created in this conversation needs no card.");
+        Assert.AreEqual(1, (await setup.Service.Notes.GetNoteTasksAsync(created.NoteId!.Value)).Entity.Count);
+    }
+
+    [TestMethod]
+    public async Task ANoteOpenInAnEditor_GetsNoTask()
+    {
+        using var setup = await SetupAsync();
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        await setup.CallAsync(AiActionRules.AddTask, ("noteNumber", note.NoteNumber), ("description", "Do it"));
+        setup.Host.InEditor.Add(note.NoteId);
+
+        await setup.Tools.ExecuteActionsAsync(setup.Tools.TurnActions);
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, setup.Tools.TurnActions.Single().Status);
+        Assert.AreEqual(0, (await setup.Service.Notes.GetNoteTasksAsync(note.NoteId)).Entity.Count);
+    }
+
+    [TestMethod]
+    public void History_AnActionWithoutANote_SendsNoNumber()
+    {
+        var action = new AiActionDto { Kind = AiActionRules.CreateFolder, Status = EnumAiActionStatus.Done, Text = "Create the folder X in Home" };
+        var history = new[] { new AiChatTurnDto { Prompt = "Q", Answer = "A", Actions = new List<AiActionDto> { action } } };
+
+        var call = AiChatTurnStreamer.BuildMessages(null, history, "Next").SelectMany(m => m.Contents).OfType<FunctionCallContent>().Single();
+
+        Assert.AreEqual(0, call.Arguments!.Count);
     }
 }

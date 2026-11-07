@@ -98,7 +98,7 @@ public class NoteCitationsTests
 
         var names = (await tools.GetToolsAsync()).Select(t => t.Name).ToList();
 
-        Assert.AreEqual(10, names.Count);
+        Assert.AreEqual(19, names.Count);
         CollectionAssert.DoesNotContain(names, "find_notes_about");
         CollectionAssert.DoesNotContain(names, "lookup_glossary");
     }

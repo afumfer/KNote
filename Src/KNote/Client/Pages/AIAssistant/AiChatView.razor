@@ -143,7 +143,14 @@
                     @* Markup of a RadzenLink, which has no click of its own. *@
                     <a class="rz-link" href="@($"notes/edit/{note.NoteId}")"
                        @onclick="@(() => kntWindows.OpenEditAsync(note.NoteId!.Value))" @onclick:preventDefault="true">
-                        <i class="notranslate rzi">note_add</i><span class="rz-link-text">Note #@note.NoteNumber created: @note.Text</span>
+                        @if (note.Type == AiChatStreamEventTypes.OpenNote)
+                        {
+                            <i class="notranslate rzi">edit_note</i><span class="rz-link-text">Open note #@note.NoteNumber: @note.Text</span>
+                        }
+                        else
+                        {
+                            <i class="notranslate rzi">note_add</i><span class="rz-link-text">Note #@note.NoteNumber created: @note.Text</span>
+                        }
                     </a>
                 </div>
             }

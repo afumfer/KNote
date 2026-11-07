@@ -199,6 +199,15 @@ public class AiAssistantController : ControllerBase
                         NoteNumber = note.NoteNumber
                     });
 
+                while (toolsHost.NotesToOpen.TryDequeue(out var note))
+                    yield return Event(new AiChatStreamEventDto
+                    {
+                        Type = AiChatStreamEventTypes.OpenNote,
+                        Text = note.Topic,
+                        NoteId = note.NoteId,
+                        NoteNumber = note.NoteNumber
+                    });
+
                 if (error != null)
                 {
                     yield return Event(new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Error, Text = error });

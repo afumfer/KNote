@@ -71,6 +71,18 @@ public class AiActionsTests
     }
 
     [TestMethod]
+    public void AReplacement_ShowsTheNewTextInTheCard_WithTheDontAskBox()
+    {
+        var action = new AiActionDto { Kind = AiActionRules.ReplaceNoteText, Text = "Replace the whole text of #1", Content = "The new text." };
+
+        var html = AiChatHtml.AssistantMessage(new AiChatTurnDto { Answer = "A", Actions = { action } }, "Provider");
+
+        StringAssert.Contains(html, "The new text.");
+        StringAssert.Contains(html, "cannot be undone");
+        StringAssert.Contains(html, "Don't ask again for replacing the text of notes");
+    }
+
+    [TestMethod]
     public void TryReadActionsAnswer_ReadsWhatThePagePosts_AndNothingElse()
     {
         var id = Guid.NewGuid();

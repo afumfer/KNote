@@ -362,7 +362,8 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   una ventana exacta. `get_note_items` no da el texto de las alarmas *Execute KntScript*. Tests con repositorio real en
   `Tests/ServiceTests/AiQueryToolsTests`, llamando a las herramientas por nombre como el modelo.
 - **Acciones del asistente (KNote Atlas, etapa 1)** (`Ai/KNoteAiActionTools.cs`, `Model/Core/AiActionRules`,
-  `Service/Core/KntAiActionExecutor`). `create_note` se hace al momento; `append_to_note` y `set_tags` solo se proponen: la
+  `Service/Core/KntAiActionExecutor`). `create_note` se hace al momento; las demás (`append_to_note`, `replace_note_text`, `move_note`, `set_tags`, `add_task`,
+  `add_alarm`, `add_email_alarm`, `set_attribute`, `relate_notes`, `create_folder`) solo se proponen: la
   herramienta añade un `AiActionDto` a `TurnActions` y le dice al modelo que está pendiente. El turno lleva sus acciones
   (`AiChatTurnDto.Actions`) y la app muestra la tarjeta: lo aceptado lo ejecuta `KNoteAiTools.ExecuteActionsAsync`, no el
   modelo, con los comandos de siempre y los roles del usuario (el `Server` pone `EnforceAuthorization` en `chat` y `actions`).
@@ -373,9 +374,20 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   proponer era escribirlo y dejaba de llamar a las herramientas (1 de 9; con las llamadas, 25 de 27). Una línea de estado en
   sus respuestas la copiaba tal cual. Que no pregunte lo que ya pregunta la tarjeta se le dice en el resultado de la herramienta,
   no en las reglas fijas: ahí se lee antes de llamar y hablaba de la tarjeta sin llamar a la herramienta (2 de 9) o daba lo
-  propuesto por hecho. Una acción repetida (`AiActionRules.IsRepeated`) no se hace: los modelos pequeños repiten llamadas, y
+  propuesto por hecho. Lo mismo a la inversa: lo hecho sin tarjeta le dice en el resultado que nada espera, porque el historial
+  le enseña a decir «pendiente en la tarjeta» tras un `Done:` (3 de 10). Y copia las llamadas que ve: el historial lleva las
+  etiquetas de `set_tags`, que sin ellas lo llamaba sin etiquetas. Una acción repetida (`AiActionRules.IsRepeated`) no se hace: los modelos pequeños repiten llamadas, y
   con el tipo aprobado el texto se añadía varias veces sin preguntar. La casilla de la tarjeta solo aprueba los tipos aceptados
-  en ella y lo dice (`DontAskAgainText`). Se guarda en el comentario oculto de la conversación sin los datos para ejecutarla, y
+  en ella y lo dice (`DontAskAgainText`). Nivel C (`create_folder`, `add_email_alarm`, `replace_note_text`): tarjeta también en una nota
+  nueva (`NeedsCard`). `replace_note_text` es lo único que pierde texto (las notas no guardan versiones): el texto nuevo va solo
+  en la tarjeta (`CardText`; `Text` es una línea, porque se guarda y va al modelo en cada turno) y lleva un sello del texto al
+  proponerlo (`TextStamp`): si la nota cambió mientras la tarjeta esperaba, no se sustituye. `open_note_editor` no es una acción
+  (no está en `Kinds`, no cambia nada): `IKNoteAiToolsHost.OpenNoteEditor` abre el editor en `ClientWin` y, en la Web, el evento
+  `openNote`. `create_note` no abre el editor (`OnNoteCreated(openEditor: false)`): con la nota abierta, lo siguiente que le pide
+  el modelo fallaría. `create_task` sí lo abre. `MinRoleOf`: `create_folder` pide ProjectManager, pero la herramienta se ofrece desde Staff para que el modelo
+  explique por qué no (sin ella, uno pequeño dice que la creó). Tras una tarea o una alarma el ejecutor guarda la nota: su
+  estado se calcula al guardar. Las alarmas son del usuario que las ejecuta y su tipo lo fija la herramienta: nunca un
+  script. Una acción nueva necesita su caso en el ejecutor, su `KindName` y entrar en `Kinds`. Se guarda en el comentario oculto de la conversación sin los datos para ejecutarla, y
   lo propuesto sin responder se lee como `NotConfirmed`. Tests en `Tests/AiActionRulesTests`,
   `Tests/ServiceTests/AiActionToolsTests` y `Tests/InProcessIntegrationTests/AiActionsInProcessTests`.
 - **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
