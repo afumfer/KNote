@@ -71,6 +71,7 @@ public static class AiChatClientFactory
                     o.Tools = [.. toolList];
             })
             .UseFunctionInvocation()
+            .Use(inner => new AiToolImagesChatClient(inner))
             .Build();
     }
 

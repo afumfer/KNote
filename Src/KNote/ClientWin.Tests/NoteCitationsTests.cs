@@ -98,7 +98,7 @@ public class NoteCitationsTests
 
         var names = (await tools.GetToolsAsync()).Select(t => t.Name).ToList();
 
-        Assert.AreEqual(19, names.Count);
+        Assert.AreEqual(20, names.Count, "view_note_images comes in, and attach_file only with files in the conversation.");
         CollectionAssert.DoesNotContain(names, "find_notes_about");
         CollectionAssert.DoesNotContain(names, "lookup_glossary");
     }

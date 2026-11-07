@@ -399,7 +399,10 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   una vista reducida que comprueba al dueño (`GetAttachmentAsync`) y la dibuja como `data:`. `AiModelCapabilities`: Ollama lo dice en
   `/api/show`; OpenAI y Anthropic se dan por buenos. SkiaSharp va en `KNote.Ai`, y `Directory.Build.targets` quita sus símbolos y los
   sistemas que KNote no usa (sin eso, el `Server` publicado pesa casi el triple); una versión nueva hay que probarla también
-  publicada. Tests en `Tests/AiAttachmentRulesTests`, `AiImageReducerTests`, `ServiceTests/AiSessionsServiceTests`,
+  publicada. `attach_file` copia un adjunto a una nota, leyéndolo por la sesión (nivel B; solo se ofrece con adjuntos). `view_note_images`
+  mira las imágenes de una nota o de la conversación, 3 por llamada y 9 por turno (`AiToolImages`): no van en el resultado de la herramienta,
+  que cada proveedor trata a su manera (Ollama lo pasaría a texto), sino en un mensaje detrás de él que añade `AiToolImagesChatClient`,
+  debajo de la invocación de funciones. Tests en `Tests/AiAttachmentRulesTests`, `AiImageReducerTests`, `ServiceTests/AiSessionsServiceTests`,
   `InProcessIntegrationTests/AiActionsInProcessTests` y `ClientWin.Tests/KNoteAIAssistantCtrlAttachmentsTests`.
 - **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
   `reasoning` y da el texto, el tiempo y los tokens (si el proveedor los distingue; Ollama no, y no se estiman) en el turno.

@@ -25,6 +25,7 @@ public class ScriptedAiChatClientProvider : IAiChatClientProvider
             .AsBuilder()
             .ConfigureOptions(o => o.Tools = [.. toolList])
             .UseFunctionInvocation()
+            .Use(inner => new KNote.Ai.AiToolImagesChatClient(inner))
             .Build();
     }
 

@@ -18,6 +18,7 @@ public partial class KNoteAiTools
 {
     private const string FindNotesAboutName = "find_notes_about";
     private const string LookupGlossaryName = "lookup_glossary";
+    private const string ViewNoteImagesName = "view_note_images";
 
     private const int MaxFolderLines = 200;
     private const int MaxItems = 30;
@@ -47,6 +48,10 @@ public partial class KNoteAiTools
             hidden.Add(LookupGlossaryName);
         if (!await CanActAsync())
             hidden.AddRange(AiActionRules.Kinds);
+        if (_attachments.Count == 0)
+            hidden.Add(AiActionRules.AttachFile);
+        if (!ModelSeesImages)
+            hidden.Add(ViewNoteImagesName);
         return GetTools().Where(t => !hidden.Contains(t.Name)).ToList();
     }
 
@@ -84,6 +89,14 @@ public partial class KNoteAiTools
             Name = "get_note_items",
             Description = "Gets what a note has besides its text: its tasks, alarms, resources (attached files) and relations " +
                 "with other notes."
+        });
+
+        yield return AIFunctionFactory.Create(ViewNoteImagesAsync, new AIFunctionFactoryOptions
+        {
+            Name = ViewNoteImagesName,
+            Description = "Looks at the images attached to a note or, without a note, at the ones of this conversation, to see an " +
+                $"image that the user sent earlier. You receive them in the next message, {AiAttachmentRules.MaxImagesPerLook} at most " +
+                "each time; it says how many there are, and which asks for others."
         });
 
         yield return AIFunctionFactory.Create(GetTasksAsync, new AIFunctionFactoryOptions
@@ -295,6 +308,93 @@ public partial class KNoteAiTools
     private static string FolderLine(FolderInfoDto folder, int depth) => $"{new string(' ', depth * 2)}{folder.Name} (#{folder.FolderNumber})";
 
     [Description("Gets the tasks, alarms, resources and relations of a note.")]
+    private async Task<string> ViewNoteImagesAsync(
+        [Description("The note's NoteNumber (a short integer, e.g. 123). Without it, the images of this conversation.")]
+        int? noteNumber = null,
+        [Description("Which images, by their position counted from 1. By default, the first ones.")]
+        int[] which = null)
+    {
+        if (TurnImages.IsFull)
+            return "Error: you have seen enough images in this answer. Answer with them, and say that you can look at more.";
+
+        var (images, whose, error) = noteNumber is int number ? await GetNoteImagesAsync(number) : GetConversationImages();
+        if (error != null)
+            return error;
+
+        var (positions, pickError) = AiAttachmentRules.PickImages(images.Count, which);
+        if (pickError != null)
+            return pickError;
+
+        var seen = new List<string>();
+        var failed = new List<string>();
+        foreach (var position in positions)
+        {
+            var image = images[position];
+            var content = await image.ReadAsync();
+            var reduced = content == null ? null : AiImageReducer.Reduce(content.Value.Bytes, content.Value.ContentType);
+            if (reduced == null)
+            {
+                failed.Add(image.Name);
+                continue;
+            }
+
+            TurnImages.Add(image.Id, reduced.Content, reduced.ContentType);
+            seen.Add($"{position + 1}. {image.Name}");
+        }
+
+        if (seen.Count == 0)
+            return $"Error: the images of {whose} could not be read.";
+
+        var notRead = failed.Count > 0 ? $" These could not be read: {string.Join(", ", failed)}." : "";
+        return $"{whose} has {images.Count} images. You receive these in the next message: {string.Join(", ", seen)}.{notRead}";
+    }
+
+    private sealed record LookableImage(Guid Id, string Name, Func<Task<(byte[] Bytes, string ContentType)?>> ReadAsync);
+
+    private (List<LookableImage> Images, string Whose, string Error) GetConversationImages()
+    {
+        var images = _attachments.Where(a => a.IsImage)
+            .Select(a => new LookableImage(a.ResourceId, a.FileName, () => ReadAttachmentAsync(a.ResourceId)))
+            .ToList();
+        return images.Count > 0
+            ? (images, "This conversation", null)
+            : (null, null, "Error: this conversation has no images. Say which note to look at.");
+    }
+
+    private async Task<(byte[] Bytes, string ContentType)?> ReadAttachmentAsync(Guid resourceId)
+    {
+        var file = await _service.AiSessions.GetAttachmentAsync(_sessionNoteId, resourceId);
+        return file.IsValid ? (Convert.FromBase64String(file.Entity.ContentBase64), file.Entity.ContentType) : null;
+    }
+
+    private async Task<(List<LookableImage> Images, string Whose, string Error)> GetNoteImagesAsync(int noteNumber)
+    {
+        var note = await _service.Notes.GetCitedNoteAsync(noteNumber);
+        if (!note.IsValid)
+            return (null, null, $"Error getting note: {note.ErrorMessage}");
+        if (note.Entity == null)
+            return (null, null, "Note not found.");
+
+        var resources = await _service.Notes.GetResourcesInfoAsync(note.Entity.NoteId);
+        if (!resources.IsValid)
+            return (null, null, $"Error reading the resources of the note: {resources.ErrorMessage}");
+
+        // The desktop app only saves the type of a few files: the extension says the rest.
+        var images = (resources.Entity ?? new List<ResourceInfoDto>())
+            .Where(r => AiAttachmentRules.IsImage(r.FileType) || AiAttachmentRules.IsImage(AiAttachmentRules.ContentTypeOf(r.NameOut)))
+            .Select(r => new LookableImage(r.ResourceId, r.NameOut, () => ReadResourceAsync(r.ResourceId)))
+            .ToList();
+        return images.Count > 0
+            ? (images, $"The note #{noteNumber}", null)
+            : (null, null, $"The note #{noteNumber} has no images.");
+    }
+
+    private async Task<(byte[] Bytes, string ContentType)?> ReadResourceAsync(Guid resourceId)
+    {
+        var resource = await _service.Notes.GetResourceAsync(resourceId);
+        return resource.IsValid && resource.Entity?.ContentArrayBytes?.Length > 0 ? (resource.Entity.ContentArrayBytes, resource.Entity.FileType) : null;
+    }
+
     private async Task<string> GetNoteItemsAsync(
         [Description("The note's NoteNumber (a short integer, e.g. 123).")]
         int noteNumber,

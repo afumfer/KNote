@@ -1,3 +1,5 @@
+using KNote.Ai;
+using Microsoft.Extensions.AI;
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
@@ -68,6 +70,65 @@ public class AiActionsTests
 
         Assert.IsFalse(html.Contains("has answered your proposal"), html);
         StringAssert.Contains(html, "Done.");
+    }
+
+    [TestMethod]
+    public async Task ToolImages_GoInAMessageAtTheEnd_AndTheirPropertyDoesNotReachTheProvider()
+    {
+        IEnumerable<ChatMessage>? sent = null;
+        ChatOptions? sentOptions = null;
+        var inner = new FakeChatClient
+        {
+            GetResponseImpl = (messages, options, ct) =>
+            {
+                sent = messages.ToList();
+                sentOptions = options;
+                return Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Seen")));
+            }
+        };
+        var images = new AiToolImages();
+        images.Add(Guid.NewGuid(), new byte[] { 1 }, "image/png");
+        var options = new ChatOptions { AdditionalProperties = new AdditionalPropertiesDictionary { [AiToolImagesChatClient.PropertyName] = images } };
+
+        await new AiToolImagesChatClient(inner).GetResponseAsync(new[] { new ChatMessage(ChatRole.User, "Look") }, options);
+
+        var last = sent!.Last();
+        Assert.AreEqual(2, sent!.Count());
+        Assert.AreEqual(ChatRole.User, last.Role);
+        Assert.AreEqual(1, last.Contents.OfType<DataContent>().Count());
+        Assert.IsFalse(sentOptions!.AdditionalProperties!.ContainsKey(AiToolImagesChatClient.PropertyName));
+        Assert.IsTrue(options.AdditionalProperties.ContainsKey(AiToolImagesChatClient.PropertyName), "The next call of the turn needs it.");
+    }
+
+    [TestMethod]
+    public async Task ToolImages_WithoutImages_ChangeNothingInTheMessages()
+    {
+        IEnumerable<ChatMessage>? sent = null;
+        var inner = new FakeChatClient
+        {
+            GetResponseImpl = (messages, options, ct) =>
+            {
+                sent = messages.ToList();
+                return Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Done")));
+            }
+        };
+        var options = new ChatOptions { AdditionalProperties = new AdditionalPropertiesDictionary { [AiToolImagesChatClient.PropertyName] = new AiToolImages() } };
+
+        await new AiToolImagesChatClient(inner).GetResponseAsync(new[] { new ChatMessage(ChatRole.User, "Look") }, options);
+
+        Assert.AreEqual(1, sent!.Count());
+    }
+
+    [TestMethod]
+    public void ToolImages_TheSameImageTwice_CountsOnce()
+    {
+        var images = new AiToolImages();
+        var id = Guid.NewGuid();
+
+        images.Add(id, new byte[] { 1 }, "image/png");
+        images.Add(id, new byte[] { 1 }, "image/png");
+
+        Assert.AreEqual(1, images.Count);
     }
 
     [TestMethod]

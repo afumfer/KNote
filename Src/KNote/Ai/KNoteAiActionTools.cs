@@ -19,14 +19,29 @@ public partial class KNoteAiTools
     private readonly HashSet<string> _autoApprovedKinds = new();
     private readonly HashSet<Guid> _newNoteIds = new();
     private List<AiActionDto> _earlierActions = new();
+    private List<AiChatAttachmentDto> _attachments = new();
+    private List<AiChatAttachmentDto> _lastAttachments = new();
+    private Guid _sessionNoteId;
 
     // The actions of the running turn, for the turn that the app keeps.
     public List<AiActionDto> TurnActions { get; private set; } = new();
 
+    // The images looked at in the running turn: the streamer gives them to the model after the result of the tool.
+    public AiToolImages TurnImages { get; private set; } = new();
+
+    // Whether the model of the turn sees images: without it, view_note_images is not offered.
+    public bool ModelSeesImages { get; set; } = true;
+
     // Before each turn: the Server keeps nothing between them, so all it depends on comes with the conversation.
-    public void BeginTurn(IEnumerable<AiChatTurnDto> history, IEnumerable<string> autoApprovedKinds)
+    public void BeginTurn(IEnumerable<AiChatTurnDto> history, IEnumerable<string> autoApprovedKinds, Guid sessionNoteId = default,
+        IReadOnlyList<AiChatAttachmentDto> attachments = null)
     {
         TurnActions = new List<AiActionDto>();
+        TurnImages = new AiToolImages();
+        _sessionNoteId = sessionNoteId;
+        var earlier = (history ?? Enumerable.Empty<AiChatTurnDto>()).Where(t => t.Attachments.Count > 0).ToList();
+        _attachments = earlier.SelectMany(t => t.Attachments).Concat(attachments ?? Array.Empty<AiChatAttachmentDto>()).ToList();
+        _lastAttachments = (attachments?.Count > 0 ? attachments : earlier.LastOrDefault()?.Attachments ?? new List<AiChatAttachmentDto>()).ToList();
         _earlierActions = (history ?? Enumerable.Empty<AiChatTurnDto>()).SelectMany(t => t.Actions).ToList();
         _autoApprovedKinds.Clear();
         _autoApprovedKinds.UnionWith(autoApprovedKinds ?? Enumerable.Empty<string>());
@@ -85,6 +100,14 @@ public partial class KNoteAiTools
             Name = AiActionRules.MoveNote,
             Description = "Moves an existing note to another folder. It is proposed to the user, who has to confirm it: until then " +
                 "it is not done."
+        });
+
+        yield return AIFunctionFactory.Create(AttachFileAsync, new AIFunctionFactoryOptions
+        {
+            Name = AiActionRules.AttachFile,
+            Description = "Attaches to an existing note an image or a file that the user attached to this conversation. To do it in " +
+                "a new note, create it first with create_note. It is proposed to the user, who has to confirm it: until then it is " +
+                "not done."
         });
 
         yield return AIFunctionFactory.Create(OpenNoteEditorAsync, new AIFunctionFactoryOptions
@@ -295,6 +318,32 @@ public partial class KNoteAiTools
             NoteId = note.NoteId,
             NoteNumber = noteNumber,
             FolderId = target.FolderId
+        });
+    }
+
+    [Description("Proposes attaching a file of this conversation to a note.")]
+    private async Task<string> AttachFileAsync(
+        [Description("The note's NoteNumber (a short integer, e.g. 123).")]
+        int noteNumber,
+        [Description("The name of the file. By default, the one of the last message, if it had only one.")]
+        string fileName = null)
+    {
+        var (file, fileError) = AiAttachmentRules.FindAttachment(_attachments, _lastAttachments, fileName);
+        if (fileError != null)
+            return fileError;
+
+        var (note, error) = await FindChangeableNoteAsync(noteNumber);
+        if (error != null)
+            return error;
+
+        return await ProposeAsync(new AiActionDto
+        {
+            Kind = AiActionRules.AttachFile,
+            Text = $"Attach {file.FileName} to #{noteNumber} ({note.Topic})",
+            NoteId = note.NoteId,
+            NoteNumber = noteNumber,
+            SessionNoteId = _sessionNoteId,
+            ResourceId = file.ResourceId
         });
     }
 

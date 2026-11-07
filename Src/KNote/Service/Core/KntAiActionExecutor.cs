@@ -28,6 +28,7 @@ public static class KntAiActionExecutor
                 AiActionRules.AppendToNote => await AppendToNoteAsync(service, action),
                 AiActionRules.ReplaceNoteText => await ReplaceNoteTextAsync(service, action),
                 AiActionRules.MoveNote => await MoveNoteAsync(service, action),
+                AiActionRules.AttachFile => await AttachFileAsync(service, action),
                 AiActionRules.SetTags => await SetTagsAsync(service, action),
                 AiActionRules.AddTask => await AddTaskAsync(service, action),
                 AiActionRules.AddAlarm => await AddAlarmAsync(service, action, EnumNotificationType.AppInfo),
@@ -165,6 +166,28 @@ public static class KntAiActionExecutor
 
         var moved = await service.Notes.UtilPatchFolderAsync(note.NoteId, folderId);
         return moved.IsValid ? null : moved.ErrorMessage;
+    }
+
+    // Read through the session, so only the user of the conversation gets the file.
+    private static async Task<string> AttachFileAsync(IKntService service, AiActionDto action)
+    {
+        var (note, error) = await GetChangeableNoteAsync(service, action.NoteId ?? Guid.Empty);
+        if (error != null)
+            return error;
+
+        var file = await service.AiSessions.GetAttachmentAsync(action.SessionNoteId ?? Guid.Empty, action.ResourceId ?? Guid.Empty);
+        if (!file.IsValid)
+            return file.ErrorMessage;
+
+        var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+        {
+            NoteId = note.NoteId,
+            Name = $"{Guid.NewGuid()}_{file.Entity.FileName}",
+            Description = file.Entity.FileName,
+            FileType = file.Entity.ContentType,
+            ContentArrayBytes = Convert.FromBase64String(file.Entity.ContentBase64)
+        });
+        return saved.IsValid ? null : saved.ErrorMessage;
     }
 
     private static async Task<string> SetTagsAsync(IKntService service, AiActionDto action)

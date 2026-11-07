@@ -539,11 +539,15 @@ public class KNoteAIAssistantCtrl : CtrlBase
             : null;
 
         // The tools are the repository's of this moment: an index or a glossary can appear during a conversation.
+        if (_tools != null)
+        {
+            _tools.BeginTurn(history, _autoApprovedKinds, _session.NoteId, _turnAttachments);
+            _tools.ModelSeesImages = await AiModelCapabilities.SupportsImagesAsync(_currentProviderRef);
+        }
         var tools = _tools != null ? await _tools.GetToolsAsync() : null;
-        _tools?.BeginTurn(history, _autoApprovedKinds);
         try
         {
-            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, LastSystemPrompt.Text, history, prompt, tools, attachments))
+            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, LastSystemPrompt.Text, history, prompt, tools, attachments, _tools?.TurnImages))
             {
                 if (e.Type == AiChatStreamEventTypes.Delta)
                 {

@@ -330,6 +330,63 @@ public class AiActionsInProcessTests
     }
 
     [TestMethod]
+    public async Task TheImagesOfANote_ReachTheModel_AfterTheResultOfTheTool()
+    {
+        var note = await FirstNoteAsync();
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+            {
+                NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_board.png", Description = "board", FileType = "image/png", ContentArrayBytes = Png()
+            });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+        }
+        _chatClients.Script = () => ScriptCalling("view_note_images", new() { ["noteNumber"] = note.NoteNumber });
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+
+        await ChatAsync(staff, new AiChatRequestDto { Prompt = "Describe its photos" });
+
+        var last = _chatClients.LastMessages[^1];
+        Assert.AreEqual(ChatRole.User, last.Role);
+        Assert.IsTrue(last.Contents.OfType<DataContent>().Any(), "The image comes in the message after the result.");
+        Assert.AreEqual(ChatRole.Tool, _chatClients.LastMessages[^2].Role);
+    }
+
+    [TestMethod]
+    public async Task AFileOfTheConversation_IsAttachedToANote_OnceAccepted()
+    {
+        var note = await FirstNoteAsync();
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        var file = await AttachAsync(staff, "square.png", "image/png", Png());
+        _chatClients.Script = () => ScriptCalling(AiActionRules.AttachFile, new() { ["noteNumber"] = note.NoteNumber });
+
+        var turn = await ChatAsync(staff, new AiChatRequestDto { Prompt = "Keep it there", SessionNoteId = file.SessionNoteId, Attachments = { file } });
+
+        var action = turn.Actions.Single();
+        Assert.AreEqual(EnumAiActionStatus.Proposed, action.Status);
+
+        var ran = (await RunAsync(staff, turn.Actions)).Single();
+
+        Assert.AreEqual(EnumAiActionStatus.Done, ran.Status, ran.Result);
+        using var service = _factory.CreateServiceForRepository(0);
+        Assert.IsTrue((await service.Notes.GetResourcesInfoAsync(note.NoteId)).Entity.Any(r => r.NameOut == "square.png"));
+    }
+
+    [TestMethod]
+    public async Task AFileOfAnotherUser_CannotBeAttached_WithAForgedAction()
+    {
+        var note = await FirstNoteAsync();
+        using var owner = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var other = await NewClientAsync(nameof(EnumRoles.Staff));
+        var file = await AttachAsync(owner, "private.png", "image/png", Png());
+        var forged = new AiActionDto { Kind = AiActionRules.AttachFile, NoteId = note.NoteId, SessionNoteId = file.SessionNoteId, ResourceId = file.ResourceId, Text = "Forged" };
+
+        var ran = (await RunAsync(other, new List<AiActionDto> { forged })).Single();
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, ran.Status);
+    }
+
+    [TestMethod]
     public async Task AskingToOpenANote_TellsTheWebClient()
     {
         var note = await FirstNoteAsync();

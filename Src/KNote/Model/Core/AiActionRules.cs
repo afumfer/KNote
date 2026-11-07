@@ -27,6 +27,7 @@ public static class AiActionRules
     public const string AppendToNote = "append_to_note";
     public const string ReplaceNoteText = "replace_note_text";
     public const string MoveNote = "move_note";
+    public const string AttachFile = "attach_file";
     public const string SetTags = "set_tags";
     public const string AddTask = "add_task";
     public const string AddAlarm = "add_alarm";
@@ -44,7 +45,7 @@ public static class AiActionRules
     // The tools of the actions, which are offered from this role on.
     public static IReadOnlyList<string> Kinds { get; } = new[]
     {
-        CreateNote, AppendToNote, ReplaceNoteText, MoveNote, SetTags, AddTask, AddAlarm, AddEmailAlarm, SetAttribute, RelateNotes, CreateFolder
+        CreateNote, AppendToNote, ReplaceNoteText, MoveNote, AttachFile, SetTags, AddTask, AddAlarm, AddEmailAlarm, SetAttribute, RelateNotes, CreateFolder
     };
 
     public const EnumRoles MinRole = EnumRoles.Staff;
@@ -88,7 +89,7 @@ public static class AiActionRules
     private static bool IsSame(AiActionDto a, AiActionDto b) => a.Kind == b.Kind
         && (a.Kind == CreateNote ? a.Topic != null && a.Topic == b.Topic : a.Text == b.Text);
 
-    private static bool AddsEachTime(string kind) => kind is CreateNote or AppendToNote or AddTask or AddAlarm or AddEmailAlarm or CreateFolder;
+    private static bool AddsEachTime(string kind) => kind is CreateNote or AppendToNote or AttachFile or AddTask or AddAlarm or AddEmailAlarm or CreateFolder;
 
     /// <summary>The box of the card. It approves only the kinds accepted in that card, so it says which.</summary>
     public static string DontAskAgainText(IEnumerable<AiActionDto> actions)
@@ -104,6 +105,7 @@ public static class AiActionRules
         AppendToNote => "text added to notes",
         ReplaceNoteText => "replacing the text of notes",
         MoveNote => "moving notes",
+        AttachFile => "files attached to notes",
         AddTask => "tasks",
         AddAlarm => "alarms",
         AddEmailAlarm => "email alarms",

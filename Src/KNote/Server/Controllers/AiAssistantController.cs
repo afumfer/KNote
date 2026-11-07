@@ -97,7 +97,8 @@ public class AiAssistantController : ControllerBase
             _service.EnforceAuthorization = true;
             var toolsHost = new ServerAiToolsHost(_service);
             var tools = new KNoteAiTools(_service, toolsHost);
-            tools.BeginTurn(request.History, request.AutoApprovedActionKinds);
+            tools.BeginTurn(request.History, request.AutoApprovedActionKinds, request.SessionNoteId, request.Attachments);
+            tools.ModelSeesImages = await AiModelCapabilities.SupportsImagesAsync(providerRef, cancellationToken);
             var chatClient = _chatClients.Create(providerRef, await tools.GetToolsAsync());
 
             var attachments = request.Attachments?.Count > 0
@@ -238,7 +239,7 @@ public class AiAssistantController : ControllerBase
     {
         // KNote Atlas: the rules, the instructions, the profile and the glossary of the session's repository.
         var context = await AiAssistantContext.ComposeAsync(_service, null, request.History, request.Prompt, _logger);
-        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, attachments: attachments, cancellationToken: cancellationToken)
+        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, attachments: attachments, toolImages: tools.TurnImages, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
         try
         {

@@ -46,6 +46,10 @@ public class AiActionDto
     public List<string> AddTags { get; set; }
     public List<string> RemoveTags { get; set; }
 
+    // The file of the conversation to attach: its session is what says whether the user can read it.
+    public Guid? SessionNoteId { get; set; }
+    public Guid? ResourceId { get; set; }
+
     // The user of a task. An alarm has none here: it is always for the user who runs it.
     public Guid? UserId { get; set; }
 

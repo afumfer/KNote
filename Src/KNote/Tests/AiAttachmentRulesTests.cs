@@ -56,6 +56,58 @@ public class AiAttachmentRulesTests
     }
 
     [TestMethod]
+    public void FindAttachment_ByItsName_WithoutMinding_TheCase()
+    {
+        var photo = File("Photo.jpg");
+
+        var (found, error) = AiAttachmentRules.FindAttachment(new[] { File("a.png"), photo }, new[] { photo }, " photo.jpg ");
+
+        Assert.AreSame(photo, found);
+        Assert.IsNull(error);
+    }
+
+    [TestMethod]
+    public void FindAttachment_WithoutAName_TakesTheOnlyOneOfTheLastMessage()
+    {
+        var earlier = File("old.png");
+        var last = File("new.png");
+
+        Assert.AreSame(last, AiAttachmentRules.FindAttachment(new[] { earlier, last }, new[] { last }, null).File);
+    }
+
+    [TestMethod]
+    public void FindAttachment_ThatCouldBeSeveral_OrDoesNotExist_GivesTheOptions()
+    {
+        var a = File("a.png");
+        var b = File("b.png");
+
+        StringAssert.Contains(AiAttachmentRules.FindAttachment(new[] { a, b }, new[] { a, b }, null).Error, "a.png, b.png");
+        StringAssert.Contains(AiAttachmentRules.FindAttachment(new[] { a, b }, new[] { b }, "c.png").Error, "a.png, b.png");
+        StringAssert.Contains(AiAttachmentRules.FindAttachment(Array.Empty<AiChatAttachmentDto>(), Array.Empty<AiChatAttachmentDto>(), null).Error, "no files");
+    }
+
+    [TestMethod]
+    public void PickImages_WithoutSayingWhich_TakesTheFirstOnes()
+    {
+        CollectionAssert.AreEqual(new[] { 0, 1, 2 }, AiAttachmentRules.PickImages(7, null).Positions);
+        CollectionAssert.AreEqual(new[] { 0, 1 }, AiAttachmentRules.PickImages(2, Array.Empty<int>()).Positions);
+    }
+
+    [TestMethod]
+    public void PickImages_TheOnesAskedFor_CountedFromOne_AndNotMoreThanTheLimit()
+    {
+        CollectionAssert.AreEqual(new[] { 4, 6 }, AiAttachmentRules.PickImages(7, new[] { 5, 7, 5 }).Positions);
+        Assert.AreEqual(AiAttachmentRules.MaxImagesPerLook, AiAttachmentRules.PickImages(7, new[] { 1, 2, 3, 4, 5 }).Positions.Count);
+    }
+
+    [TestMethod]
+    public void PickImages_ThatDoNotExist_SaysHowManyThereAre()
+    {
+        StringAssert.Contains(AiAttachmentRules.PickImages(2, new[] { 3 }).Error, "there are 2");
+        Assert.IsNotNull(AiAttachmentRules.PickImages(2, new[] { 0 }).Error);
+    }
+
+    [TestMethod]
     public void PromptWithAttachments_WithoutFiles_IsThePrompt()
     {
         Assert.AreEqual("Question", AiAttachmentRules.PromptWithAttachments("Question", null));

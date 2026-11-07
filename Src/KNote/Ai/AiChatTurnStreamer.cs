@@ -66,7 +66,7 @@ public static class AiChatTurnStreamer
     // tools: the ones of this turn (KNoteAiTools.GetToolsAsync), when they are not the ones the client was built with.
     public static async IAsyncEnumerable<AiChatStreamEventDto> StreamAsync(IChatClient chatClient, string systemPrompt,
         IEnumerable<AiChatTurnDto> history, string prompt, IList<AITool> tools = null, AiTurnAttachments attachments = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        AiToolImages toolImages = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var messages = BuildMessages(systemPrompt, history, prompt, attachments);
         var answer = new StringBuilder();
@@ -89,6 +89,11 @@ public static class AiChatTurnStreamer
         }
 
         var options = tools != null ? new ChatOptions { Tools = tools } : null;
+        if (toolImages != null)
+        {
+            options ??= new ChatOptions();
+            options.AdditionalProperties = new AdditionalPropertiesDictionary { [AiToolImagesChatClient.PropertyName] = toolImages };
+        }
 
         await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {

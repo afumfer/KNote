@@ -208,6 +208,14 @@ public class AiActionRulesTests
     }
 
     [TestMethod]
+    public void AttachingAFile_IsAChange_SoANewNoteDoesNotAsk()
+    {
+        Assert.AreEqual(EnumAiActionLevel.Change, AiActionRules.LevelOf(AiActionRules.AttachFile));
+        Assert.IsTrue(AiActionRules.NeedsCard(AiActionRules.AttachFile, approved: false, onNewNote: false));
+        Assert.IsFalse(AiActionRules.NeedsCard(AiActionRules.AttachFile, approved: false, onNewNote: true));
+    }
+
+    [TestMethod]
     public void MovingANote_IsAChange_SoANewNoteDoesNotAsk()
     {
         Assert.AreEqual(EnumAiActionLevel.Change, AiActionRules.LevelOf(AiActionRules.MoveNote));
@@ -359,6 +367,7 @@ public class AiActionRulesTests
     [DataRow(AiActionRules.CreateFolder, "new folders")]
     [DataRow(AiActionRules.ReplaceNoteText, "replacing the text of notes")]
     [DataRow(AiActionRules.MoveNote, "moving notes")]
+    [DataRow(AiActionRules.AttachFile, "files attached to notes")]
     public void DontAskAgain_NamesEachKind(string kind, string name) =>
         Assert.AreEqual($"Don't ask again for {name} in this conversation", AiActionRules.DontAskAgainText(new[] { Action(EnumAiActionStatus.Proposed, kind) }));
 }

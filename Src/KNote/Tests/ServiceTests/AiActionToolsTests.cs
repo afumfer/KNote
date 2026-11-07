@@ -122,6 +122,226 @@ public class AiActionToolsTests
         CollectionAssert.Contains(setup.Host.Changed, note.NoteId);
     }
 
+    // A 1x1 PNG.
+    private static readonly byte[] Png = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==");
+
+    private static void UseResources(Setup setup)
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"knote-ai-tools-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        setup.Service.Repository.RepositoryRef.ResourcesContainer = "AiToolsTestResources";
+        setup.Service.Repository.RepositoryRef.ResourcesContainerRootPath = root;
+    }
+
+    // A file attached to the conversation, and the turn begun with it.
+    private static async Task<AiChatAttachmentDto> AttachToConversationAsync(Setup setup, string name = "photo.png", byte[]? content = null)
+    {
+        var res = await setup.Service.AiSessions.AddAttachmentAsync(new AiChatAttachmentUploadDto
+        {
+            Provider = EnumAiProvider.Ollama, Model = "m", FileName = name, ContentType = AiAttachmentRules.ContentTypeOf(name),
+            ContentBase64 = Convert.ToBase64String(content ?? Png)
+        });
+        Assert.IsTrue(res.IsValid, res.ErrorMessage);
+        setup.Tools.BeginTurn(null, null, res.Entity.SessionNoteId, new[] { res.Entity });
+        return res.Entity;
+    }
+
+    private static async Task AddImageToNoteAsync(Setup setup, Guid noteId, string name)
+    {
+        var res = await setup.Service.Notes.SaveResourceAsync(new ResourceDto
+        {
+            NoteId = noteId, Name = $"{Guid.NewGuid()}_{name}", Description = name, FileType = AiAttachmentRules.ContentTypeOf(name), ContentArrayBytes = Png
+        });
+        Assert.IsTrue(res.IsValid, res.ErrorMessage);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AttachFile_AddsNothingUntilItIsAccepted_AndThenTheFileIsInTheNote(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        UseResources(setup);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        await AttachToConversationAsync(setup);
+
+        var result = await setup.CallAsync(AiActionRules.AttachFile, ("noteNumber", note.NoteNumber));
+
+        StringAssert.Contains(result, "NOT done");
+        var action = setup.Tools.TurnActions.Single();
+        Assert.AreEqual($"Attach photo.png to #{note.NoteNumber} (QL)", action.Text);
+        Assert.AreEqual(0, (await setup.Service.Notes.GetResourcesInfoAsync(note.NoteId)).Entity.Count);
+
+        await setup.Tools.ExecuteActionsAsync(new[] { action });
+
+        Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
+        var resource = (await setup.Service.Notes.GetResourcesInfoAsync(note.NoteId)).Entity.Single();
+        Assert.AreEqual("photo.png", resource.NameOut);
+        Assert.AreEqual("image/png", resource.FileType);
+        CollectionAssert.AreEqual(Png, (await setup.Service.Notes.GetResourceAsync(resource.ResourceId)).Entity.ContentArrayBytes);
+        CollectionAssert.Contains(setup.Host.Changed, note.NoteId);
+    }
+
+    [TestMethod]
+    public async Task AttachFile_InANoteOfTheConversation_IsDoneAtOnce()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+        var file = await AttachToConversationAsync(setup);
+        await setup.CallAsync(AiActionRules.CreateNote, ("topic", "New one"), ("content", "Text"));
+        var created = setup.Tools.TurnActions.Single();
+
+        var result = await setup.CallAsync(AiActionRules.AttachFile, ("noteNumber", created.NoteNumber!.Value));
+
+        StringAssert.StartsWith(result, "Done:");
+        Assert.AreEqual(1, (await setup.Service.Notes.GetResourcesInfoAsync(created.NoteId!.Value)).Entity.Count);
+        Assert.AreEqual(file.SessionNoteId, setup.Tools.TurnActions.Last().SessionNoteId);
+    }
+
+    [TestMethod]
+    public async Task AttachFile_IsOnlyOffered_WithFilesInTheConversation()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+
+        var before = (await setup.Tools.GetToolsAsync()).Select(t => t.Name).ToList();
+        await AttachToConversationAsync(setup);
+        var after = (await setup.Tools.GetToolsAsync()).Select(t => t.Name).ToList();
+
+        CollectionAssert.DoesNotContain(before, AiActionRules.AttachFile);
+        CollectionAssert.Contains(after, AiActionRules.AttachFile);
+    }
+
+    [TestMethod]
+    public async Task AttachFile_ANameThatDoesNotExist_GivesTheFiles_AndALockedNoteIsRefused()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var locked = await setup.Fixture.AddNoteAsync("Locked", "Text");
+        var read = await setup.ReadAsync(locked.NoteId);
+        var type = read.GetContentTypeExt();
+        type.DescriptionBlocked = true;
+        read.SetContentTypeExt(type);
+        await setup.Service.Notes.SaveAsync(read);
+        await AttachToConversationAsync(setup);
+
+        var wrong = await setup.CallAsync(AiActionRules.AttachFile, ("noteNumber", note.NoteNumber), ("fileName", "other.png"));
+        var refused = await setup.CallAsync(AiActionRules.AttachFile, ("noteNumber", locked.NoteNumber));
+
+        StringAssert.Contains(wrong, "photo.png");
+        StringAssert.Contains(refused, KntAiActionExecutor.NoteLocked);
+        Assert.AreEqual(0, setup.Tools.TurnActions.Count);
+    }
+
+    [TestMethod]
+    public async Task AttachFile_ForgedWithAFileThatIsNotOfTheSession_AddsNothing()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var file = await AttachToConversationAsync(setup);
+        var forged = new AiActionDto { Kind = AiActionRules.AttachFile, NoteId = note.NoteId, SessionNoteId = file.SessionNoteId, ResourceId = Guid.NewGuid(), Text = "Forged" };
+
+        await setup.Tools.ExecuteActionsAsync(new[] { forged });
+
+        Assert.AreEqual(EnumAiActionStatus.Failed, forged.Status);
+        Assert.AreEqual(0, (await setup.Service.Notes.GetResourcesInfoAsync(note.NoteId)).Entity.Count);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task ViewNoteImages_LooksAtTheFirstOnes_AndSaysHowManyThereAre(string orm)
+    {
+        using var setup = await SetupAsync(orm);
+        UseResources(setup);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        for (var i = 1; i <= 5; i++)
+            await AddImageToNoteAsync(setup, note.NoteId, $"{i}.png");
+        await AddImageToNoteAsync(setup, note.NoteId, "manual.pdf");
+
+        var result = await setup.CallAsync("view_note_images", ("noteNumber", note.NoteNumber));
+
+        Assert.AreEqual(AiAttachmentRules.MaxImagesPerLook, setup.Tools.TurnImages.Count);
+        StringAssert.Contains(result, $"The note #{note.NoteNumber} has 5 images");
+        Assert.IsFalse(result.Contains("manual.pdf"), result);
+    }
+
+    [TestMethod]
+    public async Task ViewNoteImages_TheOnesAskedFor_AndOnesThatDoNotExist()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        await AddImageToNoteAsync(setup, note.NoteId, "a.png");
+        await AddImageToNoteAsync(setup, note.NoteId, "b.png");
+
+        var one = await setup.CallAsync("view_note_images", ("noteNumber", note.NoteNumber), ("which", new[] { 2 }));
+        var wrong = await setup.CallAsync("view_note_images", ("noteNumber", note.NoteNumber), ("which", new[] { 9 }));
+
+        Assert.AreEqual(1, setup.Tools.TurnImages.Count);
+        StringAssert.Contains(one, "2. ");
+        StringAssert.Contains(wrong, "there are 2");
+    }
+
+    [TestMethod]
+    public async Task ViewNoteImages_ANoteWithoutImages_AndANoteOfTheSystem_GiveNothing()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        var glossary = (await setup.Service.AtlasContext.CreateGlossaryAsync()).Entity;
+
+        var none = await setup.CallAsync("view_note_images", ("noteNumber", note.NoteNumber));
+        var system = await setup.CallAsync("view_note_images", ("noteNumber", glossary.NoteNumber));
+
+        StringAssert.Contains(none, "has no images");
+        StringAssert.Contains(system, "not found");
+        Assert.AreEqual(0, setup.Tools.TurnImages.Count);
+    }
+
+    [TestMethod]
+    public async Task ViewNoteImages_WithoutANote_LooksAtTheOnesOfTheConversation()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+        var file = await AttachToConversationAsync(setup);
+
+        setup.Tools.BeginTurn(new[] { new AiChatTurnDto { Prompt = "Look", Attachments = { file } } }, null, file.SessionNoteId);
+        var result = await setup.CallAsync("view_note_images");
+
+        Assert.AreEqual(1, setup.Tools.TurnImages.Count);
+        StringAssert.Contains(result, "This conversation has 1 images");
+    }
+
+    [TestMethod]
+    public async Task ViewNoteImages_StopsAtTheImagesOfATurn()
+    {
+        using var setup = await SetupAsync();
+        UseResources(setup);
+        var note = await setup.Fixture.AddNoteAsync("QL", "Text");
+        for (var i = 1; i <= AiToolImages.MaxPerTurn; i++)
+            await AddImageToNoteAsync(setup, note.NoteId, $"{i}.png");
+
+        for (var from = 1; from <= AiToolImages.MaxPerTurn; from += AiAttachmentRules.MaxImagesPerLook)
+            await setup.CallAsync("view_note_images", ("noteNumber", note.NoteNumber), ("which", new[] { from, from + 1, from + 2 }));
+        var more = await setup.CallAsync("view_note_images", ("noteNumber", note.NoteNumber));
+
+        Assert.AreEqual(AiToolImages.MaxPerTurn, setup.Tools.TurnImages.Count);
+        StringAssert.StartsWith(more, "Error:");
+    }
+
+    [TestMethod]
+    public async Task ViewNoteImages_IsNotOffered_ToAModelThatDoesNotSeeThem()
+    {
+        using var setup = await SetupAsync();
+
+        setup.Tools.ModelSeesImages = false;
+
+        CollectionAssert.DoesNotContain((await setup.Tools.GetToolsAsync()).Select(t => t.Name).ToList(), "view_note_images");
+    }
+
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
