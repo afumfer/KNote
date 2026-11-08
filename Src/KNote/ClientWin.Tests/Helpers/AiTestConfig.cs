@@ -110,5 +110,5 @@ internal static class AiTestConfig
         }
     }
 
-    private static string FirstNonEmpty(string a, string b) => string.IsNullOrEmpty(a) ? b : a;
+    private static string? FirstNonEmpty(string? a, string? b) => string.IsNullOrEmpty(a) ? b : a;
 }

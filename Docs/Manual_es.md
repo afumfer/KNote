@@ -170,7 +170,7 @@ El menú **Options** tiene el resto:
 |---|---|
 | **Get stream** / **Get completion** | Cómo llegan las respuestas: a medida que se escriben (por defecto) o de una vez cuando están completas. |
 | **Get prompt from catalog ...** (`Ctrl+K`) | Empieza una conversación nueva a partir de un prompt del catálogo. |
-| **View system root ...** | Muestra las instrucciones que recibe el modelo antes de la conversación. |
+| **What the AI receives ...** | Muestra las instrucciones que recibe el modelo antes de la conversación. |
 | **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta de la vista de chat, los tokens y el tiempo que tardó. La vista Markdown los tiene siempre, en la marca de cada respuesta. |
 | **Manage models ...** | Añade, cambia o quita los modelos de IA (proveedores) que puedes elegir. |
 
@@ -220,7 +220,7 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 
 **3. El índice semántico (Admin).** En la aplicación de escritorio, pestaña **Semantic index** de la misma ventana; en la aplicación Web, sección **Semantic index** de la pestaña **KNote Atlas**. Muestra cómo está el índice (notas indexadas, pendientes y fragmentos; cuándo se creó por última vez y cuánto tardó). **Create index** calcula el significado de todas las notas: KNote dice antes cuántas notas enviará al modelo y, a partir de la primera vez, cuánto debería tardar. Puedes seguir trabajando (en la aplicación de escritorio puedes incluso cerrar la ventana: la barra de estado muestra el progreso); **Cancel** (**Cancel run** en la aplicación de escritorio) conserva lo hecho, y la siguiente ejecución sigue desde ahí. Las notas que fallan se listan y se reintentan en la siguiente ejecución. En el servidor Web se crea un índice a la vez, sea del repositorio que sea: los demás esperan, **Queued**.
 
-- Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea y cada recurso que tiene descripción. Las notas de las sesiones del asistente, del chat room y de la evaluación de la búsqueda quedan fuera.
+- Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea y cada recurso que tiene descripción. Las notas propias de KNote quedan fuera: las sesiones del asistente, el chat room, la evaluación de la búsqueda, el perfil, el glosario y las instrucciones de las tareas.
 - Una nota que cambias queda *pendiente*. Las pendientes se ponen al día antes de cada búsqueda por significado (unas pocas cada vez: hasta 50 notas o unos 10 segundos) o con **Update now**. Una nota muy larga (con más de 64 fragmentos por calcular) se deja para **Update now**: hasta entonces, la búsqueda usa su contenido anterior.
 - **Rebuild** calcula otra vez todos los vectores (tras cambiar las dimensiones, por ejemplo); mientras tanto la búsqueda sigue con los anteriores.
 - **Cambiar el modelo de embeddings** necesita el índice del modelo nuevo. El índice del modelo anterior se conserva (para compararlos, ver *Evaluación de la búsqueda (aplicación Web)*) y aparece en la lista de abajo; un Admin lo puede borrar.
@@ -281,8 +281,8 @@ Todo está junto en **KNote Atlas**: **Tools › KNote Atlas** en la aplicación
 
 - La primera vez, **Create the profile** / **Create the glossary** (o **Customize** en las instrucciones de las tareas) crea la nota con una plantilla y la abre en el editor de notas de siempre. Después, **Open in the editor** la abre. Las ayudas de las plantillas son comentarios ocultos (`<!-- ... -->`): los ves al editar, no aparecen en los visores y la IA nunca los recibe; tampoco los apartados que dejes vacíos.
 - **Fill in folders and types** (perfil) añade a sus apartados *Folders* y *Note types* las carpetas de los dos primeros niveles y los tipos de nota que tienen notas, para que solo tengas que escribir qué es cada uno. Solo añade lo que falta: no borra nada de lo escrito.
-- **What the AI receives** muestra el texto que recibe la IA para una tarea, con su tamaño (cuántas palabras y tokens, aproximadamente) y sus partes (rol Staff o superior). Escribe un texto de prueba y pulsa **Show its terms** para ver qué términos del glosario entrarían. En el asistente de la aplicación de escritorio, **View › What the AI receives** lo muestra para la conversación en curso.
-- En la aplicación de escritorio, un prompt elegido con **Select prompt** (o el que fija un script) sustituye solo las instrucciones del asistente en esa conversación: las reglas fijas, el perfil y el glosario se mantienen.
+- **What the AI receives** muestra el texto que recibe la IA para una tarea, con su tamaño (cuántas palabras y tokens, aproximadamente) y sus partes (rol Staff o superior). Escribe un texto de prueba y pulsa **Show its terms** para ver qué términos del glosario entrarían. En el asistente de la aplicación de escritorio, **Options › What the AI receives ...** lo muestra para la conversación en curso.
+- En la aplicación de escritorio, un prompt elegido con **Get prompt from catalog ...** (o el que fija un script) sustituye solo las instrucciones del asistente en esa conversación: las reglas fijas, el perfil y el glosario se mantienen.
 
 Cualquiera puede abrir KNote Atlas y leer las notas; solo un **ProjectManager** o un **Admin** puede crearlas, guardarlas, borrarlas, moverlas o cambiar sus etiquetas (también la nota **Search test queries**). El perfil se recorta a unas 2.000 palabras: KNote Atlas avisa si es más largo.
 

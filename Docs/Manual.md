@@ -170,7 +170,7 @@ The **Options** menu has the rest:
 |---|---|
 | **Get stream** / **Get completion** | How answers arrive: as they are being written (the default) or all at once when they are complete. |
 | **Get prompt from catalog ...** (`Ctrl+K`) | Starts a new conversation from a prompt of the catalog. |
-| **View system root ...** | Shows the instructions the model receives before the conversation. |
+| **What the AI receives ...** | Shows the instructions the model receives before the conversation. |
 | **Show model info (tokens, time)** | Shows or hides, below each answer of the chat view, the tokens and the time it took. The Markdown view always has them, in the marker of each answer. |
 | **Manage models ...** | Adds, changes or removes the AI models (providers) you can choose. |
 
@@ -220,7 +220,7 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 
 **3. The semantic index (Admin).** In the desktop app, tab **Semantic index** of the same window; in the web app, section **Semantic index** of the **KNote Atlas** tab. It shows how the index is (notes indexed, pending and fragments; when it was last created and how long it took). **Create index** calculates the meaning of every note: KNote tells you first how many notes it will send to the model and, after the first time, how long it should take. You can go on working (in the desktop app you can even close the window: the status bar shows the progress); **Cancel** (**Cancel run** in the desktop app) keeps what is done, and the next run goes on from there. The notes that fail are listed and tried again in the next run. In the web server one index is created at a time, whatever the repository: the others wait, **Queued**.
 
-- Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, and each resource that has a description. The notes of the assistant's sessions, the chat room and the search evaluation are left out.
+- Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, and each resource that has a description. KNote's own notes are left out: the assistant's sessions, the chat room, the search evaluation, the profile, the glossary and the task instructions.
 - A note you change becomes *pending*. The pending notes are brought up to date before each search by meaning (a few at a time: up to 50 notes or about 10 seconds) or with **Update now**. A very long note (with more than 64 fragments to calculate) is left for **Update now**: until then, the search uses its previous content.
 - **Rebuild** calculates every vector again (after changing the dimensions, for example); meanwhile the search goes on with the old ones.
 - **Changing the embedding model** needs the index of the new model. The index of the previous model is kept (to compare them, see *Search evaluation (web app)*) and listed below; an Admin can remove it.
@@ -281,8 +281,8 @@ Everything is together in **KNote Atlas**: **Tools › KNote Atlas** in the desk
 
 - The first time, **Create the profile** / **Create the glossary** (or **Customize** in the task instructions) creates the note with a template and opens it in the note editor of always. Afterwards, **Open in the editor** opens it. The help of the templates are hidden comments (`<!-- ... -->`): you see them while editing, they are not shown in the viewers and the AI never receives them; neither the sections left empty.
 - **Fill in folders and types** (profile) adds to its sections *Folders* and *Note types* the folders of the first two levels and the note types that have notes, so that you only write what each one is. It only adds what is missing: nothing written is removed.
-- **What the AI receives** shows the text the AI gets for a task, with its size (about how many words and tokens) and its parts (Staff role or higher). Write a test text and press **Show its terms** to see which glossary terms would go in. In the desktop app's assistant, **View › What the AI receives** shows it for the current conversation.
-- In the desktop app, a prompt chosen with **Select prompt** (or given by a script) replaces only the assistant's instructions in that conversation: the fixed rules, the profile and the glossary stay.
+- **What the AI receives** shows the text the AI gets for a task, with its size (about how many words and tokens) and its parts (Staff role or higher). Write a test text and press **Show its terms** to see which glossary terms would go in. In the desktop app's assistant, **Options › What the AI receives ...** shows it for the current conversation.
+- In the desktop app, a prompt chosen with **Get prompt from catalog ...** (or given by a script) replaces only the assistant's instructions in that conversation: the fixed rules, the profile and the glossary stay.
 
 Anyone can open KNote Atlas and read the notes; only a **ProjectManager** or an **Admin** can create, save, delete, move or retag them (also the note **Search test queries**). The profile is cut to about 2,000 words: KNote Atlas tells you if it is longer.
 

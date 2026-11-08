@@ -24,7 +24,7 @@ internal static class AiImageSmokeCheck
         surface.Canvas.Clear(SKColors.White);
         using var font = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 90);
         using var paint = new SKPaint { Color = SKColors.Black };
-        surface.Canvas.DrawText(text, 120, 130, font, paint);
+        surface.Canvas.DrawText(text, 120, 130, SKTextAlign.Left, font, paint);
         using var snapshot = surface.Snapshot();
         using var data = snapshot.Encode(SKEncodedImageFormat.Png, 100);
         return data.ToArray();

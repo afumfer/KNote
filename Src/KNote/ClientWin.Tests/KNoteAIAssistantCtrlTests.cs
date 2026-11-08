@@ -46,8 +46,8 @@ public class KNoteAIAssistantCtrlTests
     [TestMethod]
     public async Task StreamCompletionAsync_TheSearchOn_ThePaidProviderSearches_WithTheRules_UntilANewConversation()
     {
-        ChatOptions options = null;
-        List<ChatMessage> messages = null;
+        ChatOptions options = null!;
+        List<ChatMessage> messages = null!;
         static async IAsyncEnumerable<ChatResponseUpdate> Stream()
         {
             await Task.Yield();

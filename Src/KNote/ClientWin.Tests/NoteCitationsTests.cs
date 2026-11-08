@@ -19,7 +19,7 @@ public class NoteCitationsTests
     {
         var service = new FakeKntService();
         service.NotesFake.GetCitedNoteAsyncImpl = _ => Task.FromResult(answer);
-        string message = null;
+        string message = null!;
 
         await NoteCitations.OpenAsync(TestStoreFactory.CreateEmpty(), service, 123, text => message = text);
 
@@ -60,7 +60,7 @@ public class NoteCitationsTests
     [TestMethod]
     public async Task Streamer_SendsTheToolsOfTheTurn()
     {
-        ChatOptions sent = null;
+        ChatOptions sent = null!;
         var chatClient = new FakeChatClient
         {
             GetStreamingResponseImpl = (_, options, _) =>
@@ -75,7 +75,7 @@ public class NoteCitationsTests
         {
         }
 
-        CollectionAssert.AreEqual(tools, sent.Tools.ToList());
+        CollectionAssert.AreEqual(tools, sent.Tools!.ToList());
     }
 
     [TestMethod]

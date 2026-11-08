@@ -162,7 +162,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
 - `Service/Core` — clases base `KntService`/`IKntService` más `ServiceRef` (selección de repo/ORM, ver
   arriba).
 - `Service/Interfaces` + `Service/Services` — un par interfaz/implementación por objeto de dominio (Note,
-  Folder, KAttribute, NoteType, SystemValues, User, AiSession, ChatRoom).
+  Folder, KAttribute, NoteType, TraceNoteType, SystemValues, User, AiSession, ChatRoom, SemanticSearch, AtlasContext).
 - `Service/ServicesCommands` — clases de comando (`KntNoteCommands`, `KntFolderCommands`, etc.) construidas
   sobre `IPluginCommand`/`KntCommandServiceBase`. Exponen las operaciones de servicio a `KntScript`, el
   "lenguaje minimalista de automatización" mencionado en el README, invocado desde la consola de scripts de
@@ -304,7 +304,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
     (`EmbeddingBatchSize`: una nota de cientos en una llamada superaba el tiempo máximo del proveedor) y sus filas se
     sustituyen una vez al final; las puestas al día rápidas (antes de una búsqueda y de las parecidas) dejan para la
     indexación completa las notas con más de 64 fragmentos por calcular (`QuickRefreshMaxChunks`). Estado en `AI_INDEX_STATE` (`KntSemanticIndexState`). El
-    índice contiene **todas** las notas salvo las de los tipos del sistema (`KntSystemNotes.SystemNoteTypeNames`:
+    índice contiene **todas** las notas salvo las de los tipos del sistema (`KntConst.SystemNoteTypeNames`:
     sesiones, chat room, consultas de prueba, informes): los permisos se aplican al buscar. Los comandos que cambian una
     nota (guardar, carpeta, etiquetas, recursos, tareas) y los que cambian su fragmento de datos sin tocarla (renombrar
     o mover una carpeta, renombrar un tipo o un atributo) llaman a `MarkStaleAsync`; un fallo al marcar no hace fallar
@@ -346,7 +346,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   notas del perfil, el glosario, las instrucciones y las consultas de prueba (`KntAtlasNotes.ProtectedNoteTypeNames`)
   solo las guardan, borran, mueven o reetiquetan ProjectManager y Admin, también con la autorización de comandos
   apagada (el `Server`): lo comprueban `KntNotesSaveAsyncCommand` (tipo nuevo y anterior), `Delete*` y los `Patch*`;
-  sin usuario, permitido. Los tres tipos son del sistema (`KntSystemNotes.SystemNoteTypeNames`). Tests en
+  sin usuario, permitido. Los tres tipos son del sistema (`KntConst.SystemNoteTypeNames`). Tests en
   `Tests/AtlasContextRulesTests`, `Tests/ServiceTests/AtlasContextServiceTests` y
   `Tests/InProcessIntegrationTests/AtlasInProcessTests`.
 
@@ -449,7 +449,7 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
   `NoteTypesController`, `TraceNoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
   proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatRoomController` (imágenes del chat
-  room), `AlarmsController` (avisos de alarmas de la Web), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), además del scaffold
+  room), `AlarmsController` (avisos de alarmas de la Web), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), `SemanticSearchController` (índice y búsqueda por significado), `AtlasController` (contexto de la IA), `ServerController` (capacidades del servidor) y `LocalController` (API del equipo de KNote Local), además del scaffold
   `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Helpers/KntAlarms.cs` — `EmailAlarmsService`, que envía las alarmas de correo de todos los repositorios

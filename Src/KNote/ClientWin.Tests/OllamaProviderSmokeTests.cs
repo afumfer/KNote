@@ -27,7 +27,7 @@ public class OllamaProviderSmokeTests
             return;
 
         var client = TestAiChatClientFactory.Create(providerRef);
-        KNote.Model.Dto.AiChatTurnDto turn = null;
+        KNote.Model.Dto.AiChatTurnDto turn = null!;
         await foreach (var e in KNote.Ai.AiChatTurnStreamer.StreamAsync(client, null, null, "How much is 128 + 512? Think it through."))
             if (e.Type == KNote.Model.Dto.AiChatStreamEventTypes.Completed)
                 turn = e.Turn;
