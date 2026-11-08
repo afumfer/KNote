@@ -350,7 +350,10 @@ Proveedores: sección `ai.providers` de `appsettings.json`, con los mismos campo
 `ClientWin` (`alias`, `provider` = `OpenAI`/`Anthropic`/`Ollama`, `model`, `apiKey`, `host` solo para Ollama).
 `Ai/AiProvidersCatalog` descarta (y registra en el log) los que no validan; el primero válido es el
 predefinido. Las `apiKey` no van en `appsettings.json`: user-secrets (`ai:providers:0:apiKey`, por posición) o,
-si están vacías, las variables `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (`AiChatClientFactory.ResolveApiKey`).
+si están vacías, las variables `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (`AiChatClientFactory.ResolveApiKey`). Igual
+`webSearchApiKey` (solo Ollama chat, la búsqueda en Internet del asistente con ollama.com); `AiProviderInfoDto.SupportsWebSearch`
+dice si el proveedor busca, sin la clave. `POST chat` solo añade la búsqueda con `request.WebSearch` y un proveedor que puede. En
+KNote Local va en `knote-local.json` (`webSearchApiKey`, cifrada; `RemoveWebSearchApiKey` la quita).
 `Ai/IAiChatClientProvider` construye el `IChatClient` (`AiChatClientFactory` de `KNote.Ai`); existe para que los
 tests lo sustituyan. Los proveedores con `kind` = `Embeddings` no son del asistente (`AiProvidersCatalog.Default/Find/
 GetInfo` solo ven los de chat): son los modelos de embeddings del Server (ver la sección siguiente); `contextWindow` es el

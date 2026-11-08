@@ -202,6 +202,9 @@ $env:OLLAMA_HOST = "http://mi-servidor:11434"
 # o, vía user-secrets:
 dotnet user-secrets set "AiProviderSmokeTests:Ollama:Host" "http://mi-servidor:11434" --project ClientWin.Tests/KNote.ClientWin.Tests.csproj
 ```
+La búsqueda en Internet con Ollama (`WebSearch_*`) necesita además la clave de una cuenta de ollama.com:
+`AiProviderSmokeTests:Ollama:WebSearchApiKey` o `$env:OLLAMA_API_KEY`; sin ella queda Inconclusive. Los `WebSearch_*` de los
+tres proveedores hacen búsquedas reales (Anthropic cobra cada una).
 Antes de llamar de verdad, el test comprueba que el host responde (`GET {host}/api/tags`, timeout 2s); si
 no responde, se marca Inconclusive en vez de fallar — distingue "Ollama no instalado/parado" de una
 regresión real. El test de function-calling además depende de que el modelo configurado soporte tools

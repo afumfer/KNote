@@ -22,7 +22,7 @@ The Windows desktop application keeps its configuration in the folder `%LocalApp
 
 Deleting `KNoteState.config` only resets the window layout. Deleting `KNoteData.config` makes KNote start as if it were the first run: your databases are not deleted, but the list of repositories and AI providers is lost.
 
-**Passwords and API keys.** The e-mail account password, the API keys of the AI providers, the sign-in token of the chat room and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
+**Passwords and API keys.** The e-mail account password, the API keys of the AI providers (also the web search key of Ollama), the sign-in token of the chat room and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
 
 **Backups.** Every time a file is saved, the previous version is kept next to it as `KNoteData.config.bak` / `KNoteState.config.bak`. If a file cannot be read, KNote loads its `.bak` and tells you.
 
@@ -202,7 +202,7 @@ To use it you need three things, in this order: an embedding model in your insta
 - Web server: the `ai` section of the server (see *AI providers of the web app (server configuration)*).
 - KNote Local: **Admin panel → This computer → AI providers**.
 
-The **Test** button of each provider checks it: with an embedding model it calculates a test vector and shows its dimensions and the time it took, and it explains the usual errors (the model is not downloaded, the host doesn't answer, the API key is not valid). With Ollama, download the model first, for example `ollama pull qwen3-embedding:0.6b`. Local models are recommended for privacy: with a paid model (OpenAI) the content of your notes is sent to its provider. The **Context size** field is only for the chat models of Ollama (empty: the model's own).
+The **Test** button of each provider checks it: with an embedding model it calculates a test vector and shows its dimensions and the time it took, and it explains the usual errors (the model is not downloaded, the host doesn't answer, the API key is not valid). With Ollama, download the model first, for example `ollama pull qwen3-embedding:0.6b`. Local models are recommended for privacy: with a paid model (OpenAI) the content of your notes is sent to its provider. The **Context size** field is only for the chat models of Ollama (empty: the model's own), as the optional **Web search API key** (of an ollama.com account, only for searching the Internet from the assistant): with it, **Test** also makes a search and says whether the key works.
 
 **2. The repository's models (Admin).** They are the same for everybody who works with the repository, in either app:
 
@@ -316,6 +316,8 @@ You name folders, note types, users and attributes as usual: if a name doesn't e
 **Images and files.** You can attach up to 5 files to a message, of 5 MB at most each: with the **Attach** button, pasting them (Ctrl+V) or dropping them on the message box. With an image you can ask about it, have it described or transcribed ("What model is it?", "Copy what this whiteboard says"). The assistant sees it in that message only; afterwards it works with what it answered. Big photos are reduced for the model, and the original is saved intact with the conversation, which shows it again when you resume it in either app. Only you see the images of your conversations. The assistant can't read other files such as PDFs yet: they are only saved with the conversation. If the model can't see images, KNote tells you when you attach one, and with a paid provider it reminds you that images are sent to it. In the desktop app you can attach files only in conversations that are saved (the assistant opened from the menu), not in the ones a script opens.
 
 Ask for it to keep a file in a note ("Attach this photo to #340"): it shows a card, as any change to a note that already exists; in a new note it doesn't ask, so you can say "Create a note with what this whiteboard says and attach the photo". It can also look at the photos a note already has ("Describe the photos of #340", "In which of the photos of #512 is the motherboard?"), and again at an image of the conversation ("Look at the first photo again"). It looks at 3 at a time, and it tells you how many there are.
+
+**Searching the Internet.** Turn on **Internet** (the globe button next to **Attach**; in the web app, the globe next to the clip) and the assistant can search the Internet when the answer isn't in your notes, or to complete or check them: "Search the Internet for the release date of the Amstrad CPC 6128 and compare it with my note", "Find the service manual of the MSX and save the link in its note". Without it the assistant can't search, and it tells you so if you ask; an answer may still come from what the model knows, which isn't what the Internet says today. It is off in every new or resumed conversation, and it is only there with a provider that can search: OpenAI and Anthropic search themselves; with Ollama, KNote searches with the web search of ollama.com, which needs the **Web search API key** of an ollama.com account in the Ollama provider (the model still runs on your computer). While it is on, a line under the message box reminds you that what is searched leaves the computer, also with a local model; Anthropic bills each search. What it takes from the Internet comes with its link (marked with ↗, and opened in another tab of the browser in the web app), different from the citations of notes: when the provider gives its sources apart, they are added at the end of the answer under **Sources**. Saving something it found in a note follows the cards as any other change, and what a page says is never an order for the assistant.
 
 **Citations.** A `#123` in a note, in a task or in an answer of the assistant is a link to that note, shown differently from web links. In the web app it opens the note's viewer in a window; in the desktop app, the note editor. Any `#` followed by a number is a link, without checking that the note exists: when it doesn't, or it is one of KNote's own notes, you get **Note #123 not found**. They aren't links inside code, in the desktop app's HTML editor or in the chat room.
 
@@ -497,7 +499,7 @@ KNote Local is the web app running entirely in your computer, without internet, 
 In KNote Local the **Admin panel** has one more tab, **This computer**, for an Admin and only from the computer itself:
 
 - **Repositories**: **New repository** (an empty SQLite database in the data folder), **Link existing database** (a SQLite database of the computer, for example the desktop app's: both apps can use it at the same time), **Link SQL Server**, and in each row **Rename**, **Make default** (the repository of the sign-ups and of the visitors) and **Unlink** (it is only removed from the list: the database is never deleted). The changes apply at once.
-- **AI providers** of the assistant (**Kind** **Chat**; the first one is the default) and of the search by meaning (**Kind** **Embeddings**), with their API keys kept encrypted and never shown again (empty keeps the saved one), and **Test** to check each one.
+- **AI providers** of the assistant (**Kind** **Chat**; the first one is the default) and of the search by meaning (**Kind** **Embeddings**), with their API keys kept encrypted and never shown again (empty keeps the saved one; the web search key of an Ollama provider can also be removed), and **Test** to check each one.
 - **E-mail**: the SMTP account and **Send the Email alarms** (off by default; if you turn it on, uncheck **Process Email alarms** in the desktop app's options).
 - **Local server**: its address, data folder and version, its **Port** (applies the next time it starts) and **Stop local server**.
 
@@ -539,6 +541,7 @@ The AI models offered by the web app are configured in the server, in the `ai` s
 | `model` | The model of that provider. |
 | `apiKey` | The API key (OpenAI and Anthropic). Leave it empty in `appsettings.json`: see below. |
 | `host` | The address of the Ollama server (Ollama only). |
+| `webSearchApiKey` | Optional, Ollama chat models only: the API key of an ollama.com account, so that the assistant can search the Internet. A secret, like `apiKey`. |
 | `kind` | `Chat` (the default) for the models of the assistant, or `Embeddings` for the models of the search by meaning (Ollama and OpenAI only; see *Search by meaning (KNote Atlas)*). |
 | `contextWindow` | Optional, Ollama chat models only: the context size in tokens (empty: the model's own). |
 
@@ -554,7 +557,7 @@ The first valid provider is the default one (of the `Chat` kind: the `Embeddings
 dotnet user-secrets set "ai:providers:0:apiKey" "sk-..." --project Server/KNote.Server.csproj
 ```
 
-In a server, use environment variables (`ai__providers__0__apiKey`) or your hosting's secret store. If a key is empty, the server uses the `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable. The keys never reach the browser: the web app only receives the alias, provider and model of each one.
+The same for the web search key of Ollama (`ai:providers:2:webSearchApiKey`). In a server, use environment variables (`ai__providers__0__apiKey`) or your hosting's secret store. If a key is empty, the server uses the `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable. The keys never reach the browser: the web app only receives the alias, provider and model of each one.
 
 ### Password reset by e-mail (server configuration)
 

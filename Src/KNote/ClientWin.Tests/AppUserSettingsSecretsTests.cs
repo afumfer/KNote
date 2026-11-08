@@ -16,7 +16,7 @@ public class AppUserSettingsSecretsTests
         settings.Notifications.Email.Host = "smtp.example.com";
         settings.Notifications.Email.Password = "smtp-pwd";
         settings.Ai.Providers.Add(new AiProviderRef { Alias = "OpenAI", Provider = "OpenAI", Model = "m", ApiKey = "key-1" });
-        settings.Ai.Providers.Add(new AiProviderRef { Alias = "Ollama", Provider = "Ollama", Model = "m", Host = "http://localhost:11434" });
+        settings.Ai.Providers.Add(new AiProviderRef { Alias = "Ollama", Provider = "Ollama", Model = "m", Host = "http://localhost:11434", WebSearchApiKey = "web-key-1" });
         settings.Repositories.Items.Add(new RepositoryRef { Name = "Sqlite", ConnectionString = @"Data Source=C:\KaNote\Data\a.db" });
         settings.Repositories.Items.Add(new RepositoryRef { Name = "Sql", ConnectionString = SqlAuthConnectionString });
         settings.Repositories.Assistant = new RepositoryRef { Name = "Assistant", ConnectionString = SqlAuthConnectionString };
@@ -44,6 +44,8 @@ public class AppUserSettingsSecretsTests
 
         Assert.AreEqual("fake:dwp-ptms", protectedSettings.Notifications.Email.Password);
         Assert.AreEqual("fake:1-yek", protectedSettings.Ai.Providers[0].ApiKey);
+        Assert.AreEqual("fake:1-yek-bew", protectedSettings.Ai.Providers[1].WebSearchApiKey);
+        Assert.AreEqual("web-key-1", settings.Ai.Providers[1].WebSearchApiKey);
         Assert.IsTrue(protectedSettings.Repositories.Items[1].ConnectionString.StartsWith("fake:"));
         Assert.IsTrue(protectedSettings.Repositories.Assistant.ConnectionString.StartsWith("fake:"));
         Assert.AreEqual("fake:1-kot", protectedSettings.Connectivity.ChatHub.Repositories[0].Token);
@@ -74,7 +76,7 @@ public class AppUserSettingsSecretsTests
     {
         var xml = ToXml(new AppUserSettingsSecrets(new FakeSecretProtector()).Protect(NewSettings()));
 
-        foreach (var secret in new[] { "smtp-pwd", "key-1", "s3cr3t", "tok-1", "tok-2" })
+        foreach (var secret in new[] { "smtp-pwd", "key-1", "web-key-1", "s3cr3t", "tok-1", "tok-2" })
             Assert.IsFalse(xml.Contains(secret), $"'{secret}' must not appear in clear text");
     }
 

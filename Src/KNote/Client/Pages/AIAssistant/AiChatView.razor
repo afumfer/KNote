@@ -103,7 +103,7 @@
     [Parameter] public string? PendingReasoning { get; set; }
     [Parameter] public bool Thinking { get; set; }
 
-    private string? Activity => !string.IsNullOrEmpty(ToolInUse) ? $"Using {ToolInUse}" : Thinking ? AiChatTurnDto.ThinkingText : null;
+    private string? Activity => !string.IsNullOrEmpty(ToolInUse) ? AiChatTurnDto.ToolActivityText(ToolInUse) : Thinking ? AiChatTurnDto.ThinkingText : null;
 
     // The notes created by the assistant (create_task), by the index of the turn they were created in.
     [Parameter] public IReadOnlyDictionary<int, List<AiChatStreamEventDto>>? CreatedNotes { get; set; }

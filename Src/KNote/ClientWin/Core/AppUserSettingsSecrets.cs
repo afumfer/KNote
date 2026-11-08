@@ -90,6 +90,7 @@ public sealed class AppUserSettingsSecrets
         {
             var p = provider;
             yield return new Secret($"API key of AI provider '{p.Alias}'", () => p.ApiKey, v => p.ApiKey = v);
+            yield return new Secret($"web search key of AI provider '{p.Alias}'", () => p.WebSearchApiKey, v => p.WebSearchApiKey = v);
         }
 
         foreach (var repository in settings.Repositories.Items)

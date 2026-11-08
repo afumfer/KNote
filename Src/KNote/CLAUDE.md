@@ -412,6 +412,17 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   `reasoning.summary` con los modelos que no razonan (`gpt-4o-mini`, comprobado con una llamada real), así que con OpenAI
   no hay texto de razonamiento, solo sus tokens.
   Tests en `ClientWin.Tests/AiReasoningTests`.
+- **Búsqueda en Internet (KNote Atlas, etapa 1)** (`Ai/AiWebSearch.cs`, `Model/Core/AiWebSearchRules`). Solo en un turno con
+  «Search the Internet» encendido (`AiChatRequestDto.WebSearch`, `KNoteAIAssistantCtrl.WebSearch`; empieza apagado en cada
+  conversación y no se guarda) y con un proveedor que puede (`AiProviderRef.SupportsWebSearch`: OpenAI, Anthropic, u Ollama con
+  `WebSearchApiKey`, un secreto como `ApiKey`). `AiWebSearch.ToolsFor` da `HostedWebSearchTool` a OpenAI y Anthropic (sus adaptadores
+  la convierten en la búsqueda del proveedor) y a Ollama `web_search`/`web_fetch` sobre la API de ollama.com (`OllamaWebSearch`, que
+  nunca lanza: dice al modelo qué falló); el host las añade a las del turno y `AiWebSearch.SystemPrompt` añade
+  al mensaje de sistema `AiWebSearchRules.SystemRules` o, apagada o sin poder, `SystemRulesOff`/`SystemRulesUnavailable` (sin ellas,
+  el modelo respondía de memoria como si hubiera buscado). `AiChatTurnStreamer` da un evento `tool` `web_search` también con la búsqueda
+  del proveedor (`WebSearchToolCallContent`) y añade al final de la respuesta, como «Sources:», las citas (`CitationAnnotation`) que
+  no están ya en el texto (`SourcesSection`). Tests en `Tests/AiWebSearchTests`, `InProcessIntegrationTests/WebSearchInProcessTests` y
+  los `WebSearch_*` de `RequiresRealAiProvider`.
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

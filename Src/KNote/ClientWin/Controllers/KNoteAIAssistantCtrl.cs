@@ -180,6 +180,17 @@ public class KNoteAIAssistantCtrl : CtrlBase
     private AiProviderRef _currentProviderRef;
     public AiProviderRef CurrentProviderRef => _currentProviderRef;
 
+    // "Search the Internet" (KNote Atlas, chapter 23): off in each conversation until the user turns it on, and only with a
+    // provider that can (OpenAI, Anthropic, or Ollama with its web search key).
+    public bool SupportsWebSearch => _currentProviderRef?.SupportsWebSearch == true;
+
+    private bool _webSearch;
+    public bool WebSearch
+    {
+        get => _webSearch && SupportsWebSearch;
+        set => _webSearch = value;
+    }
+
     #endregion
 
     #region Constructor
@@ -388,6 +399,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     public void RestartAIAssistant()
     {
         _autoApprovedKinds.Clear();
+        _webSearch = false;
         _pendingAttachments.Clear();
         _turnAttachments = Array.Empty<AiChatAttachmentDto>();
         _previews.Clear();
@@ -545,9 +557,13 @@ public class KNoteAIAssistantCtrl : CtrlBase
             _tools.ModelSeesImages = await AiModelCapabilities.SupportsImagesAsync(_currentProviderRef);
         }
         var tools = _tools != null ? await _tools.GetToolsAsync() : null;
+        var webSearch = WebSearch;
+        if (webSearch)
+            tools = (tools ?? []).Concat(AiWebSearch.ToolsFor(_currentProviderRef)).ToList();
+        var systemPrompt = AiWebSearch.SystemPrompt(LastSystemPrompt.Text, _currentProviderRef, webSearch);
         try
         {
-            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, LastSystemPrompt.Text, history, prompt, tools, attachments, _tools?.TurnImages))
+            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, systemPrompt, history, prompt, tools, attachments, _tools?.TurnImages))
             {
                 if (e.Type == AiChatStreamEventTypes.Delta)
                 {
@@ -560,7 +576,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
                     SetActivity(AiChatTurnDto.ThinkingText);
                 }
                 else if (e.Type == AiChatStreamEventTypes.Tool)
-                    SetActivity($"Using {e.Text}");
+                    SetActivity(AiChatTurnDto.ToolActivityText(e.Text));
                 else if (e.Type == AiChatStreamEventTypes.Completed)
                     completed = e.Turn;
             }
@@ -777,6 +793,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
             return false;
 
         _autoApprovedKinds.Clear();
+        _webSearch = false;
 
         Result<AiChatSessionDto> res;
         try

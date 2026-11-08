@@ -71,7 +71,20 @@
                         }
                     </div>
                 }
+                @if (WebSearchOn)
+                {
+                    <div class="ai-prompt-files">
+                        <RadzenIcon Icon="public" Style="font-size: 1rem; color: var(--rz-warning)" />
+                        <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">@AiWebSearchRules.Notice(currentProvider?.Provider)</RadzenText>
+                    </div>
+                }
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Gap="0.5rem" class="ai-prompt">
+                    @if (currentProvider?.SupportsWebSearch == true)
+                    {
+                        <RadzenToggleButton Icon="public" @bind-Value="webSearch" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                                            ToggleButtonStyle="ButtonStyle.Warning" ToggleShade="Shade.Default" Disabled="@streaming"
+                                            MouseEnter="@(args => tooltipService.Open(args, AiWebSearchRules.ToggleText, new TooltipOptions { Position = TooltipPosition.Top }))" />
+                    }
                     <RadzenButton Icon="attach_file" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="PickFiles"
                                   Disabled="@(streaming || uploadingFiles || currentProvider == null)"
                                   MouseEnter="@(args => tooltipService.Open(args, "Attach files (you can also paste or drop them here)", new TooltipOptions { Position = TooltipPosition.Top }))" />
@@ -162,6 +175,12 @@
         : null;
 
     private long TotalTokens => session.Turns.Sum(t => t.TotalTokens);
+
+    // "Search the Internet" (KNote Atlas, chapter 23): off in each new or resumed conversation, and only with a provider
+    // that can search.
+    private bool webSearch;
+
+    private bool WebSearchOn => webSearch && currentProvider?.SupportsWebSearch == true;
 
     private string Height => InWindow ? "calc(100vh - 5rem)" : "calc(100vh - 10rem)";
 
@@ -388,6 +407,7 @@
             History = session.Turns.ToList(),
             Prompt = prompt,
             AutoApprovedActionKinds = autoApprovedKinds.ToList(),
+            WebSearch = WebSearchOn,
             SessionNoteId = session.NoteId,
             Attachments = automatic ? new() : sentAttachments.ToList()
         };
@@ -700,6 +720,7 @@
         pendingFiles.Clear();
         createdNotes.Clear();
         autoApprovedKinds.Clear();
+        webSearch = false;
         scrollToBottom = true;
     }
 

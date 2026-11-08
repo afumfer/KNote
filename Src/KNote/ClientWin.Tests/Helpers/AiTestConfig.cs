@@ -66,7 +66,9 @@ internal static class AiTestConfig
             Alias = "Test Ollama",
             Provider = EnumAiProvider.Ollama,
             Model = string.IsNullOrEmpty(section["Model"]) ? "llama3.1" : section["Model"],
-            Host = host
+            Host = host,
+            // Only for the Internet search (ollama.com's web search): optional.
+            WebSearchApiKey = FirstNonEmpty(section["WebSearchApiKey"], Environment.GetEnvironmentVariable("OLLAMA_API_KEY"))
         };
     }
 

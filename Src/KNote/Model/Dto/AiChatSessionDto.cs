@@ -55,6 +55,14 @@ public class AiChatTurnDto
     public const string ThinkingText = "Thinking…";
     public const string ReasoningText = "Reasoning";
 
+    // While a tool works: what the user sees.
+    public static string ToolActivityText(string toolName) => toolName switch
+    {
+        AiWebSearchRules.WebSearchName => "Searching the Internet…",
+        AiWebSearchRules.WebFetchName => "Reading a page of the Internet…",
+        _ => $"Using {toolName}"
+    };
+
     // The title of the reasoning of an answer: "Thought for 63 s".
     public string ReasoningTitle() =>
         ReasoningTime is TimeSpan time ? $"Thought for {Math.Max(1, (int)Math.Round(time.TotalSeconds))} s" : ReasoningText;

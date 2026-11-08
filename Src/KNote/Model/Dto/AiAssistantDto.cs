@@ -17,6 +17,9 @@ public class AiProviderInfoDto : IAiProviderIdentity
 
     // The provider used when none is chosen (the first one configured).
     public bool IsDefault { get; set; }
+
+    // The assistant can search the Internet with it (AiProviderRef.SupportsWebSearch).
+    public bool SupportsWebSearch { get; set; }
 }
 
 // One question to the assistant, with the conversation so far (the server keeps no conversation state).
@@ -36,6 +39,10 @@ public class AiChatRequestDto
     public Guid SessionNoteId { get; set; }
 
     public List<AiChatAttachmentDto> Attachments { get; set; } = new();
+
+    // "Search the Internet" of the conversation (KNote Atlas, chapter 23): off unless the user turns it on, and only with a
+    // provider that supports it.
+    public bool WebSearch { get; set; }
 }
 
 // Each server-sent event of a streamed answer (its SSE event type is Type, see AiChatStreamEventTypes).

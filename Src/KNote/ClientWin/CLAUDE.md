@@ -667,7 +667,11 @@ un `Ctrl` embebido como las pestañas del editor de repositorio. Tests en `Atlas
 (`KNote.Ai`) y el `ServiceRef` de la conversación (`LastSystemPrompt`). `RootSystemChat` es solo la capa de
 instrucciones (D6): con su valor de serie (`KntConst.DefaultRootSystemChat`) van las de KNote; con el `System` de un
 `@Prompt` del catálogo o el que fija un script (también el motor «ln»), sustituyen solo esas, y las reglas fijas, el
-perfil y el glosario se mantienen. Sin repositorio o si falla, van las reglas y las instrucciones de serie.
+perfil y el glosario se mantienen. Sin repositorio o si falla, van las reglas y las instrucciones de serie. La búsqueda en
+Internet es `WebSearch` (apagada en `RestartAIAssistant` y al abrir una sesión; `RunTurnAsync` añade `AiWebSearch.ToolsFor` y sus
+reglas); en `KNoteAIAssistantForm`, el botón **Internet** (`_buttonWebSearch`, creado en código junto a **Attach**, solo con
+`SupportsWebSearch`) y el aviso `_webSearchNotice`. Los enlaces a Internet de las respuestas llevan ↗ (`KNoteAIChat.css`) y se abren
+en el navegador (`AiChatWebRenderer`).
 
 ## KNote Atlas: búsqueda por significado
 

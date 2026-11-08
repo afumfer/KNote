@@ -578,6 +578,10 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   `AiAttachmentsView` pide las imágenes por `GetAttachmentPreviewAsync` y las dibuja como `data:`: la URL de un recurso se sirve sin
   sesión. Sin vista previa, el nombre. Las vistas previas son de `AiChatView` (`Previews`), porque un mensaje pasa del que se responde a
   los respondidos y es otro componente; al cargarse una imagen la conversación vuelve al final (`AttachmentShown`).
+- **Búsqueda en Internet del asistente**: `AIAssistant.webSearch` (el botón del globo, solo con `SupportsWebSearch`), apagado al
+  empezar o retomar una conversación (`StartSession`); mientras está encendido, el aviso `AiWebSearchRules.Notice` sobre la caja. Los
+  enlaces a Internet de las respuestas y del chat (`ViewMarkdown` con `DisableHtml`) llevan `knt-external-link` (↗) y se abren en
+  otra pestaña: en la misma, se salía de la conversación.
 - **Razonamiento del asistente**: `AIAssistant` lo acumula con los eventos `reasoning` y lo pone en el turno al terminar
   (`AiChatTurnDto.Reasoning` no viaja en el JSON); `AiChatView` lo muestra plegado, como texto plano, en un `<details>`.
 - **Citas `#123`**: `ViewMarkdown` las enlaza (`NoteCitationLinker`, con `LinkCitations`, apagado en el chat room) a

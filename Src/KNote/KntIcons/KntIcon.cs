@@ -91,5 +91,6 @@ public enum KntIcon
     Table,
     Image,
     Link,
-    Attach
+    Attach,
+    WebSearch
 }

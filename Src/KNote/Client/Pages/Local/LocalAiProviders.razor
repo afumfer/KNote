@@ -34,7 +34,7 @@
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="LocalAiProviderDto" Property="Model" Title="Model" />
                     <RadzenDataGridColumn TItem="LocalAiProviderDto" Title="API key">
-                        <Template Context="provider">@(provider.Provider == EnumAiProvider.Ollama ? "-" : provider.HasApiKey ? "Saved" : "None")</Template>
+                        <Template Context="provider">@(provider.Provider == EnumAiProvider.Ollama ? (provider.HasWebSearchApiKey ? "Web search key saved" : "-") : provider.HasApiKey ? "Saved" : "None")</Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="LocalAiProviderDto" Width="56px" Sortable="false">
                         <Template Context="provider">

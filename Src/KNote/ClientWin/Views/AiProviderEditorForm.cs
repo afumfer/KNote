@@ -95,7 +95,6 @@ public partial class AiProviderEditorForm : KntEditorForm, IViewEditor<AiProvide
     {
         FormIsDirty = true;
     }
-
     #endregion
 
     #region Private methods
@@ -110,6 +109,10 @@ public partial class AiProviderEditorForm : KntEditorForm, IViewEditor<AiProvide
         var hasContextWindow = isOllama && (string)comboKind.SelectedItem != EnumAiProviderKind.Embeddings;
         labelContextWindow.Enabled = hasContextWindow;
         textContextWindow.Enabled = hasContextWindow;
+
+        // The same for the key of ollama.com's web search: the paid providers search with their own key.
+        labelWebSearchApiKey.Enabled = hasContextWindow;
+        textWebSearchApiKey.Enabled = hasContextWindow;
     }
 
     protected override void ModelToControls()
@@ -121,6 +124,7 @@ public partial class AiProviderEditorForm : KntEditorForm, IViewEditor<AiProvide
         textApiKey.Text = _ctrl.Model.ApiKey;
         textHost.Text = _ctrl.Model.Host;
         textContextWindow.Text = _ctrl.Model.ContextWindow?.ToString();
+        textWebSearchApiKey.Text = _ctrl.Model.WebSearchApiKey;
         UpdateHostEnabled();
     }
 
@@ -140,6 +144,8 @@ public partial class AiProviderEditorForm : KntEditorForm, IViewEditor<AiProvide
         // Only an Ollama chat model keeps it; a text that is not a number is left for the validation to refuse.
         provider.ContextWindow = !textContextWindow.Enabled || string.IsNullOrWhiteSpace(textContextWindow.Text) ? null
             : int.TryParse(textContextWindow.Text.Trim(), out var tokens) ? tokens : 0;
+        provider.WebSearchApiKey = textWebSearchApiKey.Enabled && !string.IsNullOrWhiteSpace(textWebSearchApiKey.Text)
+            ? textWebSearchApiKey.Text.Trim() : null;
     }
 
     #endregion

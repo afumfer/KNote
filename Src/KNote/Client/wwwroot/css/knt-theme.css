@@ -228,6 +228,13 @@
     border-bottom: 1px dotted currentColor;
 }
 
+/* A link to the Internet in an AI answer or a chat message (ViewMarkdown with DisableHtml): it opens in another tab. */
+.knt-markdown a.knt-external-link::after {
+    content: "\2197";
+    font-size: 0.8em;
+    margin-left: 0.1em;
+}
+
 .knt-markdown table {
     display: block;
     width: max-content;

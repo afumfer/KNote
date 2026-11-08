@@ -18,9 +18,13 @@ public class ScriptedAiChatClientProvider : IAiChatClientProvider
     // The messages of the last call to the model (the system message first).
     public List<ChatMessage> LastMessages { get; private set; } = [];
 
+    // The tools the client of the last request was built with.
+    public List<AITool> LastTools { get; private set; } = [];
+
     public IChatClient Create(AiProviderRef providerRef, IEnumerable<AITool> tools)
     {
         var toolList = tools.ToList();
+        LastTools = toolList;
         return new ScriptedChatClient(Script, messages => LastMessages = messages.ToList())
             .AsBuilder()
             .ConfigureOptions(o => o.Tools = [.. toolList])

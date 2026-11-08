@@ -17,6 +17,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     private readonly AiChatWebRenderer _chatView;
     // The files of the message being written.
     private readonly FlowLayoutPanel _attachmentsBar;
+
+    // "Search the Internet" (KNote Atlas, chapter 23): a toggle next to Attach, and the notice while it is on.
+    private readonly Button _buttonWebSearch;
+    private readonly Label _webSearchNotice;
     // The menu items with a keyboard shortcut, by its text (AiChatHtml.ShortcutText).
     private readonly Dictionary<string, ToolStripMenuItem> _menuShortcuts;
     private int _countNRres;
@@ -71,6 +75,24 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         _attachmentsBar = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Visible = false };
         splitChat.Panel2.Controls.Add(_attachmentsBar);
         splitChat.Panel2.Controls.SetChildIndex(_attachmentsBar, 1);
+        _webSearchNotice = new Label
+        {
+            Dock = DockStyle.Top, AutoSize = true, Visible = false,
+            Padding = new Padding(3, 4, 3, 4)
+        };
+        splitChat.Panel2.Controls.Add(_webSearchNotice);
+        splitChat.Panel2.Controls.SetChildIndex(_webSearchNotice, 1);
+        // A button, not a CheckBox with the look of one: in dark mode WinForms paints that one white, with no image or color.
+        _buttonWebSearch = new Button
+        {
+            Text = "Internet", Font = buttonAttach.Font, Size = buttonAttach.Size, Top = buttonAttach.Top,
+            TextImageRelation = TextImageRelation.ImageBeforeText, UseVisualStyleBackColor = true,
+            TabIndex = buttonAttach.TabIndex + 1, Visible = false, AccessibleRole = AccessibleRole.CheckButton
+        };
+        _buttonWebSearch.SetKntIcon(KntIcon.WebSearch);
+        _buttonWebSearch.Click += buttonWebSearch_Click;
+        new ToolTip().SetToolTip(_buttonWebSearch, AiWebSearchRules.ToggleText);
+        panelPromptHeader.Controls.Add(_buttonWebSearch);
         textPrompt.AllowDrop = true;
         textPrompt.KeyDown += textPrompt_KeyDown;
         textPrompt.DragEnter += textPrompt_DragEnter;
@@ -101,8 +123,20 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     private void AlignResultHeader() => AlignControlsRight(panelResultHeader, 8, 8,
         buttonNavigate, buttonMarkDown);
 
-    private void AlignPromptHeader() => AlignControlsRight(panelPromptHeader, 6, 6,
-        buttonAttach, buttonSend, buttonNewSession, panelSeparator, comboProviders);
+    // The buttons next to the model, without the ones that do not show, so they leave no gap (their Visible says nothing here,
+    // as it is false until the window shows). ShowWebSearch aligns it again: Internet depends on the provider.
+    private void AlignPromptHeader()
+    {
+        var controls = new List<Control> { buttonSend, buttonNewSession };
+        if (_ctrl.CanAttach)
+            controls.Add(buttonAttach);
+        if (_ctrl.SupportsWebSearch)
+            controls.Add(_buttonWebSearch);
+        controls.Add(panelSeparator);
+        controls.Add(comboProviders);
+
+        AlignControlsRight(panelPromptHeader, 6, 6, controls.ToArray());
+    }
 
     private static IEnumerable<ToolStripMenuItem> MenuItems(ToolStripItemCollection items)
         => items.OfType<ToolStripMenuItem>().SelectMany(item => MenuItems(item.DropDownItems).Prepend(item));
@@ -132,6 +166,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         UpdateRepositoryDisplay();
         PopulateProviders();
+        ShowWebSearch();
         PopulateRepositories();
         UpdateOptionsMenu();
 
@@ -438,6 +473,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
                 buttonSend.Enabled = true;
                 SetCaption(_ctrl.SessionTopic);
                 RefreshView();
+                ShowWebSearch();
             }
             else
                 SelectCurrentSession();
@@ -751,6 +787,42 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         textPrompt.Text = "";
         textPrompt.Focus();
         ShowResult();
+        ShowWebSearch();
+    }
+
+    // Shown only with a provider that can search; off in a new or resumed conversation (KNoteAIAssistantCtrl.WebSearch).
+    private void ShowWebSearch()
+    {
+        _buttonWebSearch.Visible = _ctrl.SupportsWebSearch;
+        _webSearchNotice.Text = _ctrl.WebSearch ? AiWebSearchRules.Notice(_ctrl.CurrentProviderRef?.Provider) : "";
+        _webSearchNotice.Visible = _ctrl.WebSearch;
+        PaintWebSearchButton(_ctrl.WebSearch);
+        AlignPromptHeader();
+    }
+
+    // Orange while it is on, as in the Web: the system's pressed button is hard to tell from the others, and the searches send
+    // data out. Black over the orange in light and dark mode.
+    private void PaintWebSearchButton(bool on)
+    {
+        if (on)
+        {
+            _buttonWebSearch.BackColor = Color.Orange;
+            _buttonWebSearch.ForeColor = Color.Black;
+        }
+        else
+        {
+            _buttonWebSearch.ResetBackColor();
+            _buttonWebSearch.ResetForeColor();
+        }
+        // After the colors: changing the back color turns it off.
+        _buttonWebSearch.UseVisualStyleBackColor = !on;
+        _buttonWebSearch.SetKntIcon(KntIcon.WebSearch, color: on ? Color.Black : null);
+    }
+
+    private void buttonWebSearch_Click(object sender, EventArgs e)
+    {
+        _ctrl.WebSearch = !_ctrl.WebSearch;
+        ShowWebSearch();
     }
 
     private void UpdateStatusInfo()
@@ -853,6 +925,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             menuOptions.Enabled = false;
             buttonSend.Enabled = false;
             buttonAttach.Enabled = false;
+            _buttonWebSearch.Enabled = false;
             buttonNewSession.Enabled = false;
             buttonMarkDown.Enabled = false;
             buttonNavigate.Enabled = false;
@@ -869,6 +942,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             menuOptions.Enabled = true;
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
             buttonAttach.Enabled = _ctrl.CurrentProviderRef != null;
+            _buttonWebSearch.Enabled = true;
             buttonNewSession.Enabled = true;
             _processing = false;
             // Sending keeps the current mode: the chat view adds the turn as it arrives.

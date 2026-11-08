@@ -301,7 +301,7 @@ namespace KNote.ClientWin.Views
             panelSeparator.Location = new Point(309, 5);
             panelSeparator.Name = "panelSeparator";
             panelSeparator.Size = new Size(3, 25);
-            panelSeparator.TabIndex = 3;
+            panelSeparator.TabIndex = 5;
             //
             // buttonNewSession
             //
@@ -321,7 +321,7 @@ namespace KNote.ClientWin.Views
             buttonAttach.Location = new Point(130, 4);
             buttonAttach.Name = "buttonAttach";
             buttonAttach.Size = new Size(84, 26);
-            buttonAttach.TabIndex = 5;
+            buttonAttach.TabIndex = 3;
             buttonAttach.Text = "A&ttach";
             buttonAttach.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonAttach.UseVisualStyleBackColor = true;
@@ -345,7 +345,7 @@ namespace KNote.ClientWin.Views
             comboProviders.Location = new Point(318, 7);
             comboProviders.Name = "comboProviders";
             comboProviders.Size = new Size(180, 23);
-            comboProviders.TabIndex = 4;
+            comboProviders.TabIndex = 6;
             comboProviders.SelectedIndexChanged += comboProviders_SelectedIndexChanged;
             //
             // textPrompt

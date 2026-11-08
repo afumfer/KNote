@@ -41,6 +41,19 @@ public class OllamaProviderSmokeTests
 
     // KNote Atlas 1.5. With a model that does not see images, say so: it is not the wiring.
     [TestMethod]
+    public async Task WebSearch_KnoteSearchesTheInternet_WithOllamasWebSearch()
+    {
+        var providerRef = await GetReachableProviderRefOrInconclusiveAsync();
+        if (providerRef == null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(providerRef.WebSearchApiKey))
+            Assert.Inconclusive("No web search key of ollama.com (AiProviderSmokeTests:Ollama:WebSearchApiKey or OLLAMA_API_KEY) - skipping.");
+
+        await AiWebSearchSmokeCheck.AssertTheModelSearchesTheInternetAsync(providerRef);
+    }
+
+    [TestMethod]
     public async Task Image_IsReadByTheModel()
     {
         var providerRef = await GetReachableProviderRefOrInconclusiveAsync();

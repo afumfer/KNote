@@ -1,6 +1,7 @@
 @using Markdig
 @using Markdig.Syntax
 @using Markdig.Syntax.Inlines
+@using Markdig.Renderers.Html
 
 @inject IStore store
 @inject IJSRuntime js
@@ -115,10 +116,26 @@ else
         foreach (var link in document.Descendants<LinkInline>())
             if (!IsSafeUrl(link.Url))
                 link.Url = "";
+            else if (!link.IsImage)
+                MarkExternal(link, link.Url);
         foreach (var link in document.Descendants<AutolinkInline>())
             if (!IsSafeUrl(link.Url))
                 link.Url = "";
+            else
+                MarkExternal(link, link.Url);
         return document.ToHtml(PipelineWithoutHtml);
+    }
+
+    // A link to the Internet (the sources of an answer that searched it, KNote Atlas chapter 23) opens in another tab: in
+    // the same one, the conversation would be left.
+    private static void MarkExternal(Inline link, string? url)
+    {
+        if (url == null || !(url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+            return;
+        var attributes = link.GetAttributes();
+        attributes.AddClass("knt-external-link");
+        attributes.AddPropertyIfNotExist("target", "_blank");
+        attributes.AddPropertyIfNotExist("rel", "noopener noreferrer");
     }
 
     // Relative, or http, https or mailto (a javascript: link would run script with the user's session).

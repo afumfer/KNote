@@ -237,3 +237,10 @@ details.reasoning summary {
     transform: scale(1);
   }
 }
+
+/* A link to the Internet in an answer (it opens in the browser), different from the citations of notes (#123). */
+.msg.assistant .content a[href^="http"]::after {
+  content: "\2197";
+  font-size: 0.8em;
+  margin-left: 0.1em;
+}

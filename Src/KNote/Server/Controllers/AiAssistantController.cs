@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Net.ServerSentEvents;
@@ -99,13 +100,16 @@ public class AiAssistantController : ControllerBase
             var tools = new KNoteAiTools(_service, toolsHost);
             tools.BeginTurn(request.History, request.AutoApprovedActionKinds, request.SessionNoteId, request.Attachments);
             tools.ModelSeesImages = await AiModelCapabilities.SupportsImagesAsync(providerRef, cancellationToken);
-            var chatClient = _chatClients.Create(providerRef, await tools.GetToolsAsync());
+            // "Search the Internet" (chapter 23): only when the user turned it on, and with a provider that can.
+            var webSearch = request.WebSearch && providerRef.SupportsWebSearch;
+            var turnTools = (await tools.GetToolsAsync()).Concat(webSearch ? AiWebSearch.ToolsFor(providerRef) : []).ToList();
+            var chatClient = _chatClients.Create(providerRef, turnTools);
 
             var attachments = request.Attachments?.Count > 0
                 ? await AiTurnAttachments.LoadAsync(_service, providerRef, request.SessionNoteId, request.Attachments, cancellationToken)
                 : null;
 
-            return TypedResults.ServerSentEvents(StreamChatAsync(chatClient, request, attachments, tools, toolsHost, cancellationToken));
+            return TypedResults.ServerSentEvents(StreamChatAsync(chatClient, request, providerRef, webSearch, attachments, tools, toolsHost, cancellationToken));
         }
         catch (Exception ex)
         {
@@ -235,11 +239,11 @@ public class AiAssistantController : ControllerBase
     }
 
     private async IAsyncEnumerable<SseItem<AiChatStreamEventDto>> StreamChatAsync(IChatClient chatClient, AiChatRequestDto request,
-        AiTurnAttachments attachments, KNoteAiTools tools, ServerAiToolsHost toolsHost, [EnumeratorCancellation] CancellationToken cancellationToken)
+        AiProviderRef providerRef, bool webSearch, AiTurnAttachments attachments, KNoteAiTools tools, ServerAiToolsHost toolsHost, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // KNote Atlas: the rules, the instructions, the profile and the glossary of the session's repository.
         var context = await AiAssistantContext.ComposeAsync(_service, null, request.History, request.Prompt, _logger);
-        var events = AiChatTurnStreamer.StreamAsync(chatClient, context.Text, request.History, request.Prompt, attachments: attachments, toolImages: tools.TurnImages, cancellationToken: cancellationToken)
+        var events = AiChatTurnStreamer.StreamAsync(chatClient, AiWebSearch.SystemPrompt(context.Text, providerRef, webSearch), request.History, request.Prompt, attachments: attachments, toolImages: tools.TurnImages, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
         try
         {

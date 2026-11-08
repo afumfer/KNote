@@ -79,6 +79,9 @@ public static class AiChatTurnStreamer
         // The reasoning of the whole turn: a tool call makes the model reason again, after what it thought before.
         var reasoning = new StringBuilder();
         var reasoningTime = TimeSpan.Zero;
+
+        // The pages the provider cites (OpenAI, Anthropic): added at the end of the answer, as its sources.
+        var citations = new List<(string Url, string Title)>();
         TimeSpan? reasoningStart = null;
 
         void EndReasoning()
@@ -102,6 +105,10 @@ public static class AiChatTurnStreamer
 
             foreach (var content in update.Contents)
             {
+                foreach (var citation in content.Annotations?.OfType<CitationAnnotation>() ?? [])
+                    if (citation.Url != null)
+                        citations.Add((citation.Url.ToString(), citation.Title));
+
                 switch (content)
                 {
                     // One per call to the model, and a tool call makes several: they add up.
@@ -120,6 +127,11 @@ public static class AiChatTurnStreamer
                     case FunctionCallContent call:
                         EndReasoning();
                         yield return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Tool, Text = call.Name };
+                        break;
+                    // The provider's own search (HostedWebSearchTool).
+                    case WebSearchToolCallContent:
+                        EndReasoning();
+                        yield return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Tool, Text = AiWebSearchRules.WebSearchName };
                         break;
                     // Some providers only send it encrypted, without a text.
                     case TextReasoningContent thought when !string.IsNullOrEmpty(thought.Text):
@@ -140,6 +152,14 @@ public static class AiChatTurnStreamer
         }
 
         EndReasoning();
+
+        var sources = AiWebSearchRules.SourcesSection(answer.ToString(), citations);
+        if (sources.Length > 0)
+        {
+            answer.Append(sources);
+            yield return new AiChatStreamEventDto { Type = AiChatStreamEventTypes.Delta, Text = sources };
+        }
+
         stopwatch.Stop();
 
         var turn = new AiChatTurnDto

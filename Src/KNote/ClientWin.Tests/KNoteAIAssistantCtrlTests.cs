@@ -44,6 +44,64 @@ public class KNoteAIAssistantCtrlTests
     }
 
     [TestMethod]
+    public async Task StreamCompletionAsync_TheSearchOn_ThePaidProviderSearches_WithTheRules_UntilANewConversation()
+    {
+        ChatOptions options = null;
+        List<ChatMessage> messages = null;
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new WebSearchToolCallContent("1")]);
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "1985");
+        }
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (m, o, _) => { messages = m.ToList(); options = o; return Stream(); }
+        };
+        var store = new Store(new TestFactoryViews());
+        var ctrl = new KNoteAIAssistantCtrl(store);
+        ctrl.SetChatClientForTesting(chatClient, new AiProviderRef { Alias = "Paid", Provider = EnumAiProvider.OpenAI, Model = "m" });
+        ctrl.RestartAIAssistant();
+        var activity = new List<string>();
+        ctrl.ActivityChanged += (_, e) => activity.Add(e.Entity);
+
+        Assert.IsTrue(ctrl.SupportsWebSearch);
+        Assert.IsFalse(ctrl.WebSearch, "Off until the user turns it on.");
+        ctrl.WebSearch = true;
+        await ctrl.StreamCompletionAsync("When did the CPC 6128 come out?");
+
+        Assert.IsInstanceOfType<HostedWebSearchTool>(options!.Tools!.Single());
+        StringAssert.Contains(messages!.First(m => m.Role == ChatRole.System).Text, AiWebSearchRules.SystemRules);
+        CollectionAssert.Contains(activity, "Searching the Internet…");
+
+        ctrl.RestartAIAssistant();
+        Assert.IsFalse(ctrl.WebSearch, "A new conversation starts with it off.");
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_TheSearchOn_ButAProviderThatCannotSearch_SendsNoSearch()
+    {
+        ChatOptions options = new();
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "No");
+        }
+        var store = new Store(new TestFactoryViews());
+        var ctrl = new KNoteAIAssistantCtrl(store);
+        ctrl.SetChatClientForTesting(new FakeChatClient { GetStreamingResponseImpl = (_, o, _) => { options = o; return Stream(); } },
+            new AiProviderRef { Alias = "Local", Provider = EnumAiProvider.Ollama, Model = "m", Host = "http://127.0.0.1:9" });
+        ctrl.RestartAIAssistant();
+
+        ctrl.WebSearch = true;
+        await ctrl.StreamCompletionAsync("Hello");
+
+        Assert.IsFalse(ctrl.SupportsWebSearch, "Ollama without its web search key.");
+        Assert.IsFalse(ctrl.WebSearch);
+        Assert.IsFalse(options?.Tools?.Any() == true);
+    }
+
+    [TestMethod]
     public async Task StreamCompletionAsync_AFailureWhileUsingATool_LeavesNoToolInUse()
     {
         static async IAsyncEnumerable<ChatResponseUpdate> Stream()
