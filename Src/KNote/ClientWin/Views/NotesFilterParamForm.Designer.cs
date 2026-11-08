@@ -30,6 +30,11 @@ namespace KNote.ClientWin.Views
         private void InitializeComponent()
         {
             this.panelForm = new System.Windows.Forms.Panel();
+            this.labelModified = new System.Windows.Forms.Label();
+            this.textModifiedFrom = new System.Windows.Forms.TextBox();
+            this.buttonModifiedFrom = new System.Windows.Forms.Button();
+            this.textModifiedTo = new System.Windows.Forms.TextBox();
+            this.buttonModifiedTo = new System.Windows.Forms.Button();
             this.labelMeaningText = new System.Windows.Forms.Label();
             this.textMeaningText = new System.Windows.Forms.TextBox();
             this.listViewAttributes = new System.Windows.Forms.ListView();
@@ -67,6 +72,11 @@ namespace KNote.ClientWin.Views
             //
             // panelForm
             //
+            this.panelForm.Controls.Add(this.labelModified);
+            this.panelForm.Controls.Add(this.textModifiedFrom);
+            this.panelForm.Controls.Add(this.buttonModifiedFrom);
+            this.panelForm.Controls.Add(this.textModifiedTo);
+            this.panelForm.Controls.Add(this.buttonModifiedTo);
             this.panelForm.Controls.Add(this.labelMeaningText);
             this.panelForm.Controls.Add(this.textMeaningText);
             this.panelForm.Controls.Add(this.listViewAttributes);
@@ -108,13 +118,56 @@ namespace KNote.ClientWin.Views
             this.columnValue});
             this.listViewAttributes.FullRowSelect = true;
             this.listViewAttributes.HideSelection = false;
-            this.listViewAttributes.Location = new System.Drawing.Point(7, 434);
+            this.listViewAttributes.Location = new System.Drawing.Point(7, 464);
             this.listViewAttributes.MultiSelect = false;
             this.listViewAttributes.Name = "listViewAttributes";
-            this.listViewAttributes.Size = new System.Drawing.Size(424, 125);
+            this.listViewAttributes.Size = new System.Drawing.Size(424, 95);
             this.listViewAttributes.TabIndex = 22;
             this.listViewAttributes.UseCompatibleStateImageBehavior = false;
             this.listViewAttributes.View = System.Windows.Forms.View.Details;
+            //
+            // labelModified
+            //
+            this.labelModified.AutoSize = true;
+            this.labelModified.Location = new System.Drawing.Point(7, 406);
+            this.labelModified.Name = "labelModified";
+            this.labelModified.Size = new System.Drawing.Size(103, 15);
+            this.labelModified.TabIndex = 25;
+            this.labelModified.Text = "Modified between:";
+            //
+            // textModifiedFrom
+            //
+            this.textModifiedFrom.Location = new System.Drawing.Point(121, 402);
+            this.textModifiedFrom.Name = "textModifiedFrom";
+            this.textModifiedFrom.Size = new System.Drawing.Size(120, 23);
+            this.textModifiedFrom.TabIndex = 26;
+            //
+            // buttonModifiedFrom
+            //
+            this.buttonModifiedFrom.Location = new System.Drawing.Point(243, 402);
+            this.buttonModifiedFrom.Name = "buttonModifiedFrom";
+            this.buttonModifiedFrom.Size = new System.Drawing.Size(27, 23);
+            this.buttonModifiedFrom.TabIndex = 27;
+            this.buttonModifiedFrom.Text = "...";
+            this.buttonModifiedFrom.UseVisualStyleBackColor = true;
+            this.buttonModifiedFrom.Click += new System.EventHandler(this.buttonModifiedFrom_Click);
+            //
+            // textModifiedTo
+            //
+            this.textModifiedTo.Location = new System.Drawing.Point(282, 402);
+            this.textModifiedTo.Name = "textModifiedTo";
+            this.textModifiedTo.Size = new System.Drawing.Size(120, 23);
+            this.textModifiedTo.TabIndex = 28;
+            //
+            // buttonModifiedTo
+            //
+            this.buttonModifiedTo.Location = new System.Drawing.Point(404, 402);
+            this.buttonModifiedTo.Name = "buttonModifiedTo";
+            this.buttonModifiedTo.Size = new System.Drawing.Size(27, 23);
+            this.buttonModifiedTo.TabIndex = 29;
+            this.buttonModifiedTo.Text = "...";
+            this.buttonModifiedTo.UseVisualStyleBackColor = true;
+            this.buttonModifiedTo.Click += new System.EventHandler(this.buttonModifiedTo_Click);
             //
             // labelMeaningText
             //
@@ -149,7 +202,7 @@ namespace KNote.ClientWin.Views
             // buttonRemoveAttribute
             //
             this.buttonRemoveAttribute.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRemoveAttribute.Location = new System.Drawing.Point(401, 407);
+            this.buttonRemoveAttribute.Location = new System.Drawing.Point(401, 437);
             this.buttonRemoveAttribute.Name = "buttonRemoveAttribute";
             this.buttonRemoveAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonRemoveAttribute.TabIndex = 21;
@@ -159,7 +212,7 @@ namespace KNote.ClientWin.Views
             // buttonAddAttribute
             //
             this.buttonAddAttribute.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAttribute.Location = new System.Drawing.Point(373, 407);
+            this.buttonAddAttribute.Location = new System.Drawing.Point(373, 437);
             this.buttonAddAttribute.Name = "buttonAddAttribute";
             this.buttonAddAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonAddAttribute.TabIndex = 20;
@@ -169,7 +222,7 @@ namespace KNote.ClientWin.Views
             // labelAttributes
             //
             this.labelAttributes.AutoSize = true;
-            this.labelAttributes.Location = new System.Drawing.Point(7, 411);
+            this.labelAttributes.Location = new System.Drawing.Point(7, 441);
             this.labelAttributes.Name = "labelAttributes";
             this.labelAttributes.Size = new System.Drawing.Size(67, 15);
             this.labelAttributes.TabIndex = 19;
@@ -420,6 +473,11 @@ namespace KNote.ClientWin.Views
         #endregion
 
         private System.Windows.Forms.Panel panelForm;
+        private System.Windows.Forms.Label labelModified;
+        private System.Windows.Forms.TextBox textModifiedFrom;
+        private System.Windows.Forms.Button buttonModifiedFrom;
+        private System.Windows.Forms.TextBox textModifiedTo;
+        private System.Windows.Forms.Button buttonModifiedTo;
         private System.Windows.Forms.Label labelMeaningText;
         private System.Windows.Forms.TextBox textMeaningText;
         private System.Windows.Forms.Button buttonClean;

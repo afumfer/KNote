@@ -1,0 +1,86 @@
+@implements IDisposable
+
+@inject IStore store
+@inject KntWindows kntWindows
+
+@* KNote Atlas › Glossary (chapter 20): the glossary's note, its terms and the problems of its rows. Create it and open it
+   in the note editor of always. Only a ProjectManager or an Admin creates or saves it. *@
+
+<RadzenCard Style="height: 100%">
+    <KntFormSection Icon="menu_book" Title="Glossary" Description="The terms, acronyms and proper names of the repository. The AI only receives the terms that appear in the conversation.">
+        @if (info == null)
+        {
+            @if (loadFailed)
+            {
+                <AtlasLoadError Text="The glossary could not be read." Retry="RefreshAsync" />
+            }
+            else
+            {
+                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+            }
+        }
+        else
+        {
+            @if (info.Note == null)
+            {
+                <p><strong>This repository has no glossary yet.</strong></p>
+            }
+            else
+            {
+                <KntField Label="Note"><span>#@info.Note.NoteNumber @info.Note.Topic</span></KntField>
+                <KntField Label="Terms"><span>@info.Terms</span></KntField>
+                <KntField Label="Modified"><span>@info.Note.ModificationDateTime.ToString("g")</span></KntField>
+            }
+            @foreach (var notice in info.Notices.Concat(info.Issues))
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small">@notice</RadzenAlert>
+            }
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap" class="rz-mt-2">
+                @if (info.Note == null)
+                {
+                    <AuthorizeView Roles="ProjectManager, Admin">
+                        <RadzenButton Text="Create the glossary" Icon="add" IsBusy="saving.IsBusy" Click="CreateAsync" />
+                    </AuthorizeView>
+                }
+                else
+                {
+                    <RadzenButton Text="Open in the editor" Icon="edit" Click="() => kntWindows.OpenEditAsync(info.Note.NoteId)" />
+                }
+            </RadzenStack>
+        }
+    </KntFormSection>
+</RadzenCard>
+
+@code {
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private readonly KntLatestRequest reading = new();
+    private readonly KntSingleFlight saving = new();
+    private AtlasGlossaryInfoDto? info;
+    private bool loadFailed;
+
+    protected override Task OnInitializedAsync() => RefreshAsync();
+
+    public async Task RefreshAsync()
+    {
+        var read = await reading.RunAsync(ct => store.Atlas.GetGlossaryAsync(ct));
+        if (read.Canceled)
+            return;
+        loadFailed = !read.Value.IsValid;
+        info = loadFailed ? null : read.Value.Entity;
+        StateHasChanged();
+    }
+
+    private Task CreateAsync() => saving.RunAsync(async () =>
+    {
+        var res = await store.Atlas.CreateGlossaryAsync();
+        if (!res.IsValid)
+            return;
+        if (res.Entity != null)
+            await kntWindows.OpenEditAsync(res.Entity.NoteId);
+        await RefreshAsync();
+        await Changed.InvokeAsync();
+    });
+
+    public void Dispose() => reading.Dispose();
+}

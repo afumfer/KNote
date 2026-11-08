@@ -20,6 +20,12 @@
    page of the app: with unsaved changes, it asks first. *@
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 
+@if (changedElsewhere)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" Size="AlertSize.ExtraSmall" AllowClose="false" class="rz-mx-0 rz-mt-0 rz-mb-1">
+        This note was changed elsewhere. Saving it now may replace those changes: close it and open it again to see them.
+    </RadzenAlert>
+}
 @if (showForm)
 {
     <NoteForm Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" Saving="saving.IsBusy" NoteTypes="noteTypes"></NoteForm>
@@ -46,6 +52,8 @@ else
     private bool showForm = false;
     private bool loadFailed;
     private bool closing;
+    // Another window saved this note (the assistant, for one): saving here would replace what it did. It only warns.
+    private bool changedElsewhere;
     // One save at a time: a double click (or Save and then Save and new) saves once; a new note isn't created twice.
     private readonly KntSingleFlight saving = new();
     // The page left (another page in the window): what is being read is no longer needed (a save goes on).
@@ -57,6 +65,8 @@ else
 
     protected async override Task OnInitializedAsync()
     {
+        kntWindows.NoteSaved += OnNoteSavedElsewhere;
+
         var result = await store.NoteTypes.GetAllAsync(disposal.Token);
         if (result.IsValid)
         {
@@ -81,6 +91,7 @@ else
 
     public async ValueTask DisposeAsync()
     {
+        kntWindows.NoteSaved -= OnNoteSavedElsewhere;
         disposal.Cancel();
         if (unsavedChangesWatch != null)
         {
@@ -88,6 +99,15 @@ else
             await unsavedChangesWatch.DisposeAsync();
         }
         dotNetRef?.Dispose();
+    }
+
+    private void OnNoteSavedElsewhere(Guid noteId)
+    {
+        if (noteId != note?.NoteId)
+            return;
+
+        changedElsewhere = true;
+        _ = InvokeAsync(StateHasChanged);
     }
 
     #endregion
@@ -118,6 +138,7 @@ else
         note = result.Entity;
         note.SetIsNew(false);
         note.SetIsDirty(false);
+        changedElsewhere = false;
         if (isNew)
             await kntWindows.BecomeEditWindowAsync(note.NoteId);
         await kntWindows.NotifyNoteSavedAsync(note.NoteId);

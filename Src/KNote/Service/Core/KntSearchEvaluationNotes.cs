@@ -74,7 +74,7 @@ internal static class KntSearchEvaluationNotes
         }
         var note = resNew.Entity;
         note.Topic = topic;
-        note.Description = description;
+        note.Description = AtlasTemplates.NoteText(description);
         note.NoteTypeId = noteTypeId;
         note.FolderId = folderId;
 

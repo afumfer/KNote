@@ -98,8 +98,6 @@ public class KntAiSessionsGetAsyncCommand : KntCommandServiceBase<Guid, Result<A
 [KntAuthorize(EnumRoles.Staff)]
 public class KntAiSessionsSaveAsyncCommand : KntCommandServiceBase<AiChatSessionDto, Result<AiChatSessionDto>>
 {
-    private const int MaxTopicLength = 80;
-
     public KntAiSessionsSaveAsyncCommand(IKntService service, AiChatSessionDto session) : base(service, session)
     {
 
@@ -150,46 +148,10 @@ public class KntAiSessionsSaveAsyncCommand : KntCommandServiceBase<AiChatSession
         return result;
     }
 
-    private async Task<NoteDto> AddSessionAsync(UserDto user, AiSessionsInfrastructure infrastructure, Result<AiChatSessionDto> result)
-    {
-        // With the NoteType, KAttributesDto comes completed with the type's attributes, as for any new note.
-        var resNew = await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = infrastructure.NoteTypeId });
-        if (!resNew.IsValid)
-        {
-            result.AddListErrorMessage(resNew.ListErrorMessage);
-            return null;
-        }
-
-        var note = resNew.Entity;
-        note.Topic = string.IsNullOrWhiteSpace(Param.Topic) ? TopicFromFirstPrompt() : Param.Topic;
-        note.Description = AiChatSessionTranscript.Write(Param.Turns);
-        // NewExtendedAsync leaves Tags null, and KntNotesSaveExtendedAsyncCommand needs it.
-        note.Tags = "";
-        // FolderDto too: it is validated with the note.
-        note.FolderId = infrastructure.Folder.FolderId;
-        note.FolderDto = infrastructure.Folder.GetSimpleDto<FolderDto>();
-        note.NoteTypeId = infrastructure.NoteTypeId;
-        SetSessionAttributes(note, infrastructure);
-
-        var now = DateTime.Now;
-        note.Tasks.Add(new NoteTaskDto
-        {
-            UserId = user.UserId,
-            Description = "AI Assistant session",
-            Tags = "",
-            CreationDateTime = now,
-            ModificationDateTime = now,
-            StartDate = now
-        });
-
-        var resSave = await Service.Notes.SaveExtendedAsync(note);
-        if (!resSave.IsValid)
-        {
-            result.AddListErrorMessage(resSave.ListErrorMessage);
-            return null;
-        }
-        return resSave.Entity;
-    }
+    private Task<NoteDto> AddSessionAsync(UserDto user, AiSessionsInfrastructure infrastructure, Result<AiChatSessionDto> result) =>
+        AiSessions.AddNoteAsync(Service, user, infrastructure,
+            string.IsNullOrWhiteSpace(Param.Topic) ? AiSessions.TopicFromPrompt(Param.Turns.FirstOrDefault()?.Prompt) : Param.Topic,
+            AiChatSessionTranscript.Write(Param.Turns), Param.Provider, Param.Model, result);
 
     private async Task<NoteDto> UpdateSessionAsync(UserDto user, AiSessionsInfrastructure infrastructure, Result<AiChatSessionDto> result)
     {
@@ -200,7 +162,7 @@ public class KntAiSessionsSaveAsyncCommand : KntCommandServiceBase<AiChatSession
         if (!string.IsNullOrWhiteSpace(Param.Topic))
             note.Topic = Param.Topic;
         note.Description = AiChatSessionTranscript.Write(Param.Turns);
-        SetSessionAttributes(note, infrastructure);
+        AiSessions.SetSessionAttributes(note, infrastructure, Param.Provider, Param.Model);
 
         var resSave = await Service.Notes.SaveAsync(note);
         if (!resSave.IsValid)
@@ -210,26 +172,141 @@ public class KntAiSessionsSaveAsyncCommand : KntCommandServiceBase<AiChatSession
         }
         return resSave.Entity;
     }
+}
 
-    private void SetSessionAttributes(NoteDto note, AiSessionsInfrastructure infrastructure)
+[KntAuthorize(EnumRoles.Staff)]
+public class KntAiSessionsAddAttachmentAsyncCommand : KntCommandServiceBase<AiChatAttachmentUploadDto, Result<AiChatAttachmentDto>>
+{
+    private const string AttachmentDescription = "AI assistant attachment";
+
+    private byte[] _content;
+
+    public KntAiSessionsAddAttachmentAsyncCommand(IKntService service, AiChatAttachmentUploadDto attachment) : base(service, attachment)
     {
-        AiSessions.SetAttributeValue(note, infrastructure.ProviderAttributeId, Param.Provider);
-        AiSessions.SetAttributeValue(note, infrastructure.ModelAttributeId, Param.Model);
+
     }
 
-    // The first line of the first prompt, shortened; a dated title when there is none.
-    private string TopicFromFirstPrompt()
+    public override Result ValidateParam()
     {
-        var firstLine = (Param.Turns.FirstOrDefault()?.Prompt ?? "")
-            .ReplaceLineEndings("\n")
-            .Split('\n')
-            .Select(l => l.Trim())
-            .FirstOrDefault(l => l.Length > 0);
+        var result = new Result();
+        if (Param == null)
+        {
+            result.AddErrorMessage("The file is required.");
+            return result;
+        }
 
-        if (string.IsNullOrEmpty(firstLine))
-            return $"AI session {DateTime.Now:yyyy-MM-dd HH:mm}";
+        var sizeError = AiAttachmentRules.SizeError(Name(), Content().LongLength);
+        if (sizeError != null)
+            result.AddErrorMessage(sizeError);
+        if (Param.SessionNoteId == Guid.Empty && (string.IsNullOrWhiteSpace(Param.Provider) || string.IsNullOrWhiteSpace(Param.Model)))
+            result.AddErrorMessage("The AI provider and model of the session are required.");
+        return result;
+    }
 
-        return firstLine.Length <= MaxTopicLength ? firstLine : firstLine.Substring(0, MaxTopicLength - 1) + "…";
+    public override async Task<Result<AiChatAttachmentDto>> Execute()
+    {
+        var result = new Result<AiChatAttachmentDto>();
+
+        var user = await AiSessions.GetCurrentUserAsync(Service, result);
+        var infrastructure = await AiSessions.EnsureInfrastructureAsync(Service, result);
+        if (!result.IsValid)
+            return result;
+
+        var note = Param.SessionNoteId == Guid.Empty
+            ? await AiSessions.AddNoteAsync(Service, user, infrastructure, AiSessions.TopicFromPrompt(Param.Topic), "", Param.Provider, Param.Model, result)
+            : await AiSessions.GetUserSessionNoteAsync(Service, Param.SessionNoteId, infrastructure, user, result);
+        if (!result.IsValid)
+            return result;
+
+        // A guid before the name, as the other resources of a note have it: two files with the same name don't share a file.
+        var name = Name();
+        var contentType = string.IsNullOrWhiteSpace(Param.ContentType) ? AiAttachmentRules.ContentTypeOf(name) : Param.ContentType;
+        var saved = await Service.Notes.SaveResourceAsync(new ResourceDto
+        {
+            NoteId = note.NoteId,
+            Name = $"{Guid.NewGuid()}_{name}",
+            Description = AttachmentDescription,
+            FileType = contentType,
+            ContentArrayBytes = Content()
+        });
+        if (!saved.IsValid)
+        {
+            result.AddListErrorMessage(saved.ListErrorMessage);
+            return result;
+        }
+
+        result.Entity = new AiChatAttachmentDto
+        {
+            ResourceId = saved.Entity.ResourceId,
+            FileName = name,
+            ContentType = contentType,
+            SessionNoteId = note.NoteId
+        };
+        return result;
+    }
+
+    private string Name() => AiAttachmentRules.SafeFileName(Param.FileName);
+
+    private byte[] Content()
+    {
+        if (_content == null)
+        {
+            try
+            {
+                _content = Convert.FromBase64String(Param.ContentBase64 ?? "");
+            }
+            catch (FormatException)
+            {
+                _content = Array.Empty<byte>();
+            }
+        }
+        return _content;
+    }
+}
+
+[KntAuthorize(EnumRoles.Staff)]
+public class KntAiSessionsGetAttachmentAsyncCommand : KntCommandServiceBase<AiChatAttachmentDto, Result<AiChatAttachmentContentDto>>
+{
+    public KntAiSessionsGetAttachmentAsyncCommand(IKntService service, AiChatAttachmentDto attachment) : base(service, attachment)
+    {
+
+    }
+
+    public override async Task<Result<AiChatAttachmentContentDto>> Execute()
+    {
+        var result = new Result<AiChatAttachmentContentDto>();
+
+        var user = await AiSessions.GetCurrentUserAsync(Service, result);
+        var infrastructure = await AiSessions.EnsureInfrastructureAsync(Service, result);
+        if (!result.IsValid)
+            return result;
+
+        var note = await AiSessions.GetUserSessionNoteAsync(Service, Param.SessionNoteId, infrastructure, user, result);
+        if (!result.IsValid)
+            return result;
+
+        var resource = await Service.Notes.GetResourceAsync(Param.ResourceId);
+        if (!resource.IsValid || resource.Entity == null || resource.Entity.NoteId != note.NoteId)
+        {
+            result.AddErrorMessage("The attachment does not exist.");
+            return result;
+        }
+
+        // Its file may be in the folder of another installation, if the repository does not keep the content in the database.
+        var content = resource.Entity.ContentArrayBytes;
+        if (content == null || content.Length == 0)
+        {
+            result.AddErrorMessage("The file of the attachment is not available here.");
+            return result;
+        }
+
+        result.Entity = new AiChatAttachmentContentDto
+        {
+            FileName = resource.Entity.NameOut,
+            ContentType = resource.Entity.FileType,
+            ContentBase64 = Convert.ToBase64String(content)
+        };
+        return result;
     }
 }
 
@@ -240,6 +317,7 @@ internal sealed record AiSessionsInfrastructure(Guid NoteTypeId, Guid ProviderAt
 internal static class AiSessions
 {
     private const string InfrastructureBypassReason = "AI assistant sessions: note type, attributes and folder";
+    private const int MaxTopicLength = 80;
 
     public static Task<UserDto> GetCurrentUserAsync(IKntService service, ResultBase result) =>
         KntSystemNotes.GetCurrentUserAsync(service, result);
@@ -261,6 +339,70 @@ internal static class AiSessions
             return null;
 
         return new AiSessionsInfrastructure(noteTypeId, providerAttributeId, modelAttributeId, folder);
+    }
+
+    // A new session note, with the task that links it to its user.
+    public static async Task<NoteDto> AddNoteAsync(IKntService service, UserDto user, AiSessionsInfrastructure infrastructure, string topic,
+        string description, string provider, string model, ResultBase result)
+    {
+        // With the NoteType, KAttributesDto comes completed with the type's attributes, as for any new note.
+        var resNew = await service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = infrastructure.NoteTypeId });
+        if (!resNew.IsValid)
+        {
+            result.AddListErrorMessage(resNew.ListErrorMessage);
+            return null;
+        }
+
+        var note = resNew.Entity;
+        note.Topic = topic;
+        note.Description = description;
+        // NewExtendedAsync leaves Tags null, and KntNotesSaveExtendedAsyncCommand needs it.
+        note.Tags = "";
+        // FolderDto too: it is validated with the note.
+        note.FolderId = infrastructure.Folder.FolderId;
+        note.FolderDto = infrastructure.Folder.GetSimpleDto<FolderDto>();
+        note.NoteTypeId = infrastructure.NoteTypeId;
+        SetSessionAttributes(note, infrastructure, provider, model);
+
+        var now = DateTime.Now;
+        note.Tasks.Add(new NoteTaskDto
+        {
+            UserId = user.UserId,
+            Description = "AI Assistant session",
+            Tags = "",
+            CreationDateTime = now,
+            ModificationDateTime = now,
+            StartDate = now
+        });
+
+        var resSave = await service.Notes.SaveExtendedAsync(note);
+        if (!resSave.IsValid)
+        {
+            result.AddListErrorMessage(resSave.ListErrorMessage);
+            return null;
+        }
+        return resSave.Entity;
+    }
+
+    public static void SetSessionAttributes(NoteDto note, AiSessionsInfrastructure infrastructure, string provider, string model)
+    {
+        SetAttributeValue(note, infrastructure.ProviderAttributeId, provider);
+        SetAttributeValue(note, infrastructure.ModelAttributeId, model);
+    }
+
+    // The first line of the first prompt, shortened; a dated title when there is none.
+    public static string TopicFromPrompt(string prompt)
+    {
+        var firstLine = (prompt ?? "")
+            .ReplaceLineEndings("\n")
+            .Split('\n')
+            .Select(l => l.Trim())
+            .FirstOrDefault(l => l.Length > 0);
+
+        if (string.IsNullOrEmpty(firstLine))
+            return $"AI session {DateTime.Now:yyyy-MM-dd HH:mm}";
+
+        return firstLine.Length <= MaxTopicLength ? firstLine : firstLine.Substring(0, MaxTopicLength - 1) + "…";
     }
 
     // The session note, only if it is one (of the sessions' note type) and belongs to the user.

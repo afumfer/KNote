@@ -1,0 +1,98 @@
+@implements IDisposable
+
+@inject IStore store
+@inject KntWindows kntWindows
+
+@* KNote Atlas › Repository profile (chapter 19): the profile's note, its length and notices. Create it, open it in the
+   note editor of always (a window of its own) and fill in its folders and types. Only a ProjectManager or an Admin
+   creates or saves it. *@
+
+<RadzenCard Style="height: 100%">
+    <KntFormSection Icon="badge" Title="Repository profile" Description="It tells the AI what this repository is for. The AI receives it in all its tasks.">
+        @if (info == null)
+        {
+            @if (loadFailed)
+            {
+                <AtlasLoadError Text="The profile could not be read." Retry="RefreshAsync" />
+            }
+            else
+            {
+                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+            }
+        }
+        else
+        {
+            @if (info.Note == null)
+            {
+                <p><strong>This repository has no profile yet.</strong></p>
+            }
+            else
+            {
+                <KntField Label="Note"><span>#@info.Note.NoteNumber @info.Note.Topic</span></KntField>
+                <KntField Label="Length">
+                    <span>@info.Words words (recommended: up to @info.MaxWords) @(info.Words > info.MaxWords ? "" : "✔")</span>
+                </KntField>
+                <KntField Label="Modified"><span>@info.Note.ModificationDateTime.ToString("g")</span></KntField>
+            }
+            @foreach (var notice in info.Notices)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small">@notice</RadzenAlert>
+            }
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap" class="rz-mt-2">
+                @if (info.Note == null)
+                {
+                    <AuthorizeView Roles="ProjectManager, Admin">
+                        <RadzenButton Text="Create the profile" Icon="add" IsBusy="saving.IsBusy" Click="CreateAsync" />
+                    </AuthorizeView>
+                }
+                else
+                {
+                    <RadzenButton Text="Open in the editor" Icon="edit" Click="() => kntWindows.OpenEditAsync(info.Note.NoteId)" />
+                }
+                <AuthorizeView Roles="ProjectManager, Admin">
+                    <RadzenButton Text="Fill in folders and types" Icon="playlist_add" ButtonStyle="ButtonStyle.Secondary"
+                                  Disabled="saving.IsBusy" Click="FillAsync" />
+                </AuthorizeView>
+            </RadzenStack>
+        }
+    </KntFormSection>
+</RadzenCard>
+
+@code {
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private readonly KntLatestRequest reading = new();
+    private readonly KntSingleFlight saving = new();
+    private AtlasProfileInfoDto? info;
+    private bool loadFailed;
+
+    protected override Task OnInitializedAsync() => RefreshAsync();
+
+    public async Task RefreshAsync()
+    {
+        var read = await reading.RunAsync(ct => store.Atlas.GetProfileAsync(ct));
+        if (read.Canceled)
+            return;
+        loadFailed = !read.Value.IsValid;
+        info = loadFailed ? null : read.Value.Entity;
+        StateHasChanged();
+    }
+
+    private Task CreateAsync() => saving.RunAsync(() => ShowNoteAsync(store.Atlas.CreateProfileAsync));
+
+    private Task FillAsync() => saving.RunAsync(() => ShowNoteAsync(store.Atlas.FillProfileAsync));
+
+    // The note is opened as soon as it is there (the browser only opens a window right after the click).
+    private async Task ShowNoteAsync(Func<Task<Result<NoteDto>>> action)
+    {
+        var res = await action();
+        if (!res.IsValid)
+            return;
+        if (res.Entity != null)
+            await kntWindows.OpenEditAsync(res.Entity.NoteId);
+        await RefreshAsync();
+        await Changed.InvokeAsync();
+    }
+
+    public void Dispose() => reading.Dispose();
+}

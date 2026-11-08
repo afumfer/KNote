@@ -213,6 +213,14 @@ tr:nth-child(2n) {
   background-color: var(--md-table-row-alt);
 }
 
+/* ---------- Citas de notas (#123), distintas de los enlaces a Internet ---------- */
+a.knt-note-link {
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px dotted currentColor;
+}
+
 /* ---------- Imágenes ---------- */
 img {
   max-width: 100%;

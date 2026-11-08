@@ -5,14 +5,16 @@ using Microsoft.Extensions.AI;
 namespace KNote.Ai;
 
 // "Test" of a configured AI provider, common to ClientWin (AiProviderEditorCtrl) and KNote Local (api/local/ai/test):
-// a chat model answers a minimal question; an embedding model gives the vector of a short text, with its dimensions.
+// a chat model answers a minimal question; an embedding model gives the vector of a short text, with its dimensions. An
+// Ollama chat model with a web search key also searches once with it (ollama.com's web search).
 // The result says what happened in words a user understands (a model not downloaded, a host that does not answer...).
 public static class AiProviderTester
 {
     public const string ChatTestPrompt = "Reply with the single word OK.";
     public const string EmbeddingsTestText = "KNote test";
 
-    public static async Task<Result<string>> TestAsync(AiProviderRef providerRef, CancellationToken cancellationToken = default)
+    public static async Task<Result<string>> TestAsync(AiProviderRef providerRef, CancellationToken cancellationToken = default,
+        HttpClient webSearchHttpClient = null)
     {
         var result = new Result<string>();
         if (providerRef is null)
@@ -43,6 +45,15 @@ public static class AiProviderTester
                 if (text.Length > 80)
                     text = text[..80] + "…";
                 result.Entity = $"The model answered in {watch.ElapsedMilliseconds} ms: \"{text}\".";
+
+                if (providerRef.Provider == EnumAiProvider.Ollama && !string.IsNullOrWhiteSpace(providerRef.WebSearchApiKey))
+                {
+                    var error = await new OllamaWebSearch(providerRef.WebSearchApiKey, webSearchHttpClient).TestAsync(cancellationToken);
+                    if (error != null)
+                        result.AddErrorMessage($"{result.Entity} But the web search key does not work: {error.Replace("Error: ", "")}");
+                    else
+                        result.Entity += " The web search key works.";
+                }
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

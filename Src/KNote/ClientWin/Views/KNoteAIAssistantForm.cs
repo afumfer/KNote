@@ -15,6 +15,12 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private readonly KNoteAIAssistantCtrl _ctrl;
     private readonly AiChatWebRenderer _chatView;
+    // The files of the message being written.
+    private readonly FlowLayoutPanel _attachmentsBar;
+
+    // "Search the Internet" (KNote Atlas, chapter 23): a toggle next to Attach, and the notice while it is on.
+    private readonly Button _buttonWebSearch;
+    private readonly Label _webSearchNotice;
     // The menu items with a keyboard shortcut, by its text (AiChatHtml.ShortcutText).
     private readonly Dictionary<string, ToolStripMenuItem> _menuShortcuts;
     private int _countNRres;
@@ -40,6 +46,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
         buttonSend.SetKntIcon(KntIcon.Send);
         buttonNewSession.SetKntIcon(KntIcon.Restart);
+        buttonAttach.SetKntIcon(KntIcon.Attach);
         buttonMarkDown.SetKntIcon(KntIcon.Markdown);
         buttonNavigate.SetKntIcon(KntIcon.Navigate);
 
@@ -55,10 +62,41 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         _menuShortcuts = MenuItems(menuAssistant.Items)
             .Where(item => item.ShortcutKeys != Keys.None)
             .ToDictionary(item => AiChatHtml.ShortcutText(item.ShortcutKeys));
-        _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys);
+        _chatView = new AiChatWebRenderer(kntEditViewResult, _ctrl.Store.KNoteWebViewStyle, _menuShortcuts.Keys, _ctrl.PreviewOf);
         _chatView.ShortcutPressed += ChatView_ShortcutPressed;
+        _chatView.ActionsAnswered += ChatView_ActionsAnswered;
+        _ctrl.ActivityChanged += Ctrl_ActivityChanged;
+        // The citations of notes (#123) of the answers: notes of the assistant's repository.
+        kntEditViewResult.LinkHandler = url => NoteCitations.TryOpen(url, this, _ctrl.Store, _ctrl.ServiceRef?.Service, message => ShowInfo(message));
         kntEditViewResult.NavigationBorder = true;
         _chatView.ShowModelInfo(_ctrl.ShowModelInfo);
+
+        // Between the header and the box: its place among the docked controls of the panel.
+        _attachmentsBar = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Visible = false };
+        splitChat.Panel2.Controls.Add(_attachmentsBar);
+        splitChat.Panel2.Controls.SetChildIndex(_attachmentsBar, 1);
+        _webSearchNotice = new Label
+        {
+            Dock = DockStyle.Top, AutoSize = true, Visible = false,
+            Padding = new Padding(3, 4, 3, 4)
+        };
+        splitChat.Panel2.Controls.Add(_webSearchNotice);
+        splitChat.Panel2.Controls.SetChildIndex(_webSearchNotice, 1);
+        // A button, not a CheckBox with the look of one: in dark mode WinForms paints that one white, with no image or color.
+        _buttonWebSearch = new Button
+        {
+            Text = "Internet", Font = buttonAttach.Font, Size = buttonAttach.Size, Top = buttonAttach.Top,
+            TextImageRelation = TextImageRelation.ImageBeforeText, UseVisualStyleBackColor = true,
+            TabIndex = buttonAttach.TabIndex + 1, Visible = false, AccessibleRole = AccessibleRole.CheckButton
+        };
+        _buttonWebSearch.SetKntIcon(KntIcon.WebSearch);
+        _buttonWebSearch.Click += buttonWebSearch_Click;
+        new ToolTip().SetToolTip(_buttonWebSearch, AiWebSearchRules.ToggleText);
+        panelPromptHeader.Controls.Add(_buttonWebSearch);
+        textPrompt.AllowDrop = true;
+        textPrompt.KeyDown += textPrompt_KeyDown;
+        textPrompt.DragEnter += textPrompt_DragEnter;
+        textPrompt.DragDrop += textPrompt_DragDrop;
 
         // The Actions menu repeats the buttons and the model list, running the same handlers: its items
         // follow their enabled state, which also keeps the shortcuts off while they are off.
@@ -85,8 +123,20 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     private void AlignResultHeader() => AlignControlsRight(panelResultHeader, 8, 8,
         buttonNavigate, buttonMarkDown);
 
-    private void AlignPromptHeader() => AlignControlsRight(panelPromptHeader, 6, 6,
-        buttonSend, buttonNewSession, panelSeparator, comboProviders);
+    // The buttons next to the model, without the ones that do not show, so they leave no gap (their Visible says nothing here,
+    // as it is false until the window shows). ShowWebSearch aligns it again: Internet depends on the provider.
+    private void AlignPromptHeader()
+    {
+        var controls = new List<Control> { buttonSend, buttonNewSession };
+        if (_ctrl.CanAttach)
+            controls.Add(buttonAttach);
+        if (_ctrl.SupportsWebSearch)
+            controls.Add(_buttonWebSearch);
+        controls.Add(panelSeparator);
+        controls.Add(comboProviders);
+
+        AlignControlsRight(panelPromptHeader, 6, 6, controls.ToArray());
+    }
 
     private static IEnumerable<ToolStripMenuItem> MenuItems(ToolStripItemCollection items)
         => items.OfType<ToolStripMenuItem>().SelectMany(item => MenuItems(item.DropDownItems).Prepend(item));
@@ -116,6 +166,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     {
         UpdateRepositoryDisplay();
         PopulateProviders();
+        ShowWebSearch();
         PopulateRepositories();
         UpdateOptionsMenu();
 
@@ -127,6 +178,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         }
         else
         {
+            buttonAttach.Visible = false;
             splitSessions.Panel2Collapsed = true;
             ClientSize = new Size(ClientSize.Width - LogicalToDeviceUnits(DesignerClientWidth - WidthWithoutSessions), ClientSize.Height);
         }
@@ -195,14 +247,15 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             StatusProcessing(true);
 
-            if (_ctrl.ResponseMode == EAiResponseMode.Completion)
-                await GoGetCompletion(textPrompt.Text);
-            else
-                await GoStreamCompletion(textPrompt.Text);
+            if (!await _ctrl.SaveAttachmentsAsync(textPrompt.Text))
+                return;
 
-            // The answer has just saved the session: a new one, or moved to the top of the list.
-            if (_ctrl.PersistSession)
-                await LoadSessionsAsync();
+            // A new message without answering the card rejects what it proposed: the page shows it.
+            if (_ctrl.RejectPendingActions())
+                _chatView.Invalidate();
+
+            await SendAsync(textPrompt.Text, automatic: false);
+            ShowAttachments();
         }
         catch (Exception ex)
         {
@@ -212,6 +265,143 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             StatusProcessing(false);
         }
+    }
+
+    private async Task SendAsync(string prompt, bool automatic)
+    {
+        if (_ctrl.ResponseMode == EAiResponseMode.Completion)
+            await GoGetCompletion(prompt, automatic);
+        else
+            await GoStreamCompletion(prompt, automatic);
+
+        // The answer has just saved the session: a new one, or moved to the top of the list.
+        if (_ctrl.PersistSession)
+            await LoadSessionsAsync();
+
+        // The Markdown view has no card: the same question, all or nothing.
+        if (!ChatView && _ctrl.PendingActions.Count > 0)
+        {
+            var actions = _ctrl.PendingActions;
+            var answer = ShowInfo($"The assistant wants to do this:\n\n{string.Join("\n", actions.Select(a => a.Text))}", "AI assistant", MessageBoxButtons.YesNo);
+            await AnswerActionsAsync(answer == DialogResult.Yes ? actions.Select(a => a.ActionId).ToList() : new List<Guid>(), false);
+        }
+    }
+
+    #region Attachments
+
+    private bool CanAttachNow => _ctrl.CanAttach && !_processing;
+
+    private async void buttonAttach_Click(object sender, EventArgs e)
+    {
+        using var dialog = new OpenFileDialog { Title = "Attach files to the message", Multiselect = true };
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+            return;
+        await AddFilesAsync(dialog.FileNames.Select(f => (Path.GetFileName(f), (Func<byte[]>)(() => File.ReadAllBytes(f)))).ToList());
+    }
+
+    // Ctrl+V with a picture or files in the clipboard attaches them; with text, pastes it as always.
+    private async void textPrompt_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode != Keys.V || !e.Control || e.Alt || !CanAttachNow)
+            return;
+
+        var files = KntClipboardFiles.Read();
+        if (files.Count == 0)
+            return;
+
+        e.SuppressKeyPress = true;
+        await AddFilesAsync(files);
+    }
+
+    private void textPrompt_DragEnter(object sender, DragEventArgs e)
+    {
+        e.Effect = CanAttachNow && e.Data?.GetDataPresent(DataFormats.FileDrop) == true ? DragDropEffects.Copy : DragDropEffects.None;
+    }
+
+    private async void textPrompt_DragDrop(object sender, DragEventArgs e)
+    {
+        if (e.Data?.GetData(DataFormats.FileDrop) is string[] files)
+            await AddFilesAsync(files.Select(f => (Path.GetFileName(f), (Func<byte[]>)(() => File.ReadAllBytes(f)))).ToList());
+    }
+
+    private async Task AddFilesAsync(IReadOnlyList<(string Name, Func<byte[]> Content)> files)
+    {
+        foreach (var (name, content) in files)
+        {
+            try
+            {
+                var error = _ctrl.AddAttachment(name, content());
+                if (error != null)
+                    ShowInfo(error);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                ShowInfo($"{name} could not be read: {ex.Message}");
+            }
+        }
+        ShowAttachments();
+
+        if (files.Any(f => AiAttachmentRules.IsImage(AiAttachmentRules.ContentTypeOf(f.Name))) && !await _ctrl.SupportsImagesAsync())
+            ShowInfo($"{_ctrl.CurrentProviderRef?.Alias} does not see images: they are only saved with the conversation.");
+    }
+
+    private void ShowAttachments()
+    {
+        _attachmentsBar.SuspendLayout();
+        foreach (var control in _attachmentsBar.Controls.Cast<Control>().ToList())
+            control.Dispose();
+
+        foreach (var attachment in _ctrl.PendingAttachments)
+        {
+            var button = new Button { Text = $"{attachment.FileName}  ✕", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, UseVisualStyleBackColor = true };
+            button.Click += (s, e) =>
+            {
+                _ctrl.RemoveAttachment(attachment);
+                ShowAttachments();
+            };
+            _attachmentsBar.Controls.Add(button);
+        }
+
+        if (_ctrl.ImagesSentTo is { } provider)
+            _attachmentsBar.Controls.Add(new Label { Text = $"Images are sent to {provider}.", AutoSize = true, Margin = new Padding(LogicalToDeviceUnits(3), LogicalToDeviceUnits(8), LogicalToDeviceUnits(3), LogicalToDeviceUnits(3)) });
+
+        _attachmentsBar.Visible = _ctrl.PendingAttachments.Count > 0;
+        _attachmentsBar.ResumeLayout();
+    }
+
+    #endregion
+
+    private async void ChatView_ActionsAnswered(object sender, AiChatHtml.ActionsAnswer answer)
+    {
+        if (_processing)
+            return;
+
+        try
+        {
+            StatusProcessing(true);
+            await AnswerActionsAsync(answer.Accepted, answer.DontAsk);
+        }
+        catch (Exception ex)
+        {
+            KntMessageBox.Show(ex.Message);
+        }
+        finally
+        {
+            StatusProcessing(false);
+        }
+    }
+
+    private async Task AnswerActionsAsync(IReadOnlyCollection<Guid> accepted, bool dontAsk)
+    {
+        var goOn = await _ctrl.AnswerActionsAsync(accepted, dontAsk);
+
+        if (ChatView)
+            _chatView.ReplaceLastTurn(_ctrl.ChatTurns[^1]);
+        else
+            kntEditViewResult.ShowMarkdownContent(ChatTranscript());
+
+        if (goOn)
+            await SendAsync(AiActionRules.ContinuePrompt, automatic: true);
     }
 
     // A new conversation (the current one is already saved, see KNoteAIAssistantCtrl.NewSessionAsync).
@@ -283,6 +473,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
                 buttonSend.Enabled = true;
                 SetCaption(_ctrl.SessionTopic);
                 RefreshView();
+                ShowWebSearch();
             }
             else
                 SelectCurrentSession();
@@ -338,9 +529,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         SelectCurrentSession();
     }
 
-    private void menuViewSystem_Click(object sender, EventArgs e)
+    private async void menuViewSystem_Click(object sender, EventArgs e)
     {
-        ShowInfo($"System: {_ctrl.RootSystemChat}", $"{KntConst.AppName} - root system chat ");
+        var composed = await _ctrl.GetSystemPromptAsync();
+        new AiPromptViewForm($"{KntConst.AppName} - what the AI receives", composed).ShowDialog(this);
     }
 
     private void menuShowModelInfo_Click(object sender, EventArgs e)
@@ -595,6 +787,42 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         textPrompt.Text = "";
         textPrompt.Focus();
         ShowResult();
+        ShowWebSearch();
+    }
+
+    // Shown only with a provider that can search; off in a new or resumed conversation (KNoteAIAssistantCtrl.WebSearch).
+    private void ShowWebSearch()
+    {
+        _buttonWebSearch.Visible = _ctrl.SupportsWebSearch;
+        _webSearchNotice.Text = _ctrl.WebSearch ? AiWebSearchRules.Notice(_ctrl.CurrentProviderRef?.Provider) : "";
+        _webSearchNotice.Visible = _ctrl.WebSearch;
+        PaintWebSearchButton(_ctrl.WebSearch);
+        AlignPromptHeader();
+    }
+
+    // Orange while it is on, as in the Web: the system's pressed button is hard to tell from the others, and the searches send
+    // data out. Black over the orange in light and dark mode.
+    private void PaintWebSearchButton(bool on)
+    {
+        if (on)
+        {
+            _buttonWebSearch.BackColor = Color.Orange;
+            _buttonWebSearch.ForeColor = Color.Black;
+        }
+        else
+        {
+            _buttonWebSearch.ResetBackColor();
+            _buttonWebSearch.ResetForeColor();
+        }
+        // After the colors: changing the back color turns it off.
+        _buttonWebSearch.UseVisualStyleBackColor = !on;
+        _buttonWebSearch.SetKntIcon(KntIcon.WebSearch, color: on ? Color.Black : null);
+    }
+
+    private void buttonWebSearch_Click(object sender, EventArgs e)
+    {
+        _ctrl.WebSearch = !_ctrl.WebSearch;
+        ShowWebSearch();
     }
 
     private void UpdateStatusInfo()
@@ -663,16 +891,41 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         kntEditViewResult.MarkdownContentControl.ScrollToCaret();
     }
 
+    // The ctrl can also run a turn out of the UI thread (the "ln" script engine).
+    private void Ctrl_ActivityChanged(object sender, ControllerEventArgs<string> e)
+    {
+        if (IsDisposed || !IsHandleCreated)
+            return;
+        if (InvokeRequired)
+            BeginInvoke(() => ShowActivity(e.Entity));
+        else
+            ShowActivity(e.Entity);
+    }
+
+    private void ShowActivity(string activity)
+    {
+        if (!_processing)
+            return;
+        toolStripStatusLabelProcessing.Text = $" {activity ?? "Processing ..."}";
+        if (ChatView)
+            _chatView.ShowActivity(activity);
+    }
+
     private void StatusProcessing(bool processing = false)
     {
         if (processing)
         {
             toolStripStatusLabelProcessing.Text = " Processing ...";
+            // Without this, disabling the box passes the focus on to the chat. At the end of the turn it would go into the page,
+            // to its first control (the reasoning of the first answer), and the browser would scroll up to show it.
+            ActiveControl = null;
             textPrompt.Enabled = false;
             comboProviders.Enabled = false;
             comboRepositories.Enabled = false;
             menuOptions.Enabled = false;
             buttonSend.Enabled = false;
+            buttonAttach.Enabled = false;
+            _buttonWebSearch.Enabled = false;
             buttonNewSession.Enabled = false;
             buttonMarkDown.Enabled = false;
             buttonNavigate.Enabled = false;
@@ -688,6 +941,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             comboRepositories.Enabled = comboRepositories.Items.Count > 1;
             menuOptions.Enabled = true;
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
+            buttonAttach.Enabled = _ctrl.CurrentProviderRef != null;
+            _buttonWebSearch.Enabled = true;
             buttonNewSession.Enabled = true;
             _processing = false;
             // Sending keeps the current mode: the chat view adds the turn as it arrives.
@@ -697,16 +952,16 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         }
     }
 
-    private async Task GoGetCompletion(string prompt)
+    private async Task GoGetCompletion(string prompt, bool automatic)
     {
         // The view can't change while sending (StatusProcessing disables its buttons).
         var chatView = ChatView;
         if (chatView)
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, null);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, null, () => _ctrl.StreamingReasoning, _ctrl.TurnAttachments);
 
         try
         {
-            await _ctrl.GetCompletionAsync(prompt);
+            await _ctrl.GetCompletionAsync(prompt, automatic);
         }
         catch
         {
@@ -720,17 +975,18 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         else
             kntEditViewResult.ShowMarkdownContent(ChatTranscript());
 
-        textPrompt.Text = "";
+        if (!automatic)
+            textPrompt.Text = "";
         UpdateStatusInfo();
     }
 
-    private async Task GoStreamCompletion(string prompt)
+    private async Task GoStreamCompletion(string prompt, bool automatic)
     {
         var chatView = ChatView;
         if (chatView)
         {
             // Repainted from the ctrl's StreamingResult while it streams in: no StreamToken handler needed.
-            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult);
+            await _chatView.BeginTurnAsync(_ctrl.ChatTurns, automatic ? null : prompt, _ctrl.CurrentProviderRef?.Alias, () => _ctrl.StreamingResult, () => _ctrl.StreamingReasoning, _ctrl.TurnAttachments);
         }
         else
         {
@@ -746,7 +1002,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
         try
         {
-            await _ctrl.StreamCompletionAsync(prompt);
+            await _ctrl.StreamCompletionAsync(prompt, automatic);
         }
         catch
         {
@@ -768,7 +1024,8 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             // The whole conversation in the saved format: the new turn now with its markers and usage.
             kntEditViewResult.ShowMarkdownContent(ChatTranscript());
 
-        textPrompt.Text = "";
+        if (!automatic)
+            textPrompt.Text = "";
         UpdateStatusInfo();
     }
 

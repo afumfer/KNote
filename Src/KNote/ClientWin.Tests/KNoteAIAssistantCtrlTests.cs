@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.AI;
 
@@ -20,6 +21,127 @@ public class KNoteAIAssistantCtrlTests
         // itself doesn't do this, since it's meant to only swap the client, not force a reset.
         ctrl.RestartAIAssistant();
         return ctrl;
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_SaysWhichToolTheModelIsUsing_UntilItWritesAgain()
+    {
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("1", "search_notes")]);
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("2", "get_note_details")]);
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "Found it");
+        }
+
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
+        var tools = new List<string>();
+        ctrl.ActivityChanged += (_, e) => tools.Add(e.Entity);
+
+        await ctrl.StreamCompletionAsync("Hello");
+
+        CollectionAssert.AreEqual(new[] { "Using search_notes", "Using get_note_details", null }, tools);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_TheSearchOn_ThePaidProviderSearches_WithTheRules_UntilANewConversation()
+    {
+        ChatOptions options = null!;
+        List<ChatMessage> messages = null!;
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new WebSearchToolCallContent("1")]);
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "1985");
+        }
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (m, o, _) => { messages = m.ToList(); options = o; return Stream(); }
+        };
+        var store = new Store(new TestFactoryViews());
+        var ctrl = new KNoteAIAssistantCtrl(store);
+        ctrl.SetChatClientForTesting(chatClient, new AiProviderRef { Alias = "Paid", Provider = EnumAiProvider.OpenAI, Model = "m" });
+        ctrl.RestartAIAssistant();
+        var activity = new List<string>();
+        ctrl.ActivityChanged += (_, e) => activity.Add(e.Entity);
+
+        Assert.IsTrue(ctrl.SupportsWebSearch);
+        Assert.IsFalse(ctrl.WebSearch, "Off until the user turns it on.");
+        ctrl.WebSearch = true;
+        await ctrl.StreamCompletionAsync("When did the CPC 6128 come out?");
+
+        Assert.IsInstanceOfType<HostedWebSearchTool>(options!.Tools!.Single());
+        StringAssert.Contains(messages!.First(m => m.Role == ChatRole.System).Text, AiWebSearchRules.SystemRules);
+        CollectionAssert.Contains(activity, "Searching the Internet…");
+
+        ctrl.RestartAIAssistant();
+        Assert.IsFalse(ctrl.WebSearch, "A new conversation starts with it off.");
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_TheSearchOn_ButAProviderThatCannotSearch_SendsNoSearch()
+    {
+        ChatOptions options = new();
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "No");
+        }
+        var store = new Store(new TestFactoryViews());
+        var ctrl = new KNoteAIAssistantCtrl(store);
+        ctrl.SetChatClientForTesting(new FakeChatClient { GetStreamingResponseImpl = (_, o, _) => { options = o; return Stream(); } },
+            new AiProviderRef { Alias = "Local", Provider = EnumAiProvider.Ollama, Model = "m", Host = "http://127.0.0.1:9" });
+        ctrl.RestartAIAssistant();
+
+        ctrl.WebSearch = true;
+        await ctrl.StreamCompletionAsync("Hello");
+
+        Assert.IsFalse(ctrl.SupportsWebSearch, "Ollama without its web search key.");
+        Assert.IsFalse(ctrl.WebSearch);
+        Assert.IsFalse(options?.Tools?.Any() == true);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_AFailureWhileUsingATool_LeavesNoToolInUse()
+    {
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("1", "search_notes")]);
+            await Task.Yield();
+            throw new InvalidOperationException("simulated provider failure");
+        }
+
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
+        var tools = new List<string>();
+        ctrl.ActivityChanged += (_, e) => tools.Add(e.Entity);
+
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => ctrl.StreamCompletionAsync("Hello"));
+
+        CollectionAssert.AreEqual(new[] { "Using search_notes", null }, tools);
+    }
+
+    [TestMethod]
+    public async Task StreamCompletionAsync_TheReasoning_IsApartFromTheAnswer_AndKeptWithTheTurn()
+    {
+        static async IAsyncEnumerable<ChatResponseUpdate> Stream()
+        {
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new TextReasoningContent("Let me ")]);
+            yield return new ChatResponseUpdate(ChatRole.Assistant, [new TextReasoningContent("think.")]);
+            await Task.Yield();
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "Four");
+        }
+
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, _) => Stream() });
+        var activity = new List<string>();
+        ctrl.ActivityChanged += (_, e) => activity.Add(e.Entity);
+
+        await ctrl.StreamCompletionAsync("2 + 2?");
+
+        CollectionAssert.AreEqual(new[] { AiChatTurnDto.ThinkingText, null }, activity);
+        Assert.AreEqual("Let me think.", ctrl.StreamingReasoning);
+        var turn = ctrl.ChatTurns.Single();
+        Assert.AreEqual("Four", turn.Answer);
+        Assert.AreEqual("Let me think.", turn.Reasoning);
     }
 
     [TestMethod]
@@ -231,6 +353,36 @@ public class KNoteAIAssistantCtrlTests
         Assert.AreEqual(0, ctrl.ChatTurns.Count);
         // What the view shows of the failed answer.
         Assert.AreEqual("partial", ctrl.StreamingResult);
+    }
+
+    // KNote Atlas (D6): the instructions of a @Prompt (or of a script) replace only the task's instructions; KNote's
+    // fixed rules always go first. Without a repository (here) the assistant still has them.
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("You are a translator.")]
+    public async Task TheSystemMessage_HasKNotesRules_AndTheInstructionsOfTheConversation(string? rootSystemChat)
+    {
+        List<ChatMessage>? sent = null;
+        var chatClient = new FakeChatClient
+        {
+            GetStreamingResponseImpl = (messages, options, ct) =>
+            {
+                sent = messages.ToList();
+                return AnswerStream("Done", new UsageDetails { TotalTokenCount = 1 });
+            }
+        };
+        var ctrl = CreateCtrl(chatClient);
+        if (rootSystemChat != null)
+            ctrl.RootSystemChat = rootSystemChat;
+
+        await ctrl.GetCompletionAsync("Hello");
+
+        var system = sent!.First();
+        Assert.AreEqual(ChatRole.System, system.Role);
+        StringAssert.StartsWith(system.Text, $"# {AiPromptComposer.RulesLayer}");
+        StringAssert.Contains(system.Text, $"# {AiPromptComposer.InstructionsLayer}\n\n{rootSystemChat ?? AiTaskCatalog.Assistant.DefaultInstructions}");
+        Assert.AreEqual(system.Text, ctrl.LastSystemPrompt.Text);
+        Assert.AreEqual(system.Text, (await ctrl.GetSystemPromptAsync()).Text, "View › System shows it");
     }
 
     [TestMethod]

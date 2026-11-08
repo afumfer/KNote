@@ -74,6 +74,7 @@ public class AiProvidersCatalog
             Alias = p.Alias,
             Provider = p.Provider,
             Model = p.Model,
-            IsDefault = p == Default
+            IsDefault = p == Default,
+            SupportsWebSearch = p.SupportsWebSearch
         }).ToList();
 }

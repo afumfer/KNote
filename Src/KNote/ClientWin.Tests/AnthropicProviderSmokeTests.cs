@@ -31,6 +31,32 @@ public class AnthropicProviderSmokeTests
     }
 
     [TestMethod]
+    public async Task WebSearch_TheProviderSearchesTheInternet()
+    {
+        var providerRef = AiTestConfig.TryGetAnthropicProviderRef();
+        if (providerRef == null)
+        {
+            Assert.Inconclusive("ANTHROPIC_API_KEY is not configured (env var or ClientWin.Tests user-secrets/appsettings.json).");
+            return;
+        }
+
+        await AiWebSearchSmokeCheck.AssertTheModelSearchesTheInternetAsync(providerRef);
+    }
+
+    [TestMethod]
+    public async Task Image_IsReadByTheModel()
+    {
+        var providerRef = AiTestConfig.TryGetAnthropicProviderRef();
+        if (providerRef == null)
+        {
+            Assert.Inconclusive("ANTHROPIC_API_KEY is not configured (env var or ClientWin.Tests user-secrets/appsettings.json).");
+            return;
+        }
+
+        await AiImageSmokeCheck.AssertTheModelReadsAnImageAsync(TestAiChatClientFactory.Create(providerRef));
+    }
+
+    [TestMethod]
     public async Task Streaming_ReturnsNonEmptyResponse()
     {
         var providerRef = AiTestConfig.TryGetAnthropicProviderRef();

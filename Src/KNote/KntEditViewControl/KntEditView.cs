@@ -288,6 +288,12 @@ namespace KntWebView
         
         public event EventHandler NavigationStart;
 
+        /// <summary>
+        /// Lets the host take a link of the content shown (the citations of notes): true, the view stays where it is.
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Func<string, bool>? LinkHandler { get; set; }
+
         public event EventHandler NavigationEnd;        
 
         #region Form events management 
@@ -322,6 +328,12 @@ namespace KntWebView
 
         private void EnsureHttps(object? sender, CoreWebView2NavigationStartingEventArgs args)
         {
+            if (LinkHandler?.Invoke(args.Uri) == true)
+            {
+                args.Cancel = true;
+                return;
+            }
+
             if (!ForceHttps)
                 return;
 

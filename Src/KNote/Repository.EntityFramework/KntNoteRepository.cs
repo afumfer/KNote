@@ -1651,6 +1651,34 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             if (notesFilter.TaskUserId != null)
                 query = query.Where(n => n.NoteTasks.Any(t => t.UserId == notesFilter.TaskUserId));
 
+            // The last day is included: up to the start of the next one.
+            if (notesFilter.CreatedFrom is DateTime createdFrom)
+            {
+                var start = createdFrom.Date;
+                query = query.Where(n => n.CreationDateTime >= start);
+            }
+            if (notesFilter.CreatedTo is DateTime createdTo)
+            {
+                var end = createdTo.Date.AddDays(1);
+                query = query.Where(n => n.CreationDateTime < end);
+            }
+            if (notesFilter.ModifiedFrom is DateTime modifiedFrom)
+            {
+                var start = modifiedFrom.Date;
+                query = query.Where(n => n.ModificationDateTime >= start);
+            }
+            if (notesFilter.ModifiedTo is DateTime modifiedTo)
+            {
+                var end = modifiedTo.Date.AddDays(1);
+                query = query.Where(n => n.ModificationDateTime < end);
+            }
+
+            if (notesFilter.ExcludeNoteTypeIds?.Count > 0)
+            {
+                var excludeNoteTypeIds = notesFilter.ExcludeNoteTypeIds;
+                query = query.Where(n => n.NoteTypeId == null || !excludeNoteTypeIds.Contains(n.NoteTypeId.Value));
+            }
+
             foreach (var f in notesFilter.AttributesFilter)
             {
                 query = query.Where(n => n.KAttributes.Where(_ => _.KAttributeId == f.AtrId).Select(a => a.Value).Contains(f.Value));

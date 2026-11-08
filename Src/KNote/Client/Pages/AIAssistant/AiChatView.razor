@@ -18,14 +18,27 @@
     @for (var i = 0; i < Turns.Count; i++)
     {
         var turn = Turns[i];
-        @UserMessage(turn.Prompt)
+        if (!turn.Automatic)
+        {
+            @UserMessage(turn.Prompt, turn.Attachments)
+        }
         <div class="ai-row">
             <span class="ai-avatar ai-avatar-assistant"><RadzenIcon Icon="smart_toy" /></span>
             <div class="ai-msg ai-assistant">
+                @ReasoningOf(turn.ReasoningTitle(), turn.Reasoning, open: i == Turns.Count - 1 && reasoningOpen, pending: false)
                 <ViewMarkdown MarkdownContent="@turn.Answer" DisableHtml="true" />
                 @if (turn.Truncated)
                 {
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-warning rz-my-0">@AiChatTurnDto.TruncatedNotice</RadzenText>
+                }
+                @foreach (var action in turn.Actions.Where(a => a.Status != EnumAiActionStatus.Proposed))
+                {
+                    <div class="ai-action-line"><ViewMarkdown MarkdownContent="@AiActionRules.Line(action)" DisableHtml="true" /></div>
+                }
+                @if (PendingPrompt == null && i == Turns.Count - 1 && turn.Actions.Any(a => a.Status == EnumAiActionStatus.Proposed))
+                {
+                    <AiActionsCard Actions="@turn.Actions.Where(a => a.Status == EnumAiActionStatus.Proposed).ToList()"
+                                   Answered="ActionsAnswered" Disabled="@ActionsDisabled" />
                 }
                 <div class="ai-usage">@turn.UsageSummary()</div>
             </div>
@@ -35,20 +48,24 @@
 
     @if (PendingPrompt != null)
     {
-        @UserMessage(PendingPrompt)
+        if (!PendingAutomatic)
+        {
+            @UserMessage(PendingPrompt, PendingAttachments)
+        }
         <div class="ai-row">
             @* While it answers: a ring turning round the avatar and dots bouncing in the bubble. *@
             <span class="ai-avatar ai-avatar-assistant ai-avatar-thinking"><RadzenIcon Icon="smart_toy" /></span>
             <div class="ai-msg ai-assistant">
+                @ReasoningOf(AiChatTurnDto.ReasoningText, PendingReasoning, open: reasoningOpen, pending: true)
                 @if (!string.IsNullOrEmpty(PendingAnswer))
                 {
                     <ViewMarkdown MarkdownContent="@PendingAnswer" DisableHtml="true" />
                 }
-                <div class="ai-usage ai-thinking" role="status" aria-label="@(string.IsNullOrEmpty(ToolInUse) ? "Writing" : $"Using {ToolInUse}")">
+                <div class="ai-usage ai-thinking" role="status" aria-label="@(Activity ?? "Writing")">
                     <span class="ai-dots"><span></span><span></span><span></span></span>
-                    @if (!string.IsNullOrEmpty(ToolInUse))
+                    @if (Activity != null)
                     {
-                        <span>Using @ToolInUse</span>
+                        <span>@Activity</span>
                     }
                 </div>
             </div>
@@ -62,18 +79,69 @@
 
     // The question being answered and what has arrived of its answer (null when there is none).
     [Parameter] public string? PendingPrompt { get; set; }
+    [Parameter] public IReadOnlyList<AiChatAttachmentDto> PendingAttachments { get; set; } = Array.Empty<AiChatAttachmentDto>();
+
+    // The note of the session, where its attachments are.
+    [Parameter] public Guid SessionNoteId { get; set; }
+
+    // An image of a message has taken its place: the conversation has grown.
+    [Parameter] public EventCallback AttachmentShown { get; set; }
+
+    private readonly Dictionary<Guid, string?> attachmentPreviews = new();
+
     [Parameter] public string? PendingAnswer { get; set; }
     [Parameter] public string? ToolInUse { get; set; }
+
+    // The turn being answered was sent by the app after a card, not by the user: its prompt is not shown.
+    [Parameter] public bool PendingAutomatic { get; set; }
+
+    // The answer to the card of the last turn.
+    [Parameter] public EventCallback<AiActionsCard.AiActionsAnswer> ActionsAnswered { get; set; }
+    [Parameter] public bool ActionsDisabled { get; set; }
+
+    // What has arrived of the reasoning, and whether the model is reasoning now.
+    [Parameter] public string? PendingReasoning { get; set; }
+    [Parameter] public bool Thinking { get; set; }
+
+    private string? Activity => !string.IsNullOrEmpty(ToolInUse) ? AiChatTurnDto.ToolActivityText(ToolInUse) : Thinking ? AiChatTurnDto.ThinkingText : null;
 
     // The notes created by the assistant (create_task), by the index of the turn they were created in.
     [Parameter] public IReadOnlyDictionary<int, List<AiChatStreamEventDto>>? CreatedNotes { get; set; }
 
     [Parameter] public string ContainerId { get; set; } = "aichatcontainer";
 
-    private static RenderFragment UserMessage(string prompt) => __builder =>
+    // The reasoning of the answer arriving was opened: it stays open when the answer is complete, in the turn.
+    private bool reasoningOpen;
+    private string? lastPendingPrompt;
+
+    protected override void OnParametersSet()
+    {
+        if (PendingPrompt != null && lastPendingPrompt == null)
+            reasoningOpen = false;
+        lastPendingPrompt = PendingPrompt;
+    }
+
+    // Folded above the answer, as plain text: it is written by the model and it can be long. Open while it arrives, the
+    // text follows its end (ai-reasoning-live).
+    private RenderFragment ReasoningOf(string title, string? reasoning, bool open, bool pending) => __builder =>
+    {
+        if (!string.IsNullOrEmpty(reasoning))
+        {
+            <details class="ai-reasoning" open="@open">
+                @* While it arrives, this state opens and closes it, not the browser: both would cancel each other. *@
+                <summary @onclick="@(() => { if (pending) reasoningOpen = !reasoningOpen; })" @onclick:preventDefault="pending">@title</summary>
+                <div class="@(pending ? "ai-reasoning-text ai-reasoning-live" : "ai-reasoning-text")"><span>@reasoning</span></div>
+            </details>
+        }
+    };
+
+    private RenderFragment UserMessage(string prompt, IReadOnlyList<AiChatAttachmentDto> attachments) => __builder =>
     {
         <div class="ai-row ai-row-user">
-            <div class="ai-msg ai-user">@prompt</div>
+            <div class="ai-msg ai-user">
+                @prompt
+                <AiAttachmentsView Attachments="@attachments" SessionNoteId="@SessionNoteId" Previews="@attachmentPreviews" ImageShown="AttachmentShown" />
+            </div>
             <span class="ai-avatar ai-avatar-user"><RadzenIcon Icon="person" /></span>
         </div>
     };
@@ -88,7 +156,14 @@
                     @* Markup of a RadzenLink, which has no click of its own. *@
                     <a class="rz-link" href="@($"notes/edit/{note.NoteId}")"
                        @onclick="@(() => kntWindows.OpenEditAsync(note.NoteId!.Value))" @onclick:preventDefault="true">
-                        <i class="notranslate rzi">note_add</i><span class="rz-link-text">Note #@note.NoteNumber created: @note.Text</span>
+                        @if (note.Type == AiChatStreamEventTypes.OpenNote)
+                        {
+                            <i class="notranslate rzi">edit_note</i><span class="rz-link-text">Open note #@note.NoteNumber: @note.Text</span>
+                        }
+                        else
+                        {
+                            <i class="notranslate rzi">note_add</i><span class="rz-link-text">Note #@note.NoteNumber created: @note.Text</span>
+                        }
                     </a>
                 </div>
             }

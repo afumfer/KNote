@@ -129,6 +129,7 @@ public class KntSemanticSearchRefreshPendingAsyncCommand : KntCommandServiceBase
             SkipIfBusy = true,
             MaxNotes = Param.MaxNotes,
             MaxDuration = Param.MaxDuration,
+            MaxChunksPerNote = KntSemanticIndexer.QuickRefreshMaxChunks,
             CancellationToken = Param.CancellationToken
         });
 }
@@ -207,6 +208,7 @@ public class KntSemanticSearchSearchAsyncCommand : KntCommandServiceBase<Semanti
             SkipIfBusy = true,
             MaxNotes = SemanticIndexRefreshRequest.DefaultMaxNotes,
             MaxDuration = SemanticIndexRefreshRequest.DefaultMaxDuration,
+            MaxChunksPerNote = KntSemanticIndexer.QuickRefreshMaxChunks,
             CancellationToken = _cancellationToken
         });
 

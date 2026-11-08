@@ -59,6 +59,23 @@ body {
   overflow-wrap: anywhere;
 }
 
+.msg.user .attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.msg.user .attachment-image {
+  max-width: 256px;
+  max-height: 192px;
+  border-radius: 6px;
+}
+
+.msg.user .attachment-file::before {
+  content: "\1F4CE\00A0";
+}
+
 /* ---------- Answers: full width, Markdown ---------- */
 .msg.assistant .author {
   font-size: 12px;
@@ -101,6 +118,92 @@ body {
   color: var(--chat-failed);
 }
 
+/* ---------- What the assistant did, and the card of what it proposes ---------- */
+.action-line {
+  margin-top: 4px;
+  font-size: 0.95em;
+}
+
+.action-line p,
+.actions-card p {
+  margin: 0;
+}
+
+.actions-card {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--chat-muted);
+  border-radius: 8px;
+}
+
+.actions-card .card-title {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.actions-card .action {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.actions-card .action input {
+  margin-top: 3px;
+}
+
+.actions-card .card-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.actions-card button {
+  padding: 4px 14px;
+  border: 1px solid var(--chat-muted);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.actions-card button.primary {
+  background-color: var(--chat-user-bg);
+  color: var(--chat-user-fg);
+}
+
+.actions-card button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- What the model is doing, and its reasoning ---------- */
+.activity {
+  font-size: 0.85em;
+  color: var(--chat-muted);
+}
+
+details.reasoning {
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  color: var(--chat-muted);
+}
+
+details.reasoning summary {
+  cursor: pointer;
+}
+
+.reasoning-text {
+  margin-top: 4px;
+  padding: 6px 8px;
+  max-height: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-left: 2px solid var(--chat-muted);
+}
+
 /* ---------- Typing indicator, until the first text of an answer ---------- */
 .typing {
   padding: 6px 0;
@@ -133,4 +236,11 @@ body {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* A link to the Internet in an answer (it opens in the browser), different from the citations of notes (#123). */
+.msg.assistant .content a[href^="http"]::after {
+  content: "\2197";
+  font-size: 0.8em;
+  margin-left: 0.1em;
 }

@@ -24,6 +24,24 @@ public class TasksPanelServiceTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
+    public async Task Panel_AnExactWindow_TakesThePlaceOfTheUnits(string orm)
+    {
+        var data = await SeedAsync(orm);
+        var filter = Filter();
+        filter.WindowFrom = new DateTime(2026, 7, 15);
+        filter.WindowTo = new DateTime(2026, 11, 2);
+
+        var res = await data.Service.Notes.GetTasksPanelAsync(filter);
+
+        Assert.IsTrue(res.IsValid, res.ErrorMessage);
+        Assert.AreEqual(new DateTime(2026, 7, 15), res.Entity.WindowStart);
+        Assert.AreEqual(new DateTime(2026, 11, 2), res.Entity.WindowEnd);
+        AssertAsTheRules(res.Entity);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
     public async Task Panel_TheTasksOfTheWindowByColumn(string orm)
     {
         var data = await SeedAsync(orm);

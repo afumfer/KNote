@@ -17,6 +17,9 @@ public class AiProviderInfoDto : IAiProviderIdentity
 
     // The provider used when none is chosen (the first one configured).
     public bool IsDefault { get; set; }
+
+    // The assistant can search the Internet with it (AiProviderRef.SupportsWebSearch).
+    public bool SupportsWebSearch { get; set; }
 }
 
 // One question to the assistant, with the conversation so far (the server keeps no conversation state).
@@ -28,6 +31,18 @@ public class AiChatRequestDto
     public List<AiChatTurnDto> History { get; set; } = new();
 
     public string Prompt { get; set; }
+
+    // The kinds of action the user does not want to be asked about again in this conversation.
+    public List<string> AutoApprovedActionKinds { get; set; } = new();
+
+    // The files of this message, already saved in the note of the session.
+    public Guid SessionNoteId { get; set; }
+
+    public List<AiChatAttachmentDto> Attachments { get; set; } = new();
+
+    // "Search the Internet" of the conversation (KNote Atlas, chapter 23): off unless the user turns it on, and only with a
+    // provider that supports it.
+    public bool WebSearch { get; set; }
 }
 
 // Each server-sent event of a streamed answer (its SSE event type is Type, see AiChatStreamEventTypes).
@@ -35,10 +50,11 @@ public class AiChatStreamEventDto
 {
     public string Type { get; set; }
 
-    // Delta: the next piece of the answer. Tool: the name of the tool being called. Error: the message.
+    // Delta: the next piece of the answer. Reasoning: the next piece of the reasoning. Tool: the name of the tool being
+    // called. Error: the message.
     public string Text { get; set; }
 
-    // NoteCreated: the note the create_task tool has just saved.
+    // NoteCreated: the note the create_task tool has just saved. OpenNote: the note to show in its edit form.
     public Guid? NoteId { get; set; }
 
     public int? NoteNumber { get; set; }
@@ -50,8 +66,10 @@ public class AiChatStreamEventDto
 public static class AiChatStreamEventTypes
 {
     public const string Delta = "delta";
+    public const string Reasoning = "reasoning";
     public const string Tool = "tool";
     public const string NoteCreated = "noteCreated";
+    public const string OpenNote = "openNote";
     public const string Completed = "completed";
     public const string Error = "error";
 }

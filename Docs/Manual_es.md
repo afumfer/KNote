@@ -22,7 +22,7 @@ La aplicación de escritorio de Windows guarda su configuración en la carpeta `
 
 Borrar `KNoteState.config` solo restablece la disposición de las ventanas. Borrar `KNoteData.config` hace que KNote arranque como si fuera la primera vez: tus bases de datos no se borran, pero se pierde la lista de repositorios y de proveedores de IA.
 
-**Contraseñas y API keys.** La contraseña de la cuenta de correo, las API keys de los proveedores de IA, el token de acceso del chat room y la contraseña incluida en la cadena de conexión de un repositorio (autenticación SQL) se guardan cifradas con la protección de datos de Windows, ligadas a tu usuario de Windows y a este equipo. Las cadenas de conexión sin contraseña (SQLite, autenticación de Windows) siguen siendo legibles. Si copias `KNoteData.config` a otro equipo o usuario, esos secretos no se pueden descifrar: KNote te indica al arrancar cuáles debes volver a introducir, y el resto se carga con normalidad. Un secreto escrito en texto plano a mano en el fichero se acepta y se cifra la siguiente vez que se guarde.
+**Contraseñas y API keys.** La contraseña de la cuenta de correo, las API keys de los proveedores de IA (también la clave de búsqueda web de Ollama), el token de acceso del chat room y la contraseña incluida en la cadena de conexión de un repositorio (autenticación SQL) se guardan cifradas con la protección de datos de Windows, ligadas a tu usuario de Windows y a este equipo. Las cadenas de conexión sin contraseña (SQLite, autenticación de Windows) siguen siendo legibles. Si copias `KNoteData.config` a otro equipo o usuario, esos secretos no se pueden descifrar: KNote te indica al arrancar cuáles debes volver a introducir, y el resto se carga con normalidad. Un secreto escrito en texto plano a mano en el fichero se acepta y se cifra la siguiente vez que se guarde.
 
 **Copias de seguridad.** Cada vez que se guarda un fichero, la versión anterior se conserva a su lado como `KNoteData.config.bak` / `KNoteState.config.bak`. Si un fichero no se puede leer, KNote carga su `.bak` y te avisa.
 
@@ -170,7 +170,7 @@ El menú **Options** tiene el resto:
 |---|---|
 | **Get stream** / **Get completion** | Cómo llegan las respuestas: a medida que se escriben (por defecto) o de una vez cuando están completas. |
 | **Get prompt from catalog ...** (`Ctrl+K`) | Empieza una conversación nueva a partir de un prompt del catálogo. |
-| **View system root ...** | Muestra las instrucciones que recibe el modelo antes de la conversación. |
+| **What the AI receives ...** | Muestra las instrucciones que recibe el modelo antes de la conversación. |
 | **Show model info (tokens, time)** | Muestra u oculta, al pie de cada respuesta de la vista de chat, los tokens y el tiempo que tardó. La vista Markdown los tiene siempre, en la marca de cada respuesta. |
 | **Manage models ...** | Añade, cambia o quita los modelos de IA (proveedores) que puedes elegir. |
 
@@ -202,7 +202,7 @@ Para usarla hacen falta tres cosas, en este orden: un modelo de embeddings en tu
 - Servidor Web: la sección `ai` del servidor (ver *Proveedores de IA de la aplicación Web (configuración del servidor)*).
 - KNote Local: **Admin panel → This computer → AI providers**.
 
-El botón **Test** de cada proveedor lo comprueba: con un modelo de embeddings calcula un vector de prueba y muestra sus dimensiones y el tiempo que tardó, y explica los errores habituales (el modelo no está descargado, el host no responde, la clave de API no es válida). Con Ollama, descarga antes el modelo, por ejemplo `ollama pull qwen3-embedding:0.6b`. Se recomiendan los modelos locales por privacidad: con un modelo de pago (OpenAI) el contenido de tus notas se envía a su proveedor. El campo **Context size** es solo para los modelos de chat de Ollama (vacío: el del modelo).
+El botón **Test** de cada proveedor lo comprueba: con un modelo de embeddings calcula un vector de prueba y muestra sus dimensiones y el tiempo que tardó, y explica los errores habituales (el modelo no está descargado, el host no responde, la clave de API no es válida). Con Ollama, descarga antes el modelo, por ejemplo `ollama pull qwen3-embedding:0.6b`. Se recomiendan los modelos locales por privacidad: con un modelo de pago (OpenAI) el contenido de tus notas se envía a su proveedor. El campo **Context size** es solo para los modelos de chat de Ollama (vacío: el del modelo), igual que la **Web search API key** opcional (de una cuenta de ollama.com, solo para buscar en Internet desde el asistente): con ella, **Test** hace también una búsqueda y dice si la clave vale.
 
 **2. Los modelos del repositorio (Admin).** Son los mismos para todos los que trabajan con el repositorio, en cualquiera de las dos aplicaciones:
 
@@ -220,8 +220,8 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 
 **3. El índice semántico (Admin).** En la aplicación de escritorio, pestaña **Semantic index** de la misma ventana; en la aplicación Web, sección **Semantic index** de la pestaña **KNote Atlas**. Muestra cómo está el índice (notas indexadas, pendientes y fragmentos; cuándo se creó por última vez y cuánto tardó). **Create index** calcula el significado de todas las notas: KNote dice antes cuántas notas enviará al modelo y, a partir de la primera vez, cuánto debería tardar. Puedes seguir trabajando (en la aplicación de escritorio puedes incluso cerrar la ventana: la barra de estado muestra el progreso); **Cancel** (**Cancel run** en la aplicación de escritorio) conserva lo hecho, y la siguiente ejecución sigue desde ahí. Las notas que fallan se listan y se reintentan en la siguiente ejecución. En el servidor Web se crea un índice a la vez, sea del repositorio que sea: los demás esperan, **Queued**.
 
-- Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea y cada recurso que tiene descripción. Las notas de las sesiones del asistente, del chat room y de la evaluación de la búsqueda quedan fuera.
-- Una nota que cambias queda *pendiente*. Las pendientes se ponen al día antes de cada búsqueda por significado (unas pocas cada vez: hasta 50 notas o unos 10 segundos) o con **Update now**.
+- Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea y cada recurso que tiene descripción. Las notas propias de KNote quedan fuera: las sesiones del asistente, el chat room, la evaluación de la búsqueda, el perfil, el glosario y las instrucciones de las tareas.
+- Una nota que cambias queda *pendiente*. Las pendientes se ponen al día antes de cada búsqueda por significado (unas pocas cada vez: hasta 50 notas o unos 10 segundos) o con **Update now**. Una nota muy larga (con más de 64 fragmentos por calcular) se deja para **Update now**: hasta entonces, la búsqueda usa su contenido anterior.
 - **Rebuild** calcula otra vez todos los vectores (tras cambiar las dimensiones, por ejemplo); mientras tanto la búsqueda sigue con los anteriores.
 - **Cambiar el modelo de embeddings** necesita el índice del modelo nuevo. El índice del modelo anterior se conserva (para compararlos, ver *Evaluación de la búsqueda (aplicación Web)*) y aparece en la lista de abajo; un Admin lo puede borrar.
 
@@ -237,7 +237,7 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 
 ### Evaluación de la búsqueda (aplicación Web)
 
-**Search evaluation**, en el menú lateral (rol ProjectManager o superior), mide cómo funciona la búsqueda en un repositorio: si la búsqueda por significado encuentra lo que buscas mejor que la búsqueda por palabras, y qué modelo de embeddings lo encuentra mejor. Es un laboratorio: úsalo al elegir un modelo o después de cambiar cómo funciona la búsqueda.
+**Search evaluation**, un botón de la página **KNote Atlas** (rol ProjectManager o superior), mide cómo funciona la búsqueda en un repositorio: si la búsqueda por significado encuentra lo que buscas mejor que la búsqueda por palabras, y qué modelo de embeddings lo encuentra mejor. Es un laboratorio: úsalo al elegir un modelo o después de cambiar cómo funciona la búsqueda.
 
 1. **Las consultas de prueba.** Se guardan en la nota **Search test queries**, en la carpeta **KNote Atlas** (se crea la primera vez que abres la página). **Open in the editor** la abre: escribe una tabla con una búsqueda por fila, las notas que debería encontrar y, si quieres, las palabras que usarías para buscar por palabras:
 
@@ -256,12 +256,72 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 | Columna | Significado |
 |---|---|
 | **In the first 10** | En cuántas búsquedas una nota esperada sale entre los 10 primeros resultados: lo que ves sin bajar por la lista. Es la medida principal. |
+| **Expected notes in the first 10** | Cuántas de todas las notas esperadas salen entre los 10 primeros resultados (no solo la primera). |
 | **Found** | En cuántas búsquedas sale una nota esperada, en cualquier puesto. |
 | **Mean position** | El puesto medio de la primera nota esperada: cuanto más bajo, mejor (1 es «siempre la primera»). |
+| **Similarity of the first expected** | Por significado, el parecido medio de la primera nota esperada, en las búsquedas en que se encuentra. |
+| **Similarity of the result 10** | Por significado, el parecido medio del décimo resultado: donde terminan los 10 primeros. Si está cerca del anterior, las notas esperadas no se parecen mucho más que el resto. |
 | **Mean results** | Cuántas notas da cada búsqueda, de media. Por significado, muchos resultados indican que el parecido desde el que empieza deja entrar notas que no tienen que ver con la búsqueda. |
+| **Mean time** | Cuánto tarda cada búsqueda, de media (por significado, el vector de la búsqueda y la ordenación). |
 | **Errors** | Búsquedas que fallaron. |
 
-Debajo, cada búsqueda muestra el puesto de su primera nota esperada en cada forma de buscar (en negrita si queda fuera de los 10 primeros; «—» si no se encontró). Ten en cuenta que la búsqueda por palabras ordena su lista por el tema, no por lo que cada nota tiene que ver con la búsqueda. **Save as note** guarda el informe como una nota de la carpeta **KNote Atlas**.
+**If the minimum similarity were…** muestra, para cada índice, lo que daría la búsqueda por significado si empezara en un parecido mayor (0,50, 0,55, 0,60): en cuántas búsquedas seguiría saliendo una nota esperada entre los 10 primeros resultados y cuántos resultados daría cada búsqueda de media. Sirve para elegir un mínimo que deje fuera las notas que no tienen que ver con la búsqueda sin perder las que buscas.
+
+Debajo, cada búsqueda muestra el puesto de su primera nota esperada en cada forma de buscar y, por significado, su parecido, por ejemplo «3 (0.62)» (en negrita si queda fuera de los 10 primeros; «—» si no se encontró). Ten en cuenta que la búsqueda por palabras ordena su lista por el tema, no por lo que cada nota tiene que ver con la búsqueda. **Save as note** guarda el informe como una nota de la carpeta **KNote Atlas**.
+
+### El contexto de la IA: perfil, glosario e instrucciones de las tareas (KNote Atlas)
+
+El asistente de IA de las dos aplicaciones responde mejor si sabe de qué trata tu repositorio. Tres notas de la carpeta **KNote Atlas** se lo cuentan, y las recibe en cada pregunta:
+
+- **Repository profile** (perfil del repositorio): para qué sirve, quién lo usa, qué hay en cada carpeta y en cada tipo de nota, vuestras convenciones... con palabras sencillas y en tu idioma.
+- **Glossary** (glosario): una tabla con los términos, siglas y nombres propios del repositorio, qué significan y otras formas de escribirlos (`| Term | Meaning | Also written as |`). La IA solo recibe los términos que aparecen en la conversación.
+- **Task instructions** (instrucciones de las tareas): cómo quieres que la IA haga una tarea en este repositorio (por ahora, la tarea **Assistant**). Con el modo **Add**, se suman a las instrucciones de KNote (y sigues aprovechando las mejoras de las versiones nuevas de KNote); con **Replace**, las sustituyen. Las reglas fijas de KNote (citar las notas con `#123`, no inventar, los permisos del usuario) se mantienen siempre.
+
+Todo está junto en **KNote Atlas**: **Tools › KNote Atlas** en la aplicación de escritorio, una ventana con una pestaña para cada parte y una lista para elegir el repositorio (empieza en el de la carpeta activa; el asistente tiene el suyo), y **KNote Atlas** en el menú lateral de la aplicación Web, una página con las mismas partes, para el repositorio de tu sesión:
+
+- La primera vez, **Create the profile** / **Create the glossary** (o **Customize** en las instrucciones de las tareas) crea la nota con una plantilla y la abre en el editor de notas de siempre. Después, **Open in the editor** la abre. Las ayudas de las plantillas son comentarios ocultos (`<!-- ... -->`): los ves al editar, no aparecen en los visores y la IA nunca los recibe; tampoco los apartados que dejes vacíos.
+- **Fill in folders and types** (perfil) añade a sus apartados *Folders* y *Note types* las carpetas de los dos primeros niveles y los tipos de nota que tienen notas, para que solo tengas que escribir qué es cada uno. Solo añade lo que falta: no borra nada de lo escrito.
+- **What the AI receives** muestra el texto que recibe la IA para una tarea, con su tamaño (cuántas palabras y tokens, aproximadamente) y sus partes (rol Staff o superior). Escribe un texto de prueba y pulsa **Show its terms** para ver qué términos del glosario entrarían. En el asistente de la aplicación de escritorio, **Options › What the AI receives ...** lo muestra para la conversación en curso.
+- En la aplicación de escritorio, un prompt elegido con **Get prompt from catalog ...** (o el que fija un script) sustituye solo las instrucciones del asistente en esa conversación: las reglas fijas, el perfil y el glosario se mantienen.
+
+Cualquiera puede abrir KNote Atlas y leer las notas; solo un **ProjectManager** o un **Admin** puede crearlas, guardarlas, borrarlas, moverlas o cambiar sus etiquetas (también la nota **Search test queries**). El perfil se recorta a unas 2.000 palabras: KNote Atlas avisa si es más largo.
+
+### Qué puede consultar el asistente de IA (KNote Atlas)
+
+El asistente de las dos aplicaciones lee el repositorio por su cuenta, sin pedir permiso, porque solo lee. Además de buscar notas por palabras y leer una nota, puede:
+
+- **buscar por significado** (solo si el repositorio tiene índice semántico): «¿tengo algo sobre la Revolución francesa?»;
+- **filtrar** por carpeta, tipo de nota, etiqueta, usuario con una tarea, fechas de creación o modificación y el valor de un atributo: «las notas de la carpeta Facturación modificadas en septiembre»;
+- ver el **árbol de carpetas**;
+- ver las **tareas, alarmas, recursos y relaciones** de una nota;
+- listar las **tareas de un periodo**, de todos o de una persona: «¿qué tareas tiene Marta esta semana?»;
+- consultar términos del **glosario** (solo si tiene términos).
+
+Mientras responde, las dos aplicaciones muestran la herramienta que está usando (por ejemplo, **Using find_notes_about**), hasta que empieza a escribir.
+
+**Razonamiento.** Muchos modelos razonan antes de responder, y un modelo local puede tardar un minuto o más aunque la pregunta sea sencilla. Mientras tanto se ve **Thinking…**. Encima de la respuesta hay un apartado plegado, **Reasoning** mientras llega y **Thought for 63 s** al terminar: ábrelo para leer lo que ha pensado el modelo, también mientras piensa. No se guarda con la conversación, así que no aparece al retomar una sesión, y no se vuelve a enviar al modelo. Si el proveedor los distingue, la línea de uso de la respuesta muestra también los tokens de razonamiento. El razonamiento ocupa sitio en el contexto del modelo: con un **Context size** pequeño en un modelo local, la respuesta puede salir cortada.
+
+Las carpetas, los tipos de nota, los usuarios y los atributos se nombran como siempre: si un nombre no existe o podría ser varios, el asistente recibe las opciones y puede preguntarte cuál es. Las notas propias de KNote (sesiones de IA de cualquier usuario, hilos del chat room, perfil, glosario, instrucciones y consultas de prueba) nunca están a su alcance. De una nota muy larga lee los primeros 40.000 caracteres, y sabe que falta el resto. Los modelos locales pequeños pueden elegir mal alguna vez: suele bastar con volver a preguntar de forma más concreta.
+
+**Pedirle que actúe.** El asistente también puede escribir en el repositorio, con tus permisos y sin borrar nada. Crea una nota al momento y la muestra («Apunta esto en una nota en la carpeta Sinclair»). Los cambios sobre lo que ya existe solo los propone: añadir texto al final de una nota («Añade a la nota #340 lo que hemos hablado»), sustituir todo el texto de una nota («Sustituye el texto de la #340 por este: …»), mover una nota a otra carpeta («Mueve la #340 a la carpeta Sinclair»), poner o quitar etiquetas («Etiqueta la #212 como *restaurado*»), añadir una tarea («Añade a la #212 una tarea para Luis: revisar la fuente antes del viernes»), añadir una alarma («Avísame el lunes a las 9 para repasar la #212», «…en dos horas», «…cada lunes»), cambiar un atributo («Cambia el Estado de la #212 a *Funciona*»), relacionar dos notas («Relaciona la #512 con la #498») y crear una carpeta («Crea la carpeta Tema 5 dentro de Historia»). En la conversación aparece una tarjeta con cada cambio, que puedes desmarcar, y **Accept** y **Reject**. No se cambia nada hasta que aceptas. Si aceptas, el asistente sigue solo; si rechazas, espera a tu siguiente mensaje. **Don't ask again for tags in this conversation** (la casilla nombra lo que cubre) evita la tarjeta solo para los tipos de cambio que aceptas en esa tarjeta, y solo en esa conversación: si apruebas las etiquetas, añadir texto a una nota sigue preguntando. Escribir un mensaje nuevo sin responder a la tarjeta rechaza lo que proponía, y una conversación cerrada con una tarjeta sin responder la muestra como **Not confirmed**: nunca se hace después. Los cambios en una nota creada en esa misma conversación no necesitan tarjeta. Todo lo hecho queda en la conversación, con enlaces a sus notas, y se ve al retomarla desde cualquiera de las dos aplicaciones. Una nota bloqueada no se puede cambiar y, en la aplicación de escritorio, tampoco una nota abierta en un editor: ciérrala y vuelve a pedirlo. En la Web, un editor abierto con esa nota avisa de que cambió en otro sitio y de que guardar puede reemplazar esos cambios: ciérralo y vuelve a abrirlo.
+
+**Alarmas, tareas y carpetas.** El asistente solo te pone alarmas a ti, y puede dar una tarea a cualquier usuario. Solo envía una alarma por correo si se lo pides; esa alarma siempre muestra tarjeta, también en una nota nueva, y solo se envía si KNote tiene activado el correo de alarmas. Comprueba la fecha en la tarjeta: lleva el día de la semana para que veas al momento si el modelo la ha calculado bien. Crear carpetas necesita el rol Project manager o superior: si no, el asistente te dice que no puedes y no muestra tarjeta. Una carpeta nueva aparece en el árbol al usar **Refresh tree**.
+
+**Sustituir el texto de una nota.** Es lo único que puede hacer el asistente que pierde texto, y no se puede deshacer: KNote no guarda versiones anteriores de una nota. Por eso muestra una tarjeta, también en una nota nueva, con el texto nuevo (hasta 4.000 caracteres) y cuántos caracteres tiene y tendrá la nota: léelo antes de aceptar. Con **Don't ask again**, sustituye sin tarjeta durante el resto de esa conversación. Solo cambia el texto, no el título, las etiquetas ni nada más. Si alguien cambia el texto mientras la tarjeta espera, no se sustituye nada y el asistente te lo dice.
+
+**Abrir una nota.** Pide al asistente que abra una nota («Abre la #340 en su editor») y tendrás su formulario de edición, para verla o cambiarla a mano. Una nota que crea no se abre sola, porque en la aplicación de escritorio una nota abierta en un editor no se puede cambiar: pídelo («…y ábrela»). En la Web se abre en una ventana y, si el navegador la bloquea, tienes un enlace en la conversación.
+
+**Si no hay tarjeta, no se ha hecho nada.** Un modelo local pequeño puede decir alguna vez que propone o que ha hecho algo sin hacerlo de verdad. Lo que cuenta es la tarjeta o la línea **✔**: si no aparecen, vuelve a pedirlo.
+
+**Imágenes y archivos.** Puedes adjuntar hasta 5 archivos a un mensaje, de 5 MB como mucho cada uno: con el botón **Attach**, pegándolos (Ctrl+V) o soltándolos sobre la caja del mensaje. Con una imagen puedes preguntar por ella, pedir que la describa o que la transcriba («¿Qué modelo es?», «Copia lo que pone en esta pizarra»). El asistente la ve solo en ese mensaje; después trabaja con lo que respondió. Las fotos grandes se reducen para el modelo, y la original se guarda intacta con la conversación, que vuelve a mostrarla al retomarla en cualquiera de las dos apps. Las imágenes de tus conversaciones solo las ves tú. El asistente aún no puede leer otros archivos, como los PDF: solo se guardan con la conversación. Si el modelo no ve imágenes, KNote te lo dice al adjuntar una, y con un proveedor de pago te recuerda que se le envían. En la aplicación de escritorio solo se puede adjuntar en las conversaciones que se guardan (el asistente abierto desde el menú), no en las que abre un script.
+
+Pídele que guarde un archivo en una nota («Adjunta esta foto a la #340»): muestra tarjeta, como cualquier cambio en una nota que ya existe; en una nota nueva no pregunta, así que puedes decir «Crea una nota con lo que pone en esta pizarra y adjunta la foto». También puede mirar las fotos que ya tiene una nota («Describe las fotos de la #340», «¿En cuál de las fotos de la #512 sale la placa base?») y volver a mirar una imagen de la conversación («Mira otra vez la primera foto»). Mira 3 cada vez y te dice cuántas hay.
+
+**Buscar en Internet.** Enciende **Internet** (el botón del globo junto a **Attach**; en la aplicación Web, el globo junto al clip) y el asistente puede buscar en Internet cuando la respuesta no está en tus notas, o para completarlas o comprobarlas: «Busca en Internet la fecha de lanzamiento del Amstrad CPC 6128 y compárala con la de mi nota», «Busca el manual de servicio del MSX y guarda el enlace en su nota». Sin él, el asistente no puede buscar, y te lo dice si se lo pides; aun así, una respuesta puede salir de lo que el modelo sabe, que no es lo que dice Internet hoy. Está apagado en cada conversación nueva o retomada, y solo aparece con un proveedor que puede buscar: OpenAI y Anthropic buscan por sí mismos; con Ollama, KNote busca con la búsqueda web de ollama.com, que necesita la **Web search API key** de una cuenta de ollama.com en el proveedor de Ollama (el modelo sigue ejecutándose en tu equipo). Mientras está encendido, una línea bajo la caja del mensaje recuerda que lo que se busca sale del equipo, también con un modelo local; Anthropic cobra cada búsqueda. Lo que toma de Internet va con su enlace (marcado con ↗, y en la aplicación Web se abre en otra pestaña del navegador), distinto de las citas de notas: cuando el proveedor da sus fuentes aparte, se añaden al final de la respuesta bajo **Sources**. Guardar en una nota algo de lo encontrado sigue las tarjetas como cualquier otro cambio, y lo que dice una página nunca es una orden para el asistente.
+
+**Citas.** Un `#123` en una nota, en una tarea o en una respuesta del asistente es un enlace a esa nota, que se ve distinto de los enlaces a Internet. En la aplicación Web abre el visor de la nota en una ventana; en la de escritorio, el editor de notas. Todo `#` seguido de un número es un enlace, sin comprobar que la nota existe: si no existe, o es una nota propia de KNote, aparece **Note #123 not found**. No son enlaces dentro del código, en el editor HTML de la aplicación de escritorio ni en el chat room.
+
+**Modified between.** El filtro de notas de las dos aplicaciones tiene esta línea: las notas modificadas entre dos fechas, ambas incluidas. Cualquiera de ellas se puede dejar vacía.
 
 ### Chat room
 
@@ -439,7 +499,7 @@ KNote Local es la aplicación Web funcionando entera dentro de tu equipo, sin in
 En KNote Local el **panel de administración** tiene una pestaña más, **This computer** ("Este equipo"), para un Admin y solo desde el propio equipo:
 
 - **Repositories**: **New repository** (una base de datos SQLite vacía en la carpeta de datos), **Link existing database** (una base de datos SQLite del equipo, por ejemplo la de la aplicación de escritorio: las dos aplicaciones pueden usarla a la vez), **Link SQL Server**, y en cada fila **Rename**, **Make default** (el repositorio de los registros y de los visitantes) y **Unlink** (solo se quita de la lista: la base de datos nunca se borra). Los cambios se aplican al momento.
-- **AI providers** del asistente (**Kind** **Chat**; el primero es el predeterminado) y de la búsqueda por significado (**Kind** **Embeddings**), con sus claves de acceso guardadas cifradas y que nunca se vuelven a mostrar (vacía conserva la guardada), y **Test** para comprobar cada uno.
+- **AI providers** del asistente (**Kind** **Chat**; el primero es el predeterminado) y de la búsqueda por significado (**Kind** **Embeddings**), con sus claves de acceso guardadas cifradas y que nunca se vuelven a mostrar (vacía conserva la guardada; la clave de búsqueda web de un proveedor de Ollama también se puede quitar), y **Test** para comprobar cada uno.
 - **E-mail**: la cuenta SMTP y **Send the Email alarms** (apagado de serie; si lo activas, desmarca **Process Email alarms** en las opciones de la aplicación de escritorio).
 - **Local server**: su dirección, carpeta de datos y versión, su **Port** (se aplica la próxima vez que arranque) y **Stop local server**.
 
@@ -481,6 +541,7 @@ Los modelos de IA que ofrece la aplicación Web se configuran en el servidor, en
 | `model` | El modelo de ese proveedor. |
 | `apiKey` | La clave de API (OpenAI y Anthropic). Déjala vacía en `appsettings.json`: ver más abajo. |
 | `host` | La dirección del servidor de Ollama (solo Ollama). |
+| `webSearchApiKey` | Opcional, solo modelos de chat de Ollama: la clave de API de una cuenta de ollama.com, para que el asistente pueda buscar en Internet. Un secreto, como `apiKey`. |
 | `kind` | `Chat` (por defecto) para los modelos del asistente, o `Embeddings` para los modelos de la búsqueda por significado (solo Ollama y OpenAI; ver *Búsqueda por significado (KNote Atlas)*). |
 | `contextWindow` | Opcional, solo modelos de chat de Ollama: el tamaño de contexto en tokens (vacío: el del modelo). |
 
@@ -496,7 +557,7 @@ El primer proveedor válido es el predefinido (del tipo `Chat`: los de `Embeddin
 dotnet user-secrets set "ai:providers:0:apiKey" "sk-..." --project Server/KNote.Server.csproj
 ```
 
-En un servidor, usa variables de entorno (`ai__providers__0__apiKey`) o el almacén de secretos de tu hosting. Si una clave está vacía, el servidor usa la variable de entorno `OPENAI_API_KEY` o `ANTHROPIC_API_KEY`. Las claves nunca llegan al navegador: la aplicación Web solo recibe el alias, el proveedor y el modelo de cada una.
+Lo mismo con la clave de búsqueda web de Ollama (`ai:providers:2:webSearchApiKey`). En un servidor, usa variables de entorno (`ai__providers__0__apiKey`) o el almacén de secretos de tu hosting. Si una clave está vacía, el servidor usa la variable de entorno `OPENAI_API_KEY` o `ANTHROPIC_API_KEY`. Las claves nunca llegan al navegador: la aplicación Web solo recibe el alias, el proveedor y el modelo de cada una.
 
 ### Restablecer la contraseña por correo (configuración del servidor)
 

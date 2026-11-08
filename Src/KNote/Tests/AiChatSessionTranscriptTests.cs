@@ -10,6 +10,36 @@ namespace KNote.Tests;
 public class AiChatSessionTranscriptTests
 {
     [TestMethod]
+    public void TheAttachmentsOfATurn_AreKept_WithoutItsPromptChanging()
+    {
+        var attachment = new AiChatAttachmentDto { ResourceId = Guid.NewGuid(), FileName = "photo.jpg", ContentType = "image/jpeg", SessionNoteId = Guid.NewGuid() };
+        var turns = new List<AiChatTurnDto> { new() { Prompt = "What is it?", Answer = "A QL", Attachments = { attachment } } };
+
+        var text = AiChatSessionTranscript.Write(turns);
+        var parsed = AiChatSessionTranscript.Parse(text).Single();
+
+        Assert.AreEqual("What is it?", parsed.Prompt);
+        Assert.AreEqual("A QL", parsed.Answer);
+        var saved = parsed.Attachments.Single();
+        Assert.AreEqual(attachment.ResourceId, saved.ResourceId);
+        Assert.AreEqual("photo.jpg", saved.FileName);
+        Assert.AreEqual("image/jpeg", saved.ContentType);
+        StringAssert.Contains(text, "- photo.jpg");
+    }
+
+    [TestMethod]
+    public void AConversationSavedBeforeTheAttachments_ReadsAsAlways()
+    {
+        var text = "<!-- knt-ai:user -->\r\n**User:** \r\nHello\r\n\r\n<!-- knt-ai:assistant {\"totalTokens\":5} -->\r\n**Assistant:** \r\nHi\r\n\r\n";
+
+        var turn = AiChatSessionTranscript.Parse(text).Single();
+
+        Assert.AreEqual("Hello", turn.Prompt);
+        Assert.AreEqual("Hi", turn.Answer);
+        Assert.AreEqual(0, turn.Attachments.Count);
+    }
+
+    [TestMethod]
     public void Write_ThenParse_ReturnsTheSameTurns()
     {
         var turns = new List<AiChatTurnDto>

@@ -252,11 +252,21 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   clic o Enter la abre). En `NoteForm`, debajo de las relaciones de la pestaña «Trace notes» (se calcula al abrir la
   pestaña), con «Relate», que abre `NoteTraceNoteEditor` con la nota ya elegida y al guardar vuelve a calcular. En
   `NoteViewer`, el botón «Similar notes» abre `NoteSimilarNotesDialog` (sin «Relate»).
-- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, ruta `atlas/evaluation`, `KntSections.SearchEvaluation`, entrada
-  del menú solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
+- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, ruta `atlas/evaluation`, `KntSections.SearchEvaluation`, botón
+  de la cabecera de la página KNote Atlas, solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
   «Read again»), las casillas de los índices cuyo modelo tiene el Server y «Also without the query instruction»,
   «Evaluate» (una petición por consulta, con progreso y «Cancel», que deja el informe de las hechas), el informe
   (`SearchEvaluationReport.Markdown`, mostrado con `ViewMarkdown`) y «Save as note». No existe en `ClientWin`.
+- **Contexto de la IA** (etapa 1, `IStore.Atlas` = `AtlasWebApiService`, `api/atlas`): la página `Pages/Atlas/AtlasContext`
+  (ruta `atlas`, `KntSections.AtlasContext`, una entrada del menú lateral para cualquier usuario con sesión), con una
+  sección por parte que lee lo suyo (`KntLatestRequest`, Retry con `AtlasLoadError`): `AtlasProfileSection` y
+  `AtlasGlossarySection` lado a lado, `AtlasTaskPromptsSection` y `AtlasPromptSection` («What the AI receives», Staff+: la
+  tarea, un texto de prueba y el texto tal cual se envía, `AtlasPromptText`, con su resumen, `AiPromptComposer.Summary`).
+  La nota se edita en el editor de siempre en su propia ventana (`KntWindows.OpenEditAsync`); crearla abre esa ventana
+  justo después de la respuesta. Tras crear o rellenar una nota, la sección avisa a la página (`Changed`), que recalcula
+  «What the AI receives»; con `KntWindows.NoteSaved` la página vuelve a leer todas las secciones. Los botones de crear y
+  personalizar se ven con `AuthorizeView` (ProjectManager, Admin). «See KNote's» es `AtlasKNoteInstructionsDialog`. Si la
+  página crece con las etapas siguientes, se pasa a pestañas como las de `Admin`.
 
 ## Interfaz de usuario: Radzen.Blazor
 
@@ -555,6 +565,30 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Rutas relativas**: la app se sirve bajo `/KNote/` (`<base href="/KNote/" />` en `index.html`, a juego con
   `app.UsePathBase("/KNote")` en `Server`). Navega con rutas sin `/` inicial (`store.NavigateTo("notes/tree")`,
   `Path="index"`), o se saldrá de la base.
+- **Nota cambiada en otra ventana**: `NoteEdit` oye `KntWindows.NoteSaved` y, si es su nota, avisa de que guardar puede reemplazar
+  esos cambios (las acciones del asistente, otra ventana de edición). Solo avisa: ni bloquea ni mezcla.
+- **Abrir una nota desde el asistente**: el evento `openNote` abre la ventana del editor y deja un enlace en la conversación: como no
+  la abre un clic, el navegador puede bloquearla.
+- **Acciones del asistente**: `AiChatView` muestra las líneas del registro y, en el último turno, `AiActionsCard` con lo
+  propuesto; `AIAssistant.OnActionsAnswered` rechaza lo no aceptado, ejecuta lo demás (`IStore.AiAssistant.RunActionsAsync`),
+  guarda la sesión y, si se aceptó algo, envía el turno de continuación (`SendTurnAsync` con `automatic`, cuya pregunta no se
+  muestra). Enviar un mensaje con la tarjeta abierta la rechaza. Las notas cambiadas se avisan con `NotifyNoteSavedAsync`.
+- **Archivos del asistente**: `js/aiAttachments.js` (pegar, soltar y elegir) los da a `AIAssistant.OnAttachment`; quedan en `pendingFiles`
+  hasta que el turno se responde, y `SaveFilesAsync` los sube antes de enviar (`Saved`: si el modelo falla no se suben otra vez).
+  `AiAttachmentsView` pide las imágenes por `GetAttachmentPreviewAsync` y las dibuja como `data:`: la URL de un recurso se sirve sin
+  sesión. Sin vista previa, el nombre. Las vistas previas son de `AiChatView` (`Previews`), porque un mensaje pasa del que se responde a
+  los respondidos y es otro componente; al cargarse una imagen la conversación vuelve al final (`AttachmentShown`).
+- **Búsqueda en Internet del asistente**: `AIAssistant.webSearch` (el botón del globo, solo con `SupportsWebSearch`), apagado al
+  empezar o retomar una conversación (`StartSession`); mientras está encendido, el aviso `AiWebSearchRules.Notice` sobre la caja. Los
+  enlaces a Internet de las respuestas y del chat (`ViewMarkdown` con `DisableHtml`) llevan `knt-external-link` (↗) y se abren en
+  otra pestaña: en la misma, se salía de la conversación.
+- **Razonamiento del asistente**: `AIAssistant` lo acumula con los eventos `reasoning` y lo pone en el turno al terminar
+  (`AiChatTurnDto.Reasoning` no viaja en el JSON); `AiChatView` lo muestra plegado, como texto plano, en un `<details>`.
+- **Citas `#123`**: `ViewMarkdown` las enlaza (`NoteCitationLinker`, con `LinkCitations`, apagado en el chat room) a
+  `notes/number/{n}`, la misma `NoteView` por número (**no** `notes/view/{n}`: con `notes/view/{id:guid}` son rutas ambiguas
+  y Blazor rompe el enrutador de toda la app). El enlace es parte de un HTML, así que el clic lo oye `js/kntWindows.js`
+  (`listenNoteLinks`, en la fase de captura, antes que Blazor), que abre la ventana en el mismo clic para que el navegador
+  no la bloquee; el aviso «Note #n not found» sale en esa ventana.
 - **Ventanas de la app** (`AppStoreService/KntWindows`). **De nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`), editarla
   (`notes/edit/{id}`, `NoteEdit`) y crearla (`notes/new?folderId=...`, la misma `NoteEdit`) se hace en una
   ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/KntWindows`

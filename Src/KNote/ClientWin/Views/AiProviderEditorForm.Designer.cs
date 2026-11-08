@@ -44,6 +44,8 @@ namespace KNote.ClientWin.Views
             this.labelKind = new System.Windows.Forms.Label();
             this.textContextWindow = new System.Windows.Forms.TextBox();
             this.labelContextWindow = new System.Windows.Forms.Label();
+            this.textWebSearchApiKey = new System.Windows.Forms.TextBox();
+            this.labelWebSearchApiKey = new System.Windows.Forms.Label();
             this.buttonTest = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
@@ -55,6 +57,8 @@ namespace KNote.ClientWin.Views
             this.panelForm.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelForm.Controls.Add(this.textWebSearchApiKey);
+            this.panelForm.Controls.Add(this.labelWebSearchApiKey);
             this.panelForm.Controls.Add(this.textContextWindow);
             this.panelForm.Controls.Add(this.labelContextWindow);
             this.panelForm.Controls.Add(this.comboKind);
@@ -71,7 +75,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.labelAlias);
             this.panelForm.Location = new System.Drawing.Point(5, 12);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(407, 364);
+            this.panelForm.Size = new System.Drawing.Size(407, 416);
             this.panelForm.TabIndex = 0;
             //
             // textHost
@@ -195,13 +199,30 @@ namespace KNote.ClientWin.Views
             this.labelContextWindow.TabIndex = 11;
             this.labelContextWindow.Text = "Context size in tokens (Ollama chat; empty: the model's own):";
             //
+            // textWebSearchApiKey
+            //
+            this.textWebSearchApiKey.Location = new System.Drawing.Point(9, 393);
+            this.textWebSearchApiKey.Name = "textWebSearchApiKey";
+            this.textWebSearchApiKey.PasswordChar = '*';
+            this.textWebSearchApiKey.Size = new System.Drawing.Size(390, 23);
+            this.textWebSearchApiKey.TabIndex = 7;
+            //
+            // labelWebSearchApiKey
+            //
+            this.labelWebSearchApiKey.AutoSize = true;
+            this.labelWebSearchApiKey.Location = new System.Drawing.Point(9, 373);
+            this.labelWebSearchApiKey.Name = "labelWebSearchApiKey";
+            this.labelWebSearchApiKey.Size = new System.Drawing.Size(330, 15);
+            this.labelWebSearchApiKey.TabIndex = 12;
+            this.labelWebSearchApiKey.Text = "Web search API key (Ollama chat; optional, from ollama.com):";
+            //
             // buttonCancel
             //
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(324, 382);
+            this.buttonCancel.Location = new System.Drawing.Point(324, 434);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(81, 29);
-            this.buttonCancel.TabIndex = 9;
+            this.buttonCancel.TabIndex = 10;
             this.buttonCancel.Text = "&Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
@@ -209,10 +230,10 @@ namespace KNote.ClientWin.Views
             // buttonAccept
             //
             this.buttonAccept.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAccept.Location = new System.Drawing.Point(237, 382);
+            this.buttonAccept.Location = new System.Drawing.Point(237, 434);
             this.buttonAccept.Name = "buttonAccept";
             this.buttonAccept.Size = new System.Drawing.Size(81, 29);
-            this.buttonAccept.TabIndex = 8;
+            this.buttonAccept.TabIndex = 9;
             this.buttonAccept.Text = "&Accept";
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.buttonAccept_Click);
@@ -220,10 +241,10 @@ namespace KNote.ClientWin.Views
             // buttonTest
             //
             this.buttonTest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonTest.Location = new System.Drawing.Point(14, 382);
+            this.buttonTest.Location = new System.Drawing.Point(14, 434);
             this.buttonTest.Name = "buttonTest";
             this.buttonTest.Size = new System.Drawing.Size(81, 29);
-            this.buttonTest.TabIndex = 7;
+            this.buttonTest.TabIndex = 8;
             this.buttonTest.Text = "&Test";
             this.buttonTest.UseVisualStyleBackColor = true;
             this.buttonTest.Click += new System.EventHandler(this.buttonTest_Click);
@@ -232,7 +253,7 @@ namespace KNote.ClientWin.Views
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(417, 423);
+            this.ClientSize = new System.Drawing.Size(417, 475);
             this.Controls.Add(this.buttonTest);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAccept);
@@ -269,6 +290,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelKind;
         private System.Windows.Forms.TextBox textContextWindow;
         private System.Windows.Forms.Label labelContextWindow;
+        private System.Windows.Forms.TextBox textWebSearchApiKey;
+        private System.Windows.Forms.Label labelWebSearchApiKey;
         private System.Windows.Forms.Button buttonTest;
     }
 }

@@ -39,7 +39,7 @@ public class CommandAuthorizationMatrixTests
             "KntKAttributesGetAllAsyncCommand", "KntKAttributesGetAllByTypeAsyncCommand", "KntKAttributesGetAsyncCommand",
             "KntKAttributesTabulatedValuesAsyncCommand",
             "KntNotesGetAllAsyncCommand", "KntNotesGetMinimalAllAsyncCommand", "KntNotesHomeAllAsyncCommand", "KntNotesHomeFolderAsyncCommand",
-            "KntNotesGetAsyncCommand", "KntNotesGetByNumberAsyncCommand", "KntNotesGetExtendedAsyncCommand",
+            "KntNotesGetAsyncCommand", "KntNotesGetByNumberAsyncCommand", "KntNotesGetCitedNoteAsyncCommand", "KntNotesGetExtendedAsyncCommand",
             "KntNotesGetByFolderAsyncCommand", "KntNotesGetMinimalByFolderAsyncCommand", "KntNotesGetFilterAsyncCommand",
             "KntNotesGetMinimalFilterAsyncCommand", "KntNotesGetSearchAsyncCommand", "KntNotesGetMinimalSearchAsyncCommand",
             "KntNotesGetResourcesAsyncCommand", "KntNotesGetResourcesInfoAsyncCommand", "KntNotesGetResourceAsyncCommand",
@@ -55,6 +55,10 @@ public class CommandAuthorizationMatrixTests
             // search by meaning.
             "KntSemanticSearchGetIndexStatusAsyncCommand", "KntSemanticSearchRefreshPendingAsyncCommand",
             "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
+            // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
+            "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
+            "KntAtlasContextFindGlossaryTermsAsyncCommand",
+            "KntAtlasContextGetTaskPromptsAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).
@@ -76,7 +80,8 @@ public class CommandAuthorizationMatrixTests
         // The AI assistant's sessions: notes and tasks of the user's own (Staff, like the assistant), also to
         // read them, since the assistant itself requires Staff.
         Add(nameof(EnumRoles.Staff),
-            "KntAiSessionsGetUserSessionsAsyncCommand", "KntAiSessionsGetAsyncCommand", "KntAiSessionsSaveAsyncCommand");
+            "KntAiSessionsGetUserSessionsAsyncCommand", "KntAiSessionsGetAsyncCommand", "KntAiSessionsSaveAsyncCommand",
+            "KntAiSessionsAddAttachmentAsyncCommand", "KntAiSessionsGetAttachmentAsyncCommand");
 
         // The chat room threads: public to every Staff user (the chat room requires Staff), who reads them, creates
         // them, joins them and writes in them (notes, tasks and the resources of its images).
@@ -85,11 +90,17 @@ public class CommandAuthorizationMatrixTests
             "KntChatRoomsGetGeneralAsyncCommand", "KntChatRoomsJoinAsyncCommand", "KntChatRoomsAddMessageAsyncCommand",
             "KntChatRoomsAddImageAsyncCommand");
 
+        // KNote Atlas: what the AI receives, put together for the assistant (Staff, like the assistant).
+        Add(nameof(EnumRoles.Staff), "KntAtlasContextComposeAsyncCommand");
+
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",
             // KNote Atlas: the search evaluation (it measures the repository's search).
             "KntSemanticSearchGetSearchEvaluationAsyncCommand", "KntSemanticSearchEvaluateQueryAsyncCommand",
-            "KntSemanticSearchSaveSearchEvaluationReportAsyncCommand");
+            "KntSemanticSearchSaveSearchEvaluationReportAsyncCommand",
+            // KNote Atlas: creating the notes of the context of the AI (who saves them, too).
+            "KntAtlasContextCreateProfileAsyncCommand", "KntAtlasContextFillProfileFoldersAndTypesAsyncCommand",
+            "KntAtlasContextCreateGlossaryAsyncCommand", "KntAtlasContextCustomizeTaskAsyncCommand");
 
         // Repository administration.
         Add(nameof(EnumRoles.Admin),

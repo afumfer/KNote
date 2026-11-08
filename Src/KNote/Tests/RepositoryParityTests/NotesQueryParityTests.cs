@@ -42,6 +42,85 @@ public class NotesQueryParityTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
+    public async Task GetFilterMinimalAsync_ByDates_IncludesTheFirstAndTheLastDay(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+        var folder = (await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Dates" })).Entity;
+
+        async Task AddAsync(string topic, DateTime created, DateTime modified)
+        {
+            var res = await repo.Notes.AddAsync(new NoteDto
+            {
+                NoteId = Guid.NewGuid(), Topic = topic, FolderId = folder.FolderId, CreationDateTime = created, ModificationDateTime = modified
+            });
+            Assert.IsTrue(res.IsValid, res.ErrorMessage);
+
+            // Adding a note sets its dates to now in Dapper.
+            using var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={db.DatabaseFilePath}");
+            connection.Open();
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "UPDATE Notes SET CreationDateTime = @created, ModificationDateTime = @modified WHERE Topic = @topic;";
+            cmd.Parameters.AddWithValue("@created", created);
+            cmd.Parameters.AddWithValue("@modified", modified);
+            cmd.Parameters.AddWithValue("@topic", topic);
+            Assert.AreEqual(1, cmd.ExecuteNonQuery());
+        }
+
+        await AddAsync("before", new DateTime(2026, 1, 1), new DateTime(2026, 8, 31, 23, 59, 59));
+        await AddAsync("first", new DateTime(2026, 2, 1), new DateTime(2026, 9, 1, 0, 0, 0));
+        await AddAsync("last", new DateTime(2026, 3, 1), new DateTime(2026, 9, 30, 23, 59, 59));
+        await AddAsync("after", new DateTime(2026, 3, 2), new DateTime(2026, 10, 1, 0, 0, 0));
+
+        async Task<string> TopicsAsync(NotesFilterDto filter)
+        {
+            filter.FolderId = folder.FolderId;
+            filter.OrderColumn = "Topic";
+            var res = await repo.Notes.GetFilterMinimalAsync(filter);
+            Assert.IsTrue(res.IsValid, res.ErrorMessage);
+            return string.Join(" ", res.Entity.Select(n => n.Topic));
+        }
+
+        // The time of the dates given does not count: the days are whole.
+        Assert.AreEqual("first last", await TopicsAsync(new NotesFilterDto
+        {
+            ModifiedFrom = new DateTime(2026, 9, 1, 12, 0, 0), ModifiedTo = new DateTime(2026, 9, 30, 1, 0, 0)
+        }));
+        Assert.AreEqual("after first last", await TopicsAsync(new NotesFilterDto { ModifiedFrom = new DateTime(2026, 9, 1) }));
+        Assert.AreEqual("before first last", await TopicsAsync(new NotesFilterDto { ModifiedTo = new DateTime(2026, 9, 30) }));
+        Assert.AreEqual("first last", await TopicsAsync(new NotesFilterDto { CreatedFrom = new DateTime(2026, 2, 1), CreatedTo = new DateTime(2026, 3, 1) }));
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task GetFilterMinimalAsync_ExcludeNoteTypeIds_LeavesThemOutButNotTheNotesWithoutAType(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+        var folder = (await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Types" })).Entity;
+        var type = (await repo.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = "Left out" })).Entity;
+
+        foreach (var (topic, noteTypeId) in new[] { ("typed", (Guid?)type.NoteTypeId), ("plain", null) })
+            Assert.IsTrue((await repo.Notes.AddAsync(new NoteDto
+            {
+                NoteId = Guid.NewGuid(), Topic = topic, FolderId = folder.FolderId, NoteTypeId = noteTypeId,
+                CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now
+            })).IsValid);
+
+        var res = await repo.Notes.GetFilterMinimalAsync(new NotesFilterDto
+        {
+            FolderId = folder.FolderId, ExcludeNoteTypeIds = new List<Guid> { type.NoteTypeId }
+        });
+
+        Assert.IsTrue(res.IsValid, res.ErrorMessage);
+        CollectionAssert.AreEqual(new[] { "plain" }, res.Entity.Select(n => n.Topic).ToList());
+        Assert.AreEqual(1, res.TotalCount);
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
     public async Task GetFilterMinimalAsync_MatchesTopicCaseInsensitively(string orm)
     {
         using var db = new RepositoryTestDatabase();

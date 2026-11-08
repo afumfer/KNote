@@ -24,10 +24,10 @@
                                  MouseEnter="@(args => ShowTooltip(args, KntSections.AiAssistant.Text))" />
         </Authorized>
     </AuthorizeView>
-    <AuthorizeView Roles="ProjectManager, Admin">
+    <AuthorizeView>
         <Authorized>
-            <RadzenPanelMenuItem Text="@KntSections.SearchEvaluation.Text" Path="@KntSections.SearchEvaluation.Path" Icon="@KntSections.SearchEvaluation.Icon"
-                                 MouseEnter="@(args => ShowTooltip(args, KntSections.SearchEvaluation.Text))" />
+            <RadzenPanelMenuItem Text="@KntSections.AtlasContext.Text" Path="@KntSections.AtlasContext.Path" Icon="@KntSections.AtlasContext.Icon"
+                                 MouseEnter="@(args => ShowTooltip(args, KntSections.AtlasContext.Text))" />
         </Authorized>
     </AuthorizeView>
     <AuthorizeView Roles="Admin">

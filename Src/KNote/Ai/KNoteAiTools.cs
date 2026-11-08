@@ -14,9 +14,13 @@ namespace KNote.Ai;
 // so it can be exercised in tests against the existing FakeKntService/FakeKntNoteService test doubles
 // without a real database. What create_task does that depends on the application (where the note goes,
 // how it is shown) comes from the IKNoteAiToolsHost.
-public class KNoteAiTools
+public partial class KNoteAiTools
 {
     private const int MaxResults = 20;
+
+    // The text of a note get_note_details gives at most: one note of hundreds of thousands of characters would fill the
+    // context of a local model, which then loses part of it without saying so. A notice tells the model the note goes on.
+    public const int MaxNoteTextLength = 40000;
 
     private readonly IKntService _service;
     private readonly IKNoteAiToolsHost _host;
@@ -41,8 +45,8 @@ public class KNoteAiTools
                 "ModificationDateTime and FolderId - not just topic and tags. Use it to find notes the " +
                 "user refers to before answering questions about their content, to check whether a note " +
                 "about something already exists, or to answer follow-up questions about a note's number, " +
-                "dates, priority or folder without a further lookup. The AI assistant's own saved chat " +
-                "sessions are not included."
+                "dates, priority or folder without a further lookup. KNote's own notes (such as the saved " +
+                "chat sessions) are not included."
         });
 
         yield return AIFunctionFactory.Create(GetNoteDetailsAsync, new AIFunctionFactoryOptions
@@ -66,6 +70,12 @@ public class KNoteAiTools
                 "created in the application's default repository and folder, which may be different from " +
                 "whatever repository search_notes/get_note_details are currently operating on."
         });
+
+        foreach (var tool in GetQueryTools())
+            yield return tool;
+
+        foreach (var tool in GetActionTools())
+            yield return tool;
     }
 
     [Description("Full-text search over the notes in the user's active KNote repository (topic, tags, and optionally the note body).")]
@@ -111,8 +121,7 @@ public class KNoteAiTools
         return sb.ToString();
     }
 
-    // The assistant's own sessions (KntConst.ChatSessionsTag notes, of every user) and the chat room threads
-    // (KntConst.ChatRoomTag) are left out of search_notes: they are conversations, not the user's notes, and other
+    // The system notes (KntConst.SystemNoteTypeNames) are left out of the tools: they are not the user's notes, and other
     // users' AI sessions must not reach the model.
     private async Task<List<Guid>> GetExcludedNoteTypeIdsAsync()
     {
@@ -121,7 +130,7 @@ public class KNoteAiTools
             return null;
 
         var excluded = response.Entity?
-            .Where(t => t.Name == KntConst.ChatSessionsTag || t.Name == KntConst.ChatRoomTag)
+            .Where(t => KntConst.IsSystemNoteType(t.Name))
             .Select(t => t.NoteTypeId)
             .ToList();
         return excluded?.Count > 0 ? excluded : null;
@@ -149,10 +158,46 @@ public class KNoteAiTools
         if (!response.IsValid)
             return $"Error getting note: {response.ErrorMessage}";
 
-        if (response.Entity == null)
+        if (response.Entity == null || KntConst.IsSystemNoteType(response.Entity.NoteTypeDto?.Name))
             return "Note not found.";
 
-        return JsonSerializer.Serialize(response.Entity);
+        var note = response.Entity;
+        var fullLength = note.Description?.Length ?? 0;
+        if (fullLength > MaxNoteTextLength)
+            note.Description = note.Description.Substring(0, MaxNoteTextLength);
+
+        // Before and after the text: at the end only of a text so long, small models overlooked it.
+        var notice = fullLength > MaxNoteTextLength
+            ? $"[IMPORTANT: this note was cut: only the first {MaxNoteTextLength} of its {fullLength} characters are shown. " +
+              "Tell the user that you have read only the beginning of the note.]"
+            : null;
+
+        var details = new StringBuilder();
+        if (notice != null)
+            details.Append(notice).Append('\n');
+        details.Append(JsonSerializer.Serialize(note));
+        if (notice != null)
+            details.Append('\n').Append(notice);
+
+        var terms = await FindGlossaryTermsAsync(note);
+        if (terms.Count > 0)
+            details.Append("\nTerms of the glossary in this note:\n").Append(GlossaryLines(terms));
+
+        return details.ToString();
+    }
+
+    // D7: the terms of the glossary in what the model reads. Without them the note is still read.
+    private async Task<List<GlossaryTermDto>> FindGlossaryTermsAsync(NoteDto note)
+    {
+        try
+        {
+            var response = await _service.AtlasContext.FindGlossaryTermsAsync(new List<string> { note.Topic, note.Description });
+            return response.IsValid && response.Entity != null ? response.Entity : new List<GlossaryTermDto>();
+        }
+        catch (Exception)
+        {
+            return new List<GlossaryTermDto>();
+        }
     }
 
     [Description("Creates and saves a new note/task with the given topic and description, then shows it to the user - already persisted, not a draft.")]
@@ -192,6 +237,16 @@ public class KNoteAiTools
             return $"Error saving note: {saveResponse.ErrorMessage}";
 
         _host.OnNoteCreated(service, saveResponse.Entity);
+
+        TurnActions.Add(new AiActionDto
+        {
+            Kind = AiActionRules.CreateTask,
+            Status = EnumAiActionStatus.Done,
+            Text = $"Created the note #{saveResponse.Entity.NoteNumber} ({topic})",
+            NoteId = saveResponse.Entity.NoteId,
+            NoteNumber = saveResponse.Entity.NoteNumber
+        });
+        _newNoteIds.Add(saveResponse.Entity.NoteId);
 
         return $"Created and saved a new note titled \"{topic}\" (note #{saveResponse.Entity.NoteNumber}), " +
             "and showed it to the user. From here it is entirely the user's responsibility to modify and " +

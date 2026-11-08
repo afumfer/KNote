@@ -48,8 +48,14 @@ public class KNoteAiToolsHost : IKNoteAiToolsHost
 
     // Fire-and-forget: the note is already saved by the time this runs, so the tool doesn't need to
     // wait for the user to close the editor - it only needs to trigger showing it.
-    public void OnNoteCreated(IKntService service, NoteExtendedDto note)
+    public void OnNoteCreated(IKntService service, NoteExtendedDto note, bool openEditor = true)
     {
+        if (!openEditor)
+        {
+            OnNoteChanged(service, note.NoteId);
+            return;
+        }
+
         void Show() => _ = ShowNoteForEditingAsync(service, note.NoteId);
 
         // Marshal onto the UI thread before touching NoteEditorCtrl/Form - see the _uiContext comment
@@ -58,6 +64,40 @@ public class KNoteAiToolsHost : IKNoteAiToolsHost
             _uiContext.Post(_ => Show(), null);
         else
             Show();
+    }
+
+    public void OpenNoteEditor(IKntService service, NoteMinimalDto note)
+    {
+        void Show()
+        {
+            if (!_store.IsNoteBeingEdited(note.NoteId))
+                _ = ShowNoteForEditingAsync(service, note.NoteId);
+        }
+
+        if (_uiContext != null)
+            _uiContext.Post(_ => Show(), null);
+        else
+            Show();
+    }
+
+    public bool CanChangeNote(Guid noteId) => !_store.IsNoteBeingEdited(noteId);
+
+    // As if it had been saved in its editor: the lists and the preview show it changed.
+    public void OnNoteChanged(IKntService service, Guid noteId)
+    {
+        void Publish() => _ = PublishNoteSavedAsync(service, noteId);
+
+        if (_uiContext != null)
+            _uiContext.Post(_ => Publish(), null);
+        else
+            Publish();
+    }
+
+    private async Task PublishNoteSavedAsync(IKntService service, Guid noteId)
+    {
+        var note = await service.Notes.GetExtendedAsync(noteId);
+        if (note.IsValid && note.Entity != null)
+            _store.Events.Publish(new EntitySaved<NoteExtendedDto>(note.Entity));
     }
 
     private async Task ShowNoteForEditingAsync(IKntService service, Guid noteId)

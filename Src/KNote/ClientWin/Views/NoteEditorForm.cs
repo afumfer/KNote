@@ -100,6 +100,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         kntEditView.RenderDiagrams = true;
         kntEditViewTask.RenderDiagrams = true;
 
+        // The citations of notes (#123). Not in the HTML editor: the link would end up saved in the note.
+        kntEditView.LinkHandler = OpenCitedNote;
+        kntEditViewTask.LinkHandler = OpenCitedNote;
+
         // TODO: options for new versión
         buttonCheck.Visible = false;
         toolStripS3.Visible = false;
@@ -487,7 +491,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
                 var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(content.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
 
                 await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
+                await kntEditView.ShowNavigationContent(NoteCitationLinker.LinkForDesktop(htmlContent) + _ctrl.Store.KNoteWebViewStyle);
             }
 
             ct.ForDescription = "navigation";
@@ -1066,7 +1070,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
                 {
                     var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditView.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
                     await kntEditView.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-                    await kntEditView.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
+                    await kntEditView.ShowNavigationContent(NoteCitationLinker.LinkForDesktop(htmlContent) + _ctrl.Store.KNoteWebViewStyle);
                 }
             }
             else
@@ -2123,12 +2127,14 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         ListViewSelectionHelper.SelectByKey(listViewAttributes, noteAttribute.NoteKAttributeId.ToString());
     }
 
+    private bool OpenCitedNote(string url) => NoteCitations.TryOpen(url, this, _ctrl.Store, _ctrl.Service, message => ShowInfo(message));
+
     private async Task UpdateTaskDescription(string description)
     {
         kntEditViewTask.SetMarkdownContent(_ctrl.Service?.Notes.UtilUpdateResourceInDescriptionForRead(description, true));
         var htmlContent = _ctrl.Service.Notes.UtilMarkdownToHtml(kntEditViewTask.MarkdownText.Replace(_ctrl.Service.RepositoryRef.ResourcesContainerRootUrl, KntConst.VirtualHostNameToFolderMapping));
         await kntEditViewTask.SetVirtualHostNameToFolderMapping(_ctrl.Service.RepositoryRef.ResourcesContainerRootPath);
-        await kntEditViewTask.ShowNavigationContent(htmlContent + _ctrl.Store.KNoteWebViewStyle);
+        await kntEditViewTask.ShowNavigationContent(NoteCitationLinker.LinkForDesktop(htmlContent) + _ctrl.Store.KNoteWebViewStyle);
     }
 
     private async Task AddTaskFromSelectedText()

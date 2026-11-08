@@ -167,6 +167,17 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntAtlasContextService _atlasContext;
+    public IKntAtlasContextService AtlasContext
+    {
+        get
+        {
+            if (_atlasContext == null)
+                _atlasContext = new KntAtlasContextService(this);
+            return _atlasContext;
+        }
+    }
+
     public RepositoryRef RepositoryRef
     {
         get { return _repository.RepositoryRef; }

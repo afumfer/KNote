@@ -90,5 +90,7 @@ public enum KntIcon
     HorizontalLine,
     Table,
     Image,
-    Link
+    Link,
+    Attach,
+    WebSearch
 }

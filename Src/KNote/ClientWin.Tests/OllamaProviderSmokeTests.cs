@@ -17,6 +17,55 @@ namespace KNote.ClientWin.Tests;
 [TestCategory("RequiresRealAiProvider")]
 public class OllamaProviderSmokeTests
 {
+    // KNote Atlas 1.3: a model that reasons sends it apart from the answer, without asking for it. A model that does not
+    // reason says nothing about the wiring.
+    [TestMethod]
+    public async Task Reasoning_ComesApartFromTheAnswer()
+    {
+        var providerRef = await GetReachableProviderRefOrInconclusiveAsync();
+        if (providerRef == null)
+            return;
+
+        var client = TestAiChatClientFactory.Create(providerRef);
+        KNote.Model.Dto.AiChatTurnDto turn = null!;
+        await foreach (var e in KNote.Ai.AiChatTurnStreamer.StreamAsync(client, null, null, "How much is 128 + 512? Think it through."))
+            if (e.Type == KNote.Model.Dto.AiChatStreamEventTypes.Completed)
+                turn = e.Turn;
+
+        Assert.IsNotNull(turn);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(turn.Answer), "Expected an answer besides the reasoning.");
+        if (turn.Reasoning == null)
+            Assert.Inconclusive($"{providerRef.Model} did not reason: try with a model that does.");
+        Assert.IsNotNull(turn.ReasoningTime);
+    }
+
+    // KNote Atlas 1.5. With a model that does not see images, say so: it is not the wiring.
+    [TestMethod]
+    public async Task WebSearch_KnoteSearchesTheInternet_WithOllamasWebSearch()
+    {
+        var providerRef = await GetReachableProviderRefOrInconclusiveAsync();
+        if (providerRef == null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(providerRef.WebSearchApiKey))
+            Assert.Inconclusive("No web search key of ollama.com (AiProviderSmokeTests:Ollama:WebSearchApiKey or OLLAMA_API_KEY) - skipping.");
+
+        await AiWebSearchSmokeCheck.AssertTheModelSearchesTheInternetAsync(providerRef);
+    }
+
+    [TestMethod]
+    public async Task Image_IsReadByTheModel()
+    {
+        var providerRef = await GetReachableProviderRefOrInconclusiveAsync();
+        if (providerRef == null)
+            return;
+
+        if (!await KNote.Ai.AiModelCapabilities.SupportsImagesAsync(providerRef))
+            Assert.Inconclusive($"{providerRef.Model} does not see images: try with a model that does.");
+
+        await AiImageSmokeCheck.AssertTheModelReadsAnImageAsync(TestAiChatClientFactory.Create(providerRef));
+    }
+
     private static async Task<KNote.Model.AiProviderRef> GetReachableProviderRefOrInconclusiveAsync()
     {
         var providerRef = AiTestConfig.TryGetOllamaProviderRef();

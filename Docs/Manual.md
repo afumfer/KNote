@@ -22,7 +22,7 @@ The Windows desktop application keeps its configuration in the folder `%LocalApp
 
 Deleting `KNoteState.config` only resets the window layout. Deleting `KNoteData.config` makes KNote start as if it were the first run: your databases are not deleted, but the list of repositories and AI providers is lost.
 
-**Passwords and API keys.** The e-mail account password, the API keys of the AI providers, the sign-in token of the chat room and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
+**Passwords and API keys.** The e-mail account password, the API keys of the AI providers (also the web search key of Ollama), the sign-in token of the chat room and the password inside a repository connection string (SQL authentication) are stored encrypted with Windows data protection, tied to your Windows user and this computer. Connection strings without a password (SQLite, Windows authentication) stay readable. If you copy `KNoteData.config` to another computer or user, those secrets cannot be decrypted: KNote tells you at startup which ones must be entered again, and everything else loads normally. A secret typed in plain text into the file by hand is accepted and gets encrypted the next time the file is saved.
 
 **Backups.** Every time a file is saved, the previous version is kept next to it as `KNoteData.config.bak` / `KNoteState.config.bak`. If a file cannot be read, KNote loads its `.bak` and tells you.
 
@@ -170,7 +170,7 @@ The **Options** menu has the rest:
 |---|---|
 | **Get stream** / **Get completion** | How answers arrive: as they are being written (the default) or all at once when they are complete. |
 | **Get prompt from catalog ...** (`Ctrl+K`) | Starts a new conversation from a prompt of the catalog. |
-| **View system root ...** | Shows the instructions the model receives before the conversation. |
+| **What the AI receives ...** | Shows the instructions the model receives before the conversation. |
 | **Show model info (tokens, time)** | Shows or hides, below each answer of the chat view, the tokens and the time it took. The Markdown view always has them, in the marker of each answer. |
 | **Manage models ...** | Adds, changes or removes the AI models (providers) you can choose. |
 
@@ -202,7 +202,7 @@ To use it you need three things, in this order: an embedding model in your insta
 - Web server: the `ai` section of the server (see *AI providers of the web app (server configuration)*).
 - KNote Local: **Admin panel → This computer → AI providers**.
 
-The **Test** button of each provider checks it: with an embedding model it calculates a test vector and shows its dimensions and the time it took, and it explains the usual errors (the model is not downloaded, the host doesn't answer, the API key is not valid). With Ollama, download the model first, for example `ollama pull qwen3-embedding:0.6b`. Local models are recommended for privacy: with a paid model (OpenAI) the content of your notes is sent to its provider. The **Context size** field is only for the chat models of Ollama (empty: the model's own).
+The **Test** button of each provider checks it: with an embedding model it calculates a test vector and shows its dimensions and the time it took, and it explains the usual errors (the model is not downloaded, the host doesn't answer, the API key is not valid). With Ollama, download the model first, for example `ollama pull qwen3-embedding:0.6b`. Local models are recommended for privacy: with a paid model (OpenAI) the content of your notes is sent to its provider. The **Context size** field is only for the chat models of Ollama (empty: the model's own), as the optional **Web search API key** (of an ollama.com account, only for searching the Internet from the assistant): with it, **Test** also makes a search and says whether the key works.
 
 **2. The repository's models (Admin).** They are the same for everybody who works with the repository, in either app:
 
@@ -220,8 +220,8 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 
 **3. The semantic index (Admin).** In the desktop app, tab **Semantic index** of the same window; in the web app, section **Semantic index** of the **KNote Atlas** tab. It shows how the index is (notes indexed, pending and fragments; when it was last created and how long it took). **Create index** calculates the meaning of every note: KNote tells you first how many notes it will send to the model and, after the first time, how long it should take. You can go on working (in the desktop app you can even close the window: the status bar shows the progress); **Cancel** (**Cancel run** in the desktop app) keeps what is done, and the next run goes on from there. The notes that fail are listed and tried again in the next run. In the web server one index is created at a time, whatever the repository: the others wait, **Queued**.
 
-- Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, and each resource that has a description. The notes of the assistant's sessions, the chat room and the search evaluation are left out.
-- A note you change becomes *pending*. The pending notes are brought up to date before each search by meaning (a few at a time: up to 50 notes or about 10 seconds) or with **Update now**.
+- Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, and each resource that has a description. KNote's own notes are left out: the assistant's sessions, the chat room, the search evaluation, the profile, the glossary and the task instructions.
+- A note you change becomes *pending*. The pending notes are brought up to date before each search by meaning (a few at a time: up to 50 notes or about 10 seconds) or with **Update now**. A very long note (with more than 64 fragments to calculate) is left for **Update now**: until then, the search uses its previous content.
 - **Rebuild** calculates every vector again (after changing the dimensions, for example); meanwhile the search goes on with the old ones.
 - **Changing the embedding model** needs the index of the new model. The index of the previous model is kept (to compare them, see *Search evaluation (web app)*) and listed below; an Admin can remove it.
 
@@ -237,7 +237,7 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 
 ### Search evaluation (web app)
 
-**Search evaluation**, in the side menu (ProjectManager role or higher), measures how well the search works in a repository: whether the search by meaning finds what you look for better than the search by words, and which embedding model finds it better. It is a laboratory: use it when you choose a model or after changing how the search works.
+**Search evaluation**, a button of the **KNote Atlas** page (ProjectManager role or higher), measures how well the search works in a repository: whether the search by meaning finds what you look for better than the search by words, and which embedding model finds it better. It is a laboratory: use it when you choose a model or after changing how the search works.
 
 1. **The test queries.** They are kept in the note **Search test queries**, in the folder **KNote Atlas** (created the first time you open the page). **Open in the editor** opens it: write a table with one search per row, the notes it should find, and, optionally, the words you would use to search by words:
 
@@ -256,12 +256,72 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 | Column | Meaning |
 |---|---|
 | **In the first 10** | In how many searches an expected note is among the first 10 results: what you see without scrolling. The main measure. |
+| **Expected notes in the first 10** | How many of all the expected notes are among the first 10 results (not only the first one). |
 | **Found** | In how many searches an expected note is found, in any position. |
 | **Mean position** | The average position of the first expected note: the lower, the better (1 is "always the first one"). |
+| **Similarity of the first expected** | By meaning, the average similarity of the first expected note, in the searches where it is found. |
+| **Similarity of the result 10** | By meaning, the average similarity of the tenth result: where the first 10 end. If it is close to the one above, the expected notes are not much more similar than the rest. |
 | **Mean results** | How many notes each search gives, on average. By meaning, many results mean that the similarity it starts from lets in notes that have nothing to do with the search. |
+| **Mean time** | How long each search takes, on average (by meaning, the vector of the search and the ranking). |
 | **Errors** | Searches that failed. |
 
-Below, each search shows the position of its first expected note in each kind of search (in bold if it is beyond the first 10; «—» if it wasn't found). Keep in mind that the search by words orders its list by topic, not by how much each note has to do with the search. **Save as note** keeps the report as a note of the folder **KNote Atlas**.
+**If the minimum similarity were…** shows, for each index, what the search by meaning would give if it started from a higher similarity (0.50, 0.55, 0.60): in how many searches an expected note would still be among the first 10, and how many results each search would give on average. It helps to choose a minimum that leaves out the notes that have nothing to do with the search without losing the ones you look for.
+
+Below, each search shows the position of its first expected note in each kind of search and, by meaning, its similarity, for example «3 (0.62)» (in bold if it is beyond the first 10; «—» if it wasn't found). Keep in mind that the search by words orders its list by topic, not by how much each note has to do with the search. **Save as note** keeps the report as a note of the folder **KNote Atlas**.
+
+### The context of the AI: profile, glossary and task instructions (KNote Atlas)
+
+The AI assistant of both apps answers better when it knows what your repository is about. Three notes of the folder **KNote Atlas** tell it, and it receives them in every question:
+
+- **Repository profile**: what the repository is for, who uses it, what there is in each folder and each note type, your conventions... in plain words and in your own language.
+- **Glossary**: a table with the terms, acronyms and proper names of the repository, what they mean and other ways of writing them (`| Term | Meaning | Also written as |`). The AI only receives the terms that appear in the conversation.
+- **Task instructions**: how you want the AI to do a task in this repository (for now, the task **Assistant**). With the mode **Add**, they are added to KNote's instructions (and you keep the improvements of new versions of KNote); with **Replace**, they take their place. KNote's fixed rules (citing the notes with `#123`, not inventing, the user's permissions) always stay.
+
+Everything is together in **KNote Atlas**: **Tools › KNote Atlas** in the desktop app, a window with a tab for each part and a list to choose the repository (it starts in the one of the active folder; the assistant has its own), and **KNote Atlas** in the side menu of the web app, a page with the same parts, for the repository of your session:
+
+- The first time, **Create the profile** / **Create the glossary** (or **Customize** in the task instructions) creates the note with a template and opens it in the note editor of always. Afterwards, **Open in the editor** opens it. The help of the templates are hidden comments (`<!-- ... -->`): you see them while editing, they are not shown in the viewers and the AI never receives them; neither the sections left empty.
+- **Fill in folders and types** (profile) adds to its sections *Folders* and *Note types* the folders of the first two levels and the note types that have notes, so that you only write what each one is. It only adds what is missing: nothing written is removed.
+- **What the AI receives** shows the text the AI gets for a task, with its size (about how many words and tokens) and its parts (Staff role or higher). Write a test text and press **Show its terms** to see which glossary terms would go in. In the desktop app's assistant, **Options › What the AI receives ...** shows it for the current conversation.
+- In the desktop app, a prompt chosen with **Get prompt from catalog ...** (or given by a script) replaces only the assistant's instructions in that conversation: the fixed rules, the profile and the glossary stay.
+
+Anyone can open KNote Atlas and read the notes; only a **ProjectManager** or an **Admin** can create, save, delete, move or retag them (also the note **Search test queries**). The profile is cut to about 2,000 words: KNote Atlas tells you if it is longer.
+
+### What the AI assistant can look up (KNote Atlas)
+
+The assistant of both apps reads the repository on its own, without asking, because it only reads. Besides searching notes by words and reading a note, it can:
+
+- **search by meaning** (only if the repository has a semantic index): "do I have anything about the French Revolution?";
+- **filter** by folder, note type, tag, user with a task, creation or modification dates and the value of an attribute: "the notes of the Invoices folder modified in September";
+- see the **folders tree**;
+- see the **tasks, alarms, resources and relations** of a note;
+- list the **tasks of a period**, of everyone or of one person: "what tasks does Marta have this week?";
+- look up terms in the **glossary** (only if it has terms).
+
+While it answers, both apps show the tool it is using (**Using find_notes_about**, for instance), until it starts writing.
+
+**Thinking.** Many models reason before answering, and a local model can take a minute or more even with a simple question. Meanwhile you see **Thinking…**. Above the answer there is a folded section, **Reasoning** while it arrives and **Thought for 63 s** when it ends: open it to read what the model thought, also while it is thinking. It isn't saved with the conversation, so it isn't there when you resume a session, and it isn't sent to the model again. When the provider tells them apart, the usage line of the answer also shows the reasoning tokens. Reasoning takes room in the context of the model: with a small **Context size** in a local model, the answer may come cut.
+
+You name folders, note types, users and attributes as usual: if a name doesn't exist or could be several, the assistant gets the options and can ask you which one. KNote's own notes (AI sessions of any user, chat room threads, profile, glossary, instructions and test queries) are never within its reach. Of a very long note it reads the first 40,000 characters, and it knows the rest is missing. Small local models may choose the wrong tool now and then: asking again more concretely usually helps.
+
+**Asking it to act.** The assistant can also write in the repository, with your permissions and never deleting anything. It creates a note at once and shows it ("Write this down in a note in the Sinclair folder"). Changes to what already exists are only proposed: adding text at the end of a note ("Add to note #340 what we have said"), replacing the whole text of a note ("Replace the text of #340 with this one: ..."), moving a note to another folder ("Move #340 to the Sinclair folder"), adding or removing tags ("Tag #212 as *restored*"), adding a task ("Add to #212 a task for Luis: check the PSU before Friday"), adding an alarm ("Remind me on Monday at 9 to review #212", "...in two hours", "...every Monday"), changing an attribute ("Set the Status of #212 to *Working*"), relating two notes ("Relate #512 to #498") and creating a folder ("Create the folder Topic 5 inside History"). A card appears in the conversation with each change, which you can unmark, and **Accept** and **Reject**. Nothing is changed until you accept. If you accept, the assistant goes on by itself; if you reject, it waits for your next message. **Don't ask again for tags in this conversation** (the box names what it covers) skips the card only for the kinds of change you accept in that card, and only in this conversation: if you approve tags, adding text to a note still asks. Writing a new message without answering the card rejects what it proposed, and a conversation closed with a card unanswered shows it as **Not confirmed**: it is never done later. Changes to a note created in this conversation need no card. Each thing done stays in the conversation, with links to its notes, and you see it when you resume it from either app. A locked note can't be changed, and in the desktop app neither can a note open in an editor: close it and ask again. In the web app, an editor open with that note warns you that it was changed elsewhere and that saving it may replace those changes: close it and open it again.
+
+**Alarms, tasks and folders.** The assistant only sets alarms for you, and it can give a task to any user. It sends an alarm by email only if you ask for it; that alarm always shows a card, even in a new note, and it is only sent if KNote's email alarms are on. Check the date on the card: it shows the day of the week so that you can see at once whether the model worked it out well. Creating folders needs the Project manager role or higher: otherwise the assistant tells you that you can't, and shows no card. A new folder appears in the folders tree when you use **Refresh tree**.
+
+**Replacing the text of a note.** This is the only thing the assistant can do that loses text, and it can't be undone: KNote doesn't keep earlier versions of a note. So it shows a card, even in a new note, with the new text (up to 4,000 characters) and how many characters the note has and will have: read it before accepting. With **Don't ask again**, it replaces text without a card for the rest of that conversation. Only the text changes, not the title, the tags or anything else. If somebody changes the text while the card is waiting, nothing is replaced and the assistant tells you so.
+
+**Opening a note.** Ask the assistant to open a note ("Open #340 in its editor") and you get its edit form, to see it or change it by hand. A note it creates doesn't open by itself, because in the desktop app a note open in an editor can't be changed: ask for it ("...and open it"). In the web app it opens in a window, and if the browser blocks it you have a link in the conversation.
+
+**If there is no card, nothing was done.** A small local model may now and then say that it proposes or has done something without really doing it. What counts is the card or the **✔** line: without them, ask again.
+
+**Images and files.** You can attach up to 5 files to a message, of 5 MB at most each: with the **Attach** button, pasting them (Ctrl+V) or dropping them on the message box. With an image you can ask about it, have it described or transcribed ("What model is it?", "Copy what this whiteboard says"). The assistant sees it in that message only; afterwards it works with what it answered. Big photos are reduced for the model, and the original is saved intact with the conversation, which shows it again when you resume it in either app. Only you see the images of your conversations. The assistant can't read other files such as PDFs yet: they are only saved with the conversation. If the model can't see images, KNote tells you when you attach one, and with a paid provider it reminds you that images are sent to it. In the desktop app you can attach files only in conversations that are saved (the assistant opened from the menu), not in the ones a script opens.
+
+Ask for it to keep a file in a note ("Attach this photo to #340"): it shows a card, as any change to a note that already exists; in a new note it doesn't ask, so you can say "Create a note with what this whiteboard says and attach the photo". It can also look at the photos a note already has ("Describe the photos of #340", "In which of the photos of #512 is the motherboard?"), and again at an image of the conversation ("Look at the first photo again"). It looks at 3 at a time, and it tells you how many there are.
+
+**Searching the Internet.** Turn on **Internet** (the globe button next to **Attach**; in the web app, the globe next to the clip) and the assistant can search the Internet when the answer isn't in your notes, or to complete or check them: "Search the Internet for the release date of the Amstrad CPC 6128 and compare it with my note", "Find the service manual of the MSX and save the link in its note". Without it the assistant can't search, and it tells you so if you ask; an answer may still come from what the model knows, which isn't what the Internet says today. It is off in every new or resumed conversation, and it is only there with a provider that can search: OpenAI and Anthropic search themselves; with Ollama, KNote searches with the web search of ollama.com, which needs the **Web search API key** of an ollama.com account in the Ollama provider (the model still runs on your computer). While it is on, a line under the message box reminds you that what is searched leaves the computer, also with a local model; Anthropic bills each search. What it takes from the Internet comes with its link (marked with ↗, and opened in another tab of the browser in the web app), different from the citations of notes: when the provider gives its sources apart, they are added at the end of the answer under **Sources**. Saving something it found in a note follows the cards as any other change, and what a page says is never an order for the assistant.
+
+**Citations.** A `#123` in a note, in a task or in an answer of the assistant is a link to that note, shown differently from web links. In the web app it opens the note's viewer in a window; in the desktop app, the note editor. Any `#` followed by a number is a link, without checking that the note exists: when it doesn't, or it is one of KNote's own notes, you get **Note #123 not found**. They aren't links inside code, in the desktop app's HTML editor or in the chat room.
+
+**Modified between.** The notes filter of both apps has this line: the notes modified between two dates, both included. Either of them can be left empty.
 
 ### Chat room
 
@@ -439,7 +499,7 @@ KNote Local is the web app running entirely in your computer, without internet, 
 In KNote Local the **Admin panel** has one more tab, **This computer**, for an Admin and only from the computer itself:
 
 - **Repositories**: **New repository** (an empty SQLite database in the data folder), **Link existing database** (a SQLite database of the computer, for example the desktop app's: both apps can use it at the same time), **Link SQL Server**, and in each row **Rename**, **Make default** (the repository of the sign-ups and of the visitors) and **Unlink** (it is only removed from the list: the database is never deleted). The changes apply at once.
-- **AI providers** of the assistant (**Kind** **Chat**; the first one is the default) and of the search by meaning (**Kind** **Embeddings**), with their API keys kept encrypted and never shown again (empty keeps the saved one), and **Test** to check each one.
+- **AI providers** of the assistant (**Kind** **Chat**; the first one is the default) and of the search by meaning (**Kind** **Embeddings**), with their API keys kept encrypted and never shown again (empty keeps the saved one; the web search key of an Ollama provider can also be removed), and **Test** to check each one.
 - **E-mail**: the SMTP account and **Send the Email alarms** (off by default; if you turn it on, uncheck **Process Email alarms** in the desktop app's options).
 - **Local server**: its address, data folder and version, its **Port** (applies the next time it starts) and **Stop local server**.
 
@@ -481,6 +541,7 @@ The AI models offered by the web app are configured in the server, in the `ai` s
 | `model` | The model of that provider. |
 | `apiKey` | The API key (OpenAI and Anthropic). Leave it empty in `appsettings.json`: see below. |
 | `host` | The address of the Ollama server (Ollama only). |
+| `webSearchApiKey` | Optional, Ollama chat models only: the API key of an ollama.com account, so that the assistant can search the Internet. A secret, like `apiKey`. |
 | `kind` | `Chat` (the default) for the models of the assistant, or `Embeddings` for the models of the search by meaning (Ollama and OpenAI only; see *Search by meaning (KNote Atlas)*). |
 | `contextWindow` | Optional, Ollama chat models only: the context size in tokens (empty: the model's own). |
 
@@ -496,7 +557,7 @@ The first valid provider is the default one (of the `Chat` kind: the `Embeddings
 dotnet user-secrets set "ai:providers:0:apiKey" "sk-..." --project Server/KNote.Server.csproj
 ```
 
-In a server, use environment variables (`ai__providers__0__apiKey`) or your hosting's secret store. If a key is empty, the server uses the `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable. The keys never reach the browser: the web app only receives the alias, provider and model of each one.
+The same for the web search key of Ollama (`ai:providers:2:webSearchApiKey`). In a server, use environment variables (`ai__providers__0__apiKey`) or your hosting's secret store. If a key is empty, the server uses the `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable. The keys never reach the browser: the web app only receives the alias, provider and model of each one.
 
 ### Password reset by e-mail (server configuration)
 

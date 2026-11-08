@@ -47,10 +47,47 @@
         <RadzenSplitter Orientation="Orientation.Vertical" class="ai-chat-split">
             <RadzenSplitterPane Size="calc(100% - 90px)" Min="40%">
                 <AiChatView Turns="@session.Turns" PendingPrompt="@pendingPrompt" PendingAnswer="@pendingAnswer.ToString()"
+                            PendingAttachments="@sentAttachments" SessionNoteId="@session.NoteId" AttachmentShown="OnAttachmentShown"
+                            PendingReasoning="@pendingReasoning.ToString()" Thinking="@thinking"
+                            PendingAutomatic="@pendingAutomatic" ActionsAnswered="OnActionsAnswered" ActionsDisabled="@(streaming || runningActions)"
                             ToolInUse="@toolInUse" CreatedNotes="@createdNotes" ContainerId="@ChatContainerId" />
             </RadzenSplitterPane>
             <RadzenSplitterPane Size="82px" Min="62px">
+                <div @ref="promptArea" class="ai-prompt-area">
+                @if (!streaming && pendingFiles.Count > 0)
+                {
+                    <div class="ai-prompt-files">
+                        @foreach (var file in pendingFiles)
+                        {
+                            <span class="ai-prompt-file">
+                                @file.Upload.FileName
+                                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.ExtraSmall"
+                                              Click="@(() => pendingFiles.Remove(file))" />
+                            </span>
+                        }
+                        @if (SentToProvider != null)
+                        {
+                            <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">Images are sent to @SentToProvider.</RadzenText>
+                        }
+                    </div>
+                }
+                @if (WebSearchOn)
+                {
+                    <div class="ai-prompt-files">
+                        <RadzenIcon Icon="public" Style="font-size: 1rem; color: var(--rz-warning)" />
+                        <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">@AiWebSearchRules.Notice(currentProvider?.Provider)</RadzenText>
+                    </div>
+                }
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Gap="0.5rem" class="ai-prompt">
+                    @if (currentProvider?.SupportsWebSearch == true)
+                    {
+                        <RadzenToggleButton Icon="public" @bind-Value="webSearch" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                                            ToggleButtonStyle="ButtonStyle.Warning" ToggleShade="Shade.Default" Disabled="@streaming"
+                                            MouseEnter="@(args => tooltipService.Open(args, AiWebSearchRules.ToggleText, new TooltipOptions { Position = TooltipPosition.Top }))" />
+                    }
+                    <RadzenButton Icon="attach_file" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="PickFiles"
+                                  Disabled="@(streaming || uploadingFiles || currentProvider == null)"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Attach files (you can also paste or drop them here)", new TooltipOptions { Position = TooltipPosition.Top }))" />
                     <RadzenTextArea @bind-Value="promptInput" Immediate="true" class="ai-prompt-input"
                                     Placeholder="Ask the assistant ... (Ctrl+Enter to send)" Disabled="@(streaming || currentProvider == null)"
                                     @onkeydown="OnPromptKeyDown" />
@@ -66,6 +103,7 @@
                                       MouseEnter="@(args => tooltipService.Open(args, "Send (Ctrl+Enter)", new TooltipOptions { Position = TooltipPosition.Left }))" />
                     }
                 </RadzenStack>
+                </div>
             </RadzenSplitterPane>
         </RadzenSplitter>
     </RadzenSplitterPane>
@@ -100,7 +138,13 @@
     private bool streaming;
     private string? pendingPrompt;
     private readonly StringBuilder pendingAnswer = new();
+    private readonly StringBuilder pendingReasoning = new();
+    private bool thinking;
     private string? toolInUse;
+    private bool pendingAutomatic;
+    private bool runningActions;
+    // The kinds of action not to ask about again in this conversation.
+    private readonly HashSet<string> autoApprovedKinds = new();
     private CancellationTokenSource? answerCancellation;
     private DateTime lastRefresh;
     private bool scrollToBottom;
@@ -111,7 +155,32 @@
     private DotNetObjectReference<AIAssistant>? selfReference;
     private IJSObjectReference? unsavedChangesWatch;
 
+    // A file of the message being written. Saved: already in the note of the session, if the message has to be sent again.
+    private sealed class PendingFile
+    {
+        public required AiChatAttachmentUploadDto Upload { get; init; }
+        public AiChatAttachmentDto? Saved { get; set; }
+    }
+
+    private readonly List<PendingFile> pendingFiles = new();
+    private IReadOnlyList<AiChatAttachmentDto> sentAttachments = Array.Empty<AiChatAttachmentDto>();
+    private bool uploadingFiles;
+    private ElementReference promptArea;
+    private IJSObjectReference? attachmentsModule;
+    private IJSObjectReference? attachments;
+
+    // A paid provider: the images leave the computer, and KNote says so.
+    private string? SentToProvider => pendingFiles.Any(f => AiAttachmentRules.IsImage(f.Upload.ContentType)) && currentProvider?.Provider != EnumAiProvider.Ollama
+        ? currentProvider?.Provider
+        : null;
+
     private long TotalTokens => session.Turns.Sum(t => t.TotalTokens);
+
+    // "Search the Internet" (KNote Atlas, chapter 23): off in each new or resumed conversation, and only with a provider
+    // that can search.
+    private bool webSearch;
+
+    private bool WebSearchOn => webSearch && currentProvider?.SupportsWebSearch == true;
 
     private string Height => InWindow ? "calc(100vh - 5rem)" : "calc(100vh - 10rem)";
 
@@ -142,10 +211,16 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && InWindow)
+        if (firstRender)
         {
             selfReference = DotNetObjectReference.Create(this);
-            unsavedChangesWatch = await kntWindows.WatchUnsavedChangesAsync(selfReference);
+            if (InWindow)
+                unsavedChangesWatch = await kntWindows.WatchUnsavedChangesAsync(selfReference);
+
+            // Without its script (the server not reachable, already notified) files can't be attached.
+            attachmentsModule = await jsRuntime.ImportModuleAsync("./js/aiAttachments.js", store.AppState);
+            if (attachmentsModule != null)
+                attachments = await attachmentsModule.InvokeAsync<IJSObjectReference>("init", promptArea, selfReference, KntConst.MaxLenResourceFile);
         }
 
         if (!scrollToBottom)
@@ -173,6 +248,13 @@
                 await unsavedChangesWatch.InvokeVoidAsync("dispose");
                 await unsavedChangesWatch.DisposeAsync();
             }
+            if (attachments != null)
+            {
+                await attachments.InvokeVoidAsync("dispose");
+                await attachments.DisposeAsync();
+            }
+            if (attachmentsModule != null)
+                await attachmentsModule.DisposeAsync();
         }
         catch (JSDisconnectedException)
         {
@@ -230,21 +312,114 @@
     private async Task Send()
     {
         var prompt = promptInput;
+        if (streaming || runningActions || uploadingFiles || currentProvider == null || string.IsNullOrWhiteSpace(prompt))
+            return;
+
+        if (!await SaveFilesAsync(prompt!))
+            return;
+
+        // A new message without answering the card rejects what it proposed: the model is told.
+        AiActionRules.RejectPending(session.Turns);
+        sentAttachments = pendingFiles.Select(f => f.Saved!).ToList();
+        await SendTurnAsync(prompt!, automatic: false);
+    }
+
+    // The files of the message go to the note of the session first: from there they reach the model and the conversation.
+    private async Task<bool> SaveFilesAsync(string prompt)
+    {
+        uploadingFiles = true;
+        try
+        {
+            foreach (var file in pendingFiles.Where(f => f.Saved == null))
+            {
+                file.Upload.SessionNoteId = session.NoteId;
+                file.Upload.Provider = currentProvider!.Provider;
+                file.Upload.Model = currentProvider.Model;
+                file.Upload.Topic = prompt;
+
+                var res = await store.AiAssistant.AddAttachmentAsync(file.Upload);
+                if (!res.IsValid)
+                    return false;
+
+                file.Saved = res.Entity;
+                session.NoteId = res.Entity.SessionNoteId;
+            }
+            return true;
+        }
+        finally
+        {
+            uploadingFiles = false;
+        }
+    }
+
+    private async Task PickFiles()
+    {
+        if (attachments != null)
+            await attachments.InvokeVoidAsync("pick");
+    }
+
+    // A file pasted, dropped or chosen (js/aiAttachments.js). A pasted screenshot comes without a name.
+    [JSInvokable]
+    public async Task OnAttachment(string fileName, string contentType, string contentBase64)
+    {
+        if (pendingFiles.Count >= AiAttachmentRules.MaxPerMessage)
+        {
+            NotifyFile("Too many files", $"A message can have {AiAttachmentRules.MaxPerMessage} files at most.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+            fileName = $"image-{DateTime.Now:yyyyMMdd-HHmmss}.{contentType.Split('/')[^1].Replace("jpeg", "jpg")}";
+        if (string.IsNullOrWhiteSpace(contentType))
+            contentType = AiAttachmentRules.ContentTypeOf(fileName);
+
+        pendingFiles.Add(new PendingFile
+        {
+            Upload = new AiChatAttachmentUploadDto { FileName = fileName, ContentType = contentType, ContentBase64 = contentBase64 }
+        });
+        StateHasChanged();
+
+        if (AiAttachmentRules.IsImage(contentType) && currentProvider != null)
+        {
+            var capabilities = await store.AiAssistant.GetCapabilitiesAsync(currentProvider.Alias);
+            if (capabilities.IsValid && capabilities.Entity?.SupportsImages == false)
+                NotifyFile("This model does not see images", $"{currentProvider.Alias} will not receive {fileName}: it is only saved with the conversation.");
+        }
+    }
+
+    [JSInvokable]
+    public void OnAttachmentTooBig(string fileName) =>
+        NotifyFile("File too big", $"{fileName}: {KntConst.MaxLenResourceFile / 1_000_000.0:0.#} MB at most.");
+
+    private void NotifyFile(string summary, string detail) =>
+        notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = summary, Detail = detail, Duration = 8000 });
+
+    // automatic: the turn the app sends after a card, not a question of the user.
+    private async Task SendTurnAsync(string prompt, bool automatic)
+    {
         var provider = currentProvider;
-        if (streaming || provider == null || string.IsNullOrWhiteSpace(prompt))
+        if (provider == null)
             return;
 
         var request = new AiChatRequestDto
         {
             ProviderAlias = provider.Alias,
             History = session.Turns.ToList(),
-            Prompt = prompt
+            Prompt = prompt,
+            AutoApprovedActionKinds = autoApprovedKinds.ToList(),
+            WebSearch = WebSearchOn,
+            SessionNoteId = session.NoteId,
+            Attachments = automatic ? new() : sentAttachments.ToList()
         };
 
         streaming = true;
-        promptInput = "";
+        pendingAutomatic = automatic;
+        if (!automatic)
+            promptInput = "";
         pendingPrompt = prompt;
         pendingAnswer.Clear();
+        pendingReasoning.Clear();
+        thinking = false;
         toolInUse = null;
         answerCancellation = new CancellationTokenSource();
         scrollToBottom = true;
@@ -260,17 +435,32 @@
                     case AiChatStreamEventTypes.Delta:
                         pendingAnswer.Append(e.Text);
                         toolInUse = null;
+                        thinking = false;
                         RefreshWhileStreaming();
+                        break;
+                    case AiChatStreamEventTypes.Reasoning:
+                        var started = !thinking;
+                        pendingReasoning.Append(e.Text);
+                        toolInUse = null;
+                        thinking = true;
+                        RefreshWhileStreaming(force: started);
                         break;
                     case AiChatStreamEventTypes.Tool:
                         toolInUse = e.Text;
+                        thinking = false;
                         RefreshWhileStreaming(force: true);
                         break;
                     case AiChatStreamEventTypes.NoteCreated:
                         AddCreatedNote(session.Turns.Count, e);
                         break;
+                    case AiChatStreamEventTypes.OpenNote:
+                        await OpenNoteAsync(session.Turns.Count, e);
+                        break;
                     case AiChatStreamEventTypes.Completed:
                         completedTurn = e.Turn;
+                        // It does not travel with the turn: it is not saved, nor sent back with the history.
+                        if (completedTurn != null && pendingReasoning.Length > 0)
+                            completedTurn.Reasoning = pendingReasoning.ToString().Trim();
                         break;
                     // Error: already notified by the service; the turn stays unanswered.
                 }
@@ -284,7 +474,10 @@
         {
             streaming = false;
             pendingPrompt = null;
+            sentAttachments = Array.Empty<AiChatAttachmentDto>();
             pendingAnswer.Clear();
+            pendingReasoning.Clear();
+            thinking = false;
             toolInUse = null;
             answerCancellation?.Dispose();
             answerCancellation = null;
@@ -295,7 +488,11 @@
             // The session is held with the provider of its last answer (see AiProviderSelection).
             session.Provider = provider.Provider;
             session.Model = provider.Model;
+            completedTurn.Automatic = automatic;
             session.Turns.Add(completedTurn);
+            if (!automatic)
+                pendingFiles.Clear();
+            await NotifyChangedNotesAsync(completedTurn.Actions);
             pendingSave = true;
             scrollToBottom = true;
             StateHasChanged();
@@ -304,7 +501,8 @@
         else
         {
             // Not answered (stopped or failed): the question is back in the box, to send it again.
-            promptInput = prompt;
+            if (!automatic)
+                promptInput = prompt;
             createdNotes.Remove(session.Turns.Count);
         }
 
@@ -312,6 +510,52 @@
     }
 
     private void StopAnswer() => answerCancellation?.Cancel();
+
+    // They only load with their message or on opening the session, so this does not move what the user is reading.
+    private void OnAttachmentShown() => scrollToBottom = true;
+
+    // The card of the last turn: what is not accepted is rejected, the rest is run and, if anything was accepted, the assistant
+    // goes on by itself (D3): what was asked may depend on it.
+    private async Task OnActionsAnswered(AiActionsCard.AiActionsAnswer answer)
+    {
+        if (streaming || runningActions || session.Turns.Count == 0)
+            return;
+
+        var proposed = session.Turns[^1].Actions.Where(a => a.Status == EnumAiActionStatus.Proposed).ToList();
+        var accepted = proposed.Where(a => answer.Accepted.Contains(a.ActionId)).ToList();
+        proposed.Except(accepted).ToList().ForEach(a => a.Status = EnumAiActionStatus.Rejected);
+
+        if (accepted.Count > 0)
+        {
+            runningActions = true;
+            var res = await store.AiAssistant.RunActionsAsync(accepted);
+            runningActions = false;
+            foreach (var action in accepted)
+            {
+                var ran = res.Entity?.FirstOrDefault(a => a.ActionId == action.ActionId);
+                action.Status = ran?.Status ?? EnumAiActionStatus.Failed;
+                action.Result = ran != null ? ran.Result : res.ErrorMessage;
+            }
+            if (answer.DontAskAgain)
+                autoApprovedKinds.UnionWith(accepted.Select(a => a.Kind));
+            await NotifyChangedNotesAsync(accepted);
+        }
+
+        pendingSave = true;
+        scrollToBottom = true;
+        StateHasChanged();
+        await SaveSessionAsync();
+
+        if (accepted.Count > 0)
+            await SendTurnAsync(AiActionRules.ContinuePrompt, automatic: true);
+    }
+
+    // The lists and the windows of the notes show them changed.
+    private async Task NotifyChangedNotesAsync(IEnumerable<AiActionDto> actions)
+    {
+        foreach (var noteId in actions.Where(a => a.Status == EnumAiActionStatus.Done && a.NoteId != null).Select(a => a.NoteId!.Value).Distinct())
+            await kntWindows.NotifyNoteSavedAsync(noteId);
+    }
 
     private void RefreshWhileStreaming(bool force = false)
     {
@@ -322,11 +566,24 @@
         StateHasChanged();
     }
 
-    private void AddCreatedNote(int turnIndex, AiChatStreamEventDto note)
+    private void AddNoteLink(int turnIndex, AiChatStreamEventDto note)
     {
         if (!createdNotes.TryGetValue(turnIndex, out var notes))
             createdNotes[turnIndex] = notes = new();
         notes.Add(note);
+    }
+
+    // No click opens this window, so a browser may block it: the link stays in the conversation for that.
+    private async Task OpenNoteAsync(int turnIndex, AiChatStreamEventDto note)
+    {
+        AddNoteLink(turnIndex, note);
+        StateHasChanged();
+        await kntWindows.OpenEditAsync(note.NoteId!.Value);
+    }
+
+    private void AddCreatedNote(int turnIndex, AiChatStreamEventDto note)
+    {
+        AddNoteLink(turnIndex, note);
 
         notificationService.Notify(new NotificationMessage
         {
@@ -460,7 +717,10 @@
         session = newSession;
         pendingSave = false;
         promptInput = "";
+        pendingFiles.Clear();
         createdNotes.Clear();
+        autoApprovedKinds.Clear();
+        webSearch = false;
         scrollToBottom = true;
     }
 

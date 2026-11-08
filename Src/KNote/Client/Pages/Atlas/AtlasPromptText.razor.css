@@ -1,0 +1,18 @@
+.knt-atlas-summary {
+    color: var(--rz-text-secondary-color);
+    font-size: 0.875rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.knt-atlas-prompt {
+    background: var(--rz-base-background-color);
+    border: var(--rz-border-base-300);
+    border-radius: var(--rz-border-radius);
+    font-size: 0.8125rem;
+    margin: 0;
+    max-height: 60vh;
+    overflow: auto;
+    padding: 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

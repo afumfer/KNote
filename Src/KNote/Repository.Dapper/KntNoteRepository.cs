@@ -1859,6 +1859,30 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             strWhere += $"Notes.NoteId IN (SELECT NoteTasks.NoteId FROM NoteTasks WHERE NoteTasks.UserId = @{taskUserIdParam}) ";
         }
 
+        void AddDateCondition(string column, string comparison, DateTime? date)
+        {
+            if (date == null)
+                return;
+            strWhere = AddAndToStringSQL(strWhere);
+            var dateParam = $"wDate{paramIndex++}";
+            parameters.Add(dateParam, date.Value);
+            strWhere += $"Notes.{column} {comparison} @{dateParam} ";
+        }
+
+        // The last day is included: up to the start of the next one.
+        AddDateCondition("CreationDateTime", ">=", notesFilter.CreatedFrom?.Date);
+        AddDateCondition("CreationDateTime", "<", notesFilter.CreatedTo?.Date.AddDays(1));
+        AddDateCondition("ModificationDateTime", ">=", notesFilter.ModifiedFrom?.Date);
+        AddDateCondition("ModificationDateTime", "<", notesFilter.ModifiedTo?.Date.AddDays(1));
+
+        if (notesFilter.ExcludeNoteTypeIds?.Count > 0)
+        {
+            strWhere = AddAndToStringSQL(strWhere);
+            var excludeParam = $"wExcludeNoteTypeIds{paramIndex++}";
+            parameters.Add(excludeParam, notesFilter.ExcludeNoteTypeIds);
+            strWhere += $"(Notes.NoteTypeId IS NULL OR Notes.NoteTypeId NOT IN @{excludeParam}) ";
+        }
+
         foreach (var f in notesFilter.AttributesFilter)
         {
             strWhere = AddAndToStringSQL(strWhere);

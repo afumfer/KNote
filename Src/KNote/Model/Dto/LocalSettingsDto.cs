@@ -82,6 +82,14 @@ public class LocalAiProviderDto
     public string ApiKey { get; set; }
 
     public bool HasApiKey { get; set; }
+
+    // Only for an Ollama chat model: the key of ollama.com's web search. Write only: empty keeps the one it has.
+    public string WebSearchApiKey { get; set; }
+
+    public bool HasWebSearchApiKey { get; set; }
+
+    // Clears the saved web search key (the empty WebSearchApiKey keeps it).
+    public bool RemoveWebSearchApiKey { get; set; }
 }
 
 /// <summary>The SMTP account of the e-mails (Email alarms) and whether the server sends the Email alarms.</summary>

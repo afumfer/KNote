@@ -20,6 +20,9 @@ public class ServerAiToolsHost : IKNoteAiToolsHost
 
     public ConcurrentQueue<NoteExtendedDto> CreatedNotes { get; } = new();
 
+    // The notes the user asked to see in their edit form: only the Web client can open them.
+    public ConcurrentQueue<NoteMinimalDto> NotesToOpen { get; } = new();
+
     public async Task<AiNoteDestination> GetNewNoteDestinationAsync()
     {
         var home = await _service.Folders.GetHomeAsync();
@@ -29,5 +32,7 @@ public class ServerAiToolsHost : IKNoteAiToolsHost
         return new AiNoteDestination(_service, home.Entity);
     }
 
-    public void OnNoteCreated(IKntService service, NoteExtendedDto note) => CreatedNotes.Enqueue(note);
+    public void OnNoteCreated(IKntService service, NoteExtendedDto note, bool openEditor = true) => CreatedNotes.Enqueue(note);
+
+    public void OpenNoteEditor(IKntService service, NoteMinimalDto note) => NotesToOpen.Enqueue(note);
 }

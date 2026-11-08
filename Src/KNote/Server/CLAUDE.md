@@ -325,17 +325,35 @@ Staff, ProjectManager y Admin (como `KNoteAIAssistantCtrl` en `ClientWin` y los 
   turno y su uso, `error`). El servidor no guarda la conversación: la manda entera el cliente en cada
   pregunta. Lo que falla antes de empezar (pregunta vacía, proveedor desconocido) es un 400 con `Result`, como
   siempre; lo que falla después, un evento `error`. La lógica del turno es la común de `KNote.Ai`
-  (`AiChatTurnStreamer`), con las tools de `KNoteAiTools`; su host en el Server (`Ai/ServerAiToolsHost`)
-  guarda las notas de `create_task` en la carpeta Home y las anuncia con eventos `noteCreated`. Cancelar la
-  petición (`RequestAborted`) corta la llamada al proveedor.
+  (`AiChatTurnStreamer`), con las tools que `KNoteAiTools.GetToolsAsync` da para cada petición (dependen del índice y del
+  glosario del repositorio de la sesión); su host en el Server (`Ai/ServerAiToolsHost`)
+  guarda las notas de `create_task` y `create_note` en la carpeta Home y las anuncia con eventos `noteCreated`. `chat` y
+  `POST actions` (lo aceptado en la tarjeta) activan `EnforceAuthorization` en el servicio de la petición: las herramientas
+  pasan por los roles de los comandos, como en `ClientWin`. El turno completado lleva sus `Actions`. Cancelar la
+  petición (`RequestAborted`) corta la llamada al proveedor. El mensaje de sistema lo monta
+  `KNote.Ai/AiAssistantContext` con el servicio de la petición (reglas, instrucciones, perfil y glosario de KNote Atlas,
+  ver «Contexto de la IA» en el `CLAUDE.md` raíz), con las preguntas y respuestas de la conversación para el glosario.
+- `POST sessions/attachments` y `GET sessions/{noteId}/attachments/{resourceId}/preview` — los archivos de un mensaje: se guardan antes de enviarlo (`POST chat` lleva `SessionNoteId` y `Attachments`) y sus imágenes se ven por esa vista reducida, que comprueba al dueño de la sesión: la URL de un recurso se sirve sin sesión. `GET providers/{alias}/capabilities` dice si el modelo ve imágenes.
 - `GET sessions`, `GET sessions/{noteId}`, `POST sessions` — las sesiones del usuario
   (`IKntService.AiSessions`, ver `CLAUDE.md` raíz). El cliente guarda la sesión tras cada respuesta.
+
+## KNote Atlas: contexto de la IA (`AtlasController`, `api/atlas`)
+
+El perfil, el glosario y las instrucciones de las tareas de la página KNote Atlas (`IKntService.AtlasContext`): `GET profile`,
+`GET glossary` y `GET tasks` para cualquier usuario; `POST profile`, `POST profile/fill`, `POST glossary` y
+`POST tasks/{taskKey}/customize` (crean la nota con su plantilla, o la devuelven si ya existe) para ProjectManager y
+Admin; `POST compose` («What the AI receives», `AiComposeRequestDto` con un texto de prueba para el glosario) para
+Staff+. Las notas se guardan con la API de notas de siempre: la regla de guardado está en el `Service`, así que un
+Staff recibe un 400 con su motivo aunque `api/notes` acepte Staff. Tests en `Tests/InProcessIntegrationTests/AtlasInProcessTests`.
 
 Proveedores: sección `ai.providers` de `appsettings.json`, con los mismos campos que `AiProviderRef` en
 `ClientWin` (`alias`, `provider` = `OpenAI`/`Anthropic`/`Ollama`, `model`, `apiKey`, `host` solo para Ollama).
 `Ai/AiProvidersCatalog` descarta (y registra en el log) los que no validan; el primero válido es el
 predefinido. Las `apiKey` no van en `appsettings.json`: user-secrets (`ai:providers:0:apiKey`, por posición) o,
-si están vacías, las variables `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (`AiChatClientFactory.ResolveApiKey`).
+si están vacías, las variables `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (`AiChatClientFactory.ResolveApiKey`). Igual
+`webSearchApiKey` (solo Ollama chat, la búsqueda en Internet del asistente con ollama.com); `AiProviderInfoDto.SupportsWebSearch`
+dice si el proveedor busca, sin la clave. `POST chat` solo añade la búsqueda con `request.WebSearch` y un proveedor que puede. En
+KNote Local va en `knote-local.json` (`webSearchApiKey`, cifrada; `RemoveWebSearchApiKey` la quita).
 `Ai/IAiChatClientProvider` construye el `IChatClient` (`AiChatClientFactory` de `KNote.Ai`); existe para que los
 tests lo sustituyan. Los proveedores con `kind` = `Embeddings` no son del asistente (`AiProvidersCatalog.Default/Find/
 GetInfo` solo ven los de chat): son los modelos de embeddings del Server (ver la sección siguiente); `contextWindow` es el

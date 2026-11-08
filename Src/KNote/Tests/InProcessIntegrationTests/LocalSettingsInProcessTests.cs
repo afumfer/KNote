@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Server.Helpers;
@@ -147,6 +148,44 @@ public class LocalSettingsInProcessTests
 
         var invalid = await _admin.PutAsJsonAsync("api/local/ai", new List<LocalAiProviderDto> { new() { Alias = "No host", Provider = EnumAiProvider.Ollama, Model = "llama" } });
         Assert.AreEqual(HttpStatusCode.BadRequest, invalid.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task AiProviders_OllamaWebSearchKey_Encrypted_KeptWhenEmpty_Removed_AndTheSearchIsOffered()
+    {
+        static JsonNode Stored(int index) => LocalData.ReadConfig()["Local"]!["ai"]!["providers"]![index]!;
+        LocalAiProviderDto Ollama(string? key = null, bool remove = false, int index = -1) => new()
+        {
+            Index = index, Alias = "Local qwen", Provider = EnumAiProvider.Ollama, Model = "qwen3.5:9b", Host = "http://localhost:11434",
+            WebSearchApiKey = key, RemoveWebSearchApiKey = remove
+        };
+
+        var httpRes = await _admin.PutAsJsonAsync("api/local/ai", new List<LocalAiProviderDto>
+        {
+            Ollama("ollama-web-secret"),
+            new() { Alias = "Paid", Provider = EnumAiProvider.OpenAI, Model = "gpt-test", WebSearchApiKey = "not-for-openai" }
+        });
+        var body = await httpRes.Content.ReadAsStringAsync();
+        Assert.AreEqual(HttpStatusCode.OK, httpRes.StatusCode, body);
+        Assert.DoesNotContain("ollama-web-secret", body, "Never sent back.");
+        var saved = await ReadAsync<List<LocalAiProviderDto>>(httpRes);
+        Assert.IsTrue(saved[0].HasWebSearchApiKey);
+        Assert.IsFalse(saved[1].HasWebSearchApiKey, "Only an Ollama chat model has its own web search key.");
+        var stored = Stored(0)["webSearchApiKey"]!.GetValue<string>();
+        Assert.IsTrue(KntSecretProtector.IsProtected(stored), "Encrypted in the file.");
+
+        var providers = await ReadAsync<List<AiProviderInfoDto>>(await _admin.GetAsync("api/aiassistant/providers"));
+        Assert.IsTrue(providers.Single(p => p.Alias == "Local qwen").SupportsWebSearch, "The key reaches the provider of the assistant.");
+        Assert.IsTrue(providers.Single(p => p.Alias == "Paid").SupportsWebSearch);
+
+        await ReadAsync<List<LocalAiProviderDto>>(await _admin.PutAsJsonAsync("api/local/ai", new List<LocalAiProviderDto> { Ollama(index: 0) }));
+        Assert.AreEqual(stored, Stored(0)["webSearchApiKey"]!.GetValue<string>(), "An empty key keeps the one it had.");
+
+        var removed = await ReadAsync<List<LocalAiProviderDto>>(await _admin.PutAsJsonAsync("api/local/ai",
+            new List<LocalAiProviderDto> { Ollama(remove: true, index: 0) }));
+        Assert.IsFalse(removed.Single().HasWebSearchApiKey);
+        providers = await ReadAsync<List<AiProviderInfoDto>>(await _admin.GetAsync("api/aiassistant/providers"));
+        Assert.IsFalse(providers.Single().SupportsWebSearch, "Without the key, Ollama does not search.");
     }
 
     [TestMethod]

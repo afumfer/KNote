@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace KNote.Model.Dto;
 
@@ -20,6 +21,26 @@ public class AiChatTurnDto
 
     public long TotalTokens { get; set; }
 
+    // Of the output tokens, the ones spent on reasoning, when the provider tells them apart (Ollama does not).
+    public long? ReasoningTokens { get; set; }
+
+    // How the model thought the answer, while the conversation is open: never saved, nor sent back to the model or to the
+    // server with the turns. The app that receives the answer through the API puts it together from the reasoning events.
+    [JsonIgnore]
+    public string Reasoning { get; set; }
+
+    // How long it reasoned before writing or using its tools. Not saved.
+    public TimeSpan? ReasoningTime { get; set; }
+
+    // What the assistant did or proposed in this turn (the record of the conversation, D13).
+    public List<AiActionDto> Actions { get; set; } = new();
+
+    // The files of the message of the user (D12): what is kept of them, their content is in the resources of the session.
+    public List<AiChatAttachmentDto> Attachments { get; set; } = new();
+
+    // Sent by the app after a card, not by the user (D3): its prompt is not shown.
+    public bool Automatic { get; set; }
+
     // The tokens were estimated, not reported by the provider.
     public bool TokensEstimated { get; set; }
 
@@ -30,6 +51,22 @@ public class AiChatTurnDto
 
     public const string TruncatedNotice = "The answer was cut: it reached the output token limit.";
 
+    // While the model reasons; the title of its reasoning until the answer is complete.
+    public const string ThinkingText = "Thinking…";
+    public const string ReasoningText = "Reasoning";
+
+    // While a tool works: what the user sees.
+    public static string ToolActivityText(string toolName) => toolName switch
+    {
+        AiWebSearchRules.WebSearchName => "Searching the Internet…",
+        AiWebSearchRules.WebFetchName => "Reading a page of the Internet…",
+        _ => $"Using {toolName}"
+    };
+
+    // The title of the reasoning of an answer: "Thought for 63 s".
+    public string ReasoningTitle() =>
+        ReasoningTime is TimeSpan time ? $"Thought for {Math.Max(1, (int)Math.Round(time.TotalSeconds))} s" : ReasoningText;
+
     // What the answer cost, in one line: "3 in · 2 out · 5 tokens · 1.2 s".
     public string UsageSummary()
     {
@@ -37,7 +74,7 @@ public class AiChatTurnDto
         if (TokensEstimated)
             tokens = $"~{TotalTokens} tokens (estimated)";
         else if (InputTokens.HasValue || OutputTokens.HasValue)
-            tokens = $"{InputTokens ?? 0} in · {OutputTokens ?? 0} out · {TotalTokens} tokens";
+            tokens = $"{InputTokens ?? 0} in · {OutputTokens ?? 0} out · {(ReasoningTokens is long reasoning ? $"{reasoning} reasoning · " : "")}{TotalTokens} tokens";
         else
             tokens = $"{TotalTokens} tokens";
 

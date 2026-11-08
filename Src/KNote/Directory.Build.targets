@@ -1,0 +1,15 @@
+<Project>
+
+  <!--
+    SkiaSharp (KNote.Ai) brings its native library for some twenty systems and, for Windows, about 90 MB of debug symbols per
+    architecture: without this, a published Server weighs almost three times as much. Only what KNote runs on stays: the Server
+    and KNote Local are framework-dependent, one package for Windows, macOS and Linux, so these go with it.
+  -->
+  <Target Name="KntTrimSkiaNativeAssets" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <RuntimeTargetsCopyLocalItems Remove="@(RuntimeTargetsCopyLocalItems)"
+                                    Condition="'%(Filename)' == 'libSkiaSharp' And ('%(Extension)' == '.pdb' Or ('%(RuntimeIdentifier)' != 'win-x64' And '%(RuntimeIdentifier)' != 'win-x86' And '%(RuntimeIdentifier)' != 'win-arm64' And '%(RuntimeIdentifier)' != 'linux-x64' And '%(RuntimeIdentifier)' != 'linux-arm64' And '%(RuntimeIdentifier)' != 'osx'))" />
+    </ItemGroup>
+  </Target>
+
+</Project>

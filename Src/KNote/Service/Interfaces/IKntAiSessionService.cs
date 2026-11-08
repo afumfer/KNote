@@ -25,4 +25,16 @@ public interface IKntAiSessionService
     /// NoteId, NoteNumber, Topic and dates.
     /// </summary>
     Task<Result<AiChatSessionDto>> SaveAsync(AiChatSessionDto session);
+
+    /// <summary>
+    /// Saves a file of a message as a resource of the session's note, created if the conversation has none yet: the file has to
+    /// be there before the message is sent, to reach the model. Returns it with the note it is in.
+    /// </summary>
+    Task<Result<AiChatAttachmentDto>> AddAttachmentAsync(AiChatAttachmentUploadDto attachment);
+
+    /// <summary>
+    /// The content of an attachment, only for the user of the session. It does not go by the url of the resource: those are
+    /// served to anybody who has them, and a conversation is private.
+    /// </summary>
+    Task<Result<AiChatAttachmentContentDto>> GetAttachmentAsync(Guid sessionNoteId, Guid resourceId);
 }

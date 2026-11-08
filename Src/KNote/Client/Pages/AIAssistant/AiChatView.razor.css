@@ -95,6 +95,36 @@
     }
 
 /* What the answer cost (or what the assistant is doing), at the foot of its bubble. */
+.ai-action-line {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.ai-reasoning {
+    margin-bottom: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+    .ai-reasoning summary {
+        cursor: pointer;
+    }
+
+.ai-reasoning-text {
+    margin-top: 0.25rem;
+    padding: 0.375rem 0.5rem;
+    max-height: 16rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border-left: 2px solid var(--rz-border-color, currentColor);
+}
+
+.ai-reasoning-live {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
 .ai-usage {
     margin-top: 0.5rem;
     padding-top: 0.375rem;

@@ -21,18 +21,11 @@ namespace KNote.Service.Core;
 // per process: when another process using the same database creates one first, the failed creation finds it.
 internal static class KntSystemNotes
 {
-    // The note types of KNote's own notes: out of the tasks panel and of the semantic index (they only link users to
-    // those notes, keep private conversations, or are KNote Atlas' test queries and reports, which would find themselves).
-    public static readonly IReadOnlyList<string> SystemNoteTypeNames = new[]
-    {
-        KntConst.ChatSessionsTag, KntConst.ChatRoomTag, KntConst.TestQueriesTag, KntConst.SearchEvaluationTag
-    };
-
     public static async Task<List<Guid>> GetSystemNoteTypeIdsAsync(KNote.Repository.IKntRepository repository)
     {
         var noteTypes = await repository.NoteTypes.GetAllAsync();
         return noteTypes.Entity?
-            .Where(t => SystemNoteTypeNames.Contains(t.Name))
+            .Where(t => KntConst.IsSystemNoteType(t.Name))
             .Select(t => t.NoteTypeId)
             .ToList() ?? new List<Guid>();
     }
@@ -76,8 +69,11 @@ internal static class KntSystemNotes
                 return resSave.Entity?.NoteTypeId ?? Guid.Empty;
             });
 
+    // A text attribute or, with tabulatedValues, one of those values (EnumKAttributeDataType.TabulatedValue); dataType
+    // for another kind (Bool...).
     public static Task<Guid> EnsureAttributeAsync(IKntService service, Guid noteTypeId, string name,
-        string description, int order, string bypassReason, ResultBase result) =>
+        string description, int order, string bypassReason, ResultBase result,
+        EnumKAttributeDataType dataType = EnumKAttributeDataType.String, IReadOnlyList<string> tabulatedValues = null) =>
         FindOrCreateAsync(service, result,
             find: async () =>
             {
@@ -99,9 +95,12 @@ internal static class KntSystemNotes
                     {
                         Name = name,
                         Description = description,
-                        KAttributeDataType = EnumKAttributeDataType.String,
+                        KAttributeDataType = tabulatedValues?.Count > 0 ? EnumKAttributeDataType.TabulatedValue : dataType,
                         NoteTypeId = noteTypeId,
-                        Order = order
+                        Order = order,
+                        KAttributeValues = (tabulatedValues ?? Array.Empty<string>())
+                            .Select((value, i) => new KAttributeTabulatedValueDto { Value = value, Description = value, Order = i + 1 })
+                            .ToList()
                     });
                 }
                 if (!resSave.IsValid)

@@ -1,0 +1,72 @@
+@implements IDisposable
+
+@inject IStore store
+
+@* KNote Atlas › What the AI receives (chapters 19–21): the system message put together for a task, as it is sent, with its
+   size and its layers: the result of the other sections of the page. A test text says which glossary terms would go in.
+   Staff, as the assistant. *@
+
+<RadzenCard>
+    <KntFormSection Icon="visibility" Title="What the AI receives" Description="The text the AI gets, as it is sent. The glossary terms that appear in the test text go in.">
+        <RadzenRow Gap="1rem" AlignItems="AlignItems.End" class="rz-mb-3">
+            <RadzenColumn Size="12" SizeSM="3">
+                <KntField Label="Task" Component="atlasTask">
+                    <RadzenDropDown Name="atlasTask" TValue="string" Data="AiTaskCatalog.Tasks" TextProperty="Name" ValueProperty="Key"
+                                    @bind-Value="taskKey" Disabled="AiTaskCatalog.Tasks.Count < 2" Change="@(_ => RefreshAsync())" />
+                </KntField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeSM="9">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.End">
+                    <div style="flex: 1; min-width: 0">
+                        <KntField Label="Test text" Component="atlasTestText">
+                            <RadzenTextBox Name="atlasTestText" @bind-Value="testText" />
+                        </KntField>
+                    </div>
+                    <RadzenButton Text="Show its terms" ButtonStyle="ButtonStyle.Secondary" IsBusy="composing" Click="RefreshAsync" />
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        @if (loadFailed)
+        {
+            <AtlasLoadError Text="What the AI receives could not be put together." Retry="RefreshAsync" />
+        }
+        else if (composed == null)
+        {
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+        }
+        else
+        {
+            <AtlasPromptText Summary="@AiPromptComposer.Summary(composed)" Text="@composed.Text" />
+        }
+    </KntFormSection>
+</RadzenCard>
+
+@code {
+    private readonly KntLatestRequest reading = new();
+    private AiComposedPromptDto? composed;
+    private string taskKey = AiTaskCatalog.AssistantKey;
+    private string testText = "";
+    private bool composing;
+    private bool loadFailed;
+
+    protected override Task OnInitializedAsync() => RefreshAsync();
+
+    public async Task RefreshAsync()
+    {
+        composing = true;
+        var request = new AiComposeRequestDto
+        {
+            TaskKey = taskKey,
+            Texts = string.IsNullOrWhiteSpace(testText) ? new() : new() { testText }
+        };
+        var read = await reading.RunAsync(ct => store.Atlas.ComposeAsync(request, ct));
+        if (read.Canceled)
+            return;
+        composing = false;
+        loadFailed = !read.Value.IsValid;
+        composed = loadFailed ? null : read.Value.Entity;
+        StateHasChanged();
+    }
+
+    public void Dispose() => reading.Dispose();
+}

@@ -1,6 +1,7 @@
 @using Markdig
 @using Markdig.Syntax
 @using Markdig.Syntax.Inlines
+@using Markdig.Renderers.Html
 
 @inject IStore store
 @inject IJSRuntime js
@@ -35,6 +36,9 @@ else
     // here, with its raw HTML shown as text and only safe links (http, https, mailto or relative).
     [Parameter] public bool DisableHtml { get; set; }
 
+    // The citations of notes (#123) as links (NoteCitationLinker): a click opens the note's viewer (KntWindows hears it).
+    [Parameter] public bool LinkCitations { get; set; } = true;
+
     private static readonly MarkdownPipeline PipelineWithoutHtml =
         new MarkdownPipelineBuilder().UseAdvancedExtensions().DisableHtml().Build();
 
@@ -45,6 +49,7 @@ else
 
     private string? htmlContent;
     private string? renderedMarkdown;
+    private string? renderedSafeHtml;
     // The HTML of the content shown last: new content (or leaving) cancels the one being made; until it arrives the
     // content shown so far stays.
     private readonly KntLatestRequest htmlRequest = new();
@@ -55,7 +60,11 @@ else
     {
         if (SafeHtml != null)
         {
-            htmlContent = SafeHtml;
+            if (SafeHtml != renderedSafeHtml)
+            {
+                renderedSafeHtml = SafeHtml;
+                htmlContent = WithCitations(SafeHtml);
+            }
             return;
         }
 
@@ -67,13 +76,13 @@ else
         if (string.IsNullOrEmpty(MarkdownContent))
             htmlContent = null;
         else if (DisableHtml)
-            htmlContent = RenderWithoutHtml(MarkdownContent);
+            htmlContent = WithCitations(RenderWithoutHtml(MarkdownContent));
         else
         {
             var markdown = MarkdownContent;
             var request = await htmlRequest.RunAsync(ct => store.Notes.HtmlAsync(markdown, ct));
             if (!request.Canceled)
-                htmlContent = request.Value.IsValid ? request.Value.Entity : null;
+                htmlContent = request.Value.IsValid ? WithCitations(request.Value.Entity) : null;
         }
     }
 
@@ -98,16 +107,35 @@ else
         }
     }
 
+    private string? WithCitations(string? html) =>
+        LinkCitations ? NoteCitationLinker.Link(html ?? "", KntWindows.NoteViewByNumberPath) : html;
+
     private static string RenderWithoutHtml(string markdown)
     {
         var document = Markdown.Parse(markdown, PipelineWithoutHtml);
         foreach (var link in document.Descendants<LinkInline>())
             if (!IsSafeUrl(link.Url))
                 link.Url = "";
+            else if (!link.IsImage)
+                MarkExternal(link, link.Url);
         foreach (var link in document.Descendants<AutolinkInline>())
             if (!IsSafeUrl(link.Url))
                 link.Url = "";
+            else
+                MarkExternal(link, link.Url);
         return document.ToHtml(PipelineWithoutHtml);
+    }
+
+    // A link to the Internet (the sources of an answer that searched it, KNote Atlas chapter 23) opens in another tab: in
+    // the same one, the conversation would be left.
+    private static void MarkExternal(Inline link, string? url)
+    {
+        if (url == null || !(url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+            return;
+        var attributes = link.GetAttributes();
+        attributes.AddClass("knt-external-link");
+        attributes.AddPropertyIfNotExist("target", "_blank");
+        attributes.AddPropertyIfNotExist("rel", "noopener noreferrer");
     }
 
     // Relative, or http, https or mailto (a javascript: link would run script with the user's session).

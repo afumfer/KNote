@@ -39,6 +39,17 @@
                         <RadzenNumeric Name="ContextWindow" TValue="int?" @bind-Value="@provider.ContextWindow" Min="AiProviderRef.MinContextWindow"
                                        Max="AiProviderRef.MaxContextWindow" Step="1024" ShowUpDown="false" />
                     </KntField>
+                    <KntField Label="Web search API key" Component="WebSearchApiKey" Help="@WebSearchKeyHelp">
+                        <RadzenPassword Name="WebSearchApiKey" @bind-Value="@provider.WebSearchApiKey" AutoCompleteType="AutoCompleteType.Off"
+                                        Disabled="@provider.RemoveWebSearchApiKey" />
+                    </KntField>
+                    @if (Provider.HasWebSearchApiKey)
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <RadzenCheckBox Name="RemoveWebSearchApiKey" TValue="bool" @bind-Value="@provider.RemoveWebSearchApiKey" />
+                            <RadzenLabel Text="Remove the saved web search key" Component="RemoveWebSearchApiKey" />
+                        </RadzenStack>
+                    }
                 }
             }
             else
@@ -78,6 +89,11 @@
 
     private bool IsEmbeddings => provider.Kind == EnumAiProviderKind.Embeddings;
 
+    // Optional: the key of an ollama.com account, only for the Internet search of the assistant.
+    private string WebSearchKeyHelp => Provider.HasWebSearchApiKey
+        ? "Saved: leave it empty to keep it."
+        : "Optional: the key of an ollama.com account, so that the assistant can search the Internet (ollama.com's web search). The model still runs where Host says. It is kept encrypted.";
+
     private string ModelHelp => IsEmbeddings
         ? "The embedding model, for example qwen3-embedding:0.6b or text-embedding-3-small."
         : "The model of the provider, for example gpt-4o-mini, claude-haiku-4-5 or qwen3.5:9b.";
@@ -91,7 +107,8 @@
         Kind = Provider.Kind ?? EnumAiProviderKind.Chat,
         ContextWindow = Provider.ContextWindow,
         Host = Provider.Host,
-        HasApiKey = Provider.HasApiKey
+        HasApiKey = Provider.HasApiKey,
+        HasWebSearchApiKey = Provider.HasWebSearchApiKey
     };
 
     private void OnKindChanged(string kind)

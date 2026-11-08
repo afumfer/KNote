@@ -319,7 +319,8 @@ public class KntLocalSettings
             Kind = Text(node, "kind") ?? EnumAiProviderKind.Chat,
             ContextWindow = node["contextWindow"] is JsonValue contextWindow && contextWindow.TryGetValue<int>(out var tokens) ? tokens : null,
             Host = Text(node, "host"),
-            HasApiKey = !string.IsNullOrEmpty(Text(node, "apiKey"))
+            HasApiKey = !string.IsNullOrEmpty(Text(node, "apiKey")),
+            HasWebSearchApiKey = !string.IsNullOrEmpty(Text(node, "webSearchApiKey"))
         }).ToList();
 
     /// <summary>
@@ -332,7 +333,7 @@ public class KntLocalSettings
 
         foreach (var provider in providers)
         {
-            var check = ToProviderRef(provider, provider.ApiKey);
+            var check = ToProviderRef(provider, provider.ApiKey, null);
             if (!check.IsValid())
                 return Failed(result, $"{provider.Alias}: {check.GetErrorMessage()}");
         }
@@ -351,6 +352,10 @@ public class KntLocalSettings
                 var apiKey = !string.IsNullOrEmpty(provider.ApiKey)
                     ? _protector.Protect(provider.ApiKey.Trim())
                     : provider.Index >= 0 && provider.Index < current.Count ? Text(current[provider.Index], "apiKey") : "";
+                // Only an Ollama chat model searches the Internet with its own key (ollama.com's web search).
+                var webSearchApiKey = !HasOwnWebSearch(provider) || provider.RemoveWebSearchApiKey ? null
+                    : !string.IsNullOrEmpty(provider.WebSearchApiKey) ? _protector.Protect(provider.WebSearchApiKey.Trim())
+                    : provider.Index >= 0 && provider.Index < current.Count ? Text(current[provider.Index], "webSearchApiKey") : null;
                 list.Add(new JsonObject
                 {
                     ["alias"] = provider.Alias.Trim(),
@@ -359,7 +364,8 @@ public class KntLocalSettings
                     ["kind"] = provider.Kind ?? EnumAiProviderKind.Chat,
                     ["contextWindow"] = ContextWindowOf(provider),
                     ["host"] = provider.Provider == EnumAiProvider.Ollama ? provider.Host?.Trim() : null,
-                    ["apiKey"] = apiKey
+                    ["apiKey"] = apiKey,
+                    ["webSearchApiKey"] = webSearchApiKey
                 });
             }
             Section(Section(file, "Local"), "ai")["providers"] = list;
@@ -384,23 +390,29 @@ public class KntLocalSettings
         if (provider == null)
             return Failed(new Result<string>(), "There is no AI provider to test.");
 
+        var current = AiProvidersOf(_localData.ReadConfig());
+        string Stored(string name)
+        {
+            var stored = provider.Index >= 0 && provider.Index < current.Count ? Text(current[provider.Index], name) : null;
+            return KntSecretProtector.IsProtected(stored) ? _protector.Unprotect(stored) : stored;
+        }
+
         var apiKey = provider.ApiKey?.Trim();
         if (string.IsNullOrEmpty(apiKey))
-        {
-            var current = AiProvidersOf(_localData.ReadConfig());
-            var stored = provider.Index >= 0 && provider.Index < current.Count ? Text(current[provider.Index], "apiKey") : null;
-            apiKey = KntSecretProtector.IsProtected(stored) ? _protector.Unprotect(stored) : stored;
-        }
+            apiKey = Stored("apiKey");
+        var webSearchApiKey = provider.WebSearchApiKey?.Trim();
+        if (string.IsNullOrEmpty(webSearchApiKey) && !provider.RemoveWebSearchApiKey)
+            webSearchApiKey = Stored("webSearchApiKey");
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(AiProviderTestTimeout);
-        return await AiProviderTester.TestAsync(ToProviderRef(provider, apiKey), timeout.Token);
+        return await AiProviderTester.TestAsync(ToProviderRef(provider, apiKey, webSearchApiKey), timeout.Token);
     }
 
     // A model that Ollama has to load first can take a while.
     public static readonly TimeSpan AiProviderTestTimeout = TimeSpan.FromSeconds(90);
 
-    private static AiProviderRef ToProviderRef(LocalAiProviderDto provider, string apiKey) => new()
+    private static AiProviderRef ToProviderRef(LocalAiProviderDto provider, string apiKey, string webSearchApiKey) => new()
     {
         Alias = provider.Alias?.Trim(),
         Provider = provider.Provider,
@@ -408,8 +420,12 @@ public class KntLocalSettings
         Kind = provider.Kind ?? EnumAiProviderKind.Chat,
         ContextWindow = ContextWindowOf(provider),
         Host = provider.Host?.Trim(),
-        ApiKey = apiKey
+        ApiKey = apiKey,
+        WebSearchApiKey = HasOwnWebSearch(provider) ? webSearchApiKey : null
     };
+
+    private static bool HasOwnWebSearch(LocalAiProviderDto provider) =>
+        provider.Provider == EnumAiProvider.Ollama && (provider.Kind ?? EnumAiProviderKind.Chat) == EnumAiProviderKind.Chat;
 
     // Only an Ollama chat model has its own context size.
     private static int? ContextWindowOf(LocalAiProviderDto provider) =>

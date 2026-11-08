@@ -18,6 +18,22 @@ public class AiAssistantWebApiService : BaseService, IAiAssistantWebApiService
 
     }
 
+    public Task<Result<List<AiActionDto>>> RunActionsAsync(List<AiActionDto> actions, CancellationToken cancellationToken = default) =>
+        SendAsync<List<AiActionDto>>(ct => _httpClient.PostAsJsonAsync("api/aiassistant/actions", actions, ct), "Run the actions of the AI assistant",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<AiModelCapabilitiesDto>> GetCapabilitiesAsync(string providerAlias, CancellationToken cancellationToken = default) =>
+        SendAsync<AiModelCapabilitiesDto>(ct => _httpClient.GetAsync($"api/aiassistant/providers/{Uri.EscapeDataString(providerAlias)}/capabilities", ct),
+            "Get what the AI model can do", notifyErrors: false, cancellationToken: cancellationToken);
+
+    public Task<Result<AiChatAttachmentDto>> AddAttachmentAsync(AiChatAttachmentUploadDto attachment, CancellationToken cancellationToken = default) =>
+        SendAsync<AiChatAttachmentDto>(ct => _httpClient.PostAsJsonAsync("api/aiassistant/sessions/attachments", attachment, ct), "Attach the file",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<AiChatAttachmentContentDto>> GetAttachmentPreviewAsync(Guid sessionNoteId, Guid resourceId, CancellationToken cancellationToken = default) =>
+        SendAsync<AiChatAttachmentContentDto>(ct => _httpClient.GetAsync($"api/aiassistant/sessions/{sessionNoteId}/attachments/{resourceId}/preview", ct),
+            "Get the image of the conversation", notifyErrors: false, cancellationToken: cancellationToken);
+
     public Task<Result<List<AiProviderInfoDto>>> GetProvidersAsync(CancellationToken cancellationToken = default) =>
         SendAsync<List<AiProviderInfoDto>>(ct => _httpClient.GetAsync("api/aiassistant/providers", ct), "Get AI providers",
             cancellationToken: cancellationToken);

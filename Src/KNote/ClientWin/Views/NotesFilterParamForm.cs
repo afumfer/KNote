@@ -38,6 +38,8 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
 
         buttonFolderClear.AlignToTextBox(textFolder);
         buttonFolderSelect.AlignToTextBox(textFolder);
+        buttonModifiedFrom.AlignToTextBox(textModifiedFrom);
+        buttonModifiedTo.AlignToTextBox(textModifiedTo);
 
         buttonAddAttribute.SetKntIcon(KntIcon.Add);
         buttonRemoveAttribute.SetKntIcon(KntIcon.Remove);
@@ -96,6 +98,9 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
 
     private void buttonFilter_Click(object sender, EventArgs e)
     {
+        if (!TryGetDate(textModifiedFrom, out var modifiedFrom) || !TryGetDate(textModifiedTo, out var modifiedTo))
+            return;
+
         var selectedNoteType = comboNoteType.SelectedItem as NoteTypeDto;
 
         var notesFilter = new NotesFilterDto
@@ -107,6 +112,8 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
             FolderId = _folderId,
             IncludeChildFolders = _folderId != null && checkIncludeChildFolders.Checked,
             AttributesFilter = new List<AtrFilterDto>(_attributesFilter),
+            ModifiedFrom = modifiedFrom,
+            ModifiedTo = modifiedTo,
             MeaningText = _meaningTextShown && !string.IsNullOrWhiteSpace(textMeaningText.Text) ? textMeaningText.Text.Trim() : null
         };
 
@@ -247,12 +254,37 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         _meaningTextShown = visible;
     }
 
+    // Empty, no date; a text that is not a date is said, not ignored: the filter would give other notes.
+    private bool TryGetDate(TextBox text, out DateTime? date)
+    {
+        date = _ctrl.Store.KntTextUtils.TextToDateTime(text.Text);
+        if (date != null || string.IsNullOrWhiteSpace(text.Text))
+            return true;
+
+        ShowInfo($"'{text.Text}' is not a date.");
+        text.Focus();
+        return false;
+    }
+
+    private void buttonModifiedFrom_Click(object sender, EventArgs e) => textModifiedFrom.Text = SelectDate(textModifiedFrom.Text);
+
+    private void buttonModifiedTo_Click(object sender, EventArgs e) => textModifiedTo.Text = SelectDate(textModifiedTo.Text);
+
+    // The text stays as it was if the selector is canceled.
+    private string SelectDate(string text)
+    {
+        using var selector = new DateSelectorForm { Date = _ctrl.Store.KntTextUtils.TextToDateTime(text) ?? DateTime.Today };
+        return selector.ShowDialog() == DialogResult.OK ? selector.Date.ToShortDateString() : text;
+    }
+
     private void CleanView()
     {
         textTopic.Text = "";
         textMeaningText.Text = "";
         textDescription.Text = "";
         textTags.Text = "";
+        textModifiedFrom.Text = "";
+        textModifiedTo.Text = "";
         comboNoteType.SelectedIndex = comboNoteType.Items.Count > 0 ? 0 : -1;
         ClearFolderSelection();
         _attributesFilter.Clear();

@@ -1,0 +1,21 @@
+/* Only theme variables, so it follows the light/dark theme. */
+
+.ai-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+}
+
+.ai-attachment-image {
+    max-width: 16rem;
+    max-height: 12rem;
+    border-radius: var(--rz-border-radius);
+}
+
+.ai-attachment-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875em;
+}

@@ -460,6 +460,10 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   (`KntEditView.ContentScriptsEnabled = false`, solo para el HTML mostrado con `ShowNavigationContent`; una URL
   navegada sí los ejecuta). El chat de IA (`AiChatHtml`) y el chat room (`ChatRoomHtml`) tienen su propia página
   con scripts y escapan el HTML.
+- **Citas `#123`**: las vistas WebView2 de la nota, de sus tareas, del post-it y las respuestas del asistente pasan el
+  HTML por `NoteCitationLinker.LinkForDesktop` (enlaces `knt-note:123`) y `KntEditView.LinkHandler` para la navegación:
+  `Core/NoteCitations` abre el editor de la nota fuera del callback del WebView2 (la página del asistente deja pasar ese
+  esquema en su script). **No** se aplica al editor HTML: el enlace acabaría guardado en la nota.
   La excepción son los **diagramas Mermaid** (`KntEditView.RenderDiagrams`, activo en las vistas de la nota, de su
   tarea y del post-it): solo si el HTML tiene `class="mermaid"`, esa navegación activa los scripts y la página
   (`KntEditViewControl/KntDiagrams.Page`) empieza con una CSP `script-src https://knote.diagrams/` y acaba con
@@ -646,6 +650,29 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
   (WebView2 incluido). Termínalo con `Environment.Exit`: `Store.SaveConfig()` escribe siempre en
   `%LocalAppData%\KNote`, así que cerrar la ventana como un usuario sobrescribiría la configuración real.
 
+## KNote Atlas: contexto de la IA
+
+Etapa 1 (lógica en `Service`, ver «Contexto de la IA» en el `CLAUDE.md` raíz). **Tools › KNote Atlas** (debajo de «AI
+Assistant»): una sola ventana no modal, `AtlasContextCtrl` (`[KntAuthorize(Guest)]`) y `AtlasContextForm`, con las
+pestañas «Repository profile», «Glossary», «Task instructions» y «What the AI receives» (la tarea, un texto de prueba y
+el mensaje montado; un Guest no lo ve). Empieza en el repositorio activo y la lista de arriba elige otro entre los
+enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
+otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»
+abre el `NoteEditorCtrl` de siempre y la ventana se refresca con su `SavedEntity` (el editor puede seguir abierto después
+de cerrarla: entonces no hace nada). `Views/AiPromptViewForm` (texto de solo lectura) es «See KNote's» y, en el asistente,
+**View › What the AI receives**. Una parte nueva (la política de ruido, etapa 2) es otra pestaña; si tiene lógica propia,
+un `Ctrl` embebido como las pestañas del editor de repositorio. Tests en `AtlasContextCtrlTests`.
+
+**El asistente** (`KNoteAIAssistantCtrl`): antes de cada turno monta el mensaje de sistema con `AiAssistantContext`
+(`KNote.Ai`) y el `ServiceRef` de la conversación (`LastSystemPrompt`). `RootSystemChat` es solo la capa de
+instrucciones (D6): con su valor de serie (`KntConst.DefaultRootSystemChat`) van las de KNote; con el `System` de un
+`@Prompt` del catálogo o el que fija un script (también el motor «ln»), sustituyen solo esas, y las reglas fijas, el
+perfil y el glosario se mantienen. Sin repositorio o si falla, van las reglas y las instrucciones de serie. La búsqueda en
+Internet es `WebSearch` (apagada en `RestartAIAssistant` y al abrir una sesión; `RunTurnAsync` añade `AiWebSearch.ToolsFor` y sus
+reglas); en `KNoteAIAssistantForm`, el botón **Internet** (`_buttonWebSearch`, creado en código junto a **Attach**, solo con
+`SupportsWebSearch`) y el aviso `_webSearchNotice`. Los enlaces a Internet de las respuestas llevan ↗ (`KNoteAIChat.css`) y se abren
+en el navegador (`AiChatWebRenderer`).
+
 ## KNote Atlas: búsqueda por significado
 
 Etapa 0 de KNote Atlas (la lógica está en `Service`, ver «Índice semántico» en el `CLAUDE.md` raíz). Los textos del
@@ -701,7 +728,25 @@ La construcción del `IChatClient` por proveedor (`AiChatClientFactory`) y las t
 `Ai/`), que usa también `Server`; ahí están además todos los paquetes NuGet de IA (`ClientWin` los recibe por
 la referencia al proyecto). `KNoteAIAssistantCtrl.ApplyProvider` los combina:
 `AiChatClientFactory.Create(providerRef, new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef)).GetTools())`.
+Cada turno envía las tools de ese momento (`KNoteAiTools.GetToolsAsync`, que dependen del índice y del glosario).
+Lo que hace el modelo («Thinking…», «Using search_notes») se ve como en la Web, hasta que vuelve a escribir
+(`ActivityChanged`): en la barra de estado y en la vista de chat, bajo la respuesta que llega (`AiChatWebRenderer.ShowActivity`).
+El razonamiento va plegado encima de la respuesta (`AiChatHtml`); `replaceLast` lo deja abierto entre repintados.
+Las acciones: la tarjeta es HTML de `AiChatHtml` y responde con `postMessage('knt-actions:...')`, que `AiChatWebRenderer`
+convierte en `ActionsAnswered`; `KNoteAIAssistantCtrl.AnswerActionsAsync` ejecuta lo aceptado. En la vista Markdown, sin
+tarjeta, se pregunta con un cuadro de diálogo (todo o nada). `KNoteAiToolsHost.CanChangeNote` no deja cambiar una nota abierta
+en un editor (`Store.IsNoteBeingEdited`: al guardar pisaría el cambio) y `OnNoteChanged` publica `EntitySaved<NoteExtendedDto>`.
 
+- **Archivos del mensaje** (`KNoteAIAssistantCtrl.PendingAttachments`, solo con `PersistSession`): el botón **Attach**, Ctrl+V
+  (`Utils/KntClipboardFiles`, común con el chat room) o soltarlos en la caja; `KNoteAIAssistantForm` los muestra en `_attachmentsBar`.
+  `SaveAttachmentsAsync` los guarda antes de enviar y deja `TurnAttachments`, que `RunTurnAsync` pasa a `AiTurnAttachments`; si el
+  modelo falla, se quedan. Las imágenes de la conversación van como `data:` (`PreviewOf`, cargadas al abrir una sesión): la URL de un
+  recurso puede ser de otra instalación.
+- **Foco y scroll del chat**: al desactivar la caja del mensaje, WinForms pasa el foco al siguiente control, el WebView2. Al terminar el
+  turno entraba en la página, en su primer elemento enfocable (el `<summary>` del razonamiento de la primera respuesta), y el navegador
+  subía a mostrarlo. `StatusProcessing` deja `ActiveControl = null` antes de desactivarla. Una imagen del mensaje toma su altura al
+  cargarse, después de bajar al final: la página vuelve a bajar en su `load` (si no, deja de seguir la respuesta y el indicador de
+  espera queda fuera de la vista). Con imágenes lisas no se ve: se decodifican al instante; hay que probarlo con una tipo foto.
 - `KNoteAiTools` recibe `IKntService` (no `ServiceRef`), así que sus tests corren contra los fakes de
   servicio (`Fakes/FakeKntService.cs`) sin base de datos real. Lo que `create_task` hace distinto en cada
   aplicación lo pide a un `IKNoteAiToolsHost`; el de `ClientWin` es **`Core/KNoteAiToolsHost`**:

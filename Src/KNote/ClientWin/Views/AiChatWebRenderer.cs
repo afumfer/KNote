@@ -20,6 +20,7 @@ internal sealed class AiChatWebRenderer : IDisposable
     private readonly KntEditView _editView;
     private readonly string _markdownStyle;
     private readonly IReadOnlyCollection<string> _shortcuts;
+    private readonly Func<Guid, string> _previewOf;
     private readonly System.Windows.Forms.Timer _repaintTimer;
 
     private CoreWebView2 _core;
@@ -29,13 +30,17 @@ internal sealed class AiChatWebRenderer : IDisposable
 
     private string _providerAlias;
     private Func<string> _answerSoFar;
-    private string _paintedAnswer;
+    private Func<string> _reasoningSoFar;
+    private string _painted;
+    private string _activity;
+    private bool _turnRunning;
     private bool _showModelInfo = true;
 
     // shortcuts: the host's keyboard shortcuts (AiChatHtml.ShortcutText), raised by ShortcutPressed when they
     // are pressed while the chat has the focus.
-    public AiChatWebRenderer(KntEditView editView, string markdownStyle, IReadOnlyCollection<string> shortcuts)
+    public AiChatWebRenderer(KntEditView editView, string markdownStyle, IReadOnlyCollection<string> shortcuts, Func<Guid, string> previewOf = null)
     {
+        _previewOf = previewOf;
         _editView = editView;
         _markdownStyle = markdownStyle;
         _shortcuts = shortcuts;
@@ -48,6 +53,9 @@ internal sealed class AiChatWebRenderer : IDisposable
     // Raised outside the WebView2 callback, so its handler may open a modal dialog.
     public event EventHandler<string> ShortcutPressed;
 
+    // The answer to a card of actions. Raised outside the WebView2 callback, as ShortcutPressed.
+    public event EventHandler<AiChatHtml.ActionsAnswer> ActionsAnswered;
+
     // Shows the whole conversation, replacing whatever the view had. providerAlias: the provider of its answers.
     public async Task LoadAsync(IEnumerable<AiChatTurnDto> turns, string providerAlias)
     {
@@ -58,7 +66,7 @@ internal sealed class AiChatWebRenderer : IDisposable
         // Completed from the NavigationCompleted callback of WebView2: what follows must not run inside it.
         var pageLoaded = _pageLoaded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        await _editView.ShowNavigationContent(AiChatHtml.Page(turns, providerAlias, _markdownStyle, _showModelInfo, _shortcuts));
+        await _editView.ShowNavigationContent(AiChatHtml.Page(turns, providerAlias, _markdownStyle, _showModelInfo, _shortcuts, _previewOf));
 
         // Out of a possible WebView2 callback before going on: the caller may show a message box (see the
         // WebView2 notes of ClientWin/CLAUDE.md).
@@ -76,25 +84,49 @@ internal sealed class AiChatWebRenderer : IDisposable
     // A new turn: the question and, below it, the place of its answer (a typing indicator until it arrives).
     // turns is the conversation before this turn, to reload the page first if it is not in step with it
     // (after a failed turn). answerSoFar, for a streamed answer, returns the text received so far: it is
-    // repainted periodically until EndTurn/FailTurn.
-    public async Task BeginTurnAsync(IEnumerable<AiChatTurnDto> turns, string prompt, string providerAlias, Func<string> answerSoFar)
+    // repainted periodically until EndTurn/FailTurn, as reasoningSoFar, with what has arrived of the reasoning.
+    public async Task BeginTurnAsync(IEnumerable<AiChatTurnDto> turns, string prompt, string providerAlias, Func<string> answerSoFar,
+        Func<string> reasoningSoFar = null, IEnumerable<AiChatAttachmentDto> attachments = null)
     {
         if (!_pageInSync)
             await LoadAsync(turns, providerAlias);
 
         _providerAlias = providerAlias;
         _answerSoFar = answerSoFar;
-        _paintedAnswer = null;
+        _reasoningSoFar = reasoningSoFar;
+        _painted = null;
+        _activity = null;
+        _turnRunning = true;
 
-        Run(AiChatHtml.ScriptCall("append", AiChatHtml.UserMessage(prompt) + AiChatHtml.PendingAnswer(providerAlias, null)));
+        // Without a prompt, a turn the app sends by itself.
+        Run(AiChatHtml.ScriptCall("append", (prompt == null ? "" : AiChatHtml.UserMessage(prompt, attachments, _previewOf)) + AiChatHtml.PendingAnswer(providerAlias, null)));
 
-        if (answerSoFar != null)
+        if (answerSoFar != null || reasoningSoFar != null)
             _repaintTimer.Start();
     }
+
+    // The conversation changed in what is already painted (a card rejected by a new message): the next turn loads it again.
+    public void Invalidate() => _pageInSync = false;
+
+    // The last answer again, once its card is answered.
+    public void ReplaceLastTurn(AiChatTurnDto turn) =>
+        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.AssistantMessage(turn, _providerAlias)));
+
+    // What the model is doing (null: nothing to say) under the answer arriving.
+    public void ShowActivity(string activity)
+    {
+        _activity = activity;
+        if (_turnRunning)
+            PaintPending(_answerSoFar?.Invoke(), _reasoningSoFar?.Invoke());
+    }
+
+    private void PaintPending(string answer, string reasoning) =>
+        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, answer, _activity, reasoning)));
 
     public void EndTurn(AiChatTurnDto turn)
     {
         _repaintTimer.Stop();
+        _turnRunning = false;
         _answerSoFar = null;
         Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.AssistantMessage(turn, _providerAlias)));
     }
@@ -104,6 +136,7 @@ internal sealed class AiChatWebRenderer : IDisposable
     public void FailTurn()
     {
         _repaintTimer.Stop();
+        _turnRunning = false;
         Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.FailedAnswer(_providerAlias, _answerSoFar?.Invoke())));
         _answerSoFar = null;
         _pageInSync = false;
@@ -130,11 +163,13 @@ internal sealed class AiChatWebRenderer : IDisposable
     private void RepaintAnswer()
     {
         var answer = _answerSoFar?.Invoke();
-        if (string.IsNullOrEmpty(answer) || answer == _paintedAnswer)
+        var reasoning = _reasoningSoFar?.Invoke();
+        var painted = answer + "\0" + reasoning;
+        if ((string.IsNullOrEmpty(answer) && string.IsNullOrEmpty(reasoning)) || painted == _painted)
             return;
 
-        _paintedAnswer = answer;
-        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.PendingAnswer(_providerAlias, answer)));
+        _painted = painted;
+        PaintPending(answer, reasoning);
     }
 
     // Not awaited: WebView2 runs the scripts in the order they are sent, and awaiting them would resume the
@@ -170,7 +205,7 @@ internal sealed class AiChatWebRenderer : IDisposable
         core.WebMessageReceived += Core_WebMessageReceived;
     }
 
-    // The page only posts the host's shortcuts (see AiChatHtml); anything else is ignored.
+    // The page only posts the host's shortcuts and the answer to a card (see AiChatHtml); anything else is ignored.
     private void Core_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         string shortcut;
@@ -183,7 +218,9 @@ internal sealed class AiChatWebRenderer : IDisposable
             return;  // Not a string.
         }
 
-        if (_shortcuts.Contains(shortcut))
+        if (AiChatHtml.TryReadActionsAnswer(shortcut, out var answer))
+            _editView.BeginInvoke(() => ActionsAnswered?.Invoke(this, answer));
+        else if (_shortcuts.Contains(shortcut))
             _editView.BeginInvoke(() => ShortcutPressed?.Invoke(this, shortcut));
     }
 

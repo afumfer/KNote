@@ -385,15 +385,10 @@ public class KntChatRoomsAddImageAsyncCommand : KntCommandServiceBase<ChatRoomIm
         return _content;
     }
 
-    // The name without folders, with only letters, digits, spaces, '.', '_' and '-' (anything else could break the
-    // file name or the Markdown link), and the extension of its type.
+    // A safe name (anything else could break the file name or the Markdown link), with the extension of its type.
     private string FileName()
     {
-        var name = new string(System.IO.Path.GetFileName((Param.FileName ?? "").Replace('\\', '/'))
-            .Select(c => char.IsLetterOrDigit(c) || c is ' ' or '.' or '_' or '-' ? c : '_')
-            .ToArray()).Trim();
-        if (string.IsNullOrWhiteSpace(System.IO.Path.GetFileNameWithoutExtension(name)))
-            name = "image";
+        var name = AiAttachmentRules.SafeFileName(Param.FileName, "image");
         if (ChatRoomImageDto.ContentTypeOf(name) != Param.ContentType)
             name = System.IO.Path.GetFileNameWithoutExtension(name) + "." + Param.ContentType.Split('/')[1].Replace("jpeg", "jpg");
         return name.Length <= 120 ? name : name[^120..];

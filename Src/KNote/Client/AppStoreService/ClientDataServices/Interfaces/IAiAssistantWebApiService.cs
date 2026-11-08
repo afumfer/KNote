@@ -12,9 +12,18 @@ public interface IAiAssistantWebApiService
     // stream with an Error event, already notified to the user.
     IAsyncEnumerable<AiChatStreamEventDto> ChatAsync(AiChatRequestDto request, CancellationToken cancellationToken = default);
 
+    // Runs what the user accepted in the card: each action comes back saying what happened.
+    Task<Result<List<AiActionDto>>> RunActionsAsync(List<AiActionDto> actions, CancellationToken cancellationToken = default);
+
     Task<Result<List<AiChatSessionInfoDto>>> GetSessionsAsync(CancellationToken cancellationToken = default);
 
     Task<Result<AiChatSessionDto>> GetSessionAsync(Guid noteId, CancellationToken cancellationToken = default);
 
     Task<Result<AiChatSessionDto>> SaveSessionAsync(AiChatSessionDto session, CancellationToken cancellationToken = default);
+
+    Task<Result<AiModelCapabilitiesDto>> GetCapabilitiesAsync(string providerAlias, CancellationToken cancellationToken = default);
+
+    Task<Result<AiChatAttachmentDto>> AddAttachmentAsync(AiChatAttachmentUploadDto attachment, CancellationToken cancellationToken = default);
+
+    Task<Result<AiChatAttachmentContentDto>> GetAttachmentPreviewAsync(Guid sessionNoteId, Guid resourceId, CancellationToken cancellationToken = default);
 }

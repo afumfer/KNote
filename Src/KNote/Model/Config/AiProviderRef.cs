@@ -96,6 +96,22 @@ public class AiProviderRef : SmartModelDtoBase, IAiProviderIdentity
         }
     }
 
+    // Only for an Ollama chat model: the API key of an ollama.com account, used only by the Internet search of the
+    // assistant (ollama.com's web search; the model still runs where Host says). A secret, like ApiKey.
+    private string _webSearchApiKey;
+    public string WebSearchApiKey
+    {
+        get { return _webSearchApiKey; }
+        set
+        {
+            if (_webSearchApiKey != value)
+            {
+                _webSearchApiKey = value;
+                OnPropertyChanged("WebSearchApiKey");
+            }
+        }
+    }
+
     // Only required/used when Provider == EnumAiProvider.Ollama.
     private string _host;
     public string Host
@@ -152,6 +168,10 @@ public class AiProviderRef : SmartModelDtoBase, IAiProviderIdentity
 
     // A paid service: the content sent to it leaves this computer's network (KNote marks it wherever models are listed).
     public bool IsPaid => !string.IsNullOrEmpty(Provider) && Provider != EnumAiProvider.Ollama;
+
+    // The assistant can search the Internet (KNote Atlas, chapter 23): OpenAI and Anthropic search themselves; with
+    // Ollama, KNote searches with ollama.com's web search, which needs its key.
+    public bool SupportsWebSearch => IsChat && (IsPaid || !string.IsNullOrWhiteSpace(WebSearchApiKey));
 
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

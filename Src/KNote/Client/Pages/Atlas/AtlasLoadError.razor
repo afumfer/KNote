@@ -1,0 +1,11 @@
+@* A section of the page KNote Atlas that could not read its part: what failed and Retry. *@
+
+<div class="knt-load-error">
+    <span class="knt-load-error-text"><RadzenIcon Icon="error" /> @Text</span>
+    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Click="Retry" />
+</div>
+
+@code {
+    [Parameter][EditorRequired] public string Text { get; set; } = "";
+    [Parameter] public EventCallback Retry { get; set; }
+}

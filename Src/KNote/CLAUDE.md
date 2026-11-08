@@ -117,7 +117,8 @@ que se vean nítidos con cualquier escalado de Windows; ver `KntIcons/CLAUDE.md`
 
 `KNote.Ai` es lo común del asistente de IA: `AiChatClientFactory.Create(AiProviderRef, tools)` construye el
 `IChatClient` de `Microsoft.Extensions.AI` para OpenAI (Responses API), Anthropic u Ollama, y `KNoteAiTools`
-expone a los modelos `search_notes`, `get_note_details` y `create_task` sobre la capa `Service`. Lo que
+expone a los modelos sus herramientas sobre la capa `Service`: `search_notes`, `get_note_details` y `create_task`, y las
+de solo lectura de KNote Atlas (`KNoteAiQueryTools.cs`, ver «Herramientas de consulta del asistente» más abajo). Lo que
 `create_task` hace distinto en cada aplicación (dónde guarda la nota y cómo se la muestra al usuario) lo
 aporta un `IKNoteAiToolsHost` (el de `ClientWin` es `Core/KNoteAiToolsHost`). Para KNote Atlas (ver «Índice
 semántico» más abajo) da también los modelos de embeddings: `AiEmbeddingGeneratorFactory` (Ollama y OpenAI;
@@ -161,7 +162,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
 - `Service/Core` — clases base `KntService`/`IKntService` más `ServiceRef` (selección de repo/ORM, ver
   arriba).
 - `Service/Interfaces` + `Service/Services` — un par interfaz/implementación por objeto de dominio (Note,
-  Folder, KAttribute, NoteType, SystemValues, User, AiSession, ChatRoom).
+  Folder, KAttribute, NoteType, TraceNoteType, SystemValues, User, AiSession, ChatRoom, SemanticSearch, AtlasContext).
 - `Service/ServicesCommands` — clases de comando (`KntNoteCommands`, `KntFolderCommands`, etc.) construidas
   sobre `IPluginCommand`/`KntCommandServiceBase`. Exponen las operaciones de servicio a `KntScript`, el
   "lenguaje minimalista de automatización" mencionado en el README, invocado desde la consola de scripts de
@@ -263,8 +264,8 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   con `Model/Dto/AiChatSessionTranscript`: Markdown legible con un comentario HTML oculto por mensaje (el del
   asistente lleva el uso en JSON), del que se recuperan los turnos (`AiChatTurnDto`) exactamente; es el
   formato común de `ClientWin` y la Web, que se retoman las sesiones la una a la otra (con su proveedor y
-  modelo si siguen configurados: `AiProviderSelection.ForSession`). `search_notes` deja fuera estas notas y los
-  hilos del chat room (`NotesSearchDto.ExcludeNoteTypeIds`). Usos: `KNoteAIAssistantCtrl` (ver
+  modelo si siguen configurados: `AiProviderSelection.ForSession`). Las herramientas del asistente dejan fuera estas
+  notas y las demás del sistema. Usos: `KNoteAIAssistantCtrl` (ver
   `ClientWin/CLAUDE.md`) y `AiAssistantController` + página `AIAssistant` (ver `Server/CLAUDE.md` y
   `Client/CLAUDE.md`).
 - **Hilos del chat room** (`IKntService.ChatRooms`, comandos en `KntChatRoomCommands.cs`, Staff). Cada hilo es una
@@ -299,8 +300,11 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   - **Indexado** (`Service/Core/KntSemanticIndexer`, independiente del host, con progreso y cancelación entre notas; lo
     hecho se conserva): *crear / actualizar* procesa las notas pendientes, *rehacer* recalcula todos los vectores
     mientras la búsqueda sigue con los anteriores, ambos Admin; *poner al día* (antes de cada búsqueda: 50 notas o unos
-    10 s, nada si hay otra ejecución en marcha) es Guest. Estado en `AI_INDEX_STATE` (`KntSemanticIndexState`). El
-    índice contiene **todas** las notas salvo las de los tipos del sistema (`KntSystemNotes.SystemNoteTypeNames`:
+    10 s, nada si hay otra ejecución en marcha) es Guest. Los vectores de una nota se piden en lotes de 32 fragmentos
+    (`EmbeddingBatchSize`: una nota de cientos en una llamada superaba el tiempo máximo del proveedor) y sus filas se
+    sustituyen una vez al final; las puestas al día rápidas (antes de una búsqueda y de las parecidas) dejan para la
+    indexación completa las notas con más de 64 fragmentos por calcular (`QuickRefreshMaxChunks`). Estado en `AI_INDEX_STATE` (`KntSemanticIndexState`). El
+    índice contiene **todas** las notas salvo las de los tipos del sistema (`KntConst.SystemNoteTypeNames`:
     sesiones, chat room, consultas de prueba, informes): los permisos se aplican al buscar. Los comandos que cambian una
     nota (guardar, carpeta, etiquetas, recursos, tareas) y los que cambian su fragmento de datos sin tocarla (renombrar
     o mover una carpeta, renombrar un tipo o un atributo) llaman a `MarkStaleAsync`; un fallo al marcar no hace fallar
@@ -319,12 +323,111 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
     guarda nada; solo esa nota se pone al día.
   - **Evaluación de la búsqueda** (ProjectManager, solo en la Web): la nota del sistema «Search test queries»
     (`@KNoteTestQueries`, tabla `SearchTestQueries`) en la carpeta «KNote Atlas», una consulta por petición
-    (`EvaluateQueryAsync`: palabras y significado en cada índice, con y sin la instrucción) y el informe
-    (`SearchEvaluationReport`), que se guarda como nota `@KNoteSearchEvaluation` (`KntSearchEvaluationNotes`).
+    (`EvaluateQueryAsync`: palabras y significado en cada índice, con y sin la instrucción; por cada una, posición,
+    esperadas entre las 10 primeras, el parecido de cada resultado y el tiempo) y el informe (`SearchEvaluationReport`,
+    con el parecido de la primera esperada y del resultado 10 y la tabla «si el corte fuera…», `Cutoffs`), que se guarda como nota `@KNoteSearchEvaluation` (`KntSearchEvaluationNotes`).
   - Tests: reglas puras en `Tests/*` (`NoteChunkBuilderTests`, `SemanticSearchRulesTests`...), servicio en
     `Tests/ServiceTests/Semantic*`, `SimilarNotesServiceTests` y `SearchEvaluationServiceTests` con un generador falso y
     determinista (`Tests/Helpers/FakeEmbeddingGenerators`, 1024 dimensiones: con menos, textos sin relación salían
     parecidos), y la API en `Tests/InProcessIntegrationTests/Semantic*` y `SearchByMeaningInProcessTests`.
+- **Contexto de la IA (KNote Atlas, etapa 1)** (`IKntService.AtlasContext`, comandos en `KntAtlasContextCommands.cs`;
+  especificación en `C:\Dev\KNote-Atlas\03-Etapa-1.md`). Tres notas del sistema en la carpeta «KNote Atlas»
+  (`Service/Core/KntAtlasNotes`, creadas con `KntSystemNotes`): el perfil (`@KNoteProfile`) y el glosario
+  (`@KNoteGlossary`, tabla `Term | Meaning | Also written as`), uno de cada uno (con varios, el más antiguo), y las
+  instrucciones de cada tarea (`@KNoteTaskPrompt`, atributos `Task`, `Mode` = `Add`/`Replace` y `Active`, una activa por
+  tarea). Las ventanas (Guest) no crean nada; crear las notas es de ProjectManager. Lo que recibe la IA lo monta
+  `Model/Core/AiPromptComposer` en capas (reglas fijas de `AiTaskCatalog` con el usuario, su rol, el repositorio y la
+  fecha → instrucciones de la tarea, de serie más o en lugar de la nota → perfil recortado a 2.000 palabras → términos
+  del glosario de la conversación), sin los comentarios HTML (las ayudas de las plantillas, `AtlasTemplates`) ni los
+  apartados vacíos (`AtlasMarkdown.Clean`). Los términos (`GlossaryTable.Find`: sin mayúsculas ni acentos, por palabra
+  completa y por sus variantes) se ordenan por su primera aparición en la conversación: un término nuevo solo se añade
+  al final, para no romper la caché del proveedor. `ComposeAsync` es Staff; `KNote.Ai/AiAssistantContext` lo usa en el
+  asistente de las dos apps y, si falla, monta solo las reglas y las instrucciones de serie. **Regla de guardado**: las
+  notas del perfil, el glosario, las instrucciones y las consultas de prueba (`KntAtlasNotes.ProtectedNoteTypeNames`)
+  solo las guardan, borran, mueven o reetiquetan ProjectManager y Admin, también con la autorización de comandos
+  apagada (el `Server`): lo comprueban `KntNotesSaveAsyncCommand` (tipo nuevo y anterior), `Delete*` y los `Patch*`;
+  sin usuario, permitido. Los tres tipos son del sistema (`KntConst.SystemNoteTypeNames`). Tests en
+  `Tests/AtlasContextRulesTests`, `Tests/ServiceTests/AtlasContextServiceTests` y
+  `Tests/InProcessIntegrationTests/AtlasInProcessTests`.
+
+- **Herramientas de consulta del asistente (KNote Atlas, etapa 1)** (`Ai/KNoteAiQueryTools.cs`, parte de `KNoteAiTools`):
+  `find_notes_about`, `filter_notes`, `get_folder_tree`, `get_note_items`, `get_tasks` y `lookup_glossary`, además de
+  `search_notes` y `get_note_details`. La lista se calcula **en cada turno** (`GetToolsAsync`: `find_notes_about` solo con
+  índice utilizable y `lookup_glossary` solo con términos; `AiChatTurnStreamer.StreamAsync` recibe las del turno). El
+  modelo escribe nombres: `AiFolders` y los `Find*` los traducen (sin mayúsculas ni acentos) y, si faltan o podrían ser
+  varios, devuelven las opciones. Las notas del sistema (`KntConst.IsSystemNoteType`, `SystemFolderNames`) quedan fuera de
+  todas; `filter_notes` lo hace con `NotesFilterDto.ExcludeNoteTypeIds`, en la consulta, para que la paginación y el total
+  sean correctos. `get_note_details` corta la descripción en `MaxNoteTextLength` con un aviso y añade los términos del
+  glosario de la nota (`IKntAtlasContextService.FindGlossaryTermsAsync`). `get_tasks` usa `TasksPanelFilterDto.WindowFrom/To`,
+  una ventana exacta. `get_note_items` no da el texto de las alarmas *Execute KntScript*. Tests con repositorio real en
+  `Tests/ServiceTests/AiQueryToolsTests`, llamando a las herramientas por nombre como el modelo.
+- **Acciones del asistente (KNote Atlas, etapa 1)** (`Ai/KNoteAiActionTools.cs`, `Model/Core/AiActionRules`,
+  `Service/Core/KntAiActionExecutor`). `create_note` se hace al momento; las demás (`append_to_note`, `replace_note_text`, `move_note`, `set_tags`, `add_task`,
+  `add_alarm`, `add_email_alarm`, `set_attribute`, `relate_notes`, `create_folder`) solo se proponen: la
+  herramienta añade un `AiActionDto` a `TurnActions` y le dice al modelo que está pendiente. El turno lleva sus acciones
+  (`AiChatTurnDto.Actions`) y la app muestra la tarjeta: lo aceptado lo ejecuta `KNoteAiTools.ExecuteActionsAsync`, no el
+  modelo, con los comandos de siempre y los roles del usuario (el `Server` pone `EnforceAuthorization` en `chat` y `actions`).
+  El ejecutor vuelve a mirar la nota: no se fía de lo que llega. Un tipo aprobado para la conversación
+  (`AutoApprovedActionKinds`) y un cambio en una nota creada en ella se hacen al momento. `BeginTurn` recibe eso en cada turno:
+  el `Server` no guarda nada entre peticiones. **El historial que recibe el modelo lleva cada acción como lo que fue: la
+  llamada a la herramienta y su resultado** (`BuildMessages`). Con solo el texto de las respuestas, `qwen3.5:9b` aprendía que
+  proponer era escribirlo y dejaba de llamar a las herramientas (1 de 9; con las llamadas, 25 de 27). Una línea de estado en
+  sus respuestas la copiaba tal cual. Que no pregunte lo que ya pregunta la tarjeta se le dice en el resultado de la herramienta,
+  no en las reglas fijas: ahí se lee antes de llamar y hablaba de la tarjeta sin llamar a la herramienta (2 de 9) o daba lo
+  propuesto por hecho. Lo mismo a la inversa: lo hecho sin tarjeta le dice en el resultado que nada espera, porque el historial
+  le enseña a decir «pendiente en la tarjeta» tras un `Done:` (3 de 10). Y copia las llamadas que ve: el historial lleva las
+  etiquetas de `set_tags`, que sin ellas lo llamaba sin etiquetas. Una acción repetida (`AiActionRules.IsRepeated`) no se hace: los modelos pequeños repiten llamadas, y
+  con el tipo aprobado el texto se añadía varias veces sin preguntar. La casilla de la tarjeta solo aprueba los tipos aceptados
+  en ella y lo dice (`DontAskAgainText`). Nivel C (`create_folder`, `add_email_alarm`, `replace_note_text`): tarjeta también en una nota
+  nueva (`NeedsCard`). `replace_note_text` es lo único que pierde texto (las notas no guardan versiones): el texto nuevo va solo
+  en la tarjeta (`CardText`; `Text` es una línea, porque se guarda y va al modelo en cada turno) y lleva un sello del texto al
+  proponerlo (`TextStamp`): si la nota cambió mientras la tarjeta esperaba, no se sustituye. `open_note_editor` no es una acción
+  (no está en `Kinds`, no cambia nada): `IKNoteAiToolsHost.OpenNoteEditor` abre el editor en `ClientWin` y, en la Web, el evento
+  `openNote`. `create_note` no abre el editor (`OnNoteCreated(openEditor: false)`): con la nota abierta, lo siguiente que le pide
+  el modelo fallaría. `create_task` sí lo abre. `MinRoleOf`: `create_folder` pide ProjectManager, pero la herramienta se ofrece desde Staff para que el modelo
+  explique por qué no (sin ella, uno pequeño dice que la creó). Tras una tarea o una alarma el ejecutor guarda la nota: su
+  estado se calcula al guardar. Las alarmas son del usuario que las ejecuta y su tipo lo fija la herramienta: nunca un
+  script. Una acción nueva necesita su caso en el ejecutor, su `KindName` y entrar en `Kinds`. Se guarda en el comentario oculto de la conversación sin los datos para ejecutarla, y
+  lo propuesto sin responder se lee como `NotConfirmed`. Tests en `Tests/AiActionRulesTests`,
+  `Tests/ServiceTests/AiActionToolsTests` y `Tests/InProcessIntegrationTests/AiActionsInProcessTests`.
+- **Imágenes y archivos del asistente (KNote Atlas, etapa 1)** (`IKntAiSessionService.AddAttachmentAsync`/`GetAttachmentAsync`,
+  `Model/Core/AiAttachmentRules`, `Ai/AiTurnAttachments`, `Ai/AiImageReducer`, `Ai/AiModelCapabilities`). Al enviar, cada archivo se
+  guarda como recurso de la nota de la sesión (la crea si no existe) y `AiChatRequestDto` solo lleva su referencia; `AiTurnAttachments`
+  lee las imágenes, las reduce (lado mayor 1.600 px, EXIF aplicado) y `AiChatTurnStreamer` las pone como `DataContent` **solo en ese
+  turno**. Del historial el modelo solo recibe los nombres (`AiChatTurnDto.Attachments`, guardados en el comentario oculto). **Las
+  imágenes no se muestran por la URL del recurso**: se sirven sin sesión y su fichero puede estar en otra instalación; cada app pide
+  una vista reducida que comprueba al dueño (`GetAttachmentAsync`) y la dibuja como `data:`. `AiModelCapabilities`: Ollama lo dice en
+  `/api/show`; OpenAI y Anthropic se dan por buenos. SkiaSharp va en `KNote.Ai`, y `Directory.Build.targets` quita sus símbolos y los
+  sistemas que KNote no usa (sin eso, el `Server` publicado pesa casi el triple); una versión nueva hay que probarla también
+  publicada. `attach_file` copia un adjunto a una nota, leyéndolo por la sesión (nivel B; solo se ofrece con adjuntos). `view_note_images`
+  mira las imágenes de una nota o de la conversación, 3 por llamada y 9 por turno (`AiToolImages`): no van en el resultado de la herramienta,
+  que cada proveedor trata a su manera (Ollama lo pasaría a texto), sino en un mensaje detrás de él que añade `AiToolImagesChatClient`,
+  debajo de la invocación de funciones. Tests en `Tests/AiAttachmentRulesTests`, `AiImageReducerTests`, `ServiceTests/AiSessionsServiceTests`,
+  `InProcessIntegrationTests/AiActionsInProcessTests` y `ClientWin.Tests/KNoteAIAssistantCtrlAttachmentsTests`.
+- **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
+  `reasoning` y da el texto, el tiempo y los tokens (si el proveedor los distingue; Ollama no, y no se estiman) en el turno.
+  `AiChatTurnDto.Reasoning` va con `[JsonIgnore]`: no se guarda ni viaja con el historial, y la Web lo monta con los eventos.
+  Solo `ReasoningTokens` queda en el comentario oculto de la conversación. Ollama no necesita `think`: los modelos que
+  razonan lo envían aparte por su cuenta. `AiChatClientFactory` no pide nada a ningún proveedor: OpenAI responde 400 a
+  `reasoning.summary` con los modelos que no razonan (`gpt-4o-mini`, comprobado con una llamada real), así que con OpenAI
+  no hay texto de razonamiento, solo sus tokens.
+  Tests en `ClientWin.Tests/AiReasoningTests`.
+- **Búsqueda en Internet (KNote Atlas, etapa 1)** (`Ai/AiWebSearch.cs`, `Model/Core/AiWebSearchRules`). Solo en un turno con
+  «Search the Internet» encendido (`AiChatRequestDto.WebSearch`, `KNoteAIAssistantCtrl.WebSearch`; empieza apagado en cada
+  conversación y no se guarda) y con un proveedor que puede (`AiProviderRef.SupportsWebSearch`: OpenAI, Anthropic, u Ollama con
+  `WebSearchApiKey`, un secreto como `ApiKey`). `AiWebSearch.ToolsFor` da `HostedWebSearchTool` a OpenAI y Anthropic (sus adaptadores
+  la convierten en la búsqueda del proveedor) y a Ollama `web_search`/`web_fetch` sobre la API de ollama.com (`OllamaWebSearch`, que
+  nunca lanza: dice al modelo qué falló); el host las añade a las del turno y `AiWebSearch.SystemPrompt` añade
+  al mensaje de sistema `AiWebSearchRules.SystemRules` o, apagada o sin poder, `SystemRulesOff`/`SystemRulesUnavailable` (sin ellas,
+  el modelo respondía de memoria como si hubiera buscado). `AiChatTurnStreamer` da un evento `tool` `web_search` también con la búsqueda
+  del proveedor (`WebSearchToolCallContent`) y añade al final de la respuesta, como «Sources:», las citas (`CitationAnnotation`) que
+  no están ya en el texto (`SourcesSection`). Tests en `Tests/AiWebSearchTests`, `InProcessIntegrationTests/WebSearchInProcessTests` y
+  los `WebSearch_*` de `RequiresRealAiProvider`.
+- **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
+  existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
+  nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del
+  sistema: los números son consecutivos y probarlos no debe llevar a las conversaciones de IA de otros. Web: ver
+  `Client/CLAUDE.md`; `ClientWin`: ver `ClientWin/CLAUDE.md`.
 
 ### Client (Blazor) vs ClientWin (WinForms) — dos caminos de acceso a datos muy distintos
 
@@ -346,7 +449,7 @@ construye con la librería de componentes **Radzen.Blazor** (<https://blazor.rad
 - `Server/Controllers` — API REST: `FoldersController`, `NotesController`, `KAttributesController`,
   `NoteTypesController`, `TraceNoteTypesController`, `SystemValuesController`, `UsersController`, `AiAssistantController` (asistente de IA:
   proveedores, chat con streaming SSE y sesiones; ver `Server/CLAUDE.md`), `ChatRoomController` (imágenes del chat
-  room), `AlarmsController` (avisos de alarmas de la Web), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), además del scaffold
+  room), `AlarmsController` (avisos de alarmas de la Web), `ReportsController` (informes imprimibles y CSV de las listas de notas, con `KNote.Reports`), `SemanticSearchController` (índice y búsqueda por significado), `AtlasController` (contexto de la IA), `ServerController` (capacidades del servidor) y `LocalController` (API del equipo de KNote Local), además del scaffold
   `WeatherForecastController`. Capa fina sobre `IKntService`; responden siempre
   con un `Result<T>` y autorizan con `[Authorize(Roles = ...)]`.
 - `Server/Helpers/KntAlarms.cs` — `EmailAlarmsService`, que envía las alarmas de correo de todos los repositorios

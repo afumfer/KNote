@@ -74,6 +74,11 @@ requiere ApiKeys reales y no corre por defecto** (ver más abajo cómo configura
   perezosa). `AiChatClientFactory` y `KNoteAiTools` viven en el proyecto compartido `KNote.Ai` (`Ai/`), que
   declara su propio `InternalsVisibleTo("KNote.ClientWin.Tests")` para `ResolveApiKey`; sus tests siguen
   aquí porque aquí están los fakes de servicio.
+- `AiActionsTests.cs` — la tarjeta y el registro en la página del chat, la respuesta que envía y `AnswerActionsAsync`.
+- `AiReasoningTests.cs` — el razonamiento: eventos, tiempo, tokens, que no se guarda ni viaja en el JSON, y su HTML.
+- `NoteCitationsTests.cs` — las citas `#123` del asistente y lo que hace un clic si la nota no se puede abrir, y las
+  tools de cada turno. Las herramientas de consulta se prueban contra un repositorio real en
+  `Tests/ServiceTests/AiQueryToolsTests`.
 - `KNoteAiToolsTests.cs` — `search_notes`/`get_note_details`/`create_task` contra
   `FakeKntService`/`FakeKntNoteService` (sin base de datos real). Como esos métodos son `private` en
   `KNoteAiTools` (solo pensados para llegar a través del `AITool` que construye `AIFunctionFactory.Create`
@@ -115,8 +120,8 @@ dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "TestCategory!
 `AiChatClientFactory.Create` con las tools de `KNoteAiTools`, igual que `KNoteAIAssistantCtrl.ApplyProvider`), para
 detectar roturas de comportamiento en tiempo de ejecución que un `dotnet build` no puede ver — por ejemplo,
 un paquete NuGet (`OpenAI`, `Anthropic`, `OllamaSharp`, `Microsoft.Extensions.AI*`) que cambia de versión y
-rompe la llamada real, aunque el código siga compilando sin problema. Por proveedor, 3 tests: completion,
-streaming, y un round-trip de function-calling contra `search_notes`.
+rompe la llamada real, aunque el código siga compilando sin problema. Por proveedor: completion, streaming, un
+round-trip de function-calling contra `search_notes` y una imagen que el modelo tiene que leer (`Helpers/AiImageSmokeCheck`).
 
 **Por qué existen — precedente real**: esta suite ya encontró y ayudó a corregir dos bugs reales de
 producción en `AiChatClientFactory` el mismo día en que se escribió, cuando OpenAI se llamaba por Chat
@@ -197,6 +202,9 @@ $env:OLLAMA_HOST = "http://mi-servidor:11434"
 # o, vía user-secrets:
 dotnet user-secrets set "AiProviderSmokeTests:Ollama:Host" "http://mi-servidor:11434" --project ClientWin.Tests/KNote.ClientWin.Tests.csproj
 ```
+La búsqueda en Internet con Ollama (`WebSearch_*`) necesita además la clave de una cuenta de ollama.com:
+`AiProviderSmokeTests:Ollama:WebSearchApiKey` o `$env:OLLAMA_API_KEY`; sin ella queda Inconclusive. Los `WebSearch_*` de los
+tres proveedores hacen búsquedas reales (Anthropic cobra cada una).
 Antes de llamar de verdad, el test comprueba que el host responde (`GET {host}/api/tags`, timeout 2s); si
 no responde, se marca Inconclusive en vez de fallar — distingue "Ollama no instalado/parado" de una
 regresión real. El test de function-calling además depende de que el modelo configurado soporte tools

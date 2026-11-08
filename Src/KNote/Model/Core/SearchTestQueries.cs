@@ -35,33 +35,9 @@ public static class SearchTestQueries
     {
         var queries = new List<SearchTestQueryDto>();
         var issues = new List<string>();
-        var row = 0;
-        var inTable = false;
-        var headerSeen = false;
 
-        foreach (var rawLine in (markdown ?? "").Replace("\r\n", "\n").Split('\n'))
+        foreach (var (row, cells) in MarkdownTable.Rows(markdown))
         {
-            var line = rawLine.Trim();
-            if (!line.StartsWith('|'))
-            {
-                if (inTable)
-                    break; // the first table only
-                continue;
-            }
-            inTable = true;
-
-            var cells = Cells(line);
-            if (!headerSeen)
-            {
-                headerSeen = true; // the header row
-                continue;
-            }
-            if (cells.Count > 0 && cells.All(c => c.Length > 0 && c.All(ch => ch is '-' or ':' or ' ')))
-                continue; // the separator row
-
-            row++;
-            if (cells.All(c => c.Length == 0))
-                continue; // an empty row
             var query = cells.ElementAtOrDefault(0) ?? "";
             var expected = cells.ElementAtOrDefault(1) ?? "";
             var words = cells.ElementAtOrDefault(2) ?? "";
@@ -99,36 +75,5 @@ public static class SearchTestQueries
         }
 
         return (queries, issues);
-    }
-
-    // The cells of a table row: between its pipes (an escaped one, \|, is part of a cell).
-    private static List<string> Cells(string line)
-    {
-        var cells = new List<string>();
-        var cell = new System.Text.StringBuilder();
-        for (var i = 0; i < line.Length; i++)
-        {
-            var c = line[i];
-            if (c == '\\' && i + 1 < line.Length && line[i + 1] == '|')
-            {
-                cell.Append('|');
-                i++;
-            }
-            else if (c == '|')
-            {
-                cells.Add(cell.ToString().Trim());
-                cell.Clear();
-            }
-            else
-                cell.Append(c);
-        }
-        cells.Add(cell.ToString().Trim());
-
-        // A row starts (and usually ends) with a pipe: the empty cells outside them are not cells.
-        if (cells.Count > 0 && cells[0].Length == 0)
-            cells.RemoveAt(0);
-        if (cells.Count > 0 && cells[^1].Length == 0 && line.EndsWith('|') && !line.EndsWith("\\|"))
-            cells.RemoveAt(cells.Count - 1);
-        return cells;
     }
 }

@@ -21,6 +21,14 @@ public class KNoteAIAssistantCtrl : CtrlBase
     #region Private fields
 
     private IChatClient _chatClient;
+    private KNoteAiTools _tools;
+    // The kinds of action not to ask about again in this conversation.
+    private readonly HashSet<string> _autoApprovedKinds = new();
+
+    private readonly List<PendingAttachment> _pendingAttachments = new();
+    private IReadOnlyList<AiChatAttachmentDto> _turnAttachments = Array.Empty<AiChatAttachmentDto>();
+    private readonly Dictionary<Guid, string> _previews = new();
+    private string _activity;
 
     #endregion
 
@@ -49,6 +57,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
 
     // The answer received so far by the running StreamCompletionAsync (or by the last one, until the next
     // starts), so a view can repaint it while it streams in.
+    // What has arrived of the reasoning of the running turn.
+    private readonly StringBuilder _streamingReasoning = new StringBuilder();
+    public string StreamingReasoning => _streamingReasoning.ToString();
+
     private readonly StringBuilder _streamingResult = new StringBuilder();
     public string StreamingResult
     {
@@ -110,7 +122,16 @@ public class KNoteAIAssistantCtrl : CtrlBase
     public List<ServiceRef> Repositories =>
         Store.GetAllServiceRef().Where(s => Store.Security.IsAuthorized(typeof(KntAiSessionsSaveAsyncCommand), s.Service)).ToList();
 
+    // The instructions of the conversation (KNote Atlas, D6): KNote's default one, or the System of a @Prompt of the
+    // catalog or the one a script gives, which replace the task's instructions (layer 2) and nothing else: the fixed
+    // rules, the profile and the glossary of the repository always go (AiAssistantContext).
     public string RootSystemChat { get; set; }
+
+    // The system message of the last turn, put together (or of the next one, GetSystemPromptAsync).
+    public AiComposedPromptDto LastSystemPrompt { get; private set; }
+
+    private string InstructionsOverride =>
+        string.IsNullOrWhiteSpace(RootSystemChat) || RootSystemChat == KntConst.DefaultRootSystemChat ? null : RootSystemChat;
 
     // Default response mode the view should preselect (Get Stream / Get Completion radios) when
     // it's shown - Stream matches the pre-existing manual-use default (KNoteManagement menu). A
@@ -159,6 +180,17 @@ public class KNoteAIAssistantCtrl : CtrlBase
     private AiProviderRef _currentProviderRef;
     public AiProviderRef CurrentProviderRef => _currentProviderRef;
 
+    // "Search the Internet" (KNote Atlas, chapter 23): off in each conversation until the user turns it on, and only with a
+    // provider that can (OpenAI, Anthropic, or Ollama with its web search key).
+    public bool SupportsWebSearch => _currentProviderRef?.SupportsWebSearch == true;
+
+    private bool _webSearch;
+    public bool WebSearch
+    {
+        get => _webSearch && SupportsWebSearch;
+        set => _webSearch = value;
+    }
+
     #endregion
 
     #region Constructor
@@ -175,6 +207,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
     #region Events
 
     public event EventHandler<ControllerEventArgs<string>> StreamToken;
+
+    // What the model is doing in the running turn, as the web shows it: "Thinking…" or "Using search_notes", until it
+    // writes (null).
+    public event EventHandler<ControllerEventArgs<string>> ActivityChanged;
 
     #endregion
 
@@ -285,8 +321,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
             throw new ArgumentNullException(nameof(providerRef));
 
         _currentProviderRef = providerRef;
-        var tools = new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
-        _chatClient = AiChatClientFactory.Create(providerRef, tools.GetTools());
+        _tools = new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
+        _chatClient = AiChatClientFactory.Create(providerRef, _tools.GetTools());
         RestartAIAssistant();
     }
 
@@ -353,11 +389,20 @@ public class KNoteAIAssistantCtrl : CtrlBase
     internal void SetChatClientForTesting(IChatClient chatClient, AiProviderRef providerRef = null)
     {
         _chatClient = chatClient;
+        _tools = null;
         _currentProviderRef = providerRef;
     }
 
+    // Test seam (ClientWin.Tests): a turn of the conversation, as if it had been answered.
+    internal void AddTurnForTesting(AiChatTurnDto turn) => AddTurn(turn);
+
     public void RestartAIAssistant()
     {
+        _autoApprovedKinds.Clear();
+        _webSearch = false;
+        _pendingAttachments.Clear();
+        _turnAttachments = Array.Empty<AiChatAttachmentDto>();
+        _previews.Clear();
         _prompt = "";
         _result = "";
 
@@ -374,13 +419,15 @@ public class KNoteAIAssistantCtrl : CtrlBase
         SessionPendingSave = false;
     }
 
-    public async Task GetCompletionAsync(string prompt)
+    // automatic: the turn the app sends after a card, not a question of the user.
+    public async Task GetCompletionAsync(string prompt, bool automatic = false)
     {
         // Streamed and put together (RunTurnAsync) rather than one GetResponseAsync call: the answer then comes
         // in as it is written, so a long one can't run into the HTTP timeout of a single response (10 minutes in
         // the Anthropic SDK). It is still shown all at once.
         var turn = await RunTurnAsync(prompt, null);
         turn.Answer = turn.Answer.Replace("\n", "\r\n");
+        turn.Automatic = automatic;
         AddTurn(turn);
 
         _chatTextMessages.Append($"\r\n");
@@ -411,7 +458,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
     }
     // --------------------------------------------------------------------------
 
-    public async Task StreamCompletionAsync(string prompt)
+    public async Task StreamCompletionAsync(string prompt, bool automatic = false)
     {
         // Cleared before the first await, so a view repainting StreamingResult never shows the previous answer.
         StringBuilder resAssistant = _streamingResult;
@@ -441,6 +488,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
         }
 
         turn.Answer = resAssistant.ToString();
+        turn.Automatic = automatic;
         AddTurn(turn);
         _chatTextMessages.Append(resAssistant.ToString());
         _chatTextMessages.Append($"\r\n\r\n");
@@ -454,21 +502,200 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // far are sent with the prompt, and the answer comes back piece by piece (onText) and then whole, with its
     // usage. Nothing is added to the conversation here: an unanswered prompt (the provider failed) leaves no
     // orphaned user message behind to be resent with the next one.
+    // What the last answer proposes, waiting for the user.
+    public IReadOnlyList<AiActionDto> PendingActions =>
+        _chatTurns.LastOrDefault()?.Actions.Where(a => a.Status == EnumAiActionStatus.Proposed).ToList() ?? new List<AiActionDto>();
+
+    // A new message without answering the card rejects what it proposed. True if there was something.
+    public bool RejectPendingActions() => AiActionRules.RejectPending(_chatTurns);
+
+    // The card: what is not accepted is rejected, the rest is run with the permissions of the user. True if anything was
+    // accepted: the view then lets the assistant go on (D3).
+    public async Task<bool> AnswerActionsAsync(IReadOnlyCollection<Guid> accepted, bool dontAskAgain)
+    {
+        var proposed = PendingActions;
+        var toRun = proposed.Where(a => accepted.Contains(a.ActionId)).ToList();
+        foreach (var action in proposed.Except(toRun))
+            action.Status = EnumAiActionStatus.Rejected;
+
+        if (toRun.Count > 0)
+        {
+            var tools = _tools ?? new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
+            await tools.ExecuteActionsAsync(toRun);
+            if (dontAskAgain)
+                _autoApprovedKinds.UnionWith(toRun.Select(a => a.Kind));
+        }
+
+        await SaveAnsweredTurnAsync();
+        return toRun.Count > 0;
+    }
+
+    private void SetActivity(string activity)
+    {
+        if (_activity == activity)
+            return;
+        _activity = activity;
+        ActivityChanged?.Invoke(this, new ControllerEventArgs<string>(activity));
+    }
+
     private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText)
     {
+        _streamingReasoning.Clear();
+        RejectPendingActions();
         var history = _chatTurns.ToList();
         AiChatTurnDto completed = null;
 
-        await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, RootSystemChat, history, prompt))
+        LastSystemPrompt = await AiAssistantContext.ComposeAsync(ServiceRef?.Service, InstructionsOverride, history, prompt);
+        var attachments = _turnAttachments.Count > 0
+            ? await AiTurnAttachments.LoadAsync(ServiceRef.Service, _currentProviderRef, _session.NoteId, _turnAttachments)
+            : null;
+
+        // The tools are the repository's of this moment: an index or a glossary can appear during a conversation.
+        if (_tools != null)
         {
-            if (e.Type == AiChatStreamEventTypes.Delta)
-                onText?.Invoke(e.Text);
-            else if (e.Type == AiChatStreamEventTypes.Completed)
-                completed = e.Turn;
+            _tools.BeginTurn(history, _autoApprovedKinds, _session.NoteId, _turnAttachments);
+            _tools.ModelSeesImages = await AiModelCapabilities.SupportsImagesAsync(_currentProviderRef);
+        }
+        var tools = _tools != null ? await _tools.GetToolsAsync() : null;
+        var webSearch = WebSearch;
+        if (webSearch)
+            tools = (tools ?? []).Concat(AiWebSearch.ToolsFor(_currentProviderRef)).ToList();
+        var systemPrompt = AiWebSearch.SystemPrompt(LastSystemPrompt.Text, _currentProviderRef, webSearch);
+        try
+        {
+            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, systemPrompt, history, prompt, tools, attachments, _tools?.TurnImages))
+            {
+                if (e.Type == AiChatStreamEventTypes.Delta)
+                {
+                    SetActivity(null);
+                    onText?.Invoke(e.Text);
+                }
+                else if (e.Type == AiChatStreamEventTypes.Reasoning)
+                {
+                    _streamingReasoning.Append(e.Text);
+                    SetActivity(AiChatTurnDto.ThinkingText);
+                }
+                else if (e.Type == AiChatStreamEventTypes.Tool)
+                    SetActivity(AiChatTurnDto.ToolActivityText(e.Text));
+                else if (e.Type == AiChatStreamEventTypes.Completed)
+                    completed = e.Turn;
+            }
+        }
+        finally
+        {
+            SetActivity(null);
+        }
+
+        if (completed != null && _tools != null)
+            completed.Actions = _tools.TurnActions;
+
+        // Answered: if it failed, the message goes back to the box with its files, to send it again.
+        if (completed != null)
+        {
+            _pendingAttachments.Clear();
+            _turnAttachments = Array.Empty<AiChatAttachmentDto>();
         }
 
         return completed ?? throw new InvalidOperationException("The AI provider ended the answer unexpectedly.");
     }
+
+    #region Attachments
+
+    // A file of the message being written. Saved: already in the note of the session, if the message has to be sent again.
+    public sealed class PendingAttachment
+    {
+        public string FileName { get; init; }
+        public string ContentType { get; init; }
+        public byte[] Content { get; init; }
+        public AiChatAttachmentDto Saved { get; set; }
+    }
+
+    public IReadOnlyList<PendingAttachment> PendingAttachments => _pendingAttachments;
+
+    // The files of the message being sent, for the view.
+    public IReadOnlyList<AiChatAttachmentDto> TurnAttachments => _turnAttachments;
+
+    // A conversation that is not saved (a script) has no note to keep them in.
+    public bool CanAttach => PersistSession;
+
+    // A paid provider: the images leave the computer, and KNote says so.
+    public string ImagesSentTo => _pendingAttachments.Any(a => AiAttachmentRules.IsImage(a.ContentType)) && _currentProviderRef?.Provider != EnumAiProvider.Ollama
+        ? _currentProviderRef?.Provider
+        : null;
+
+    // Null, or why it can't be attached.
+    public string AddAttachment(string fileName, byte[] content)
+    {
+        if (_pendingAttachments.Count >= AiAttachmentRules.MaxPerMessage)
+            return $"A message can have {AiAttachmentRules.MaxPerMessage} files at most.";
+
+        var error = AiAttachmentRules.SizeError(fileName, content.LongLength);
+        if (error != null)
+            return error;
+
+        _pendingAttachments.Add(new PendingAttachment { FileName = fileName, ContentType = AiAttachmentRules.ContentTypeOf(fileName), Content = content });
+        return null;
+    }
+
+    public void RemoveAttachment(PendingAttachment attachment) => _pendingAttachments.Remove(attachment);
+
+    public Task<bool> SupportsImagesAsync() => AiModelCapabilities.SupportsImagesAsync(_currentProviderRef);
+
+    // The files go to the note of the session first: from there they reach the model and the conversation. False if one could
+    // not be saved: nothing is sent, and they are kept.
+    public async Task<bool> SaveAttachmentsAsync(string prompt)
+    {
+        foreach (var file in _pendingAttachments.Where(a => a.Saved == null))
+        {
+            var res = await ServiceRef.Service.AiSessions.AddAttachmentAsync(new AiChatAttachmentUploadDto
+            {
+                SessionNoteId = _session.NoteId,
+                Provider = _currentProviderRef?.Provider,
+                Model = _currentProviderRef?.Model,
+                Topic = prompt,
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                ContentBase64 = Convert.ToBase64String(file.Content)
+            });
+            if (!res.IsValid)
+            {
+                AIAssistantView.ShowInfo($"{file.FileName} could not be attached: {res.ErrorMessage}");
+                return false;
+            }
+
+            file.Saved = res.Entity;
+            _session.NoteId = res.Entity.SessionNoteId;
+            await AddPreviewAsync(res.Entity.ResourceId, file.ContentType, file.Content);
+        }
+
+        _turnAttachments = _pendingAttachments.Select(a => a.Saved).ToList();
+        return true;
+    }
+
+    // The image of a message as a data: url, or null: it is left as its name.
+    public string PreviewOf(Guid resourceId) => _previews.GetValueOrDefault(resourceId);
+
+    private async Task AddPreviewAsync(Guid resourceId, string contentType, byte[] content)
+    {
+        if (!AiAttachmentRules.IsImage(contentType))
+            return;
+
+        var preview = await Task.Run(() => AiImageReducer.Preview(content, contentType));
+        if (preview != null)
+            _previews[resourceId] = preview.DataUrl;
+    }
+
+    private async Task LoadPreviewsAsync(Guid sessionNoteId, IEnumerable<AiChatTurnDto> turns)
+    {
+        foreach (var attachment in turns.SelectMany(t => t.Attachments).Where(a => a.IsImage))
+        {
+            var file = await ServiceRef.Service.AiSessions.GetAttachmentAsync(sessionNoteId, attachment.ResourceId);
+            if (file.IsValid)
+                await AddPreviewAsync(attachment.ResourceId, file.Entity.ContentType, Convert.FromBase64String(file.Entity.ContentBase64));
+        }
+    }
+
+    #endregion
 
     // An answered turn joins the conversation: the messages kept for scripts (ChatMessages), the turns of the
     // views and of the session, and the totals.
@@ -565,6 +792,9 @@ public class KNoteAIAssistantCtrl : CtrlBase
         if (noteId == _session.NoteId || !await LeaveSessionAsync())
             return false;
 
+        _autoApprovedKinds.Clear();
+        _webSearch = false;
+
         Result<AiChatSessionDto> res;
         try
         {
@@ -600,6 +830,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
             AddTurn(turn);
             _chatTextMessages.Append($"**User:** \r\n{turn.Prompt}\r\n\r\n**Assistant:** \r\n{turn.Answer}\r\n\r\n");
         }
+        await LoadPreviewsAsync(session.NoteId, session.Turns);
         _session = session;
         _session.Turns = new List<AiChatTurnDto>();
         return true;
@@ -616,6 +847,10 @@ public class KNoteAIAssistantCtrl : CtrlBase
     }
 
     #endregion
+
+    /// <summary>What the AI receives in this conversation (View › System): the rules, the instructions, the profile and the glossary.</summary>
+    public async Task<AiComposedPromptDto> GetSystemPromptAsync() =>
+        await AiAssistantContext.ComposeAsync(ServiceRef?.Service, InstructionsOverride, _chatTurns.ToList(), null);
 
     public async Task<KntAssistantInfo> GetCatalogPrompt()
     {
