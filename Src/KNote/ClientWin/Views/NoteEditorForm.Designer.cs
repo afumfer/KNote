@@ -1193,10 +1193,11 @@
             // textDescriptionResource
             // 
             textDescriptionResource.Dock = DockStyle.Bottom;
-            textDescriptionResource.Location = new Point(0, 515);
+            textDescriptionResource.Location = new Point(0, 498);
             textDescriptionResource.Multiline = true;
             textDescriptionResource.Name = "textDescriptionResource";
-            textDescriptionResource.Size = new Size(398, 47);
+            textDescriptionResource.ScrollBars = ScrollBars.Vertical;
+            textDescriptionResource.Size = new Size(398, 64);
             textDescriptionResource.TabIndex = 3;
             // 
             // panelResourcesRightHeader

@@ -93,17 +93,8 @@ public static class NoteChunkBuilder
     /// Whether the description of a resource says something of it: not empty, nor its file name, nor the text the apps
     /// give an image pasted from the clipboard. The others are left out of the index.
     /// </summary>
-    public static bool HasOwnDescription(NoteChunkResource resource)
-    {
-        var description = resource.Description?.Trim();
-        if (string.IsNullOrEmpty(description))
-            return false;
-
-        var name = resource.Name?.Trim() ?? "";
-        return !string.Equals(description, name, StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(description, System.IO.Path.GetFileNameWithoutExtension(name), StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(description, KntConst.ClipboardImageResourceDescription, StringComparison.OrdinalIgnoreCase);
-    }
+    public static bool HasOwnDescription(NoteChunkResource resource) =>
+        ResourceDescriptionRules.HasOwnDescription(resource.Description, resource.Name);
 
     /// <summary>SHA-256 in lowercase hexadecimal of the text, with its line ends normalized.</summary>
     public static string Hash(string text) =>

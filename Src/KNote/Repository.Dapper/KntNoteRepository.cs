@@ -512,9 +512,9 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             var db = GetOpenConnection();
 
             var sql = @"SELECT 
-                    ResourceId, [Name], Container, [Description], [Order], FileType, ContentInDB, ContentArrayBytes, NoteId 
+                    ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order], FileType, ContentInDB, ContentArrayBytes, NoteId
                 FROM Resources
-                WHERE NoteId = @idNote 
+                WHERE NoteId = @idNote
                 ORDER BY [Order], [Name];";
 
             var entity = await db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
@@ -538,8 +538,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             
             var db = GetOpenConnection();
 
-            var sql = @"SELECT  ResourceId, [Name], Container, [Description], [Order], FileType, 
-                            ContentInDB, ContentArrayBytes, NoteId 
+            var sql = @"SELECT  ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order], FileType,
+                            ContentInDB, ContentArrayBytes, NoteId
                     FROM Resources 
                     WHERE ResourceId = @Id";
 
@@ -574,14 +574,14 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 entity.ContentArrayBytes = null;
 
             var sql = @"INSERT INTO Resources 
-                        (ResourceId, [Name], Container, [Description], [Order], 
+                        (ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order],
                             FileType, ContentInDB, ContentArrayBytes, NoteId)
-                        VALUES (@ResourceId, @Name, @Container, @Description, @Order, 
+                        VALUES (@ResourceId, @Name, @Container, @Description, @DescriptionByUser, @DescriptionModel, @Order,
                             @FileType, @ContentInDB, @ContentArrayBytes, @NoteId)";
 
             var r = await db.ExecuteAsync(sql.ToString(),
-                new { entity.ResourceId, entity.Name, entity.Container, 
-                    entity.Description, entity.Order, entity.FileType, 
+                new { entity.ResourceId, entity.Name, entity.Container,
+                    entity.Description, entity.DescriptionByUser, entity.DescriptionModel, entity.Order, entity.FileType,
                     entity.ContentInDB, entity.ContentArrayBytes, entity.NoteId });
                 
             if (r == 0)
@@ -615,8 +615,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             var sql = @"UPDATE Resources SET                                                
                         [Name] = @Name, 
                         Container = @Container, 
-                        [Description] = @Description, 
-                        [Order] = @Order, 
+                        [Description] = @Description,
+                        DescriptionByUser = @DescriptionByUser,
+                        DescriptionModel = @DescriptionModel,
+                        [Order] = @Order,
                         FileType = @FileType, 
                         ContentInDB = @ContentInDB, 
                         ContentArrayBytes = @ContentArrayBytes, 
@@ -628,6 +630,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     entity.Name,
                     entity.Container,
                     entity.Description,
+                    entity.DescriptionByUser,
+                    entity.DescriptionModel,
                     entity.Order,
                     entity.FileType,
                     entity.ContentInDB,

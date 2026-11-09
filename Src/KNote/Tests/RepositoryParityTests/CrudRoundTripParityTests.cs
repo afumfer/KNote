@@ -166,6 +166,39 @@ public class CrudRoundTripParityTests
         Assert.AreEqual(addRes.Entity.FolderId, getRes.Entity.FolderId);
     }
 
+    // Who wrote the description of a resource (KntSchemaUpdater revision 9): written and changed by one ORM, read by the other.
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
+    public async Task ResourceDescriptionLock_WrittenByOneOrm_IsReadByTheOther(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+
+        var folderRes = await writer.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Parity Resources Folder" });
+        var noteId = Guid.NewGuid();
+        var noteRes = await writer.Notes.AddAsync(new NoteDto { NoteId = noteId, Topic = "Parity resources", FolderId = folderRes.Entity.FolderId, CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now });
+        Assert.IsTrue(noteRes.IsValid, noteRes.ErrorMessage);
+
+        var resource = new ResourceDto { ResourceId = Guid.NewGuid(), NoteId = noteId, Name = "photo.png", Container = "R", Description = "A QL.", FileType = "image/png" };
+        var added = await writer.Notes.AddResourceAsync(resource);
+        Assert.IsTrue(added.IsValid, added.ErrorMessage);
+
+        var read = (await reader.Notes.GetResourceAsync(resource.ResourceId)).Entity;
+        Assert.IsFalse(read.DescriptionByUser);
+        Assert.IsNull(read.DescriptionModel);
+
+        resource.DescriptionByUser = true;
+        resource.DescriptionModel = "qwen3.5:9b";
+        Assert.IsTrue((await writer.Notes.UpdateResourceAsync(resource)).IsValid);
+
+        var list = (await reader.Notes.GetResourcesAsync(noteId)).Entity;
+        Assert.HasCount(1, list);
+        Assert.IsTrue(list[0].DescriptionByUser);
+        Assert.AreEqual("qwen3.5:9b", list[0].DescriptionModel);
+    }
+
     // An alarm of a user (with the user's name) and one without a user: both listed and read by either ORM.
     [TestMethod]
     [DataRow("Dapper", "EntityFramework")]

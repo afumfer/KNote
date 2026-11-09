@@ -25,7 +25,7 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 8;
+    public const int CurrentSchemaRevision = 9;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
@@ -35,7 +35,8 @@ public static class KntSchemaUpdater
         (5, AddRepositoryIdentity),
         (6, AddNoteTasksDateIndexes),
         (7, AddNoteChunks),
-        (8, AddNoteChunksPendingIndex)
+        (8, AddNoteChunksPendingIndex),
+        (9, AddResourceDescriptionColumns)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -469,6 +470,50 @@ IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_NoteChunks_Model_NoteI
     private const string AddNoteChunksPendingIndexSqlite = @"
 CREATE INDEX IF NOT EXISTS ""IX_NoteChunks_Model_NoteId_Stale_IndexedDateTime"" ON ""NoteChunks"" (""Model"", ""NoteId"", ""Stale"", ""IndexedDateTime"");
 ";
+
+    // Revision 9 - who wrote the description of a resource (KNote Atlas, stage 4, D12): DescriptionByUser (locked, a
+    // person's) and DescriptionModel (the model that wrote it). Must match Entities/Resource.cs. The existing rows take
+    // false: their descriptions are not locked. Sqlite has no ADD COLUMN IF NOT EXISTS (see revision 3): a new database
+    // already has the columns from the EF model.
+    private static void AddResourceDescriptionColumns(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        if (repositoryRef.Provider == "Microsoft.Data.SqlClient")
+        {
+            ctx.Database.ExecuteSqlRaw(AddResourceDescriptionColumnsSqlServer);
+            return;
+        }
+
+        AddColumnIfMissingSqlite(ctx, "Resources", "DescriptionByUser", "INTEGER NOT NULL DEFAULT 0");
+        AddColumnIfMissingSqlite(ctx, "Resources", "DescriptionModel", "TEXT NULL");
+    }
+
+    private const string AddResourceDescriptionColumnsSqlServer = @"
+IF COL_LENGTH('Resources', 'DescriptionByUser') IS NULL
+    ALTER TABLE [Resources] ADD [DescriptionByUser] bit NOT NULL CONSTRAINT [DF_Resources_DescriptionByUser] DEFAULT CAST(0 AS bit);
+
+IF COL_LENGTH('Resources', 'DescriptionModel') IS NULL
+    ALTER TABLE [Resources] ADD [DescriptionModel] nvarchar(256) NULL;
+";
+
+    private static void AddColumnIfMissingSqlite(KntDbContext ctx, string table, string column, string definition)
+    {
+        var connection = ctx.Database.GetDbConnection();
+
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = $"PRAGMA table_info(\"{table}\")";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                if (string.Equals(reader.GetString(1), column, StringComparison.OrdinalIgnoreCase))
+                    return;
+            }
+        }
+
+        // Only constants of this class reach here: no value from outside.
+        var sql = "ALTER TABLE \"" + table + "\" ADD COLUMN \"" + column + "\" " + definition + ";";
+        ctx.Database.ExecuteSqlRaw(sql);
+    }
 
     private static void AddSystemValueIfMissing(KntDbContext ctx, string key, string value)
     {

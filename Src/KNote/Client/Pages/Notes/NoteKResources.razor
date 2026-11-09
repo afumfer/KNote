@@ -28,7 +28,7 @@ else
                      @onclick="() => ViewAsync(resource)" title="@(CanView(resource) ? "View" : "Open")">
                     @if (image != null)
                     {
-                        <img src="@image" alt="@resource.Description" loading="lazy" />
+                        <img src="@image" alt="@resource.GetTitle()" loading="lazy" />
                     }
                     else
                     {
@@ -37,10 +37,14 @@ else
                     }
                 </div>
                 <div class="knt-resource-body">
-                    <div class="knt-resource-title">@(string.IsNullOrWhiteSpace(resource.Description) ? resource.NameOut : resource.Description)</div>
+                    <div class="knt-resource-title" title="@resource.Description">@resource.GetTitle()</div>
                     <div class="knt-resource-meta">
                         <span class="knt-resource-order">@resource.Order</span>
                         <span class="knt-resource-name">@resource.NameOut</span>
+                        @if (resource.DescriptionByUser)
+                        {
+                            <RadzenIcon Icon="lock" class="knt-resource-locked" title="Description locked: the AI won't change it" />
+                        }
                     </div>
                 </div>
                 <div class="knt-resource-actions">

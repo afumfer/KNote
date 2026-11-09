@@ -70,6 +70,10 @@
     white-space: nowrap;
 }
 
+.knt-resource-locked {
+    font-size: 0.875rem;
+}
+
 .knt-resource-meta {
     display: flex;
     align-items: center;

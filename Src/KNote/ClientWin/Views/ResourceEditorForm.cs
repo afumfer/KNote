@@ -16,6 +16,13 @@ public partial class ResourceEditorForm : KntEditorForm, IViewEditor<ResourceDto
     private string varName;
     private string varContainer;
 
+    // The lock (ResourceDescriptionRules, D12): checked by itself while a person writes a text of their own, until the
+    // person touches the checkbox; what is saved is what it says.
+    private bool _loadedLock;
+    private string _loadedModel;
+    private bool _lockTouched;
+    private bool _settingControls;
+
     #endregion
 
     #region Constructor
@@ -73,11 +80,37 @@ public partial class ResourceEditorForm : KntEditorForm, IViewEditor<ResourceDto
             var fileTmp = openFileDialog.FileName;
             varContentArrayBytes = File.ReadAllBytes(fileTmp);
             textFileName.Text = _ctrl.Service.ReplaceSpecialCharacters(Path.GetFileName(fileTmp));
-            textDescription.Text = textFileName.Text;
+            // A locked description stays: the person wrote it (or decided to keep it).
+            if (!checkLockDescription.Checked)
+                textDescription.Text = textFileName.Text;
             varName = _ctrl.Model.ResourceId.ToString() + "_" + textFileName.Text;
             varFileType = _ctrl.ExtensionFileToFileType(Path.GetExtension(fileTmp));
             await ShowPreview(fileTmp);
         }
+    }
+
+    private void textDescription_TextChanged(object sender, EventArgs e)
+    {
+        if (_settingControls)
+            return;
+
+        if (!_lockTouched)
+        {
+            _settingControls = true;
+            checkLockDescription.Checked = ResourceDescriptionRules.LockWhileEditing(
+                _ctrl.Model.LoadedDescription, _loadedLock, textDescription.Text, varName);
+            _settingControls = false;
+        }
+        ShowAuthor();
+    }
+
+    private void checkLockDescription_CheckedChanged(object sender, EventArgs e)
+    {
+        if (_settingControls)
+            return;
+
+        _lockTouched = true;
+        ShowAuthor();
     }
 
     #endregion
@@ -90,11 +123,31 @@ public partial class ResourceEditorForm : KntEditorForm, IViewEditor<ResourceDto
         kntView.ShowNavigationTools = false;
     }
 
+    // Who wrote the description, as it would be saved now; a person's text that is not locked, as a warning.
+    private void ShowAuthor()
+    {
+        var model = ResourceDescriptionRules.ModelWhileEditing(_ctrl.Model.LoadedDescription, _loadedModel, textDescription.Text);
+        var locked = checkLockDescription.Checked;
+        labelAuthor.Text = ResourceDescriptionRules.Author(textDescription.Text, locked, model, varName);
+        labelAuthor.ForeColor = ResourceDescriptionRules.IsAtRisk(textDescription.Text, locked, model, varName)
+            ? Color.DarkOrange : SystemColors.GrayText;
+    }
+
     private async Task ModelToControlsAsync()
     {
+        // The description this editor starts from: the first time it is opened (the note may be edited again before saving).
+        _ctrl.Model.LoadedDescription ??= _ctrl.Model.Description ?? "";
+        _loadedLock = _ctrl.Model.DescriptionByUser;
+        _loadedModel = _ctrl.Model.DescriptionModel;
+        _lockTouched = false;
+
+        _settingControls = true;
         textFileName.Text = _ctrl.Model.NameOut;
         varName = _ctrl.Model.Name;
         textDescription.Text = _ctrl.Model.Description;
+        checkLockDescription.Checked = _ctrl.Model.DescriptionByUser;
+        _settingControls = false;
+        ShowAuthor();
         textOrder.Text = _ctrl.Model.Order.ToString();
         varFileType = _ctrl.Model.FileType;
         varContainer = _ctrl.Model.Container;
@@ -116,6 +169,7 @@ public partial class ResourceEditorForm : KntEditorForm, IViewEditor<ResourceDto
     {
         _ctrl.Model.Name = varName;
         _ctrl.Model.Description = textDescription.Text;
+        _ctrl.Model.DescriptionByUser = checkLockDescription.Checked;
         _ctrl.Model.Order = _ctrl.Store.KntTextUtils.TextToInt(textOrder.Text);
         _ctrl.Model.FileType = varFileType;
         _ctrl.Model.Container = varContainer;

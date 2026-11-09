@@ -42,6 +42,8 @@ namespace KNote.ClientWin.Views
             labelOrder = new Label();
             buttonSelectFile = new Button();
             labelFileName = new Label();
+            checkLockDescription = new CheckBox();
+            labelAuthor = new Label();
             openFileDialog = new OpenFileDialog();
             panelForm.SuspendLayout();
             SuspendLayout();
@@ -72,6 +74,8 @@ namespace KNote.ClientWin.Views
             // 
             panelForm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panelForm.Controls.Add(kntView);
+            panelForm.Controls.Add(labelAuthor);
+            panelForm.Controls.Add(checkLockDescription);
             panelForm.Controls.Add(textFileName);
             panelForm.Controls.Add(labelPreview);
             panelForm.Controls.Add(textDescription);
@@ -89,9 +93,9 @@ namespace KNote.ClientWin.Views
             // 
             kntView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             kntView.BorderStyle = BorderStyle.FixedSingle;
-            kntView.Location = new Point(11, 93);
+            kntView.Location = new Point(11, 183);
             kntView.Name = "kntView";
-            kntView.Size = new Size(655, 477);
+            kntView.Size = new Size(655, 387);
             kntView.TabIndex = 17;
             // 
             // textFileName
@@ -106,7 +110,7 @@ namespace KNote.ClientWin.Views
             // labelPreview
             // 
             labelPreview.AutoSize = true;
-            labelPreview.Location = new Point(11, 75);
+            labelPreview.Location = new Point(11, 165);
             labelPreview.Name = "labelPreview";
             labelPreview.Size = new Size(51, 15);
             labelPreview.TabIndex = 16;
@@ -117,17 +121,41 @@ namespace KNote.ClientWin.Views
             textDescription.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textDescription.Location = new Point(89, 43);
             textDescription.MaxLength = 3332767;
+            textDescription.Multiline = true;
             textDescription.Name = "textDescription";
-            textDescription.Size = new Size(346, 23);
+            textDescription.ScrollBars = ScrollBars.Vertical;
+            textDescription.Size = new Size(577, 64);
             textDescription.TabIndex = 2;
-            // 
+            textDescription.TextChanged += textDescription_TextChanged;
+            //
+            // checkLockDescription
+            //
+            checkLockDescription.AutoSize = true;
+            checkLockDescription.Location = new Point(89, 115);
+            checkLockDescription.Name = "checkLockDescription";
+            checkLockDescription.Size = new Size(232, 19);
+            checkLockDescription.TabIndex = 3;
+            checkLockDescription.Text = "Lock description (AI won't change it)";
+            checkLockDescription.UseVisualStyleBackColor = true;
+            checkLockDescription.CheckedChanged += checkLockDescription_CheckedChanged;
+            //
+            // labelAuthor
+            //
+            labelAuthor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelAuthor.AutoEllipsis = true;
+            labelAuthor.ForeColor = SystemColors.GrayText;
+            labelAuthor.Location = new Point(89, 140);
+            labelAuthor.Name = "labelAuthor";
+            labelAuthor.Size = new Size(577, 18);
+            labelAuthor.TabIndex = 18;
+            //
             // textOrder
-            // 
+            //
             textOrder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            textOrder.Location = new Point(487, 42);
+            textOrder.Location = new Point(604, 113);
             textOrder.Name = "textOrder";
             textOrder.Size = new Size(62, 23);
-            textOrder.TabIndex = 3;
+            textOrder.TabIndex = 4;
             // 
             // labelDescription
             // 
@@ -142,7 +170,7 @@ namespace KNote.ClientWin.Views
             // 
             labelOrder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelOrder.AutoSize = true;
-            labelOrder.Location = new Point(441, 46);
+            labelOrder.Location = new Point(558, 117);
             labelOrder.Name = "labelOrder";
             labelOrder.Size = new Size(40, 15);
             labelOrder.TabIndex = 12;
@@ -203,5 +231,7 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textFileName;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private KntWebView.KntEditView kntView;
+        private System.Windows.Forms.CheckBox checkLockDescription;
+        private System.Windows.Forms.Label labelAuthor;
     }
 }

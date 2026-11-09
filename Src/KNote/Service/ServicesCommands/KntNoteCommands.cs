@@ -601,7 +601,11 @@ public class KntNotesGetResourcesAsyncCommand : KntCommandServiceBase<Guid, Resu
         var res = await Repository.Notes.GetResourcesAsync(Param);
         if (res.IsValid)
             foreach (var r in res.Entity)
+            {
                 Service.Notes.UtilManageResourceContent(r);
+                // What it was read with (D12): saving it again without changing it keeps what is saved by then.
+                r.LoadedDescription = r.Description ?? "";
+            }
         return res;
     }
 }
@@ -641,7 +645,11 @@ public class KntNotesGetResourceAsyncCommand : KntCommandServiceBase<Guid, Resul
     {
         var res = await Repository.Notes.GetResourceAsync(Param);
         if (res.IsValid)
+        {
             Service.Notes.UtilManageResourceContent(res.Entity);
+            // What it was read with (D12): saving it again without changing it keeps what is saved by then.
+            res.Entity.LoadedDescription = res.Entity.Description ?? "";
+        }
         return res;
     }
 }
@@ -675,6 +683,9 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
         if (!Param.ContentInDB)
             Param.ContentArrayBytes = null;
 
+        var checkExist = Param.ResourceId == Guid.Empty ? null : await Service.Notes.GetResourceAsync(Param.ResourceId);
+        ApplyDescriptionRules(checkExist?.IsValid == true ? checkExist.Entity : null);
+
         if (Param.ResourceId == Guid.Empty)
         {
             Param.ResourceId = Guid.NewGuid();
@@ -682,8 +693,6 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
         }
         else
         {
-            var checkExist = await Service.Notes.GetResourceAsync(Param.ResourceId);
-
             // Delete old resource file
             if (checkExist.IsValid)
             {
@@ -722,11 +731,26 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
             result.Entity.ContentArrayBytes = tmpContent;
 
         (result.Entity.RelativeUrl, result.Entity.FullUrl) = Service.Notes.UtilGetResourceUrls(result.Entity);
+        // Saved: who saves it again starts from what is saved now.
+        result.Entity.LoadedDescription = result.Entity.Description ?? "";
 
         if (result.IsValid)
             await KntSemanticIndexer.MarkStaleAsync(Service, result.Entity.NoteId);
 
         return result;
+    }
+
+    // KNote Atlas, stage 4 (D12): what a person writes the AI never overwrites, and the lock is what the editor says.
+    // Here, not in the UIs, so that every way of saving a resource follows it. Saving a resource doesn't touch its note.
+    private void ApplyDescriptionRules(ResourceDto stored)
+    {
+        var decided = ResourceDescriptionRules.Decide(
+            stored == null ? null : new ResourceDescriptionState(stored.Description, stored.DescriptionByUser, stored.DescriptionModel),
+            stored?.Name, Param.Description, Param.DescriptionByUser, Param.LoadedDescription, Param.Name);
+
+        Param.Description = decided.Description;
+        Param.DescriptionByUser = decided.DescriptionByUser;
+        Param.DescriptionModel = decided.DescriptionModel;
     }
 }
 
@@ -751,8 +775,8 @@ public class KntNotesSaveResourceInfoAsyncCommand : KntCommandSaveServiceBase<Re
             resource = Param.GetSimpleDto<ResourceDto>();
         else
         {
-            // An existing resource: only its description and order change. Its file, and its content when it is kept
-            // in the database (ResourceInfoDto doesn't say so), stay as they are.
+            // An existing resource: only its description, its lock and its order change. Its file, and its content when
+            // it is kept in the database (ResourceInfoDto doesn't say so), stay as they are.
             var resGetResource = await Service.Notes.GetResourceAsync(Param.ResourceId);
             if (!resGetResource.IsValid)
             {
@@ -761,6 +785,8 @@ public class KntNotesSaveResourceInfoAsyncCommand : KntCommandSaveServiceBase<Re
             }
             resource = resGetResource.Entity;
             resource.Description = Param.Description;
+            resource.DescriptionByUser = Param.DescriptionByUser;
+            resource.LoadedDescription = Param.LoadedDescription;
             resource.Order = Param.Order;
         }
 

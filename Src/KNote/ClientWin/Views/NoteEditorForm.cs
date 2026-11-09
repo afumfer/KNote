@@ -1508,7 +1508,12 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         if (_selectedResource == null)
             return;
 
-        textDescriptionResource.Text = _selectedResource.Description;
+        // The whole description and who wrote it.
+        var author = _selectedResource.GetDescriptionAuthor();
+        var description = ResourceDescriptionRules.HasOwnDescription(_selectedResource.Description, _selectedResource.Name)
+            ? _selectedResource.Description : "";
+        textDescriptionResource.Text = string.Join(Environment.NewLine + Environment.NewLine,
+            new[] { description, author }.Where(t => !string.IsNullOrEmpty(t)));
 
         if (_ctrl.Store.KntTextUtils.IsSupportedFileTypeForPreview(_selectedResource.FileType))
         {
@@ -1933,21 +1938,24 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(_selectedResource.Container, _selectedResource.Name);
+        // The title, made safe for the link: a description may have quotes or brackets.
+        var title = ResourceDescriptionRules.ForLink(_selectedResource.GetTitle());
+        var fileName = ResourceDescriptionRules.ForLink(_selectedResource.NameOut);
 
         tabNoteData.SelectedIndex = 0;
 
         if (!buttonViewHtml.Enabled)
         {
             string strLink = (_selectedResource.FileType.Contains("image")) ?
-                $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
-                $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";
+                $"<img src='{tmpFile}' alt='{title}'/>" :
+                $"<a href='{tmpFile}' target='_blank'>{fileName}</a>";
             kntEditView.HtmlContentControl.SelectedHtml = strLink;
             kntEditView.HtmlContentControl.Focus();
         }
         else
         {
             string strLink = (_selectedResource.FileType.Contains("image")) ?
-                $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
+                $"![alt text]({tmpFile} '{title}')" : $"[{fileName}]({tmpFile} '{title}')";
             // Dropping several files at once inserts them one after another at the same caret
             // position (each insertion advances it) - a blank line between them (not just after
             // the first) keeps the list readable instead of running the links together. A plain

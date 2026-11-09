@@ -39,6 +39,16 @@
                     </div>
                     break;
             }
+            @if (ResourceDescriptionRules.HasOwnDescription(Resource.Description, Resource.Name) || !string.IsNullOrEmpty(Resource.GetDescriptionAuthor()))
+            {
+                <div class="knt-resource-viewer-description">
+                    @if (ResourceDescriptionRules.HasOwnDescription(Resource.Description, Resource.Name))
+                    {
+                        <div class="knt-resource-viewer-text">@Resource.Description</div>
+                    }
+                    <div class="knt-resource-viewer-author">@Resource.GetDescriptionAuthor()</div>
+                </div>
+            }
         </div>
     </ChildContent>
     <Footer>
@@ -54,7 +64,7 @@
     private KntFileTypes.Kind kind;
     private bool actualSize;
 
-    private string Title => string.IsNullOrWhiteSpace(Resource.Description) ? Resource.NameOut : Resource.Description;
+    private string Title => Resource.GetTitle();
 
     protected override void OnParametersSet()
     {

@@ -548,7 +548,7 @@
     private async Task OnDeleteResource(ResourceInfoDto resource)
     {
         var confirmed = await dialogService.Confirm(
-            $"Are you sure you want to delete the resource - {resource.Description} -?", "Delete resource",
+            $"Are you sure you want to delete the resource - {resource.GetTitle()} -?", "Delete resource",
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
         if (confirmed != true)
             return;
@@ -570,9 +570,11 @@
     // description is shown again, with its cursor after the resource.
     private void InsertInDescription(ResourceInfoDto resource)
     {
+        // The title, made safe for the link: a description may have quotes or brackets.
+        var title = ResourceDescriptionRules.ForLink(resource.GetTitle());
         var markdown = KntFileTypes.IsImage(resource.FileType, resource.Name)
-            ? "![alt text](" + resource.FullUrl + " '" + resource.Description + "' )"
-            : "<a href=" + resource.FullUrl + " target='_blank'>" + resource.Description + "</a>";
+            ? "![alt text](" + resource.FullUrl + " '" + title + "' )"
+            : "<a href=" + resource.FullUrl + " target='_blank'>" + title + "</a>";
         Note.Description = descriptionState.InsertBlock(Note.Description, markdown);
 
         tabsSelectedIndex = 0;

@@ -51,6 +51,26 @@
         max-height: none;
     }
 
+/* The whole description under the resource, and who wrote it. */
+.knt-resource-viewer-description {
+    flex: none;
+    max-height: 7.5rem;
+    overflow: auto;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.knt-resource-viewer-text {
+    white-space: pre-wrap;
+    color: var(--rz-text-color);
+}
+
+.knt-resource-viewer-author {
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
 .knt-resource-viewer-center {
     display: flex;
     flex: 1;

@@ -32,11 +32,20 @@
                     </div>
                 </div>
             }
-            <RadzenRow Gap="1rem">
+            <KntField Label="Description" Component="Description" Help="What the resource shows or says. Its first sentence is its title.">
+                <RadzenTextArea Name="Description" Value="@typedDescription" ValueChanged="@((string value) => OnDescriptionChanged(value))"
+                                Immediate="true" Rows="4" Style="width: 100%" Disabled="@(!fileChosen)" />
+            </KntField>
+            <RadzenRow Gap="1rem" AlignItems="AlignItems.Center">
                 <RadzenColumn Size="12" SizeSM="9">
-                    <KntField Label="Description" Component="Description" Help="How the resource is shown and inserted in the description.">
-                        <RadzenTextBox Name="Description" @bind-Value="@resource.Description" Disabled="@(!fileChosen)" />
-                    </KntField>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox Name="LockDescription" TValue="bool" Value="@resource.DescriptionByUser" Change="OnLockChanged" Disabled="@(!fileChosen)" />
+                        <RadzenLabel Text="Lock description (AI won't change it)" Component="LockDescription" />
+                    </RadzenStack>
+                    @if (!string.IsNullOrEmpty(Author))
+                    {
+                        <div class="knt-resource-author @(AtRisk ? "knt-resource-author-risk" : null)">@Author</div>
+                    }
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeSM="3">
                     <KntField Label="Order" Component="Order" Help="Position in the list.">
@@ -63,7 +72,18 @@
     private ResourceInfoDto resource = new ResourceInfoDto();
     private bool fileChosen;
 
+    // The lock (ResourceDescriptionRules, D12): checked by itself while a person writes a text of their own, until the
+    // person touches the checkbox; what is saved is what it says.
+    private string typedDescription = "";
+    private bool loadedLock;
+    private string? loadedModel;
+    private bool lockTouched;
+
     private bool IsNew => Resource == null;
+
+    private string? CurrentModel => ResourceDescriptionRules.ModelWhileEditing(resource.LoadedDescription, loadedModel, typedDescription);
+    private string Author => ResourceDescriptionRules.Author(typedDescription, resource.DescriptionByUser, CurrentModel, resource.Name);
+    private bool AtRisk => ResourceDescriptionRules.IsAtRisk(typedDescription, resource.DescriptionByUser, CurrentModel, resource.Name);
 
     protected override void OnInitialized()
     {
@@ -71,6 +91,10 @@
         if (Resource != null)
         {
             resource = Resource.GetSimpleDto<ResourceInfoDto>();
+            resource.LoadedDescription = Resource.Description ?? "";
+            typedDescription = resource.Description ?? "";
+            loadedLock = resource.DescriptionByUser;
+            loadedModel = resource.DescriptionModel;
             fileChosen = true;
         }
     }
@@ -79,9 +103,28 @@
     {
         resource.ContentBase64 = file.ContentBase64;
         resource.Name = file.Name;
-        resource.Description = file.Name;
         resource.FileType = file.Type;
+        if (!resource.DescriptionByUser)
+        {
+            resource.Description = file.Name;
+            resource.LoadedDescription = file.Name;
+            typedDescription = file.Name;
+        }
         fileChosen = true;
+    }
+
+    private void OnDescriptionChanged(string value)
+    {
+        typedDescription = value ?? "";
+        resource.Description = typedDescription;
+        if (!lockTouched)
+            resource.DescriptionByUser = ResourceDescriptionRules.LockWhileEditing(resource.LoadedDescription, loadedLock, typedDescription, resource.Name);
+    }
+
+    private void OnLockChanged(bool value)
+    {
+        lockTouched = true;
+        resource.DescriptionByUser = value;
     }
 
     private void OnConfirm()

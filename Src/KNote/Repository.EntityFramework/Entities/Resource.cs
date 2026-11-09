@@ -27,7 +27,14 @@ namespace KNote.Repository.EntityFramework.Entities
         public string Container { get; set; }
         
         public string Description { get; set; }
-        
+
+        // KntSchemaUpdater revision 9 (KNote Atlas, stage 4): the description is a person's (the AI doesn't change it),
+        // and the model that wrote it (null: not the AI).
+        public bool DescriptionByUser { get; set; }
+
+        [MaxLength(256)]
+        public string DescriptionModel { get; set; }
+
         public int Order { get; set; }
         
         [MaxLength(64)]
