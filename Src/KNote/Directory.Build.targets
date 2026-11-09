@@ -12,4 +12,12 @@
     </ItemGroup>
   </Target>
 
+  <!-- The same for PDFium (PDFtoImage, KNote Atlas stage 4): the systems of SkiaSharp, with macOS by architecture. -->
+  <Target Name="KntTrimPdfiumNativeAssets" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <RuntimeTargetsCopyLocalItems Remove="@(RuntimeTargetsCopyLocalItems)"
+                                    Condition="('%(Filename)' == 'pdfium' Or '%(Filename)' == 'libpdfium') And '%(RuntimeIdentifier)' != 'win-x64' And '%(RuntimeIdentifier)' != 'win-x86' And '%(RuntimeIdentifier)' != 'win-arm64' And '%(RuntimeIdentifier)' != 'linux-x64' And '%(RuntimeIdentifier)' != 'linux-arm64' And '%(RuntimeIdentifier)' != 'osx-x64' And '%(RuntimeIdentifier)' != 'osx-arm64'" />
+    </ItemGroup>
+  </Target>
+
 </Project>

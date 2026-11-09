@@ -160,6 +160,22 @@ y la prueba del botón «Test» (`AiProviderTester`). Usa el host de Ollama de l
 `ollama pull qwen3-embedding:0.6b`); sin host o con el host caído, `Inconclusive`. Los tests de servicio no usan
 modelos reales: tienen un generador falso y determinista (`Tests/Helpers/FakeEmbeddingGenerators`).
 
+**Fotos y documentos (KNote Atlas, etapa 4)**. `ResourceLibrariesTests` (capa 1, sin modelo) comprueba lo que la etapa espera
+de PdfPig, PDFtoImage y la lectura de DOCX y ODT, con documentos creados en el propio test (`Helpers/ResourceProbe`): pásalos
+tras subir esos paquetes. `ResourceVisionSmokeTests` (capa 2) hace que un modelo real de Ollama describa una foto y transcriba
+una página, con razonamiento y sin él. `ResourceVisionMeasure` mide con ficheros reales del propietario, por pasadas: solo corre
+con `KNOTE_RESOURCE_MEASURE_FOLDER` (carpeta con `photos/`, `scans/` y `text/`; opcional `KNOTE_RESOURCE_MEASURE_CONTEXT`), guarda
+cada elemento al terminarlo, sigue donde iba si se corta y deja `results/report.html` en esa carpeta, **fuera del repositorio**,
+porque contiene lo que dicen los ficheros. Filtra siempre por nombre, sin usar toda la categoría, que llamaría también a
+los proveedores de pago configurados:
+```powershell
+$env:KNOTE_RESOURCE_SMOKE_MODEL = "qwen3.5:9b"   # si no, el modelo de AiProviderSmokeTests:Ollama:Model
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionSmokeTests"
+$env:KNOTE_RESOURCE_MEASURE_FOLDER = "C:\Dev\KNote-Atlas\Medidas-Etapa-4"
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionMeasure.Documents"
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionMeasure.PassA"
+```
+
 ## Cómo configurar las ApiKeys para correr la Capa 2
 
 `Helpers/AiTestConfig.cs` resuelve cada proveedor con la misma precedencia que usa producción
