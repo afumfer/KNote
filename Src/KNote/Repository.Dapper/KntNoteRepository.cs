@@ -653,6 +653,30 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<bool>> SaveResourceAiDescriptionAsync(Guid resourceId, string description, string model, string expectedDescription, string expectedName)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var db = GetOpenConnection();
+
+            var sql = @"UPDATE Resources SET [Description] = @description, DescriptionModel = @model
+                WHERE ResourceId = @resourceId AND DescriptionByUser = 0 AND [Name] = @expectedName
+                    AND (([Description] IS NULL AND @expectedDescription IS NULL) OR [Description] = @expectedDescription)";
+            var r = await db.ExecuteAsync(sql, new { resourceId, description, model, expectedDescription, expectedName });
+            result.Entity = r == 1;
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteResourceAsync(Guid id)
     {
         try

@@ -1,4 +1,5 @@
-﻿using KNote.ClientWin.Core;
+﻿using KNote.Ai;
+using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Views;
 using KNote.Model;
@@ -804,6 +805,83 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         else
             return Task.FromResult<ResourceDto>(null);
     }
+
+    #region Describe photos (KNote Atlas, stage 4)
+
+    // The model that describes the photos: the repository's recommended LLM if it is configured here, else the provider the
+    // assistant starts with (the last one chosen, or the first one).
+    public async Task<(AiProviderRef Provider, ResourceDescriberDto Info)> GetPhotoDescriberAsync()
+    {
+        var providers = Store.Settings.Ai.Providers.Where(p => p.IsChat).ToList();
+        var lastAlias = Store.State.Session.LastAiProviderAlias;
+        var fallback = providers.FirstOrDefault(p => string.Equals(p.Alias, lastAlias, StringComparison.OrdinalIgnoreCase)) ?? providers.FirstOrDefault();
+
+        var models = await Service.SystemValues.GetRepositoryAiModelsAsync();
+        return await AiPhotoDescriber.ChooseAsync(providers, fallback, models.IsValid ? models.Entity?.LlmModel : null);
+    }
+
+    // Only the resources already saved and without changes of this editor: the AI writes in the repository.
+    public static bool CanDescribeNow(ResourceDto resource) =>
+        AiPhotoRules.CanDescribe(resource) && !resource.IsNew() && !resource.IsDirty();
+
+    // Locks the descriptions people wrote (the choice «Keep them and lock them»), as the resource editor saves.
+    public async Task<List<string>> LockDescriptionsAsync(IEnumerable<ResourceDto> resources)
+    {
+        var errors = new List<string>();
+        foreach (var resource in resources)
+        {
+            resource.DescriptionByUser = true;
+            var saved = await Service.Notes.SaveResourceAsync(resource);
+            if (saved.IsValid)
+                resource.SetIsDirty(false);
+            else
+                errors.Add($"{resource.GetTitle()}: {saved.ErrorMessage}");
+        }
+        return errors;
+    }
+
+    // Describes the photos one after another (progress: "2 of 5"); cancelling stops after the one being described. Each one
+    // described is updated in this editor, without making it dirty: saving the note keeps it (ResourceInfoDto.LoadedDescription).
+    public async Task<(int Described, List<string> Errors)> DescribePhotosAsync(AiProviderRef provider, IReadOnlyList<ResourceDto> photos,
+        IProgress<string> progress, CancellationToken cancellationToken)
+    {
+        var chatClient = AiChatClientFactory.Create(provider);
+        var described = 0;
+        var errors = new List<string>();
+        for (var i = 0; i < photos.Count && !cancellationToken.IsCancellationRequested; i++)
+        {
+            progress?.Report(photos.Count == 1 ? "Describing the photo…" : $"Describing photo {i + 1} of {photos.Count}…");
+            var photo = photos[i];
+            try
+            {
+                var res = await AiPhotoDescriber.DescribeAsync(Service, chatClient, provider, photo.ResourceId, replacePersonDescription: true,
+                    Store.Logger, cancellationToken);
+                if (!res.IsValid)
+                {
+                    errors.Add($"{photo.GetTitle()}: {res.ErrorMessage}");
+                    continue;
+                }
+
+                photo.Description = res.Entity.Description;
+                photo.DescriptionModel = res.Entity.DescriptionModel;
+                photo.DescriptionByUser = res.Entity.DescriptionByUser;
+                photo.LoadedDescription = res.Entity.Description;
+                photo.SetIsDirty(false);
+                described++;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"{photo.GetTitle()}: {ex.Message}");
+            }
+        }
+        return (described, errors);
+    }
+
+    #endregion
 
     public bool DeleteResource(Guid resourceId)
     {

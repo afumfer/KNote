@@ -26,6 +26,9 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<ResourceDto>> GetResourceAsync(Guid noteResourceId);
     Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity);
     Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity);
+    // KNote Atlas, stage 4 (D12): writes the description of the AI and its model only if the resource is not locked and still
+    // has the description and the file it was read with. Entity: whether it was written. The note is not touched.
+    Task<Result<bool>> SaveResourceAiDescriptionAsync(Guid resourceId, string description, string model, string expectedDescription, string expectedName);
     Task<Result> DeleteResourceAsync(Guid resourceId);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
     // The tasks panel (TaskPanelRules in SQL; never the tasks of the query's ExcludeNoteTypeIds): how many tasks each

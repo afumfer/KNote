@@ -175,6 +175,9 @@ $env:KNOTE_RESOURCE_MEASURE_FOLDER = "C:\Dev\KNote-Atlas\Medidas-Etapa-4"
 dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionMeasure.Documents"
 dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionMeasure.PassA"
 ```
+El camino de producción de las fotos (`AiPhotoDescriber`: repositorio, contexto de la tarea y guardado condicional) tiene su smoke
+test en `Tests/ServiceTests/AiPhotoDescriberSmokeTests`, con la misma variable `KNOTE_RESOURCE_SMOKE_MODEL` (sin ella, Inconclusive):
+`dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiPhotoDescriberSmokeTests"`.
 
 ## Cómo configurar las ApiKeys para correr la Capa 2
 

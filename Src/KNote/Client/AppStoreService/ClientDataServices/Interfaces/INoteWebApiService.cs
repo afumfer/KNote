@@ -19,6 +19,9 @@ public interface INoteWebApiService
     Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId, CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto entity, CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId, CancellationToken cancellationToken = default);
+    // KNote Atlas, stage 4: the model that describes photos, and describing one (replace: also a person's description).
+    Task<Result<ResourceDescriberDto>> GetPhotoDescriberAsync(CancellationToken cancellationToken = default);
+    Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId, CancellationToken cancellationToken = default);
     // The tasks panel: the tasks of a time window by column, or a page of one column.
     Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter, CancellationToken cancellationToken = default);

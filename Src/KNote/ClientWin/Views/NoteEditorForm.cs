@@ -113,8 +113,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         // SplitterDistance recalculation in FixSplitterDistances(). Reposition explicitly
         // instead, driven by the header panel's own Resize (fires on load, DPI change and
         // splitter drag alike), so it always reflects the panel's real runtime width.
-        panelResourcesLeftHeader.Resize += (s, e) => AlignButtonsRight(panelResourcesLeftHeader, 3, 3,
-            buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource);
+        panelResourcesLeftHeader.Resize += (s, e) => LayoutResourcesHeader();
         panelTasksHeader.Resize += (s, e) => AlignButtonsRight(panelTasksHeader, 4, 1,
             buttonTaskAdd, buttonTaskDelete, buttonTaskEdit);
         panelTraceFromHeader.Resize += (s, e) => AlignButtonsRight(panelTraceFromHeader, 3, 3,
@@ -201,6 +200,22 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             btn.Left = right - btn.Width;
             right = btn.Left - spacing;
         }
+    }
+
+    // While the photos are described only «Cancel» is shown, at the right. The label (the progress, then) is cut with «…»
+    // before the buttons, so that it never goes under them.
+    private void LayoutResourcesHeader()
+    {
+        if (_describing != null)
+            AlignButtonsRight(panelResourcesLeftHeader, 3, 3, buttonDescribePhotos);
+        else
+            AlignButtonsRight(panelResourcesLeftHeader, 3, 3,
+                buttonDescribePhotos, buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource);
+
+        label12.AutoSize = false;
+        label12.AutoEllipsis = true;
+        label12.Height = label12.PreferredHeight;
+        label12.Width = Math.Max(0, buttonDescribePhotos.Left - label12.Left - LogicalToDeviceUnits(4));
     }
 
     private void PlaceExpandContentLabel()
@@ -329,6 +344,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
+        // Describing photos: it stops after the one being described (what is done is kept).
+        _describing?.Cancel();
+
         if (!ViewFinalized)
         {
             var savedOk = await SaveModel();
@@ -858,6 +876,157 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
     }
 
+    #region Describe photos (KNote Atlas, stage 4)
+
+    // While it runs, the button cancels (after the photo being described).
+    private CancellationTokenSource _describing;
+
+    private void buttonDescribePhotos_Click(object sender, EventArgs e)
+    {
+        if (_describing != null)
+        {
+            _describing.Cancel();
+            buttonDescribePhotos.Enabled = false;
+            return;
+        }
+
+        var selected = _selectedResource;
+        var menu = new ContextMenuStrip();
+        menu.Items.Add("Describe the photos of the note...", null, async (s, a) => await DescribePhotosAsync(null));
+        var single = menu.Items.Add("Describe the selected photo...", null, async (s, a) => await DescribePhotosAsync(selected));
+        single.Enabled = selected != null && AiPhotoRules.CanDescribe(selected);
+        menu.Closed += (s, a) => BeginInvoke(menu.Dispose);
+        menu.Show(buttonDescribePhotos, new Point(0, buttonDescribePhotos.Height));
+    }
+
+    // single: one photo («Describe the selected photo»); null: the photos of the note, as AiPhotoRules.PlanForNote says.
+    private async Task DescribePhotosAsync(ResourceDto single)
+    {
+        var resources = _ctrl.Model.Resources;
+        var candidates = single != null
+            ? new List<ResourceDto> { single }
+            : resources.Where(r => AiPhotoRules.PlanForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
+        if (candidates.Count == 0)
+        {
+            ShowInfo("There are no photos to describe: they are locked or already described by the AI.");
+            return;
+        }
+
+        // The AI writes in the repository: what is new or changed here has to be saved first.
+        var unsaved = candidates.Where(r => !NoteEditorCtrl.CanDescribeNow(r)).ToList();
+        candidates = candidates.Except(unsaved).ToList();
+        if (candidates.Count == 0)
+        {
+            ShowInfo("Save the note first: the photos to describe are new or have changes not saved.");
+            return;
+        }
+
+        var (provider, describer) = await _ctrl.GetPhotoDescriberAsync();
+        if (!describer.Available)
+        {
+            ShowInfo(describer.Message);
+            return;
+        }
+
+        var choice = AskHowToDescribe(describer, candidates, single != null);
+        if (choice == null)
+            return;
+
+        var errors = new List<string>();
+        if (choice == EnumPersonDescriptions.Lock)
+            errors.AddRange(await _ctrl.LockDescriptionsAsync(candidates.Where(r => AiPhotoRules.PlanForNote(r, EnumPersonDescriptions.Lock) == EnumPhotoAction.Lock)));
+        var photos = single != null
+            ? candidates
+            : candidates.Where(r => AiPhotoRules.PlanForNote(r, choice.Value) == EnumPhotoAction.Describe).ToList();
+
+        // While it runs, the header shows the progress, and the resources can't be changed here.
+        _describing = new CancellationTokenSource();
+        var text = buttonDescribePhotos.Text;
+        var header = label12.Text;
+        Control[] resourceButtons = [buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource];
+        var visible = resourceButtons.Select(b => b.Visible).ToArray();
+        foreach (var button in resourceButtons)
+            button.Visible = false;
+        buttonDescribePhotos.Text = "Cancel";
+        toolTipHelps.SetToolTip(buttonDescribePhotos, "Stop after the photo being described");
+        LayoutResourcesHeader();
+        var described = 0;
+        var cancelled = false;
+        try
+        {
+            var progress = new Progress<string>(message => { if (!IsDisposed) label12.Text = message; });
+            (described, var describeErrors) = await _ctrl.DescribePhotosAsync(provider, photos, progress, _describing.Token);
+            errors.AddRange(describeErrors);
+        }
+        finally
+        {
+            cancelled = _describing.IsCancellationRequested;
+            _describing.Dispose();
+            _describing = null;
+        }
+
+        // The editor may have been closed meanwhile.
+        if (!IsDisposed)
+        {
+            label12.Text = header;
+            for (var i = 0; i < resourceButtons.Length; i++)
+                resourceButtons[i].Visible = visible[i];
+            buttonDescribePhotos.Text = text;
+            buttonDescribePhotos.Enabled = true;
+            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos with the AI");
+            LayoutResourcesHeader();
+
+            UpdatePreviewResource(_selectedResource);
+            var summary = $"{described} of {photos.Count} described" + (cancelled ? " (cancelled)." : ".");
+            if (unsaved.Count > 0)
+                summary += $" {unsaved.Count} not described: new or with changes not saved.";
+            if (errors.Count > 0)
+                summary += Environment.NewLine + Environment.NewLine + string.Join(Environment.NewLine, errors);
+            ShowInfo(summary);
+        }
+    }
+
+    // The model, whether it is paid and, if some photos have a description a person wrote, what to do with them. Null: cancelled.
+    private EnumPersonDescriptions? AskHowToDescribe(ResourceDescriberDto describer, List<ResourceDto> photos, bool single)
+    {
+        var persons = photos.Count(AiPhotoRules.HasPersonDescription);
+        var text = single
+            ? $"The photo will be described by {describer.Model}."
+            : $"{photos.Count - persons} photo(s) will be described by {describer.Model}, one after another.";
+        if (describer.IsPaid)
+            text += $"{Environment.NewLine}{Environment.NewLine}{describer.Model} is a paid model: the photos are sent to {describer.Provider}.";
+
+        var describe = new TaskDialogButton("Describe");
+        var page = new TaskDialogPage
+        {
+            Caption = KntConst.AppName,
+            Heading = single ? "Describe photo" : "Describe photos",
+            Text = text,
+            Buttons = { describe, TaskDialogButton.Cancel },
+            DefaultButton = describe
+        };
+
+        TaskDialogRadioButton skip = null, keep = null, replace = null;
+        if (persons > 0 && single)
+            page.Text += $"{Environment.NewLine}{Environment.NewLine}Its description was written by a person and is not locked: the AI will use it (who is in the photo, where) to write its own, which replaces it. It can't be undone.";
+        else if (persons > 0)
+        {
+            page.Text += $"{Environment.NewLine}{Environment.NewLine}{persons} photo(s) have a description written by a person, not locked:";
+            skip = page.RadioButtons.Add("Leave them as they are (not described)");
+            keep = page.RadioButtons.Add("Keep them and lock them");
+            replace = page.RadioButtons.Add("Replace them with the AI's, written from them (it can't be undone)");
+            skip.Checked = true;
+        }
+
+        if (TaskDialog.ShowDialog(this, page) != describe)
+            return null;
+        if (single || persons == 0 || replace?.Checked == true)
+            return EnumPersonDescriptions.Replace;
+        return keep?.Checked == true ? EnumPersonDescriptions.Lock : EnumPersonDescriptions.Skip;
+    }
+
+    #endregion
+
     private void buttonInsertLink_Click(object sender, EventArgs e)
     {
         if (listViewResources.SelectedItems.Count == 0)
@@ -977,6 +1146,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             buttonTaskAdd.Visible = false;
             buttonTaskDelete.Visible = false;
             buttonTaskEdit.Visible = false;
+            buttonDescribePhotos.Visible = false;
             buttonResourceAdd.Visible = false;
             buttonResourceDelete.Visible = false;
             buttonResourceEdit.Visible = false;
@@ -1508,12 +1678,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         if (_selectedResource == null)
             return;
 
-        // The whole description and who wrote it.
-        var author = _selectedResource.GetDescriptionAuthor();
-        var description = ResourceDescriptionRules.HasOwnDescription(_selectedResource.Description, _selectedResource.Name)
+        // The whole description; who wrote it is only in the resource's editor.
+        textDescriptionResource.Text = ResourceDescriptionRules.HasOwnDescription(_selectedResource.Description, _selectedResource.Name)
             ? _selectedResource.Description : "";
-        textDescriptionResource.Text = string.Join(Environment.NewLine + Environment.NewLine,
-            new[] { description, author }.Where(t => !string.IsNullOrEmpty(t)));
 
         if (_ctrl.Store.KntTextUtils.IsSupportedFileTypeForPreview(_selectedResource.FileType))
         {

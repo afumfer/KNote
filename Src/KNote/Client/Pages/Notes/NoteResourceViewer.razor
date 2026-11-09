@@ -39,14 +39,11 @@
                     </div>
                     break;
             }
-            @if (ResourceDescriptionRules.HasOwnDescription(Resource.Description, Resource.Name) || !string.IsNullOrEmpty(Resource.GetDescriptionAuthor()))
+            @* Who wrote the description (a person, the AI and its model) is only in the resource's editor. *@
+            @if (ResourceDescriptionRules.HasOwnDescription(Resource.Description, Resource.Name))
             {
                 <div class="knt-resource-viewer-description">
-                    @if (ResourceDescriptionRules.HasOwnDescription(Resource.Description, Resource.Name))
-                    {
-                        <div class="knt-resource-viewer-text">@Resource.Description</div>
-                    }
-                    <div class="knt-resource-viewer-author">@Resource.GetDescriptionAuthor()</div>
+                    <div class="knt-resource-viewer-text">@Resource.Description</div>
                 </div>
             }
         </div>

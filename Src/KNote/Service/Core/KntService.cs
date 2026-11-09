@@ -178,6 +178,17 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntResourceContentService _resourceContent;
+    public IKntResourceContentService ResourceContent
+    {
+        get
+        {
+            if (_resourceContent == null)
+                _resourceContent = new KntResourceContentService(this);
+            return _resourceContent;
+        }
+    }
+
     public RepositoryRef RepositoryRef
     {
         get { return _repository.RepositoryRef; }

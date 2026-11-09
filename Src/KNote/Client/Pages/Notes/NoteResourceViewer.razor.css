@@ -65,12 +65,6 @@
     color: var(--rz-text-color);
 }
 
-.knt-resource-viewer-author {
-    margin-top: 0.25rem;
-    font-size: 0.8125rem;
-    color: var(--rz-text-secondary-color);
-}
-
 .knt-resource-viewer-center {
     display: flex;
     flex: 1;

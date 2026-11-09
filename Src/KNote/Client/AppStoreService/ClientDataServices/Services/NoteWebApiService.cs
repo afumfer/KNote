@@ -60,6 +60,15 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         SendAsync<ResourceInfoDto>(ct => _httpClient.DeleteAsync($"api/notes/resources/{resourceId}", ct),
             "Delete resource", true, cancellationToken);
 
+    public Task<Result<ResourceDescriberDto>> GetPhotoDescriberAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceDescriberDto>(ct => _httpClient.GetAsync("api/resources/describer", ct),
+            "Describe photos", cancellationToken: cancellationToken);
+
+    // Its errors are not notified one by one: «Describe photos» gives a summary at the end.
+    public Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceInfoDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/describe?replace={(replace ? "true" : "false")}", null, ct),
+            "Describe photo", cancellationToken: cancellationToken, notifyErrors: false);
+
     public Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId, CancellationToken cancellationToken = default) =>
         SendAsync<List<NoteTaskDto>>(ct => _httpClient.GetAsync($"api/notes/{noteId}/tasks", ct),
             "Get note tasks", cancellationToken: cancellationToken);

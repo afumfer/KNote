@@ -199,6 +199,45 @@ public class CrudRoundTripParityTests
         Assert.AreEqual("qwen3.5:9b", list[0].DescriptionModel);
     }
 
+    // The description of the AI (KNote Atlas, 4.2) is written only if the resource is as it was read and not locked.
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task ResourceAiDescription_IsWrittenOnlyIfNothingChanged(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repository = db.CreateRepository(orm);
+
+        var folderRes = await repository.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "AI descriptions" });
+        var noteId = Guid.NewGuid();
+        Assert.IsTrue((await repository.Notes.AddAsync(new NoteDto { NoteId = noteId, Topic = "AI descriptions", FolderId = folderRes.Entity.FolderId, CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now })).IsValid);
+
+        async Task<Guid> AddAsync(string description, bool locked)
+        {
+            var resource = new ResourceDto { ResourceId = Guid.NewGuid(), NoteId = noteId, Name = $"{Guid.NewGuid()}.png", Container = "R", Description = description, DescriptionByUser = locked, FileType = "image/png" };
+            Assert.IsTrue((await repository.Notes.AddResourceAsync(resource)).IsValid);
+            return resource.ResourceId;
+        }
+        async Task<ResourceDto> GetAsync(Guid id) => (await repository.Notes.GetResourceAsync(id)).Entity;
+
+        var free = await AddAsync("photo.png", false);
+        var empty = await AddAsync(null, false);
+        var locked = await AddAsync("photo.png", true);
+        var changed = await AddAsync("A person's text.", false);
+
+        Assert.IsTrue((await repository.Notes.SaveResourceAiDescriptionAsync(free, "A QL.", "qwen3.5:9b", "photo.png", (await GetAsync(free)).Name)).Entity);
+        Assert.IsTrue((await repository.Notes.SaveResourceAiDescriptionAsync(empty, "A QL.", "qwen3.5:9b", null, (await GetAsync(empty)).Name)).Entity);
+        Assert.IsFalse((await repository.Notes.SaveResourceAiDescriptionAsync(locked, "A QL.", "qwen3.5:9b", "photo.png", (await GetAsync(locked)).Name)).Entity);
+        Assert.IsFalse((await repository.Notes.SaveResourceAiDescriptionAsync(changed, "A QL.", "qwen3.5:9b", "photo.png", (await GetAsync(changed)).Name)).Entity);
+        Assert.IsFalse((await repository.Notes.SaveResourceAiDescriptionAsync(changed, "A QL.", "qwen3.5:9b", "A person's text.", "another-file.png")).Entity);
+
+        Assert.AreEqual("qwen3.5:9b", (await GetAsync(free)).DescriptionModel);
+        Assert.AreEqual("A QL.", (await GetAsync(empty)).Description);
+        Assert.AreEqual("photo.png", (await GetAsync(locked)).Description);
+        Assert.IsNull((await GetAsync(locked)).DescriptionModel);
+        Assert.AreEqual("A person's text.", (await GetAsync(changed)).Description);
+    }
+
     // An alarm of a user (with the user's name) and one without a user: both listed and read by either ORM.
     [TestMethod]
     [DataRow("Dapper", "EntityFramework")]

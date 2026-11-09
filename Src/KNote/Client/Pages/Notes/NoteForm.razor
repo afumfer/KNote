@@ -146,7 +146,11 @@
                                         OnEdit="r => tabsSaving.RunAsync(() => OnEditResource(r))"
                                         OnDelete="r => tabsSaving.RunAsync(() => OnDeleteResource(r))"
                                         OnInsertInDesription="InsertInDescription"
-                                        OnNew="() => tabsSaving.RunAsync(OnNewResource)">
+                                        OnNew="() => tabsSaving.RunAsync(OnNewResource)"
+                                        OnDescribePhotos="() => tabsSaving.RunAsync(OnDescribePhotos)"
+                                        OnDescribe="r => tabsSaving.RunAsync(() => OnDescribePhoto(r))"
+                                        OnCancelDescribing="() => cancelDescribing = true"
+                                        Describing="@describing">
                         </NoteKResources>
                     }
                 </ChildContent>
@@ -564,6 +568,113 @@
             resources = null;
             await ShowPanel(2);
         }
+    }
+
+    // KNote Atlas, stage 4 (4.2): the photos described with the AI, one per request, with their progress; Cancel stops after
+    // the one being described. What to do with each one is AiPhotoRules.PlanForNote.
+    private string? describing;
+    private bool cancelDescribing;
+
+    private async Task OnDescribePhotos()
+    {
+        var list = resources ?? new();
+        var toDescribe = list.Where(r => AiPhotoRules.PlanForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
+        if (toDescribe.Count == 0)
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Describe photos",
+                Detail = "There are no photos to describe: they are locked or already described by the AI.", Duration = 8000 });
+            return;
+        }
+
+        var describer = await DescriberAsync();
+        if (describer == null)
+            return;
+
+        var persons = toDescribe.Count(AiPhotoRules.HasPersonDescription);
+        var choice = await dialogService.OpenAsync<DescribePhotosDialog>("Describe photos",
+            new Dictionary<string, object?> { { "NoteTopic", Note.Topic }, { "Describer", describer },
+                { "Photos", toDescribe.Count - persons }, { "PersonPhotos", persons } },
+            KntDialogs.Framed(KntDialogs.Medium()));
+        if (choice is not EnumPersonDescriptions chosen)
+            return;
+
+        // The ones kept: locked as they are (the resource editor's saving, with the text it was read with).
+        foreach (var resource in list.Where(r => AiPhotoRules.PlanForNote(r, chosen) == EnumPhotoAction.Lock))
+        {
+            var locked = resource.GetSimpleDto<ResourceInfoDto>();
+            locked.ContentBase64 = null;
+            locked.LoadedDescription = resource.Description;
+            locked.DescriptionByUser = true;
+            await webApiService.Notes.SaveResourceAsync(locked);
+        }
+
+        await DescribeAsync(list.Where(r => AiPhotoRules.PlanForNote(r, chosen) == EnumPhotoAction.Describe).ToList());
+    }
+
+    private async Task OnDescribePhoto(ResourceInfoDto resource)
+    {
+        var describer = await DescriberAsync();
+        if (describer == null)
+            return;
+
+        var choice = await dialogService.OpenAsync<DescribePhotosDialog>("Describe photo",
+            new Dictionary<string, object?> { { "NoteTopic", resource.GetTitle() }, { "Describer", describer }, { "Single", true },
+                { "Photos", 1 }, { "PersonPhotos", AiPhotoRules.HasPersonDescription(resource) ? 1 : 0 } },
+            KntDialogs.Framed(KntDialogs.Medium()));
+        if (choice is EnumPersonDescriptions)
+            await DescribeAsync([resource]);
+    }
+
+    // The model that describes the photos, or null (and why not, notified).
+    private async Task<ResourceDescriberDto?> DescriberAsync()
+    {
+        var describer = await webApiService.Notes.GetPhotoDescriberAsync();
+        if (!describer.IsValid)
+            return null;
+        if (!describer.Entity.Available)
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Describe photos",
+                Detail = describer.Entity.Message, Duration = 12000 });
+            return null;
+        }
+        return describer.Entity;
+    }
+
+    private async Task DescribeAsync(List<ResourceInfoDto> photos)
+    {
+        cancelDescribing = false;
+        var described = 0;
+        var errors = new List<string>();
+        try
+        {
+            for (var i = 0; i < photos.Count && !cancelDescribing; i++)
+            {
+                describing = photos.Count == 1 ? "Describing the photo…" : $"Describing photo {i + 1} of {photos.Count}…";
+                StateHasChanged();
+
+                var res = await webApiService.Notes.DescribePhotoAsync(photos[i].ResourceId, replace: true, disposal.Token);
+                if (res.IsValid)
+                    described++;
+                else
+                    errors.Add($"{photos[i].GetTitle()}: {res.ErrorMessage}");
+            }
+        }
+        finally
+        {
+            describing = null;
+        }
+
+        resources = null;
+        await ShowPanel(2);
+
+        var detail = $"{described} of {photos.Count} described" + (cancelDescribing ? " (cancelled)." : ".");
+        if (errors.Count > 0)
+            detail += " " + string.Join(" ", errors);
+        notificationService.Notify(new NotificationMessage
+        {
+            Severity = errors.Count > 0 ? NotificationSeverity.Warning : NotificationSeverity.Success,
+            Summary = photos.Count == 1 ? "Describe photo" : "Describe photos", Detail = detail, Duration = errors.Count > 0 ? 20000 : 6000
+        });
     }
 
     // Where the cursor of the description was (it is in another tab, left when this one was chosen), and the

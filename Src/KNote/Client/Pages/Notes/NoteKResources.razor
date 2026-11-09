@@ -6,7 +6,20 @@
 
 <div class="knt-list-header">
     <span>@Resources.Count @(Resources.Count == 1 ? "resource" : "resources")</span>
-    <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        @if (Describing != null)
+        {
+            <span class="knt-resource-describing">@Describing</span>
+            <RadzenButton Text="Cancel" Click="() => OnCancelDescribing.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small" />
+        }
+        else if (Resources.Any(AiPhotoRules.CanDescribe))
+        {
+            <RadzenButton Text="Describe photos" Icon="auto_awesome" Click="() => OnDescribePhotos.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base"
+                          Variant="Variant.Text" Size="ButtonSize.Small" Disabled="@Busy"
+                          MouseEnter="@(args => tooltipService.Open(args, "Describe the photos with the AI (those not locked)"))" />
+        }
+        <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
+    </RadzenStack>
 </div>
 
 @if (Resources.Count == 0)
@@ -48,6 +61,11 @@ else
                     </div>
                 </div>
                 <div class="knt-resource-actions">
+                    @if (AiPhotoRules.CanDescribe(resource))
+                    {
+                        <RadzenButton Icon="auto_awesome" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                      Click="@(() => OnDescribe.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Describe photo with the AI"))" />
+                    }
                     <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OnEdit.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
                     <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
@@ -70,6 +88,11 @@ else
     [Parameter] public EventCallback OnNew { get; set; }
     // A change being saved (NoteForm): adding, editing and deleting wait for it.
     [Parameter] public bool Busy { get; set; }
+    // KNote Atlas, stage 4: describing the photos with the AI (Describing: its progress while it runs).
+    [Parameter] public EventCallback OnDescribePhotos { get; set; }
+    [Parameter] public EventCallback<ResourceInfoDto> OnDescribe { get; set; }
+    [Parameter] public EventCallback OnCancelDescribing { get; set; }
+    [Parameter] public string? Describing { get; set; }
 
     [Inject] private IJSRuntime js { get; set; } = null!;
 

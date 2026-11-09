@@ -429,6 +429,30 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<bool>> SaveResourceAiDescriptionAsync(Guid resourceId, string description, string model, string expectedDescription, string expectedName)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var ctx = GetOpenConnection();
+            var written = await ctx.Resources
+                .Where(r => r.ResourceId == resourceId && !r.DescriptionByUser && r.Name == expectedName && r.Description == expectedDescription)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(r => r.Description, description)
+                    .SetProperty(r => r.DescriptionModel, model));
+            result.Entity = written == 1;
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteResourceAsync(Guid id)
     {
         try

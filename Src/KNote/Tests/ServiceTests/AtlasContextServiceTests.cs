@@ -69,7 +69,8 @@ public class AtlasContextServiceTests
         Assert.IsTrue(profile.IsValid, profile.ErrorMessage);
         Assert.IsNull(profile.Entity.Note);
         Assert.IsNull(glossary.Entity.Note);
-        Assert.AreEqual(EnumAtlasTaskPromptState.Default, tasks.Entity.Single().State);
+        Assert.AreEqual(EnumAtlasTaskPromptState.Default, tasks.Entity.Single(t => t.TaskKey == AiTaskCatalog.AssistantKey).State);
+        Assert.IsTrue(tasks.Entity.All(t => t.State == EnumAtlasTaskPromptState.Default), "every task, with KNote's instructions");
         var types = (await guest.NoteTypes.GetAllAsync()).Entity;
         Assert.IsFalse(types.Any(t => t.Name == KntConst.ProfileTag || t.Name == KntConst.TaskPromptTag));
         Assert.IsFalse((await guest.AtlasContext.CreateProfileAsync()).IsValid, "a Guest does not create it");
@@ -122,16 +123,16 @@ public class AtlasContextServiceTests
         Assert.AreEqual(EnumKAttributeDataType.Bool, note.KAttributesDto.Single(a => a.Name == KntConst.TaskPromptActiveAttributeName).KAttributeDataType);
         Assert.IsFalse(HasBareLf(note.Description), "CR+LF");
         Assert.AreEqual(res.Entity.NoteId, (await admin.AtlasContext.CustomizeTaskAsync("Assistant")).Entity.NoteId, "the same note");
-        Assert.AreEqual(EnumAtlasTaskPromptState.Added, (await admin.AtlasContext.GetTaskPromptsAsync()).Entity.Single().State);
+        Assert.AreEqual(EnumAtlasTaskPromptState.Added, (await admin.AtlasContext.GetTaskPromptsAsync()).Entity.Single(t => t.TaskKey == AiTaskCatalog.AssistantKey).State);
 
         await SaveDescriptionAsync(admin, note.NoteId, "Only short answers.");
         await SetAttributeAsync(admin, note.NoteId, KntConst.TaskPromptModeAttributeName, "Replace");
         var replaced = (await admin.AtlasContext.ComposeAsync(new AiComposeRequestDto())).Entity;
-        Assert.AreEqual(EnumAtlasTaskPromptState.Replaced, (await admin.AtlasContext.GetTaskPromptsAsync()).Entity.Single().State);
+        Assert.AreEqual(EnumAtlasTaskPromptState.Replaced, (await admin.AtlasContext.GetTaskPromptsAsync()).Entity.Single(t => t.TaskKey == AiTaskCatalog.AssistantKey).State);
         Assert.AreEqual("Only short answers.", replaced.Layers.Single(l => l.Name == AiPromptComposer.InstructionsLayer).Text);
 
         await SetAttributeAsync(admin, note.NoteId, KntConst.TaskPromptActiveAttributeName, false.ToString());
-        var inactive = (await admin.AtlasContext.GetTaskPromptsAsync()).Entity.Single();
+        var inactive = (await admin.AtlasContext.GetTaskPromptsAsync()).Entity.Single(t => t.TaskKey == AiTaskCatalog.AssistantKey);
         Assert.AreEqual(EnumAtlasTaskPromptState.Default, inactive.State);
         Assert.AreEqual(note.NoteId, inactive.Note.NoteId, "«Customize» opens it");
         var composed = (await admin.AtlasContext.ComposeAsync(new AiComposeRequestDto())).Entity;

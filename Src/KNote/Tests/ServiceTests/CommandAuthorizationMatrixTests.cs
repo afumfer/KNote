@@ -93,6 +93,10 @@ public class CommandAuthorizationMatrixTests
         // KNote Atlas: what the AI receives, put together for the assistant (Staff, like the assistant).
         Add(nameof(EnumRoles.Staff), "KntAtlasContextComposeAsyncCommand");
 
+        // KNote Atlas, stage 4: describing a photo of a note with the AI (who edits the note's resources).
+        Add(nameof(EnumRoles.Staff),
+            "KntResourceContentGetPhotoContextAsyncCommand", "KntResourceContentSaveAiDescriptionAsyncCommand");
+
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",
             // KNote Atlas: the search evaluation (it measures the repository's search).

@@ -1,0 +1,65 @@
+@inject DialogService dialogService
+
+@* Before describing the photos of a note (or one of them) with the AI: which model, whether it is paid (the photos are sent to
+   the provider), and what to do with the photos whose description a person wrote and didn't lock. The result is the choice
+   (EnumPersonDescriptions), or null if cancelled. *@
+
+<KntDialogFrame Icon="auto_awesome" Title="@(Single ? "Describe photo" : "Describe photos")" Subtitle="@NoteTopic">
+    <ChildContent>
+        <RadzenStack Gap="0.75rem">
+            <div>
+                @if (Single)
+                {
+                    <text>The photo will be described by <b>@Describer.Model</b>.</text>
+                }
+                else
+                {
+                    <text>@Photos @(Photos == 1 ? "photo" : "photos") will be described by <b>@Describer.Model</b>, one after another.</text>
+                }
+            </div>
+            @if (Describer.IsPaid)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                    @Describer.Model is a paid model: the @(Single ? "photo is" : "photos are") sent to @Describer.Provider.
+                </RadzenAlert>
+            }
+            @if (PersonPhotos > 0)
+            {
+                @if (Single)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                        Its description was written by a person and is not locked: the AI will use it (who is in the photo, where) to write its own, which replaces it. It can't be undone.
+                    </RadzenAlert>
+                }
+                else
+                {
+                    <div>@PersonPhotos @(PersonPhotos == 1 ? "photo has a description" : "photos have a description") written by a person, not locked:</div>
+                    <RadzenRadioButtonList @bind-Value="@choice" TValue="EnumPersonDescriptions" Orientation="Orientation.Vertical">
+                        <Items>
+                            <RadzenRadioButtonListItem Text="Leave them as they are (not described)" Value="EnumPersonDescriptions.Skip" />
+                            <RadzenRadioButtonListItem Text="Keep them and lock them" Value="EnumPersonDescriptions.Lock" />
+                            <RadzenRadioButtonListItem Text="Replace them with the AI's, written from them (it can't be undone)" Value="EnumPersonDescriptions.Replace" />
+                        </Items>
+                    </RadzenRadioButtonList>
+                }
+            }
+        </RadzenStack>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => dialogService.Close(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+        <RadzenButton Text="Describe" Icon="auto_awesome" ButtonStyle="ButtonStyle.Primary"
+                      Click="() => dialogService.Close(Single ? EnumPersonDescriptions.Replace : choice)" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter] public string? NoteTopic { get; set; }
+    [Parameter] [EditorRequired] public ResourceDescriberDto Describer { get; set; } = null!;
+    // A single photo (Describe photo), or the photos of the note.
+    [Parameter] public bool Single { get; set; }
+    // The photos to describe that have no description of a person, and the ones that have one.
+    [Parameter] public int Photos { get; set; }
+    [Parameter] public int PersonPhotos { get; set; }
+
+    private EnumPersonDescriptions choice = EnumPersonDescriptions.Skip;
+}

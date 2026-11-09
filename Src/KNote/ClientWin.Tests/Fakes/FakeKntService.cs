@@ -52,6 +52,7 @@ internal class FakeKntService : IKntService
     public IKntChatRoomService ChatRooms => throw new NotSupportedException();
     public IKntSemanticSearchService SemanticSearch => SemanticSearchFake;
     public IKntAtlasContextService AtlasContext => AtlasContextFake;
+    public IKntResourceContentService ResourceContent => throw new NotSupportedException();
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();
