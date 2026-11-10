@@ -73,7 +73,8 @@ public class AiPhotoRulesTests
         var request = AiPhotoRules.Request("Cumpleaños", "", [], "La abuela Carmen es la señora del chaleco amarillo.");
         var withoutNote = AiPhotoRules.Request(null, null, [], "La abuela Carmen.");
 
-        StringAssert.Contains(request, "What a person wrote of this photo (it is true: keep its names and facts):\nLa abuela Carmen es la señora del chaleco amarillo.\n\nDescribe this photo. Write in the language of the note");
+        StringAssert.Contains(request, "What a person wrote of this photo (it is true: keep its names and facts):\nLa abuela Carmen es la señora del chaleco amarillo.\n\n" +
+            "Describe this photo with the names and facts that the person wrote of it, without mentioning the note. Write in the language of the note");
         Assert.IsFalse(withoutNote.Contains("The note this photo belongs to"));
         StringAssert.EndsWith(withoutNote, "Write in the language of what the person wrote of it.");
     }

@@ -55,6 +55,8 @@ public class CommandAuthorizationMatrixTests
             // search by meaning.
             "KntSemanticSearchGetIndexStatusAsyncCommand", "KntSemanticSearchRefreshPendingAsyncCommand",
             "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
+            // KNote Atlas, stage 4: what «Process pending resources» would process (counts, no content).
+            "KntResourceContentGetProcessingStatusAsyncCommand",
             // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
             "KntAtlasContextFindGlossaryTermsAsyncCommand",
@@ -113,6 +115,8 @@ public class CommandAuthorizationMatrixTests
             "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
             "KntSystemValueSaveRepositoryAiModelsAsyncCommand",
             "KntSemanticSearchRunIndexAsyncCommand", "KntSemanticSearchDeleteModelIndexAsyncCommand",
+            // KNote Atlas, stage 4: «Process pending resources» (as the semantic index).
+            "KntResourceContentPrepareProcessingAsyncCommand", "KntResourceContentSaveProcessingRunAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand", "KntUsersGetPasswordStampAsyncCommand");

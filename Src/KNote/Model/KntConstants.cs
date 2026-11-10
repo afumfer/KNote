@@ -97,6 +97,8 @@ public static class KntConst
     public static string AiLlmModelKey { get; private set; } = "AI_LLM_MODEL";
     // How the semantic index is (SemanticIndexStateDto, JSON), kept by the indexer.
     public static string AiIndexStateKey { get; private set; } = "AI_INDEX_STATE";
+    // The runs of «Process pending resources» (ResourceProcessingStateDto, JSON): the pace of the last one, for the estimates.
+    public static string AiResourcesStateKey { get; private set; } = "AI_RESOURCES_STATE";
 
     // The description the apps give a resource made from an image pasted from the clipboard. Like the file name, it says
     // nothing of the resource: the semantic index leaves out the resources without a description of their own.

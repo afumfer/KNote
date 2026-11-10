@@ -22,6 +22,11 @@ public interface INoteWebApiService
     // KNote Atlas, stage 4: the model that describes photos, and describing one (replace: also a person's description).
     Task<Result<ResourceDescriberDto>> GetPhotoDescriberAsync(CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
+    // «Process pending resources» of the session's repository (Admin to run): what it would process, and its run.
+    Task<Result<ResourceProcessingStatusDto>> GetResourceProcessingStatusAsync(CancellationToken cancellationToken = default);
+    Task<Result<ResourceProcessingProgressDto>> ProcessResourcesAsync(ResourceProcessingOptionsDto options);
+    Task<Result<ResourceProcessingProgressDto>> GetResourceProcessingProgressAsync(CancellationToken cancellationToken = default);
+    Task<Result<bool>> CancelResourceProcessingAsync();
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId, CancellationToken cancellationToken = default);
     // The tasks panel: the tasks of a time window by column, or a page of one column.
     Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter, CancellationToken cancellationToken = default);

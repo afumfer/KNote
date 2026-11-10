@@ -69,6 +69,21 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         SendAsync<ResourceInfoDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/describe?replace={(replace ? "true" : "false")}", null, ct),
             "Describe photo", cancellationToken: cancellationToken, notifyErrors: false);
 
+    public Task<Result<ResourceProcessingStatusDto>> GetResourceProcessingStatusAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceProcessingStatusDto>(ct => _httpClient.GetAsync("api/resources/status", ct),
+            "Pending resources", cancellationToken: cancellationToken, notifyErrors: false);
+
+    public Task<Result<ResourceProcessingProgressDto>> ProcessResourcesAsync(ResourceProcessingOptionsDto options) =>
+        SendAsync<ResourceProcessingProgressDto>(ct => _httpClient.PostAsJsonAsync("api/resources/process", options, ct),
+            "Process pending resources");
+
+    public Task<Result<ResourceProcessingProgressDto>> GetResourceProcessingProgressAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceProcessingProgressDto>(ct => _httpClient.GetAsync("api/resources/process/progress", ct),
+            "Process pending resources progress", cancellationToken: cancellationToken, notifyErrors: false);
+
+    public Task<Result<bool>> CancelResourceProcessingAsync() =>
+        SendAsync<bool>(ct => _httpClient.PostAsync("api/resources/process/cancel", null, ct), "Cancel process pending resources");
+
     public Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId, CancellationToken cancellationToken = default) =>
         SendAsync<List<NoteTaskDto>>(ct => _httpClient.GetAsync($"api/notes/{noteId}/tasks", ct),
             "Get note tasks", cancellationToken: cancellationToken);

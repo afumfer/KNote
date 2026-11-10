@@ -238,6 +238,69 @@ public class CrudRoundTripParityTests
         Assert.AreEqual("A person's text.", (await GetAsync(changed)).Description);
     }
 
+    // «Process pending resources» (KNote Atlas, 4.3): the resources the AI could describe, without their content nor the ones of
+    // the excluded note types, and locking a description only if it is still the same, not locked and not the AI's.
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task ResourcesToDescribe_AndLockingADescription(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repository = db.CreateRepository(orm);
+
+        var folderRes = await repository.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Resources to describe" });
+        var excludedTypeId = Guid.NewGuid();
+        Assert.IsTrue((await repository.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = excludedTypeId, Name = "@Excluded" })).IsValid);
+        async Task<Guid> AddNoteAsync(Guid? noteTypeId)
+        {
+            var noteId = Guid.NewGuid();
+            Assert.IsTrue((await repository.Notes.AddAsync(new NoteDto
+            {
+                NoteId = noteId, Topic = "Resources", FolderId = folderRes.Entity.FolderId, NoteTypeId = noteTypeId,
+                CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now
+            })).IsValid);
+            return noteId;
+        }
+        var noteId = await AddNoteAsync(null);
+        var excludedNoteId = await AddNoteAsync(excludedTypeId);
+
+        async Task<Guid> AddAsync(Guid note, string description, bool locked = false, string? model = null)
+        {
+            var resource = new ResourceDto
+            {
+                ResourceId = Guid.NewGuid(), NoteId = note, Name = $"{Guid.NewGuid()}.png", Container = "R", Description = description,
+                DescriptionByUser = locked, DescriptionModel = model, FileType = "image/png", ContentInDB = true, ContentArrayBytes = [1, 2, 3]
+            };
+            Assert.IsTrue((await repository.Notes.AddResourceAsync(resource)).IsValid);
+            return resource.ResourceId;
+        }
+
+        var pending = await AddAsync(noteId, "photo.png");
+        var person = await AddAsync(noteId, "A person's text.");
+        await AddAsync(noteId, "Mine.", locked: true);
+        var byTheAi = await AddAsync(noteId, "A QL.", model: "qwen3.5:9b");
+        var ofExcluded = await AddAsync(excludedNoteId, "photo.png");
+
+        var all = (await repository.Notes.GetResourcesToDescribeAsync()).Entity;
+        var notExcluded = (await repository.Notes.GetResourcesToDescribeAsync([excludedTypeId])).Entity;
+
+        CollectionAssert.AreEquivalent(new[] { pending, person, ofExcluded }, all.Select(r => r.ResourceId).ToList());
+        CollectionAssert.AreEquivalent(new[] { pending, person }, notExcluded.Select(r => r.ResourceId).ToList());
+        var read = notExcluded.Single(r => r.ResourceId == person);
+        Assert.AreEqual("A person's text.", read.Description);
+        Assert.AreEqual(noteId, read.NoteId);
+        Assert.AreEqual("image/png", read.FileType);
+        Assert.IsInstanceOfType<ResourceInfoDto>(read);
+        Assert.IsNotInstanceOfType<ResourceDto>(read, "without the content");
+
+        Assert.IsFalse((await repository.Notes.LockResourceDescriptionAsync(person, "Another text.")).Entity, "it changed");
+        Assert.IsFalse((await repository.Notes.LockResourceDescriptionAsync(byTheAi, "A QL.")).Entity, "the AI's is not a person's");
+        Assert.IsTrue((await repository.Notes.LockResourceDescriptionAsync(person, "A person's text.")).Entity);
+        Assert.IsFalse((await repository.Notes.LockResourceDescriptionAsync(person, "A person's text.")).Entity, "already locked");
+        Assert.IsTrue((await repository.Notes.GetResourceAsync(person)).Entity.DescriptionByUser);
+        Assert.IsFalse((await repository.Notes.GetResourceAsync(byTheAi)).Entity.DescriptionByUser);
+    }
+
     // An alarm of a user (with the user's name) and one without a user: both listed and read by either ORM.
     [TestMethod]
     [DataRow("Dapper", "EntityFramework")]

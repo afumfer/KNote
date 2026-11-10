@@ -808,17 +808,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
     #region Describe photos (KNote Atlas, stage 4)
 
-    // The model that describes the photos: the repository's recommended LLM if it is configured here, else the provider the
-    // assistant starts with (the last one chosen, or the first one).
-    public async Task<(AiProviderRef Provider, ResourceDescriberDto Info)> GetPhotoDescriberAsync()
-    {
-        var providers = Store.Settings.Ai.Providers.Where(p => p.IsChat).ToList();
-        var lastAlias = Store.State.Session.LastAiProviderAlias;
-        var fallback = providers.FirstOrDefault(p => string.Equals(p.Alias, lastAlias, StringComparison.OrdinalIgnoreCase)) ?? providers.FirstOrDefault();
-
-        var models = await Service.SystemValues.GetRepositoryAiModelsAsync();
-        return await AiPhotoDescriber.ChooseAsync(providers, fallback, models.IsValid ? models.Entity?.LlmModel : null);
-    }
+    // The model that describes the photos (Store.GetPhotoDescriberAsync).
+    public Task<(AiProviderRef Provider, ResourceDescriberDto Info)> GetPhotoDescriberAsync() => Store.GetPhotoDescriberAsync(Service);
 
     // Only the resources already saved and without changes of this editor: the AI writes in the repository.
     public static bool CanDescribeNow(ResourceDto resource) =>

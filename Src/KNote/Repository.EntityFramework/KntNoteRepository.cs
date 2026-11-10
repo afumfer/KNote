@@ -453,6 +453,60 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<bool>> LockResourceDescriptionAsync(Guid resourceId, string expectedDescription)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var ctx = GetOpenConnection();
+            var locked = await ctx.Resources
+                .Where(r => r.ResourceId == resourceId && !r.DescriptionByUser && r.DescriptionModel == null && r.Description == expectedDescription)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.DescriptionByUser, true));
+            result.Entity = locked == 1;
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceInfoDto>>> GetResourcesToDescribeAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+
+            var notes = ctx.Notes.AsNoTracking();
+            if (excludedNoteTypeIds?.Count > 0)
+                notes = notes.Where(n => n.NoteTypeId == null || !excludedNoteTypeIds.Contains(n.NoteTypeId.Value));
+            var resources = await ctx.Resources.AsNoTracking()
+                .Where(r => !r.DescriptionByUser && r.DescriptionModel == null)
+                .Join(notes, r => r.NoteId, n => n.NoteId, (r, n) => new { r, n.NoteNumber })
+                .OrderBy(x => x.NoteNumber).ThenBy(x => x.r.Order).ThenBy(x => x.r.Name)
+                .Select(x => new ResourceInfoDto
+                {
+                    ResourceId = x.r.ResourceId, Name = x.r.Name, Container = x.r.Container, Description = x.r.Description,
+                    DescriptionByUser = x.r.DescriptionByUser, DescriptionModel = x.r.DescriptionModel, Order = x.r.Order,
+                    FileType = x.r.FileType, NoteId = x.r.NoteId
+                })
+                .ToListAsync();
+            var result = new Result<List<ResourceInfoDto>> { Entity = resources };
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteResourceAsync(Guid id)
     {
         try

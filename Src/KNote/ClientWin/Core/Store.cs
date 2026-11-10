@@ -63,6 +63,28 @@ public class Store
     private SemanticIndexJob _semanticIndex;
     public SemanticIndexJob SemanticIndex => _semanticIndex ??= new SemanticIndexJob(Events);
 
+    // The run of «Process pending resources» (KNote Atlas, stage 4), one at a time in the app and never with the index's
+    // (one Ollama): see ResourceProcessingJob.
+    private ResourceProcessingJob _resourceProcessing;
+    public ResourceProcessingJob ResourceProcessing => _resourceProcessing ??= new ResourceProcessingJob(Events, SemanticIndex);
+
+    // Whether a long run of KNote Atlas is going on (the index or the resources): another one waits.
+    public bool AtlasJobRunning => SemanticIndex.IsRunning || ResourceProcessing.IsRunning;
+
+    /// <summary>
+    /// The model that describes the photos of a repository: its recommended LLM if it is configured here, else the provider
+    /// the assistant starts with (the last one chosen, or the first one).
+    /// </summary>
+    public async Task<(AiProviderRef Provider, ResourceDescriberDto Info)> GetPhotoDescriberAsync(IKntService service)
+    {
+        var providers = Settings.Ai.Providers.Where(p => p.IsChat).ToList();
+        var lastAlias = State.Session.LastAiProviderAlias;
+        var fallback = providers.FirstOrDefault(p => string.Equals(p.Alias, lastAlias, StringComparison.OrdinalIgnoreCase)) ?? providers.FirstOrDefault();
+
+        var models = await service.SystemValues.GetRepositoryAiModelsAsync();
+        return await AiPhotoDescriber.ChooseAsync(providers, fallback, models.IsValid ? models.Entity?.LlmModel : null);
+    }
+
     private KntTextUtils _kntTextUtils;
     public KntTextUtils KntTextUtils
     {

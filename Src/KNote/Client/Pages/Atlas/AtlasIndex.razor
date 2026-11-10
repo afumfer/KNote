@@ -1,5 +1,5 @@
-@* KNote Atlas, a tab of the admin panel: the AI models of the session's repository (CU-02) and its semantic index
-   (CU-03). Each section reads and saves its own part. *@
+@* KNote Atlas, a tab of the admin panel: the AI models of the session's repository (CU-02), its semantic index
+   (CU-03) and «Process pending resources» (CU-25). Each section reads and saves its own part. *@
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -8,6 +8,7 @@
 <div class="rz-pt-2">
     <AtlasRepositoryModels OnSaved="@(() => semanticIndex?.RefreshAsync() ?? Task.CompletedTask)" />
     <AtlasSemanticIndex @ref="semanticIndex" />
+    <AtlasResources OnFinished="@(() => semanticIndex?.FollowRunAsync() ?? Task.CompletedTask)" />
 </div>
 
 @code {

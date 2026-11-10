@@ -33,6 +33,7 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         tabPageUsers.Controls.Add(_ctrl.UsersManageCtrl.View.PanelView());
         tabPageAtlas.Controls.Add(_ctrl.RepositoryAiModelsCtrl.View.PanelView());
         tabPageSemanticIndex.Controls.Add(_ctrl.RepositorySemanticIndexCtrl.View.PanelView());
+        tabPageResources.Controls.Add(_ctrl.RepositoryResourcesCtrl.View.PanelView());
     }
 
     #endregion 
@@ -205,6 +206,7 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         tabPageAttributes.Enabled = _ctrl.AdministrationAvailable;
         tabPageAtlas.Enabled = _ctrl.AdministrationAvailable;
         tabPageSemanticIndex.Enabled = _ctrl.AdministrationAvailable;
+        tabPageResources.Enabled = _ctrl.AdministrationAvailable;
 
         var adminTabsHint = _ctrl.AdministrationAvailable ? "" : "Available once the repository is linked.";
 
@@ -217,6 +219,7 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         toolTipAdminTabs.SetToolTip(tabPageAttributes, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageAtlas, adminTabsHint);
         toolTipAdminTabs.SetToolTip(tabPageSemanticIndex, adminTabsHint);
+        toolTipAdminTabs.SetToolTip(tabPageResources, adminTabsHint);
 
         // A linked repository is named in its own database.
         labelName.Visible = _ctrl.EditorMode != EnumRepositoryEditorMode.AddLink;

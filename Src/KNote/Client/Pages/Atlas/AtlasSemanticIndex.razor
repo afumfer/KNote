@@ -143,6 +143,14 @@
         StateHasChanged();
     }
 
+    // A run queued by someone else (the server, after «Process pending resources»): its progress is followed.
+    public async Task FollowRunAsync()
+    {
+        await PollOnceAsync();
+        StartPolling();
+        await RefreshAsync();
+    }
+
     private Task OnRun(bool rebuild) => acting.RunAsync(async () =>
     {
         if (status == null || !await ConfirmRunAsync(rebuild))

@@ -677,6 +677,56 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<bool>> LockResourceDescriptionAsync(Guid resourceId, string expectedDescription)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var db = GetOpenConnection();
+
+            var sql = @"UPDATE Resources SET DescriptionByUser = 1
+                WHERE ResourceId = @resourceId AND DescriptionByUser = 0 AND DescriptionModel IS NULL
+                    AND (([Description] IS NULL AND @expectedDescription IS NULL) OR [Description] = @expectedDescription)";
+            var r = await db.ExecuteAsync(sql, new { resourceId, expectedDescription });
+            result.Entity = r == 1;
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceInfoDto>>> GetResourcesToDescribeAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var result = new Result<List<ResourceInfoDto>>();
+
+            var db = GetOpenConnection();
+
+            var notExcluded = excludedNoteTypeIds?.Count > 0 ? "(n.NoteTypeId IS NULL OR n.NoteTypeId NOT IN @excluded)" : "1 = 1";
+            var sql = $@"SELECT r.ResourceId, r.[Name], r.Container, r.[Description], r.DescriptionByUser, r.DescriptionModel, r.[Order], r.FileType, r.NoteId
+                FROM Resources r INNER JOIN Notes n ON n.NoteId = r.NoteId
+                WHERE r.DescriptionByUser = 0 AND r.DescriptionModel IS NULL AND {notExcluded}
+                ORDER BY n.NoteNumber, r.[Order], r.[Name];";
+            var entity = await db.QueryAsync<ResourceInfoDto>(sql, new { excluded = excludedNoteTypeIds });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteResourceAsync(Guid id)
     {
         try

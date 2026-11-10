@@ -15,7 +15,7 @@ namespace KNote.Server.Controllers;
 // KNote Atlas: the repository's AI models, its semantic index and the search by meaning (the most similar notes, not
 // paged). The models are SystemValues of the session's repository (Service: SystemValues.Get/SaveRepositoryAiModelsAsync);
 // which models this Server has are its AI providers (AiProvidersCatalog). Creating, updating or rebuilding the index is
-// a run of SemanticIndexJobs (one queue for the Server), of the session's repository and with its user: each user sees
+// a run of KntAtlasJobs (one queue for the Server), of the session's repository and with its user: each user sees
 // and cancels only the run of the repository of their session.
 [Authorize]
 [ApiController]
@@ -25,11 +25,11 @@ public class SemanticSearchController : ControllerBase
     private readonly IKntService _service;
     private readonly AiProvidersCatalog _providers;
     private readonly KntRepositories _repositories;
-    private readonly SemanticIndexJobs _jobs;
+    private readonly KntAtlasJobs _jobs;
     private readonly ILogger<SemanticSearchController> _logger;
 
     public SemanticSearchController(IKntService service, IHttpContextAccessor httpContextAccessor, AiProvidersCatalog providers,
-        KntRepositories repositories, SemanticIndexJobs jobs, ILogger<SemanticSearchController> logger)
+        KntRepositories repositories, KntAtlasJobs jobs, ILogger<SemanticSearchController> logger)
     {
         _service = service;
         _service.Logger = logger;
@@ -107,7 +107,7 @@ public class SemanticSearchController : ControllerBase
     public IActionResult RunIndex([FromBody] SemanticIndexRunDto run)
     {
         var repository = _repositories.ForUser(User);
-        var progress = _jobs.Enqueue(repository.RepositoryId, repository.RepositoryRef.Name, User?.Identity?.Name, run?.Rebuild == true);
+        var progress = _jobs.EnqueueIndex(repository.RepositoryId, repository.RepositoryRef.Name, User?.Identity?.Name, run?.Rebuild == true);
         return Ok(new Result<SemanticIndexProgressDto>(progress));
     }
 
@@ -115,12 +115,12 @@ public class SemanticSearchController : ControllerBase
     [HttpGet("index/progress")]
     [Authorize(Roles = "Admin")]
     public IActionResult GetIndexProgress() =>
-        Ok(new Result<SemanticIndexProgressDto>(_jobs.GetProgress(_repositories.ForUser(User).RepositoryId)));
+        Ok(new Result<SemanticIndexProgressDto>(_jobs.GetIndexProgress(_repositories.ForUser(User).RepositoryId)));
 
     [HttpPost("index/cancel")]
     [Authorize(Roles = "Admin")]
     public IActionResult CancelIndex() =>
-        Ok(new Result<bool>(_jobs.Cancel(_repositories.ForUser(User).RepositoryId)));
+        Ok(new Result<bool>(_jobs.CancelIndex(_repositories.ForUser(User).RepositoryId)));
 
     // Searches by meaning in the session's repository (the search, or the filter with «Talks about…»): the most similar
     // notes, not paged. It brings the index up to date before, within the request and with its user (D8). Any user.

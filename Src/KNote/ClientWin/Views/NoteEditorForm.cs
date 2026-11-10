@@ -1012,9 +1012,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         else if (persons > 0)
         {
             page.Text += $"{Environment.NewLine}{Environment.NewLine}{persons} photo(s) have a description written by a person, not locked:";
-            skip = page.RadioButtons.Add("Leave them as they are (not described)");
-            keep = page.RadioButtons.Add("Keep them and lock them");
-            replace = page.RadioButtons.Add("Replace them with the AI's, written from them (it can't be undone)");
+            skip = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceSkip);
+            keep = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceLock);
+            replace = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceReplace);
             skip.Checked = true;
         }
 

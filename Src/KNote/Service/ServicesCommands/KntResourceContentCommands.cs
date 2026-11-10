@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model;
@@ -37,7 +38,7 @@ public class KntResourceContentGetPhotoContextAsyncCommand : KntCommandServiceBa
         Service.Notes.UtilManageResourceContent(resource);
         if (resource.ContentArrayBytes == null || resource.ContentArrayBytes.Length == 0)
         {
-            result.AddErrorMessage("The file of the photo is not available in this installation.");
+            result.AddErrorMessage(AiPhotoRules.FileNotAvailableMessage);
             return result;
         }
         resource.LoadedDescription = resource.Description;
@@ -113,9 +114,118 @@ public class KntResourceContentSaveAiDescriptionAsyncCommand : KntCommandService
     }
 }
 
+[KntAuthorize(EnumRoles.Guest)]
+public class KntResourceContentGetProcessingStatusAsyncCommand : KntCommandServiceBase<Result<ResourceProcessingStatusDto>>
+{
+    public KntResourceContentGetProcessingStatusAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<ResourceProcessingStatusDto>> Execute()
+    {
+        var result = new Result<ResourceProcessingStatusDto>();
+
+        var resources = await KntResourceContent.GetResourcesToDescribeAsync(Service, result);
+        if (!result.IsValid)
+            return result;
+
+        var (pending, person) = ResourceProcessingRules.Count(resources);
+        var state = await KntResourceProcessingState.ReadAsync(Service);
+        result.Entity = new ResourceProcessingStatusDto
+        {
+            PendingPhotos = pending,
+            PersonPhotos = person,
+            LastRunDateTime = state?.LastRunDateTime,
+            SecondsPerPhoto = state?.SecondsPerPhoto
+        };
+        return result;
+    }
+}
+
+[KntAuthorize(EnumRoles.Admin)]
+public class KntResourceContentPrepareProcessingAsyncCommand : KntCommandServiceBase<ResourceProcessingOptionsDto, Result<ResourceProcessingPlanDto>>
+{
+    public KntResourceContentPrepareProcessingAsyncCommand(IKntService service, ResourceProcessingOptionsDto options) : base(service, options)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null || !Param.Photos)
+            result.AddErrorMessage("Choose what to process.");
+        return result;
+    }
+
+    public override async Task<Result<ResourceProcessingPlanDto>> Execute()
+    {
+        var result = new Result<ResourceProcessingPlanDto>();
+
+        var resources = await KntResourceContent.GetResourcesToDescribeAsync(Service, result);
+        if (!result.IsValid)
+            return result;
+
+        var (describe, lockThem) = ResourceProcessingRules.Plan(resources, Param);
+        var plan = new ResourceProcessingPlanDto
+        {
+            PhotosToDescribe = describe,
+            ReplacePersonDescriptions = Param.PersonDescriptions == EnumPersonDescriptions.Replace
+        };
+
+        // Kept as they are: only if nobody changed them meanwhile (a conditional write, as the AI's descriptions).
+        foreach (var resource in lockThem)
+        {
+            var locked = await Repository.Notes.LockResourceDescriptionAsync(resource.ResourceId, resource.Description);
+            if (locked.IsValid && locked.Entity)
+                plan.Locked++;
+        }
+
+        result.Entity = plan;
+        return result;
+    }
+}
+
+[KntAuthorize(EnumRoles.Admin)]
+public class KntResourceContentSaveProcessingRunAsyncCommand : KntCommandServiceBase<ResourceProcessingRunDto, Result>
+{
+    public KntResourceContentSaveProcessingRunAsyncCommand(IKntService service, ResourceProcessingRunDto run) : base(service, run)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null || Param.PhotosDescribed < 0 || Param.Seconds < 0)
+            result.AddErrorMessage("The run is not valid.");
+        return result;
+    }
+
+    public override async Task<Result> Execute()
+    {
+        // The pace changes only with a run that described something: a canceled one at the first photo says nothing.
+        var state = await KntResourceProcessingState.ReadAsync(Service) ?? new ResourceProcessingStateDto();
+        state.LastRunDateTime = DateTime.Now;
+        state.SecondsPerPhoto = ResourceProcessingRules.SecondsPerPhoto(Param.PhotosDescribed, Param.Seconds) ?? state.SecondsPerPhoto;
+        return await KntResourceProcessingState.WriteAsync(Service, state);
+    }
+}
+
 // What both commands check: the resource exists and is not of one of KNote's own notes (sessions, chat room...).
 internal static class KntResourceContent
 {
+    // The resources the AI could describe, of the notes that are not KNote's own.
+    public static async Task<List<ResourceInfoDto>> GetResourcesToDescribeAsync(IKntService service, ResultBase result)
+    {
+        var excluded = await KntSystemNotes.GetSystemNoteTypeIdsAsync(service.Repository);
+        var resources = await service.Repository.Notes.GetResourcesToDescribeAsync(excluded);
+        if (!resources.IsValid)
+            result.AddListErrorMessage(resources.ListErrorMessage);
+        return resources.Entity ?? new List<ResourceInfoDto>();
+    }
+
     public static async Task<(ResourceDto Resource, NoteDto Note)> GetDescribableAsync(IKntService service, Guid resourceId, ResultBase result)
     {
         var resource = await service.Repository.Notes.GetResourceAsync(resourceId);

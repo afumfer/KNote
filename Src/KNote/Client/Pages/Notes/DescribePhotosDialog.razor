@@ -36,9 +36,9 @@
                     <div>@PersonPhotos @(PersonPhotos == 1 ? "photo has a description" : "photos have a description") written by a person, not locked:</div>
                     <RadzenRadioButtonList @bind-Value="@choice" TValue="EnumPersonDescriptions" Orientation="Orientation.Vertical">
                         <Items>
-                            <RadzenRadioButtonListItem Text="Leave them as they are (not described)" Value="EnumPersonDescriptions.Skip" />
-                            <RadzenRadioButtonListItem Text="Keep them and lock them" Value="EnumPersonDescriptions.Lock" />
-                            <RadzenRadioButtonListItem Text="Replace them with the AI's, written from them (it can't be undone)" Value="EnumPersonDescriptions.Replace" />
+                            <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceSkip" Value="EnumPersonDescriptions.Skip" />
+                            <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceLock" Value="EnumPersonDescriptions.Lock" />
+                            <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceReplace" Value="EnumPersonDescriptions.Replace" />
                         </Items>
                     </RadzenRadioButtonList>
                 }

@@ -20,4 +20,16 @@ public interface IKntResourceContentService
     /// (Entity: the resource as it is now). Marks its note for the semantic index. Staff.
     /// </summary>
     Task<Result<ResourceInfoDto>> SaveAiDescriptionAsync(AiDescriptionSaveDto description);
+
+    /// <summary>What «Process pending resources» would process, and the pace of its last run. Guest.</summary>
+    Task<Result<ResourceProcessingStatusDto>> GetProcessingStatusAsync();
+
+    /// <summary>
+    /// Starts a run of «Process pending resources» (D10): locks the descriptions written by people that were chosen to keep,
+    /// and gives the photos to describe. Admin, as the semantic index.
+    /// </summary>
+    Task<Result<ResourceProcessingPlanDto>> PrepareProcessingAsync(ResourceProcessingOptionsDto options);
+
+    /// <summary>Keeps the pace of a run that ended, for the estimates. Admin.</summary>
+    Task<Result> SaveProcessingRunAsync(ResourceProcessingRunDto run);
 }

@@ -136,6 +136,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         Store.Events.Subscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
         Store.Events.Subscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
         Store.Events.Subscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
+        Store.Events.Subscribe<ResourceProcessingProgressChanged>(ResourceProcessing_ProgressChanged);
     }
 
     private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
@@ -279,11 +280,14 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         View.ShowInfo(null);
     }
 
-    // The run of the semantic index goes on when the repository editor is closed: the status bar shows it.
-    private void SemanticIndex_ProgressChanged(SemanticIndexProgressChanged e)
-    {
-        View.ShowSemanticIndexProgress(e.Job.StatusBarText);
-    }
+    // The runs of KNote Atlas (the semantic index, the resources) go on when the repository editor is closed: the status
+    // bar shows the one running.
+    private void SemanticIndex_ProgressChanged(SemanticIndexProgressChanged e) => ShowAtlasJobProgress();
+
+    private void ResourceProcessing_ProgressChanged(ResourceProcessingProgressChanged e) => ShowAtlasJobProgress();
+
+    private void ShowAtlasJobProgress() =>
+        View.ShowSemanticIndexProgress(Store.SemanticIndex.StatusBarText ?? Store.ResourceProcessing.StatusBarText);
 
     public override void Dispose()
     {
@@ -303,9 +307,11 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         Store.Events.Unsubscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
         Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
         Store.Events.Unsubscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
+        Store.Events.Unsubscribe<ResourceProcessingProgressChanged>(ResourceProcessing_ProgressChanged);
 
-        // The app closes: the run of the semantic index stops (what is done is kept).
+        // The app closes: the runs of KNote Atlas stop (what is done is kept).
         Store.SemanticIndex.Cancel();
+        Store.ResourceProcessing.Cancel();
 
         base.Dispose();
     }

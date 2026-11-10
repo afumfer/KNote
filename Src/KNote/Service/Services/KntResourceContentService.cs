@@ -20,4 +20,13 @@ public class KntResourceContentService : KntServiceBase, IKntResourceContentServ
 
     public async Task<Result<ResourceInfoDto>> SaveAiDescriptionAsync(AiDescriptionSaveDto description) =>
         await ExecuteCommand(new KntResourceContentSaveAiDescriptionAsyncCommand(Service, description));
+
+    public async Task<Result<ResourceProcessingStatusDto>> GetProcessingStatusAsync() =>
+        await ExecuteCommand(new KntResourceContentGetProcessingStatusAsyncCommand(Service));
+
+    public async Task<Result<ResourceProcessingPlanDto>> PrepareProcessingAsync(ResourceProcessingOptionsDto options) =>
+        await ExecuteCommand(new KntResourceContentPrepareProcessingAsyncCommand(Service, options));
+
+    public async Task<Result> SaveProcessingRunAsync(ResourceProcessingRunDto run) =>
+        await ExecuteCommand(new KntResourceContentSaveProcessingRunAsyncCommand(Service, run));
 }

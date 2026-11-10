@@ -131,6 +131,13 @@ public interface IViewSemanticIndex : IViewEmbeddable
     void RefreshProgress();
 }
 
+// «Process pending resources» of the repository editor (RepositoryResourcesCtrl): RefreshView shows what it would process,
+// RefreshProgress the progress of its run (Store.ResourceProcessing).
+public interface IViewResourceProcessing : IViewEmbeddable
+{
+    void RefreshProgress();
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();
@@ -140,7 +147,7 @@ public interface IViewKNoteManagement : IViewBase
     void ReportProgressKNoteManagement(int porcentaje);
     void SetVisibleProgressBar(bool visible);
 
-    // The run of the semantic index in the status bar (SemanticIndexJob.StatusBarText): null hides it.
+    // The run of KNote Atlas in the status bar (SemanticIndexJob or ResourceProcessingJob.StatusBarText): null hides it.
     void ShowSemanticIndexProgress(string text);
 
     // Single-value input prompt (backed by ReadVarForm), used by KNoteManagementCtrl.ChangeTags so the

@@ -47,6 +47,7 @@ public class ControllerAuthorizationMatrixTests
         // KNote Atlas: the AI models a repository declares.
         ["RepositoryAiModelsCtrl"] = Included,
         ["RepositorySemanticIndexCtrl"] = Included,
+        ["RepositoryResourcesCtrl"] = Included,
         // KNote Atlas: the window of the context of the AI (any user; its buttons ask the role of each command).
         ["AtlasContextCtrl"] = Requirement(EnumRoles.Guest, AuthorizationScope.Repository),
 

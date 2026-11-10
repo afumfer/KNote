@@ -65,6 +65,9 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     private RepositorySemanticIndexCtrl _repositorySemanticIndexCtrl;
     public RepositorySemanticIndexCtrl RepositorySemanticIndexCtrl => _repositorySemanticIndexCtrl ??= new RepositorySemanticIndexCtrl(Store);
 
+    private RepositoryResourcesCtrl _repositoryResourcesCtrl;
+    public RepositoryResourcesCtrl RepositoryResourcesCtrl => _repositoryResourcesCtrl ??= new RepositoryResourcesCtrl(Store);
+
     #endregion
 
     #region Constructor 
@@ -111,6 +114,7 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 await TraceNoteTypesManageCtrl.LoadEntitiesAsync(service);
                 await RepositoryAiModelsCtrl.NewModel(service);
                 await RepositorySemanticIndexCtrl.LoadAsync(service, Model.Name);
+                await RepositoryResourcesCtrl.LoadAsync(service, Model.Name);
                 // A new embedding model is another index.
                 RepositoryAiModelsCtrl.SavedEntity -= RepositoryAiModelsCtrl_SavedEntity;
                 RepositoryAiModelsCtrl.SavedEntity += RepositoryAiModelsCtrl_SavedEntity;

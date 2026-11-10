@@ -81,6 +81,40 @@ public class ResourceContentInProcessTests
         Assert.AreEqual("fake-model", (await service.Notes.GetResourceAsync(photoId)).Entity.DescriptionModel);
     }
 
+    // «Process pending resources» (4.3): only an Admin runs it, in the Server's queue; its progress until it ends, and what is
+    // pending afterwards.
+    [TestMethod]
+    public async Task ProcessPendingResources_IsAnAdminRun_InTheServersQueue()
+    {
+        var photoId = await AddPhotoAsync();
+        _chatClients.Script = () => Enumerable.Range(0, 100).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "A blue square.") }).ToList();
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        var options = new ResourceProcessingOptionsDto { Photos = true, PersonDescriptions = EnumPersonDescriptions.Skip };
+
+        var status = await staff.GetAsync("api/resources/status");
+        var forbidden = await staff.PostAsJsonAsync("api/resources/process", options);
+        var started = await _admin.PostAsJsonAsync("api/resources/process", options);
+
+        Assert.IsTrue(status.IsSuccessStatusCode, await status.Content.ReadAsStringAsync());
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        var body = await started.Content.ReadAsStringAsync();
+        Assert.IsTrue(started.IsSuccessStatusCode, body);
+
+        ResourceProcessingProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            var res = await _admin.GetFromJsonAsync<Result<ResourceProcessingProgressDto>>("api/resources/process/progress", _json);
+            progress = res!.Entity;
+        }
+        Assert.AreEqual(EnumResourceProcessingPhase.Completed, progress!.Phase, progress.Message);
+        Assert.IsTrue(progress.PhotosDescribed >= 1);
+        Assert.AreEqual("fake-model", progress.Model);
+        using var service = _factory.CreateServiceForRepository(0);
+        Assert.AreEqual("A blue square.", (await service.Notes.GetResourceAsync(photoId)).Entity.Description);
+        Assert.AreEqual(0, (await service.ResourceContent.GetProcessingStatusAsync()).Entity.PendingPhotos);
+    }
+
     private static async Task<Guid> AddPhotoAsync()
     {
         using var service = _factory.CreateServiceForRepository(0);

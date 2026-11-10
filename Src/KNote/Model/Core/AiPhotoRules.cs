@@ -19,6 +19,10 @@ public static class AiPhotoRules
     public const int MaxPersonDescriptionLength = 300;
     public const int MaxDescriptionLength = 600;
 
+    // A photo whose file is in another installation (its folder of resources is not here): not an error of a run, it is
+    // described where the file is.
+    public const string FileNotAvailableMessage = "The file of the photo is not available in this installation.";
+
     /// <summary>Whether the resource is a photo the AI can describe (by its type or, without one, by its name).</summary>
     public static bool IsPhoto(string fileType, string name) =>
         ContentType(fileType, name) != null;
@@ -108,12 +112,14 @@ public static class AiPhotoRules
         if (!string.IsNullOrWhiteSpace(photoDescription))
             request.Append($"What a person wrote of this photo (it is true: keep its names and facts):\n{photoDescription.Trim()}\n\n");
 
-        if (!hasNote && !string.IsNullOrWhiteSpace(photoDescription))
-            request.Append("Describe this photo. Write in the language of what the person wrote of it.");
+        // The last line is what a small model follows best (measured in 4.2 and 4.3 with qwen3.5:9b): without "without mentioning
+        // the note" it wrote «The note says…»; with it alone, it left out the names a person wrote of the photo.
+        var hasPhotoDescription = !string.IsNullOrWhiteSpace(photoDescription);
+        request.Append(hasPhotoDescription ? "Describe this photo with the names and facts that the person wrote of it" : "Describe this photo");
+        if (hasNote)
+            request.Append(", without mentioning the note. Write in the language of the note (of its text or, if it has none, of its topic).");
         else
-            request.Append(hasNote
-                ? "Describe this photo. Write in the language of the note (of its text or, if it has none, of its topic)."
-                : "Describe this photo. Write in English.");
+            request.Append(hasPhotoDescription ? ". Write in the language of what the person wrote of it." : ". Write in English.");
         return request.ToString();
     }
 

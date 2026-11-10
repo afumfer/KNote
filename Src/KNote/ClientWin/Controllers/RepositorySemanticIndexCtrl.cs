@@ -20,6 +20,7 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     {
         ControllerName = "Repository semantic index";
         Store.Events.Subscribe<SemanticIndexProgressChanged>(OnProgressChanged);
+        Store.Events.Subscribe<ResourceProcessingProgressChanged>(OnResourcesProgressChanged);
     }
 
     #endregion
@@ -40,7 +41,8 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     // Another repository's run: this one waits (one at a time in the app).
     public bool OtherRepositoryRunning => Store.SemanticIndex.IsRunning && !Store.SemanticIndex.IsOf(Service);
 
-    public bool CanRun => Status?.IndexKey != null && Status.EmbeddingModelAvailable && !Store.SemanticIndex.IsRunning;
+    // One run of KNote Atlas at a time in the app (the index or the resources: one Ollama).
+    public bool CanRun => Status?.IndexKey != null && Status.EmbeddingModelAvailable && !Store.AtlasJobRunning;
 
     public bool CanUpdate => CanRun && !(Status.Status == EnumSemanticIndexStatus.Ready && Status.PendingNotes == 0);
 
@@ -62,7 +64,9 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
             ? $"This installation has no embeddings provider with the model {Status.EmbeddingModel}: the index cannot be created or updated here (Tools > Manage AI providers)."
             : OtherRepositoryRunning
                 ? $"The index of {Store.SemanticIndex.RepositoryName} is being created: one index at a time."
-                : "";
+                : Store.ResourceProcessing.IsRunning
+                    ? $"The resources of {Store.ResourceProcessing.RepositoryName} are being processed: one run of KNote Atlas at a time."
+                    : "";
 
     public string ProgressText => Progress is { } progress ? SemanticIndexTexts.Progress(progress) : "";
 
@@ -168,6 +172,7 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     public override void Dispose()
     {
         Store.Events.Unsubscribe<SemanticIndexProgressChanged>(OnProgressChanged);
+        Store.Events.Unsubscribe<ResourceProcessingProgressChanged>(OnResourcesProgressChanged);
         base.Dispose();
     }
 
@@ -179,6 +184,13 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     private bool IsPaidModel() =>
         Store.Settings.Ai.Providers.Any(p => p.IsEmbeddings && p.IsValid() && p.IsPaid
             && string.Equals(p.Model?.Trim(), Status?.EmbeddingModel, StringComparison.OrdinalIgnoreCase));
+
+    // A run of the resources holds this one back.
+    private void OnResourcesProgressChanged(ResourceProcessingProgressChanged e)
+    {
+        if (Service != null)
+            View.RefreshView();
+    }
 
     private async void OnProgressChanged(SemanticIndexProgressChanged e)
     {
