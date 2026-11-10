@@ -17,10 +17,8 @@ public static class KntSections
     public static readonly KntSection Alarms = new("Alarms calendar", "notes/alarmscalendar", "alarm");
     public static readonly KntSection ChatRoom = new("Chat room", "chat", "chat_bubble");
     public static readonly KntSection AiAssistant = new("AI Assistant", "aiassistant", "smart_toy");
-    // KNote Atlas: the context of the AI (any user) and, reached from it, the laboratory of the search by meaning
-    // (ProjectManager), only in the Web.
-    public static readonly KntSection AtlasContext = new("KNote Atlas", "atlas", "travel_explore");
-    public static readonly KntSection SearchEvaluation = new("Search evaluation", "atlas/evaluation", "query_stats");
+    // KNote Atlas: everything of the AI of the repository, in one page with a tab for each part (each one for its role).
+    public static readonly KntSection Atlas = new("KNote Atlas", "atlas", "travel_explore");
     public static readonly KntSection Admin = new("Admin panel", "admin", "admin_panel_settings");
 
     // Admin panel tabs
@@ -30,8 +28,14 @@ public static class KntSections
     // Also the icon of the note editor's "Trace notes" tab.
     public static readonly KntSection TraceNoteTypes = new("Trace note types", "tracenotetypes", "conversion_path");
     public static readonly KntSection Attributes = new("Attributes management", "attributes", "format_list_bulleted");
-    // KNote Atlas: the repository's AI models and semantic index.
-    public static readonly KntSection Atlas = new("KNote Atlas", "admin", "hub");
+
+    // KNote Atlas tabs (Path: the page with the tab chosen).
+    public static readonly KntSection AtlasModels = new("Repository models", "atlas?tab=models", "hub");
+    public static readonly KntSection AtlasPersonalization = new("AI personalization", "atlas?tab=personalization", "tune");
+    public static readonly KntSection AtlasSemanticIndex = new("Semantic index", "atlas?tab=index", "manage_search");
+    public static readonly KntSection AtlasResources = new("Process pending resources", "atlas?tab=resources", "photo_library");
+    // The laboratory of the search by meaning (ProjectManager), only in the Web.
+    public static readonly KntSection SearchEvaluation = new("Search evaluation", "atlas?tab=evaluation", "query_stats");
     // Only in KNote Local (the server's capabilities).
     public static readonly KntSection ThisComputer = new("This computer", "local", "computer");
 }

@@ -1,33 +1,19 @@
-@page "/atlas"
-
 @implements IDisposable
 
 @inject KntWindows kntWindows
 
-@attribute [Authorize]
+@* KNote Atlas, the tab «AI personalization» (chapters 19–21): the context the AI receives in the session's repository. Each
+   section reads its own part: the profile and the glossary side by side, the instructions of the tasks and what the AI
+   receives (the result of the three, Staff). The notes are written in the note editor of always, in its own window: when
+   one is saved there, the tab is read again. *@
 
-@* KNote Atlas (chapters 19–21): the context the AI receives in the session's repository, on one page. Each section reads
-   its own part: the profile and the glossary side by side, the instructions of the tasks and what the AI receives (the
-   result of the three, Staff). The notes are written in the note editor of always, in its own window: when one is saved
-   there, the page is read again. The search evaluation (ProjectManager) is reached from here. *@
-
-<KntIndexHeader Section="KntSections.AtlasContext" Subtitle="The context the AI receives in this repository">
-    <IndexMenu>
-        <AuthorizeView Roles="ProjectManager, Admin">
-            <Authorized>
-                <RadzenMenu>
-                    <RadzenMenuItem Text="@KntSections.SearchEvaluation.Text" Icon="@KntSections.SearchEvaluation.Icon" Path="@KntSections.SearchEvaluation.Path" />
-                </RadzenMenu>
-            </Authorized>
-        </AuthorizeView>
-    </IndexMenu>
-</KntIndexHeader>
+<KntIndexHeader Section="KntSections.AtlasPersonalization" Subtitle="The context the AI receives in this repository" />
 
 <RadzenStack Gap="1rem" class="rz-pt-2">
     <RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">
-        The AI assistant receives this context in every question, so that it knows your repository: what it is for, its
-        vocabulary and how you want it to work. The profile, the glossary and the instructions are notes of the folder
-        «KNote Atlas»: you write them in the note editor, and only a ProjectManager or an Admin saves them.
+        The AI receives this context in every task, so that it knows your repository: what it is for, its vocabulary and how
+        you want it to work. The profile, the glossary and the instructions are notes of the folder «KNote Atlas»: you write
+        them in the note editor, and only a ProjectManager or an Admin saves them.
     </RadzenText>
     <RadzenRow Gap="1rem">
         <RadzenColumn Size="12" SizeMD="6">

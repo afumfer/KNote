@@ -8,7 +8,7 @@ namespace KNote.ClientWin.Core;
 /// <summary>
 /// The run of «Process pending resources» of ClientWin (KNote Atlas, stage 4, D10/D11), one at a time in the app and never
 /// with the semantic index's (Store.AtlasJobRunning: one Ollama). Like SemanticIndexJob, it belongs to the Store, not to the
-/// repository editor that starts it; its progress is published on Store.Events (ResourceProcessingProgressChanged, on the
+/// window that starts it; its progress is published on Store.Events (ResourceProcessingProgressChanged, on the
 /// UI thread, a few times a second at most). It runs in the thread pool with the repository's service, so with the app's
 /// user and role (preparing the run is an Admin command). Canceled when the app closes (what is done is kept). When it
 /// describes something in a repository with a semantic index, it starts the update of the index.

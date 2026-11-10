@@ -7,7 +7,7 @@
 @inject DialogService dialogService
 @inject TooltipService tooltipService
 
-<KntFormSection Icon="travel_explore" Title="Semantic index"
+<KntFormSection Icon="@KntSections.AtlasSemanticIndex.Icon" Title="@KntSections.AtlasSemanticIndex.Text"
                 Description="The meaning of every note (its data, text, tasks and described resources), calculated with the repository's embedding model, that the search by meaning uses. The notes that change are updated before each search by meaning or with Update now.">
     @if (status == null)
     {
@@ -141,14 +141,6 @@
         if (res.IsValid)
             status = res.Entity;
         StateHasChanged();
-    }
-
-    // A run queued by someone else (the server, after «Process pending resources»): its progress is followed.
-    public async Task FollowRunAsync()
-    {
-        await PollOnceAsync();
-        StartPolling();
-        await RefreshAsync();
     }
 
     private Task OnRun(bool rebuild) => acting.RunAsync(async () =>

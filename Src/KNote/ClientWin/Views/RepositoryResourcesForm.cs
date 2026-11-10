@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-// "Resources" tab of the repository editor (RepositoryResourcesCtrl): what «Process pending resources» would process and
+// Section Â«Process pending resourcesÂ» of the KNote Atlas window (RepositoryResourcesCtrl): what «Process pending resources» would process and
 // running it, with the choice for the descriptions written by people and its progress. Always used embedded (PanelView())
 // inside RepositoryEditorForm's TabPage, never shown as a window. The run is the Store's: closing the editor does not stop it.
 public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing

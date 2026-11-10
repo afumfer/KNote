@@ -1,13 +1,13 @@
 @* «Process pending resources» of the session's repository (KNote Atlas, stage 4, CU-25): what it would process, and running
    it in the server's queue (one run of KNote Atlas at a time for the whole server), with the choice for the descriptions
    written by people, its progress and its cancellation. A run goes on when the page is left; coming back shows its progress
-   again. When it ends, the server queues the update of the semantic index (OnFinished: the index section follows it). *@
+   again. When it ends, the server queues the update of the semantic index (its tab shows it). *@
 
 @implements IDisposable
 @inject IStore store
 @inject DialogService dialogService
 
-<KntFormSection Icon="photo_library" Title="@ResourceProcessingTexts.Title" Description="@ResourceProcessingTexts.Description">
+<KntFormSection Icon="@KntSections.AtlasResources.Icon" Title="@KntSections.AtlasResources.Text" Description="@ResourceProcessingTexts.Description">
     @if (status == null)
     {
         @if (loadFailed)
@@ -86,9 +86,6 @@
 </KntFormSection>
 
 @code {
-    // When a run ends (the server queues the update of the semantic index).
-    [Parameter] public EventCallback OnFinished { get; set; }
-
     private ResourceProcessingStatusDto? status;
     private ResourceProcessingProgressDto? progress;
     private EnumPersonDescriptions choice = EnumPersonDescriptions.Skip;
@@ -178,7 +175,6 @@
             {
                 justFinished = true;
                 await RefreshAsync();
-                await OnFinished.InvokeAsync();
             }
         }
         catch (OperationCanceledException)

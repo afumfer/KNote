@@ -6,11 +6,11 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// The "Resources" tab of the repository editor (RepositoryEditorCtrl, Management mode; KNote Atlas, stage 4, D10): what
+/// Section Â«Process pending resourcesÂ» of the KNote Atlas window (AtlasCtrl; KNote Atlas, stage 4, D10): what
 /// «Process pending resources» would process (Service.ResourceContent) and running it, with the choice for the descriptions
 /// written by people, its progress and its cancellation. The run is the Store's (Store.ResourceProcessing, one run of KNote
 /// Atlas at a time in the app): it goes on when the editor is closed, and opening it again shows its progress. Included in
-/// the repository editor (no [KntAuthorize]: it decides); the commands check the role (Admin to run).
+/// the KNote Atlas window (no [KntAuthorize]: it decides); the commands check the role (Admin to run).
 /// </summary>
 public class RepositoryResourcesCtrl : CtrlViewEmbeddableBase<IViewResourceProcessing>
 {

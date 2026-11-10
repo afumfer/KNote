@@ -9,7 +9,7 @@ using KNote.Service.Interfaces;
 namespace KNote.ClientWin.Tests;
 
 /// <summary>
-/// RepositoryResourcesCtrl ("Resources" tab of the repository editor, KNote Atlas 4.3) and the Store's run of «Process pending
+/// RepositoryResourcesCtrl (Â«Process pending resourcesÂ» of the KNote Atlas window, KNote Atlas 4.3) and the Store's run of «Process pending
 /// resources» (ResourceProcessingJob): what it shows, a run started after saying what it does (with which model, whether it is
 /// paid), the choice for the descriptions written by people, one run of KNote Atlas at a time in the app (also with the index),
 /// and the update of the semantic index when a run describes something.

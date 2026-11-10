@@ -1003,7 +1003,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     // KNote Atlas: the context of the AI, starting in the active repository.
     public async Task ShowAtlasContextAsync()
     {
-        var atlasCtrl = new AtlasContextCtrl(Store);
+        var atlasCtrl = new AtlasCtrl(Store);
         if (atlasCtrl.Service == null)
         {
             View.ShowInfo("There is no repository to work in.");

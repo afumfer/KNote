@@ -9,7 +9,7 @@ using KNote.Service.Interfaces;
 namespace KNote.ClientWin.Tests;
 
 /// <summary>
-/// RepositorySemanticIndexCtrl ("Semantic index" tab of the repository editor) and the Store's run of the index
+/// RepositorySemanticIndexCtrl (Â«Semantic indexÂ» of the KNote Atlas window) and the Store's run of the index
 /// (SemanticIndexJob): the status it shows, a run started after saying what it does, one run at a time in the app, its
 /// cancellation, the status read again when it ends, and removing the index of another model.
 /// </summary>

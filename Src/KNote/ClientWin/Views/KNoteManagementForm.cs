@@ -58,7 +58,7 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         {
             BorderSides = ToolStripStatusLabelBorderSides.Left,
             Visible = false,
-            ToolTipText = "Its progress, in the Semantic index tab of the repository editor (Tools > Repositories)."
+            ToolTipText = "Its progress, in the KNote Atlas window (Tools > KNote Atlas)."
         };
         statusBarManagement.Items.Insert(statusBarManagement.Items.IndexOf(statusLabelUser), _statusLabelSemanticIndex);
     }

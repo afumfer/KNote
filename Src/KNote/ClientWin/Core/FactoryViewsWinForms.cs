@@ -49,7 +49,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<NotesFilterParamCtrl, IViewEmbeddable>(c => new NotesFilterParamForm(c));
         Registry.Register<OptionsEditorCtrl, IViewEditor<OptionsModel>>(c => new OptionsEditorForm(c));
         Registry.Register<KNoteAIAssistantCtrl, IViewBase>(c => new KNoteAIAssistantForm(c));
-        Registry.Register<AtlasContextCtrl, IViewBase>(c => new AtlasContextForm(c));
+        Registry.Register<AtlasCtrl, IViewBase>(c => new AtlasForm(c));
         Registry.Register<AiProviderEditorCtrl, IViewEditor<AiProviderRef>>(c => new AiProviderEditorForm(c));
         Registry.Register<RepositoryAiModelsCtrl, IViewEditorEmbeddable<RepositoryAiModelsDto>>(c => new RepositoryAiModelsForm(c));
         Registry.Register<RepositorySemanticIndexCtrl, IViewSemanticIndex>(c => new RepositorySemanticIndexForm(c));

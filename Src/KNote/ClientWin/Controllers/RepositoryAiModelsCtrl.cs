@@ -6,10 +6,10 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// KNote Atlas tab of the repository editor (RepositoryEditorCtrl, Management mode): the AI models a repository
+/// Section Â«Repository modelsÂ» of the KNote Atlas window (AtlasCtrl): the AI models a repository
 /// declares (CU-02), its embedding model, which every installation working with it must use, and the recommended LLM.
 /// They are SystemValues of the repository (Service.SystemValues.Get/SaveRepositoryAiModelsAsync, Admin); where each
-/// model runs is this installation's AI providers (Store.Settings.Ai.Providers). Included in the repository editor
+/// model runs is this installation's AI providers (Store.Settings.Ai.Providers). Included in the KNote Atlas window
 /// (no [KntAuthorize]: it decides), and saved by its own button, as the other tabs save at once; the editor asks about
 /// the changes not saved when it is closed (ResolvePendingChangesAsync, HasPendingChanges).
 /// </summary>
@@ -157,14 +157,14 @@ public class RepositoryAiModelsCtrl : CtrlEditorBase<IViewEditorEmbeddable<Repos
         return Model.IsDirty();
     }
 
-    // Before the repository editor accepts: the changes not saved yet are saved, discarded or kept (false: the
+    // Before the KNote Atlas window changes the repository or closes: the changes not saved yet are saved, discarded or kept (false: the
     // editor stays open).
     public async Task<bool> ResolvePendingChangesAsync()
     {
         if (!HasPendingChanges())
             return true;
 
-        var answer = View.ShowInfo("The repository's AI models (KNote Atlas tab) have changes not saved. Save them?",
+        var answer = View.ShowInfo("The repository's AI models (Repository models) have changes not saved. Save them?",
             "Repository AI models", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
         switch (answer)

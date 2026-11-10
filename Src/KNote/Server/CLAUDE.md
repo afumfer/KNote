@@ -377,16 +377,17 @@ repositorio de la sesión.
   laboratorio de evaluación, una consulta por petición). `NotesController.Search`/`Filter` no cambian. Los informes
   (`api/reports`) de una lista por significado repiten la búsqueda (`NotesListReportRequestDto.SearchMode`) y llevan la
   columna Similarity.
-- **Trabajos de índice** (`Helpers/SemanticIndexJobs`, `KntAddSemanticIndex`, `BackgroundService` singleton): **una cola
-  para todo el Server y un trabajo a la vez**, sea del repositorio que sea (con un solo Ollama, dos a la vez solo
-  compiten por el modelo), y un trabajo por repositorio, en marcha o en cola (pedir otro devuelve el que hay; los que
+- **Trabajos de KNote Atlas** (`Helpers/KntAtlasJobs`, `KntAddAtlasJobs`, `BackgroundService` singleton; hasta la 4.3,
+  `SemanticIndexJobs`): el índice semántico y «Process pending resources» (etapa 4, `api/resources/process`, Admin, con
+  `AiResourceProcessor`). **Una cola para todo el Server y un trabajo a la vez**, sea del repositorio y del tipo que sea
+  (con un solo Ollama, dos a la vez solo compiten por el modelo), y un trabajo por repositorio y tipo, en marcha o en cola (pedir otro devuelve el que hay; los que
   esperan salen «Queued» con su posición). Cada trabajo crea **su propio** `IKntService` del repositorio con el usuario
   que lo pidió (el de la petición se libera al terminarla) y los modelos del Server. El progreso del último trabajo de
   cada repositorio se guarda en memoria; cada usuario ve y cancela solo el del repositorio de su sesión. Un trabajo que
   falla no para la cola. Mientras un repositorio tiene un trabajo, su búsqueda no pone pendientes al día.
 - **KNote Local**: `api/local` guarda `kind` y `contextWindow` de los proveedores y `POST api/local/ai/test` prueba uno
   (`AiProviderTester`; sin clave, con la guardada).
-- Tests: `Tests/InProcessIntegrationTests/SemanticIndexInProcessTests`, `SemanticIndexJobsTests`,
+- Tests: `Tests/InProcessIntegrationTests/SemanticIndexInProcessTests`, `KntAtlasJobsTests`, `ResourceContentInProcessTests`,
   `SemanticSearchInProcessTests` (modelos) y `SearchByMeaningInProcessTests` (búsqueda, parecidas, informes y
   evaluación), con un generador falso (`TestServices` de `KNoteWebApplicationFactory`).
 

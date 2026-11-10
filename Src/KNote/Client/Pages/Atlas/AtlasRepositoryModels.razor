@@ -7,7 +7,7 @@
 @inject DialogService dialogService
 @inject NotificationService notificationService
 
-<KntFormSection Icon="hub" Title="Repository models"
+<KntFormSection Icon="@KntSections.AtlasModels.Icon" Title="@KntSections.AtlasModels.Text"
                 Description="The models everyone working with this repository uses: the embedding model of the search by meaning (all its notes are indexed with it) and the LLM recommended for its AI tasks. Where each model runs is set in each installation (its AI providers).">
     @if (models == null)
     {

@@ -235,11 +235,20 @@ Etapa 0 de KNote Atlas (la lógica está en `Service`, ver «Índice semántico�
 (`SemanticIndexTexts.CanSearch` sobre `GetIndexStatusAsync`: hay filas y el Server tiene su modelo); los textos del
 estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexTexts`, comunes con `ClientWin`.
 
-- **Administración** (pestaña **KNote Atlas** de `Admin.razor`, `KntSections.Atlas`, Admin): `AtlasIndex` con dos
-  secciones que leen y guardan cada una lo suyo: `AtlasRepositoryModels` (los modelos del repositorio, con los avisos de
-  modelo que el Server no tiene o que es de pago, de `installation-models`) y `AtlasSemanticIndex` (estado, «Create
-  index» / «Update now», «Rebuild», «Cancel», el progreso con sus errores, que se consulta mientras dura, y los índices
-  de otros modelos con su botón para borrarlos). Guardar los modelos vuelve a leer el estado del índice.
+- **La página KNote Atlas** (`Pages/Atlas/Atlas.razor`, rutas `atlas` y `atlas/evaluation`, `KntSections.Atlas`, una
+  entrada del menú lateral para cualquier usuario con sesión; 4.3b): todo lo de la IA del repositorio en `RadzenTabs` a la
+  izquierda (arriba en pantallas estrechas, `Atlas.razor.css`), una pestaña por parte y cada una para su rol: *Repository
+  models* (`AtlasRepositoryModels`, Admin), *AI personalization* (`AtlasPersonalization`, todos), *Semantic index*
+  (`AtlasSemanticIndex`, Admin), *Process pending resources* (`AtlasResources`, Admin) y *Search evaluation*
+  (`SearchEvaluation`, ProjectManager). Las que el usuario no puede usar se ven deshabilitadas con un candado y su `title`
+  dice quién puede, y **su contenido no se dibuja** (no pide nada al Server). Solo se dibuja la pestaña elegida
+  (`RadzenTabs` por defecto), así que cada una lee su estado al abrirse; la elegida va en la dirección (`?tab=models`,
+  `personalization`, `index`, `resources`, `evaluation`) y en `localStorage` (`knt-atlas-tab`); `atlas/evaluation` abre
+  la suya. Sin nada, *AI personalization*. Las pestañas de `KntSections` (`AtlasModels`...) dan el texto y el icono.
+- `AtlasRepositoryModels`: los modelos del repositorio, con los avisos de modelo que el Server no tiene o que es de pago
+  (`installation-models`). `AtlasSemanticIndex`: estado, «Create index» / «Update now», «Rebuild», «Cancel», el progreso
+  con sus errores, que se consulta mientras dura, y los índices de otros modelos con su botón para borrarlos.
+  `AtlasResources` (etapa 4): «Process pending resources» (`api/resources`), con los textos de `ResourceProcessingTexts`.
 - **Búsqueda** (`NotesSearch.razor`): selector «Words / Meaning» (`RadzenSelectBar`); el modo va en la URL
   (`mode=meaning`) y en la posición de la lista. Por significado no hay paginación en el Server: `KntMeaningSearchPages`
   hace la búsqueda con la primera página que pide `NotesGrid` y le da las demás en memoria, ordenadas con
@@ -252,21 +261,20 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   clic o Enter la abre). En `NoteForm`, debajo de las relaciones de la pestaña «Trace notes» (se calcula al abrir la
   pestaña), con «Relate», que abre `NoteTraceNoteEditor` con la nota ya elegida y al guardar vuelve a calcular. En
   `NoteViewer`, el botón «Similar notes» abre `NoteSimilarNotesDialog` (sin «Relate»).
-- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, ruta `atlas/evaluation`, `KntSections.SearchEvaluation`, botón
-  de la cabecera de la página KNote Atlas, solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
+- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, pestaña de la página KNote Atlas, `KntSections.SearchEvaluation`,
+  solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
   «Read again»), las casillas de los índices cuyo modelo tiene el Server y «Also without the query instruction»,
   «Evaluate» (una petición por consulta, con progreso y «Cancel», que deja el informe de las hechas), el informe
   (`SearchEvaluationReport.Markdown`, mostrado con `ViewMarkdown`) y «Save as note». No existe en `ClientWin`.
-- **Contexto de la IA** (etapa 1, `IStore.Atlas` = `AtlasWebApiService`, `api/atlas`): la página `Pages/Atlas/AtlasContext`
-  (ruta `atlas`, `KntSections.AtlasContext`, una entrada del menú lateral para cualquier usuario con sesión), con una
-  sección por parte que lee lo suyo (`KntLatestRequest`, Retry con `AtlasLoadError`): `AtlasProfileSection` y
+- **Contexto de la IA** (etapa 1, `IStore.Atlas` = `AtlasWebApiService`, `api/atlas`): la pestaña *AI personalization*
+  (`Pages/Atlas/AtlasPersonalization`), con una sección por parte que lee lo suyo (`KntLatestRequest`, Retry con `AtlasLoadError`): `AtlasProfileSection` y
   `AtlasGlossarySection` lado a lado, `AtlasTaskPromptsSection` y `AtlasPromptSection` («What the AI receives», Staff+: la
   tarea, un texto de prueba y el texto tal cual se envía, `AtlasPromptText`, con su resumen, `AiPromptComposer.Summary`).
   La nota se edita en el editor de siempre en su propia ventana (`KntWindows.OpenEditAsync`); crearla abre esa ventana
-  justo después de la respuesta. Tras crear o rellenar una nota, la sección avisa a la página (`Changed`), que recalcula
-  «What the AI receives»; con `KntWindows.NoteSaved` la página vuelve a leer todas las secciones. Los botones de crear y
-  personalizar se ven con `AuthorizeView` (ProjectManager, Admin). «See KNote's» es `AtlasKNoteInstructionsDialog`. Si la
-  página crece con las etapas siguientes, se pasa a pestañas como las de `Admin`.
+  justo después de la respuesta. Tras crear o rellenar una nota, la sección avisa a la pestaña (`Changed`), que recalcula
+  «What the AI receives»; con `KntWindows.NoteSaved` la pestaña vuelve a leer todas las secciones. Los botones de crear y
+  personalizar se ven con `AuthorizeView` (ProjectManager, Admin). «See KNote's» es `AtlasKNoteInstructionsDialog`. Una
+  parte nueva de KNote Atlas (etapas 2 y 3) es otra pestaña de la página.
 
 ## Interfaz de usuario: Radzen.Blazor
 

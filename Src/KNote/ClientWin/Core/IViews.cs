@@ -124,7 +124,7 @@ public interface IViewFileExport : IViewBase
     string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName);
 }
 
-// The semantic index of the repository editor (RepositorySemanticIndexCtrl): RefreshView shows its status,
+// The semantic index of the KNote Atlas window (RepositorySemanticIndexCtrl): RefreshView shows its status,
 // RefreshProgress the progress of its run (Store.SemanticIndex).
 public interface IViewSemanticIndex : IViewEmbeddable
 {

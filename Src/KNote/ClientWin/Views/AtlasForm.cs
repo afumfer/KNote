@@ -6,19 +6,23 @@ using KNote.Service.Core;
 
 namespace KNote.ClientWin.Views;
 
-// KNote Atlas (chapters 19–21): the context the AI receives in a repository, a tab for each part. The repository's
-// profile, its glossary and the instructions of the tasks show the state of their notes, which are written in the note
-// editor; «What the AI receives» shows the result of the three.
-public partial class AtlasContextForm : KntForm, IViewBase
+// KNote Atlas (Tools › KNote Atlas, 4.3b): everything of the AI of a repository, a section for each part in the list on the
+// left (a section the user can't use is grayed out and says who can). The AI personalization (chapters 19–21) is this
+// form's own tabs: the repository's profile, its glossary and the instructions of the tasks show the state of their notes,
+// which are written in the note editor; «What the AI receives» shows the result of the three. The other sections are the
+// embedded views of their controllers (AtlasCtrl.ModelsCtrl, SemanticIndexCtrl, ResourcesCtrl).
+public partial class AtlasForm : KntForm, IViewBase
 {
-    private readonly AtlasContextCtrl _ctrl;
+    private readonly AtlasCtrl _ctrl;
+    private readonly ToolTip _toolTipSections = new();
+    private bool _closingResolved;
 
-    public AtlasContextForm()
+    public AtlasForm()
     {
         InitializeComponent();
     }
 
-    public AtlasContextForm(AtlasContextCtrl ctrl) : this()
+    public AtlasForm(AtlasCtrl ctrl) : this()
     {
         _ctrl = ctrl;
 
@@ -26,6 +30,18 @@ public partial class AtlasContextForm : KntForm, IViewBase
         comboTasks.DataSource = AiTaskCatalog.Tasks.ToList();
         comboTasks.Enabled = AiTaskCatalog.Tasks.Count > 1;
         comboTasks.SelectedIndexChanged += comboTasks_SelectedIndexChanged;
+
+        panelModels.Controls.Add(_ctrl.ModelsCtrl.View.PanelView());
+        panelSemanticIndex.Controls.Add(_ctrl.SemanticIndexCtrl.View.PanelView());
+        panelResources.Controls.Add(_ctrl.ResourcesCtrl.View.PanelView());
+
+        // The height of the text and a margin, at any scale.
+        listSections.ItemHeight = listSections.Font.Height + LogicalToDeviceUnits(10);
+        foreach (var section in AtlasCtrl.Sections)
+            listSections.Items.Add(section);
+        listSections.DrawItem += listSections_DrawItem;
+        listSections.SelectedIndexChanged += listSections_SelectedIndexChanged;
+        listSections.MouseMove += listSections_MouseMove;
     }
 
     private AtlasTaskPromptStatusDto SelectedTask =>
@@ -35,6 +51,7 @@ public partial class AtlasContextForm : KntForm, IViewBase
     {
         Text = $"KNote Atlas · {_ctrl.RepositoryName}";
         ShowRepositories();
+        ShowSections();
         ShowProfile();
         ShowGlossary();
         ShowTasks();
@@ -139,12 +156,89 @@ public partial class AtlasContextForm : KntForm, IViewBase
         textPrompt.Text = (composed?.Text ?? "").ReplaceLineEndings("\r\n");
     }
 
-    protected override void OnUserClosing(FormClosingEventArgs e) => _ctrl.Finalize();
+    private Panel PanelOf(EnumAtlasSection section) => section switch
+    {
+        EnumAtlasSection.Models => panelModels,
+        EnumAtlasSection.SemanticIndex => panelSemanticIndex,
+        EnumAtlasSection.Resources => panelResources,
+        _ => panelPersonalization
+    };
+
+    private void ShowSections()
+    {
+        listSections.SelectedIndexChanged -= listSections_SelectedIndexChanged;
+        listSections.SelectedItem = _ctrl.Section;
+        listSections.SelectedIndexChanged += listSections_SelectedIndexChanged;
+        listSections.Invalidate();
+
+        foreach (var section in AtlasCtrl.Sections)
+            PanelOf(section).Visible = section == _ctrl.Section;
+    }
+
+    private void listSections_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        // A section the user can't use is not shown: the list goes back to the one there was.
+        if (listSections.SelectedItem is EnumAtlasSection section && _ctrl.IsAvailable(section))
+            _ctrl.Section = section;
+        ShowSections();
+    }
+
+    private void listSections_DrawItem(object sender, DrawItemEventArgs e)
+    {
+        if (e.Index < 0)
+            return;
+
+        var section = (EnumAtlasSection)listSections.Items[e.Index];
+        var available = _ctrl.IsAvailable(section);
+        var selected = (e.State & DrawItemState.Selected) != 0;
+        e.DrawBackground();
+        var color = !available ? SystemColors.GrayText : selected ? SystemColors.HighlightText : listSections.ForeColor;
+        var text = AtlasCtrl.SectionText(section) + (available ? "" : " (Admin)");
+        var bounds = new Rectangle(e.Bounds.X + LogicalToDeviceUnits(8), e.Bounds.Y, e.Bounds.Width - LogicalToDeviceUnits(8), e.Bounds.Height);
+        TextRenderer.DrawText(e.Graphics, text, listSections.Font, bounds, color,
+            TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis);
+        e.DrawFocusRectangle();
+    }
+
+    // Who can use a section that is grayed out.
+    private void listSections_MouseMove(object sender, MouseEventArgs e)
+    {
+        var index = listSections.IndexFromPoint(e.Location);
+        var hint = index >= 0 && listSections.Items[index] is EnumAtlasSection section && !_ctrl.IsAvailable(section)
+            ? AtlasCtrl.WhoCanUse(section) : "";
+        if (_toolTipSections.GetToolTip(listSections) != hint)
+            _toolTipSections.SetToolTip(listSections, hint);
+    }
+
+    protected override void OnUserClosing(FormClosingEventArgs e)
+    {
+        // The AI models not saved: save them, discard them or stay (async, so the closing waits for the answer).
+        if (!_closingResolved && _ctrl.HasPendingChanges)
+        {
+            e.Cancel = true;
+            BeginInvoke(async () =>
+            {
+                if (await _ctrl.ResolvePendingChangesAsync())
+                {
+                    _closingResolved = true;
+                    Close();
+                }
+            });
+            return;
+        }
+        _ctrl.Finalize();
+    }
 
     private async void comboRepositories_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (comboRepositories.SelectedItem is ServiceRef repository && repository != _ctrl.ServiceRef)
-            await RunAsync(() => _ctrl.SelectRepositoryAsync(repository));
+        {
+            var changed = false;
+            await RunAsync(async () => changed = await _ctrl.SelectRepositoryAsync(repository));
+            // The AI models not saved kept the repository.
+            if (!changed)
+                ShowRepositories();
+        }
     }
 
     private async void buttonCreateProfile_Click(object sender, EventArgs e) => await RunAsync(_ctrl.CreateProfileAsync);
@@ -163,7 +257,7 @@ public partial class AtlasContextForm : KntForm, IViewBase
     {
         var task = SelectedTask;
         if (task != null)
-            new AiPromptViewForm($"KNote's instructions · {task.TaskName}", AtlasContextCtrl.KNoteInstructions(task.TaskKey)).ShowDialog(this);
+            new AiPromptViewForm($"KNote's instructions · {task.TaskName}", AtlasCtrl.KNoteInstructions(task.TaskKey)).ShowDialog(this);
     }
 
     private async void buttonCustomize_Click(object sender, EventArgs e)

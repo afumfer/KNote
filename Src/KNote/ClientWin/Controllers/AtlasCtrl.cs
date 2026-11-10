@@ -6,20 +6,89 @@ using KNote.Service.ServicesCommands;
 
 namespace KNote.ClientWin.Controllers;
 
+/// <summary>The parts of the KNote Atlas window, in the order of its list.</summary>
+public enum EnumAtlasSection
+{
+    Models,
+    Personalization,
+    SemanticIndex,
+    Resources
+}
+
 /// <summary>
-/// KNote Atlas (Tools › KNote Atlas, chapters 19–21): the context the AI receives in a repository, in one window. The
-/// repository's profile, its glossary, the instructions of each task (notes written in the note editor of always, which
-/// only ProjectManager and Admin save: a rule of the Service) and what the AI receives, all of them read together. It
-/// starts in the active repository and the user can choose another one: the assistant has its own.
+/// KNote Atlas (Tools › KNote Atlas): everything of the AI of a repository in one window (KNote Atlas 4.3b), a section for
+/// each part, each one for its role: the repository's AI models (RepositoryAiModelsCtrl), the semantic index
+/// (RepositorySemanticIndexCtrl) and «Process pending resources» (RepositoryResourcesCtrl), for an Admin; and the AI
+/// personalization (chapters 19–21), for everyone: the repository's profile, its glossary, the instructions of each task
+/// (notes written in the note editor of always, which only ProjectManager and Admin save: a rule of the Service) and what
+/// the AI receives. A section the user can't use is disabled, with who can (WhoCanUse). It starts in the active repository
+/// and the user can choose another one (the assistant has its own); the AI models not saved are asked about first.
 /// </summary>
 [KntAuthorize(EnumRoles.Guest)]
-public class AtlasContextCtrl : CtrlViewBase<IViewBase>
+public class AtlasCtrl : CtrlViewBase<IViewBase>
 {
-    public AtlasContextCtrl(Store store) : base(store)
+    public AtlasCtrl(Store store) : base(store)
     {
         ControllerName = "KNote Atlas";
         ServiceRef = store.GetActiveOrDefaultServiceRef();
     }
+
+    public static IReadOnlyList<EnumAtlasSection> Sections { get; } = Enum.GetValues<EnumAtlasSection>();
+
+    public static string SectionText(EnumAtlasSection section) => section switch
+    {
+        EnumAtlasSection.Models => "Repository models",
+        EnumAtlasSection.Personalization => "AI personalization",
+        EnumAtlasSection.SemanticIndex => "Semantic index",
+        _ => ResourceProcessingTexts.Title
+    };
+
+    // Why a section is disabled.
+    public static string WhoCanUse(EnumAtlasSection section) => section switch
+    {
+        EnumAtlasSection.Models => "Only an Admin chooses the AI models of the repository.",
+        EnumAtlasSection.SemanticIndex => "Only an Admin creates or updates the semantic index.",
+        EnumAtlasSection.Resources => "Only an Admin processes the pending resources of the repository.",
+        _ => ""
+    };
+
+    // The section shown; it starts in the one everybody can use.
+    public EnumAtlasSection Section { get; set; } = EnumAtlasSection.Personalization;
+
+    // Whether the user can use a section in the chosen repository (the role of the commands it runs).
+    public bool IsAvailable(EnumAtlasSection section) => section switch
+    {
+        EnumAtlasSection.Models => IsAllowed(typeof(KntSystemValueSaveRepositoryAiModelsAsyncCommand)),
+        EnumAtlasSection.SemanticIndex => IsAllowed(typeof(KntSemanticSearchRunIndexAsyncCommand)),
+        EnumAtlasSection.Resources => IsAllowed(typeof(KntResourceContentPrepareProcessingAsyncCommand)),
+        _ => true
+    };
+
+    private RepositoryAiModelsCtrl _modelsCtrl;
+    public RepositoryAiModelsCtrl ModelsCtrl
+    {
+        get
+        {
+            if (_modelsCtrl == null)
+            {
+                _modelsCtrl = new RepositoryAiModelsCtrl(Store);
+                // A new embedding model is another index.
+                _modelsCtrl.SavedEntity += async (_, _) => await SemanticIndexCtrl.RefreshStatusAsync();
+            }
+            return _modelsCtrl;
+        }
+    }
+
+    private RepositorySemanticIndexCtrl _semanticIndexCtrl;
+    public RepositorySemanticIndexCtrl SemanticIndexCtrl => _semanticIndexCtrl ??= new RepositorySemanticIndexCtrl(Store);
+
+    private RepositoryResourcesCtrl _resourcesCtrl;
+    public RepositoryResourcesCtrl ResourcesCtrl => _resourcesCtrl ??= new RepositoryResourcesCtrl(Store);
+
+    // AI models not saved (they are asked about before changing the repository or closing).
+    public bool HasPendingChanges => _modelsCtrl?.HasPendingChanges() == true;
+
+    public Task<bool> ResolvePendingChangesAsync() => _modelsCtrl == null ? Task.FromResult(true) : _modelsCtrl.ResolvePendingChangesAsync();
 
     public ServiceRef ServiceRef { get; private set; }
 
@@ -54,7 +123,7 @@ public class AtlasContextCtrl : CtrlViewBase<IViewBase>
 
     public bool CanCompose => IsAllowed(typeof(KntAtlasContextComposeAsyncCommand));
 
-    protected override IViewBase CreateView() => Store.FactoryViews.Registry.Resolve<AtlasContextCtrl, IViewBase>(this);
+    protected override IViewBase CreateView() => Store.FactoryViews.Registry.Resolve<AtlasCtrl, IViewBase>(this);
 
     // The note editor can outlive the window, and it asks for a new read when a note is saved.
     private bool IsClosed => !PreconditionsMet || ControllerState == EControllerState.Finalized;
@@ -83,13 +152,29 @@ public class AtlasContextCtrl : CtrlViewBase<IViewBase>
         var failed = new ResultBase[] { profile, glossary, tasks, composed }.FirstOrDefault(r => r?.IsValid == false);
         if (failed != null)
             ShowResultError(failed);
+
+        // The sections of the Admin, only for whom can use them (they would only meet errors).
+        if (IsAvailable(EnumAtlasSection.Models))
+            await ModelsCtrl.NewModel(service);
+        if (IsAvailable(EnumAtlasSection.SemanticIndex))
+            await SemanticIndexCtrl.LoadAsync(service, RepositoryName);
+        if (IsAvailable(EnumAtlasSection.Resources))
+            await ResourcesCtrl.LoadAsync(service, RepositoryName);
+        if (!IsAvailable(Section))
+            Section = EnumAtlasSection.Personalization;
+
         View.RefreshView();
     }
 
-    public async Task SelectRepositoryAsync(ServiceRef repository)
+    /// <summary>Another repository: false if the AI models not saved keep this one.</summary>
+    public async Task<bool> SelectRepositoryAsync(ServiceRef repository)
     {
-        ServiceRef = repository ?? throw new ArgumentNullException(nameof(repository));
+        ArgumentNullException.ThrowIfNull(repository);
+        if (!await ResolvePendingChangesAsync())
+            return false;
+        ServiceRef = repository;
         await LoadAsync();
+        return true;
     }
 
     public async Task CreateProfileAsync() => await ShowNoteAsync(await Service.AtlasContext.CreateProfileAsync());
@@ -140,6 +225,15 @@ public class AtlasContextCtrl : CtrlViewBase<IViewBase>
         });
 
     private bool IsAllowed(Type command) => Service != null && Store.Security.IsAuthorized(command, Service);
+
+    protected override Result<EControllerResult> OnFinalized()
+    {
+        // The embedded sections listen to the Store's events.
+        _modelsCtrl?.Dispose();
+        _semanticIndexCtrl?.Dispose();
+        _resourcesCtrl?.Dispose();
+        return base.OnFinalized();
+    }
 
     // A note created or changed by a command: the window shows it and the note editor opens it.
     private async Task ShowNoteAsync(Result<NoteDto> res)

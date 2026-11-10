@@ -4,7 +4,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-// KNote Atlas tab of the repository editor (RepositoryAiModelsCtrl): the AI models of the repository. Always used
+// Section Â«Repository modelsÂ» of the KNote Atlas window (RepositoryAiModelsCtrl): the AI models of the repository. Always used
 // embedded (PanelView()) inside RepositoryEditorForm's TabPage, never shown as a window. The model names can be typed
 // (a model declared for the repository may not be configured in this installation); the lists are this installation's
 // models ("Manage models" opens this installation's AI providers). "Save models" saves them at once, as the other tabs

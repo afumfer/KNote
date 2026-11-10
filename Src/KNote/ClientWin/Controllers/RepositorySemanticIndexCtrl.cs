@@ -6,11 +6,11 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// The "Semantic index" tab of the repository editor (RepositoryEditorCtrl, Management mode, CU-03): the status of the
+/// Section Â«Semantic indexÂ» of the KNote Atlas window (AtlasCtrl, CU-03): the status of the
 /// repository's semantic index and creating, updating or rebuilding it (Service.SemanticSearch), with its progress, its
 /// cancellation and the indexes of other models kept in the repository. The run is the Store's (Store.SemanticIndex,
 /// one at a time in the app): it goes on when the editor is closed, and opening it again shows its progress. Included
-/// in the repository editor (no [KntAuthorize]: it decides); the commands check the role (Admin to run).
+/// in the KNote Atlas window (no [KntAuthorize]: it decides); the commands check the role (Admin to run).
 /// </summary>
 public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticIndex>
 {
@@ -52,7 +52,7 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
 
     public string StatusText =>
         Status == null ? "" : Status.IndexKey == null
-            ? "The repository has no embedding model: choose one in the KNote Atlas tab to create its index."
+            ? "The repository has no embedding model: choose one in Â«Repository modelsÂ» to create its index."
             : $"{SemanticIndexTexts.Status(Status)} · model {Status.IndexKey}";
 
     public string CountsText => Status?.IndexKey == null ? "" : SemanticIndexTexts.Counts(Status);

@@ -7,9 +7,9 @@ namespace KNote.ClientWin.Core;
 
 /// <summary>
 /// The run of the semantic index of ClientWin (KNote Atlas: create, update or rebuild the index of a repository), one
-/// at a time in the app. It belongs to the Store, not to the repository editor that starts it: the editor can be
+/// at a time in the app. It belongs to the Store, not to the window that starts it: the editor can be
 /// closed and the app goes on being used; its progress is published on Store.Events (SemanticIndexProgressChanged, on
-/// the UI thread, a few times a second at most) for the KNote Atlas tab and the status bar. It runs in the thread pool
+/// the UI thread, a few times a second at most) for the KNote Atlas window and the status bar. It runs in the thread pool
 /// with the repository's service, so with the app's user and role (the run is an Admin command). Canceled when the app
 /// closes (what is done is kept).
 /// </summary>

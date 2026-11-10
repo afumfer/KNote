@@ -1,5 +1,3 @@
-@page "/atlas/evaluation"
-
 @using KNote.Model
 
 @implements IDisposable
@@ -7,12 +5,10 @@
 @inject IStore store
 @inject KntWindows kntWindows
 
-@attribute [Authorize(Roles = "ProjectManager, Admin")]
-
-@* KNote Atlas' laboratory of the search (CU-06, chapter 18): the test queries of the note «Search test queries»,
-   evaluated one by one (D4: short requests, real progress, cancellation at once) by words and by meaning in the
-   indexes chosen, also without the query instruction (D3), and the report (SearchEvaluationReport) shown and saved as
-   a note. Only in the Web. *@
+@* KNote Atlas' laboratory of the search (CU-06, chapter 18), a tab of the KNote Atlas page (ProjectManager): the test
+   queries of the note «Search test queries», evaluated one by one (D4: short requests, real progress, cancellation at
+   once) by words and by meaning in the indexes chosen, also without the query instruction (D3), and the report
+   (SearchEvaluationReport) shown and saved as a note. Only in the Web. *@
 
 <KntIndexHeader Section="KntSections.SearchEvaluation" />
 
