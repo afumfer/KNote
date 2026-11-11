@@ -46,6 +46,74 @@ public class NotesSelectorCtrlMeaningTests
         Assert.AreEqual(0.71f, ((NoteSearchHitDto)ctrl.ListEntities.Single()).Similarity);
     }
 
+    // KNote Atlas 4.6b: the photos or the documents found, a row for each one (a note found with its resource).
+    [TestMethod]
+    public async Task ASearchOfPhotos_LoadsTheResourcesFound_AsRowsOfTheList()
+    {
+        var store = new Store(new TestFactoryViews()) { AppUserName = "jdoe" };
+        var ctrl = new NotesSelectorCtrl(store);
+        var service = new FakeKntService();
+        SemanticSearchRequestDto? asked = null;
+        var photo = new ResourceInfoDto { ResourceId = Guid.NewGuid(), Name = $"{Guid.NewGuid()}_beach.png", FileType = "image/png", Description = "The beach." };
+        service.SemanticSearchFake.SearchAsyncImpl = request =>
+        {
+            asked = request;
+            return Task.FromResult(new Result<SemanticSearchResultDto>(new SemanticSearchResultDto
+            {
+                Resources = { new ResourceSearchHitDto { NoteId = Guid.NewGuid(), NoteNumber = 3, Topic = "Holidays", Similarity = 0.66f, Resource = photo } }
+            }));
+        };
+
+        await ctrl.LoadSearchEntities(service, new NotesSearchDto
+        {
+            TextSearch = "beach", Mode = EnumNotesSearchMode.Meaning, ResourceKind = EnumResourceKind.Photos
+        }, refreshView: false);
+
+        Assert.AreEqual(EnumResourceKind.Photos, asked!.ResourceKind);
+        Assert.IsTrue(ctrl.ByResources);
+        Assert.AreEqual(EnumResourceKind.Photos, ctrl.ResourceKind);
+        Assert.AreEqual(photo, ctrl.ResourceHits.Single().Resource);
+        Assert.AreEqual("Holidays", ctrl.ListEntities.Single().Topic, "a row of the notes list");
+
+        await ctrl.LoadSearchEntities(service, new NotesSearchDto { TextSearch = "beach", Mode = EnumNotesSearchMode.Meaning }, refreshView: false);
+        Assert.IsFalse(ctrl.ByResources, "All: the notes");
+    }
+
+    // 4.6b: a search canceled (the «Cancel» of its progress) leaves the list as it was.
+    [TestMethod]
+    public async Task ACanceledSearch_LeavesTheListAsItWas()
+    {
+        var (ctrl, service, _) = CreateCtrl();
+        await ctrl.LoadSearchEntities(service, new NotesSearchDto { TextSearch = "keyboard", Mode = EnumNotesSearchMode.Meaning }, refreshView: false);
+        var before = ctrl.ListEntities;
+        var never = new TaskCompletionSource<Result<List<NoteMinimalDto>>>();
+        service.NotesFake.GetSearchMinimalAsyncImpl = _ => never.Task;
+        using var cancellation = new CancellationTokenSource();
+
+        var loading = ctrl.LoadSearchEntities(service, new NotesSearchDto { TextSearch = "slow" }, refreshView: false, cancellation.Token);
+        cancellation.Cancel();
+        await loading;
+
+        Assert.IsTrue(ctrl.LastLoadCanceled);
+        Assert.AreSame(before, ctrl.ListEntities);
+        Assert.IsTrue(ctrl.ByMeaning, "as it was");
+    }
+
+    // The wait cursor of the app comes back to the arrow when the last one ends, whatever their order (an async void that
+    // outlived the one around it left it for ever).
+    [TestMethod]
+    public void TheWaitCursor_EndsWithTheLastOne_InAnyOrder()
+    {
+        var outer = new WaitCursor();
+        var inner = new WaitCursor();
+        outer.Dispose();
+        Assert.IsTrue(Application.UseWaitCursor);
+        inner.Dispose();
+        Assert.IsFalse(Application.UseWaitCursor);
+        inner.Dispose();
+        Assert.IsFalse(Application.UseWaitCursor, "twice, nothing");
+    }
+
     [TestMethod]
     public async Task ASearchByWords_LoadsAsAlways()
     {

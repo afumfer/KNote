@@ -503,6 +503,26 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var resources = new List<ResourceDto>();
+            const string sql = @"SELECT ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order], FileType,
+                    ContentInDB, NoteId
+                FROM Resources WHERE ResourceId IN @ids";
+            foreach (var ids in (resourceIds ?? new()).Distinct().Chunk(500))
+                resources.AddRange(await db.QueryAsync<ResourceDto>(sql, new { ids }));
+            await CloseIsTempConnection(db);
+            return new Result<List<ResourceDto>> { Entity = resources };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
     {
         try

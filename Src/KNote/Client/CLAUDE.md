@@ -254,7 +254,13 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   «Search in note tasks» y «Search in resources», **todas desmarcadas por defecto** (decidido por el propietario, aunque en
   `ClientWin` la de la descripción viene marcada); van en la URL (`inDescription`, `inTasks`, `inResources`) y en la clave de la
   lista (`OptionsKeyMark` y tres 0/1), para que cada búsqueda tenga su posición. El filtro tiene, bajo «Description», «Also in the
-  note tasks» y «Also in the resources». Por significado no hay paginación en el Server: `KntMeaningSearchPages`
+  note tasks» y «Also in the resources». En «Meaning» (4.6b, D14), «All / Photos / Documents» (`kind` en la URL, `KindKeyMark` en la
+  clave de la lista): con fotos o documentos, `ResourceSearchResults` sustituye a `NotesGrid` (galería de tarjetas con miniaturas pedidas
+  una a una a `api/resources/{id}/thumbnail`, o filas con la página), la vista previa es la de la nota del recurso elegido, doble clic
+  abre `NoteResourceViewer` (con `Page`: un PDF en esa página) y «Open note» su nota; sin «Delete» ni imprimir y exportar.
+  El aviso de las notas no puestas al día es `SemanticPendingNotice` (búsqueda y filtro): por qué están pendientes y, para un Admin,
+  «Update index», que lanza la indexación completa en la cola del `Server` (`RunIndexAsync`, como «Update now»), muestra su progreso y,
+  al terminar, la página repite la búsqueda si la lista es la misma (`ListKey`). Por significado no hay paginación en el Server: `KntMeaningSearchPages`
   hace la búsqueda con la primera página que pide `NotesGrid` y le da las demás en memoria, ordenadas con
   `NoteListSorter` (sin orden, de más a menos parecida). `NotesGrid.ShowSimilarity` añade las columnas «Similarity» y
   «Fragment» (no se ordenan con su cabecera). Encima, el aviso de las notas sin poner al día con «Update index» (la

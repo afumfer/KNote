@@ -301,6 +301,30 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var resources = new List<ResourceDto>();
+            foreach (var ids in (resourceIds ?? new()).Distinct().Chunk(500))
+                resources.AddRange(await ctx.Resources.AsNoTracking().Where(r => ids.Contains(r.ResourceId))
+                    .Select(r => new ResourceDto
+                    {
+                        ResourceId = r.ResourceId, Name = r.Name, Container = r.Container, Description = r.Description,
+                        DescriptionByUser = r.DescriptionByUser, DescriptionModel = r.DescriptionModel, Order = r.Order, FileType = r.FileType,
+                        ContentInDB = r.ContentInDB, NoteId = r.NoteId
+                    })
+                    .ToListAsync());
+            await CloseIsTempConnection(ctx);
+            return new Result<List<ResourceDto>> { Entity = resources };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
     {
         try

@@ -43,6 +43,9 @@ public class KntResourceContentService : KntServiceBase, IKntResourceContentServ
     public async Task<Result<List<ScannedDocumentDto>>> GetScannedDocumentsAsync(Guid? resourceId = null) =>
         await ExecuteCommand(new KntResourceContentGetScannedDocumentsAsyncCommand(Service, resourceId));
 
+    public async Task<Result<ResourceDto>> GetPhotoFileAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntResourceContentGetPhotoFileAsyncCommand(Service, resourceId));
+
     public async Task<Result<PageTranscriptionContextDto>> GetPageContextAsync(Guid resourceId, int page) =>
         await ExecuteCommand(new KntResourceContentGetPageContextAsyncCommand(Service, new DocumentPageRequest(resourceId, page)));
 

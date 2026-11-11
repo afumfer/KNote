@@ -225,6 +225,24 @@ public class ResourceContentInProcessTests
         Assert.AreEqual((true, "A transcribed page."), (page.Transcribed, page.Text));
     }
 
+    // 4.6b: the thumbnail of a photo, for anyone signed in (a guest too), reduced; not without a session, nor of a file that is not a photo.
+    [TestMethod]
+    public async Task TheThumbnailOfAPhoto_IsForAnyoneSignedIn()
+    {
+        var photoId = await AddPhotoAsync();
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+        using var anonymous = _factory.CreateClient();
+        anonymous.BaseAddress = _admin.BaseAddress;
+
+        var thumbnail = await guest.GetFromJsonAsync<Result<ResourceThumbnailDto>>($"api/resources/{photoId}/thumbnail", _json);
+        var refused = await anonymous.GetAsync($"api/resources/{photoId}/thumbnail");
+
+        Assert.IsTrue(thumbnail!.IsValid, thumbnail.ErrorMessage);
+        StringAssert.StartsWith(thumbnail.Entity.ContentType, "image/", "a small photo stays as it is");
+        StringAssert.StartsWith(thumbnail.Entity.DataUrl, $"data:{thumbnail.Entity.ContentType};base64,");
+        Assert.AreEqual(HttpStatusCode.Unauthorized, refused.StatusCode);
+    }
+
     private static async Task<Guid> AddPhotoAsync()
     {
         using var service = _factory.CreateServiceForRepository(0);

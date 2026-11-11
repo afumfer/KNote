@@ -147,6 +147,9 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         throw new NotImplementedException();
     }
 
+    public IDisposable ShowWorkInProgress(string title, string text, CancellationTokenSource cancellation) =>
+        WorkProgressForm.Start(this, title, text, cancellation);
+
     public void ActivateWaitState()
     {
         this.Cursor = Cursors.WaitCursor;

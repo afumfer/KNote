@@ -30,14 +30,11 @@
 @* The panel takes the height left in the window (below the notice of a search by meaning, if any): the criteria and
    the notes list scroll each on its own. *@
 <RadzenStack Gap="0.5rem" class="rz-mt-2" Style="height: calc(100vh - 10rem)">
-@if (meaningPages?.PendingNotes > 0)
+@* The notes not up to date (4.6b: why, and «Update index», the full indexing, for an Admin). *@
+@if (meaningPages != null)
 {
-    <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Size="AlertSize.Small" class="rz-m-0">
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Wrap="FlexWrap.Wrap">
-            <span>@SemanticIndexTexts.PendingInSearch(meaningPages.PendingNotes)</span>
-            <RadzenButton Text="@SemanticIndexTexts.UpdateIndex" Icon="sync" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Primary" Click="OnUpdateIndex" />
-        </RadzenStack>
-    </RadzenAlert>
+    <SemanticPendingNotice Pending="@meaningPages.PendingNotes" ForFullRun="@meaningPages.NotesForFullRun" WithoutFiles="@meaningPages.NotesWithoutFiles"
+                           ListKey="@filterVersion.ToString()" Indexed="OnUpdateIndex" />
 }
 <RadzenCard class="rz-p-1" Style="flex: 1; min-height: 0">
     <RadzenSplitter class="@(appState.NotesPreviewVisible == true ? null : "knt-preview-hidden")" Resize="paneSizes.Resized">
@@ -117,7 +114,7 @@
         filterVersion++;
     }
 
-    // The same filter again: before searching, the search by meaning brings the index up to date (some pending notes).
+    // The same filter again (4.6b: when the full indexing started from the notice ends).
     private void OnUpdateIndex()
     {
         NewMeaningPages();

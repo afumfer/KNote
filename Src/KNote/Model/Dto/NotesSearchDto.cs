@@ -26,6 +26,9 @@ public class NotesSearchDto : SmartModelDtoBase
     // searches chooses which one to call. The repository's search by words ignores it.
     public EnumNotesSearchMode Mode { get; set; }
 
+    // By meaning (KNote Atlas, stage 4, D14): the notes, or the photos or the documents (SemanticSearchRequestDto.ResourceKind).
+    public EnumResourceKind ResourceKind { get; set; }
+
     // Leaves out the notes of these NoteTypes (e.g. the AI assistant's own sessions and the chat room threads, see
     // KntConst.ChatSessionsTag and KntConst.ChatRoomTag).
     public List<Guid> ExcludeNoteTypeIds { get; set; }

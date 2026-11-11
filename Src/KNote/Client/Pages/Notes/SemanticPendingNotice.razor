@@ -1,0 +1,110 @@
+@using KNote.Client.Auth
+
+@implements IDisposable
+
+@inject IStore store
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+
+@* The notice of a search by meaning (NotesSearch, NotesFilter) with notes not up to date in the semantic index (KNote Atlas 4.6b):
+   how many, how many wait for the full indexing and, besides, the ones whose documents have no file here (they don't show the notice
+   by themselves). For an Admin, «Update index» starts the full indexing in the server's queue (as «Update now» of KNote Atlas), its
+   progress here, and Indexed when it ends if the list is still the one it was started from (ListKey): the page searches again. *@
+
+@if (SemanticIndexTexts.ShowsPendingNotice(Pending, WithoutFiles) || run != null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Size="AlertSize.Small" class="rz-m-0">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+            <span>@SemanticIndexTexts.PendingInSearch(Pending, ForFullRun, WithoutFiles, canRun)</span>
+            @if (run != null)
+            {
+                <span><b>@RunText</b></span>
+            }
+            @if (canRun)
+            {
+                <RadzenButton Text="@SemanticIndexTexts.UpdateIndex" Icon="sync" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Primary"
+                              Disabled="@(run != null)" Click="OnUpdateIndex" MouseEnter="@(args => tooltipService.Open(args, SemanticIndexTexts.UpdateIndexHelp))" />
+            }
+        </RadzenStack>
+    </RadzenAlert>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    [Parameter] public int Pending { get; set; }
+    [Parameter] public int ForFullRun { get; set; }
+    [Parameter] public int WithoutFiles { get; set; }
+    // The list shown (its key): the search is repeated only if it is still the same when the indexing ends.
+    [Parameter] public string ListKey { get; set; } = "";
+    [Parameter] public EventCallback Indexed { get; set; }
+
+    private bool canRun;
+    // The run started here, while it lasts.
+    private SemanticIndexProgressDto? run;
+    private string runListKey = "";
+    private readonly KntSingleFlight starting = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    private string RunText => run?.Phase switch
+    {
+        EnumSemanticIndexPhase.Queued => "Queued: one run of KNote Atlas at a time.",
+        EnumSemanticIndexPhase.Indexing => $"Updating the index: {run.NotesDone} of {run.NotesTotal}…",
+        _ => "Updating the index…"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+        canRun = KntAccess.HasRole(state.User, EnumRoles.Admin);
+    }
+
+    private Task OnUpdateIndex() => starting.RunAsync(UpdateIndexAsync);
+
+    private async Task UpdateIndexAsync()
+    {
+        if (await dialogService.Confirm(SemanticIndexTexts.UpdateIndexQuestion, SemanticIndexTexts.UpdateIndex,
+                new ConfirmOptions { OkButtonText = SemanticIndexTexts.UpdateIndex, CancelButtonText = "Cancel" }) != true)
+            return;
+
+        var started = await store.SemanticSearch.RunIndexAsync(false);
+        if (disposal.IsCancellationRequested || !started.IsValid)
+            return;
+        run = started.Entity;
+        runListKey = ListKey;
+        StateHasChanged();
+
+        // Its progress, until it ends (the server runs it: leaving the page doesn't stop it).
+        try
+        {
+            while (run != null && !run.IsFinished)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2), disposal.Token);
+                var progress = await store.SemanticSearch.GetIndexProgressAsync(disposal.Token);
+                if (disposal.IsCancellationRequested)
+                    return;
+                if (progress.IsValid && progress.Entity != null)
+                {
+                    run = progress.Entity;
+                    StateHasChanged();
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        var sameList = runListKey == ListKey;
+        run = null;
+        StateHasChanged();
+        if (sameList)
+            await Indexed.InvokeAsync();
+    }
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

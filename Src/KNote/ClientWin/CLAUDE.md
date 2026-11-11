@@ -711,7 +711,23 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   **Filtro** (`NotesFilterParamCtrl`): «Talks about…», solo si el repositorio puede (oculto, los atributos ocupan su
   sitio). Imprimir y exportar no llevan el fragmento. Las palabras en los recursos (4.6a, D18): «Search in resources» en la
   búsqueda, junto a «Search in note tasks», y bajo «Description» del filtro, «Also in the note tasks» y «Also in the resources»;
-  las mismas opciones que la Web.
+  las mismas opciones que la Web. Buscar fotos y documentos (4.6b, D14): «Find: All / Photos / Documents» en la búsqueda por significado
+  (`NotesSearchDto.ResourceKind`); `NotesSelectorCtrl` carga `ResourceSearchHitDto` como filas de la lista (`ByResources`, `ResourceHits`,
+  miniaturas con `GetThumbnailAsync`, cómo se abre con `ResourceToOpen`) y `NotesSelectorForm` muestra la miniatura, el recurso y la página;
+  doble clic abre el recurso (una foto o un PDF en `DocumentPageForm`, en su página; otro documento con su programa) y el menú contextual
+  tiene «Open resource» y «Open note». Con fotos, «Gallery» abre `Views/ResourceGalleryForm` (no modal, miniaturas grandes, sincronizada con
+  la lista; posición en `AppUserState.ResourceGalleryWindow`). Imprimir y exportar se niegan con una lista de recursos.
+- **«Update index»** del aviso (4.6b): para un Admin, `NotesSelectorCtrl.RunFullIndex` lanza `Store.SemanticIndex` (como «Update now»),
+  con su progreso en la barra de estado y el botón desactivado mientras corre un trabajo de KNote Atlas; al terminar, la búsqueda se
+  repite si la lista sigue siendo la misma (`_searchAfterIndex`, que anula cualquier carga nueva). El aviso (`SemanticIndexTexts.PendingInSearch`
+  con `NotesForFullRun`/`NotesWithoutFiles`) solo sale si hay pendientes que una indexación completa puede poner al día.
+- **Búsqueda y filtro largos** (4.6b, pedido por el propietario): la pestaña *Search/Filter* (`KNoteManagementCtrl.RefreshActiveFilterWithServiceRef`)
+  no usa el cursor de espera, sino `Views/WorkProgressForm` (`IViewKNoteManagement.ShowWorkInProgress`): una ventana sobre
+  la principal, que se muestra si dura más de 400 ms, con barra en movimiento y «Cancel». `NotesSelectorCtrl.LoadSearchEntities`/
+  `LoadFilteredEntities` reciben un `CancellationToken`: cancelado, la lista se queda como estaba (`LastLoadCanceled`); lo que hace el
+  repositorio no se para, solo no se usa. El árbol de carpetas sigue con el cursor de espera. `Core/WaitCursor` cuenta los vivos: el
+  árbol (`FoldersSelectorForm.RefreshView`, `async void`) acababa después del de `OnInitialized` y, al restaurar «el valor anterior»,
+  dejaba el cursor de espera para siempre.
 - **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las
   relaciones (creada en código, envuelve el `SplitContainer` del Designer), plegada si no hay índice utilizable o la nota
   es nueva; se calcula al abrir la pestaña y al cambiar de nota o de relaciones con ella abierta.

@@ -19,6 +19,8 @@ internal class FakeKntResourceContentService : IKntResourceContentService
 
     public Task<Result<PhotoDescriptionContextDto>> GetPhotoContextAsync(Guid resourceId) => throw new NotSupportedException();
 
+    public Task<Result<ResourceDto>> GetPhotoFileAsync(Guid resourceId) => throw new NotSupportedException();
+
     public Task<Result<DocumentSummaryContextDto>> GetDocumentContextAsync(Guid resourceId) =>
         (GetDocumentContextAsyncImpl ?? throw new NotSupportedException($"{nameof(GetDocumentContextAsync)} not configured for this test"))(resourceId);
 

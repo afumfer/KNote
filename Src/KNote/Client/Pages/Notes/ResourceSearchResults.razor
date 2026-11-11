@@ -1,0 +1,183 @@
+@implements IDisposable
+
+@inject IStore store
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+@inject ContextMenuService contextMenuService
+
+@* The photos or the documents found by meaning (KNote Atlas, stage 4, D14), for NotesSearch: the photos as a gallery of cards (their
+   thumbnail, title, note and similarity) and the documents as rows (title, page, fragment, note and similarity). A click selects
+   (the preview pane shows its note), a double click opens the resource (a PDF at the page of its fragment) and «Open note» its note.
+   The search runs once for its text and kind; the thumbnails are asked one after another (api/resources/{id}/thumbnail, drawn as
+   data: urls). *@
+
+@if (found == null)
+{
+    @if (loadFailed)
+    {
+        <div class="knt-load-error">
+            <span class="knt-load-error-text">The search could not be done.</span>
+            <RadzenButton Text="Retry" Icon="refresh" Size="ButtonSize.Small" Click="SearchAsync" />
+        </div>
+    }
+    else
+    {
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+    }
+}
+else if (found.Resources.Count == 0)
+{
+    <div class="knt-empty-state">
+        <RadzenIcon Icon="@(Kind == EnumResourceKind.Photos ? "image" : "description")" />
+        <div class="knt-empty-state-text">No @(Kind == EnumResourceKind.Photos ? "photos" : "documents") talk about it.</div>
+    </div>
+}
+else if (Kind == EnumResourceKind.Photos)
+{
+    <div class="knt-found-photos">
+        @foreach (var hit in found.Resources)
+        {
+            <div class="knt-found-photo @(hit == selected ? "knt-found-selected" : null)" @onclick="() => SelectAsync(hit)" @ondblclick="() => OpenAsync(hit)">
+                <div class="knt-found-photo-thumb">
+                    @if (thumbnails.GetValueOrDefault(hit.Resource.ResourceId) is string source)
+                    {
+                        <img src="@source" alt="@hit.Resource.GetTitle()" />
+                    }
+                    else
+                    {
+                        <RadzenIcon Icon="image" />
+                    }
+                </div>
+                <div class="knt-found-photo-body">
+                    <div class="knt-found-photo-title" title="@hit.Resource.Description">@hit.Resource.GetTitle()</div>
+                    <div class="knt-found-photo-meta">
+                        <span class="knt-found-similarity">@hit.Similarity.ToString("0.00")</span>
+                        <span class="knt-found-note" title="Open note" @onclick="() => OpenNote.InvokeAsync(hit)" @onclick:stopPropagation="true">@($"#{hit.NoteNumber} {hit.Topic}")</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <RadzenDataGrid TItem="ResourceSearchHitDto" Data="@found.Resources" Density="Density.Compact" AllowColumnResize="true"
+                    SelectionMode="DataGridSelectionMode.Single" Value="@SelectedList" class="knt-list" AllowAlternatingRows="false"
+                    RowClick="@(args => SelectAsync(args.Data!))" RowDoubleClick="@(args => OpenAsync(args.Data!))"
+                    CellContextMenu="OnCellContextMenu" Style="height: 100%">
+        <Columns>
+            <RadzenDataGridColumn TItem="ResourceSearchHitDto" Title="Similarity" Width="90px">
+                <Template Context="hit"><span class="knt-found-similarity">@hit.Similarity.ToString("0.00")</span></Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ResourceSearchHitDto" Title="Document" MinWidth="180px">
+                <Template Context="hit">
+                    <RadzenIcon Icon="@KntFileTypes.Icon(hit.Resource.FileType, hit.Resource.Name)" class="knt-found-icon" />
+                    <span title="@hit.Resource.NameOut">@hit.Resource.GetTitle()</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ResourceSearchHitDto" Title="Page" Width="70px">
+                <Template Context="hit">@hit.FragmentPage</Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ResourceSearchHitDto" Title="Fragment" MinWidth="240px">
+                <Template Context="hit">
+                    <RadzenText TagName="TagName.Span" class="knt-found-fragment"
+                                MouseEnter="@(args => tooltipService.Open(args, hit.Fragment, new TooltipOptions { Duration = null, Style = "max-width: 40rem" }))">@hit.Fragment</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ResourceSearchHitDto" Title="Note" MinWidth="180px">
+                <Template Context="hit">@($"#{hit.NoteNumber} {hit.Topic}")</Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+
+@code {
+    [Parameter] [EditorRequired] public string Text { get; set; } = "";
+    [Parameter] [EditorRequired] public EnumResourceKind Kind { get; set; }
+    // The resource selected (its note goes to the preview pane), and «Open note».
+    [Parameter] public EventCallback<ResourceSearchHitDto?> SelectedChanged { get; set; }
+    [Parameter] public EventCallback<ResourceSearchHitDto> OpenNote { get; set; }
+    // The search done (the notes of the index not up to date: the page's notice).
+    [Parameter] public EventCallback<SemanticSearchResultDto> Found { get; set; }
+
+    private SemanticSearchResultDto? found;
+    private ResourceSearchHitDto? selected;
+    private bool loadFailed;
+    private readonly Dictionary<Guid, string> thumbnails = new();
+    private readonly KntLatestRequest search = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    private IList<ResourceSearchHitDto> SelectedList => selected == null ? new List<ResourceSearchHitDto>() : new List<ResourceSearchHitDto> { selected };
+
+    protected override Task OnInitializedAsync() => SearchAsync();
+
+    private async Task SearchAsync()
+    {
+        loadFailed = false;
+        found = null;
+        var result = await search.RunAsync(ct => store.SemanticSearch.SearchAsync(new SemanticSearchRequestDto { Text = Text, ResourceKind = Kind }, ct));
+        if (result.Canceled)
+            return;
+        if (!result.Value.IsValid)
+        {
+            loadFailed = true;
+            StateHasChanged();
+            return;
+        }
+        found = result.Value.Entity;
+        StateHasChanged();
+        await Found.InvokeAsync(found);
+        if (Kind == EnumResourceKind.Photos)
+            await LoadThumbnailsAsync(found.Resources);
+    }
+
+    // One after another, in the order of the list: the first ones are seen first.
+    private async Task LoadThumbnailsAsync(List<ResourceSearchHitDto> hits)
+    {
+        foreach (var hit in hits)
+        {
+            if (disposal.IsCancellationRequested)
+                return;
+            var thumbnail = await store.Notes.GetThumbnailAsync(hit.Resource.ResourceId, disposal.Token);
+            if (disposal.IsCancellationRequested)
+                return;
+            if (thumbnail.IsValid && thumbnail.Entity != null)
+            {
+                thumbnails[hit.Resource.ResourceId] = thumbnail.Entity.DataUrl;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task SelectAsync(ResourceSearchHitDto hit)
+    {
+        selected = hit;
+        await SelectedChanged.InvokeAsync(hit);
+    }
+
+    // The resource in the viewer of the notes: a PDF at the page of its fragment.
+    private async Task OpenAsync(ResourceSearchHitDto hit)
+    {
+        await SelectAsync(hit);
+        await dialogService.OpenAsync<NoteResourceViewer>("View resource",
+            new Dictionary<string, object?> { { "Resource", hit.Resource }, { "Page", hit.FragmentPage } }, NoteResourceViewer.Options());
+    }
+
+    private async Task OnCellContextMenu(DataGridCellMouseEventArgs<ResourceSearchHitDto> args)
+    {
+        var hit = args.Data!;
+        await SelectAsync(hit);
+        KntActionsMenu.Open(contextMenuService, args, new List<KntAction>
+        {
+            new("Open", "open_in_new", () => OpenAsync(hit)),
+            new("Open note", "edit_note", () => OpenNote.InvokeAsync(hit))
+        });
+    }
+
+    public void Dispose()
+    {
+        search.Dispose();
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

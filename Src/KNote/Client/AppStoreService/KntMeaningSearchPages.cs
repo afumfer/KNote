@@ -25,6 +25,11 @@ public sealed class KntMeaningSearchPages : IDisposable
     /// <summary>The notes of the index not up to date after the search (D8); 0 until it is done.</summary>
     public int PendingNotes { get; private set; }
 
+    /// <summary>Of PendingNotes (4.6b): the ones that wait for the full indexing, and the ones whose documents have no file here.</summary>
+    public int NotesForFullRun { get; private set; }
+
+    public int NotesWithoutFiles { get; private set; }
+
     /// <summary>The search is done (PendingNotes is known), to show the notice.</summary>
     public event Action? Found;
 
@@ -65,6 +70,8 @@ public sealed class KntMeaningSearchPages : IDisposable
         if (result.IsValid && !_disposal.IsCancellationRequested)
         {
             PendingNotes = result.Entity.PendingNotes;
+            NotesForFullRun = result.Entity.NotesForFullRun;
+            NotesWithoutFiles = result.Entity.NotesWithoutFiles;
             Found?.Invoke();
         }
         return result;

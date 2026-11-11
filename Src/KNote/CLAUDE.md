@@ -318,6 +318,11 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
     (`NoteSearchHitDto : NoteMinimalDto`, con parecido y fragmento) lo muestran las listas de siempre; `NoteListSorter`
     ordena en memoria como el repositorio. Sin modelo, sin su generador o sin índice, un error claro: una búsqueda no
     crea el índice.
+  - **Buscar fotos y documentos** (KNote Atlas, etapa 4, D14): `SemanticSearchRequestDto.ResourceKind` (`All`, `Photos`, `Documents`).
+    Con `All`, las notas de siempre, y el fragmento de un recurso dice cuál y su página (`NoteSearchHitDto.FragmentResource`/`FragmentPage`,
+    `FragmentShown()`). Con los otros, `SemanticSearchRules.RankResources` (el mejor fragmento propio de cada recurso: descripción o texto)
+    y `SemanticSearchResultDto.Resources` (`ResourceSearchHitDto : NoteSearchHitDto`, con el `ResourceInfoDto` sin el fichero, para que las
+    listas de notas lo muestren como una fila más). La caché de vectores lleva `SourceId`. Nunca los recursos de las notas del sistema.
   - **Notas parecidas** (`GetSimilarNotesAsync`): `SemanticSearchRules.RankSimilar` (media de los mejores parecidos de
     cada fragmento), desde 0,60, 10 como mucho, sin las ya relacionadas; «Possible duplicate» desde 0,95. Al vuelo, no se
     guarda nada; solo esa nota se pone al día.

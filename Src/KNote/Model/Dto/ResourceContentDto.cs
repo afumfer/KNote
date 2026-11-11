@@ -33,6 +33,18 @@ public class PageTranscriptionContextDto
     public string ExpectedName { get; set; }
 }
 
+/// <summary>
+/// The thumbnail of a photo (KNote Atlas, stage 4, D14), reduced in the Server: the Web draws it as a data: url (the URL of a
+/// resource is served without a session, and its file may be in another installation).
+/// </summary>
+public class ResourceThumbnailDto
+{
+    public string ContentType { get; set; }
+    public string ContentBase64 { get; set; }
+
+    public string DataUrl => $"data:{ContentType};base64,{ContentBase64}";
+}
+
 /// <summary>The transcription of a scanned page, saved only if the file is the same and the page is still pending.</summary>
 public class PageTranscriptionSaveDto
 {

@@ -97,6 +97,30 @@ public class ResourceContentController : ControllerBase
             return await AiDocumentSummarizer.SummarizeAsync(_service, chatClient, provider, id, replace, _logger, cancellationToken);
         });
 
+    // The thumbnail of a photo (KNote Atlas, stage 4, D14), for the search of photos: anyone signed in, as the notes.
+    [HttpGet("{id:guid}/thumbnail")]
+    public Task<IActionResult> GetThumbnail(Guid id) =>
+        RunAsync(nameof(GetThumbnail), async () =>
+        {
+            var result = new Result<ResourceThumbnailDto>();
+            var photo = await _service.ResourceContent.GetPhotoFileAsync(id);
+            if (!photo.IsValid)
+            {
+                result.AddListErrorMessage(photo.ListErrorMessage);
+                return result;
+            }
+            var reduced = AiImageReducer.Reduce(photo.Entity.ContentArrayBytes, AiPhotoRules.ContentType(photo.Entity.FileType, photo.Entity.Name),
+                ThumbnailSide);
+            if (reduced == null)
+                result.AddErrorMessage("The photo could not be read.");
+            else
+                result.Entity = new ResourceThumbnailDto { ContentType = reduced.ContentType, ContentBase64 = Convert.ToBase64String(reduced.Content) };
+            return result;
+        });
+
+    // The longest side of a thumbnail: the cards of the gallery of the Web.
+    private const int ThumbnailSide = 320;
+
     // The scanned pages of a document pending of a transcription (Entity null: none).
     [HttpGet("{id:guid}/scanned")]
     [Authorize(Roles = StaffRoles)]

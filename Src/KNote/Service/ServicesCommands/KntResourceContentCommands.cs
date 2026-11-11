@@ -277,6 +277,39 @@ public class KntResourceContentGetScannedDocumentsAsyncCommand : KntCommandServi
     }
 }
 
+// KNote Atlas, stage 4 (D14): a photo with its file, to draw its thumbnail in the search of photos.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntResourceContentGetPhotoFileAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceDto>>
+{
+    public KntResourceContentGetPhotoFileAsyncCommand(IKntService service, Guid resourceId) : base(service, resourceId)
+    {
+
+    }
+
+    public override async Task<Result<ResourceDto>> Execute()
+    {
+        var result = new Result<ResourceDto>();
+
+        var (resource, _) = await KntResourceContent.GetDescribableAsync(Service, Param, result);
+        if (!result.IsValid)
+            return result;
+        if (!AiPhotoRules.IsPhoto(resource))
+        {
+            result.AddErrorMessage("It is not a photo (PNG, JPEG, GIF or WEBP).");
+            return result;
+        }
+
+        Service.Notes.UtilManageResourceContent(resource);
+        if (resource.ContentArrayBytes == null || resource.ContentArrayBytes.Length == 0)
+        {
+            result.AddErrorMessage(AiPhotoRules.FileNotAvailableMessage);
+            return result;
+        }
+        result.Entity = resource;
+        return result;
+    }
+}
+
 /// <summary>A page of a document (its number from 1).</summary>
 public record DocumentPageRequest(Guid ResourceId, int Page);
 

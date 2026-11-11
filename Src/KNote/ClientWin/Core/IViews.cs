@@ -150,6 +150,10 @@ public interface IViewKNoteManagement : IViewBase
     // The run of KNote Atlas in the status bar (SemanticIndexJob or ResourceProcessingJob.StatusBarText): null hides it.
     void ShowSemanticIndexProgress(string text);
 
+    // A long work over this window (a search or a filter of the notes list, KNote Atlas 4.6b): what is being done, a moving bar and
+    // «Cancel», which cancels the source given (WorkProgressForm). Disposing the result ends it.
+    IDisposable ShowWorkInProgress(string title, string text, CancellationTokenSource cancellation);
+
     // Single-value input prompt (backed by ReadVarForm), used by KNoteManagementCtrl.ChangeTags so the
     // controller doesn't have to reference a concrete WinForms Form to ask the user for the tag text.
     // Returns the value the user typed, or null if the dialog was canceled.

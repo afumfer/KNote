@@ -26,6 +26,9 @@ public interface INoteWebApiService
     Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> SummarizeDocumentAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
 
+    // KNote Atlas 4.6b: the thumbnail of a photo (the search of photos).
+    Task<Result<ResourceThumbnailDto>> GetThumbnailAsync(Guid resourceId, CancellationToken cancellationToken = default);
+
     // KNote Atlas 4.5b: the scanned pages of a document pending of a transcription (Entity null: none), and transcribing one.
     Task<Result<ScannedDocumentDto>> GetScannedPagesAsync(Guid resourceId, CancellationToken cancellationToken = default);
 

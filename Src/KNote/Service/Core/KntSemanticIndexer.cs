@@ -355,6 +355,13 @@ internal static class KntSemanticIndexer
         result.AddErrorMessage(message);
     }
 
+    /// <summary>
+    /// Whether a quick update (before a search) left this note for a full run (KNote Atlas 4.6b: the notice of the search says it):
+    /// too many fragments to calculate, or documents not read yet. Known in this process only.
+    /// </summary>
+    public static bool IsLeftForFullRun(IKntService service, string indexKey, Guid noteId) =>
+        LeftForFullRun.ContainsKey(NoteKey(service, indexKey, noteId));
+
     private static string NoteKey(IKntService service, string indexKey, Guid noteId) =>
         $"{service.RepositoryRef?.ConnectionString}|{indexKey}|{noteId}";
 

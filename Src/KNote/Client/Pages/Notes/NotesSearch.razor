@@ -18,10 +18,19 @@
     <IndexMenu>
         <RadzenMenu>
             <RadzenMenuItem Text="New note" Icon="post_add"  Click="OnNew"></RadzenMenuItem>
-            <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.HasCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
-            <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.HasCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
-            <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
-            <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" ListName="@($"Search: {SearchedText()}")" />
+            @if (ResourcesShown)
+            {
+                @* The photos or the documents found (4.6b): their notes, but no printing (the reports are of notes). *@
+                <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(selectedHit == null)" Click="@(() => OnOpenNote(selectedHit!))"></RadzenMenuItem>
+                <NotesViewOptionsMenu Grid="null" Changed="StateHasChanged" />
+            }
+            else
+            {
+                <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.HasCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
+                <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.HasCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+                <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
+                <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" ListName="@($"Search: {SearchedText()}")" />
+            }
         </RadzenMenu>
     </IndexMenu>
 </KntIndexHeader>
@@ -45,6 +54,18 @@
                     <RadzenSelectBarItem Text="Meaning" Value="EnumNotesSearchMode.Meaning" />
                 </Items>
             </RadzenSelectBar>
+            @* By meaning (4.6b): the notes, or the photos or the documents by their own fragments. *@
+            @if (searchMode == EnumNotesSearchMode.Meaning)
+            {
+                <RadzenSelectBar @bind-Value="resourceKind" TValue="EnumResourceKind" Size="ButtonSize.Medium"
+                                 MouseEnter="@(args => tooltipService.Open(args, "All: the notes. Photos or Documents: the photos or the documents that talk about it, by their own description and text."))">
+                    <Items>
+                        <RadzenSelectBarItem Text="All" Value="EnumResourceKind.All" />
+                        <RadzenSelectBarItem Text="Photos" Value="EnumResourceKind.Photos" />
+                        <RadzenSelectBarItem Text="Documents" Value="EnumResourceKind.Documents" />
+                    </Items>
+                </RadzenSelectBar>
+            }
         }
         <RadzenButton Text="Search" Icon="search" Click="OnSearch" ButtonStyle="ButtonStyle.Primary" />
     </RadzenStack>
@@ -69,31 +90,38 @@
         </RadzenStack>
     }
 
-    @if (meaningPages?.PendingNotes > 0)
+    @* The notes not up to date (4.6b: why, and «Update index», the full indexing, for an Admin). *@
+    @if (ResourcesShown ? resourcesFound != null : meaningPages != null)
     {
-        <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Size="AlertSize.Small" class="rz-m-0">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Wrap="FlexWrap.Wrap">
-                <span>@SemanticIndexTexts.PendingInSearch(meaningPages.PendingNotes)</span>
-                <RadzenButton Text="@SemanticIndexTexts.UpdateIndex" Icon="sync" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Primary" Click="OnUpdateIndex" />
-            </RadzenStack>
-        </RadzenAlert>
+        <SemanticPendingNotice Pending="@(ResourcesShown ? resourcesFound!.PendingNotes : meaningPages!.PendingNotes)"
+                               ForFullRun="@(ResourcesShown ? resourcesFound!.NotesForFullRun : meaningPages!.NotesForFullRun)"
+                               WithoutFiles="@(ResourcesShown ? resourcesFound!.NotesWithoutFiles : meaningPages!.NotesWithoutFiles)"
+                               ListKey="@ListKey()" Indexed="OnUpdateIndex" />
     }
 
     <RadzenCard class="rz-p-1" Style="flex: 1; min-height: 0">
         @* The list and, at its right, the preview of the selected note (if shown). *@
         <RadzenSplitter class="@(appState.NotesPreviewVisible == true ? null : "knt-preview-hidden")" Resize="paneSizes.Resized">
             <RadzenSplitterPane Size="@paneSizes[0]" Min="320px" class="knt-notes-list-pane">
-                @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
-                <NotesGrid @ref="notesGrid" CurrentChanged="StateHasChanged" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
-                           ShowSimilarity="@(SearchedMode() == EnumNotesSearchMode.Meaning)"
-                           OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
+                @if (ResourcesShown)
+                {
+                    <ResourceSearchResults @key="searchVersion" Text="@SearchedText()" Kind="@SearchedKind()"
+                                           SelectedChanged="OnHitSelected" OpenNote="OnOpenNote" Found="OnResourcesFound" />
+                }
+                else
+                {
+                    @* A new grid for each search: it starts at the top (or where it was left) with its own data. *@
+                    <NotesGrid @ref="notesGrid" CurrentChanged="StateHasChanged" Compact="@(appState.NotesListCompact ?? true)" @key="searchVersion" LoadPage="LoadNotesPage" Position="appState.NotesSearchPosition"
+                               ShowSimilarity="@(SearchedMode() == EnumNotesSearchMode.Meaning)"
+                               OnNoteDelete="OnDelete" OnNoteEdit="OnEdit" OnNoteView="OnView" />
+                }
             </RadzenSplitterPane>
             @* Always there, with the sizes of all the panes set from the start (Radzen sizes the panes when they are
                added): hidden with knt-preview-hidden, see knt-theme.css. *@
             <RadzenSplitterPane Size="@paneSizes[1]" Min="240px" class="knt-note-preview-pane">
                 @if (appState.NotesPreviewVisible == true)
                 {
-                    <NotePreviewPane NoteId="@notesGrid?.Current?.NoteId" />
+                    <NotePreviewPane NoteId="@(ResourcesShown ? selectedHit?.NoteId : notesGrid?.Current?.NoteId)" />
                 }
             </RadzenSplitterPane>
         </RadzenSplitter>
@@ -114,6 +142,11 @@
     private bool inDescription;
     private bool inTasks;
     private bool inResources;
+    // By meaning (4.6b): what is found, chosen beside the mode (the one of the list shown is SearchedKind), the resource
+    // selected and the notes not up to date of its search.
+    private EnumResourceKind resourceKind;
+    private ResourceSearchHitDto? selectedHit;
+    private SemanticSearchResultDto? resourcesFound;
     // The search by meaning can be offered: a semantic index this server can search (SemanticIndexTexts.CanSearch).
     private bool meaningAvailable;
     // The notes found by meaning of the list shown (null: by words, or without text).
@@ -128,6 +161,8 @@
     // 0 or 1: description, tasks, resources).
     private const string MeaningKeyMark = "\u0001";
     private const string OptionsKeyMark = "\u0002";
+    // By meaning, the photos or the documents (4.6b): after the mark of the meaning, this one and p or d.
+    private const string KindKeyMark = "\u0003";
 
     private sealed record WordOptions(bool Description, bool Tasks, bool Resources)
     {
@@ -155,8 +190,10 @@
             var mode = queries.TryGetValue("mode", out var modeText) && modeText == "meaning" ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words;
             bool On(string name) => queries.TryGetValue(name, out var value) && value == "true";
             var options = new WordOptions(On("inDescription"), On("inTasks"), On("inResources"));
-            if (appState.NotesSearchPosition?.ListKey != ListKeyOf(mode, text, options))
-                appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text, options) };
+            var kind = !queries.TryGetValue("kind", out var kindText) ? EnumResourceKind.All
+                : kindText == "photos" ? EnumResourceKind.Photos : kindText == "documents" ? EnumResourceKind.Documents : EnumResourceKind.All;
+            if (appState.NotesSearchPosition?.ListKey != ListKeyOf(mode, text, options, kind))
+                appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text, options, kind) };
         }
         else
             appState.NotesSearchPosition ??= new NotesListPosition { ListKey = "" };
@@ -164,6 +201,7 @@
         textSearch = SearchedText();
         searchMode = SearchedMode();
         (inDescription, inTasks, inResources) = (SearchedOptions().Description, SearchedOptions().Tasks, SearchedOptions().Resources);
+        resourceKind = SearchedKind();
         NewMeaningPages();
 
         kntWindows.NoteSaved += OnNoteSaved;
@@ -187,19 +225,38 @@
         disposal.Dispose();
     }
 
-    private void OnSearch() => Search(searchMode, textSearch, new WordOptions(inDescription, inTasks, inResources));
+    private void OnSearch() => Search(searchMode, textSearch, new WordOptions(inDescription, inTasks, inResources), resourceKind);
 
-    // The same search again: before searching, it brings the index up to date (some pending notes).
-    private void OnUpdateIndex() => Search(SearchedMode(), SearchedText(), WordOptions.None);
+    // The same search again (4.6b: when the full indexing started from the notice ends).
+    private void OnUpdateIndex() => Search(SearchedMode(), SearchedText(), WordOptions.None, SearchedKind());
 
-    private void Search(EnumNotesSearchMode mode, string text, WordOptions options)
+    private void Search(EnumNotesSearchMode mode, string text, WordOptions options, EnumResourceKind kind)
     {
-        appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text, options) };
+        appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text, options, kind) };
+        selectedHit = null;
+        resourcesFound = null;
         NewMeaningPages();
         searchVersion++;
         store.NavigateTo(string.IsNullOrEmpty(text)
             ? "notes/search"
-            : $"notes/search?textSearch={Uri.EscapeDataString(text)}" + (mode == EnumNotesSearchMode.Meaning ? "&mode=meaning" : options.Query));
+            : $"notes/search?textSearch={Uri.EscapeDataString(text)}" + (mode == EnumNotesSearchMode.Meaning
+                ? "&mode=meaning" + (kind == EnumResourceKind.All ? "" : $"&kind={kind.ToString().ToLowerInvariant()}")
+                : options.Query));
+    }
+
+    // The photos or the documents found by meaning are shown instead of the notes (4.6b).
+    private bool ResourcesShown => SearchedMode() == EnumNotesSearchMode.Meaning && SearchedKind() != EnumResourceKind.All
+        && !string.IsNullOrWhiteSpace(SearchedText());
+
+    private void OnHitSelected(ResourceSearchHitDto? hit) => selectedHit = hit;
+
+    private void OnResourcesFound(SemanticSearchResultDto found) => resourcesFound = found;
+
+    // Its note: in its editing window, or to read it if the user can't edit (as the notes grid). No wait before: it opens a window.
+    private Task OnOpenNote(ResourceSearchHitDto hit)
+    {
+        var user = AuthenticationState.IsCompletedSuccessfully ? AuthenticationState.Result.User : null;
+        return user != null && KntAccess.HasRole(user, EnumRoles.Staff) ? kntWindows.OpenEditAsync(hit.NoteId) : kntWindows.OpenViewAsync(hit.NoteId);
     }
 
     private void TopicKeyPress(KeyboardEventArgs e)
@@ -230,7 +287,7 @@
     {
         DisposeMeaningPages();
         var text = SearchedText();
-        if (SearchedMode() != EnumNotesSearchMode.Meaning || string.IsNullOrWhiteSpace(text))
+        if (SearchedMode() != EnumNotesSearchMode.Meaning || string.IsNullOrWhiteSpace(text) || SearchedKind() != EnumResourceKind.All)
             return;
         meaningPages = new KntMeaningSearchPages(ct => store.SemanticSearch.SearchAsync(new SemanticSearchRequestDto { Text = text }, ct));
         meaningPages.Found += OnMeaningFound;
@@ -250,10 +307,21 @@
 
     private string ListKey() => appState.NotesSearchPosition?.ListKey ?? "";
 
-    private static string ListKeyOf(EnumNotesSearchMode mode, string text, WordOptions options) =>
-        mode == EnumNotesSearchMode.Meaning ? MeaningKeyMark + text
+    private static string ListKeyOf(EnumNotesSearchMode mode, string text, WordOptions options, EnumResourceKind kind) =>
+        mode == EnumNotesSearchMode.Meaning
+            ? MeaningKeyMark + (kind switch { EnumResourceKind.Photos => KindKeyMark + "p", EnumResourceKind.Documents => KindKeyMark + "d", _ => "" }) + text
         : options.Any ? OptionsKeyMark + options.Key + text
         : text;
+
+    // By meaning, what was searched (4.6b).
+    private EnumResourceKind SearchedKind()
+    {
+        var key = ListKey();
+        if (SearchedMode() != EnumNotesSearchMode.Meaning || key.Length < MeaningKeyMark.Length + KindKeyMark.Length + 1
+            || !key[MeaningKeyMark.Length..].StartsWith(KindKeyMark, StringComparison.Ordinal))
+            return EnumResourceKind.All;
+        return key[MeaningKeyMark.Length + KindKeyMark.Length] == 'p' ? EnumResourceKind.Photos : EnumResourceKind.Documents;
+    }
 
     // The mode, the text and the options of the search shown in the list (the box may have been changed without searching it).
     private EnumNotesSearchMode SearchedMode() =>
@@ -265,7 +333,8 @@
         HasOptions() ? WordOptions.OfKey(ListKey().Substring(OptionsKeyMark.Length, 3)) : WordOptions.None;
 
     private string SearchedText() =>
-        SearchedMode() == EnumNotesSearchMode.Meaning ? ListKey()[MeaningKeyMark.Length..]
+        SearchedMode() == EnumNotesSearchMode.Meaning
+            ? ListKey()[(MeaningKeyMark.Length + (SearchedKind() == EnumResourceKind.All ? 0 : KindKeyMark.Length + 1))..]
         : HasOptions() ? ListKey()[(OptionsKeyMark.Length + 3)..]
         : ListKey();
 

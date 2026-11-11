@@ -23,6 +23,8 @@ public interface IKntNoteRepository : IDisposable
     Task<Result> DeleteAsync(Guid id);
     Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
     Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
+    // KNote Atlas, stage 4 (D14): these resources without their file (ContentArrayBytes null), for the lists of the search.
+    Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds);
     Task<Result<ResourceDto>> GetResourceAsync(Guid noteResourceId);
     Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity);
     Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity);

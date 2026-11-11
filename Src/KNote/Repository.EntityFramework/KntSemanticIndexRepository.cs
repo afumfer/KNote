@@ -220,7 +220,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
             if (changedSince != null)
                 query = query.Where(c => c.IndexedDateTime >= changedSince.Value);
             var rows = await query
-                .Select(c => new { c.NoteChunkId, c.NoteId, c.SourceType, c.Vector })
+                .Select(c => new { c.NoteChunkId, c.NoteId, c.SourceType, c.SourceId, c.Vector })
                 .ToListAsync();
             var result = new Result<List<NoteChunkVectorDto>>
             {
@@ -229,6 +229,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
                     NoteChunkId = r.NoteChunkId,
                     NoteId = r.NoteId,
                     SourceType = (NoteChunkSourceType)r.SourceType,
+                    SourceId = r.SourceId,
                     Vector = EmbeddingVector.FromBytes(r.Vector)
                 }).ToList()
             };

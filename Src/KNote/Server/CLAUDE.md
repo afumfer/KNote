@@ -254,6 +254,9 @@ public class FoldersController : ControllerBase
   api/notes/alarms/{id}`: Staff+, como los comandos. Las reglas, en `KMessageDto.Validate` (fecha obligatoria; "cada N
   minutos" con minutos). Guardar una alarma no recalcula el estado de la nota ("Alarms pending", `InternalTags`): lo hace
   el guardado de la nota, como con las tareas. Tests en `NoteAlarmsInProcessTests`.
+- **Miniatura de una foto** (KNote Atlas 4.6b, `GET api/resources/{id}/thumbnail`, cualquiera con sesión): `ResourceContent.GetPhotoFileAsync`
+  (nunca de una nota del sistema) reducida con `AiImageReducer` (lado mayor 320) en un `ResourceThumbnailDto`, que la Web dibuja como
+  `data:`. La búsqueda de recursos va por `api/semantic/search` con `ResourceKind`.
 - **Opciones de la búsqueda por palabras** (KNote Atlas 4.6a, D18): `GET api/notes/search` admite `searchInDescription`,
   `searchInNoteTasks` y `searchInResources` (`NotesSearchParam`, apagadas sin ellas), como la búsqueda de `ClientWin`; el filtro las
   lleva en `NotesFilterDto` (`SearchInNoteTasks`, `SearchInResources`, para su campo `Description`). La condición de los recursos

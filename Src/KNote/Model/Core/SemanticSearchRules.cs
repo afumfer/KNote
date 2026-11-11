@@ -28,6 +28,45 @@ public static class SemanticSearchRules
 
     public readonly record struct NoteMatch(Guid NoteId, float Similarity, Guid NoteChunkId, NoteChunkSourceType SourceType);
 
+    public readonly record struct ResourceMatch(Guid ResourceId, Guid NoteId, float Similarity, Guid NoteChunkId, NoteChunkSourceType SourceType);
+
+    /// <summary>
+    /// The resources (KNote Atlas, stage 4, D14) whose best fragment of their own (their description and, a document, its text) is at
+    /// least minSimilarity similar to the query, the most similar first (the resource's id breaks ties). Only the resources allowed
+    /// (the kind chosen, of the notes that can be found). The fragments of the note itself don't count.
+    /// </summary>
+    public static List<ResourceMatch> RankResources(IEnumerable<NoteChunkVectorDto> chunks, float[] query, Func<Guid, Guid, bool> allowed,
+        float minSimilarity = MinSimilarity)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+        ArgumentNullException.ThrowIfNull(allowed);
+
+        var best = new Dictionary<Guid, ResourceMatch>();
+        foreach (var chunk in chunks ?? Enumerable.Empty<NoteChunkVectorDto>())
+        {
+            if (chunk?.Vector == null || chunk.Vector.Length != query.Length
+                || chunk.SourceType is not (NoteChunkSourceType.Resource or NoteChunkSourceType.ResourceText))
+                continue;
+            if (!allowed(chunk.SourceId, chunk.NoteId))
+                continue;
+
+            var similarity = EmbeddingVector.Dot(chunk.Vector, query);
+            if (similarity < minSimilarity)
+                continue;
+            if (!best.TryGetValue(chunk.SourceId, out var current) || similarity > current.Similarity)
+                best[chunk.SourceId] = new ResourceMatch(chunk.SourceId, chunk.NoteId, similarity, chunk.NoteChunkId, chunk.SourceType);
+        }
+
+        return best.Values
+            .OrderByDescending(m => m.Similarity)
+            .ThenBy(m => m.ResourceId)
+            .ToList();
+    }
+
+    /// <summary>Where a fragment of a resource is, as the lists say it: «in manual.pdf, p. 12» (null: not of a resource).</summary>
+    public static string FragmentPlace(string fileName, int? page) =>
+        string.IsNullOrWhiteSpace(fileName) ? null : $"in {fileName.Trim()}" + (page is int number ? $", p. {number}" : "");
+
     /// <summary>
     /// The text of a query for the embedding model: with the repository's query instruction, in the format of the
     /// models that use one (Qwen3-Embedding: "Instruct: {instruction}\nQuery:{query}"); without it, the query alone.

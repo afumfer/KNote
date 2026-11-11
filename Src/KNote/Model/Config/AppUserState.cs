@@ -25,6 +25,9 @@ public class AppUserState
 
     public ChatRoomWindowState ChatRoomWindow { get; set; } = new();
 
+    // KNote Atlas, stage 4 (D14): the gallery of the photos found by meaning (ResourceGalleryForm).
+    public ResourceGalleryWindowState ResourceGalleryWindow { get; set; } = new();
+
     public ReportsState Reports { get; set; } = new();
 }
 
@@ -150,6 +153,13 @@ public class ChatRoomWindowState
     public int ThreadsPanelWidth { get; set; }
 
     public int MessagePanelHeight { get; set; }
+}
+
+// The gallery of the photos found by meaning (ClientWin, ResourceGalleryForm): its bounds (0: never changed by the user).
+[Serializable]
+public class ResourceGalleryWindowState
+{
+    public WindowBoundsState Bounds { get; set; } = new();
 }
 
 [Serializable]

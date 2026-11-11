@@ -48,6 +48,8 @@ public class NoteChunkVectorDto
     public Guid NoteChunkId { get; set; }
     public Guid NoteId { get; set; }
     public NoteChunkSourceType SourceType { get; set; }
+    // The task or the resource of the fragment (KNote Atlas, stage 4, D14: the search by resource), Guid.Empty for the note's own.
+    public Guid SourceId { get; set; }
     public float[] Vector { get; set; }
 }
 

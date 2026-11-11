@@ -213,7 +213,7 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
         {
             var db = GetOpenConnection();
 
-            var sql = @"SELECT NoteChunkId, NoteId, SourceType, Vector FROM NoteChunks WHERE Model = @Model"
+            var sql = @"SELECT NoteChunkId, NoteId, SourceType, SourceId, Vector FROM NoteChunks WHERE Model = @Model"
                 + (changedSince != null ? " AND IndexedDateTime >= @ChangedSince" : "");
             var rows = await db.QueryAsync<NoteChunkRow>(sql, new { Model = model, ChangedSince = changedSince });
             var result = new Result<List<NoteChunkVectorDto>>
@@ -223,6 +223,7 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
                     NoteChunkId = r.NoteChunkId,
                     NoteId = r.NoteId,
                     SourceType = (NoteChunkSourceType)r.SourceType,
+                    SourceId = r.SourceId,
                     Vector = EmbeddingVector.FromBytes(r.Vector)
                 }).ToList()
             };

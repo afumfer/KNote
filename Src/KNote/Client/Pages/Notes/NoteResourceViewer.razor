@@ -164,6 +164,8 @@
 
 @code {
     [Parameter] [EditorRequired] public ResourceInfoDto Resource { get; set; } = null!;
+    // KNote Atlas 4.6b: the page to show of a PDF (the page of the fragment found by the search).
+    [Parameter] public int? Page { get; set; }
 
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
@@ -223,6 +225,8 @@
         var format = DocumentTextRules.FormatOf(Resource.FileType, Resource.Name);
         isDocument = format != EnumDocumentFormat.None;
         paged = DocumentTextRules.IsPaged(format);
+        if (Page is int page && page > 0 && pdfPage == 0 && kind == KntFileTypes.Kind.Pdf)
+            pdfPage = page;
         // A document the browser can't show (DOCX, ODT) opens with its text.
         if (isDocument && kind == KntFileTypes.Kind.Other && !showText)
         {

@@ -54,6 +54,12 @@ public interface IKntResourceContentService
     /// </summary>
     Task<Result<List<ScannedDocumentDto>>> GetScannedDocumentsAsync(Guid? resourceId = null);
 
+    /// <summary>
+    /// A photo with its file, to draw its thumbnail (KNote Atlas, stage 4, D14: the search of photos), never one of KNote's own
+    /// notes. Guest (who sees the notes).
+    /// </summary>
+    Task<Result<ResourceDto>> GetPhotoFileAsync(Guid resourceId);
+
     /// <summary>A scanned page pending of a transcription, drawn, to transcribe it (4.5). Staff.</summary>
     Task<Result<PageTranscriptionContextDto>> GetPageContextAsync(Guid resourceId, int page);
 
