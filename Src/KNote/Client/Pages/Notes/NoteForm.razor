@@ -138,7 +138,10 @@
                 <ChildContent>
                     @if (resources == null && !Note.IsNew())
                     {
-                        <p>Loading resources ...</p>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-p-4">
+                            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+                            <span>Loading the resources…</span>
+                        </RadzenStack>
                     }
                     else
                     {
@@ -467,8 +470,12 @@
 
     private async Task ShowPanel(int panel)
     {        
+        // Shown at once while they are read (after adding one, the list being read again).
         if (panel == 2 && resources == null && !Note.IsNew())
+        {
+            StateHasChanged();
             await LoadResourcesAsync();
+        }
 
         if (panel == 3 && tasks == null && !Note.IsNew())
             await LoadTasksAsync();
@@ -506,26 +513,15 @@
         }
         else
         {            
+            // The dialog uploads and saves it (KNote Atlas, stage 4, D6): the result is the resource saved.
             var resultDialog = await dialogService.OpenAsync<NoteResourceEditor>($"New resource and upload resource file",
-                   new Dictionary<string, object?>() { { "NoteTopic", Note.Topic } },
+                   new Dictionary<string, object?>() { { "NoteTopic", Note.Topic }, { "NoteId", Note.NoteId } },
                    KntDialogs.Framed(KntDialogs.Medium()));
 
-            if(resultDialog != null)
-            {                
-                resultDialog.NoteId = Note.NoteId;
-                resultDialog.Name = Note.NoteId.ToString() + "_" + resultDialog.Name;
-
-                var resultApi = await webApiService.Notes.SaveResourceAsync(resultDialog);
-                if (resultApi.IsValid)
-                {
-                    // Option 1. TODO: test this not refresh UI, ??
-                    //resources?.Add(resultApi.Entity);
-                    //StateHasChanged();
-
-                    // Option 2. Alternative implementation
-                    resources = null;
-                    await ShowPanel(2);
-                }
+            if (resultDialog != null)
+            {
+                resources = null;
+                await ShowPanel(2);
             }
         }
     }

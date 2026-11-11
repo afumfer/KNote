@@ -254,6 +254,13 @@ public class FoldersController : ControllerBase
   api/notes/alarms/{id}`: Staff+, como los comandos. Las reglas, en `KMessageDto.Validate` (fecha obligatoria; "cada N
   minutos" con minutos). Guardar una alarma no recalcula el estado de la nota ("Alarms pending", `InternalTags`): lo hace
   el guardado de la nota, como con las tareas. Tests en `NoteAlarmsInProcessTests`.
+- **Subir un recurso** (KNote Atlas 4.4b, `POST api/notes/{id}/resources/upload`, Staff+): un formulario multipart
+  (`file`, `description`, `loadedDescription`, `descriptionByUser`, `order`) que el navegador envía desde el disco, de hasta
+  200 MB (`KntConst.MaxLenNoteResourceFile`); `Notes.UploadResourceAsync` lo escribe a la carpeta de recursos sin cargarlo
+  entero (o en memoria con `ContentInDB`). Límites: `[RequestSizeLimit]` del endpoint (Kestrel) y **`Server/web.config`**
+  (`maxAllowedContentLength`, para IIS; la publicación lo completa con el `aspNetCore` de siempre). El alta antigua en
+  base64 (`POST api/notes/resources`) sigue para los ficheros pequeños. El texto leído de un documento: `POST
+  api/resources/{id}/read` (Staff+) y `GET api/resources/{id}/text` (cualquier usuario; su comienzo, `MaxViewerLength`).
 - **Editar un recurso** (`PUT api/notes/resources`, `ResourceInfoDto`): un recurso que ya existe solo cambia su
   descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
   fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el

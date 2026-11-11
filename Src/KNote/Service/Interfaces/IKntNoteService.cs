@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
@@ -37,6 +38,12 @@ public interface IKntNoteService
     Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId);
     Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity, bool forceNew = false);
     Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resourceInfo, bool forceNew = false);
+    /// <summary>
+    /// A new resource of a note with its file read as it comes (KNote Atlas, stage 4, D6: up to KntConst.MaxLenNoteResourceFile),
+    /// written to the folder of the resources without loading it whole or, kept in the database, read in memory. Its name
+    /// (the file's) gets a prefix of its own. Staff.
+    /// </summary>
+    Task<Result<ResourceInfoDto>> UploadResourceAsync(ResourceDto resource, Stream content, long length);
     Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId);
     Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
@@ -73,7 +80,7 @@ public interface IKntNoteService
     Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
     string UtilGetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages);
     (string, string) UtilGetResourceUrls(ResourceDto resource);
-    bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true);
+    bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true, bool readContent = true);
     string UtilGetResourceFilePath(ResourceDto resource);
     string UtilGetResourceFileUrl(string container, string fileName);
     string UtilGetDefaultNewResourceContainer();

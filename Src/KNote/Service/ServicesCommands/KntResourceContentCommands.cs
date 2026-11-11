@@ -266,10 +266,13 @@ public class KntResourceContentReadDocumentAsyncCommand : KntCommandServiceBase<
     }
 }
 
+/// <summary>The text read of a resource, its beginning only with a MaxLength (DocumentTextRules.Cut; 0: all of it).</summary>
+public record DocumentTextRequest(Guid ResourceId, int MaxLength);
+
 [KntAuthorize(EnumRoles.Guest)]
-public class KntResourceContentGetDocumentTextAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceTextDto>>
+public class KntResourceContentGetDocumentTextAsyncCommand : KntCommandServiceBase<DocumentTextRequest, Result<ResourceTextDto>>
 {
-    public KntResourceContentGetDocumentTextAsyncCommand(IKntService service, Guid resourceId) : base(service, resourceId)
+    public KntResourceContentGetDocumentTextAsyncCommand(IKntService service, DocumentTextRequest request) : base(service, request)
     {
 
     }
@@ -278,17 +281,22 @@ public class KntResourceContentGetDocumentTextAsyncCommand : KntCommandServiceBa
     {
         var result = new Result<ResourceTextDto>();
 
-        await KntResourceContent.GetDescribableAsync(Service, Param, result);
+        await KntResourceContent.GetDescribableAsync(Service, Param.ResourceId, result);
         if (!result.IsValid)
             return result;
 
-        var text = await Repository.Notes.GetResourceTextAsync(Param);
+        var text = await Repository.Notes.GetResourceTextAsync(Param.ResourceId);
         if (!text.IsValid)
         {
             result.AddListErrorMessage(text.ListErrorMessage);
             return result;
         }
-        result.Entity = text.Entity;
+
+        var entity = text.Entity;
+        // Not read: no text (null), and no pages.
+        if (entity?.Text != null)
+            (entity.Text, entity.PagesShown, entity.PagesCount) = DocumentTextRules.Cut(entity.Text, Param.MaxLength);
+        result.Entity = entity;
         return result;
     }
 }

@@ -618,16 +618,31 @@ public class KntNotesGetResourcesInfoAsyncCommand : KntCommandServiceBase<Guid, 
 
     }
 
+    // Without their content (KNote Atlas, stage 4, 4.4b): the list read every file whole and gave it in base64, so a note with a
+    // document of 200 MB took minutes to show its resources in the Web (and the semantic index read it each time). Only a small
+    // image kept in the database keeps it: the Web shows it from there.
     public override async Task<Result<List<ResourceInfoDto>>> Execute()
     {
         var res = new Result<List<ResourceInfoDto>>();
 
-        var resGetResources = await Service.Notes.GetResourcesAsync(Param);
+        var resGetResources = await Repository.Notes.GetResourcesAsync(Param);
 
         res.AddListErrorMessage(resGetResources.ListErrorMessage);
         res.Entity = new List<ResourceInfoDto>();
-        foreach (var r in resGetResources.Entity)
-            res.Entity.Add(r.GetSimpleDto<ResourceInfoDto>());
+        foreach (var r in resGetResources.Entity ?? new List<ResourceDto>())
+        {
+            Service.Notes.UtilManageResourceContent(r, readContent: false);
+            var keepContent = r.ContentInDB && AiPhotoRules.IsPhoto(r) && r.ContentArrayBytes?.Length <= KntConst.MaxLenResourceFile;
+            if (!keepContent)
+                r.ContentArrayBytes = null;
+
+            var info = r.GetSimpleDto<ResourceInfoDto>();
+            if (!keepContent)
+                info.ContentBase64 = null;
+            // What it was read with (D12): saving it again without changing it keeps what is saved by then.
+            info.LoadedDescription = r.Description ?? "";
+            res.Entity.Add(info);
+        }
 
         return res;
     }
@@ -658,9 +673,13 @@ public class KntNotesGetResourceAsyncCommand : KntCommandServiceBase<Guid, Resul
 public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<ResourceDto, Result<ResourceDto>>
 {
     private readonly bool forceNew;
-    public KntNotesSaveResourceAsyncCommand(IKntService service, ResourceDto resource, bool forceNew = false) : base(service, resource)
+    // Without it, a saved resource whose file is in the folder comes back with its content (read again: an upload of
+    // 200 MB doesn't, KntNotesUploadResourceAsyncCommand).
+    private readonly bool readContentBack;
+    public KntNotesSaveResourceAsyncCommand(IKntService service, ResourceDto resource, bool forceNew = false, bool readContentBack = true) : base(service, resource)
     {
         this.forceNew = forceNew;
+        this.readContentBack = readContentBack;
     }
 
     public override async Task<Result<ResourceDto>> Execute()
@@ -668,7 +687,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
         Result<ResourceDto> result;
 
         var hasNewContent = Param.ContentArrayBytes != null;
-        var fileManaged = Service.Notes.UtilManageResourceContent(Param);
+        var fileManaged = Service.Notes.UtilManageResourceContent(Param, readContent: readContentBack);
 
         // Without its file (and its content not in the database) the resource would be saved empty.
         if (hasNewContent && !fileManaged && !Param.ContentInDB)
@@ -805,6 +824,164 @@ public class KntNotesSaveResourceInfoAsyncCommand : KntCommandSaveServiceBase<Re
         res.Entity = resSaveResource.Entity?.GetSimpleDto<ResourceInfoDto>();
 
         return res;
+    }
+}
+
+/// <summary>The parameter of IKntNoteService.UploadResourceAsync (its ToString doesn't give the content, for the log).</summary>
+public class KntResourceUploadParam
+{
+    public KntResourceUploadParam(ResourceDto resource, Stream content, long length)
+    {
+        Resource = resource;
+        Content = content;
+        Length = length;
+    }
+
+    public ResourceDto Resource { get; }
+    public Stream Content { get; }
+    public long Length { get; }
+
+    public override string ToString() => $"{Resource?.Name} ({Length} bytes) for the note {Resource?.NoteId}";
+}
+
+// KNote Atlas, stage 4 (D6): a new resource of up to 200 MB. Its file is written to the folder of the resources as it comes
+// (to a .part file, renamed when it is whole: a file cut halfway is never a resource), or read in memory if the repository
+// keeps them in the database; then it is saved as any other resource, without reading its file back.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntNotesUploadResourceAsyncCommand : KntCommandServiceBase<KntResourceUploadParam, Result<ResourceInfoDto>>
+{
+    private const int BufferSize = 81920;
+
+    public KntNotesUploadResourceAsyncCommand(IKntService service, KntResourceUploadParam upload) : base(service, upload)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param?.Resource == null || Param.Content == null)
+            result.AddErrorMessage("The resource and its file are required.");
+        else if (Param.Resource.NoteId == Guid.Empty)
+            result.AddErrorMessage("The note of the resource is required.");
+        else if (string.IsNullOrWhiteSpace(Param.Resource.Name))
+            result.AddErrorMessage("The name of the file is required.");
+        else if (ResourceFileRules.SizeError(Param.Resource.Name, Param.Length) is string error)
+            result.AddErrorMessage(error);
+        return result;
+    }
+
+    public override async Task<Result<ResourceInfoDto>> Execute()
+    {
+        var result = new Result<ResourceInfoDto>();
+
+        var note = await Service.Notes.GetAsync(Param.Resource.NoteId);
+        if (!note.IsValid || note.Entity == null)
+        {
+            result.AddErrorMessage("The note of the resource does not exist.");
+            return result;
+        }
+
+        var resource = Param.Resource;
+        var fileName = Service.ReplaceSpecialCharacters(Path.GetFileName(resource.Name));
+        resource.ResourceId = Guid.Empty;
+        resource.Name = $"{Guid.NewGuid()}_{fileName}";
+        resource.Container = Service.Notes.UtilGetDefaultNewResourceContainer();
+        resource.ContentInDB = Repository.RepositoryRef.ResourceContentInDB;
+        resource.ContentArrayBytes = null;
+
+        string file = null;
+        try
+        {
+            if (resource.ContentInDB)
+            {
+                using var memory = new MemoryStream();
+                await CopyAsync(Param.Content, memory);
+                resource.ContentArrayBytes = memory.ToArray();
+            }
+            else
+            {
+                file = Service.Notes.UtilGetResourceFilePath(resource);
+                if (string.IsNullOrEmpty(file))
+                {
+                    result.AddErrorMessage("The folder of the resources is not configured on the server.");
+                    return result;
+                }
+                Directory.CreateDirectory(Path.GetDirectoryName(file));
+                var part = file + ".part";
+                await using (var target = new FileStream(part, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, useAsync: true))
+                    await CopyAsync(Param.Content, target);
+                File.Move(part, file, overwrite: false);
+            }
+        }
+        catch (InvalidDataException ex)
+        {
+            DeletePart(file);
+            result.AddErrorMessage(ex.Message);
+            return result;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            DeletePart(file);
+            Service.Logger?.LogError(ex, "Resource {name}: the file {file} couldn't be written.", resource.Name, file);
+            result.AddErrorMessage("The resource file couldn't be saved on the server (see the server log: the folder of the resources may lack permissions).");
+            return result;
+        }
+
+        var save = new KntNotesSaveResourceAsyncCommand(Service, resource, readContentBack: false);
+        var valid = save.ValidateParam();
+        var saved = valid.IsValid ? await save.Execute() : null;
+        if (saved?.IsValid != true)
+        {
+            // Not a resource: its file goes.
+            if (file != null)
+                TryDelete(file);
+            result.AddListErrorMessage(saved?.ListErrorMessage ?? valid.ListErrorMessage);
+            return result;
+        }
+
+        var info = saved.Entity.GetSimpleDto<ResourceInfoDto>();
+        info.ContentBase64 = null;
+        info.LoadedDescription = info.Description ?? "";
+        (info.RelativeUrl, info.FullUrl) = Service.Notes.UtilGetResourceUrls(saved.Entity);
+        result.Entity = info;
+        return result;
+    }
+
+    // The file as it comes, up to the limit (what was said of its length is not trusted).
+    private static async Task CopyAsync(Stream from, Stream to)
+    {
+        var buffer = new byte[BufferSize];
+        long total = 0;
+        int read;
+        while ((read = await from.ReadAsync(buffer)) > 0)
+        {
+            total += read;
+            if (total > KntConst.MaxLenNoteResourceFile)
+                throw new InvalidDataException($"The file is too big: {ResourceFileRules.MaxSizeText} at most.");
+            await to.WriteAsync(buffer.AsMemory(0, read));
+        }
+        if (total == 0)
+            throw new InvalidDataException("The file is empty.");
+    }
+
+    private void DeletePart(string file)
+    {
+        if (file != null)
+            TryDelete(file + ".part");
+    }
+
+    private void TryDelete(string file)
+    {
+        try
+        {
+            if (File.Exists(file))
+                File.Delete(file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Service.Logger?.LogWarning(ex, "The file {file} couldn't be deleted.", file);
+        }
     }
 }
 

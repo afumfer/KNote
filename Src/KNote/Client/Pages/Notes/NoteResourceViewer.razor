@@ -1,43 +1,119 @@
+@using KNote.Client.Auth
+
 @inject DialogService dialogService
 @inject IJSRuntime js
+@inject IStore store
+@inject KntAccess access
+@inject NotificationService notificationService
+
+@implements IDisposable
 
 @* A note's resource shown in the window where the note is (NoteKResources opens it framed, almost the whole window):
    an image (fitted, or at its size with a click), a PDF (the browser's viewer), a video or an audio (their player)
-   or a text. The other files can't be shown in the browser: only opened. *@
+   or a text. The other files can't be shown in the browser: only opened. A document (PDF, DOCX, ODT, TXT, MD; KNote
+   Atlas, stage 4, 4.4b) also has its text as KNote read it, by pages, with «Read document» (Staff+): its beginning only,
+   some 100 pages (DocumentTextRules.MaxViewerLength). *@
 
 <KntDialogFrame Icon="@KntFileTypes.Icon(Resource.FileType, Resource.Name)" Title="@Title" Subtitle="@Resource.NameOut">
     <ChildContent>
         <div class="knt-resource-viewer">
-            @switch (kind)
+            @if (isDocument)
             {
-                case KntFileTypes.Kind.Image:
-                    <div class="knt-resource-viewer-image @(actualSize ? "knt-resource-viewer-actual" : null)"
-                         title="@(actualSize ? "Fit to the window" : "Actual size")" @onclick="() => actualSize = !actualSize">
-                        <img src="@NoteKResources.ImageSource(Resource)" alt="@Title" />
+                <RadzenSelectBar TValue="bool" Value="@showText" ValueChanged="@((bool value) => OnShowTextChanged(value))" Size="ButtonSize.Small"
+                                 class="knt-resource-viewer-mode">
+                    <Items>
+                        <RadzenSelectBarItem Text="File" Value="false" Icon="description" />
+                        <RadzenSelectBarItem Text="Text" Value="true" Icon="notes" />
+                    </Items>
+                </RadzenSelectBar>
+            }
+            @if (showText)
+            {
+                <div class="knt-document-text">
+                    <div class="knt-document-text-state">
+                        <span>@StateText</span>
+                        <RadzenButton Text="@(CanReadAgain ? DocumentTexts.ReadAgain : DocumentTexts.ReadDocument)" Icon="plagiarism"
+                                      ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                      IsBusy="@reading.IsBusy" BusyText="Reading…" Disabled="@(text == null && !loadFailed)" Click="OnReadDocument" />
                     </div>
-                    break;
-                case KntFileTypes.Kind.Pdf:
-                    <iframe src="@Resource.FullUrl" title="@Title"></iframe>
-                    break;
-                case KntFileTypes.Kind.Video:
-                    <video src="@Resource.FullUrl" controls></video>
-                    break;
-                case KntFileTypes.Kind.Audio:
-                    <div class="knt-resource-viewer-center"><audio src="@Resource.FullUrl" controls></audio></div>
-                    break;
-                case KntFileTypes.Kind.Text:
-                    @* Sandboxed: a file saved as text may be HTML, its scripts don't run. *@
-                    <iframe src="@Resource.FullUrl" title="@Title" sandbox=""></iframe>
-                    break;
-                default:
-                    <div class="knt-resource-viewer-center">
-                        <div class="knt-empty-state">
-                            <RadzenIcon Icon="@KntFileTypes.Icon(Resource.FileType, Resource.Name)" />
-                            <div class="knt-empty-state-title">This file can't be shown here</div>
-                            <div class="knt-empty-state-text">Open it in a new tab to see it or download it.</div>
+                    <div class="knt-document-text-body">
+                        @if (text == null && !loadFailed)
+                        {
+                            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+                        }
+                        else if (loadFailed)
+                        {
+                            <div class="knt-load-error">
+                                <span class="knt-load-error-text">The text could not be loaded.</span>
+                                <RadzenButton Text="Retry" Icon="refresh" Size="ButtonSize.Small" Click="LoadTextAsync" />
+                            </div>
+                        }
+                        else if (pages.Count == 0)
+                        {
+                            <div class="knt-empty-state">
+                                <RadzenIcon Icon="notes" />
+                                <div class="knt-empty-state-text">@(text!.State == EnumExtractedState.NotRead ? DocumentTexts.State(EnumExtractedState.NotRead) : DocumentTexts.NothingRead)</div>
+                            </div>
+                        }
+                        else if (!paged)
+                        {
+                            <div class="knt-document-text-page-text">@pages[0].Text</div>
+                        }
+                        else
+                        {
+                            @foreach (var documentPage in pages)
+                            {
+                                <section class="knt-document-text-page">
+                                    <div class="knt-document-text-page-heading">
+                                        <span>@DocumentTexts.PageHeading(documentPage.Number)</span>
+                                        @if (documentPage.NeedsTranscription)
+                                        {
+                                            <span class="knt-document-text-scanned">@DocumentTexts.ScannedPage</span>
+                                        }
+                                    </div>
+                                    @if (documentPage.Text.Length > 0)
+                                    {
+                                        <div class="knt-document-text-page-text">@documentPage.Text</div>
+                                    }
+                                </section>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                @switch (kind)
+                {
+                    case KntFileTypes.Kind.Image:
+                        <div class="knt-resource-viewer-image @(actualSize ? "knt-resource-viewer-actual" : null)"
+                             title="@(actualSize ? "Fit to the window" : "Actual size")" @onclick="() => actualSize = !actualSize">
+                            <img src="@NoteKResources.ImageSource(Resource)" alt="@Title" />
                         </div>
-                    </div>
-                    break;
+                        break;
+                    case KntFileTypes.Kind.Pdf:
+                        <iframe src="@Resource.FullUrl" title="@Title"></iframe>
+                        break;
+                    case KntFileTypes.Kind.Video:
+                        <video src="@Resource.FullUrl" controls></video>
+                        break;
+                    case KntFileTypes.Kind.Audio:
+                        <div class="knt-resource-viewer-center"><audio src="@Resource.FullUrl" controls></audio></div>
+                        break;
+                    case KntFileTypes.Kind.Text:
+                        @* Sandboxed: a file saved as text may be HTML, its scripts don't run. *@
+                        <iframe src="@Resource.FullUrl" title="@Title" sandbox=""></iframe>
+                        break;
+                    default:
+                        <div class="knt-resource-viewer-center">
+                            <div class="knt-empty-state">
+                                <RadzenIcon Icon="@KntFileTypes.Icon(Resource.FileType, Resource.Name)" />
+                                <div class="knt-empty-state-title">This file can't be shown here</div>
+                                <div class="knt-empty-state-text">Open it in a new tab to see it or download it@(isDocument ? ", or see its text" : "").</div>
+                            </div>
+                        </div>
+                        break;
+                }
             }
             @* Who wrote the description (a person, the AI and its model) is only in the resource's editor. *@
             @if (ResourceDescriptionRules.HasOwnDescription(Resource.Description, Resource.Name))
@@ -58,21 +134,116 @@
 @code {
     [Parameter] [EditorRequired] public ResourceInfoDto Resource { get; set; } = null!;
 
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
     private KntFileTypes.Kind kind;
     private bool actualSize;
 
+    // KNote Atlas, stage 4 (4.4b): the text read of a document.
+    private bool isDocument;
+    private bool paged;
+    private bool showText;
+    private ResourceTextDto? text;
+    private List<DocumentPageDto> pages = new();
+    private bool loadFailed;
+    private readonly KntLatestRequest textRequest = new();
+    private readonly KntSingleFlight reading = new();
+    private readonly CancellationTokenSource disposal = new();
+
     private string Title => Resource.GetTitle();
 
-    protected override void OnParametersSet()
+    private bool CanReadAgain => text != null && text.State != EnumExtractedState.NotRead;
+
+    private string StateText
+    {
+        get
+        {
+            if (text == null)
+                return loadFailed ? "" : "Loading the text…";
+            var state = DocumentTexts.State(text.State);
+            if (text.State == EnumExtractedState.Partial)
+                state += " " + DocumentTexts.ScannedPageHelp;
+            var showing = DocumentTexts.Showing(text.PagesShown, text.PagesCount);
+            return showing == null ? state : $"{state} {showing}";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
     {
         kind = KntFileTypes.KindOf(Resource.FileType, Resource.Name);
         // Without its URL, only an image (its content came with it) can be shown.
         if (kind != KntFileTypes.Kind.Image && string.IsNullOrEmpty(Resource.FullUrl))
             kind = KntFileTypes.Kind.Other;
+
+        var format = DocumentTextRules.FormatOf(Resource.FileType, Resource.Name);
+        isDocument = format != EnumDocumentFormat.None;
+        paged = DocumentTextRules.IsPaged(format);
+        // A document the browser can't show (DOCX, ODT) opens with its text.
+        if (isDocument && kind == KntFileTypes.Kind.Other && !showText)
+        {
+            showText = true;
+            await LoadTextAsync();
+        }
+    }
+
+    private async Task OnShowTextChanged(bool value)
+    {
+        showText = value;
+        if (showText && text == null)
+            await LoadTextAsync();
+    }
+
+    private async Task LoadTextAsync()
+    {
+        loadFailed = false;
+        text = null;
+        var result = await textRequest.RunAsync(ct => store.Notes.GetDocumentTextAsync(Resource.ResourceId, ct));
+        if (result.Canceled)
+            return;
+        if (result.Value.IsValid && result.Value.Entity != null)
+        {
+            text = result.Value.Entity;
+            pages = DocumentTextRules.Pages(text.Text);
+        }
+        else
+            loadFailed = true;
+        StateHasChanged();
+    }
+
+    private Task OnReadDocument() => reading.RunAsync(ReadDocumentAsync);
+
+    private async Task ReadDocumentAsync()
+    {
+        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Reading documents"))
+            return;
+        if (CanReadAgain && await dialogService.Confirm(DocumentTexts.ReadAgainQuestion, DocumentTexts.ReadAgain,
+                new ConfirmOptions { OkButtonText = DocumentTexts.ReadAgain, CancelButtonText = "Cancel" }) != true)
+            return;
+
+        // A write: not canceled when the dialog closes (the server may have done it).
+        var result = await store.Notes.ReadDocumentAsync(Resource.ResourceId);
+        if (disposal.IsCancellationRequested || !result.IsValid)
+            return;
+
+        notificationService.Notify(new NotificationMessage
+        {
+            Severity = result.Entity.State == EnumExtractedState.Unreadable ? NotificationSeverity.Warning : NotificationSeverity.Success,
+            Summary = DocumentTexts.ReadDocument,
+            Detail = DocumentTexts.ReadResult(result.Entity),
+            Duration = 8000
+        });
+        await LoadTextAsync();
     }
 
     private async Task OpenAsync() =>
         await js.InvokeVoidAsync("open", Resource.FullUrl, "_blank", "noopener");
+
+    public void Dispose()
+    {
+        textRequest.Dispose();
+        disposal.Cancel();
+        disposal.Dispose();
+    }
 
     /// <summary>The options of its dialog: almost the whole window.</summary>
     public static DialogOptions Options() =>

@@ -347,6 +347,52 @@ public class NotesController : ControllerBase
         }
     }
 
+    // A request of an upload can be this big: the file (KntConst.MaxLenNoteResourceFile, 200 MB, which the command checks
+    // exactly) and the rest of the form. Kestrel's limit by default is 30 MB; IIS has its own (web.config).
+    private const long UploadRequestLimit = 201L * 1024 * 1024;
+
+    // KNote Atlas, stage 4 (D6): a new resource of a note with its file as a form (multipart), sent by the browser from the
+    // disk. ASP.NET keeps the form's file in a temporary file, not in memory; the command writes it to the folder of the
+    // resources (or reads it in memory, if the repository keeps them in the database).
+    [HttpPost("{noteId:guid}/resources/upload")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    [RequestSizeLimit(UploadRequestLimit)]
+    [RequestFormLimits(MultipartBodyLengthLimit = UploadRequestLimit)]
+    public async Task<IActionResult> UploadResource(Guid noteId, IFormFile file, [FromForm] string description,
+        [FromForm] string loadedDescription, [FromForm] bool descriptionByUser, [FromForm] int order)
+    {
+        var resApi = new Result<ResourceInfoDto>();
+        try
+        {
+            _logger.LogTrace("UploadResource {dateTime}.", DateTime.Now);
+            if (file == null)
+            {
+                resApi.AddErrorMessage("The file is required.");
+                return BadRequest(resApi);
+            }
+
+            var resource = new ResourceDto
+            {
+                NoteId = noteId,
+                Name = file.FileName,
+                FileType = file.ContentType,
+                Description = description ?? file.FileName,
+                LoadedDescription = loadedDescription ?? file.FileName,
+                DescriptionByUser = descriptionByUser,
+                Order = order
+            };
+            await using var content = file.OpenReadStream();
+            resApi = await _service.Notes.UploadResourceAsync(resource, content, file.Length);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "UploadResource at {dateTime}.", DateTime.Now);
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     [HttpGet("{id}/[action]")]
     [Authorize(Roles = "Admin, Staff, ProjectManager")]
     public async Task<IActionResult> Resources(Guid id)

@@ -33,6 +33,6 @@ public class KntResourceContentService : KntServiceBase, IKntResourceContentServ
     public async Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId) =>
         await ExecuteCommand(new KntResourceContentReadDocumentAsyncCommand(Service, resourceId));
 
-    public async Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId) =>
-        await ExecuteCommand(new KntResourceContentGetDocumentTextAsyncCommand(Service, resourceId));
+    public async Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, int maxLength = 0) =>
+        await ExecuteCommand(new KntResourceContentGetDocumentTextAsyncCommand(Service, new DocumentTextRequest(resourceId, maxLength)));
 }

@@ -36,7 +36,8 @@ public class DocumentReadDto
 
 /// <summary>
 /// The text read of a resource (Resources.ExtractedText, DocumentTextRules' format), out of the queries of the resources,
-/// which never read it: it can be of hundreds of pages.
+/// which never read it: it can be of hundreds of pages. To show it, only its beginning may come (DocumentTextRules.Cut):
+/// PagesShown of PagesCount.
 /// </summary>
 public class ResourceTextDto
 {
@@ -46,4 +47,6 @@ public class ResourceTextDto
     public string FileType { get; set; }
     public EnumExtractedState State { get; set; }
     public string Text { get; set; }
+    public int PagesShown { get; set; }
+    public int PagesCount { get; set; }
 }

@@ -78,13 +78,21 @@ public partial class ResourceEditorForm : KntEditorForm, IViewEditor<ResourceDto
         if (openFileDialog.ShowDialog() == DialogResult.OK)
         {
             var fileTmp = openFileDialog.FileName;
+            // KNote Atlas, stage 4 (D6): the same limit as the Web.
+            if (ResourceFileRules.SizeError(Path.GetFileName(fileTmp), new FileInfo(fileTmp).Length) is string sizeError)
+            {
+                ShowInfo(sizeError, KntConst.AppName);
+                return;
+            }
             varContentArrayBytes = File.ReadAllBytes(fileTmp);
             textFileName.Text = _ctrl.Service.ReplaceSpecialCharacters(Path.GetFileName(fileTmp));
+            // Its name first: the lock (textDescription_TextChanged) compares the description with it, and the file's name
+            // is not a text of a person (with the name before, a new resource was locked by itself).
+            varName = _ctrl.Model.ResourceId.ToString() + "_" + textFileName.Text;
+            varFileType = _ctrl.ExtensionFileToFileType(Path.GetExtension(fileTmp));
             // A locked description stays: the person wrote it (or decided to keep it).
             if (!checkLockDescription.Checked)
                 textDescription.Text = textFileName.Text;
-            varName = _ctrl.Model.ResourceId.ToString() + "_" + textFileName.Text;
-            varFileType = _ctrl.ExtensionFileToFileType(Path.GetExtension(fileTmp));
             await ShowPreview(fileTmp);
         }
     }

@@ -717,6 +717,11 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   «Relate» (no en el editor incrustado ni en modo consulta) abre el editor de relaciones con la nota elegida. Sin botón
   aparte en la vista previa: es el editor incrustado, que ya tiene la pestaña.
 - **Sin evaluación de la búsqueda**: el laboratorio («Search evaluation») es solo de la Web.
+- **El texto de un documento** (etapa 4, 4.4b): `Views/DocumentTextForm` (sin `Ctrl` propio: usa `NoteEditorCtrl`
+  `GetDocumentTextAsync`/`ReadDocumentAsync`), desde «Describe ▾» de los recursos del editor de la nota, «Text of the selected
+  document», solo para un documento guardado (`NoteEditorCtrl.CanReadNow`). Muestra el texto **entero** (`DocumentTexts.Readable`),
+  metido en la caja a trozos con una barra de progreso, y «Read document» / «Read again» (pregunta). Los ficheros de los
+  recursos, hasta 200 MB (`ResourceFileRules.SizeError` al elegirlos, como la Web).
 - Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
   `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
 

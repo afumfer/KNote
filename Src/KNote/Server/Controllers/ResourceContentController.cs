@@ -18,11 +18,14 @@ namespace KNote.Server.Controllers;
 // photo, one per request (the Web asks for them one after another, with its progress and its cancel), with the model of
 // AiPhotoDescriber.ChooseAsync. The roles of the commands apply, as in the assistant (EnforceAuthorization). 4.3: «Process
 // pending resources» (Admin, as the semantic index), a run of KntAtlasJobs of the session's repository and with its user.
-[Authorize(Roles = "Staff, ProjectManager, Admin")]
+// 4.4b: reading a document (Staff) and its text (anyone signed in, as the notes).
+[Authorize]
 [ApiController]
 [Route("api/resources")]
 public class ResourceContentController : ControllerBase
 {
+    private const string StaffRoles = "Staff, ProjectManager, Admin";
+
     private readonly IKntService _service;
     private readonly AiProvidersCatalog _providers;
     private readonly IAiChatClientProvider _chatClients;
@@ -45,6 +48,7 @@ public class ResourceContentController : ControllerBase
 
     // The model that would describe the photos (what the Web shows before describing).
     [HttpGet("describer")]
+    [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> GetDescriber(CancellationToken cancellationToken) =>
         RunAsync(nameof(GetDescriber), async () =>
         {
@@ -54,6 +58,7 @@ public class ResourceContentController : ControllerBase
 
     // Describes a photo and saves its description. replace: also if a person wrote it (the Web asks first).
     [HttpPost("{id:guid}/describe")]
+    [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> Describe(Guid id, [FromQuery] bool replace, CancellationToken cancellationToken) =>
         RunAsync(nameof(Describe), async () =>
         {
@@ -72,8 +77,22 @@ public class ResourceContentController : ControllerBase
 
     // What «Process pending resources» would process, and the pace of its last run.
     [HttpGet("status")]
+    [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> GetStatus() =>
         RunAsync(nameof(GetStatus), () => _service.ResourceContent.GetProcessingStatusAsync());
+
+    // Reads the text of a document and keeps it (also when it was read: the reader may read it better now).
+    [HttpPost("{id:guid}/read")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> ReadDocument(Guid id) =>
+        RunAsync(nameof(ReadDocument), () => _service.ResourceContent.ReadDocumentAsync(id));
+
+    // The text read of a document: its beginning (whole pages, DocumentTextRules.Cut), up to maxLength or, without it, what
+    // the Web shows (MaxViewerLength).
+    [HttpGet("{id:guid}/text")]
+    public Task<IActionResult> GetDocumentText(Guid id, [FromQuery] int? maxLength) =>
+        RunAsync(nameof(GetDocumentText), () => _service.ResourceContent.GetDocumentTextAsync(id,
+            maxLength is > 0 and <= DocumentTextRules.MaxTextLength ? maxLength.Value : DocumentTextRules.MaxViewerLength));
 
     // Queues «Process pending resources» (or gives the run the repository already has), with the model of «Describe photos».
     [HttpPost("process")]

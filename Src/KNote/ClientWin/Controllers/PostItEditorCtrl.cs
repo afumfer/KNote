@@ -193,6 +193,13 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
 
             var fileName = Service.ReplaceSpecialCharacters(Path.GetFileName(filePath));
 
+            // KNote Atlas, stage 4 (D6): the same limit as the Web.
+            if (ResourceFileRules.SizeError(Path.GetFileName(filePath), new FileInfo(filePath).Length) is string sizeError)
+            {
+                View.ShowInfo(sizeError, KntConst.AppName);
+                return null;
+            }
+
             var newResource = new ResourceDto();
             newResource.SetIsNew(true);
             newResource.ResourceId = Guid.NewGuid();

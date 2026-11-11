@@ -114,11 +114,13 @@ else
         return dot >= 0 && dot < name.Length - 1 ? name[(dot + 1)..].ToUpperInvariant() : "";
     }
 
-    // What the browser can show (an image, a PDF, a video, an audio or a text) is shown in this window
-    // (NoteResourceViewer), over the note; any other file opens in a new tab.
+    // Every resource is shown in this window (NoteResourceViewer), over the note: what the browser can show (an image, a PDF,
+    // a video, an audio or a text), the text of a document (KNote Atlas 4.4b) and, for any other file (a .doc, a .zip...), its
+    // description with «Open in a new tab». Only one without a URL nor an image is opened directly.
     private static bool CanView(ResourceInfoDto resource) =>
         ImageSource(resource) != null
-        || (KntFileTypes.KindOf(resource.FileType, resource.Name) != KntFileTypes.Kind.Other && !string.IsNullOrEmpty(resource.FullUrl));
+        || DocumentTextRules.IsDocument(resource)
+        || !string.IsNullOrEmpty(resource.FullUrl);
 
     private async Task ViewAsync(ResourceInfoDto resource)
     {

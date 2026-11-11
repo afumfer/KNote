@@ -479,14 +479,22 @@ Patrones ya establecidos que hay que seguir:
   `DescriptionBlocked`): bloqueado, la descripción solo se ve (sin editor). La Web no menciona `ClientWin` en la
   interfaz. Las pestañas de recursos y tareas se cargan al abrir la nota y otra vez si cambia (`OnParametersSetAsync`
   por `NoteId`, p. ej. tras "Save and new").
+- **Subir un recurso** (KNote Atlas 4.4b): `InputFileUpload` no lee el fichero (solo una imagen pequeña, para verla): el
+  diálogo `NoteResourceEditor` lo envía con `IStore.Notes.UploadResourceAsync`, que usa `js/kntUpload.js` (`XMLHttpRequest`
+  con el `input` del fichero, el token y el progreso, y `cancel`), y se cierra con el recurso ya guardado. Hasta 200 MB
+  (`ResourceFileRules`). **El texto de un documento**: `NoteResourceViewer` tiene «File / Text» para los documentos
+  (`DocumentTextRules.IsDocument`; un DOCX o un ODT abre en «Text»), con las páginas, las escaneadas marcadas, «Showing pages
+  1–N of M» y «Read document» (Staff+, `KntAccess` al pulsar; si ya se leyó, pregunta). Textos de `DocumentTexts`.
 - **Recursos de la nota** (`NoteKResources`, galería; `NoteResourceEditor`, diálogo de alta y edición): al editar
   un recurso solo cambian su descripción y su orden; el fichero no se cambia ni se reenvía (`Server` conserva el
   fichero y el contenido guardado en la BD, ver `Server/CLAUDE.md`). Al pulsar un recurso se ve en la misma ventana
   de la nota (`NoteResourceViewer`, casi a ventana completa): imagen (ajustada o a su tamaño), PDF (visor del
   navegador), vídeo, audio o texto (en un `iframe` con `sandbox`: un fichero guardado como texto puede ser HTML). Los
-  demás se abren en otra pestaña: la ventana de la nota es emergente y no tiene pestañas, así que se abren en la
+  demás (un `.doc`, un `.zip`...) también abren el visor, con su descripción y «Open in a new tab» (4.4b; antes se
+  descargaban al pulsarlos): la ventana de la nota es emergente y no tiene pestañas, así que se abren en la
   ventana principal. El tipo se deduce del MIME o, si no lo hay, de la extensión (`KntFileTypes.KindOf`: `ClientWin`
-  solo guarda el tipo de unos pocos ficheros).
+  solo guarda el tipo de unos pocos ficheros). La lista de la pestaña (`api/notes/{id}/resources`) no trae los ficheros
+  (solo una imagen pequeña guardada en la BD): las imágenes se ven por su URL.
 - **Tareas de la nota** (`NoteKTasks`), como en `ClientWin`: la lista (por prioridad y tema) y, al lado, la tarea
   seleccionada con sus datos y su descripción en HTML (`ViewMarkdown`: Markdown largo, con imágenes), en un
   `RadzenSplitter` con tamaños guardados (`KntPaneSizes`, clave `KNoteNoteTasksPanes`); en una ventana estrecha la

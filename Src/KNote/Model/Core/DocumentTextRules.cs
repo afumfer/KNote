@@ -35,6 +35,8 @@ public static class DocumentTextRules
     public const double ScannedImageCoverage = 0.85;
     // What is kept of a document, at most (some 7,000 pages of text).
     public const int MaxTextLength = 20_000_000;
+    // What the Web shows of a document's text, at most (some 100 pages; decided in 4.4b): ClientWin shows it whole.
+    public const int MaxViewerLength = 200_000;
 
     private static readonly Regex HyphenatedWord = new(@"(\p{L})-\n(\p{Ll})", RegexOptions.Compiled);
     private static readonly Regex TrailingSpaces = new(@"[ \t]+\n", RegexOptions.Compiled);
@@ -118,6 +120,27 @@ public static class DocumentTextRules
             NeedsTranscription = page.Length > 0 && page[0] == PendingMark,
             Text = page.Length > 0 && page[0] == PendingMark ? page[1..] : page
         }).ToList();
+    }
+
+    /// <summary>
+    /// The beginning of a kept text to show it: the whole pages that fit in maxLength (only the first one, cut, if it alone is
+    /// longer), how many those are and how many the text has. maxLength 0: all of it.
+    /// </summary>
+    public static (string Text, int PagesShown, int PagesCount) Cut(string extractedText, int maxLength)
+    {
+        if (string.IsNullOrEmpty(extractedText))
+            return ("", 0, 0);
+
+        var count = extractedText.Count(c => c == PageSeparator) + 1;
+        if (maxLength <= 0 || extractedText.Length <= maxLength)
+            return (extractedText, count, count);
+
+        // A separator at maxLength still leaves the pages before it within maxLength.
+        var end = extractedText.LastIndexOf(PageSeparator, maxLength);
+        if (end <= 0)
+            return (extractedText[..maxLength], 1, count);
+        var shown = extractedText[..end];
+        return (shown, shown.Count(c => c == PageSeparator) + 1, count);
     }
 
     /// <summary>What a reading leaves: pages to transcribe, or read.</summary>

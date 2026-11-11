@@ -10,7 +10,9 @@ namespace KNote.Tests.ServiceTests;
 /// <summary>
 /// The text of the documents in the Service (KNote Atlas, stage 4, 4.4a): «Read document» keeps it (from the folder or from
 /// the database) without touching the note, a file that is not here or can't be read, replacing the file forgets it, and the
-/// semantic index reads each document once (not in a quick refresh), with fragments by page. Dapper and EF.
+/// semantic index reads each document once (not in a quick refresh), with fragments by page. 4.4b: the upload of a resource
+/// from a stream (to the folder without reading it back, or to the database) and the beginning of a text by whole pages.
+/// Dapper and EF.
 /// </summary>
 [TestClass]
 public class DocumentTextServiceTests
@@ -165,6 +167,112 @@ public class DocumentTextServiceTests
         Assert.IsTrue(chunks.All(c => c.SourceId == pdf.ResourceId));
         CollectionAssert.AreEqual(new int?[] { 1 }, chunks.Select(c => c.Page).ToList(), "two short pages: one fragment, from page 1");
         StringAssert.Contains(chunks[0].Content, "SuperBASIC");
+    }
+
+    private ResourceDto NewUpload(Guid noteId, string fileName) => new()
+    {
+        NoteId = noteId, Name = fileName, FileType = "application/pdf", Description = fileName, LoadedDescription = fileName, Order = 2
+    };
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task AnUpload_WritesItsFileToTheFolder_AndIsADocumentToRead(string orm)
+    {
+        await OpenAsync(orm);
+        var note = await fixture.AddNoteAsync("Manuals");
+        var content = TestDocuments.Pdf("The QL user guide.");
+
+        using var stream = new MemoryStream(content);
+        var uploaded = await fixture.Service.Notes.UploadResourceAsync(NewUpload(note.NoteId, "user guide.pdf"), stream, content.Length);
+
+        Assert.IsTrue(uploaded.IsValid, uploaded.ErrorMessage);
+        var resource = uploaded.Entity;
+        Assert.AreEqual(note.NoteId, resource.NoteId);
+        Assert.AreEqual("user_guide.pdf", ResourceInfoDto.FileNameOf(resource.Name), "the name of the file, with a prefix of its own");
+        Assert.AreEqual(2, resource.Order);
+        Assert.IsNull(resource.ContentBase64);
+        Assert.IsFalse(string.IsNullOrEmpty(resource.FullUrl));
+        var files = Directory.GetFiles(rootPath, "*", SearchOption.AllDirectories);
+        Assert.AreEqual(1, files.Length, "no .part file is left");
+        CollectionAssert.AreEqual(content, File.ReadAllBytes(files[0]));
+
+        var read = await fixture.Service.ResourceContent.ReadDocumentAsync(resource.ResourceId);
+        Assert.IsTrue(read.IsValid, read.ErrorMessage);
+        StringAssert.Contains((await fixture.Service.ResourceContent.GetDocumentTextAsync(resource.ResourceId)).Entity.Text, "user guide");
+    }
+
+    [TestMethod]
+    public async Task AnUpload_ToARepositoryThatKeepsTheFilesInTheDatabase_KeepsItThere()
+    {
+        await OpenAsync("EntityFramework", contentInDb: true);
+        var note = await fixture.AddNoteAsync("Manuals");
+        var content = TestDocuments.Pdf("Kept in the database.");
+
+        using var stream = new MemoryStream(content);
+        var uploaded = await fixture.Service.Notes.UploadResourceAsync(NewUpload(note.NoteId, "db.pdf"), stream, content.Length);
+
+        Assert.IsTrue(uploaded.IsValid, uploaded.ErrorMessage);
+        var stored = (await fixture.Service.Repository.Notes.GetResourceAsync(uploaded.Entity.ResourceId)).Entity;
+        Assert.IsTrue(stored.ContentInDB);
+        CollectionAssert.AreEqual(content, stored.ContentArrayBytes);
+    }
+
+    [TestMethod]
+    public async Task AnUpload_EmptyOrTooBig_IsRefused_AndLeavesNoFile()
+    {
+        await OpenAsync("Dapper");
+        var note = await fixture.AddNoteAsync("Manuals");
+
+        using var empty = new MemoryStream();
+        var refusedEmpty = await fixture.Service.Notes.UploadResourceAsync(NewUpload(note.NoteId, "empty.pdf"), empty, 0);
+        using var small = new MemoryStream([1, 2, 3]);
+        var refusedBig = await fixture.Service.Notes.UploadResourceAsync(NewUpload(note.NoteId, "big.pdf"), small, KntConst.MaxLenNoteResourceFile + 1);
+        // What was said of its length is not trusted: an empty stream is refused while it is written.
+        using var lies = new MemoryStream();
+        var refusedLie = await fixture.Service.Notes.UploadResourceAsync(NewUpload(note.NoteId, "lie.pdf"), lies, 10);
+
+        StringAssert.Contains(refusedEmpty.ErrorMessage, "empty");
+        StringAssert.Contains(refusedBig.ErrorMessage, "too big");
+        StringAssert.Contains(refusedLie.ErrorMessage, "empty");
+        Assert.AreEqual(0, Directory.GetFiles(rootPath, "*", SearchOption.AllDirectories).Length);
+        Assert.AreEqual(0, (await fixture.Service.Notes.GetResourcesAsync(note.NoteId)).Entity.Count);
+    }
+
+    // The list of a note's resources (what the Web shows in its tab) doesn't bring their files: with one of 200 MB it took minutes.
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task TheListOfTheResources_DoesntBringTheirFiles_ButASmallImageInTheDatabase(bool contentInDb)
+    {
+        await OpenAsync("EntityFramework", contentInDb);
+        var note = await fixture.AddNoteAsync("Gallery");
+        await AddResourceAsync(note.NoteId, "manual.pdf", TestDocuments.Pdf("A manual."));
+        await AddResourceAsync(note.NoteId, "photo.png", [1, 2, 3], "image/png");
+
+        var list = (await fixture.Service.Notes.GetResourcesInfoAsync(note.NoteId)).Entity;
+
+        Assert.AreEqual(2, list.Count);
+        Assert.IsNull(list.Single(r => r.NameOut == "manual.pdf").ContentBase64);
+        Assert.AreEqual(contentInDb ? Convert.ToBase64String([1, 2, 3]) : null, list.Single(r => r.NameOut == "photo.png").ContentBase64);
+        Assert.IsTrue(list.All(r => !string.IsNullOrEmpty(r.FullUrl) && r.LoadedDescription == r.Description));
+    }
+
+    [TestMethod]
+    public async Task TheBeginningOfAText_HasWholePages()
+    {
+        await OpenAsync("Dapper");
+        var note = await fixture.AddNoteAsync("Manuals");
+        var pages = Enumerable.Range(1, 5).Select(i => $"Page {i}: " + new string('x', 40)).ToArray();
+        var pdf = await AddResourceAsync(note.NoteId, "pages.pdf", TestDocuments.Pdf(pages));
+        Assert.IsTrue((await fixture.Service.ResourceContent.ReadDocumentAsync(pdf.ResourceId)).IsValid);
+
+        var beginning = (await fixture.Service.ResourceContent.GetDocumentTextAsync(pdf.ResourceId, 120)).Entity;
+        var whole = (await fixture.Service.ResourceContent.GetDocumentTextAsync(pdf.ResourceId)).Entity;
+
+        Assert.AreEqual((2, 5), (beginning.PagesShown, beginning.PagesCount));
+        Assert.AreEqual(2, DocumentTextRules.Pages(beginning.Text).Count);
+        Assert.AreEqual((5, 5), (whole.PagesShown, whole.PagesCount));
     }
 
     [TestMethod]

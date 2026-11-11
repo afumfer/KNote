@@ -73,6 +73,53 @@ public class DocumentTextRulesTests
     }
 
     [TestMethod]
+    public void Cut_GivesWholePages_OrTheFirstOneCut()
+    {
+        var text = string.Join(DocumentTextRules.PageSeparator, "aaaa", "bbbb", "cccc");
+
+        Assert.AreEqual(("aaaa\fbbbb", 2, 3), DocumentTextRules.Cut(text, 10));
+        Assert.AreEqual(("aaaa\fbbbb", 2, 3), DocumentTextRules.Cut(text, 9));
+        Assert.AreEqual(("aa", 1, 3), DocumentTextRules.Cut(text, 2));
+        Assert.AreEqual((text, 3, 3), DocumentTextRules.Cut(text, 0));
+        Assert.AreEqual((text, 3, 3), DocumentTextRules.Cut(text, 1000));
+        Assert.AreEqual(("", 0, 0), DocumentTextRules.Cut(null!, 10));
+    }
+
+    [TestMethod]
+    public void Readable_HeadsThePages_AndMarksTheScannedOnes()
+    {
+        var text = DocumentTextRules.Compose(
+        [
+            new DocumentPageDto { Number = 1, Text = "First." },
+            new DocumentPageDto { Number = 2, Text = "", NeedsTranscription = true }
+        ], paged: true);
+
+        Assert.AreEqual($"── Page 1 ──\r\nFirst.\r\n\r\n── Page 2 ──\r\n[{DocumentTexts.ScannedPage}]", DocumentTexts.Readable(text, paged: true));
+        Assert.AreEqual("One\r\nletter.", DocumentTexts.Readable("One\nletter.", paged: false));
+    }
+
+    [TestMethod]
+    public void TheResultOfReading_SaysThePagesAndTheScannedOnes()
+    {
+        Assert.AreEqual("Read: 12 pages.", DocumentTexts.ReadResult(new DocumentReadDto { State = EnumExtractedState.Complete, Pages = 12 }));
+        Assert.AreEqual("Read.", DocumentTexts.ReadResult(new DocumentReadDto { State = EnumExtractedState.Complete, Pages = 1 }));
+        StringAssert.StartsWith(DocumentTexts.ReadResult(new DocumentReadDto { State = EnumExtractedState.Partial, Pages = 9, PagesToTranscribe = 3 }),
+            "Read: 9 pages, 3 of them scanned.");
+        StringAssert.Contains(DocumentTexts.ReadResult(new DocumentReadDto { State = EnumExtractedState.Unreadable }), "can't be read");
+        Assert.AreEqual("Showing pages 1–100 of 250.", DocumentTexts.Showing(100, 250));
+        Assert.IsNull(DocumentTexts.Showing(3, 3));
+    }
+
+    [TestMethod]
+    public void AResourceFile_IsUpTo200MB_AndNotEmpty()
+    {
+        Assert.AreEqual("200 MB", ResourceFileRules.MaxSizeText);
+        Assert.IsNull(ResourceFileRules.SizeError("a.pdf", KntConst.MaxLenNoteResourceFile));
+        StringAssert.Contains(ResourceFileRules.SizeError("a.pdf", KntConst.MaxLenNoteResourceFile + 1), "too big: 200 MB at most");
+        StringAssert.Contains(ResourceFileRules.SizeError("a.pdf", 0), "empty");
+    }
+
+    [TestMethod]
     public void ADocumentWithoutPages_IsOne()
     {
         var text = DocumentTextRules.Compose([new DocumentPageDto { Number = 1, Text = "One\r\ntext." }], paged: false);

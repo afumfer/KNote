@@ -129,7 +129,7 @@ public class BaseService
     }
 
     // Not valid (its data must not be used), with no notification.
-    private static Result<T> CancelledResult<T>()
+    protected static Result<T> CancelledResult<T>()
     {
         var res = new Result<T>();
         res.AddErrorMessage("The request was cancelled.");

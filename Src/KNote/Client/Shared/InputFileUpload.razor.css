@@ -29,6 +29,16 @@
     border-style: solid;
 }
 
+.knt-dropzone-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.knt-dropzone-error {
+    font-size: 0.875rem;
+    color: var(--rz-danger);
+}
+
 .knt-dropzone ::deep .knt-dropzone-input {
     position: absolute;
     inset: 0;

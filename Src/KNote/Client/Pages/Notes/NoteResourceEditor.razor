@@ -1,8 +1,13 @@
 @inject DialogService dialogService
+@inject IStore store
+@inject IJSRuntime js
 
-@* Dialog of a note's resource (NoteForm opens it framed). A new one: the file to upload, its description and order.
-   An existing one (Resource): its description and order (its file is shown, but it can't be changed). The result is
-   the resource (a new one with its content), or null if cancelled. *@
+@implements IDisposable
+
+@* Dialog of a note's resource (NoteForm opens it framed). A new one: the file, its description and order; «Add» sends the
+   file from the disk with its progress (KNote Atlas, stage 4, D6: up to 200 MB) and the dialog closes when it is saved;
+   Cancel stops it. An existing one (Resource): its description and order (its file is shown, but it can't be changed).
+   The result is the resource (a new one already saved), or null if cancelled. *@
 
 <KntDialogFrame Icon="@(IsNew ? "upload_file" : "edit_document")" Title="@(IsNew ? "Add resource" : "Edit resource")"
                 Subtitle="@(string.IsNullOrEmpty(NoteTopic) ? (IsNew ? "Upload a file to the note." : "A resource of the note.") : NoteTopic)">
@@ -10,7 +15,14 @@
         <RadzenStack Gap="1rem">
             @if (IsNew)
             {
-                <InputFileUpload OnSelectedFile="OnFileSelected" />
+                <InputFileUpload @ref="fileUpload" OnSelectedFile="OnFileSelected" Disabled="@uploading" />
+                @if (uploading)
+                {
+                    <div>
+                        <RadzenProgressBar Value="@UploadPercent" ShowValue="false" Style="height: 0.5rem" />
+                        <div class="knt-resource-upload-text">@UploadText</div>
+                    </div>
+                }
             }
             else
             {
@@ -34,12 +46,12 @@
             }
             <KntField Label="Description" Component="Description" Help="What the resource shows or says. Its first sentence is its title.">
                 <RadzenTextArea Name="Description" Value="@typedDescription" ValueChanged="@((string value) => OnDescriptionChanged(value))"
-                                Immediate="true" Rows="4" Style="width: 100%" Disabled="@(!fileChosen)" />
+                                Immediate="true" Rows="4" Style="width: 100%" Disabled="@(!fileChosen || uploading)" />
             </KntField>
             <RadzenRow Gap="1rem" AlignItems="AlignItems.Center">
                 <RadzenColumn Size="12" SizeSM="9">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                        <RadzenCheckBox Name="LockDescription" TValue="bool" Value="@resource.DescriptionByUser" Change="OnLockChanged" Disabled="@(!fileChosen)" />
+                        <RadzenCheckBox Name="LockDescription" TValue="bool" Value="@resource.DescriptionByUser" Change="OnLockChanged" Disabled="@(!fileChosen || uploading)" />
                         <RadzenLabel Text="Lock description (AI won't change it)" Component="LockDescription" />
                     </RadzenStack>
                     @if (!string.IsNullOrEmpty(Author))
@@ -49,7 +61,7 @@
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeSM="3">
                     <KntField Label="Order" Component="Order" Help="Position in the list.">
-                        <RadzenNumeric Name="Order" @bind-Value="@resource.Order" Disabled="@(!fileChosen)" />
+                        <RadzenNumeric Name="Order" @bind-Value="@resource.Order" Disabled="@(!fileChosen || uploading)" />
                     </KntField>
                 </RadzenColumn>
             </RadzenRow>
@@ -58,7 +70,7 @@
     <Footer>
         <RadzenButton Text="Cancel" Click="() => OnCancel()" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
         <RadzenButton Text="@(IsNew ? "Add" : "Save")" Icon="@(IsNew ? "upload" : "save")" Click="() => OnConfirm()"
-                      ButtonStyle="ButtonStyle.Primary" Disabled="@(!fileChosen)" />
+                      ButtonStyle="ButtonStyle.Primary" Disabled="@(!fileChosen)" IsBusy="@uploading" BusyText="Uploading…" />
     </Footer>
 </KntDialogFrame>
 
@@ -69,8 +81,24 @@
     // The resource to edit; none for a new one.
     [Parameter] public ResourceInfoDto? Resource { get; set; }
 
+    // The note of a new one (it is saved by the dialog, with its file).
+    [Parameter] public Guid NoteId { get; set; }
+
     private ResourceInfoDto resource = new ResourceInfoDto();
     private bool fileChosen;
+
+    private InputFileUpload fileUpload = null!;
+    private readonly KntSingleFlight adding = new();
+    private CancellationTokenSource? uploadCancel;
+    private bool uploading;
+    private long sent;
+    private long total;
+    private bool closed;
+
+    private double UploadPercent => total > 0 ? sent * 100d / total : 0;
+    private string UploadText => sent >= total && total > 0
+        ? "Saving…"
+        : $"Uploading {KntFileTypes.Size(sent)} of {KntFileTypes.Size(total)}…";
 
     // The lock (ResourceDescriptionRules, D12): checked by itself while a person writes a text of their own, until the
     // person touches the checkbox; what is saved is what it says.
@@ -99,9 +127,14 @@
         }
     }
 
-    private void OnFileSelected(KntFileInfo file)
+    private void OnFileSelected(KntFileInfo? file)
     {
-        resource.ContentBase64 = file.ContentBase64;
+        if (file == null)
+        {
+            fileChosen = false;
+            return;
+        }
+
         resource.Name = file.Name;
         resource.FileType = file.Type;
         if (!resource.DescriptionByUser)
@@ -110,6 +143,7 @@
             resource.LoadedDescription = file.Name;
             typedDescription = file.Name;
         }
+        total = file.Size;
         fileChosen = true;
     }
 
@@ -127,14 +161,55 @@
         resource.DescriptionByUser = value;
     }
 
-    private void OnConfirm()
+    private Task OnConfirm() => adding.RunAsync(ConfirmAsync);
+
+    private async Task ConfirmAsync()
     {
-        if (fileChosen)
-            dialogService.Close(resource);
+        if (!fileChosen)
+            return;
+        if (!IsNew)
+        {
+            Close(resource);
+            return;
+        }
+
+        uploadCancel = new CancellationTokenSource();
+        uploading = true;
+        sent = 0;
+        var progress = new Progress<(long Sent, long Total)>(p =>
+        {
+            (sent, total) = p;
+            StateHasChanged();
+        });
+
+        resource.NoteId = NoteId;
+        var result = await store.Notes.UploadResourceAsync(js, fileUpload.Input, resource, progress, uploadCancel.Token);
+        uploading = false;
+        if (result.IsValid)
+            Close(result.Entity);
+        else if (!closed)
+            StateHasChanged();
     }
 
     private void OnCancel()
     {
-        dialogService.Close(null);
+        uploadCancel?.Cancel();
+        Close(null);
+    }
+
+    // Once: a late Close (after the upload, if the dialog was closed with Esc) would close another dialog.
+    private void Close(ResourceInfoDto? result)
+    {
+        if (closed)
+            return;
+        closed = true;
+        dialogService.Close(result);
+    }
+
+    public void Dispose()
+    {
+        closed = true;
+        uploadCancel?.Cancel();
+        uploadCancel?.Dispose();
     }
 }

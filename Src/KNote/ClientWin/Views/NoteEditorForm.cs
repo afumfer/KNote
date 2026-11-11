@@ -890,13 +890,35 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             return;
         }
 
-        var selected = _selectedResource;
+        var selected = SelectedResourceNow();
         var menu = new ContextMenuStrip();
         menu.Items.Add("Describe the photos of the note...", null, async (s, a) => await DescribePhotosAsync(null));
         var single = menu.Items.Add("Describe the selected photo...", null, async (s, a) => await DescribePhotosAsync(selected));
         single.Enabled = selected != null && AiPhotoRules.CanDescribe(selected);
+        // KNote Atlas, stage 4 (4.4b): the text KNote read of a document, and «Read document» there.
+        menu.Items.Add(new ToolStripSeparator());
+        var documentText = menu.Items.Add("Text of the selected document...", null, (s, a) => ShowDocumentText(selected));
+        documentText.Enabled = selected != null && DocumentTextRules.IsDocument(selected);
         menu.Closed += (s, a) => BeginInvoke(menu.Dispose);
         menu.Show(buttonDescribePhotos, new Point(0, buttonDescribePhotos.Height));
+    }
+
+    // The resource selected, as the note has it now: saving the note replaces its resources by the saved ones, and the one
+    // selected before would still be new or changed (the AI and «Read document» asked to save it again).
+    private ResourceDto SelectedResourceNow() =>
+        _selectedResource == null ? null
+            : _ctrl.Model.Resources.FirstOrDefault(r => r.ResourceId == _selectedResource.ResourceId) ?? _selectedResource;
+
+    // Its text is the one of the repository: a document new or with changes here has to be saved first.
+    private void ShowDocumentText(ResourceDto document)
+    {
+        if (!NoteEditorCtrl.CanReadNow(document))
+        {
+            ShowInfo("Save the note first: the document is new or has changes not saved.");
+            return;
+        }
+        using var form = new DocumentTextForm(_ctrl, document);
+        form.ShowDialog(this);
     }
 
     // single: one photo («Describe the selected photo»); null: the photos of the note, as AiPhotoRules.PlanForNote says.

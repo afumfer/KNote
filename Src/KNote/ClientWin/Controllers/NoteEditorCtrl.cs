@@ -764,6 +764,13 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
             var fileName = Service.ReplaceSpecialCharacters(Path.GetFileName(filePath));
 
+            // KNote Atlas, stage 4 (D6): the same limit as the Web.
+            if (ResourceFileRules.SizeError(Path.GetFileName(filePath), new FileInfo(filePath).Length) is string sizeError)
+            {
+                View.ShowInfo(sizeError, KntConst.AppName);
+                return null;
+            }
+
             var newResource = new ResourceDto();
             newResource.SetIsNew(true);
             newResource.ResourceId = Guid.NewGuid();
@@ -871,6 +878,22 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         }
         return (described, errors);
     }
+
+    #endregion
+
+    #region The text of the documents (KNote Atlas, stage 4, 4.4b)
+
+    // A document already saved and without changes of this editor: its text is the one of the repository.
+    public static bool CanReadNow(ResourceDto resource) =>
+        resource != null && DocumentTextRules.IsDocument(resource) && !resource.IsNew() && !resource.IsDirty();
+
+    // Its whole text (ClientWin shows it all; the Web, its beginning).
+    public Task<Result<ResourceTextDto>> GetDocumentTextAsync(ResourceDto resource) =>
+        Service.ResourceContent.GetDocumentTextAsync(resource.ResourceId);
+
+    // Reads it and keeps its text (also when it was read: the reader may read it better now). Staff (the command checks it).
+    public Task<Result<DocumentReadDto>> ReadDocumentAsync(ResourceDto resource) =>
+        Service.ResourceContent.ReadDocumentAsync(resource.ResourceId);
 
     #endregion
 

@@ -40,5 +40,5 @@ public interface IKntResourceContentService
     Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId);
 
     /// <summary>The text read of a document (DocumentTextRules' format). Guest.</summary>
-    Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId);
+    Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, int maxLength = 0);
 }

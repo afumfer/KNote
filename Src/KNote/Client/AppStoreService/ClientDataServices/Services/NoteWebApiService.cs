@@ -1,4 +1,9 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
+using System.Text;
+using KNote.Client.Helpers;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using KNote.Client.AppStoreService.ClientDataServices.Base;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -63,6 +68,79 @@ public class NoteWebApiService : BaseService, INoteWebApiService
     public Task<Result<ResourceDescriberDto>> GetPhotoDescriberAsync(CancellationToken cancellationToken = default) =>
         SendAsync<ResourceDescriberDto>(ct => _httpClient.GetAsync("api/resources/describer", ct),
             "Describe photos", cancellationToken: cancellationToken);
+
+    public async Task<Result<ResourceInfoDto>> UploadResourceAsync(IJSRuntime js, ElementReference input, ResourceInfoDto resource,
+        IProgress<(long Sent, long Total)>? progress = null, CancellationToken cancellationToken = default)
+    {
+        const string action = "Upload resource";
+        var module = await js.ImportModuleAsync("./js/kntUpload.js", _appState);
+        if (module == null)
+        {
+            var notLoaded = new Result<ResourceInfoDto>();
+            notLoaded.AddErrorMessage("The upload could not start: part of the page could not be loaded.");
+            return notLoaded;
+        }
+
+        await using (module)
+        {
+            using var reporter = DotNetObjectReference.Create(new UploadProgress(progress));
+            var url = new Uri(_httpClient.BaseAddress!, $"api/notes/{resource.NoteId}/resources/upload").ToString();
+            var fields = new Dictionary<string, string?>
+            {
+                ["description"] = resource.Description,
+                ["loadedDescription"] = resource.LoadedDescription,
+                ["descriptionByUser"] = resource.DescriptionByUser ? "true" : "false",
+                ["order"] = resource.Order.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            };
+
+            UploadAnswer answer;
+            using (cancellationToken.Register(() => _ = module.InvokeVoidAsync("cancel").AsTask()))
+                answer = await module.InvokeAsync<UploadAnswer>("upload", input, url,
+                    _httpClient.DefaultRequestHeaders.Authorization?.Parameter, fields, reporter);
+
+            if (answer.Canceled || cancellationToken.IsCancellationRequested)
+                return CancelledResult<ResourceInfoDto>();
+            if (answer.Status == 0)
+            {
+                var res = new Result<ResourceInfoDto>();
+                res.AddErrorMessage($"Error. {answer.Error ?? "The web server could not be reached."}");
+                _appState.NotifyError(action, res.ErrorMessage);
+                return res;
+            }
+            if (answer.Status == (int)HttpStatusCode.RequestEntityTooLarge)
+            {
+                // Refused by the web server before KNote (IIS without the limit of its web.config, a proxy).
+                var res = new Result<ResourceInfoDto>();
+                res.AddErrorMessage($"The web server refused the file for its size (KNote admits {ResourceFileRules.MaxSizeText}).");
+                _appState.NotifyError(action, res.ErrorMessage);
+                return res;
+            }
+
+            using var response = new HttpResponseMessage((HttpStatusCode)answer.Status)
+            {
+                Content = new StringContent(answer.Body ?? "", Encoding.UTF8, "application/json")
+            };
+            return await ProcessResultFromHttpResponse<ResourceInfoDto>(response, action);
+        }
+    }
+
+    public Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
+        SendAsync<DocumentReadDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/read", null, ct),
+            DocumentTexts.ReadDocument, cancellationToken: cancellationToken);
+
+    public Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceTextDto>(ct => _httpClient.GetAsync($"api/resources/{resourceId}/text?maxLength={DocumentTextRules.MaxViewerLength}", ct),
+            "Text of the document", cancellationToken: cancellationToken);
+
+    // What js/kntUpload.js answers.
+    private sealed record UploadAnswer(int Status, string? Body, string? Error, bool Canceled);
+
+    // The progress of an upload, from js/kntUpload.js.
+    private sealed class UploadProgress(IProgress<(long Sent, long Total)>? progress)
+    {
+        [JSInvokable]
+        public void OnUploadProgress(long sent, long total) => progress?.Report((sent, total));
+    }
 
     // Its errors are not notified one by one: «Describe photos» gives a summary at the end.
     public Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default) =>

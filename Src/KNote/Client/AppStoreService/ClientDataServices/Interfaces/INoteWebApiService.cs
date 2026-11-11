@@ -1,5 +1,7 @@
 ﻿using KNote.Model;
 using KNote.Model.Dto;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace KNote.Client.AppStoreService.ClientDataServices;
 
@@ -22,6 +24,17 @@ public interface INoteWebApiService
     // KNote Atlas, stage 4: the model that describes photos, and describing one (replace: also a person's description).
     Task<Result<ResourceDescriberDto>> GetPhotoDescriberAsync(CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// A new resource of a note (resource: its NoteId, description, lock and order) with the file chosen in an InputFile,
+    /// sent by the browser from the disk (js/kntUpload.js; KNote Atlas, stage 4, D6), with its progress (sent, total bytes).
+    /// Canceling stops the upload: nothing is saved.
+    /// </summary>
+    Task<Result<ResourceInfoDto>> UploadResourceAsync(IJSRuntime js, ElementReference input, ResourceInfoDto resource,
+        IProgress<(long Sent, long Total)>? progress = null, CancellationToken cancellationToken = default);
+    Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId, CancellationToken cancellationToken = default);
+    // Its beginning: what the Web shows (DocumentTextRules.MaxViewerLength).
+    Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, CancellationToken cancellationToken = default);
     // «Process pending resources» of the session's repository (Admin to run): what it would process, and its run.
     Task<Result<ResourceProcessingStatusDto>> GetResourceProcessingStatusAsync(CancellationToken cancellationToken = default);
     Task<Result<ResourceProcessingProgressDto>> ProcessResourcesAsync(ResourceProcessingOptionsDto options);

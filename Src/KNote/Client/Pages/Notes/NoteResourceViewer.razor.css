@@ -71,3 +71,67 @@
     align-items: center;
     justify-content: center;
 }
+
+/* A document: «File» (the browser's viewer) or «Text» (what KNote read of it, by pages; KNote Atlas, stage 4, 4.4b). */
+.knt-resource-viewer ::deep .knt-resource-viewer-mode {
+    align-self: flex-start;
+    flex: none;
+    margin-bottom: 0.75rem;
+}
+
+.knt-document-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.knt-document-text-state {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-document-text-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 0.75rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    border-radius: var(--rz-border-radius);
+    background-color: var(--rz-base-background-color);
+}
+
+.knt-document-text-page + .knt-document-text-page {
+    margin-top: 1.25rem;
+}
+
+.knt-document-text-page-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-document-text-scanned {
+    font-weight: normal;
+    color: var(--rz-warning-dark);
+}
+
+.knt-document-text-page-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--rz-text-color);
+}

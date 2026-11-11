@@ -17,6 +17,9 @@ public static class KntConst
     public static string License { get; private set; }
     public static string TagForMerging { get; private set; } = "[@NoteMerging]";    
     public static int MaxLenResourceFile { get; private set; } = 5120000;
+    // The files of the notes' resources (KNote Atlas, stage 4, D6: 200 MB in both apps, also kept in the database); the
+    // attachments of the assistant and the images of the chat room keep MaxLenResourceFile.
+    public static long MaxLenNoteResourceFile { get; private set; } = 200L * 1024 * 1024;
     public static string VirtualHostNameToFolderMapping = @"https://knote.resources";
     public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; private set; }
     public static Dictionary<EnumAlarmType, string> AlarmType { get; private set; }   
