@@ -238,6 +238,48 @@ public class CrudRoundTripParityTests
         Assert.AreEqual("A person's text.", (await GetAsync(changed)).Description);
     }
 
+    // The text read of a document (KNote Atlas, 4.4a, D2): what one ORM writes the other reads, only while the resource has
+    // that file; saving the resource (as a note with its resources does) keeps it, and forgetting it leaves it unread.
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
+    public async Task TheTextOfADocument_IsKeptApart_AndSavingTheResourceKeepsIt(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+
+        var folderRes = await writer.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Documents" });
+        var noteId = Guid.NewGuid();
+        Assert.IsTrue((await writer.Notes.AddAsync(new NoteDto { NoteId = noteId, Topic = "A manual", FolderId = folderRes.Entity.FolderId,
+            CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now })).IsValid);
+        var resource = new ResourceDto { ResourceId = Guid.NewGuid(), NoteId = noteId, Name = $"{Guid.NewGuid()}_manual.pdf", Container = "R",
+            Description = "manual.pdf", FileType = "application/pdf" };
+        Assert.IsTrue((await writer.Notes.AddResourceAsync(resource)).IsValid);
+        var text = "Page one\f\u0001OCR of page two";
+
+        Assert.IsFalse((await writer.Notes.SaveResourceTextAsync(resource.ResourceId, text, EnumExtractedState.Partial, "another.pdf")).Entity,
+            "its file was replaced meanwhile");
+        Assert.AreEqual(EnumExtractedState.NotRead, (await reader.Notes.GetResourceTextAsync(resource.ResourceId)).Entity.State);
+        Assert.IsTrue((await writer.Notes.SaveResourceTextAsync(resource.ResourceId, text, EnumExtractedState.Partial, resource.Name)).Entity);
+
+        var read = (await reader.Notes.GetResourceTextAsync(resource.ResourceId)).Entity;
+        Assert.AreEqual((resource.ResourceId, noteId, "application/pdf", EnumExtractedState.Partial, text),
+            (read.ResourceId, read.NoteId, read.FileType, read.State, read.Text));
+        Assert.AreEqual(text, (await reader.Notes.GetResourceTextsAsync(noteId)).Entity.Single().Text);
+
+        // Saving the resource with the other ORM, as saving its note does: the text stays.
+        var stored = (await reader.Notes.GetResourceAsync(resource.ResourceId)).Entity;
+        stored.Description = "The manual of the QL.";
+        Assert.IsTrue((await reader.Notes.UpdateResourceAsync(stored)).IsValid);
+        Assert.AreEqual(text, (await writer.Notes.GetResourceTextAsync(resource.ResourceId)).Entity.Text);
+
+        Assert.IsTrue((await writer.Notes.ClearResourceTextAsync(resource.ResourceId)).IsValid);
+        var cleared = (await reader.Notes.GetResourceTextAsync(resource.ResourceId)).Entity;
+        Assert.AreEqual((EnumExtractedState.NotRead, (string?)null), (cleared.State, cleared.Text));
+        Assert.IsNull((await reader.Notes.GetResourceTextAsync(Guid.NewGuid())).Entity);
+    }
+
     // «Process pending resources» (KNote Atlas, 4.3): the resources the AI could describe, without their content nor the ones of
     // the excluded note types, and locking a description only if it is still the same, not locked and not the AI's.
     [TestMethod]

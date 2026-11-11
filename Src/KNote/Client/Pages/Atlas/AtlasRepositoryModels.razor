@@ -97,6 +97,9 @@
     {
         loadFailed = false;
         var resModels = await store.SemanticSearch.GetModelsAsync(disposal.Token);
+        // Closed meanwhile (another tab chosen): its token is not there any more.
+        if (disposal.IsCancellationRequested)
+            return;
         var resInstallation = await store.SemanticSearch.GetInstallationModelsAsync(disposal.Token);
         if (disposal.IsCancellationRequested)
             return;

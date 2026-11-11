@@ -37,6 +37,9 @@ public class Store
     // service in AddServiceRef (IKntService.EmbeddingGenerators).
     public IKntEmbeddingGenerators EmbeddingGenerators { get; }
 
+    // The reader of the documents (KNote Atlas, stage 4), given to each repository's service as EmbeddingGenerators.
+    public IKntDocumentReader DocumentReader { get; } = new AiDocumentReader();
+
     public AppUserState State { get; protected set; }
 
     // The user of this session: the Windows account, or the KNote user name typed in the sign-in dialog
@@ -199,6 +202,7 @@ public class Store
             throw new ArgumentNullException(nameof(serviceRef));
 
         serviceRef.Service.EmbeddingGenerators = EmbeddingGenerators;
+        serviceRef.Service.DocumentReader = DocumentReader;
         serviceRef.Service.CommandExecuting += ServiceRef_CommandExecuting;
         serviceRef.Service.CommandExecuted += ServiceRef_CommandExecuted;
 

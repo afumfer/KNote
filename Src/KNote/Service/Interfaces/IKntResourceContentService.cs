@@ -32,4 +32,13 @@ public interface IKntResourceContentService
 
     /// <summary>Keeps the pace of a run that ended, for the estimates. Admin.</summary>
     Task<Result> SaveProcessingRunAsync(ResourceProcessingRunDto run);
+
+    /// <summary>
+    /// Reads a document of a note now and keeps its text (D2), also in a repository without a semantic index (D10, D18): its
+    /// file must be in this installation. Marks its note for the index. Staff (who edits the resources).
+    /// </summary>
+    Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId);
+
+    /// <summary>The text read of a document (DocumentTextRules' format). Guest.</summary>
+    Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId);
 }

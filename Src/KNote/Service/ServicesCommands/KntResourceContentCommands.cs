@@ -213,6 +213,86 @@ public class KntResourceContentSaveProcessingRunAsyncCommand : KntCommandService
     }
 }
 
+[KntAuthorize(EnumRoles.Staff)]
+public class KntResourceContentReadDocumentAsyncCommand : KntCommandServiceBase<Guid, Result<DocumentReadDto>>
+{
+    public KntResourceContentReadDocumentAsyncCommand(IKntService service, Guid resourceId) : base(service, resourceId)
+    {
+
+    }
+
+    public override async Task<Result<DocumentReadDto>> Execute()
+    {
+        var result = new Result<DocumentReadDto>();
+
+        var (resource, note) = await KntResourceContent.GetDescribableAsync(Service, Param, result);
+        if (!result.IsValid)
+            return result;
+        if (!DocumentTextRules.IsDocument(resource))
+        {
+            result.AddErrorMessage("It is not a document KNote reads (PDF, DOCX, ODT, TXT or MD).");
+            return result;
+        }
+
+        var (outcome, read) = await KntDocuments.ReadAndSaveAsync(Service, Param);
+        switch (outcome)
+        {
+            case EnumDocumentReadOutcome.NoReader:
+                result.AddErrorMessage("This installation can't read documents.");
+                return result;
+            case EnumDocumentReadOutcome.NotAvailable:
+                result.AddErrorMessage("The file of the document is not available in this installation.");
+                return result;
+            case EnumDocumentReadOutcome.Changed:
+                result.AddErrorMessage("Its file was replaced while it was being read: read it again.");
+                return result;
+            case EnumDocumentReadOutcome.NotADocument:
+                result.AddErrorMessage("It is not a document KNote reads (PDF, DOCX, ODT, TXT or MD).");
+                return result;
+        }
+
+        // Its fragments of the semantic index change; the note itself doesn't (nor its date).
+        await KntSemanticIndexer.MarkStaleAsync(Service, note.NoteId);
+
+        var pages = DocumentTextRules.Pages(read.Text);
+        result.Entity = new DocumentReadDto
+        {
+            ResourceId = Param,
+            State = read.State,
+            Pages = pages.Count,
+            PagesToTranscribe = pages.Count(p => p.NeedsTranscription)
+        };
+        return result;
+    }
+}
+
+[KntAuthorize(EnumRoles.Guest)]
+public class KntResourceContentGetDocumentTextAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceTextDto>>
+{
+    public KntResourceContentGetDocumentTextAsyncCommand(IKntService service, Guid resourceId) : base(service, resourceId)
+    {
+
+    }
+
+    public override async Task<Result<ResourceTextDto>> Execute()
+    {
+        var result = new Result<ResourceTextDto>();
+
+        await KntResourceContent.GetDescribableAsync(Service, Param, result);
+        if (!result.IsValid)
+            return result;
+
+        var text = await Repository.Notes.GetResourceTextAsync(Param);
+        if (!text.IsValid)
+        {
+            result.AddListErrorMessage(text.ListErrorMessage);
+            return result;
+        }
+        result.Entity = text.Entity;
+        return result;
+    }
+}
+
 // What both commands check: the resource exists and is not of one of KNote's own notes (sessions, chat room...).
 internal static class KntResourceContent
 {

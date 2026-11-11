@@ -19,6 +19,8 @@ public class NoteChunkSource
     public string Description { get; set; }
     public List<NoteChunkTask> Tasks { get; set; } = new();
     public List<NoteChunkResource> Resources { get; set; } = new();
+    // The text read of its documents (KNote Atlas, stage 4): the indexer adds it, it is not in the note.
+    public List<NoteChunkDocument> Documents { get; set; } = new();
 
     public static NoteChunkSource From(NoteExtendedDto note, string folderPath, string description) =>
         From(note, note.Tasks, note.Resources, folderPath, description);
@@ -52,3 +54,6 @@ public record NoteChunkTask(Guid TaskId, string Topic, string Description, bool 
 
 // Name: the file name without the note's prefix (ResourceInfoDto.NameOut).
 public record NoteChunkResource(Guid ResourceId, string Name, string FileType, string Description);
+
+// Text: Resources.ExtractedText (DocumentTextRules' format); Paged: its fragments have the number of their page.
+public record NoteChunkDocument(Guid ResourceId, string Name, bool Paged, string Text);

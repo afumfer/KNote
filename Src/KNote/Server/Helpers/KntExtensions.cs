@@ -38,6 +38,7 @@ public static class KntExtensions
             var httpContext = provider.GetRequiredService<IHttpContextAccessor>().HttpContext;
             var service = repositories.CreateService(repositories.ForUser(httpContext?.User), null, httpContext?.Request);
             service.EmbeddingGenerators = provider.GetService<IKntEmbeddingGenerators>();
+            service.DocumentReader = provider.GetService<IKntDocumentReader>();
             return service;
         });
 
@@ -62,6 +63,8 @@ public static class KntExtensions
             var catalog = provider.GetRequiredService<AiProvidersCatalog>();
             return new AiEmbeddingGenerators(() => catalog.EmbeddingProviders);
         });
+        // The reader of the documents (KNote Atlas, stage 4): no AI nor configuration, one for the Server.
+        services.AddSingleton<IKntDocumentReader, AiDocumentReader>();
 
         return services;
     }

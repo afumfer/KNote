@@ -35,6 +35,14 @@ public interface IKntNoteRepository : IDisposable
     // KNote Atlas, stage 4 (D10): the resources the AI could describe, without their content: not locked, not described by
     // the AI, of notes whose type is not one of these (KNote's own notes). Ordered by note and resource.
     Task<Result<List<ResourceInfoDto>>> GetResourcesToDescribeAsync(List<Guid> excludedNoteTypeIds = null);
+    // KNote Atlas, stage 4 (D2): the text read of the documents (Resources.ExtractedText and ExtractedState), which no other
+    // query of the resources reads. Of one resource (null: it doesn't exist), and of the resources of a note.
+    Task<Result<ResourceTextDto>> GetResourceTextAsync(Guid resourceId);
+    Task<Result<List<ResourceTextDto>>> GetResourceTextsAsync(Guid noteId);
+    // Writes it only if the resource still has that file (expectedName). Entity: whether it was written. The note is not touched.
+    Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName);
+    // Its file was replaced: what was read of it is forgotten.
+    Task<Result> ClearResourceTextAsync(Guid resourceId);
     Task<Result> DeleteResourceAsync(Guid resourceId);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
     // The tasks panel (TaskPanelRules in SQL; never the tasks of the query's ExcludeNoteTypeIds): how many tasks each

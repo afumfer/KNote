@@ -46,7 +46,8 @@ public static class SemanticIndexTexts
         EnumSemanticIndexPhase.Preparing => "Preparing…",
         EnumSemanticIndexPhase.Indexing => $"{(progress.Rebuild ? "Rebuilding" : "Indexing")}: {progress.NotesDone} of {progress.NotesTotal} notes"
             + (progress.RemainingSeconds is double left && left > 0 ? $" · about {Duration(left)} left" : ""),
-        EnumSemanticIndexPhase.Completed => $"Done: {progress.NotesDone} notes in {Duration(progress.ElapsedSeconds)}.",
+        EnumSemanticIndexPhase.Completed => $"Done: {progress.NotesDone} notes in {Duration(progress.ElapsedSeconds)}"
+            + (progress.DocumentsNotAvailable > 0 ? $" · {progress.DocumentsNotAvailable} documents not available here" : "") + ".",
         EnumSemanticIndexPhase.Canceled => $"Canceled after {progress.NotesDone} notes: what is done is kept.",
         _ => $"Failed: {progress.Message}"
     };

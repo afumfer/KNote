@@ -13,7 +13,7 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
     // The ids of an IN list per query (SQL Server allows 2100 parameters).
     private const int IdsPerQuery = 500;
 
-    private const string ChunkColumns = @"NoteChunkId, NoteId, SourceType, SourceId, ChunkIndex, Content, ContentHash,
+    private const string ChunkColumns = @"NoteChunkId, NoteId, SourceType, SourceId, ChunkIndex, Page, Content, ContentHash,
         SourceHash, Stale, Model, Dimensions, IndexedDateTime";
 
     // A note (n) the index of @Model has to calculate: without rows, with rows marked as Stale or modified after them.
@@ -72,9 +72,9 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
                 await db.ExecuteAsync("DELETE FROM NoteChunks WHERE NoteId = @NoteId AND Model = @Model",
                     new { NoteId = noteId, Model = model }, transaction);
 
-                var sql = @"INSERT INTO NoteChunks (NoteChunkId, NoteId, SourceType, SourceId, ChunkIndex, Content,
+                var sql = @"INSERT INTO NoteChunks (NoteChunkId, NoteId, SourceType, SourceId, ChunkIndex, Page, Content,
                         ContentHash, SourceHash, Stale, Model, Dimensions, Vector, IndexedDateTime)
-                    VALUES (@NoteChunkId, @NoteId, @SourceType, @SourceId, @ChunkIndex, @Content,
+                    VALUES (@NoteChunkId, @NoteId, @SourceType, @SourceId, @ChunkIndex, @Page, @Content,
                         @ContentHash, @SourceHash, @Stale, @Model, @Dimensions, @Vector, @IndexedDateTime)";
                 await db.ExecuteAsync(sql, chunks.Select(c => new
                 {
@@ -83,6 +83,7 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
                     SourceType = (int)c.SourceType,
                     c.SourceId,
                     c.ChunkIndex,
+                    c.Page,
                     c.Content,
                     c.ContentHash,
                     c.SourceHash,
@@ -322,6 +323,7 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
         public int SourceType { get; set; }
         public Guid SourceId { get; set; }
         public int ChunkIndex { get; set; }
+        public int? Page { get; set; }
         public string Content { get; set; }
         public string ContentHash { get; set; }
         public string SourceHash { get; set; }
@@ -338,6 +340,7 @@ public class KntSemanticIndexRepository : KntRepositoryDapperBase, IKntSemanticI
             SourceType = (NoteChunkSourceType)SourceType,
             SourceId = SourceId,
             ChunkIndex = ChunkIndex,
+            Page = Page,
             Content = Content,
             ContentHash = ContentHash,
             SourceHash = SourceHash,

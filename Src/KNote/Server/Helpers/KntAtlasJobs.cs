@@ -56,13 +56,16 @@ public class KntAtlasJobs : BackgroundService
     private readonly ILogger<KntAtlasJobs> _logger;
 
     public KntAtlasJobs(KntRepositories repositories, IAiChatClientProvider chatClients, ILogger<KntAtlasJobs> logger,
-        IKntEmbeddingGenerators generators = null)
+        IKntEmbeddingGenerators generators = null, IKntDocumentReader documentReader = null)
     {
         _logger = logger;
+        _documentReader = documentReader;
         _indexRunner = (job, progress, cancellationToken) => RunIndexWithServiceAsync(repositories, generators, job, progress, cancellationToken);
         _resourcesRunner = (job, progress, cancellationToken) =>
             RunResourcesWithServiceAsync(repositories, generators, chatClients, job, progress, cancellationToken);
     }
+
+    private readonly IKntDocumentReader _documentReader;
 
     public KntAtlasJobs(IndexRunner indexRunner, ResourcesRunner resourcesRunner, ILogger<KntAtlasJobs> logger)
     {
@@ -255,6 +258,7 @@ public class KntAtlasJobs : BackgroundService
 
         using var service = repositories.CreateService(repository, job.UserName, null);
         service.EmbeddingGenerators = generators;
+        service.DocumentReader = _documentReader;
         service.Logger = _logger;
         return await service.SemanticSearch.RunIndexAsync(new SemanticIndexRunRequest
         {
@@ -274,6 +278,7 @@ public class KntAtlasJobs : BackgroundService
 
         using var service = repositories.CreateService(repository, job.UserName, null);
         service.EmbeddingGenerators = generators;
+        service.DocumentReader = _documentReader;
         service.Logger = _logger;
         // The roles of the commands apply, as in a request of the assistant.
         service.EnforceAuthorization = true;

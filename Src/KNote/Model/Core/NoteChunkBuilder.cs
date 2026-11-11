@@ -19,6 +19,8 @@ public class NoteChunkDraft
     public NoteChunkSourceType SourceType { get; init; }
     public Guid SourceId { get; init; }
     public int ChunkIndex { get; init; }
+    // The page of a fragment of a document (ResourceText) with pages.
+    public int? Page { get; init; }
     public string Heading { get; init; }
     public string Content { get; init; }
     public string ContentHash { get; init; }
@@ -45,6 +47,9 @@ public class NoteChunkSet
 /// <item>Task (one per task): "Task:", "Status: pending | resolved" and its clean description.</item>
 /// <item>Resource (one per resource with a description of its own, HasOwnDescription): "Resource:", "Type:" and its
 /// description.</item>
+/// <item>ResourceText (KNote Atlas, stage 4, D8): the text read of each document, by pages: a page of less than
+/// MinSectionLength characters joins the next one while they fit in MaxChunkLength, a longer one is cut as the text. The
+/// heading is the topic, the file and «p. N» (the page where the fragment starts), and the fragment keeps its page.</item>
 /// </list>
 /// Every fragment is cut to MaxChunkLength as the text is. SourceId is the task or the resource, Guid.Empty for the note's
 /// own fragments. The heading of context is the topic and the path of headings, joined by HeadingSeparator, in the
@@ -53,7 +58,8 @@ public class NoteChunkSet
 public static class NoteChunkBuilder
 {
     // Changing what the fragments are made of changes the SourceHash of every note: raise it with the rules.
-    public const int RulesVersion = 1;
+    // 2: the documents' text (KNote Atlas, stage 4).
+    public const int RulesVersion = 2;
     public const int MaxChunkLength = 1500;
     public const int MinSectionLength = 300;
     public const int MaxResourceNames = 20;
@@ -79,6 +85,17 @@ public static class NoteChunkBuilder
         foreach (var resource in (source.Resources ?? new()).Where(HasOwnDescription))
             Add(chunks, NoteChunkSourceType.Resource, resource.ResourceId, topic, Split(ResourceContent(resource)));
 
+        foreach (var document in source.Documents ?? new())
+        {
+            var pieces = DocumentPieces(document).ToList();
+            for (var i = 0; i < pieces.Count; i++)
+            {
+                var heading = string.Join(HeadingSeparator, new[] { topic, OneLine(document.Name),
+                    pieces[i].Page is int page ? $"p. {page}" : "" }.Where(t => t.Length > 0));
+                chunks.Add(NewChunk(NoteChunkSourceType.ResourceText, document.ResourceId, i, heading, pieces[i].Content, pieces[i].Page));
+            }
+        }
+
         return new NoteChunkSet { SourceHash = SourceHashOf(source), Chunks = chunks };
     }
 
@@ -102,11 +119,13 @@ public static class NoteChunkBuilder
 
     #region Private methods
 
-    private static NoteChunkDraft NewChunk(NoteChunkSourceType sourceType, Guid sourceId, int index, string heading, string content) => new()
+    private static NoteChunkDraft NewChunk(NoteChunkSourceType sourceType, Guid sourceId, int index, string heading, string content,
+        int? page = null) => new()
     {
         SourceType = sourceType,
         SourceId = sourceId,
         ChunkIndex = index,
+        Page = page,
         Heading = heading,
         Content = content,
         ContentHash = Hash(TextForEmbedding(heading, content))
@@ -162,6 +181,35 @@ public static class NoteChunkBuilder
     }
 
     private static string OneLine(string value) => Spaces.Replace(value ?? "", " ").Trim();
+
+    // The text of a document by pages, the small ones joined to the next, the long ones cut. Without pages, one; the pages
+    // without text (a scanned one not transcribed yet, without an OCR layer) are left out.
+    private static IEnumerable<(int? Page, string Content)> DocumentPieces(NoteChunkDocument document)
+    {
+        var pages = DocumentTextRules.Pages(document.Text)
+            .Select(p => (Page: document.Paged ? p.Number : (int?)null, Text: p.Text.Trim()))
+            .Where(p => p.Text.Length > 0)
+            .ToList();
+
+        var merged = new List<(int? Page, string Text)>();
+        foreach (var page in pages)
+        {
+            if (merged.Count > 0)
+            {
+                var last = merged[^1];
+                if (last.Text.Length < MinSectionLength && last.Text.Length + page.Text.Length + 2 <= MaxChunkLength)
+                {
+                    merged[^1] = (last.Page, last.Text + "\n\n" + page.Text);
+                    continue;
+                }
+            }
+            merged.Add(page);
+        }
+
+        foreach (var page in merged)
+            foreach (var piece in Split(page.Text))
+                yield return (page.Page, piece);
+    }
 
     // The clean description by sections, the small ones joined to the next, the long ones cut.
     private static IEnumerable<(string Heading, string Content)> TextPieces(string topic, string description)
@@ -290,6 +338,13 @@ public static class NoteChunkBuilder
             Add("name", resource.Name);
             Add("type", resource.FileType);
             Add("description", resource.Description);
+        }
+        // A footprint of the text, not the file: so it does not depend on the installation.
+        foreach (var document in source.Documents ?? new())
+        {
+            Add("document", document.ResourceId);
+            Add("paged", document.Paged);
+            Add("text", Hash(document.Text ?? ""));
         }
         return Hash(text.ToString());
     }

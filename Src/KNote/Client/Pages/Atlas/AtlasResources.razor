@@ -104,6 +104,9 @@
     protected override async Task OnInitializedAsync()
     {
         await RefreshAsync();
+        // Closed meanwhile (another tab chosen): its token is not there any more.
+        if (disposal.IsCancellationRequested)
+            return;
         var resProgress = await store.Notes.GetResourceProcessingProgressAsync(disposal.Token);
         if (resProgress.IsValid && resProgress.Entity != null)
         {

@@ -25,6 +25,9 @@ namespace KNote.Service.Core;
 /// read: a change while it is indexed leaves it pending.</item>
 /// <item>The quick updates (before a search, before the similar notes of a note) leave pending the notes with more than
 /// QuickRefreshMaxChunks fragments to calculate: a full run (RunIndexAsync) indexes them.</item>
+/// <item>A note indexed with documents not read yet (a quick update doesn't read them; a full run, when this installation
+/// has their file) is written with the rest, but it stays pending: the next full run reads them. The quick updates
+/// don't write it again while it doesn't change.</item>
 /// <item>Canceled between notes and between batches: what is done is kept (a note half done, not written). A note that fails is counted, its error goes to the progress
 /// and it is tried again in the next run, MaxFailuresPerProcess times per process.</item>
 /// <item>One run at a time per database in a process: a run waits for the one in progress; a refresh (before a search)
@@ -47,9 +50,9 @@ internal static class KntSemanticIndexer
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> RunLocks = new();
     private static readonly ConcurrentDictionary<string, int> Failures = new();
-    // The notes left by a quick update for having too many fragments, with the modification they had: they are not read
-    // again by the next quick updates until they change or a full run indexes them.
-    private static readonly ConcurrentDictionary<string, DateTime> TooLong = new();
+    // The notes left for a full run by a quick update (too many fragments) or indexed with documents not read yet, with the
+    // modification they had: the next quick updates leave them until they change (or are marked) or a full run indexes them.
+    private static readonly ConcurrentDictionary<string, DateTime> LeftForFullRun = new();
 
     public sealed class Options
     {
@@ -200,14 +203,15 @@ internal static class KntSemanticIndexer
 
                 try
                 {
-                    var (embedded, reused, tooLong) = await run.IndexNoteAsync(noteId, options.CancellationToken, options.MaxChunksPerNote);
-                    if (tooLong)
+                    var (embedded, reused, left) = await run.IndexNoteAsync(noteId, options.CancellationToken, options.MaxChunksPerNote);
+                    if (left)
                     {
                         progress.NotesTotal = Math.Max(progress.NotesDone, progress.NotesTotal - 1);
                         continue;
                     }
                     progress.ChunksEmbedded += embedded;
                     progress.ChunksReused += reused;
+                    progress.DocumentsNotAvailable = run.DocumentsNotAvailable;
                     Failures.TryRemove(failureKey, out _);
                 }
                 catch (OperationCanceledException) when (options.CancellationToken.IsCancellationRequested)
@@ -282,7 +286,7 @@ internal static class KntSemanticIndexer
             var state = await KntSemanticIndexState.ReadAsync(service);
             var rebuildSince = state?.IndexKey == indexKey ? state.RebuildSince : null;
             var run = new Run(service, repository, generator, indexKey, resModels.Entity.EmbeddingDimensions, rebuildSince);
-            return !(await run.IndexNoteAsync(noteId, cancellationToken, QuickRefreshMaxChunks)).TooLong;
+            return !(await run.IndexNoteAsync(noteId, cancellationToken, QuickRefreshMaxChunks)).LeftForFullRun;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -301,8 +305,15 @@ internal static class KntSemanticIndexer
     /// Marks the rows of a note to be calculated again, after a command changed it. A failure does not fail the
     /// command: it is logged (the note's ModificationDateTime still makes it pending, if it changed).
     /// </summary>
-    public static Task MarkStaleAsync(IKntService service, Guid noteId) =>
-        MarkStaleAsync(service, r => r.MarkStaleAsync(noteId));
+    public static Task MarkStaleAsync(IKntService service, Guid noteId)
+    {
+        // Changed: the quick updates index it again (a resource added doesn't always change its ModificationDateTime).
+        var prefix = $"{service.RepositoryRef?.ConnectionString}|";
+        var suffix = $"|{noteId}";
+        foreach (var key in LeftForFullRun.Keys.Where(k => k.StartsWith(prefix, StringComparison.Ordinal) && k.EndsWith(suffix, StringComparison.Ordinal)))
+            LeftForFullRun.TryRemove(key, out _);
+        return MarkStaleAsync(service, r => r.MarkStaleAsync(noteId));
+    }
 
     /// <summary>The same for the notes of a folder and of its subfolders.</summary>
     public static Task MarkFolderStaleAsync(IKntService service, Guid folderId) =>
@@ -392,9 +403,13 @@ internal static class KntSemanticIndexer
 
         public string Describe(Guid noteId) => _topics.TryGetValue(noteId, out var topic) ? topic : noteId.ToString();
 
-        // The fragments of the note calculated and reused; TooLong, it was left pending for having more than maxChunks
-        // fragments to calculate (nothing written).
-        public async Task<(int Embedded, int Reused, bool TooLong)> IndexNoteAsync(Guid noteId, CancellationToken cancellationToken,
+        // Documents of the notes indexed whose file is not in this installation.
+        public int DocumentsNotAvailable { get; private set; }
+
+        // The fragments of the note calculated and reused; LeftForFullRun, a quick update (maxChunks) left it pending for a
+        // full run, without writing anything: more than maxChunks fragments to calculate, or it was indexed before with
+        // documents not read yet and it didn't change.
+        public async Task<(int Embedded, int Reused, bool LeftForFullRun)> IndexNoteAsync(Guid noteId, CancellationToken cancellationToken,
             int? maxChunks = null)
         {
             var readAt = DateTime.Now;
@@ -405,7 +420,7 @@ internal static class KntSemanticIndexer
             var note = resNote.Entity;
             _topics[noteId] = $"#{note.NoteNumber} {note.Topic}";
             var noteKey = NoteKey(_service, _indexKey, noteId);
-            if (maxChunks != null && TooLong.TryGetValue(noteKey, out var leftAt) && leftAt == note.ModificationDateTime)
+            if (maxChunks != null && LeftForFullRun.TryGetValue(noteKey, out var leftAt) && leftAt == note.ModificationDateTime)
                 return (0, 0, true);
 
             var resTasks = await _service.Notes.GetNoteTasksAsync(noteId);
@@ -418,6 +433,9 @@ internal static class KntSemanticIndexer
                 description = _service.Notes.UtilHtmlToMarkdown(description);
 
             var source = NoteChunkSource.From(note, resTasks.Entity, resResources.Entity, await FolderPathAsync(note.FolderId), description);
+            // A quick refresh (before a search, maxChunks) doesn't read documents: a long PDF would take its time.
+            var (documents, documentsNotRead) = await DocumentsAsync(noteId, readNew: maxChunks == null, cancellationToken);
+            source.Documents = documents;
             var set = NoteChunkBuilder.Build(source);
 
             var resPrevious = await _repository.GetNoteChunksAsync(noteId, _indexKey);
@@ -430,7 +448,7 @@ internal static class KntSemanticIndexer
             var missing = set.Chunks.Where(c => !reusable.ContainsKey((c.SourceType, c.SourceId, c.ContentHash))).ToList();
             if (maxChunks != null && missing.Count > maxChunks)
             {
-                TooLong[noteKey] = note.ModificationDateTime;
+                LeftForFullRun[noteKey] = note.ModificationDateTime;
                 _service.Logger?.LogInformation("Semantic index: the note {note} has {count} fragments to calculate, left for a full run.",
                     _topics[noteId], missing.Count);
                 return (0, 0, true);
@@ -453,6 +471,7 @@ internal static class KntSemanticIndexer
                 SourceType = c.SourceType,
                 SourceId = c.SourceId,
                 ChunkIndex = c.ChunkIndex,
+                Page = c.Page,
                 Content = c.Content,
                 ContentHash = c.ContentHash,
                 SourceHash = set.SourceHash,
@@ -460,9 +479,45 @@ internal static class KntSemanticIndexer
                 IndexedDateTime = readAt
             }).ToList();
             Check(await _repository.ReplaceNoteChunksAsync(noteId, _indexKey, rows));
-            TooLong.TryRemove(noteKey, out _);
+            if (documentsNotRead)
+            {
+                // Written without them, but pending: a full run reads them (or tries again, if its file isn't here).
+                Check(await _repository.MarkStaleAsync(noteId));
+                LeftForFullRun[noteKey] = note.ModificationDateTime;
+            }
+            else
+                LeftForFullRun.TryRemove(noteKey, out _);
 
             return (missing.Count, set.Chunks.Count - missing.Count, false);
+        }
+
+        // The text of the note's documents (KNote Atlas, stage 4, D2): the one kept; the ones not read yet, read now and kept (so
+        // the next time the note is indexed the file is not opened), if readNew and this installation has their file. NotRead:
+        // some document is still not read (not readNew, its file is not here, no reader, replaced meanwhile).
+        private async Task<(List<NoteChunkDocument> Documents, bool NotRead)> DocumentsAsync(Guid noteId, bool readNew,
+            CancellationToken cancellationToken)
+        {
+            var documents = new List<NoteChunkDocument>();
+            var notRead = false;
+            foreach (var document in await KntDocuments.GetDocumentsAsync(_service, noteId))
+            {
+                var text = document;
+                if (document.State == EnumExtractedState.NotRead && readNew && _service.DocumentReader != null)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var (outcome, read) = await KntDocuments.ReadAndSaveAsync(_service, document.ResourceId, cancellationToken);
+                    if (outcome == EnumDocumentReadOutcome.NotAvailable)
+                        DocumentsNotAvailable++;
+                    text = read ?? document;
+                }
+                if (text.State == EnumExtractedState.NotRead)
+                    notRead = true;
+
+                if (text.State is EnumExtractedState.Partial or EnumExtractedState.Complete && !string.IsNullOrEmpty(text.Text))
+                    documents.Add(new NoteChunkDocument(text.ResourceId, ResourceInfoDto.FileNameOf(text.Name),
+                        DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(text.FileType, text.Name)), text.Text));
+            }
+            return (documents, notRead);
         }
 
         private async Task<string> FolderPathAsync(Guid folderId)

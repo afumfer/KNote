@@ -119,9 +119,14 @@
     protected override async Task OnInitializedAsync()
     {
         var resInstallation = await store.SemanticSearch.GetInstallationModelsAsync(disposal.Token);
+        // Closed meanwhile (another tab chosen): its token is not there any more.
+        if (disposal.IsCancellationRequested)
+            return;
         if (resInstallation.IsValid && resInstallation.Entity != null)
             installation = resInstallation.Entity;
         await RefreshAsync();
+        if (disposal.IsCancellationRequested)
+            return;
         var resProgress = await store.SemanticSearch.GetIndexProgressAsync(disposal.Token);
         if (resProgress.IsValid && resProgress.Entity != null)
         {

@@ -25,7 +25,7 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 9;
+    public const int CurrentSchemaRevision = 10;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
@@ -36,7 +36,8 @@ public static class KntSchemaUpdater
         (6, AddNoteTasksDateIndexes),
         (7, AddNoteChunks),
         (8, AddNoteChunksPendingIndex),
-        (9, AddResourceDescriptionColumns)
+        (9, AddResourceDescriptionColumns),
+        (10, UpdateSchemaV10)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -76,6 +77,9 @@ public static class KntSchemaUpdater
         // Also for a database that is already at the current revision without having gone through step 5:
         // one created just above by EnsureCreated (seeded at CurrentSchemaRevision), or created elsewhere.
         AddRepositoryIdentity(ctx, repositoryRef);
+
+        // Also for a new database: the columns of the documents' text are not in the EF model (see revision 10).
+        AddDocumentTextColumns(ctx, repositoryRef);
 
         if (repositoryRef.Provider == "Microsoft.Data.Sqlite")
             UseWriteAheadLog(ctx);
@@ -399,7 +403,8 @@ CREATE INDEX IF NOT EXISTS ""IX_NoteTasks_EndDate"" ON ""NoteTasks"" (""EndDate"
 
     // Revision 7 - the NoteChunks table of the semantic index (KNote Atlas): the fragments of each note with their
     // vector, per embedding model. Generated with GenerateCreateScript() from the EF model (Entities/NoteChunk.cs and
-    // ModelBuilderExtensions' NoteChunk configuration) and made idempotent by hand.
+    // ModelBuilderExtensions' NoteChunk configuration) and made idempotent by hand. With Page since revision 10, as the model
+    // has it: a database that comes from before 7 gets the table as a new one (revision 10 adds it to the existing tables).
     private static void AddNoteChunks(KntDbContext ctx, RepositoryRef repositoryRef)
     {
         var sql = repositoryRef.Provider == "Microsoft.Data.SqlClient" ? AddNoteChunksSqlServer : AddNoteChunksSqlite;
@@ -415,6 +420,7 @@ BEGIN
         [SourceType] int NOT NULL,
         [SourceId] uniqueidentifier NOT NULL,
         [ChunkIndex] int NOT NULL,
+        [Page] int NULL,
         [Content] nvarchar(max) NOT NULL,
         [ContentHash] nvarchar(64) NOT NULL,
         [SourceHash] nvarchar(64) NOT NULL,
@@ -439,6 +445,7 @@ CREATE TABLE IF NOT EXISTS ""NoteChunks"" (
     ""SourceType"" INTEGER NOT NULL,
     ""SourceId"" TEXT NOT NULL,
     ""ChunkIndex"" INTEGER NOT NULL,
+    ""Page"" INTEGER NULL,
     ""Content"" TEXT NOT NULL,
     ""ContentHash"" TEXT NOT NULL,
     ""SourceHash"" TEXT NOT NULL,
@@ -493,6 +500,56 @@ IF COL_LENGTH('Resources', 'DescriptionByUser') IS NULL
 
 IF COL_LENGTH('Resources', 'DescriptionModel') IS NULL
     ALTER TABLE [Resources] ADD [DescriptionModel] nvarchar(256) NULL;
+";
+
+    // Revision 10 - the text read of the documents (KNote Atlas, stage 4, D2): Resources.ExtractedText and ExtractedState
+    // (EnumExtractedState), and NoteChunks.Page (D8). ExtractedText and ExtractedState are NOT in the EF model, on purpose: EF
+    // reads the whole rows of Resources (a note with its resources, saving a note), and the text of a document can be of
+    // hundreds of pages; the repositories read and write them with SQL of their own. So EnsureCreated doesn't make them, and
+    // this runs for every database (EnsureUpToDate). NoteChunks.Page is in the model (Entities/NoteChunk.cs): this adds it to
+    // the databases made before.
+    private static void UpdateSchemaV10(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        AddDocumentTextColumns(ctx, repositoryRef);
+        MarkNotesWithDocumentsStale(ctx);
+    }
+
+    // The notes already indexed that have documents are indexed again, to read them (their other fragments keep their vectors,
+    // by ContentHash). Only when a database comes to revision 10: nothing else tells the index that its rules changed.
+    private static void MarkNotesWithDocumentsStale(KntDbContext ctx) =>
+        ctx.Database.ExecuteSqlRaw(MarkNotesWithDocumentsStaleSql);
+
+    // The formats of DocumentTextRules.FormatOf, by type or by name.
+    private const string MarkNotesWithDocumentsStaleSql = @"
+UPDATE NoteChunks SET Stale = 1 WHERE NoteId IN (SELECT NoteId FROM Resources WHERE
+    LOWER(Name) LIKE '%.pdf' OR LOWER(Name) LIKE '%.docx' OR LOWER(Name) LIKE '%.odt' OR LOWER(Name) LIKE '%.txt'
+    OR LOWER(Name) LIKE '%.md' OR LOWER(Name) LIKE '%.markdown'
+    OR LOWER(FileType) IN ('application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.oasis.opendocument.text', 'text/plain', 'text/markdown', 'text/x-markdown'));
+";
+
+    private static void AddDocumentTextColumns(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        if (repositoryRef.Provider == "Microsoft.Data.SqlClient")
+        {
+            ctx.Database.ExecuteSqlRaw(AddDocumentTextColumnsSqlServer);
+            return;
+        }
+
+        AddColumnIfMissingSqlite(ctx, "Resources", "ExtractedText", "TEXT NULL");
+        AddColumnIfMissingSqlite(ctx, "Resources", "ExtractedState", "INTEGER NOT NULL DEFAULT 0");
+        AddColumnIfMissingSqlite(ctx, "NoteChunks", "Page", "INTEGER NULL");
+    }
+
+    private const string AddDocumentTextColumnsSqlServer = @"
+IF COL_LENGTH('Resources', 'ExtractedText') IS NULL
+    ALTER TABLE [Resources] ADD [ExtractedText] nvarchar(max) NULL;
+
+IF COL_LENGTH('Resources', 'ExtractedState') IS NULL
+    ALTER TABLE [Resources] ADD [ExtractedState] int NOT NULL CONSTRAINT [DF_Resources_ExtractedState] DEFAULT 0;
+
+IF COL_LENGTH('NoteChunks', 'Page') IS NULL
+    ALTER TABLE [NoteChunks] ADD [Page] int NULL;
 ";
 
     private static void AddColumnIfMissingSqlite(KntDbContext ctx, string table, string column, string definition)

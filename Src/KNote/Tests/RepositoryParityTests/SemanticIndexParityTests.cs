@@ -373,4 +373,27 @@ public class SemanticIndexParityTests
         CollectionAssert.AreEquivalent(new[] { inFolder, ofType, withAttribute, other }, await StaleOfAsync(ModelB));
         CollectionAssert.AreEquivalent(new[] { inFolder, ofType, withAttribute }, await StaleOfAsync(ModelA));
     }
+
+    // KNote Atlas, stage 4 (D8): the page of the fragments of a document.
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
+    public async Task ThePageOfAFragment_IsReadTheSameByTheOther(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+        var noteId = await AddNoteAsync(writer, "A manual");
+        var documentId = Guid.NewGuid();
+        var page = Chunk(NoteChunkSourceType.ResourceText, 0, "Chapter 4", DateTime.Now, documentId);
+        page.Page = 12;
+
+        await ReplaceAsync(writer, noteId, ModelA, Chunk(NoteChunkSourceType.Text, 0, "Its text", DateTime.Now), page);
+
+        var read = await ChunksOfAsync(reader, noteId, ModelA);
+        Assert.IsNull(read.Single(c => c.SourceType == NoteChunkSourceType.Text).Page);
+        var document = read.Single(c => c.SourceType == NoteChunkSourceType.ResourceText);
+        Assert.AreEqual(12, document.Page);
+        Assert.AreEqual(documentId, document.SourceId);
+    }
 }

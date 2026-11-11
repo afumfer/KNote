@@ -80,7 +80,9 @@ public static class SemanticSearchRules
     public static List<NoteMatch> RankSimilar(IReadOnlyList<NoteChunkVectorDto> noteChunks, IEnumerable<NoteChunkVectorDto> chunks,
         float minSimilarity = MinSimilarNotes, Func<Guid, bool> allowed = null)
     {
-        var own = (noteChunks ?? Array.Empty<NoteChunkVectorDto>()).Where(c => c?.Vector != null).ToList();
+        // D9 (stage 4): a document's text would weigh more than the note; a document counts by its description (Resource).
+        var own = (noteChunks ?? Array.Empty<NoteChunkVectorDto>())
+            .Where(c => c?.Vector != null && c.SourceType != NoteChunkSourceType.ResourceText).ToList();
         if (own.Count == 0)
             return new List<NoteMatch>();
         var noteId = own[0].NoteId;
@@ -90,7 +92,8 @@ public static class SemanticSearchRules
         var notes = new Dictionary<Guid, SimilarNote>();
         foreach (var chunk in chunks ?? Enumerable.Empty<NoteChunkVectorDto>())
         {
-            if (chunk?.Vector == null || chunk.Vector.Length != dimensions || chunk.NoteId == noteId)
+            if (chunk?.Vector == null || chunk.Vector.Length != dimensions || chunk.NoteId == noteId
+                || chunk.SourceType == NoteChunkSourceType.ResourceText)
                 continue;
             if (allowed != null && !allowed(chunk.NoteId))
                 continue;

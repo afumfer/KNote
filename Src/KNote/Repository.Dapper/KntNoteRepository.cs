@@ -727,6 +727,72 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    private const string ResourceTextColumns = "ResourceId, NoteId, [Name], FileType, ExtractedState AS State, ExtractedText AS Text";
+
+    public async Task<Result<ResourceTextDto>> GetResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var text = await db.QueryFirstOrDefaultAsync<ResourceTextDto>(
+                $"SELECT {ResourceTextColumns} FROM Resources WHERE ResourceId = @resourceId", new { resourceId });
+            await CloseIsTempConnection(db);
+            return new Result<ResourceTextDto> { Entity = text };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextsAsync(Guid noteId)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var texts = await db.QueryAsync<ResourceTextDto>(
+                $"SELECT {ResourceTextColumns} FROM Resources WHERE NoteId = @noteId ORDER BY [Order], [Name]", new { noteId });
+            await CloseIsTempConnection(db);
+            return new Result<List<ResourceTextDto>> { Entity = texts.ToList() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var r = await db.ExecuteAsync(
+                "UPDATE Resources SET ExtractedText = @text, ExtractedState = @state WHERE ResourceId = @resourceId AND [Name] = @expectedName",
+                new { resourceId, text, state = (int)state, expectedName });
+            await CloseIsTempConnection(db);
+            return new Result<bool> { Entity = r == 1 };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result> ClearResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            await db.ExecuteAsync("UPDATE Resources SET ExtractedText = NULL, ExtractedState = 0 WHERE ResourceId = @resourceId", new { resourceId });
+            await CloseIsTempConnection(db);
+            return new Result();
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteResourceAsync(Guid id)
     {
         try

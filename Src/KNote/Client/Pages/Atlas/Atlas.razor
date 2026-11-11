@@ -11,56 +11,60 @@
 @* KNote Atlas: everything of the AI of the session's repository in one page, a tab for each part (KNote Atlas 4.3b). Each
    tab is for its role: the AI models, the semantic index and «Process pending resources» for an Admin, the search
    evaluation for a ProjectManager, the AI personalization for everyone. A tab the user can't use is disabled, with who can.
-   Only the chosen tab is drawn (and asks the server). The tab goes in the address (?tab=) and is remembered in the browser;
-   /atlas/evaluation, the old page of the evaluation, opens its tab. *@
+   Only the chosen tab is drawn (and asks the server): the tabs are drawn once it is known, not the first one meanwhile. The
+   tab goes in the address (?tab=) and is remembered in the browser; /atlas/evaluation, the old page of the evaluation, opens
+   its tab. *@
 
 <KntIndexHeader Section="KntSections.Atlas" Subtitle="The AI of this repository" />
 
 <div class="rz-pt-2 knt-atlas">
     @* The pages shown in the tabs draw their headers in compact style. *@
     <CascadingValue Name="KntCompactHeader" Value="true">
-        <RadzenTabs TabPosition="TabPosition.Left" SelectedIndex="@selectedIndex" SelectedIndexChanged="OnTabChanged">
-            <Tabs>
-                @foreach (var tab in tabs)
-                {
-                    <RadzenTabsItem Text="@tab.Section.Text" Disabled="@(!CanUse(tab))">
-                        <Template>
-                            <span class="knt-atlas-tab" title="@(CanUse(tab) ? null : tab.Who)">
-                                <RadzenIcon Icon="@tab.Section.Icon" />
-                                <span>@tab.Section.Text</span>
-                                @if (!CanUse(tab))
+        @if (selectedIndex >= 0)
+        {
+            <RadzenTabs TabPosition="TabPosition.Left" SelectedIndex="@selectedIndex" SelectedIndexChanged="OnTabChanged">
+                <Tabs>
+                    @foreach (var tab in tabs)
+                    {
+                        <RadzenTabsItem Text="@tab.Section.Text" Disabled="@(!CanUse(tab))">
+                            <Template>
+                                <span class="knt-atlas-tab" title="@(CanUse(tab) ? null : tab.Who)">
+                                    <RadzenIcon Icon="@tab.Section.Icon" />
+                                    <span>@tab.Section.Text</span>
+                                    @if (!CanUse(tab))
+                                    {
+                                        <RadzenIcon Icon="lock" class="knt-atlas-tab-lock" />
+                                    }
+                                </span>
+                            </Template>
+                            <ChildContent>
+                                @if (CanUse(tab))
                                 {
-                                    <RadzenIcon Icon="lock" class="knt-atlas-tab-lock" />
+                                    @switch (tab.Key)
+                                    {
+                                        case ModelsTab:
+                                            <AtlasRepositoryModels />
+                                            break;
+                                        case PersonalizationTab:
+                                            <AtlasPersonalization />
+                                            break;
+                                        case IndexTab:
+                                            <AtlasSemanticIndex />
+                                            break;
+                                        case ResourcesTab:
+                                            <AtlasResources />
+                                            break;
+                                        case EvaluationTab:
+                                            <SearchEvaluation />
+                                            break;
+                                    }
                                 }
-                            </span>
-                        </Template>
-                        <ChildContent>
-                            @if (CanUse(tab))
-                            {
-                                @switch (tab.Key)
-                                {
-                                    case ModelsTab:
-                                        <AtlasRepositoryModels />
-                                        break;
-                                    case PersonalizationTab:
-                                        <AtlasPersonalization />
-                                        break;
-                                    case IndexTab:
-                                        <AtlasSemanticIndex />
-                                        break;
-                                    case ResourcesTab:
-                                        <AtlasResources />
-                                        break;
-                                    case EvaluationTab:
-                                        <SearchEvaluation />
-                                        break;
-                                }
-                            }
-                        </ChildContent>
-                    </RadzenTabsItem>
-                }
-            </Tabs>
-        </RadzenTabs>
+                            </ChildContent>
+                        </RadzenTabsItem>
+                    }
+                </Tabs>
+            </RadzenTabs>
+        }
     </CascadingValue>
 </div>
 

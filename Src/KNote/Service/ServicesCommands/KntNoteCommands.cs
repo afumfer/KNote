@@ -730,6 +730,15 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
         if (!result.Entity.ContentInDB)
             result.Entity.ContentArrayBytes = tmpContent;
 
+        // KNote Atlas, stage 4 (D12): its file was replaced (each upload has a name of its own), what was read of it is forgotten.
+        if (result.IsValid && checkExist?.IsValid == true && checkExist.Entity != null && checkExist.Entity.Name != Param.Name)
+        {
+            var cleared = await Repository.Notes.ClearResourceTextAsync(Param.ResourceId);
+            if (!cleared.IsValid)
+                Service.Logger?.LogWarning("Resource {name}: the text read of its previous file couldn't be forgotten: {error}",
+                    Param.Name, cleared.ErrorMessage);
+        }
+
         (result.Entity.RelativeUrl, result.Entity.FullUrl) = Service.Notes.UtilGetResourceUrls(result.Entity);
         // Saved: who saves it again starts from what is saved now.
         result.Entity.LoadedDescription = result.Entity.Description ?? "";

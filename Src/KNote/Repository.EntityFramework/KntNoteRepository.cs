@@ -507,6 +507,92 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    // The text of the documents is not in the EF model (KntSchemaUpdater, revision 10): EF would read it with every resource.
+    private sealed class ResourceTextRow
+    {
+        public Guid ResourceId { get; set; }
+        public Guid NoteId { get; set; }
+        public string Name { get; set; }
+        public string FileType { get; set; }
+        public int ExtractedState { get; set; }
+        public string ExtractedText { get; set; }
+
+        public ResourceTextDto ToDto() => new()
+        {
+            ResourceId = ResourceId, NoteId = NoteId, Name = Name, FileType = FileType,
+            State = (EnumExtractedState)ExtractedState, Text = ExtractedText
+        };
+    }
+
+    public async Task<Result<ResourceTextDto>> GetResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var rows = await ctx.Database.SqlQuery<ResourceTextRow>(
+                $"SELECT ResourceId, NoteId, Name, FileType, ExtractedState, ExtractedText FROM Resources WHERE ResourceId = {resourceId}").ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<ResourceTextDto> { Entity = rows.FirstOrDefault()?.ToDto() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextsAsync(Guid noteId)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var rows = await ctx.Database.SqlQuery<ResourceTextRow>(
+                $"SELECT ResourceId, NoteId, Name, FileType, ExtractedState, ExtractedText FROM Resources WHERE NoteId = {noteId}").ToListAsync();
+            var order = await ctx.Resources.AsNoTracking().Where(r => r.NoteId == noteId)
+                .Select(r => new { r.ResourceId, r.Order, r.Name }).ToListAsync();
+            await CloseIsTempConnection(ctx);
+            var position = order.OrderBy(r => r.Order).ThenBy(r => r.Name).Select((r, i) => (r.ResourceId, i)).ToDictionary(p => p.ResourceId, p => p.i);
+            return new Result<List<ResourceTextDto>>
+            {
+                Entity = rows.OrderBy(r => position.GetValueOrDefault(r.ResourceId)).Select(r => r.ToDto()).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var written = await ctx.Database.ExecuteSqlAsync(
+                $"UPDATE Resources SET ExtractedText = {text}, ExtractedState = {(int)state} WHERE ResourceId = {resourceId} AND Name = {expectedName}");
+            await CloseIsTempConnection(ctx);
+            return new Result<bool> { Entity = written == 1 };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result> ClearResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            await ctx.Database.ExecuteSqlAsync($"UPDATE Resources SET ExtractedText = NULL, ExtractedState = 0 WHERE ResourceId = {resourceId}");
+            await CloseIsTempConnection(ctx);
+            return new Result();
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> DeleteResourceAsync(Guid id)
     {
         try

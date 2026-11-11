@@ -57,6 +57,8 @@ public class CommandAuthorizationMatrixTests
             "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
             // KNote Atlas, stage 4: what «Process pending resources» would process (counts, no content).
             "KntResourceContentGetProcessingStatusAsyncCommand",
+            // KNote Atlas, stage 4: the text read of a document (the same notes the user sees).
+            "KntResourceContentGetDocumentTextAsyncCommand",
             // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
             "KntAtlasContextFindGlossaryTermsAsyncCommand",
@@ -97,7 +99,9 @@ public class CommandAuthorizationMatrixTests
 
         // KNote Atlas, stage 4: describing a photo of a note with the AI (who edits the note's resources).
         Add(nameof(EnumRoles.Staff),
-            "KntResourceContentGetPhotoContextAsyncCommand", "KntResourceContentSaveAiDescriptionAsyncCommand");
+            "KntResourceContentGetPhotoContextAsyncCommand", "KntResourceContentSaveAiDescriptionAsyncCommand",
+            // ... and reading a document now.
+            "KntResourceContentReadDocumentAsyncCommand");
 
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",

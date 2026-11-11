@@ -22,4 +22,8 @@ internal class FakeKntResourceContentService : IKntResourceContentService
     public Task<Result<ResourceProcessingPlanDto>> PrepareProcessingAsync(ResourceProcessingOptionsDto options) => throw new NotSupportedException();
 
     public Task<Result> SaveProcessingRunAsync(ResourceProcessingRunDto run) => throw new NotSupportedException();
+
+    public Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId) => throw new NotSupportedException();
+
+    public Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId) => throw new NotSupportedException();
 }

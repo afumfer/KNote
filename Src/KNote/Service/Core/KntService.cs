@@ -57,6 +57,8 @@ public class KntService : IKntService, IDisposable
 
     public IKntEmbeddingGenerators EmbeddingGenerators { get; set; }
 
+    public IKntDocumentReader DocumentReader { get; set; }
+
     private IKntUserService _users;
     public IKntUserService Users
     {
