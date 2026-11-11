@@ -147,6 +147,45 @@ public class ResourceContentInProcessTests
         Assert.AreEqual(0, (await service.ResourceContent.GetProcessingStatusAsync()).Entity.PendingPhotos);
     }
 
+    // 4.5b: the scanned pages of one document, one per request, by someone who edits notes; not by a guest.
+    [TestMethod]
+    public async Task AScannedPage_IsTranscribedBySomeoneWhoEditsNotes_NotByAGuest()
+    {
+        Guid scanId;
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var note = (await service.Notes.HomeNotesAsync()).Entity.First();
+            var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+            {
+                NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_one.pdf", Description = "one.pdf", FileType = "application/pdf",
+                ContentArrayBytes = TestDocuments.ScannedPdf("PAGE ONE", "OCR:PAGE TWO")
+            });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+            scanId = saved.Entity.ResourceId;
+        }
+        _chatClients.Script = () => [[new ChatResponseUpdate(ChatRole.Assistant, "Page one, transcribed.")]];
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+        Assert.IsTrue((await staff.PostAsync($"api/resources/{scanId}/read", null)).IsSuccessStatusCode);
+
+        var forbiddenScanned = await guest.GetAsync($"api/resources/{scanId}/scanned");
+        var forbidden = await guest.PostAsync($"api/resources/{scanId}/transcribe?page=1", null);
+        var scanned = await staff.GetFromJsonAsync<Result<ScannedDocumentDto>>($"api/resources/{scanId}/scanned", _json);
+        var transcribed = await staff.PostAsync($"api/resources/{scanId}/transcribe?page=1", null);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbiddenScanned.StatusCode);
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        CollectionAssert.AreEqual(new[] { 1, 2 }, scanned!.Entity.PendingPages);
+        CollectionAssert.AreEqual(new[] { 2 }, scanned.Entity.OcrPages);
+        var body = await transcribed.Content.ReadAsStringAsync();
+        Assert.IsTrue(transcribed.IsSuccessStatusCode, body);
+        Assert.AreEqual(1, JsonSerializer.Deserialize<Result<DocumentReadDto>>(body, _json)!.Entity.PagesToTranscribe);
+        Assert.AreEqual(0, _chatClients.LastTools.Count, "No tools.");
+        using var check = _factory.CreateServiceForRepository(0);
+        var page = DocumentTextRules.Pages((await check.ResourceContent.GetDocumentTextAsync(scanId)).Entity.Text)[0];
+        Assert.AreEqual((true, "Page one, transcribed."), (page.Transcribed, page.Text));
+    }
+
     // 4.5: the batch transcribes the scanned pages (also of a document it reads in the run) with the model of the Server.
     [TestMethod]
     public async Task ProcessPendingResources_TranscribesTheScannedPages()

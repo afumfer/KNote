@@ -726,6 +726,11 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   (`NoteEditorCtrl.DescribePhotosAsync`, con `AiDocumentSummarizer` para los documentos) y «Summarize the selected document»;
   la sección *Process pending resources* (`RepositoryResourcesCtrl`) tiene las casillas «Photos» y «Documents» (`Options`) y
   (4.5a) «Scanned pages» y «Also the pages with… (OCR layer)» (`ScannedPages`, `OcrPages`).
+- **Transcribir un documento** (4.5b): «Transcribe scanned pages» en `DocumentTextForm` (y «Describe ▾», «Transcribe the scanned
+  pages of the selected document…», que abre esa ventana y empieza): `NoteEditorCtrl.TranscribePagesAsync` (página a página con
+  `AiPageTranscriber`; el botón cancela al momento, y cerrar la ventana también) y el resumen al final de un documento que lo
+  esperaba. El modelo sale de `NoteEditorCtrl.ChatClientFactory` (`internal`, para los tests). «See the original page» con el selector
+  de página (el cursor lo pone, `DocumentTexts.PageAt`) abre `Views/DocumentPageForm`: el PDF en esa página (WebView2, `#page=N`).
 - Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
   `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
 

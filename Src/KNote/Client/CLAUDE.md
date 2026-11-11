@@ -489,6 +489,11 @@ Patrones ya establecidos que hay que seguir:
   `DescribeWithAiDialog` (cuenta unos y otros) y una petición por recurso (`DescribePhotoAsync` / `SummarizeDocumentAsync`); la
   tarjeta de un documento tiene «Summarize document». El lote (`AtlasResources`) tiene las casillas «Photos» y «Documents» y
   (4.5a) «Scanned pages», con «Also the pages with… (OCR layer)» debajo, desactivada sin la anterior.
+- **Transcribir un documento** (4.5b): en `NoteResourceViewer`, vista «Text» de un PDF con páginas escaneadas, «Transcribe scanned
+  pages» (Staff+): `TranscribePagesDialog` (páginas, la casilla de las de OCR, estimación y modelo) y una petición por página
+  (`TranscribePageAsync`) con su progreso y «Cancel» (tras la página en curso; cerrar el visor también para). Si el documento
+  esperaba su resumen (`AiDocumentRules.WaitsForSummary`), se resume al final y se actualiza el `ResourceInfoDto` de la tarjeta.
+  Las páginas transcritas llevan «Automatic transcription» y «See the original page», que muestra el PDF en `#page=N`.
 - **Recursos de la nota** (`NoteKResources`, galería; `NoteResourceEditor`, diálogo de alta y edición): al editar
   un recurso solo cambian su descripción y su orden; el fichero no se cambia ni se reenvía (`Server` conserva el
   fichero y el contenido guardado en la BD, ver `Server/CLAUDE.md`). Al pulsar un recurso se ve en la misma ventana

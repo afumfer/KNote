@@ -900,6 +900,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         menu.Items.Add(new ToolStripSeparator());
         var documentText = menu.Items.Add("Text of the selected document...", null, (s, a) => ShowDocumentText(selected));
         documentText.Enabled = selected != null && DocumentTextRules.IsDocument(selected);
+        // 4.5b: its scanned pages, in the same window (it starts when shown).
+        var transcribe = menu.Items.Add("Transcribe the scanned pages of the selected document...", null, (s, a) => ShowDocumentText(selected, transcribe: true));
+        transcribe.Enabled = selected != null && DocumentTextRules.FormatOf(selected.FileType, selected.Name) == EnumDocumentFormat.Pdf;
         menu.Closed += (s, a) => BeginInvoke(menu.Dispose);
         menu.Show(buttonDescribePhotos, new Point(0, buttonDescribePhotos.Height));
     }
@@ -910,16 +913,19 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _selectedResource == null ? null
             : _ctrl.Model.Resources.FirstOrDefault(r => r.ResourceId == _selectedResource.ResourceId) ?? _selectedResource;
 
-    // Its text is the one of the repository: a document new or with changes here has to be saved first.
-    private void ShowDocumentText(ResourceDto document)
+    // Its text is the one of the repository: a document new or with changes here has to be saved first. transcribe: «Transcribe
+    // the scanned pages of the selected document» (4.5b).
+    private void ShowDocumentText(ResourceDto document, bool transcribe = false)
     {
         if (!NoteEditorCtrl.CanReadNow(document))
         {
             ShowInfo("Save the note first: the document is new or has changes not saved.");
             return;
         }
-        using var form = new DocumentTextForm(_ctrl, document);
+        using var form = new DocumentTextForm(_ctrl, document, transcribe);
         form.ShowDialog(this);
+        // Its summary may have been written when its pages were transcribed.
+        UpdatePreviewResource(_selectedResource);
     }
 
     // single: one photo or document («Describe the selected photo», «Summarize the selected document»); null: the photos and the

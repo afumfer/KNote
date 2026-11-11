@@ -34,6 +34,11 @@ namespace KNote.ClientWin.Views
             progressLoad = new ProgressBar();
             textDocument = new TextBox();
             buttonClose = new Button();
+            buttonTranscribe = new Button();
+            labelPage = new Label();
+            numericPage = new NumericUpDown();
+            buttonOriginalPage = new Button();
+            ((System.ComponentModel.ISupportInitialize)numericPage).BeginInit();
             SuspendLayout();
             //
             // labelFile
@@ -53,7 +58,7 @@ namespace KNote.ClientWin.Views
             labelState.ForeColor = SystemColors.GrayText;
             labelState.Location = new Point(12, 32);
             labelState.Name = "labelState";
-            labelState.Size = new Size(560, 34);
+            labelState.Size = new Size(384, 34);
             labelState.TabIndex = 1;
             labelState.Text = "State";
             //
@@ -90,6 +95,8 @@ namespace KNote.ClientWin.Views
             textDocument.Size = new Size(676, 382);
             textDocument.TabIndex = 4;
             textDocument.WordWrap = true;
+            textDocument.Click += textDocument_CaretMoved;
+            textDocument.KeyUp += textDocument_CaretMoved;
             //
             // buttonClose
             //
@@ -102,12 +109,59 @@ namespace KNote.ClientWin.Views
             buttonClose.Text = "&Close";
             buttonClose.UseVisualStyleBackColor = true;
             //
+            // buttonTranscribe
+            //
+            buttonTranscribe.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonTranscribe.Location = new Point(402, 34);
+            buttonTranscribe.Name = "buttonTranscribe";
+            buttonTranscribe.Size = new Size(170, 29);
+            buttonTranscribe.TabIndex = 6;
+            buttonTranscribe.Text = "Transcribe scanned pages";
+            buttonTranscribe.UseVisualStyleBackColor = true;
+            buttonTranscribe.Visible = false;
+            buttonTranscribe.Click += buttonTranscribe_Click;
+            //
+            // labelPage
+            //
+            labelPage.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            labelPage.AutoSize = true;
+            labelPage.Location = new Point(12, 481);
+            labelPage.Name = "labelPage";
+            labelPage.Size = new Size(33, 15);
+            labelPage.TabIndex = 7;
+            labelPage.Text = "Page";
+            //
+            // numericPage
+            //
+            numericPage.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            numericPage.Location = new Point(51, 478);
+            numericPage.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericPage.Name = "numericPage";
+            numericPage.Size = new Size(70, 23);
+            numericPage.TabIndex = 8;
+            numericPage.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            //
+            // buttonOriginalPage
+            //
+            buttonOriginalPage.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            buttonOriginalPage.Location = new Point(127, 474);
+            buttonOriginalPage.Name = "buttonOriginalPage";
+            buttonOriginalPage.Size = new Size(160, 29);
+            buttonOriginalPage.TabIndex = 9;
+            buttonOriginalPage.Text = "See the original page";
+            buttonOriginalPage.UseVisualStyleBackColor = true;
+            buttonOriginalPage.Click += buttonOriginalPage_Click;
+            //
             // DocumentTextForm
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonClose;
             ClientSize = new Size(700, 515);
+            Controls.Add(buttonOriginalPage);
+            Controls.Add(numericPage);
+            Controls.Add(labelPage);
+            Controls.Add(buttonTranscribe);
             Controls.Add(buttonClose);
             Controls.Add(textDocument);
             Controls.Add(progressLoad);
@@ -120,7 +174,9 @@ namespace KNote.ClientWin.Views
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Text of the document";
+            ((System.ComponentModel.ISupportInitialize)numericPage).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -131,5 +187,9 @@ namespace KNote.ClientWin.Views
         private ProgressBar progressLoad;
         private TextBox textDocument;
         private Button buttonClose;
+        private Button buttonTranscribe;
+        private Label labelPage;
+        private NumericUpDown numericPage;
+        private Button buttonOriginalPage;
     }
 }

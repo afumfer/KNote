@@ -130,6 +130,17 @@
     color: var(--rz-warning-dark);
 }
 
+/* A page transcribed by the AI (4.5b): it may be wrong, so it says so. */
+.knt-document-text-transcribed {
+    font-weight: normal;
+    color: var(--rz-info-dark);
+}
+
+::deep .knt-document-text-progress {
+    flex: 1 1 8rem;
+    height: 0.5rem;
+}
+
 .knt-document-text-page-text {
     white-space: pre-wrap;
     overflow-wrap: anywhere;

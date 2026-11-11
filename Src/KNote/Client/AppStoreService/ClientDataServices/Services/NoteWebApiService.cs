@@ -152,6 +152,14 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         SendAsync<ResourceInfoDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/summarize?replace={(replace ? "true" : "false")}", null, ct),
             "Summarize document", cancellationToken: cancellationToken, notifyErrors: false);
 
+    public Task<Result<ScannedDocumentDto>> GetScannedPagesAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
+        SendAsync<ScannedDocumentDto>(ct => _httpClient.GetAsync($"api/resources/{resourceId}/scanned", ct),
+            DocumentTexts.TranscribePages, cancellationToken: cancellationToken);
+
+    public Task<Result<DocumentReadDto>> TranscribePageAsync(Guid resourceId, int page, CancellationToken cancellationToken = default) =>
+        SendAsync<DocumentReadDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/transcribe?page={page}", null, ct),
+            DocumentTexts.TranscribePages, cancellationToken: cancellationToken, notifyErrors: false);
+
     public Task<Result<ResourceProcessingStatusDto>> GetResourceProcessingStatusAsync(CancellationToken cancellationToken = default) =>
         SendAsync<ResourceProcessingStatusDto>(ct => _httpClient.GetAsync("api/resources/status", ct),
             "Pending resources", cancellationToken: cancellationToken, notifyErrors: false);

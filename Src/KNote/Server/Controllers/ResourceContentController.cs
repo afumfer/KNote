@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KNote.Ai;
@@ -18,7 +19,8 @@ namespace KNote.Server.Controllers;
 // photo, one per request (the Web asks for them one after another, with its progress and its cancel), with the model of
 // AiPhotoDescriber.ChooseAsync. The roles of the commands apply, as in the assistant (EnforceAuthorization). 4.3: «Process
 // pending resources» (Admin, as the semantic index), a run of KntAtlasJobs of the session's repository and with its user.
-// 4.4b: reading a document (Staff) and its text (anyone signed in, as the notes).
+// 4.4b: reading a document (Staff) and its text (anyone signed in, as the notes). 4.5b: transcribing the scanned pages of a
+// document, one per request (as the photos), with a model that sees images.
 [Authorize]
 [ApiController]
 [Route("api/resources")]
@@ -93,6 +95,37 @@ public class ResourceContentController : ControllerBase
             _service.EnforceAuthorization = true;
             var chatClient = _chatClients.Create(provider, []);
             return await AiDocumentSummarizer.SummarizeAsync(_service, chatClient, provider, id, replace, _logger, cancellationToken);
+        });
+
+    // The scanned pages of a document pending of a transcription (Entity null: none).
+    [HttpGet("{id:guid}/scanned")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> GetScanned(Guid id) =>
+        RunAsync(nameof(GetScanned), async () =>
+        {
+            var scanned = await _service.ResourceContent.GetScannedDocumentsAsync(id);
+            var result = new Result<ScannedDocumentDto> { Entity = scanned.Entity?.FirstOrDefault() };
+            result.AddListErrorMessage(scanned.ListErrorMessage);
+            return result;
+        });
+
+    // Transcribes a scanned page of a document and keeps it (Entity: what is left of the document).
+    [HttpPost("{id:guid}/transcribe")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> Transcribe(Guid id, [FromQuery] int page, CancellationToken cancellationToken) =>
+        RunAsync(nameof(Transcribe), async () =>
+        {
+            var (provider, info) = await ChooseAsync(cancellationToken);
+            if (!info.Available)
+            {
+                var res = new Result<DocumentReadDto>();
+                res.AddErrorMessage(info.Message);
+                return res;
+            }
+
+            _service.EnforceAuthorization = true;
+            var chatClient = _chatClients.Create(provider, []);
+            return await AiPageTranscriber.TranscribeAsync(_service, chatClient, provider, id, page, _logger, cancellationToken);
         });
 
     // What «Process pending resources» would process, and the pace of its last run.

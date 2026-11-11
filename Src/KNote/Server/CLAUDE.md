@@ -265,7 +265,9 @@ public class FoldersController : ControllerBase
   cualquier modelo de chat); el lote (`POST api/resources/process`) acepta `Documents` además de `Photos`, y (4.5a)
   `ScannedPages`/`OcrPages`: transcribe las páginas escaneadas con `AiPageTranscriber` (un modelo que vea imágenes, como las
   fotos: `options.NeedsImages`). PDFium dibuja las páginas en el `Server` (`IKntDocumentReader.DrawPage`, de `KNote.Ai`): en un
-  sistema donde no carga, las páginas dan un error claro y lo demás sigue.
+  sistema donde no carga, las páginas dan un error claro y lo demás sigue. Un documento (4.5b): `GET api/resources/{id}/scanned`
+  (sus páginas pendientes, `ScannedDocumentDto`; `null` si no hay) y `POST api/resources/{id}/transcribe?page=N` (una página por
+  petición, como las fotos; Staff+, `EnforceAuthorization`).
 - **Editar un recurso** (`PUT api/notes/resources`, `ResourceInfoDto`): un recurso que ya existe solo cambia su
   descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
   fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el

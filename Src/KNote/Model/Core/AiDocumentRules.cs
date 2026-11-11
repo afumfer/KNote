@@ -54,6 +54,13 @@ public static class AiDocumentRules
     public static EnumPhotoAction PlanResourceForNote(ResourceInfoDto resource, EnumPersonDescriptions choice) =>
         AiPhotoRules.IsPhoto(resource) ? AiPhotoRules.PlanForNote(resource, choice) : PlanForNote(resource, choice);
 
+    /// <summary>
+    /// Whether a document is summarized when its scanned pages are transcribed (4.5b, decided by the owner): it has no
+    /// description of its own (not written by a person nor by the AI, not locked), so its summary was waiting for them.
+    /// </summary>
+    public static bool WaitsForSummary(ResourceInfoDto resource) =>
+        PlanForNote(resource, EnumPersonDescriptions.Skip) == EnumPhotoAction.Describe;
+
     /// <summary>What a person wrote of this document, as the model receives it (null: nothing).</summary>
     public static string PersonDescription(ResourceInfoDto resource) =>
         HasPersonDescription(resource) ? Cut(OneLine(resource.Description), AiPhotoRules.MaxPersonDescriptionLength) : null;

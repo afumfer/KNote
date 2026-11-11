@@ -142,4 +142,50 @@ public class AiTranscriptionRulesTests
         Assert.AreEqual((3, 8), ResourceProcessingTexts.Bar(transcribing));
         StringAssert.StartsWith(ResourceProcessingTexts.Progress(done), "Done: 7 scanned pages transcribed in 1 min");
     }
+
+    // 4.5b: one document in the apps.
+    [TestMethod]
+    public void TheViewers_MarkThePagesTranscribed_AndFindThePageOfACursor()
+    {
+        var readable = DocumentTexts.Readable(Kept("First.", T + "Transcribed.", P + "OCR"), paged: true);
+
+        Assert.AreEqual(string.Join("\r\n", "── Page 1 ──", "First.", "", "── Page 2 ──", "[Automatic transcription]", "Transcribed.", "",
+
+            "── Page 3 ──", "[Scanned page: transcription pending]", "OCR"), readable);
+        Assert.AreEqual(1, DocumentTexts.PageAt(readable, 0));
+        Assert.AreEqual(1, DocumentTexts.PageAt(readable, readable.IndexOf("First.")));
+        Assert.AreEqual(2, DocumentTexts.PageAt(readable, readable.IndexOf("── Page 2")), "on its heading");
+        Assert.AreEqual(2, DocumentTexts.PageAt(readable, readable.IndexOf("Transcribed.")));
+        Assert.AreEqual(3, DocumentTexts.PageAt(readable, readable.Length));
+        Assert.IsNull(DocumentTexts.PageAt(DocumentTexts.Readable("A letter.", paged: false), 3), "no pages");
+        Assert.IsNull(DocumentTexts.PageAt("", 0));
+    }
+
+    [TestMethod]
+    public void TheTexts_OfOneDocument()
+    {
+        var local = new ResourceDescriberDto { Model = "qwen3.5:9b", SupportsImages = true };
+        var paid = new ResourceDescriberDto { Model = "gpt-test", IsPaid = true, SupportsImages = true };
+
+        Assert.AreEqual("The AI transcribes 12 scanned pages of this document with the model qwen3.5:9b, one after another. It should take about " +
+            "1 min 36 s. Each page is kept as soon as it is transcribed: canceling keeps them, and you can go on later.",
+            DocumentTexts.TranscriptionConfirmation(12, local, 8));
+        Assert.IsFalse(DocumentTexts.TranscriptionConfirmation(12, local, null).Contains("take about"), "without a pace, no estimate");
+        StringAssert.Contains(DocumentTexts.TranscriptionConfirmation(1, paid, null), "gpt-test is a paid model: the pages are sent to its provider.");
+        Assert.AreEqual("Transcribing page 3 of 12…", DocumentTexts.TranscriptionProgress(2, 12));
+        Assert.AreEqual("11 of 12 scanned pages transcribed. The document was summarized too.", DocumentTexts.TranscriptionResult(11, 12, false, true));
+        Assert.AreEqual("Canceled after 4 scanned pages transcribed: what is done is kept.", DocumentTexts.TranscriptionResult(4, 12, true, false));
+    }
+
+    [TestMethod]
+    public void ADocumentWaitsForItsSummary_OnlyWithoutADescriptionOfItsOwn()
+    {
+        static ResourceInfoDto Pdf(string? description = null, bool locked = false, string? model = null) =>
+            new() { Name = $"{Guid.NewGuid()}_scan.pdf", FileType = "application/pdf", Description = description ?? "scan.pdf", DescriptionByUser = locked, DescriptionModel = model };
+
+        Assert.IsTrue(AiDocumentRules.WaitsForSummary(Pdf()));
+        Assert.IsFalse(AiDocumentRules.WaitsForSummary(Pdf("The manual of the QL.")), "a person's");
+        Assert.IsFalse(AiDocumentRules.WaitsForSummary(Pdf("A manual.", model: "qwen3.5:9b")), "the AI's");
+        Assert.IsFalse(AiDocumentRules.WaitsForSummary(Pdf(locked: true)));
+    }
 }

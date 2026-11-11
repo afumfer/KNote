@@ -12,7 +12,10 @@
    an image (fitted, or at its size with a click), a PDF (the browser's viewer), a video or an audio (their player)
    or a text. The other files can't be shown in the browser: only opened. A document (PDF, DOCX, ODT, TXT, MD; KNote
    Atlas, stage 4, 4.4b) also has its text as KNote read it, by pages, with «Read document» (Staff+): its beginning only,
-   some 100 pages (DocumentTextRules.MaxViewerLength). *@
+   some 100 pages (DocumentTextRules.MaxViewerLength). A scanned PDF (4.5b) has «Transcribe scanned pages» (Staff+): one page
+   per request, as the photos, with its progress and «Cancel» (after the page being done); closing the viewer stops too, and
+   what is done is kept. A document whose summary waited for its pages is summarized at the end. The pages transcribed are
+   marked, with «See the original page» (the PDF at that page). *@
 
 <KntDialogFrame Icon="@KntFileTypes.Icon(Resource.FileType, Resource.Name)" Title="@Title" Subtitle="@Resource.NameOut">
     <ChildContent>
@@ -31,10 +34,27 @@
             {
                 <div class="knt-document-text">
                     <div class="knt-document-text-state">
-                        <span>@StateText</span>
-                        <RadzenButton Text="@(CanReadAgain ? DocumentTexts.ReadAgain : DocumentTexts.ReadDocument)" Icon="plagiarism"
-                                      ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
-                                      IsBusy="@reading.IsBusy" BusyText="Reading…" Disabled="@(text == null && !loadFailed)" Click="OnReadDocument" />
+                        @if (transcribing)
+                        {
+                            <span>@transcribeStep</span>
+                            <RadzenProgressBar Value="@transcribeDone" Max="@Math.Max(1, transcribeTotal)" ShowValue="false" class="knt-document-text-progress" />
+                            <RadzenButton Text="Cancel" Icon="stop" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                          Disabled="@cancelTranscribing" Click="() => cancelTranscribing = true" />
+                        }
+                        else
+                        {
+                            <span>@StateText</span>
+                            @if (text?.State == EnumExtractedState.Partial && paged)
+                            {
+                                <RadzenButton Text="@DocumentTexts.TranscribePages" Icon="document_scanner"
+                                              ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                              IsBusy="@transcribingFlight.IsBusy" Disabled="@reading.IsBusy" Click="OnTranscribe" />
+                            }
+                            <RadzenButton Text="@(CanReadAgain ? DocumentTexts.ReadAgain : DocumentTexts.ReadDocument)" Icon="plagiarism"
+                                          ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                          IsBusy="@reading.IsBusy" BusyText="Reading…" Disabled="@(text == null && !loadFailed || transcribingFlight.IsBusy)"
+                                          Click="OnReadDocument" />
+                        }
                     </div>
                     <div class="knt-document-text-body">
                         @if (text == null && !loadFailed)
@@ -70,6 +90,16 @@
                                         {
                                             <span class="knt-document-text-scanned">@DocumentTexts.ScannedPage</span>
                                         }
+                                        else if (documentPage.Transcribed)
+                                        {
+                                            <span class="knt-document-text-transcribed">@DocumentTexts.AutomaticTranscription</span>
+                                            @if (kind == KntFileTypes.Kind.Pdf)
+                                            {
+                                                var number = documentPage.Number;
+                                                <RadzenButton Text="@DocumentTexts.SeeOriginalPage" Icon="find_in_page" ButtonStyle="ButtonStyle.Base"
+                                                              Variant="Variant.Text" Size="ButtonSize.ExtraSmall" Click="() => ShowOriginalPage(number)" />
+                                            }
+                                        }
                                     </div>
                                     @if (documentPage.Text.Length > 0)
                                     {
@@ -92,7 +122,8 @@
                         </div>
                         break;
                     case KntFileTypes.Kind.Pdf:
-                        <iframe src="@Resource.FullUrl" title="@Title"></iframe>
+                        @* At a page (4.5b), if the viewer of the browser follows #page. *@
+                        <iframe @key="PdfSource" src="@PdfSource" title="@Title"></iframe>
                         break;
                     case KntFileTypes.Kind.Video:
                         <video src="@Resource.FullUrl" controls></video>
@@ -150,6 +181,17 @@
     private readonly KntSingleFlight reading = new();
     private readonly CancellationTokenSource disposal = new();
 
+    // KNote Atlas, stage 4 (4.5b): transcribing the scanned pages, and the page of the PDF shown.
+    private readonly KntSingleFlight transcribingFlight = new();
+    private bool transcribing;
+    private bool cancelTranscribing;
+    private int transcribeDone;
+    private int transcribeTotal;
+    private string transcribeStep = "";
+    private int pdfPage;
+
+    private string PdfSource => pdfPage > 0 ? $"{Resource.FullUrl}#page={pdfPage}" : Resource.FullUrl;
+
     private string Title => Resource.GetTitle();
 
     private bool CanReadAgain => text != null && text.State != EnumExtractedState.NotRead;
@@ -163,6 +205,9 @@
             var state = DocumentTexts.State(text.State);
             if (text.State == EnumExtractedState.Partial)
                 state += " " + DocumentTexts.ScannedPageHelp;
+            // The pages transcribed by the AI may be wrong (4.5b).
+            if (pages.Any(p => p.Transcribed))
+                state += " " + DocumentTexts.AutomaticTranscriptionHelp;
             var showing = DocumentTexts.Showing(text.PagesShown, text.PagesCount);
             return showing == null ? state : $"{state} {showing}";
         }
@@ -234,6 +279,113 @@
         });
         await LoadTextAsync();
     }
+
+    private void ShowOriginalPage(int number)
+    {
+        pdfPage = number;
+        showText = false;
+    }
+
+    private Task OnTranscribe() => transcribingFlight.RunAsync(TranscribeAsync);
+
+    private async Task TranscribeAsync()
+    {
+        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Transcribing scanned pages"))
+            return;
+
+        var scanned = await store.Notes.GetScannedPagesAsync(Resource.ResourceId, disposal.Token);
+        if (disposal.IsCancellationRequested || !scanned.IsValid)
+            return;
+        if (scanned.Entity == null)
+        {
+            Notify(NotificationSeverity.Info, DocumentTexts.NoPagesToTranscribe);
+            return;
+        }
+        // The pages need a model that sees images, as the photos.
+        var describer = await store.Notes.GetPhotoDescriberAsync(disposal.Token);
+        if (disposal.IsCancellationRequested || !describer.IsValid)
+            return;
+        if (!describer.Entity.Available)
+        {
+            Notify(NotificationSeverity.Warning, describer.Entity.Message);
+            return;
+        }
+        var status = await store.Notes.GetResourceProcessingStatusAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+
+        var choice = await dialogService.OpenAsync<TranscribePagesDialog>(DocumentTexts.TranscribePages,
+            new Dictionary<string, object?>
+            {
+                { "FileName", Resource.NameOut }, { "Scanned", scanned.Entity }, { "Describer", describer.Entity },
+                { "SecondsPerPage", status.IsValid ? status.Entity?.SecondsPerPage : null }
+            },
+            KntDialogs.Framed(KntDialogs.Medium()));
+        if (choice is not bool withOcr || disposal.IsCancellationRequested)
+            return;
+
+        var pagesToDo = scanned.Entity.PagesToTranscribe(withOcr);
+        var errors = new List<string>();
+        var transcribed = 0;
+        var summarized = false;
+        transcribing = true;
+        cancelTranscribing = false;
+        (transcribeDone, transcribeTotal) = (0, pagesToDo.Count);
+        try
+        {
+            foreach (var page in pagesToDo)
+            {
+                if (cancelTranscribing || disposal.IsCancellationRequested)
+                    break;
+                transcribeStep = DocumentTexts.TranscriptionProgress(transcribeDone, transcribeTotal);
+                StateHasChanged();
+                // A write: not canceled when the viewer closes (the server may have done it).
+                var result = await store.Notes.TranscribePageAsync(Resource.ResourceId, page);
+                if (result.IsValid)
+                    transcribed++;
+                else if (!result.ErrorMessage.Contains(AiTranscriptionRules.NotPendingMessage))
+                {
+                    errors.Add($"{DocumentTexts.PageHeading(page)}: {result.ErrorMessage}");
+                    if (result.ErrorMessage.Contains(AiDocumentRules.FileNotAvailableMessage))
+                        break;
+                }
+                transcribeDone++;
+            }
+
+            // Its summary waited for its pages (decided by the owner): in the same process.
+            if (!cancelTranscribing && !disposal.IsCancellationRequested && transcribed > 0 && AiDocumentRules.WaitsForSummary(Resource))
+            {
+                transcribeStep = "Summarizing the document…";
+                StateHasChanged();
+                var summary = await store.Notes.SummarizeDocumentAsync(Resource.ResourceId, replace: false);
+                if (summary.IsValid)
+                {
+                    // The card of the note shows its new title when the viewer closes.
+                    Resource.Description = summary.Entity.Description;
+                    Resource.DescriptionModel = summary.Entity.DescriptionModel;
+                    Resource.DescriptionByUser = summary.Entity.DescriptionByUser;
+                    Resource.LoadedDescription = summary.Entity.Description;
+                    summarized = true;
+                }
+                else
+                    errors.Add(summary.ErrorMessage);
+            }
+        }
+        finally
+        {
+            transcribing = false;
+        }
+        if (disposal.IsCancellationRequested)
+            return;
+
+        var done = DocumentTexts.TranscriptionResult(transcribed, transcribeTotal, cancelTranscribing, summarized);
+        Notify(errors.Count > 0 ? NotificationSeverity.Warning : NotificationSeverity.Success,
+            errors.Count > 0 ? done + " " + string.Join(" ", errors) : done);
+        await LoadTextAsync();
+    }
+
+    private void Notify(NotificationSeverity severity, string detail) =>
+        notificationService.Notify(new NotificationMessage { Severity = severity, Summary = DocumentTexts.TranscribePages, Detail = detail, Duration = 10000 });
 
     private async Task OpenAsync() =>
         await js.InvokeVoidAsync("open", Resource.FullUrl, "_blank", "noopener");
