@@ -126,9 +126,9 @@ public class ResourceContentController : ControllerBase
                 result.AddErrorMessage("Choose what to process.");
                 return result;
             }
-            // The photos need a model that sees images; the documents, any model.
+            // The photos and the scanned pages need a model that sees images; the documents, any model.
             var (provider, info) = await ChooseAsync(cancellationToken);
-            if (options.Photos ? !info.Available : !info.CanSummarize)
+            if (options.NeedsImages ? !info.Available : !info.CanSummarize)
             {
                 result.AddErrorMessage(info.Message);
                 return result;

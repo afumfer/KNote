@@ -45,6 +45,23 @@ internal static class TestDocuments
         document.EndPage();
     });
 
+    // A PDF of scanned pages, one per string: a page whose string starts with "OCR:" brings its text over the image too (an OCR
+    // layer), the others only the image.
+    public static byte[] ScannedPdf(params string[] pages) => Make(document =>
+    {
+        foreach (var page in pages)
+        {
+            var ocr = page.StartsWith("OCR:", StringComparison.Ordinal);
+            var text = ocr ? page[4..] : page;
+            using var scan = Picture(text);
+            var canvas = document.BeginPage(PageWidth, PageHeight);
+            canvas.DrawImage(scan, new SKRect(0, 0, PageWidth, PageHeight), new SKSamplingOptions(SKFilterMode.Linear));
+            if (ocr)
+                DrawTextPage(canvas, text);
+            document.EndPage();
+        }
+    });
+
     // A page of text with a small picture (a logo): not scanned.
     public static byte[] PdfWithLogo(string text) => Make(document =>
     {

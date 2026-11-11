@@ -71,9 +71,28 @@ public static class ResourceProcessingRules
     public static double? EstimateSeconds(int items, double? secondsPerItem) =>
         items == 0 ? 0 : secondsPerItem is > 0 ? items * secondsPerItem.Value : null;
 
-    /// <summary>The seconds of photos and documents; null if a pace that is needed is missing (only the counts, then).</summary>
-    public static double? EstimateSeconds(int photos, double? secondsPerPhoto, int documents, double? secondsPerDocument) =>
-        EstimateSeconds(photos, secondsPerPhoto) is double p && EstimateSeconds(documents, secondsPerDocument) is double d ? p + d : null;
+    /// <summary>The seconds of photos, documents and pages; null if a pace that is needed is missing (only the counts, then).</summary>
+    public static double? EstimateSeconds(int photos, double? secondsPerPhoto, int documents, double? secondsPerDocument,
+        int pages = 0, double? secondsPerPage = null) =>
+        EstimateSeconds(photos, secondsPerPhoto) is double p && EstimateSeconds(documents, secondsPerDocument) is double d
+            && EstimateSeconds(pages, secondsPerPage) is double s ? p + d + s : null;
+
+    /// <summary>The scanned documents of the texts kept (4.5): the ones with pages pending of a transcription.</summary>
+    public static List<ScannedDocumentDto> ScannedDocuments(IEnumerable<ResourceTextDto> texts) =>
+        (texts ?? Enumerable.Empty<ResourceTextDto>())
+            .Where(t => t.State == EnumExtractedState.Partial && t.Text != null)
+            .Select(t =>
+            {
+                var pages = DocumentTextRules.Pages(t.Text);
+                return new ScannedDocumentDto
+                {
+                    ResourceId = t.ResourceId, NoteId = t.NoteId, Name = t.Name, FileType = t.FileType, PagesCount = pages.Count,
+                    PendingPages = pages.Where(p => p.NeedsTranscription).Select(p => p.Number).ToList(),
+                    OcrPages = pages.Where(DocumentTextRules.HasOcrLayer).Select(p => p.Number).ToList()
+                };
+            })
+            .Where(d => d.PendingPages.Count > 0)
+            .ToList();
 
     /// <summary>The pace of a run that did some items (null: it didn't do enough to say).</summary>
     public static double? Pace(int itemsDone, double seconds) =>

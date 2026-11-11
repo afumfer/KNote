@@ -28,6 +28,8 @@ public class DocumentTextServiceTests
             Reads++;
             return _reader.Read(content, format);
         }
+
+        public byte[] DrawPage(Stream content, int pageNumber, int maxSide) => _reader.DrawPage(content, pageNumber, maxSide);
     }
 
     private SemanticIndexFixture fixture = null!;

@@ -178,6 +178,9 @@ dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifie
 Los resúmenes de los documentos (4.4c): `ResourceSummaryMeasure` (`Summaries`: 4.000, 8.000 y 16.000 caracteres de cada documento de
 `text/`; `Languages`: el idioma del resumen), con la misma carpeta y fuera del repositorio; y `Tests/ServiceTests/AiDocumentSummarizerSmokeTests`
 (el camino de producción, con `KNOTE_RESOURCE_SMOKE_MODEL`). Filtra por nombre, como los demás.
+La transcripción de las páginas escaneadas (4.5): `ResourceTranscriptionMeasure` (las mismas páginas de `scans/` que la 4.0, por el camino
+de producción: dibujo, tarea, opciones y limpieza; cuenta las imágenes inventadas, los bloques de código y las páginas cortadas; resultados
+en `results\transcriptions*`) y `Tests/ServiceTests/AiPageTranscriberSmokeTests`, con las mismas variables.
 El camino de producción de las fotos (`AiPhotoDescriber`: repositorio, contexto de la tarea y guardado condicional) tiene su smoke
 test en `Tests/ServiceTests/AiPhotoDescriberSmokeTests`, con la misma variable `KNOTE_RESOURCE_SMOKE_MODEL` (sin ella, Inconclusive):
 `dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiPhotoDescriberSmokeTests"`.

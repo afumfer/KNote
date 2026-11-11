@@ -134,6 +134,10 @@ public class KntResourceContentGetProcessingStatusAsyncCommand : KntCommandServi
         if (!result.IsValid)
             return result;
 
+        var scanned = await KntResourceContent.GetScannedDocumentsAsync(Service, states, result);
+        if (!result.IsValid)
+            return result;
+
         var counts = ResourceProcessingRules.Count(resources);
         var state = await KntResourceProcessingState.ReadAsync(Service);
         result.Entity = new ResourceProcessingStatusDto
@@ -143,9 +147,13 @@ public class KntResourceContentGetProcessingStatusAsyncCommand : KntCommandServi
             PendingDocuments = counts.PendingDocuments,
             PersonDocuments = counts.PersonDocuments,
             DocumentsToRead = ResourceProcessingRules.DocumentsToRead(states).Count,
+            PendingPages = scanned.Sum(d => d.PendingPages.Count),
+            OcrPages = scanned.Sum(d => d.OcrPages.Count),
+            ScannedDocuments = scanned.Count,
             LastRunDateTime = state?.LastRunDateTime,
             SecondsPerPhoto = state?.SecondsPerPhoto,
-            SecondsPerDocument = state?.SecondsPerDocument
+            SecondsPerDocument = state?.SecondsPerDocument,
+            SecondsPerPage = state?.SecondsPerPage
         };
         return result;
     }
@@ -174,7 +182,8 @@ public class KntResourceContentPrepareProcessingAsyncCommand : KntCommandService
         var resources = await KntResourceContent.GetResourcesToDescribeAsync(Service, result);
         if (!result.IsValid)
             return result;
-        var states = Param.Documents ? await KntResourceContent.GetTextStatesAsync(Service, result) : new List<ResourceTextDto>();
+        // The documents not read yet are read for their summaries and for their scanned pages (4.5).
+        var states = Param.Documents || Param.ScannedPages ? await KntResourceContent.GetTextStatesAsync(Service, result) : new List<ResourceTextDto>();
         if (!result.IsValid)
             return result;
 
@@ -211,7 +220,8 @@ public class KntResourceContentSaveProcessingRunAsyncCommand : KntCommandService
     public override Result ValidateParam()
     {
         var result = new Result();
-        if (Param == null || Param.PhotosDescribed < 0 || Param.PhotoSeconds < 0 || Param.DocumentsSummarized < 0 || Param.DocumentSeconds < 0)
+        if (Param == null || Param.PhotosDescribed < 0 || Param.PhotoSeconds < 0 || Param.DocumentsSummarized < 0 || Param.DocumentSeconds < 0
+            || Param.PagesTranscribed < 0 || Param.PageSeconds < 0)
             result.AddErrorMessage("The run is not valid.");
         return result;
     }
@@ -223,7 +233,187 @@ public class KntResourceContentSaveProcessingRunAsyncCommand : KntCommandService
         state.LastRunDateTime = DateTime.Now;
         state.SecondsPerPhoto = ResourceProcessingRules.Pace(Param.PhotosDescribed, Param.PhotoSeconds) ?? state.SecondsPerPhoto;
         state.SecondsPerDocument = ResourceProcessingRules.Pace(Param.DocumentsSummarized, Param.DocumentSeconds) ?? state.SecondsPerDocument;
+        state.SecondsPerPage = ResourceProcessingRules.Pace(Param.PagesTranscribed, Param.PageSeconds) ?? state.SecondsPerPage;
         return await KntResourceProcessingState.WriteAsync(Service, state);
+    }
+}
+
+// KNote Atlas, stage 4 (4.5): the scanned documents with pages pending of a transcription, of the repository or one of them.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntResourceContentGetScannedDocumentsAsyncCommand : KntCommandServiceBase<Guid?, Result<List<ScannedDocumentDto>>>
+{
+    public KntResourceContentGetScannedDocumentsAsyncCommand(IKntService service, Guid? resourceId) : base(service, resourceId)
+    {
+
+    }
+
+    public override async Task<Result<List<ScannedDocumentDto>>> Execute()
+    {
+        var result = new Result<List<ScannedDocumentDto>>();
+
+        List<ResourceTextDto> states;
+        if (Param is Guid resourceId)
+        {
+            await KntResourceContent.GetDescribableAsync(Service, resourceId, result);
+            if (!result.IsValid)
+                return result;
+            var text = await Repository.Notes.GetResourceTextAsync(resourceId);
+            if (!text.IsValid)
+            {
+                result.AddListErrorMessage(text.ListErrorMessage);
+                return result;
+            }
+            states = text.Entity == null ? new() : [text.Entity];
+        }
+        else
+        {
+            states = await KntResourceContent.GetTextStatesAsync(Service, result);
+            if (!result.IsValid)
+                return result;
+        }
+
+        result.Entity = await KntResourceContent.GetScannedDocumentsAsync(Service, states, result);
+        return result;
+    }
+}
+
+/// <summary>A page of a document (its number from 1).</summary>
+public record DocumentPageRequest(Guid ResourceId, int Page);
+
+// KNote Atlas, stage 4 (4.5): a scanned page drawn, to transcribe it. Refused: a page not pending, a file not here, a system that
+// can't draw PDF pages.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntResourceContentGetPageContextAsyncCommand : KntCommandServiceBase<DocumentPageRequest, Result<PageTranscriptionContextDto>>
+{
+    public KntResourceContentGetPageContextAsyncCommand(IKntService service, DocumentPageRequest request) : base(service, request)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null || Param.ResourceId == Guid.Empty || Param.Page < 1)
+            result.AddErrorMessage("The resource and the page are required.");
+        return result;
+    }
+
+    public override async Task<Result<PageTranscriptionContextDto>> Execute()
+    {
+        var result = new Result<PageTranscriptionContextDto>();
+
+        var (resource, note) = await KntResourceContent.GetDescribableAsync(Service, Param.ResourceId, result);
+        if (!result.IsValid)
+            return result;
+        if (DocumentTextRules.FormatOf(resource.FileType, resource.Name) != EnumDocumentFormat.Pdf)
+        {
+            result.AddErrorMessage("Only the pages of a PDF are transcribed.");
+            return result;
+        }
+        var reader = Service.DocumentReader;
+        if (reader == null)
+        {
+            result.AddErrorMessage("This installation can't read documents.");
+            return result;
+        }
+
+        var text = await Repository.Notes.GetResourceTextAsync(Param.ResourceId);
+        if (!text.IsValid)
+        {
+            result.AddListErrorMessage(text.ListErrorMessage);
+            return result;
+        }
+        var pages = DocumentTextRules.Pages(text.Entity?.Text);
+        if (pages.FirstOrDefault(p => p.Number == Param.Page) is not { NeedsTranscription: true })
+        {
+            result.AddErrorMessage(AiTranscriptionRules.NotPendingMessage);
+            return result;
+        }
+
+        using var content = KntDocuments.OpenContent(Service, resource);
+        if (content == null)
+        {
+            result.AddErrorMessage(AiDocumentRules.FileNotAvailableMessage);
+            return result;
+        }
+        byte[] image;
+        try
+        {
+            // Drawing takes a while: not in the caller's thread (ClientWin's UI).
+            image = await Task.Run(() => reader.DrawPage(content, Param.Page, AiTranscriptionRules.PageImageSide));
+        }
+        catch (Exception ex) when (ex is KntDocumentUnreadableException or PlatformNotSupportedException)
+        {
+            result.AddErrorMessage(ex.Message);
+            return result;
+        }
+
+        result.Entity = new PageTranscriptionContextDto
+        {
+            ResourceId = resource.ResourceId,
+            NoteId = note.NoteId,
+            FileName = resource.NameOut,
+            Page = Param.Page,
+            PagesCount = pages.Count,
+            Image = image,
+            ExpectedName = resource.Name
+        };
+        return result;
+    }
+}
+
+// KNote Atlas, stage 4 (4.5): keeps the transcription of a scanned page, only if its file is the same and the page is still
+// pending. Marks the note for the semantic index, without touching it (nor its date).
+[KntAuthorize(EnumRoles.Staff)]
+public class KntResourceContentSaveTranscriptionAsyncCommand : KntCommandServiceBase<PageTranscriptionSaveDto, Result<DocumentReadDto>>
+{
+    public KntResourceContentSaveTranscriptionAsyncCommand(IKntService service, PageTranscriptionSaveDto transcription) : base(service, transcription)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null || Param.ResourceId == Guid.Empty || Param.Page < 1)
+            result.AddErrorMessage("The resource and the page are required.");
+        else if (Param.Text == null)
+            result.AddErrorMessage("The transcription is required (empty for a page without text).");
+        return result;
+    }
+
+    public override async Task<Result<DocumentReadDto>> Execute()
+    {
+        var result = new Result<DocumentReadDto>();
+
+        var (_, note) = await KntResourceContent.GetDescribableAsync(Service, Param.ResourceId, result);
+        if (!result.IsValid)
+            return result;
+
+        var (outcome, text) = await KntDocuments.SaveTranscriptionAsync(Service, Param.ResourceId, Param.Page,
+            AiTranscriptionRules.CleanTranscription(Param.Text), Param.ExpectedName);
+        switch (outcome)
+        {
+            case EnumTranscriptionSaveOutcome.NotPending:
+                result.AddErrorMessage(AiTranscriptionRules.NotPendingMessage);
+                return result;
+            case EnumTranscriptionSaveOutcome.Changed:
+                result.AddErrorMessage("Its file was replaced while the page was being transcribed: it was not kept.");
+                return result;
+        }
+
+        // Its fragments of the semantic index change; the note itself doesn't (nor its date).
+        await KntSemanticIndexer.MarkStaleAsync(Service, note.NoteId);
+
+        var pages = DocumentTextRules.Pages(text.Text);
+        result.Entity = new DocumentReadDto
+        {
+            ResourceId = Param.ResourceId,
+            State = text.State,
+            Pages = pages.Count,
+            PagesToTranscribe = pages.Count(p => p.NeedsTranscription)
+        };
+        return result;
     }
 }
 
@@ -430,6 +620,25 @@ internal static class KntResourceContent
         if (!states.IsValid)
             result.AddListErrorMessage(states.ListErrorMessage);
         return states.Entity ?? new List<ResourceTextDto>();
+    }
+
+    // The PDF of those states with pages pending of a transcription (reading the text of each one that has them).
+    public static async Task<List<ScannedDocumentDto>> GetScannedDocumentsAsync(IKntService service, IEnumerable<ResourceTextDto> states, ResultBase result)
+    {
+        var texts = new List<ResourceTextDto>();
+        foreach (var state in states.Where(s => s.State == EnumExtractedState.Partial
+            && DocumentTextRules.FormatOf(s.FileType, s.Name) == EnumDocumentFormat.Pdf))
+        {
+            var text = state.Text != null ? new Result<ResourceTextDto> { Entity = state } : await service.Repository.Notes.GetResourceTextAsync(state.ResourceId);
+            if (!text.IsValid)
+            {
+                result.AddListErrorMessage(text.ListErrorMessage);
+                return new List<ScannedDocumentDto>();
+            }
+            if (text.Entity != null)
+                texts.Add(text.Entity);
+        }
+        return ResourceProcessingRules.ScannedDocuments(texts);
     }
 
     public static async Task<(ResourceDto Resource, NoteDto Note)> GetDescribableAsync(IKntService service, Guid resourceId, ResultBase result)

@@ -71,7 +71,7 @@ public class RepositoryResourcesCtrlTests
         Assert.IsTrue(ctrl.CanRun);
     }
 
-    // 4.4c: documents to read are something to do, if the documents are chosen; the photos alone, not.
+    // 4.4c: documents to read are something to do, if the documents (or, 4.5, their scanned pages) are chosen; the photos alone, not.
     [TestMethod]
     public async Task DocumentsToRead_AreSomethingToRun_IfTheDocumentsAreChosen()
     {
@@ -82,8 +82,26 @@ public class RepositoryResourcesCtrlTests
 
         Assert.IsTrue(ctrl.CanRun);
         ctrl.Documents = false;
+        Assert.IsTrue(ctrl.CanRun, "they are read to find their scanned pages");
+        ctrl.ScannedPages = false;
         Assert.IsFalse(ctrl.CanRun);
         Assert.IsFalse(ctrl.Options.Documents);
+    }
+
+    // 4.5: the scanned pages, with or without the ones with an OCR layer.
+    [TestMethod]
+    public async Task ScannedPages_AreSomethingToRun_WithOrWithoutTheOcrOnes()
+    {
+        var status = Status(pending: 0, person: 0);
+        (status.PendingPages, status.OcrPages, status.ScannedDocuments) = (3, 3, 1);
+        var (ctrl, _, service, _) = CreateCtrl(status);
+        await ctrl.LoadAsync(service, "Notes");
+
+        StringAssert.Contains(ctrl.CountsText, "Scanned pages: 3 to transcribe (3 with an OCR layer) in 1 document.");
+        Assert.IsTrue(ctrl.CanRun);
+        ctrl.OcrPages = false;
+        Assert.IsFalse(ctrl.CanRun, "all of them have an OCR layer");
+        Assert.AreEqual((true, false), (ctrl.Options.ScannedPages, ctrl.Options.OcrPages));
     }
 
     [TestMethod]

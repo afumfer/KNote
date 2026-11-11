@@ -262,7 +262,10 @@ public class FoldersController : ControllerBase
   base64 (`POST api/notes/resources`) sigue para los ficheros pequeños. El texto leído de un documento: `POST
   api/resources/{id}/read` (Staff+) y `GET api/resources/{id}/text` (cualquier usuario; su comienzo, `MaxViewerLength`).
   El resumen breve de un documento con la IA (4.4c): `POST api/resources/{id}/summarize?replace=` (Staff+, `AiDocumentSummarizer`,
-  cualquier modelo de chat); el lote (`POST api/resources/process`) acepta `Documents` además de `Photos`.
+  cualquier modelo de chat); el lote (`POST api/resources/process`) acepta `Documents` además de `Photos`, y (4.5a)
+  `ScannedPages`/`OcrPages`: transcribe las páginas escaneadas con `AiPageTranscriber` (un modelo que vea imágenes, como las
+  fotos: `options.NeedsImages`). PDFium dibuja las páginas en el `Server` (`IKntDocumentReader.DrawPage`, de `KNote.Ai`): en un
+  sistema donde no carga, las páginas dan un error claro y lo demás sigue.
 - **Editar un recurso** (`PUT api/notes/resources`, `ResourceInfoDto`): un recurso que ya existe solo cambia su
   descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
   fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el

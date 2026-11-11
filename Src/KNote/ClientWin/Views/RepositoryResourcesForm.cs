@@ -5,7 +5,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-// Section Â«Process pending resourcesÂ» of the KNote Atlas window (RepositoryResourcesCtrl): what «Process pending resources» would process and
+// Section «Process pending resources» of the KNote Atlas window (RepositoryResourcesCtrl): what «Process pending resources» would process and
 // running it, with the choice for the descriptions written by people and its progress. Always used embedded (PanelView())
 // inside RepositoryEditorForm's TabPage, never shown as a window. The run is the Store's: closing the editor does not stop it.
 public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
@@ -29,6 +29,8 @@ public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
         radioReplace.Text = ResourceProcessingTexts.PersonChoiceReplace;
         checkPhotos.Text = ResourceProcessingTexts.PhotosOption;
         checkDocuments.Text = ResourceProcessingTexts.DocumentsOption;
+        checkPages.Text = ResourceProcessingTexts.ScannedPagesOption;
+        checkOcrPages.Text = ResourceProcessingTexts.OcrPagesOption;
     }
 
     #endregion
@@ -72,7 +74,8 @@ public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
         foreach (var line in errors)
             listErrors.Items.Add(line);
 
-        radioSkip.Enabled = radioLock.Enabled = radioReplace.Enabled = checkPhotos.Enabled = checkDocuments.Enabled = !_ctrl.IsRunning;
+        radioSkip.Enabled = radioLock.Enabled = radioReplace.Enabled = checkPhotos.Enabled = checkDocuments.Enabled = checkPages.Enabled = !_ctrl.IsRunning;
+        checkOcrPages.Enabled = !_ctrl.IsRunning && checkPages.Checked;
         buttonRun.Enabled = _ctrl.CanRun;
         buttonCancelRun.Visible = _ctrl.IsRunning;
     }
@@ -95,6 +98,8 @@ public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
     {
         _ctrl.Photos = checkPhotos.Checked;
         _ctrl.Documents = checkDocuments.Checked;
+        _ctrl.ScannedPages = checkPages.Checked;
+        _ctrl.OcrPages = checkOcrPages.Checked;
         RefreshView();
     }
 

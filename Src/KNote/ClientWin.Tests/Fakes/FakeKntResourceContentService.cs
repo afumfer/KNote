@@ -15,6 +15,12 @@ internal class FakeKntResourceContentService : IKntResourceContentService
     public Task<Result<PhotoDescriptionContextDto>> GetPhotoContextAsync(Guid resourceId) => throw new NotSupportedException();
     public Task<Result<DocumentSummaryContextDto>> GetDocumentContextAsync(Guid resourceId) => throw new NotSupportedException();
 
+    public Task<Result<List<ScannedDocumentDto>>> GetScannedDocumentsAsync(Guid? resourceId = null) => throw new NotSupportedException();
+
+    public Task<Result<PageTranscriptionContextDto>> GetPageContextAsync(Guid resourceId, int page) => throw new NotSupportedException();
+
+    public Task<Result<DocumentReadDto>> SaveTranscriptionAsync(PageTranscriptionSaveDto transcription) => throw new NotSupportedException();
+
     public Task<Result<ResourceInfoDto>> SaveAiDescriptionAsync(AiDescriptionSaveDto description) => throw new NotSupportedException();
 
     public Task<Result<ResourceProcessingStatusDto>> GetProcessingStatusAsync() =>

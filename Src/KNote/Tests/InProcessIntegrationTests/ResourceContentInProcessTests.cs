@@ -147,6 +147,45 @@ public class ResourceContentInProcessTests
         Assert.AreEqual(0, (await service.ResourceContent.GetProcessingStatusAsync()).Entity.PendingPhotos);
     }
 
+    // 4.5: the batch transcribes the scanned pages (also of a document it reads in the run) with the model of the Server.
+    [TestMethod]
+    public async Task ProcessPendingResources_TranscribesTheScannedPages()
+    {
+        Guid scanId;
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var note = (await service.Notes.HomeNotesAsync()).Entity.First();
+            var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+            {
+                NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_scan.pdf", Description = "scan.pdf", FileType = "application/pdf",
+                ContentArrayBytes = TestDocuments.ScannedPdf("A SCANNED PAGE")
+            });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+            scanId = saved.Entity.ResourceId;
+        }
+        _chatClients.Script = () => Enumerable.Range(0, 100).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "A transcribed page.") }).ToList();
+        var options = new ResourceProcessingOptionsDto { Photos = false, Documents = false, ScannedPages = true };
+
+        var started = await _admin.PostAsJsonAsync("api/resources/process", options);
+
+        Assert.IsTrue(started.IsSuccessStatusCode, await started.Content.ReadAsStringAsync());
+        ResourceProcessingProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            var res = await _admin.GetFromJsonAsync<Result<ResourceProcessingProgressDto>>("api/resources/process/progress", _json);
+            progress = res!.Entity;
+        }
+        Assert.AreEqual(EnumResourceProcessingPhase.Completed, progress!.Phase, progress.Message);
+        Assert.IsTrue(progress.PagesTranscribed >= 1, string.Join(" ", progress.Errors));
+        Assert.AreEqual(0, _chatClients.LastTools.Count, "No tools.");
+        using var check = _factory.CreateServiceForRepository(0);
+        var text = (await check.ResourceContent.GetDocumentTextAsync(scanId)).Entity;
+        Assert.AreEqual(EnumExtractedState.Complete, text.State);
+        var page = DocumentTextRules.Pages(text.Text).Single();
+        Assert.AreEqual((true, "A transcribed page."), (page.Transcribed, page.Text));
+    }
+
     private static async Task<Guid> AddPhotoAsync()
     {
         using var service = _factory.CreateServiceForRepository(0);

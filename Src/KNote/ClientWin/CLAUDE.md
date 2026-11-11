@@ -724,7 +724,8 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   recursos, hasta 200 MB (`ResourceFileRules.SizeError` al elegirlos, como la Web).
 - **El resumen de los documentos** (4.4c): «Describe ▾» del editor de la nota describe las fotos y resume los documentos
   (`NoteEditorCtrl.DescribePhotosAsync`, con `AiDocumentSummarizer` para los documentos) y «Summarize the selected document»;
-  la sección *Process pending resources* (`RepositoryResourcesCtrl`) tiene las casillas «Photos» y «Documents» (`Options`).
+  la sección *Process pending resources* (`RepositoryResourcesCtrl`) tiene las casillas «Photos» y «Documents» (`Options`) y
+  (4.5a) «Scanned pages» y «Also the pages with… (OCR layer)» (`ScannedPages`, `OcrPages`).
 - Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
   `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
 

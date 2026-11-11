@@ -17,9 +17,14 @@ public class ResourceProcessingStatusDto
     public int PendingDocuments { get; set; }
     public int PersonDocuments { get; set; }
     public int DocumentsToRead { get; set; }
+    // The scanned pages pending of a transcription (4.5), and how many of them have an OCR layer (counted in PendingPages).
+    public int PendingPages { get; set; }
+    public int OcrPages { get; set; }
+    public int ScannedDocuments { get; set; }
     public DateTime? LastRunDateTime { get; set; }
     public double? SecondsPerPhoto { get; set; }
     public double? SecondsPerDocument { get; set; }
+    public double? SecondsPerPage { get; set; }
 }
 
 /// <summary>What «Process pending resources» is asked to do (POST api/resources/process).</summary>
@@ -28,11 +33,34 @@ public class ResourceProcessingOptionsDto
     public bool Photos { get; set; } = true;
     // Read the documents not read yet and summarize the pending ones (4.4c).
     public bool Documents { get; set; } = true;
+    // Transcribe the scanned pages (4.5) and, with OcrPages, also the ones with an OCR layer.
+    public bool ScannedPages { get; set; } = true;
+    public bool OcrPages { get; set; } = true;
     public EnumPersonDescriptions PersonDescriptions { get; set; } = EnumPersonDescriptions.Skip;
 
-    public bool Any => Photos || Documents;
+    public bool Any => Photos || Documents || ScannedPages;
 
-    public override string ToString() => $"Photos: {Photos}, documents: {Documents}, descriptions written by people: {PersonDescriptions}";
+    // The photos and the scanned pages need a model that sees images.
+    public bool NeedsImages => Photos || ScannedPages;
+
+    public override string ToString() =>
+        $"Photos: {Photos}, documents: {Documents}, scanned pages: {ScannedPages} (with an OCR layer: {OcrPages}), descriptions written by people: {PersonDescriptions}";
+}
+
+/// <summary>A scanned document with pages pending of a transcription (4.5): their numbers, and the ones with an OCR layer.</summary>
+public class ScannedDocumentDto
+{
+    public Guid ResourceId { get; set; }
+    public Guid NoteId { get; set; }
+    public string Name { get; set; }
+    public string FileType { get; set; }
+    public int PagesCount { get; set; }
+    public List<int> PendingPages { get; set; } = new();
+    public List<int> OcrPages { get; set; } = new();
+
+    /// <summary>The pages to transcribe: all the pending ones, or only the ones without an OCR layer.</summary>
+    public List<int> PagesToTranscribe(bool withOcrLayer) =>
+        withOcrLayer ? new List<int>(PendingPages) : PendingPages.FindAll(p => !OcrPages.Contains(p));
 }
 
 /// <summary>
@@ -56,9 +84,11 @@ public class ResourceProcessingRunDto
     public double PhotoSeconds { get; set; }
     public int DocumentsSummarized { get; set; }
     public double DocumentSeconds { get; set; }
+    public int PagesTranscribed { get; set; }
+    public double PageSeconds { get; set; }
 
     public override string ToString() =>
-        $"{PhotosDescribed} photos in {PhotoSeconds:0} s, {DocumentsSummarized} documents in {DocumentSeconds:0} s";
+        $"{PhotosDescribed} photos in {PhotoSeconds:0} s, {DocumentsSummarized} documents in {DocumentSeconds:0} s, {PagesTranscribed} pages in {PageSeconds:0} s";
 }
 
 /// <summary>What KNote keeps of the runs of a repository (SystemValues AI / AI_RESOURCES_STATE, as JSON).</summary>
@@ -67,13 +97,15 @@ public class ResourceProcessingStateDto
     public DateTime? LastRunDateTime { get; set; }
     public double? SecondsPerPhoto { get; set; }
     public double? SecondsPerDocument { get; set; }
+    public double? SecondsPerPage { get; set; }
 }
 
-/// <summary>What a run is doing (Phase Processing).</summary>
+/// <summary>What a run is doing (Phase Processing), in this order: the documents transcribed are summarized in the same run.</summary>
 public enum EnumResourceProcessingStep
 {
     Photos,
     ReadingDocuments,
+    Pages,
     Documents
 }
 
@@ -115,7 +147,11 @@ public class ResourceProcessingProgressDto
     public int DocumentsTotal { get; set; }
     public int DocumentsDone { get; set; }
     public int DocumentsSummarized { get; set; }
-    // Scanned documents without text: their summary waits for the transcription of their pages (stage 4.5).
+    // Scanned pages (4.5): the ones to transcribe (known once the documents are read), done and transcribed.
+    public int PagesTotal { get; set; }
+    public int PagesDone { get; set; }
+    public int PagesTranscribed { get; set; }
+    // Scanned documents without text: their summary waits for the transcription of their pages.
     public int DocumentsWaiting { get; set; }
     // Documents that can't be read (protected, encrypted, damaged): not tried again.
     public int DocumentsUnreadable { get; set; }

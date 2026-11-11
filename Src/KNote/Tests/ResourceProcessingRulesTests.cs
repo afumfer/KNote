@@ -97,10 +97,11 @@ public class ResourceProcessingRulesTests
 
         var replace = ResourceProcessingTexts.RunConfirmation(status, new ResourceProcessingOptionsDto { PersonDescriptions = EnumPersonDescriptions.Replace }, paid);
         var keep = ResourceProcessingTexts.RunConfirmation(status,
-            new ResourceProcessingOptionsDto { Documents = false, PersonDescriptions = EnumPersonDescriptions.Lock }, new ResourceDescriberDto { Model = "qwen3.5:9b" });
+            new ResourceProcessingOptionsDto { Documents = false, ScannedPages = false, PersonDescriptions = EnumPersonDescriptions.Lock },
+            new ResourceDescriberDto { Model = "qwen3.5:9b" });
 
         StringAssert.Contains(replace, "The AI describes 12 photos and summarizes 5 documents with the model gpt-test.");
-        StringAssert.Contains(replace, "KNote reads the text of 6 documents first (without the AI).");
+        StringAssert.Contains(replace, "KNote reads the text of 6 documents first (without the AI), and their scanned pages are transcribed too.");
         StringAssert.Contains(replace, "It should take about 46 s.");
         StringAssert.Contains(replace, "gpt-test is a paid model: these photos and documents are sent");
         StringAssert.Contains(keep, "describes 10 photos with");
@@ -115,7 +116,8 @@ public class ResourceProcessingRulesTests
         var onlyToRead = new ResourceProcessingStatusDto { DocumentsToRead = 2 };
 
         Assert.IsTrue(ResourceProcessingTexts.HasWork(onlyToRead, new ResourceProcessingOptionsDto()));
-        Assert.IsFalse(ResourceProcessingTexts.HasWork(onlyToRead, new ResourceProcessingOptionsDto { Documents = false }));
+        Assert.IsTrue(ResourceProcessingTexts.HasWork(onlyToRead, new ResourceProcessingOptionsDto { Documents = false }), "to find their scanned pages");
+        Assert.IsFalse(ResourceProcessingTexts.HasWork(onlyToRead, new ResourceProcessingOptionsDto { Documents = false, ScannedPages = false }));
         Assert.IsTrue(ResourceProcessingTexts.HasWork(new ResourceProcessingStatusDto { PersonDocuments = 1 },
             new ResourceProcessingOptionsDto { PersonDescriptions = EnumPersonDescriptions.Lock }));
     }

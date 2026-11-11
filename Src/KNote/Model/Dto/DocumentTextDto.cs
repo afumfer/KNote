@@ -22,6 +22,8 @@ public class DocumentPageDto
     public string Text { get; set; }
     // A scanned page (DocumentTextRules.NeedsTranscription): its text, if any, is the one of its OCR layer.
     public bool NeedsTranscription { get; set; }
+    // A scanned page transcribed by the AI (KNote Atlas 4.5): its text is the transcription.
+    public bool Transcribed { get; set; }
 }
 
 /// <summary>What «Read document» did (IKntResourceContentService.ReadDocumentAsync).</summary>

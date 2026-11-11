@@ -18,6 +18,34 @@ public class PhotoDescriptionContextDto
 }
 
 /// <summary>
+/// What the AI receives to transcribe a scanned page of a PDF (KNote Atlas 4.5): the page drawn as a JPEG
+/// (AiTranscriptionRules.PageImageSide) and what is checked when the transcription is saved (the file is the same).
+/// </summary>
+public class PageTranscriptionContextDto
+{
+    public Guid ResourceId { get; set; }
+    public Guid NoteId { get; set; }
+    public string FileName { get; set; }
+    public int Page { get; set; }
+    public int PagesCount { get; set; }
+    public byte[] Image { get; set; }
+    public string ContentType { get; set; } = "image/jpeg";
+    public string ExpectedName { get; set; }
+}
+
+/// <summary>The transcription of a scanned page, saved only if the file is the same and the page is still pending.</summary>
+public class PageTranscriptionSaveDto
+{
+    public Guid ResourceId { get; set; }
+    public int Page { get; set; }
+    public string Text { get; set; }
+    public string ExpectedName { get; set; }
+
+    // Without the text: the log of the commands writes the parameter.
+    public override string ToString() => $"Resource {ResourceId}, page {Page}, {Text?.Length ?? 0} characters";
+}
+
+/// <summary>
 /// The description the AI wrote of a resource, and what the resource was when it was read: it is written only if it is still
 /// so and not locked (D12).
 /// </summary>

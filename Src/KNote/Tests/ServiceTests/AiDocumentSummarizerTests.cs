@@ -147,7 +147,8 @@ public class AiDocumentSummarizerTests
         var model = new FakeModel("A summary.");
 
         var before = (await service.ResourceContent.GetProcessingStatusAsync()).Entity;
-        var run = await AiResourceProcessor.ProcessAsync(service, model, Ollama, new ResourceProcessingOptionsDto { Photos = false });
+        // Without its scanned pages (4.5): the scan waits for them.
+        var run = await AiResourceProcessor.ProcessAsync(service, model, Ollama, new ResourceProcessingOptionsDto { Photos = false, ScannedPages = false });
 
         Assert.AreEqual((1, 3, 0), (before.PendingPhotos, before.DocumentsToRead, before.PersonDocuments));
         Assert.AreEqual(2, before.PendingDocuments, "the manual and the scan");

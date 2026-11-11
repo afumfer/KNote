@@ -6,7 +6,7 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// Section Â«Process pending resourcesÂ» of the KNote Atlas window (AtlasCtrl; KNote Atlas, stage 4, D10): what
+/// Section «Process pending resources» of the KNote Atlas window (AtlasCtrl; KNote Atlas, stage 4, D10): what
 /// «Process pending resources» would process (Service.ResourceContent) and running it, with the choice for the descriptions
 /// written by people, its progress and its cancellation. The run is the Store's (Store.ResourceProcessing, one run of KNote
 /// Atlas at a time in the app): it goes on when the editor is closed, and opening it again shows its progress. Included in
@@ -36,18 +36,24 @@ public class RepositoryResourcesCtrl : CtrlViewEmbeddableBase<IViewResourceProce
     // The choice for the descriptions written by people (the view's radio buttons).
     public EnumPersonDescriptions PersonDescriptions { get; set; } = EnumPersonDescriptions.Skip;
 
-    // What to process (the view's check boxes; 4.4c).
+    // What to process (the view's check boxes; 4.4c, 4.5).
     public bool Photos { get; set; } = true;
     public bool Documents { get; set; } = true;
+    public bool ScannedPages { get; set; } = true;
+    public bool OcrPages { get; set; } = true;
 
-    public ResourceProcessingOptionsDto Options => new() { Photos = Photos, Documents = Documents, PersonDescriptions = PersonDescriptions };
+    public ResourceProcessingOptionsDto Options => new()
+    {
+        Photos = Photos, Documents = Documents, ScannedPages = ScannedPages, OcrPages = OcrPages, PersonDescriptions = PersonDescriptions
+    };
 
     // The run of this repository (running or the last one), or null.
     public ResourceProcessingProgressDto Progress => Store.ResourceProcessing.IsOf(Service) ? Store.ResourceProcessing.Progress : null;
 
     public bool IsRunning => Store.ResourceProcessing.IsRunning && Store.ResourceProcessing.IsOf(Service);
 
-    // Something to do: photos to describe, documents to read or to summarize or, with «Keep them and lock them», descriptions to lock.
+    // Something to do: photos to describe, documents to read or to summarize, scanned pages to transcribe or, with «Keep them and
+    // lock them», descriptions to lock.
     public bool CanRun => Status != null && !Store.AtlasJobRunning && Options.Any && ResourceProcessingTexts.HasWork(Status, Options);
 
     public bool HasPersonPhotos => PersonPhotosText.Length > 0;
@@ -126,7 +132,7 @@ public class RepositoryResourcesCtrl : CtrlViewEmbeddableBase<IViewResourceProce
         // The photos need a model that sees images; the documents, any model.
         var options = Options;
         var (provider, describer) = await Store.GetPhotoDescriberAsync(Service);
-        if (options.Photos ? !describer.Available : !describer.CanSummarize)
+        if (options.NeedsImages ? !describer.Available : !describer.CanSummarize)
         {
             View.ShowInfo(describer.Message, ResourceProcessingTexts.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
             return false;

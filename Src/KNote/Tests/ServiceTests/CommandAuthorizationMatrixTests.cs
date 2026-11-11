@@ -101,7 +101,9 @@ public class CommandAuthorizationMatrixTests
         Add(nameof(EnumRoles.Staff),
             "KntResourceContentGetPhotoContextAsyncCommand", "KntResourceContentSaveAiDescriptionAsyncCommand",
             // ... and reading a document now.
-            "KntResourceContentReadDocumentAsyncCommand", "KntResourceContentGetDocumentContextAsyncCommand");
+            "KntResourceContentReadDocumentAsyncCommand", "KntResourceContentGetDocumentContextAsyncCommand",
+            "KntResourceContentGetScannedDocumentsAsyncCommand", "KntResourceContentGetPageContextAsyncCommand",
+            "KntResourceContentSaveTranscriptionAsyncCommand");
 
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",

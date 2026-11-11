@@ -58,6 +58,7 @@ public class ResourceProcessingJob
             var what = progress.Step switch
             {
                 EnumResourceProcessingStep.ReadingDocuments => "Reading documents",
+                EnumResourceProcessingStep.Pages => "Transcribing scanned pages",
                 EnumResourceProcessingStep.Documents => "Summarizing documents",
                 _ => "Describing photos"
             };
@@ -130,7 +131,7 @@ public class ResourceProcessingJob
 
         // The descriptions written change the notes' fragments: the index is brought up to date (on the UI thread, as a click).
         // Something the index has to read again: a description, a summary or the text of a document.
-        if ((final.PhotosDescribed > 0 || final.DocumentsSummarized > 0 || final.DocumentsRead > 0) && hasSemanticIndex)
+        if ((final.PhotosDescribed > 0 || final.DocumentsSummarized > 0 || final.DocumentsRead > 0 || final.PagesTranscribed > 0) && hasSemanticIndex)
             Post(() => _semanticIndex.Start(service, RepositoryName, rebuild: false));
         Publish(force: true);
     }

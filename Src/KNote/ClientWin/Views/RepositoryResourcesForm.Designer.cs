@@ -34,6 +34,8 @@ namespace KNote.ClientWin.Views
             this.labelLastRun = new System.Windows.Forms.Label();
             this.checkPhotos = new System.Windows.Forms.CheckBox();
             this.checkDocuments = new System.Windows.Forms.CheckBox();
+            this.checkPages = new System.Windows.Forms.CheckBox();
+            this.checkOcrPages = new System.Windows.Forms.CheckBox();
             this.labelPersonPhotos = new System.Windows.Forms.Label();
             this.radioSkip = new System.Windows.Forms.RadioButton();
             this.radioLock = new System.Windows.Forms.RadioButton();
@@ -59,6 +61,8 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.radioLock);
             this.panelForm.Controls.Add(this.radioSkip);
             this.panelForm.Controls.Add(this.labelPersonPhotos);
+            this.panelForm.Controls.Add(this.checkOcrPages);
+            this.panelForm.Controls.Add(this.checkPages);
             this.panelForm.Controls.Add(this.checkDocuments);
             this.panelForm.Controls.Add(this.checkPhotos);
             this.panelForm.Controls.Add(this.labelLastRun);
@@ -67,7 +71,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(626, 508);
+            this.panelForm.Size = new System.Drawing.Size(626, 570);
             this.panelForm.TabIndex = 0;
             //
             // labelDescription
@@ -86,14 +90,14 @@ namespace KNote.ClientWin.Views
             this.labelCounts.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.labelCounts.Location = new System.Drawing.Point(9, 69);
             this.labelCounts.Name = "labelCounts";
-            this.labelCounts.Size = new System.Drawing.Size(608, 50);
+            this.labelCounts.Size = new System.Drawing.Size(608, 66);
             this.labelCounts.TabIndex = 11;
             //
             // labelLastRun
             //
             this.labelLastRun.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelLastRun.Location = new System.Drawing.Point(9, 121);
+            this.labelLastRun.Location = new System.Drawing.Point(9, 137);
             this.labelLastRun.Name = "labelLastRun";
             this.labelLastRun.Size = new System.Drawing.Size(608, 20);
             this.labelLastRun.TabIndex = 12;
@@ -102,7 +106,7 @@ namespace KNote.ClientWin.Views
             //
             this.labelPersonPhotos.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelPersonPhotos.Location = new System.Drawing.Point(9, 199);
+            this.labelPersonPhotos.Location = new System.Drawing.Point(9, 261);
             this.labelPersonPhotos.Name = "labelPersonPhotos";
             this.labelPersonPhotos.Size = new System.Drawing.Size(608, 34);
             this.labelPersonPhotos.TabIndex = 13;
@@ -112,7 +116,7 @@ namespace KNote.ClientWin.Views
             this.checkPhotos.AutoSize = true;
             this.checkPhotos.Checked = true;
             this.checkPhotos.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkPhotos.Location = new System.Drawing.Point(12, 147);
+            this.checkPhotos.Location = new System.Drawing.Point(12, 163);
             this.checkPhotos.Name = "checkPhotos";
             this.checkPhotos.Size = new System.Drawing.Size(140, 19);
             this.checkPhotos.TabIndex = 6;
@@ -125,19 +129,45 @@ namespace KNote.ClientWin.Views
             this.checkDocuments.AutoSize = true;
             this.checkDocuments.Checked = true;
             this.checkDocuments.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkDocuments.Location = new System.Drawing.Point(12, 170);
+            this.checkDocuments.Location = new System.Drawing.Point(12, 186);
             this.checkDocuments.Name = "checkDocuments";
             this.checkDocuments.Size = new System.Drawing.Size(160, 19);
             this.checkDocuments.TabIndex = 7;
             this.checkDocuments.Text = "Documents";
             this.checkDocuments.UseVisualStyleBackColor = true;
             this.checkDocuments.CheckedChanged += new System.EventHandler(this.checkProcess_CheckedChanged);
+            // 
+            // checkPages
+            // 
+            this.checkPages.AutoSize = true;
+            this.checkPages.Checked = true;
+            this.checkPages.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkPages.Location = new System.Drawing.Point(12, 209);
+            this.checkPages.Name = "checkPages";
+            this.checkPages.Size = new System.Drawing.Size(160, 19);
+            this.checkPages.TabIndex = 8;
+            this.checkPages.Text = "Scanned pages";
+            this.checkPages.UseVisualStyleBackColor = true;
+            this.checkPages.CheckedChanged += new System.EventHandler(this.checkProcess_CheckedChanged);
+            // 
+            // checkOcrPages
+            // 
+            this.checkOcrPages.AutoSize = true;
+            this.checkOcrPages.Checked = true;
+            this.checkOcrPages.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkOcrPages.Location = new System.Drawing.Point(30, 232);
+            this.checkOcrPages.Name = "checkOcrPages";
+            this.checkOcrPages.Size = new System.Drawing.Size(160, 19);
+            this.checkOcrPages.TabIndex = 9;
+            this.checkOcrPages.Text = "Also the pages with an OCR layer";
+            this.checkOcrPages.UseVisualStyleBackColor = true;
+            this.checkOcrPages.CheckedChanged += new System.EventHandler(this.checkProcess_CheckedChanged);
             //
             // radioSkip
             //
             this.radioSkip.AutoSize = true;
             this.radioSkip.Checked = true;
-            this.radioSkip.Location = new System.Drawing.Point(21, 235);
+            this.radioSkip.Location = new System.Drawing.Point(21, 297);
             this.radioSkip.Name = "radioSkip";
             this.radioSkip.Size = new System.Drawing.Size(220, 19);
             this.radioSkip.TabIndex = 3;
@@ -148,7 +178,7 @@ namespace KNote.ClientWin.Views
             // radioLock
             //
             this.radioLock.AutoSize = true;
-            this.radioLock.Location = new System.Drawing.Point(21, 258);
+            this.radioLock.Location = new System.Drawing.Point(21, 320);
             this.radioLock.Name = "radioLock";
             this.radioLock.Size = new System.Drawing.Size(160, 19);
             this.radioLock.TabIndex = 4;
@@ -158,7 +188,7 @@ namespace KNote.ClientWin.Views
             // radioReplace
             //
             this.radioReplace.AutoSize = true;
-            this.radioReplace.Location = new System.Drawing.Point(21, 281);
+            this.radioReplace.Location = new System.Drawing.Point(21, 343);
             this.radioReplace.Name = "radioReplace";
             this.radioReplace.Size = new System.Drawing.Size(380, 19);
             this.radioReplace.TabIndex = 5;
@@ -169,7 +199,7 @@ namespace KNote.ClientWin.Views
             //
             this.labelWarning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelWarning.Location = new System.Drawing.Point(9, 309);
+            this.labelWarning.Location = new System.Drawing.Point(9, 371);
             this.labelWarning.Name = "labelWarning";
             this.labelWarning.Size = new System.Drawing.Size(608, 34);
             this.labelWarning.TabIndex = 14;
@@ -178,7 +208,7 @@ namespace KNote.ClientWin.Views
             //
             this.labelProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelProgress.Location = new System.Drawing.Point(9, 347);
+            this.labelProgress.Location = new System.Drawing.Point(9, 409);
             this.labelProgress.Name = "labelProgress";
             this.labelProgress.Size = new System.Drawing.Size(608, 20);
             this.labelProgress.TabIndex = 15;
@@ -187,7 +217,7 @@ namespace KNote.ClientWin.Views
             //
             this.progressBarRun.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBarRun.Location = new System.Drawing.Point(9, 370);
+            this.progressBarRun.Location = new System.Drawing.Point(9, 432);
             this.progressBarRun.Name = "progressBarRun";
             this.progressBarRun.Size = new System.Drawing.Size(608, 12);
             this.progressBarRun.TabIndex = 16;
@@ -200,7 +230,7 @@ namespace KNote.ClientWin.Views
             this.listErrors.FormattingEnabled = true;
             this.listErrors.HorizontalScrollbar = true;
             this.listErrors.IntegralHeight = false;
-            this.listErrors.Location = new System.Drawing.Point(9, 390);
+            this.listErrors.Location = new System.Drawing.Point(9, 452);
             this.listErrors.Name = "listErrors";
             this.listErrors.SelectionMode = System.Windows.Forms.SelectionMode.None;
             this.listErrors.Size = new System.Drawing.Size(608, 72);
@@ -209,7 +239,7 @@ namespace KNote.ClientWin.Views
             // buttonCancelRun
             //
             this.buttonCancelRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonCancelRun.Location = new System.Drawing.Point(9, 471);
+            this.buttonCancelRun.Location = new System.Drawing.Point(9, 533);
             this.buttonCancelRun.Name = "buttonCancelRun";
             this.buttonCancelRun.Size = new System.Drawing.Size(110, 29);
             this.buttonCancelRun.TabIndex = 2;
@@ -220,7 +250,7 @@ namespace KNote.ClientWin.Views
             // buttonRun
             //
             this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRun.Location = new System.Drawing.Point(417, 471);
+            this.buttonRun.Location = new System.Drawing.Point(417, 533);
             this.buttonRun.Name = "buttonRun";
             this.buttonRun.Size = new System.Drawing.Size(200, 29);
             this.buttonRun.TabIndex = 0;
@@ -232,7 +262,7 @@ namespace KNote.ClientWin.Views
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(626, 508);
+            this.ClientSize = new System.Drawing.Size(626, 570);
             this.Controls.Add(this.panelForm);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "RepositoryResourcesForm";
@@ -251,6 +281,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label labelLastRun;
         private System.Windows.Forms.CheckBox checkPhotos;
         private System.Windows.Forms.CheckBox checkDocuments;
+        private System.Windows.Forms.CheckBox checkPages;
+        private System.Windows.Forms.CheckBox checkOcrPages;
         private System.Windows.Forms.Label labelPersonPhotos;
         private System.Windows.Forms.RadioButton radioSkip;
         private System.Windows.Forms.RadioButton radioLock;

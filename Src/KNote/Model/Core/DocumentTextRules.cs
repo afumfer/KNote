@@ -20,13 +20,15 @@ public enum EnumDocumentFormat
 /// <summary>
 /// The text of the documents (KNote Atlas, stage 4, D1, D2, D5): which ones are read, which page of a PDF is scanned, how the
 /// text is cleaned and how it is kept in Resources.ExtractedText. The pages are separated by PageSeparator (form feed) and a
-/// page that needs a transcription starts with PendingMark: control characters, not letters nor numbers, so that searching
-/// «12» or «page» in the documents (D18) does not find them all. The number of a page is its position.
+/// page that needs a transcription starts with PendingMark and one transcribed by the AI (4.5) with TranscribedMark: control
+/// characters, not letters nor numbers, so that searching «12» or «page» in the documents (D18) does not find them all. The
+/// number of a page is its position.
 /// </summary>
 public static class DocumentTextRules
 {
     public const char PageSeparator = '\f';
     public const char PendingMark = '\u0001';
+    public const char TranscribedMark = '\u0002';
 
     // A page with fewer letters than this and an image is a scanned one (measured in 4.0).
     public const int MaxLettersOfAScannedPage = 20;
@@ -103,10 +105,13 @@ public static class DocumentTextRules
     {
         var list = (pages ?? Enumerable.Empty<DocumentPageDto>()).ToList();
         var text = paged
-            ? string.Join(PageSeparator, list.Select(p => (p.NeedsTranscription ? PendingMark.ToString() : "") + Clean(p.Text)))
+            ? string.Join(PageSeparator, list.Select(p => Mark(p) + Clean(p.Text)))
             : Clean(string.Join("\n\n", list.Select(p => p.Text)));
         return text.Length > MaxTextLength ? text[..MaxTextLength] : text;
     }
+
+    private static string Mark(DocumentPageDto page) =>
+        page.NeedsTranscription ? PendingMark.ToString() : page.Transcribed ? TranscribedMark.ToString() : "";
 
     /// <summary>The pages of a kept text, numbered from 1.</summary>
     public static List<DocumentPageDto> Pages(string extractedText)
@@ -114,13 +119,58 @@ public static class DocumentTextRules
         if (string.IsNullOrEmpty(extractedText))
             return new List<DocumentPageDto>();
 
-        return extractedText.Split(PageSeparator).Select((page, i) => new DocumentPageDto
+        return extractedText.Split(PageSeparator).Select((page, i) =>
         {
-            Number = i + 1,
-            NeedsTranscription = page.Length > 0 && page[0] == PendingMark,
-            Text = page.Length > 0 && page[0] == PendingMark ? page[1..] : page
+            var mark = page.Length > 0 ? page[0] : ' ';
+            var marked = mark == PendingMark || mark == TranscribedMark;
+            return new DocumentPageDto
+            {
+                Number = i + 1,
+                NeedsTranscription = mark == PendingMark,
+                Transcribed = mark == TranscribedMark,
+                Text = marked ? page[1..] : page
+            };
         }).ToList();
     }
+
+    /// <summary>
+    /// The kept text with the transcription of a scanned page (4.5) in place of the text of its OCR layer, or null if the page
+    /// is not pending of a transcription (already transcribed, or not there: the document was read again meanwhile).
+    /// </summary>
+    public static string Transcribe(string extractedText, int pageNumber, string transcription)
+    {
+        var pages = Pages(extractedText);
+        var page = pages.FirstOrDefault(p => p.Number == pageNumber);
+        if (page == null || !page.NeedsTranscription)
+            return null;
+
+        page.NeedsTranscription = false;
+        page.Transcribed = true;
+        page.Text = transcription ?? "";
+        return Compose(pages, paged: true);
+    }
+
+    /// <summary>
+    /// The pages of a document read again, with the transcriptions it had (4.5, decided by the owner): repeating them is
+    /// expensive, so each page that is still scanned keeps its transcription, if the document has the same number of pages.
+    /// </summary>
+    public static List<DocumentPageDto> KeepTranscriptions(string previousText, List<DocumentPageDto> pages)
+    {
+        var previous = Pages(previousText);
+        if (pages == null || previous.Count != pages.Count || !previous.Any(p => p.Transcribed))
+            return pages;
+
+        return pages.Select((page, i) => page.NeedsTranscription && previous[i].Transcribed
+            ? new DocumentPageDto { Number = page.Number, Text = previous[i].Text, Transcribed = true }
+            : page).ToList();
+    }
+
+    /// <summary>The scanned pages pending of a transcription: all, or only the ones without an OCR layer.</summary>
+    public static List<int> PagesToTranscribe(string extractedText, bool withOcrLayer = true) =>
+        Pages(extractedText).Where(p => p.NeedsTranscription && (withOcrLayer || !HasOcrLayer(p))).Select(p => p.Number).ToList();
+
+    /// <summary>A scanned page that came with the text of an old text recognition (OCR): usable until it is transcribed.</summary>
+    public static bool HasOcrLayer(DocumentPageDto page) => page.NeedsTranscription && !string.IsNullOrWhiteSpace(page.Text);
 
     /// <summary>
     /// The beginning of a kept text to show it: the whole pages that fit in maxLength (only the first one, cut, if it alone is

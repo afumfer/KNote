@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -46,4 +47,19 @@ public interface IKntResourceContentService
 
     /// <summary>The text read of a document (DocumentTextRules' format). Guest.</summary>
     Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, int maxLength = 0);
+
+    /// <summary>
+    /// The scanned documents with pages pending of a transcription (4.5): of the repository, or the one given (an empty list if it
+    /// has none). Staff.
+    /// </summary>
+    Task<Result<List<ScannedDocumentDto>>> GetScannedDocumentsAsync(Guid? resourceId = null);
+
+    /// <summary>A scanned page pending of a transcription, drawn, to transcribe it (4.5). Staff.</summary>
+    Task<Result<PageTranscriptionContextDto>> GetPageContextAsync(Guid resourceId, int page);
+
+    /// <summary>
+    /// Keeps the transcription of a scanned page (4.5), only if its file is the same and the page is still pending (Entity: what
+    /// is left of the document). Marks its note for the semantic index. Staff.
+    /// </summary>
+    Task<Result<DocumentReadDto>> SaveTranscriptionAsync(PageTranscriptionSaveDto transcription);
 }

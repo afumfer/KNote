@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -38,4 +39,13 @@ public class KntResourceContentService : KntServiceBase, IKntResourceContentServ
 
     public async Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, int maxLength = 0) =>
         await ExecuteCommand(new KntResourceContentGetDocumentTextAsyncCommand(Service, new DocumentTextRequest(resourceId, maxLength)));
+
+    public async Task<Result<List<ScannedDocumentDto>>> GetScannedDocumentsAsync(Guid? resourceId = null) =>
+        await ExecuteCommand(new KntResourceContentGetScannedDocumentsAsyncCommand(Service, resourceId));
+
+    public async Task<Result<PageTranscriptionContextDto>> GetPageContextAsync(Guid resourceId, int page) =>
+        await ExecuteCommand(new KntResourceContentGetPageContextAsyncCommand(Service, new DocumentPageRequest(resourceId, page)));
+
+    public async Task<Result<DocumentReadDto>> SaveTranscriptionAsync(PageTranscriptionSaveDto transcription) =>
+        await ExecuteCommand(new KntResourceContentSaveTranscriptionAsyncCommand(Service, transcription));
 }

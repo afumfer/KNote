@@ -1,9 +1,12 @@
 using System.IO.Compression;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
 using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using PDFtoImage;
+using SkiaSharp;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.TextExtractor;
@@ -52,6 +55,53 @@ public sealed class AiDocumentReader : IKntDocumentReader
     };
 
     private static List<DocumentPageDto> OnePage(string text) => [new DocumentPageDto { Number = 1, Text = text }];
+
+    #region Drawing a page (4.5)
+
+    private const int JpegQuality = 85;
+
+    public byte[] DrawPage(Stream content, int pageNumber, int maxSide)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        // PDFium is native: PDFtoImage brings it for these systems (KNote Local runs on the three).
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        {
+            try
+            {
+                return Draw(content, pageNumber, maxSide);
+            }
+            catch (Exception ex) when (ex is DllNotFoundException or BadImageFormatException or TypeInitializationException)
+            {
+                throw new PlatformNotSupportedException("This installation can't draw the pages of a PDF (PDFium could not be loaded).", ex);
+            }
+            catch (Exception ex) when (ex is not (IOException or OutOfMemoryException or OperationCanceledException))
+            {
+                throw new KntDocumentUnreadableException($"the page {pageNumber} could not be drawn: {ex.Message}", ex);
+            }
+        }
+        throw new PlatformNotSupportedException("This system can't draw the pages of a PDF.");
+    }
+
+    // Measured in 4.0 (ClientWin.Tests/Helpers/ResourceProbe): the other side by its proportion, on white (a page without a
+    // background would come out black as a JPEG).
+    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("linux")]
+    [SupportedOSPlatform("macos")]
+    private static byte[] Draw(Stream content, int pageNumber, int maxSide)
+    {
+        var size = Conversion.GetPageSize(content, pageNumber - 1, leaveOpen: true);
+        content.Position = 0;
+        var options = size.Width >= size.Height
+            ? new RenderOptions(Width: maxSide, WithAspectRatio: true, BackgroundColor: SKColors.White)
+            : new RenderOptions(Height: maxSide, WithAspectRatio: true, BackgroundColor: SKColors.White);
+
+        using var bitmap = Conversion.ToImage(content, pageNumber - 1, leaveOpen: true, options: options);
+        using var image = SKImage.FromBitmap(bitmap);
+        using var data = image.Encode(SKEncodedImageFormat.Jpeg, JpegQuality);
+        return data.ToArray();
+    }
+
+    #endregion
 
     #region PDF
 

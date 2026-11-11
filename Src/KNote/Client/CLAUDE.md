@@ -487,7 +487,8 @@ Patrones ya establecidos que hay que seguir:
   1–N of M» y «Read document» (Staff+, `KntAccess` al pulsar; si ya se leyó, pregunta). Textos de `DocumentTexts`.
 - **«Describe with AI»** (4.4c, antes «Describe photos»): `NoteForm` describe las fotos y resume los documentos de la nota con
   `DescribeWithAiDialog` (cuenta unos y otros) y una petición por recurso (`DescribePhotoAsync` / `SummarizeDocumentAsync`); la
-  tarjeta de un documento tiene «Summarize document». El lote (`AtlasResources`) tiene las casillas «Photos» y «Documents».
+  tarjeta de un documento tiene «Summarize document». El lote (`AtlasResources`) tiene las casillas «Photos» y «Documents» y
+  (4.5a) «Scanned pages», con «Also the pages with… (OCR layer)» debajo, desactivada sin la anterior.
 - **Recursos de la nota** (`NoteKResources`, galería; `NoteResourceEditor`, diálogo de alta y edición): al editar
   un recurso solo cambian su descripción y su orden; el fichero no se cambia ni se reenvía (`Server` conserva el
   fichero y el contenido guardado en la BD, ver `Server/CLAUDE.md`). Al pulsar un recurso se ve en la misma ventana

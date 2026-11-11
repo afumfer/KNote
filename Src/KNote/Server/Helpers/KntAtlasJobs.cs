@@ -232,7 +232,7 @@ public class KntAtlasJobs : BackgroundService
                     var result = await _resourcesRunner(resources, progress, cancellation.Token);
                     progress.Report(result.Entity ?? new ResourceProcessingProgressDto { Phase = EnumResourceProcessingPhase.Failed, Message = result.ErrorMessage });
                     // Something the index has to read again: a description, a summary or the text of a document.
-                    if (result.Entity is { } done && (done.PhotosDescribed > 0 || done.DocumentsSummarized > 0 || done.DocumentsRead > 0)
+                    if (result.Entity is { } done && (done.PhotosDescribed > 0 || done.DocumentsSummarized > 0 || done.DocumentsRead > 0 || done.PagesTranscribed > 0)
                         && resources.HasSemanticIndex)
                         EnqueueIndex(resources.RepositoryId, resources.Progress.RepositoryName, resources.UserName, false);
                     break;

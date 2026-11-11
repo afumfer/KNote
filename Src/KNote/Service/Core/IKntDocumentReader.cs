@@ -19,6 +19,13 @@ public interface IKntDocumentReader
     /// protected PDF, an encrypted ODT, a damaged file) throws KntDocumentUnreadableException: it is not tried again.
     /// </summary>
     List<DocumentPageDto> Read(Stream content, EnumDocumentFormat format);
+
+    /// <summary>
+    /// A page of a PDF drawn as a JPEG on white, with its longest side of <paramref name="maxSide"/> pixels, to transcribe it
+    /// (4.5). A page that can't be drawn throws KntDocumentUnreadableException; a system where PDFium can't run (KNote Local on
+    /// another platform), PlatformNotSupportedException.
+    /// </summary>
+    byte[] DrawPage(Stream content, int pageNumber, int maxSide);
 }
 
 /// <summary>A document KNote can't read, whatever is tried: it is kept as EnumExtractedState.Unreadable.</summary>
