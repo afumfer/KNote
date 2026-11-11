@@ -250,7 +250,11 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   con sus errores, que se consulta mientras dura, y los índices de otros modelos con su botón para borrarlos.
   `AtlasResources` (etapa 4): «Process pending resources» (`api/resources`), con los textos de `ResourceProcessingTexts`.
 - **Búsqueda** (`NotesSearch.razor`): selector «Words / Meaning» (`RadzenSelectBar`); el modo va en la URL
-  (`mode=meaning`) y en la posición de la lista. Por significado no hay paginación en el Server: `KntMeaningSearchPages`
+  (`mode=meaning`) y en la posición de la lista. En «Words» (4.6a, D18, las mismas que `ClientWin`): «Search in note description»,
+  «Search in note tasks» y «Search in resources», **todas desmarcadas por defecto** (decidido por el propietario, aunque en
+  `ClientWin` la de la descripción viene marcada); van en la URL (`inDescription`, `inTasks`, `inResources`) y en la clave de la
+  lista (`OptionsKeyMark` y tres 0/1), para que cada búsqueda tenga su posición. El filtro tiene, bajo «Description», «Also in the
+  note tasks» y «Also in the resources». Por significado no hay paginación en el Server: `KntMeaningSearchPages`
   hace la búsqueda con la primera página que pide `NotesGrid` y le da las demás en memoria, ordenadas con
   `NoteListSorter` (sin orden, de más a menos parecida). `NotesGrid.ShowSimilarity` añade las columnas «Similarity» y
   «Fragment» (no se ordenan con su cabecera). Encima, el aviso de las notas sin poner al día con «Update index» (la

@@ -49,6 +49,26 @@
         <RadzenButton Text="Search" Icon="search" Click="OnSearch" ButtonStyle="ButtonStyle.Primary" />
     </RadzenStack>
 
+    @* The options of the search by words (KNote Atlas 4.6a, as ClientWin's): the topic and the tags always. *@
+    @if (searchMode == EnumNotesSearchMode.Words)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="SearchInDescription" TValue="bool" @bind-Value="@inDescription" />
+                <RadzenLabel Text="Search in note description" Component="SearchInDescription" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="SearchInNoteTasks" TValue="bool" @bind-Value="@inTasks" />
+                <RadzenLabel Text="Search in note tasks" Component="SearchInNoteTasks" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="SearchInResources" TValue="bool" @bind-Value="@inResources" />
+                <RadzenLabel Text="Search in resources" Component="SearchInResources"
+                             MouseEnter="@(args => tooltipService.Open(args, "Also in the descriptions of the photos and documents, and in the text of the documents (also the transcriptions of the scanned pages)."))" />
+            </RadzenStack>
+        </RadzenStack>
+    }
+
     @if (meaningPages?.PendingNotes > 0)
     {
         <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false" Size="AlertSize.Small" class="rz-m-0">
@@ -89,6 +109,11 @@
     private string textSearch = "";
     // The mode chosen beside the box (the one of the list shown is the search's, SearchedMode).
     private EnumNotesSearchMode searchMode;
+    // The options of the search by words chosen below the box (4.6a; the ones of the list shown are SearchedOptions). The
+    // description too is off by default in the Web (decided by the owner; ClientWin has it on).
+    private bool inDescription;
+    private bool inTasks;
+    private bool inResources;
     // The search by meaning can be offered: a semantic index this server can search (SemanticIndexTexts.CanSearch).
     private bool meaningAvailable;
     // The notes found by meaning of the list shown (null: by words, or without text).
@@ -99,8 +124,23 @@
     private readonly CancellationTokenSource disposal = new();
 
     // The list's key (NotesListPosition.ListKey) is the text searched; by meaning, after a mark that can't be typed: it
-    // is another list, with a position of its own.
+    // is another list, with a position of its own. By words with options (4.6a), after another mark and the options (three
+    // 0 or 1: description, tasks, resources).
     private const string MeaningKeyMark = "\u0001";
+    private const string OptionsKeyMark = "\u0002";
+
+    private sealed record WordOptions(bool Description, bool Tasks, bool Resources)
+    {
+        public static readonly WordOptions None = new(false, false, false);
+
+        public bool Any => Description || Tasks || Resources;
+
+        public string Key => $"{(Description ? 1 : 0)}{(Tasks ? 1 : 0)}{(Resources ? 1 : 0)}";
+
+        public string Query => (Description ? "&inDescription=true" : "") + (Tasks ? "&inTasks=true" : "") + (Resources ? "&inResources=true" : "");
+
+        public static WordOptions OfKey(string key) => key.Length == 3 ? new(key[0] == '1', key[1] == '1', key[2] == '1') : None;
+    }
 
     protected override void OnInitialized()
     {
@@ -113,14 +153,17 @@
         if (queries != null && queries.TryGetValue("textSearch", out var text))
         {
             var mode = queries.TryGetValue("mode", out var modeText) && modeText == "meaning" ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words;
-            if (appState.NotesSearchPosition?.ListKey != ListKeyOf(mode, text))
-                appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text) };
+            bool On(string name) => queries.TryGetValue(name, out var value) && value == "true";
+            var options = new WordOptions(On("inDescription"), On("inTasks"), On("inResources"));
+            if (appState.NotesSearchPosition?.ListKey != ListKeyOf(mode, text, options))
+                appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text, options) };
         }
         else
             appState.NotesSearchPosition ??= new NotesListPosition { ListKey = "" };
 
         textSearch = SearchedText();
         searchMode = SearchedMode();
+        (inDescription, inTasks, inResources) = (SearchedOptions().Description, SearchedOptions().Tasks, SearchedOptions().Resources);
         NewMeaningPages();
 
         kntWindows.NoteSaved += OnNoteSaved;
@@ -144,19 +187,19 @@
         disposal.Dispose();
     }
 
-    private void OnSearch() => Search(searchMode, textSearch);
+    private void OnSearch() => Search(searchMode, textSearch, new WordOptions(inDescription, inTasks, inResources));
 
     // The same search again: before searching, it brings the index up to date (some pending notes).
-    private void OnUpdateIndex() => Search(SearchedMode(), SearchedText());
+    private void OnUpdateIndex() => Search(SearchedMode(), SearchedText(), WordOptions.None);
 
-    private void Search(EnumNotesSearchMode mode, string text)
+    private void Search(EnumNotesSearchMode mode, string text, WordOptions options)
     {
-        appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text) };
+        appState.NotesSearchPosition = new NotesListPosition { ListKey = ListKeyOf(mode, text, options) };
         NewMeaningPages();
         searchVersion++;
         store.NavigateTo(string.IsNullOrEmpty(text)
             ? "notes/search"
-            : $"notes/search?textSearch={Uri.EscapeDataString(text)}{(mode == EnumNotesSearchMode.Meaning ? "&mode=meaning" : "")}");
+            : $"notes/search?textSearch={Uri.EscapeDataString(text)}" + (mode == EnumNotesSearchMode.Meaning ? "&mode=meaning" : options.Query));
     }
 
     private void TopicKeyPress(KeyboardEventArgs e)
@@ -173,7 +216,10 @@
                 : new Result<List<NoteMinimalDto>>(new List<NoteMinimalDto>()) { TotalCount = 0 };
 
         var search = SearchedText();
-        var queryString = $"textSearch={Uri.EscapeDataString(search)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}";
+        var options = SearchedOptions();
+        var queryString = $"textSearch={Uri.EscapeDataString(search)}&pageNumber={page.PageNumber}&pageSize={page.PageSize}"
+            + (options.Description ? "&searchInDescription=true" : "") + (options.Tasks ? "&searchInNoteTasks=true" : "")
+            + (options.Resources ? "&searchInResources=true" : "");
         if (order != null)
             queryString += $"&orderColumn={order.Column}&orderAscending={order.Ascending}";
         return await store.Notes.GetSearch(queryString, cancellationToken);
@@ -204,22 +250,34 @@
 
     private string ListKey() => appState.NotesSearchPosition?.ListKey ?? "";
 
-    private static string ListKeyOf(EnumNotesSearchMode mode, string text) =>
-        mode == EnumNotesSearchMode.Meaning ? MeaningKeyMark + text : text;
+    private static string ListKeyOf(EnumNotesSearchMode mode, string text, WordOptions options) =>
+        mode == EnumNotesSearchMode.Meaning ? MeaningKeyMark + text
+        : options.Any ? OptionsKeyMark + options.Key + text
+        : text;
 
-    // The mode and the text of the search shown in the list (the box may have been changed without searching it).
+    // The mode, the text and the options of the search shown in the list (the box may have been changed without searching it).
     private EnumNotesSearchMode SearchedMode() =>
         ListKey().StartsWith(MeaningKeyMark, StringComparison.Ordinal) ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words;
 
+    private bool HasOptions() => ListKey().StartsWith(OptionsKeyMark, StringComparison.Ordinal) && ListKey().Length >= 4;
+
+    private WordOptions SearchedOptions() =>
+        HasOptions() ? WordOptions.OfKey(ListKey().Substring(OptionsKeyMark.Length, 3)) : WordOptions.None;
+
     private string SearchedText() =>
-        SearchedMode() == EnumNotesSearchMode.Meaning ? ListKey()[MeaningKeyMark.Length..] : ListKey();
+        SearchedMode() == EnumNotesSearchMode.Meaning ? ListKey()[MeaningKeyMark.Length..]
+        : HasOptions() ? ListKey()[(OptionsKeyMark.Length + 3)..]
+        : ListKey();
 
     // The notes found, to print or export them (NotesPrintExportMenu adds the list's order and view).
     private NotesListReportRequestDto ReportRequest() => new()
     {
         Source = NotesListReportSource.Search,
         TextSearch = SearchedText(),
-        SearchMode = SearchedMode()
+        SearchMode = SearchedMode(),
+        SearchInDescription = SearchedOptions().Description,
+        SearchInNoteTasks = SearchedOptions().Tasks,
+        SearchInResources = SearchedOptions().Resources
     };
 
     // Creating a note needs Staff (KntAccess, checked with no wait before: it opens a window).

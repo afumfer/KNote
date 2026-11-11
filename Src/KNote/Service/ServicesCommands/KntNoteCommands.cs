@@ -205,6 +205,7 @@ public class KntNotesGetFilterAsyncCommand : KntCommandServiceBase<NotesFilterDt
 
     public override async Task<Result<List<NoteInfoDto>>> Execute()
     {
+        await KntResourcesSearch.PrepareAsync(Service, Param);
         return await Repository.Notes.GetFilterAsync(Param);
     }
 }
@@ -219,6 +220,7 @@ public class KntNotesGetMinimalFilterAsyncCommand : KntCommandServiceBase<NotesF
 
     public override async Task<Result<List<NoteMinimalDto>>> Execute()
     {
+        await KntResourcesSearch.PrepareAsync(Service, Param);
         return await Repository.Notes.GetFilterMinimalAsync(Param);
     }
 }
@@ -233,6 +235,7 @@ public class KntNotesGetSearchAsyncCommand : KntCommandServiceBase<NotesSearchDt
 
     public override async Task<Result<List<NoteInfoDto>>> Execute()
     {
+        await KntResourcesSearch.PrepareAsync(Service, Param);
         return await Repository.Notes.GetSearchAsync(Param);
     }
 }
@@ -247,7 +250,25 @@ public class KntNotesGetMinimalSearchAsyncCommand : KntCommandServiceBase<NotesS
 
     public override async Task<Result<List<NoteMinimalDto>>> Execute()
     {
+        await KntResourcesSearch.PrepareAsync(Service, Param);
         return await Repository.Notes.GetSearchMinimalAsync(Param);
+    }
+}
+
+// KNote Atlas, stage 4 (D18): searching in the resources of the notes leaves out the ones of the system notes (the attachments of
+// the conversations of the assistant, the images of the chat room), so that the option finds nothing inside them (§ 7).
+internal static class KntResourcesSearch
+{
+    public static async Task PrepareAsync(IKntService service, NotesSearchDto search)
+    {
+        if (search?.SearchInResources == true)
+            search.ResourcesExcludedNoteTypeIds = await KntSystemNotes.GetSystemNoteTypeIdsAsync(service.Repository);
+    }
+
+    public static async Task PrepareAsync(IKntService service, NotesFilterDto filter)
+    {
+        if (filter?.SearchInResources == true && !string.IsNullOrEmpty(filter.Description))
+            filter.ResourcesExcludedNoteTypeIds = await KntSystemNotes.GetSystemNoteTypeIdsAsync(service.Repository);
     }
 }
 

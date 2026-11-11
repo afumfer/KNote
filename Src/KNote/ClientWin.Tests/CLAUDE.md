@@ -178,6 +178,9 @@ dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifie
 Los resúmenes de los documentos (4.4c): `ResourceSummaryMeasure` (`Summaries`: 4.000, 8.000 y 16.000 caracteres de cada documento de
 `text/`; `Languages`: el idioma del resumen), con la misma carpeta y fuera del repositorio; y `Tests/ServiceTests/AiDocumentSummarizerSmokeTests`
 (el camino de producción, con `KNOTE_RESOURCE_SMOKE_MODEL`). Filtra por nombre, como los demás.
+«Search in resources» (4.6a, D18): `ResourceSearchMeasure` mide la búsqueda por palabras con la opción y sin ella, y el filtro, en las
+dos ORM, contra una **copia** de un repositorio real (`KNOTE_SEARCH_MEASURE_DB`: un SQLite o una cadena de SQL Server; abrirlo pone al día
+su esquema), con las palabras de `KNOTE_SEARCH_MEASURE_WORDS` (separadas por `|`) y los resultados en `results\search-resources.*`.
 La transcripción de las páginas escaneadas (4.5): `ResourceTranscriptionMeasure` (las mismas páginas de `scans/` que la 4.0, por el camino
 de producción: dibujo, tarea, opciones y limpieza; cuenta las imágenes inventadas, los bloques de código y las páginas cortadas; resultados
 en `results\transcriptions*`) y `Tests/ServiceTests/AiPageTranscriberSmokeTests`, con las mismas variables.

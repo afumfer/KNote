@@ -26,6 +26,18 @@
                 <RadzenTextBox Name="Description" @bind-Value="@notesFilter.Description" InputSize="InputSize.Small" />
             </ChildContent>
         </RadzenFormField>
+        @* KNote Atlas 4.6a: the text of Description also in the note's tasks and resources (as ClientWin's filter). *@
+        <RadzenStack Gap="0.25rem" class="knt-filter-description-options">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="FilterInNoteTasks" TValue="bool" @bind-Value="@notesFilter.SearchInNoteTasks" />
+                <RadzenLabel Text="Also in the note tasks" Component="FilterInNoteTasks" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="FilterInResources" TValue="bool" @bind-Value="@notesFilter.SearchInResources" />
+                <RadzenLabel Text="Also in the resources" Component="FilterInResources"
+                             MouseEnter="@(args => tooltipService.Open(args, "The descriptions of the photos and documents, and the text of the documents (also the transcriptions of the scanned pages)."))" />
+            </RadzenStack>
+        </RadzenStack>
 
         <RadzenFormField Text="Tags" Variant="Variant.Outlined" Component="Tags">
             <Start><RadzenIcon Icon="sell" /></Start>
@@ -177,6 +189,8 @@
         notesFilter.Tags = null;
         notesFilter.FolderId = null;
         notesFilter.Description = null;
+        notesFilter.SearchInNoteTasks = false;
+        notesFilter.SearchInResources = false;
         notesFilter.MeaningText = null;
         notesFilter.ModifiedFrom = null;
         notesFilter.ModifiedTo = null;

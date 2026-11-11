@@ -1846,9 +1846,23 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     : query.Where(n => EF.Functions.Like(n.Tags, $"%{notesFilter.Tags}%"));
 
             if (!string.IsNullOrEmpty(notesFilter.Description))
+            {
+                // KNote Atlas, stage 4 (4.6a): also in the note's tasks and resources, if chosen.
+                var text = notesFilter.Description;
+                var pattern = $"%{text}%";
+                var inTasks = notesFilter.SearchInNoteTasks;
+                var inResources = notesFilter.SearchInResources;
+                var resourceNotes = inResources ? await NotesWithResourcesMatchingAsync(ctx, pattern, isSqlServer) : new List<Guid>();
+                var excluded = notesFilter.ResourcesExcludedNoteTypeIds ?? new List<Guid>();
                 query = isSqlServer
-                    ? query.Where(n => EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(notesFilter.Description))
-                    : query.Where(n => EF.Functions.Like(n.Description, $"%{notesFilter.Description}%"));
+                    ? query.Where(n => EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(text)
+                                     || (inTasks && n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(text)
+                                                                       || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(text)))
+                                     || (inResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))))
+                    : query.Where(n => EF.Functions.Like(n.Description, pattern)
+                                     || (inTasks && n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, pattern) || EF.Functions.Like(t.Description, pattern)))
+                                     || (inResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))));
+            }
 
             if (notesFilter.TaskUserId != null)
                 query = query.Where(n => n.NoteTasks.Any(t => t.UserId == notesFilter.TaskUserId));
@@ -1942,6 +1956,19 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         return result;
     }
 
+    // KNote Atlas, stage 4 (D18): the notes with a resource whose description or text read (ExtractedText, out of the model of EF:
+    // read with SQL of its own, as GetResourceTextAsync) matches the pattern, accent-insensitive as the other conditions (on SQLite,
+    // the LIKE of KntSqliteAccentFunctions).
+    private static async Task<List<Guid>> NotesWithResourcesMatchingAsync(KntDbContext ctx, string pattern, bool isSqlServer) =>
+        await ctx.Database.SqlQueryRaw<Guid>(isSqlServer ? ResourcesMatchingSqlServer : ResourcesMatchingSqlite, pattern).ToListAsync();
+
+    // The pattern is a parameter ({0}); only the collation (AccentInsensitiveCollation) is in the text.
+    private const string ResourcesMatchingSqlServer =
+        "SELECT DISTINCT NoteId AS Value FROM Resources WHERE [Description] COLLATE Latin1_General_100_CI_AI_SC LIKE {0} " +
+        "OR ExtractedText COLLATE Latin1_General_100_CI_AI_SC LIKE {0}";
+    private const string ResourcesMatchingSqlite =
+        "SELECT DISTINCT NoteId AS Value FROM Resources WHERE [Description] LIKE {0} OR ExtractedText LIKE {0}";
+
     private async Task<Result<List<T>>> GetSearchPrivateAsync<T>(NotesSearchDto notesSearch) where T : NoteMinimalDto, new()
     {
         try
@@ -1962,15 +1989,14 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
             else
             {
-                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
-
-                // TODO: refactor this -----------------------------
-                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
-                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());
-                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
-                // --------------------------------------------------
+                var listTokens = ExtractListTokensSearch(notesSearch.TextSearch);
+                // The description only with its option (the token "***" that also turned it on is gone: KNote Atlas 4.6a).
+                var flagSearchDescription = notesSearch.SearchInDescription;
 
                 var searchInNoteTasks = notesSearch.SearchInNoteTasks;
+                // KNote Atlas, stage 4 (D18): the resources, read with SQL of its own (ExtractedText is out of the model of EF).
+                var searchInResources = notesSearch.SearchInResources;
+                var excluded = notesSearch.ResourcesExcludedNoteTypeIds ?? new List<Guid>();
 
                 foreach (var token in listTokens)
                 {
@@ -1980,31 +2006,37 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     if (token[0] != '!')
                     {
                         var pattern = $"%{token}%";
+                        var resourceNotes = searchInResources ? await NotesWithResourcesMatchingAsync(ctx, pattern, isSqlServer) : new List<Guid>();
                         query = isSqlServer
                             ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(token)
                                              || EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(token)
                                              || (flagSearchDescription && EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(token))
                                              || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(token)
-                                                                                         || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(token))))
+                                                                                         || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(token)))
+                                             || (searchInResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))))
                             : query.Where(n => EF.Functions.Like(n.Topic, pattern)
                                              || EF.Functions.Like(n.Tags, pattern)
                                              || (flagSearchDescription && EF.Functions.Like(n.Description, pattern))
-                                             || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, pattern) || EF.Functions.Like(t.Description, pattern))));
+                                             || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, pattern) || EF.Functions.Like(t.Description, pattern)))
+                                             || (searchInResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))));
                     }
                     else
                     {
                         var tokenNot = token.Substring(1, token.Length - 1);
                         var patternNot = $"%{tokenNot}%";
+                        var resourceNotesNot = searchInResources ? await NotesWithResourcesMatchingAsync(ctx, patternNot, isSqlServer) : new List<Guid>();
                         query = isSqlServer
                             ? query.Where(n => !EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(tokenNot)
                                              && !EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(tokenNot)
                                              && (!flagSearchDescription || !EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(tokenNot))
                                              && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(tokenNot)
-                                                                                           || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(tokenNot))))
+                                                                                           || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(tokenNot)))
+                                             && (!searchInResources || !(resourceNotesNot.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value)))))
                             : query.Where(n => !EF.Functions.Like(n.Topic, patternNot)
                                              && !EF.Functions.Like(n.Tags, patternNot)
                                              && (!flagSearchDescription || !EF.Functions.Like(n.Description, patternNot))
-                                             && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, patternNot) || EF.Functions.Like(t.Description, patternNot))));
+                                             && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, patternNot) || EF.Functions.Like(t.Description, patternNot)))
+                                             && (!searchInResources || !(resourceNotesNot.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value)))));
                     }
                 }
             }

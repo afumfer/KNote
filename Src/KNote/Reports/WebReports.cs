@@ -123,6 +123,9 @@ public class WebReports
                 return await _service.Notes.GetSearchMinimalAsync(new NotesSearchDto
                 {
                     TextSearch = request.TextSearch,
+                    SearchInDescription = request.SearchInDescription,
+                    SearchInNoteTasks = request.SearchInNoteTasks,
+                    SearchInResources = request.SearchInResources,
                     OrderColumn = request.OrderColumn,
                     OrderAscending = request.OrderAscending
                 });
@@ -173,6 +176,9 @@ public class WebReports
                 context.Source = NotesListSource.Search;
                 context.SearchText = request.TextSearch?.Trim();
                 context.SearchByMeaning = request.SearchMode == EnumNotesSearchMode.Meaning;
+                context.SearchInDescription = request.SearchInDescription;
+                context.SearchInNoteTasks = request.SearchInNoteTasks;
+                context.SearchInResources = request.SearchInResources;
                 break;
 
             default:

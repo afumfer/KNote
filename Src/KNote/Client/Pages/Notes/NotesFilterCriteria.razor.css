@@ -18,3 +18,13 @@
 .knt-filter-criteria-none {
     color: var(--rz-text-tertiary-color);
 }
+
+/* The options of Description (4.6a): close to its field, with the size of the labels. */
+.knt-filter-description-options {
+    margin-top: -0.5rem;
+    padding-left: 0.25rem;
+}
+
+.knt-filter-description-options ::deep .rz-label {
+    font-size: 0.8125rem;
+}

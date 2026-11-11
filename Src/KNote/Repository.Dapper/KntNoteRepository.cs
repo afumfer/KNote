@@ -2012,7 +2012,13 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             strWhere = AddAndToStringSQL(strWhere);
             var descriptionParam = $"wDescription{paramIndex++}";
             parameters.Add(descriptionParam, $"%{notesFilter.Description}%");
-            strWhere += $"Description{collate} LIKE @{descriptionParam} ";
+            // KNote Atlas, stage 4 (4.6a): also in the note's tasks and resources, if chosen.
+            var descriptionParts = new List<string> { $"Description{collate} LIKE @{descriptionParam}" };
+            if (notesFilter.SearchInNoteTasks)
+                descriptionParts.Add(NoteTasksCondition(descriptionParam, collate));
+            if (notesFilter.SearchInResources)
+                descriptionParts.Add(ResourcesCondition(descriptionParam, collate, notesFilter.ResourcesExcludedNoteTypeIds, parameters, ref paramIndex));
+            strWhere += "(" + string.Join(" OR ", descriptionParts) + ") ";
         }
 
         if (notesFilter.TaskUserId != null)
@@ -2074,8 +2080,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
     }
 
     // Positive (non-negated) match for one search token: Topic/Tags, optionally Description, and
-    // optionally any related NoteTasks row (1-to-n) whose own Tags/Description matches too.
-    private string BuildSearchTokenCondition(string token, string collate, bool searchDescription, bool searchInNoteTasks, DynamicParameters parameters, ref int paramIndex)
+    // optionally any related NoteTasks row (1-to-n) whose own Tags/Description matches too, and (KNote Atlas, D18) any
+    // resource whose description or text read matches.
+    private string BuildSearchTokenCondition(string token, string collate, bool searchDescription, bool searchInNoteTasks,
+        bool searchInResources, List<Guid> resourcesExcluded, DynamicParameters parameters, ref int paramIndex)
     {
         var tokenParam = $"tok{paramIndex++}";
         parameters.Add(tokenParam, $"%{token}%");
@@ -2090,14 +2098,17 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             parts.Add($"Description{collate} LIKE @{tokenParam}");
 
         if (searchInNoteTasks)
-            parts.Add($@"EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
-                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))");
+            parts.Add(NoteTasksCondition(tokenParam, collate));
+
+        if (searchInResources)
+            parts.Add(ResourcesCondition(tokenParam, collate, resourcesExcluded, parameters, ref paramIndex));
 
         return "(" + string.Join(" OR ", parts) + ")";
     }
 
     // Negated match (a "!token") for one search token: every field checked above must NOT match.
-    private string BuildSearchTokenNotCondition(string tokenNot, string collate, bool searchDescription, bool searchInNoteTasks, DynamicParameters parameters, ref int paramIndex)
+    private string BuildSearchTokenNotCondition(string tokenNot, string collate, bool searchDescription, bool searchInNoteTasks,
+        bool searchInResources, List<Guid> resourcesExcluded, DynamicParameters parameters, ref int paramIndex)
     {
         var tokenParam = $"tokNot{paramIndex++}";
         parameters.Add(tokenParam, $"%{tokenNot}%");
@@ -2112,10 +2123,32 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             parts.Add($"Description{collate} NOT LIKE @{tokenParam}");
 
         if (searchInNoteTasks)
-            parts.Add($@"NOT EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
-                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))");
+            parts.Add($"NOT {NoteTasksCondition(tokenParam, collate)}");
+
+        if (searchInResources)
+            parts.Add($"NOT {ResourcesCondition(tokenParam, collate, resourcesExcluded, parameters, ref paramIndex)}");
 
         return "(" + string.Join(" AND ", parts) + ")";
+    }
+
+    // A task of the note whose tags or description match.
+    private static string NoteTasksCondition(string tokenParam, string collate) =>
+        $@"EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
+                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))";
+
+    // KNote Atlas, stage 4 (D18): a resource of the note whose description or text read (also the transcriptions) matches; never
+    // the resources of the notes of the excluded types (the system ones: the attachments of the conversations).
+    private static string ResourcesCondition(string tokenParam, string collate, List<Guid> resourcesExcluded, DynamicParameters parameters, ref int paramIndex)
+    {
+        var excluded = "";
+        if (resourcesExcluded?.Count > 0)
+        {
+            var excludedParam = $"resExcluded{paramIndex++}";
+            parameters.Add(excludedParam, resourcesExcluded);
+            excluded = $" AND ([Notes].NoteTypeId IS NULL OR [Notes].NoteTypeId NOT IN @{excludedParam})";
+        }
+        return $@"(EXISTS (SELECT 1 FROM Resources WHERE [Resources].NoteId = [Notes].NoteId
+                            AND ([Resources].[Description]{collate} LIKE @{tokenParam} OR [Resources].ExtractedText{collate} LIKE @{tokenParam})){excluded})";
     }
 
     // Root folder id plus every descendant in its subtree, computed in-memory (same "load all
@@ -2341,13 +2374,9 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             }
             else
             {
-                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
-
-                // TODO: refactor this -----------------------------
-                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
-                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());
-                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
-                // --------------------------------------------------
+                var listTokens = ExtractListTokensSearch(notesSearch.TextSearch);
+                // The description only with its option (the token "***" that also turned it on is gone: KNote Atlas 4.6a).
+                var flagSearchDescription = notesSearch.SearchInDescription;
 
                 foreach (var token in listTokens)
                 {
@@ -2356,8 +2385,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
                     sqlWhere = AddAndToStringSQL(sqlWhere);
                     sqlWhere += token[0] != '!'
-                        ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " "
-                        : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " ";
+                        ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks,
+                            notesSearch.SearchInResources, notesSearch.ResourcesExcludedNoteTypeIds, parameters, ref paramIndex) + " "
+                        : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks,
+                            notesSearch.SearchInResources, notesSearch.ResourcesExcludedNoteTypeIds, parameters, ref paramIndex) + " ";
                 }
             }
 

@@ -1827,6 +1827,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             context.SearchText = notesSearch?.TextSearch?.Trim();
             context.SearchInDescription = notesSearch?.SearchInDescription ?? false;
             context.SearchInNoteTasks = notesSearch?.SearchInNoteTasks ?? false;
+            context.SearchInResources = notesSearch?.SearchInResources ?? false;
             context.SearchByMeaning = notesSearch?.Mode == EnumNotesSearchMode.Meaning;
         }
 

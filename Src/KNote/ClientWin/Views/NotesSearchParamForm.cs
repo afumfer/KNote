@@ -80,6 +80,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
                 TextSearch = textTextSearch.Text,
                 SearchInDescription = checkSearchInDescription.Checked,
                 SearchInNoteTasks = checkSearchInNoteTasks.Checked,
+                SearchInResources = checkSearchInResources.Checked,
                 Mode = radioSearchMeaning.Visible && radioSearchMeaning.Checked ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words
             }
         };
@@ -92,6 +93,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
     {
         checkSearchInDescription.Enabled = radioSearchWords.Checked;
         checkSearchInNoteTasks.Enabled = radioSearchWords.Checked;
+        checkSearchInResources.Enabled = radioSearchWords.Checked;
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
@@ -138,6 +140,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         textTextSearch.Text = "";
         checkSearchInDescription.Checked = true;
         checkSearchInNoteTasks.Checked = false;
+        checkSearchInResources.Checked = false;
     }
 
     private void textTextSearch_KeyUp(object sender, KeyEventArgs e)

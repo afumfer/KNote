@@ -94,6 +94,10 @@ public class NotesController : ControllerBase
             
             var notesSearch = new NotesSearchDto();
             notesSearch.TextSearch = notesSearchParam.TextSearch;
+            // KNote Atlas, stage 4 (4.6a): the options of the search, as ClientWin's.
+            notesSearch.SearchInDescription = notesSearchParam.SearchInDescription;
+            notesSearch.SearchInNoteTasks = notesSearchParam.SearchInNoteTasks;
+            notesSearch.SearchInResources = notesSearchParam.SearchInResources;
             if(notesSearchParam.PageNumber > 0)
                 notesSearch.PageIdentifier.PageNumber = notesSearchParam.PageNumber;
             notesSearch.PageIdentifier.PageSize = notesSearchParam.PageSize;

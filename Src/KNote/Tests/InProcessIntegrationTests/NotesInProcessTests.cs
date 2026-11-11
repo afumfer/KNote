@@ -240,6 +240,44 @@ public class NotesInProcessTests
         }
     }
 
+    // KNote Atlas 4.6a: the options of the search of the Web (in the description, the tasks and the resources), off by default.
+    [TestMethod]
+    public async Task Search_WithTheOptions_InTheDescriptionAndTheResources()
+    {
+        var marker = $"OPTS{Guid.NewGuid():N}"[..16];
+        var inDescription = await CreateNoteAsync("Options in the description", $"It talks about {marker}.");
+        var inResource = await CreateNoteAsync("Options in a resource");
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var resource = await service.Repository.Notes.AddResourceAsync(new ResourceDto
+            {
+                ResourceId = Guid.NewGuid(), NoteId = inResource.NoteId, Name = $"{Guid.NewGuid()}_doc.pdf", Description = $"A document of {marker}",
+                ContentInDB = true, ContentArrayBytes = [1], FileType = "application/pdf", Container = "KntResources"
+            });
+            Assert.IsTrue(resource.IsValid, resource.ErrorMessage);
+        }
+
+        async Task<List<Guid>> SearchAsync(string options)
+        {
+            var res = await _httpClient.GetFromJsonAsync<Result<List<NoteMinimalDto>>>($"api/notes/search?textSearch={marker}&pageNumber=1&pageSize=25{options}");
+            return res!.Entity!.Select(n => n.NoteId).ToList();
+        }
+
+        try
+        {
+            Assert.AreEqual(0, (await SearchAsync("")).Count, "the topic and the tags only, by default");
+            CollectionAssert.AreEquivalent(new[] { inDescription.NoteId }, await SearchAsync("&searchInDescription=true"));
+            CollectionAssert.AreEquivalent(new[] { inResource.NoteId }, await SearchAsync("&searchInResources=true"));
+            CollectionAssert.AreEquivalent(new[] { inDescription.NoteId, inResource.NoteId },
+                await SearchAsync("&searchInDescription=true&searchInNoteTasks=true&searchInResources=true"));
+        }
+        finally
+        {
+            await _httpClient.DeleteAsync($"api/notes/{inDescription.NoteId}");
+            await _httpClient.DeleteAsync($"api/notes/{inResource.NoteId}");
+        }
+    }
+
     [TestMethod]
     public async Task Post_WithNonExistentFolder_ReturnsRootCauseNotServiceWrapper()
     {

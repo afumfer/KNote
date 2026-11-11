@@ -35,6 +35,11 @@ public class NotesListReportRequestDto
     // By words (the search of always) or by meaning (the most similar notes, see SemanticSearchRequestDto).
     public EnumNotesSearchMode SearchMode { get; set; }
 
+    // The options of the search by words (4.6a).
+    public bool SearchInDescription { get; set; }
+    public bool SearchInNoteTasks { get; set; }
+    public bool SearchInResources { get; set; }
+
     // Filter (its paging and order are ignored: the whole list is printed, in OrderColumn/OrderAscending). With a
     // MeaningText, the notes found by meaning among the filter's.
     public NotesFilterDto NotesFilter { get; set; }

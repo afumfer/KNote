@@ -709,7 +709,9 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   enlazadas, con `CellFormatting`; **`AutoGenerateColumns = false` después de configurarlas**: si no, el grid las
   regeneraba y movía los índices), ordenada por parecido, con el aviso de las notas sin poner al día y «Update index».
   **Filtro** (`NotesFilterParamCtrl`): «Talks about…», solo si el repositorio puede (oculto, los atributos ocupan su
-  sitio). Imprimir y exportar no llevan el fragmento.
+  sitio). Imprimir y exportar no llevan el fragmento. Las palabras en los recursos (4.6a, D18): «Search in resources» en la
+  búsqueda, junto a «Search in note tasks», y bajo «Description» del filtro, «Also in the note tasks» y «Also in the resources»;
+  las mismas opciones que la Web.
 - **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las
   relaciones (creada en código, envuelve el `SplitContainer` del Designer), plegada si no hay índice utilizable o la nota
   es nueva; se calcula al abrir la pestaña y al cambiar de nota o de relaciones con ella abierta.

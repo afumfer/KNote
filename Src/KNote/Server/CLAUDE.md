@@ -254,6 +254,11 @@ public class FoldersController : ControllerBase
   api/notes/alarms/{id}`: Staff+, como los comandos. Las reglas, en `KMessageDto.Validate` (fecha obligatoria; "cada N
   minutos" con minutos). Guardar una alarma no recalcula el estado de la nota ("Alarms pending", `InternalTags`): lo hace
   el guardado de la nota, como con las tareas. Tests en `NoteAlarmsInProcessTests`.
+- **Opciones de la búsqueda por palabras** (KNote Atlas 4.6a, D18): `GET api/notes/search` admite `searchInDescription`,
+  `searchInNoteTasks` y `searchInResources` (`NotesSearchParam`, apagadas sin ellas), como la búsqueda de `ClientWin`; el filtro las
+  lleva en `NotesFilterDto` (`SearchInNoteTasks`, `SearchInResources`, para su campo `Description`). La condición de los recursos
+  no mira los de las notas del sistema: lo pone el `Service` (`ResourcesExcludedNoteTypeIds`). Los informes de una búsqueda llevan
+  las mismas opciones (`NotesListReportRequestDto`).
 - **Subir un recurso** (KNote Atlas 4.4b, `POST api/notes/{id}/resources/upload`, Staff+): un formulario multipart
   (`file`, `description`, `loadedDescription`, `descriptionByUser`, `order`) que el navegador envía desde el disco, de hasta
   200 MB (`KntConst.MaxLenNoteResourceFile`); `Notes.UploadResourceAsync` lo escribe a la carpeta de recursos sin cargarlo
