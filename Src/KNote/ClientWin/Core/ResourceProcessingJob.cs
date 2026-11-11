@@ -52,9 +52,16 @@ public class ResourceProcessingJob
             var progress = Progress;
             if (!IsRunning || progress == null)
                 return null;
-            return progress.Phase == EnumResourceProcessingPhase.Processing
-                ? $"Describing photos of {RepositoryName}: {progress.PhotosDone}/{progress.PhotosTotal}"
-                : $"Resources of {RepositoryName}: {progress.Phase.ToString().ToLowerInvariant()}";
+            if (progress.Phase != EnumResourceProcessingPhase.Processing)
+                return $"Resources of {RepositoryName}: {progress.Phase.ToString().ToLowerInvariant()}";
+            var (done, total) = ResourceProcessingTexts.Bar(progress);
+            var what = progress.Step switch
+            {
+                EnumResourceProcessingStep.ReadingDocuments => "Reading documents",
+                EnumResourceProcessingStep.Documents => "Summarizing documents",
+                _ => "Describing photos"
+            };
+            return $"{what} of {RepositoryName}: {done}/{total}";
         }
     }
 
@@ -122,7 +129,8 @@ public class ResourceProcessingJob
         cancellation.Dispose();
 
         // The descriptions written change the notes' fragments: the index is brought up to date (on the UI thread, as a click).
-        if (final.PhotosDescribed > 0 && hasSemanticIndex)
+        // Something the index has to read again: a description, a summary or the text of a document.
+        if ((final.PhotosDescribed > 0 || final.DocumentsSummarized > 0 || final.DocumentsRead > 0) && hasSemanticIndex)
             Post(() => _semanticIndex.Start(service, RepositoryName, rebuild: false));
         Publish(force: true);
     }

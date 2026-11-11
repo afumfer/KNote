@@ -567,35 +567,43 @@
     }
 
     // KNote Atlas, stage 4 (4.2): the photos described with the AI, one per request, with their progress; Cancel stops after
-    // the one being described. What to do with each one is AiPhotoRules.PlanForNote.
+    // the one being described. What to do with each one is AiPhotoRules.PlanForNote (and, 4.4c, AiDocumentRules.PlanForNote).
     private string? describing;
     private bool cancelDescribing;
 
     private async Task OnDescribePhotos()
     {
+        // KNote Atlas 4.4c: the photos and the documents (AiDocumentRules.PlanResourceForNote).
         var list = resources ?? new();
-        var toDescribe = list.Where(r => AiPhotoRules.PlanForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
+        var toDescribe = list.Where(r => AiDocumentRules.PlanResourceForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
         if (toDescribe.Count == 0)
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Describe photos",
-                Detail = "There are no photos to describe: they are locked or already described by the AI.", Duration = 8000 });
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = ResourceProcessingTexts.DescribeWithAi,
+                Detail = "There are no photos to describe nor documents to summarize: they are locked or already done by the AI.", Duration = 8000 });
             return;
         }
 
-        var describer = await DescriberAsync();
+        var describer = await DescriberAsync(toDescribe.Any(AiPhotoRules.IsPhoto), toDescribe.Any(r => !AiPhotoRules.IsPhoto(r)));
         if (describer == null)
             return;
+        // A model that doesn't see images: only the documents.
+        if (!describer.Available)
+            toDescribe = toDescribe.Where(r => !AiPhotoRules.IsPhoto(r)).ToList();
 
-        var persons = toDescribe.Count(AiPhotoRules.HasPersonDescription);
-        var choice = await dialogService.OpenAsync<DescribePhotosDialog>("Describe photos",
+        var photos = toDescribe.Where(AiPhotoRules.IsPhoto).ToList();
+        var documents = toDescribe.Where(r => !AiPhotoRules.IsPhoto(r)).ToList();
+        var personPhotos = photos.Count(AiPhotoRules.HasPersonDescription);
+        var personDocuments = documents.Count(AiDocumentRules.HasPersonDescription);
+        var choice = await dialogService.OpenAsync<DescribeWithAiDialog>(ResourceProcessingTexts.DescribeWithAi,
             new Dictionary<string, object?> { { "NoteTopic", Note.Topic }, { "Describer", describer },
-                { "Photos", toDescribe.Count - persons }, { "PersonPhotos", persons } },
+                { "Photos", photos.Count - personPhotos }, { "PersonPhotos", personPhotos },
+                { "Documents", documents.Count - personDocuments }, { "PersonDocuments", personDocuments } },
             KntDialogs.Framed(KntDialogs.Medium()));
         if (choice is not EnumPersonDescriptions chosen)
             return;
 
         // The ones kept: locked as they are (the resource editor's saving, with the text it was read with).
-        foreach (var resource in list.Where(r => AiPhotoRules.PlanForNote(r, chosen) == EnumPhotoAction.Lock))
+        foreach (var resource in toDescribe.Where(r => AiDocumentRules.PlanResourceForNote(r, chosen) == EnumPhotoAction.Lock))
         {
             var locked = resource.GetSimpleDto<ResourceInfoDto>();
             locked.ContentBase64 = null;
@@ -604,55 +612,64 @@
             await webApiService.Notes.SaveResourceAsync(locked);
         }
 
-        await DescribeAsync(list.Where(r => AiPhotoRules.PlanForNote(r, chosen) == EnumPhotoAction.Describe).ToList());
+        await DescribeAsync(toDescribe.Where(r => AiDocumentRules.PlanResourceForNote(r, chosen) == EnumPhotoAction.Describe).ToList());
     }
 
+    // «Describe photo» or «Summarize document»: also one the AI already did (again, maybe with another model).
     private async Task OnDescribePhoto(ResourceInfoDto resource)
     {
-        var describer = await DescriberAsync();
+        var photo = AiPhotoRules.IsPhoto(resource);
+        var describer = await DescriberAsync(photo, !photo);
         if (describer == null)
             return;
 
-        var choice = await dialogService.OpenAsync<DescribePhotosDialog>("Describe photo",
+        var person = photo ? AiPhotoRules.HasPersonDescription(resource) : AiDocumentRules.HasPersonDescription(resource);
+        var choice = await dialogService.OpenAsync<DescribeWithAiDialog>(photo ? "Describe photo" : "Summarize document",
             new Dictionary<string, object?> { { "NoteTopic", resource.GetTitle() }, { "Describer", describer }, { "Single", true },
-                { "Photos", 1 }, { "PersonPhotos", AiPhotoRules.HasPersonDescription(resource) ? 1 : 0 } },
+                { photo ? "Photos" : "Documents", person ? 0 : 1 }, { photo ? "PersonPhotos" : "PersonDocuments", person ? 1 : 0 } },
             KntDialogs.Framed(KntDialogs.Medium()));
         if (choice is EnumPersonDescriptions)
             await DescribeAsync([resource]);
     }
 
-    // The model that describes the photos, or null (and why not, notified).
-    private async Task<ResourceDescriberDto?> DescriberAsync()
+    // The model that describes the photos and summarizes the documents, or null (and why not, notified). The photos need one
+    // that sees images; the documents, any model.
+    private async Task<ResourceDescriberDto?> DescriberAsync(bool photos, bool documents)
     {
         var describer = await webApiService.Notes.GetPhotoDescriberAsync();
         if (!describer.IsValid)
             return null;
-        if (!describer.Entity.Available)
+        if (!(photos && describer.Entity.Available || documents && describer.Entity.CanSummarize))
         {
-            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Describe photos",
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = ResourceProcessingTexts.DescribeWithAi,
                 Detail = describer.Entity.Message, Duration = 12000 });
             return null;
         }
         return describer.Entity;
     }
 
-    private async Task DescribeAsync(List<ResourceInfoDto> photos)
+    // One per request, with its progress; Cancel stops after the one being done.
+    private async Task DescribeAsync(List<ResourceInfoDto> items)
     {
         cancelDescribing = false;
-        var described = 0;
+        var done = 0;
         var errors = new List<string>();
         try
         {
-            for (var i = 0; i < photos.Count && !cancelDescribing; i++)
+            for (var i = 0; i < items.Count && !cancelDescribing; i++)
             {
-                describing = photos.Count == 1 ? "Describing the photo…" : $"Describing photo {i + 1} of {photos.Count}…";
+                var photo = AiPhotoRules.IsPhoto(items[i]);
+                describing = items.Count > 1 ? $"Describing {i + 1} of {items.Count}…"
+                    : photo ? "Describing the photo…" : "Summarizing the document…";
                 StateHasChanged();
 
-                var res = await webApiService.Notes.DescribePhotoAsync(photos[i].ResourceId, replace: true, disposal.Token);
+                var res = photo
+                    ? await webApiService.Notes.DescribePhotoAsync(items[i].ResourceId, replace: true, disposal.Token)
+                    : await webApiService.Notes.SummarizeDocumentAsync(items[i].ResourceId, replace: true, disposal.Token);
                 if (res.IsValid)
-                    described++;
+                    done++;
                 else
-                    errors.Add($"{photos[i].GetTitle()}: {res.ErrorMessage}");
+                    errors.Add($"{items[i].GetTitle()}: {res.ErrorMessage}");
             }
         }
         finally
@@ -663,13 +680,14 @@
         resources = null;
         await ShowPanel(2);
 
-        var detail = $"{described} of {photos.Count} described" + (cancelDescribing ? " (cancelled)." : ".");
+        var detail = $"{done} of {items.Count} done" + (cancelDescribing ? " (cancelled)." : ".");
         if (errors.Count > 0)
             detail += " " + string.Join(" ", errors);
         notificationService.Notify(new NotificationMessage
         {
             Severity = errors.Count > 0 ? NotificationSeverity.Warning : NotificationSeverity.Success,
-            Summary = photos.Count == 1 ? "Describe photo" : "Describe photos", Detail = detail, Duration = errors.Count > 0 ? 20000 : 6000
+            Summary = items.Count == 1 ? (AiPhotoRules.IsPhoto(items[0]) ? "Describe photo" : "Summarize document") : ResourceProcessingTexts.DescribeWithAi,
+            Detail = detail, Duration = errors.Count > 0 ? 20000 : 6000
         });
     }
 

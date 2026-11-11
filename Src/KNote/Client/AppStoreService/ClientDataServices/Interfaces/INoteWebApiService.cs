@@ -24,6 +24,7 @@ public interface INoteWebApiService
     // KNote Atlas, stage 4: the model that describes photos, and describing one (replace: also a person's description).
     Task<Result<ResourceDescriberDto>> GetPhotoDescriberAsync(CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
+    Task<Result<ResourceInfoDto>> SummarizeDocumentAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// A new resource of a note (resource: its NoteId, description, lock and order) with the file chosen in an InputFile,

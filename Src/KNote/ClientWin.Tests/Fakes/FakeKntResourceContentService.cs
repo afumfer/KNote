@@ -13,6 +13,7 @@ internal class FakeKntResourceContentService : IKntResourceContentService
     public Func<Task<Result<ResourceProcessingStatusDto>>>? GetProcessingStatusAsyncImpl { get; set; }
 
     public Task<Result<PhotoDescriptionContextDto>> GetPhotoContextAsync(Guid resourceId) => throw new NotSupportedException();
+    public Task<Result<DocumentSummaryContextDto>> GetDocumentContextAsync(Guid resourceId) => throw new NotSupportedException();
 
     public Task<Result<ResourceInfoDto>> SaveAiDescriptionAsync(AiDescriptionSaveDto description) => throw new NotSupportedException();
 

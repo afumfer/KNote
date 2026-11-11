@@ -45,6 +45,23 @@ public class ResourceDescriberDto
     public string Message { get; set; }
 
     public bool Available => string.IsNullOrEmpty(Message);
+
+    // The documents only need a model, not one that sees images (4.4c).
+    public bool CanSummarize => !string.IsNullOrEmpty(Model);
+}
+
+/// <summary>
+/// What the AI receives to summarize a document (IKntResourceContentService.GetDocumentContextAsync, KNote Atlas 4.4c): the
+/// resource (without its content), the note, what a person wrote of it, how many pages and the beginning of its text.
+/// </summary>
+public class DocumentSummaryContextDto
+{
+    public ResourceInfoDto Resource { get; set; }
+    public string NoteTopic { get; set; }
+    public string NoteText { get; set; }
+    public string PersonDescription { get; set; }
+    public int Pages { get; set; }
+    public string DocumentText { get; set; }
 }
 
 /// <summary>What «Describe photos» does with the photos of a note whose description a person wrote and didn't lock.</summary>

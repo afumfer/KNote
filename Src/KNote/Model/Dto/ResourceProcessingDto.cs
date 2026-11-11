@@ -4,26 +4,35 @@ using System.Collections.Generic;
 namespace KNote.Model.Dto;
 
 /// <summary>
-/// The resources of a repository that «Process pending resources» would process (KNote Atlas, stage 4, D10). For now the
-/// photos: the pending ones (without a description of their own) and the ones with a description a person wrote and did not
-/// lock (old descriptions: they are not told apart from one written by hand, so it is chosen what to do with them). The
-/// estimate uses the pace of the last run; without one, only the counts.
+/// The resources of a repository that «Process pending resources» would process (KNote Atlas, stage 4, D10): the photos and the
+/// documents pending (without a description of their own) and the ones with a description a person wrote and did not lock (old
+/// descriptions: they are not told apart from one written by hand, so it is chosen what to do with them), and the documents not
+/// read yet (all of them, also the locked ones: their text is for the search). The estimate uses the pace of the last run;
+/// without one, only the counts.
 /// </summary>
 public class ResourceProcessingStatusDto
 {
     public int PendingPhotos { get; set; }
     public int PersonPhotos { get; set; }
+    public int PendingDocuments { get; set; }
+    public int PersonDocuments { get; set; }
+    public int DocumentsToRead { get; set; }
     public DateTime? LastRunDateTime { get; set; }
     public double? SecondsPerPhoto { get; set; }
+    public double? SecondsPerDocument { get; set; }
 }
 
 /// <summary>What «Process pending resources» is asked to do (POST api/resources/process).</summary>
 public class ResourceProcessingOptionsDto
 {
     public bool Photos { get; set; } = true;
+    // Read the documents not read yet and summarize the pending ones (4.4c).
+    public bool Documents { get; set; } = true;
     public EnumPersonDescriptions PersonDescriptions { get; set; } = EnumPersonDescriptions.Skip;
 
-    public override string ToString() => $"Photos: {Photos}, descriptions written by people: {PersonDescriptions}";
+    public bool Any => Photos || Documents;
+
+    public override string ToString() => $"Photos: {Photos}, documents: {Documents}, descriptions written by people: {PersonDescriptions}";
 }
 
 /// <summary>
@@ -33,6 +42,9 @@ public class ResourceProcessingOptionsDto
 public class ResourceProcessingPlanDto
 {
     public List<ResourceInfoDto> PhotosToDescribe { get; set; } = new();
+    public List<ResourceInfoDto> DocumentsToSummarize { get; set; } = new();
+    // The documents not read yet (their text is read without AI, before the summaries).
+    public List<ResourceTextDto> DocumentsToRead { get; set; } = new();
     public bool ReplacePersonDescriptions { get; set; }
     public int Locked { get; set; }
 }
@@ -41,9 +53,12 @@ public class ResourceProcessingPlanDto
 public class ResourceProcessingRunDto
 {
     public int PhotosDescribed { get; set; }
-    public double Seconds { get; set; }
+    public double PhotoSeconds { get; set; }
+    public int DocumentsSummarized { get; set; }
+    public double DocumentSeconds { get; set; }
 
-    public override string ToString() => $"{PhotosDescribed} photos in {Seconds:0} s";
+    public override string ToString() =>
+        $"{PhotosDescribed} photos in {PhotoSeconds:0} s, {DocumentsSummarized} documents in {DocumentSeconds:0} s";
 }
 
 /// <summary>What KNote keeps of the runs of a repository (SystemValues AI / AI_RESOURCES_STATE, as JSON).</summary>
@@ -51,6 +66,15 @@ public class ResourceProcessingStateDto
 {
     public DateTime? LastRunDateTime { get; set; }
     public double? SecondsPerPhoto { get; set; }
+    public double? SecondsPerDocument { get; set; }
+}
+
+/// <summary>What a run is doing (Phase Processing).</summary>
+public enum EnumResourceProcessingStep
+{
+    Photos,
+    ReadingDocuments,
+    Documents
 }
 
 public enum EnumResourceProcessingPhase
@@ -80,11 +104,22 @@ public class ResourceProcessingProgressDto
     public DateTime? StartedDateTime { get; set; }
     public double ElapsedSeconds { get; set; }
     public double? RemainingSeconds { get; set; }
+    public EnumResourceProcessingStep Step { get; set; }
     public int PhotosTotal { get; set; }
     public int PhotosDone { get; set; }
     public int PhotosDescribed { get; set; }
     public int PhotosLocked { get; set; }
-    // Photos whose file is not in this installation: not an error, they are described where the file is.
+    // Documents (4.4c): the ones to read (without AI) and the ones to summarize.
+    public int DocumentsToReadTotal { get; set; }
+    public int DocumentsRead { get; set; }
+    public int DocumentsTotal { get; set; }
+    public int DocumentsDone { get; set; }
+    public int DocumentsSummarized { get; set; }
+    // Scanned documents without text: their summary waits for the transcription of their pages (stage 4.5).
+    public int DocumentsWaiting { get; set; }
+    // Documents that can't be read (protected, encrypted, damaged): not tried again.
+    public int DocumentsUnreadable { get; set; }
+    // Photos and documents whose file is not in this installation: not an error, they are processed where the file is.
     public int NotAvailable { get; set; }
     public int ErrorsCount { get; set; }
     // The first MaxErrors errors.

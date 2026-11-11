@@ -75,6 +75,26 @@ public class ResourceContentController : ControllerBase
             return await AiPhotoDescriber.DescribeAsync(_service, chatClient, provider, id, replace, _logger, cancellationToken);
         });
 
+    // Summarizes a document and saves its summary (4.4c), reading it first if it was not read. replace: also if a person wrote its
+    // description (the Web asks first). Any model: it doesn't need to see images.
+    [HttpPost("{id:guid}/summarize")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> Summarize(Guid id, [FromQuery] bool replace, CancellationToken cancellationToken) =>
+        RunAsync(nameof(Summarize), async () =>
+        {
+            var (provider, info) = await ChooseAsync(cancellationToken);
+            if (!info.CanSummarize)
+            {
+                var res = new Result<ResourceInfoDto>();
+                res.AddErrorMessage(info.Message);
+                return res;
+            }
+
+            _service.EnforceAuthorization = true;
+            var chatClient = _chatClients.Create(provider, []);
+            return await AiDocumentSummarizer.SummarizeAsync(_service, chatClient, provider, id, replace, _logger, cancellationToken);
+        });
+
     // What «Process pending resources» would process, and the pace of its last run.
     [HttpGet("status")]
     [Authorize(Roles = StaffRoles)]
@@ -101,13 +121,14 @@ public class ResourceContentController : ControllerBase
         RunAsync(nameof(Process), async () =>
         {
             var result = new Result<ResourceProcessingProgressDto>();
-            if (options == null || !options.Photos)
+            if (options == null || !options.Any)
             {
                 result.AddErrorMessage("Choose what to process.");
                 return result;
             }
+            // The photos need a model that sees images; the documents, any model.
             var (provider, info) = await ChooseAsync(cancellationToken);
-            if (!info.Available)
+            if (options.Photos ? !info.Available : !info.CanSummarize)
             {
                 result.AddErrorMessage(info.Message);
                 return result;

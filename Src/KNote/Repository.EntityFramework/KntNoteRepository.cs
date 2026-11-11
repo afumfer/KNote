@@ -562,6 +562,44 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    // The state of every resource (an unmapped column, KntSchemaUpdater revision 10), joined in memory with the resources of the
+    // notes that are not excluded.
+    private sealed class ResourceStateRow
+    {
+        public Guid ResourceId { get; set; }
+        public int ExtractedState { get; set; }
+    }
+
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextStatesAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var notes = ctx.Notes.AsNoTracking();
+            if (excludedNoteTypeIds?.Count > 0)
+                notes = notes.Where(n => n.NoteTypeId == null || !excludedNoteTypeIds.Contains(n.NoteTypeId.Value));
+            var resources = await ctx.Resources.AsNoTracking()
+                .Join(notes, r => r.NoteId, n => n.NoteId, (r, n) => new { r.ResourceId, r.NoteId, r.Name, r.FileType, r.Order, n.NoteNumber })
+                .OrderBy(x => x.NoteNumber).ThenBy(x => x.Order).ThenBy(x => x.Name)
+                .ToListAsync();
+            var states = (await ctx.Database.SqlQuery<ResourceStateRow>($"SELECT ResourceId, ExtractedState FROM Resources").ToListAsync())
+                .ToDictionary(s => s.ResourceId, s => (EnumExtractedState)s.ExtractedState);
+            await CloseIsTempConnection(ctx);
+            return new Result<List<ResourceTextDto>>
+            {
+                Entity = resources.Select(r => new ResourceTextDto
+                {
+                    ResourceId = r.ResourceId, NoteId = r.NoteId, Name = r.Name, FileType = r.FileType,
+                    State = states.GetValueOrDefault(r.ResourceId)
+                }).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName)
     {
         try

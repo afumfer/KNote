@@ -39,6 +39,9 @@ public interface IKntNoteRepository : IDisposable
     // query of the resources reads. Of one resource (null: it doesn't exist), and of the resources of a note.
     Task<Result<ResourceTextDto>> GetResourceTextAsync(Guid resourceId);
     Task<Result<List<ResourceTextDto>>> GetResourceTextsAsync(Guid noteId);
+    // KNote Atlas, stage 4 (4.4c): what was read of each resource of the notes whose type is not one of these (KNote's own),
+    // without its text: for «Process pending resources», which reads the documents not read yet.
+    Task<Result<List<ResourceTextDto>>> GetResourceTextStatesAsync(List<Guid> excludedNoteTypeIds = null);
     // Writes it only if the resource still has that file (expectedName). Entity: whether it was written. The note is not touched.
     Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName);
     // Its file was replaced: what was read of it is forgotten.

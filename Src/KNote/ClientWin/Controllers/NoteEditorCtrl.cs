@@ -818,9 +818,9 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
     // The model that describes the photos (Store.GetPhotoDescriberAsync).
     public Task<(AiProviderRef Provider, ResourceDescriberDto Info)> GetPhotoDescriberAsync() => Store.GetPhotoDescriberAsync(Service);
 
-    // Only the resources already saved and without changes of this editor: the AI writes in the repository.
+    // Only the photos and the documents (4.4c) already saved and without changes of this editor: the AI writes in the repository.
     public static bool CanDescribeNow(ResourceDto resource) =>
-        AiPhotoRules.CanDescribe(resource) && !resource.IsNew() && !resource.IsDirty();
+        (AiPhotoRules.CanDescribe(resource) || AiDocumentRules.CanSummarize(resource)) && !resource.IsNew() && !resource.IsDirty();
 
     // Locks the descriptions people wrote (the choice «Keep them and lock them»), as the resource editor saves.
     public async Task<List<string>> LockDescriptionsAsync(IEnumerable<ResourceDto> resources)
@@ -838,8 +838,9 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         return errors;
     }
 
-    // Describes the photos one after another (progress: "2 of 5"); cancelling stops after the one being described. Each one
-    // described is updated in this editor, without making it dirty: saving the note keeps it (ResourceInfoDto.LoadedDescription).
+    // Describes the photos and summarizes the documents (4.4c) one after another (progress: "2 of 5"); cancelling stops after the
+    // one being done. Each one done is updated in this editor, without making it dirty: saving the note keeps it
+    // (ResourceInfoDto.LoadedDescription).
     public async Task<(int Described, List<string> Errors)> DescribePhotosAsync(AiProviderRef provider, IReadOnlyList<ResourceDto> photos,
         IProgress<string> progress, CancellationToken cancellationToken)
     {
@@ -848,12 +849,17 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         var errors = new List<string>();
         for (var i = 0; i < photos.Count && !cancellationToken.IsCancellationRequested; i++)
         {
-            progress?.Report(photos.Count == 1 ? "Describing the photo…" : $"Describing photo {i + 1} of {photos.Count}…");
             var photo = photos[i];
+            var isPhoto = AiPhotoRules.IsPhoto(photo);
+            progress?.Report(photos.Count > 1 ? $"Describing {i + 1} of {photos.Count}…"
+                : isPhoto ? "Describing the photo…" : "Summarizing the document…");
             try
             {
-                var res = await AiPhotoDescriber.DescribeAsync(Service, chatClient, provider, photo.ResourceId, replacePersonDescription: true,
-                    Store.Logger, cancellationToken);
+                var res = isPhoto
+                    ? await AiPhotoDescriber.DescribeAsync(Service, chatClient, provider, photo.ResourceId, replacePersonDescription: true,
+                        Store.Logger, cancellationToken)
+                    : await AiDocumentSummarizer.SummarizeAsync(Service, chatClient, provider, photo.ResourceId, replacePersonDescription: true,
+                        Store.Logger, cancellationToken);
                 if (!res.IsValid)
                 {
                     errors.Add($"{photo.GetTitle()}: {res.ErrorMessage}");

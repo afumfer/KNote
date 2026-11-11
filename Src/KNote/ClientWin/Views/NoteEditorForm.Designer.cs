@@ -1104,7 +1104,7 @@
             buttonDescribePhotos.Size = new Size(77, 26);
             buttonDescribePhotos.TabIndex = 9;
             buttonDescribePhotos.Text = "Describe ▾";
-            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos with the AI");
+            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos and summarize the documents with the AI");
             buttonDescribePhotos.UseVisualStyleBackColor = true;
             buttonDescribePhotos.Click += buttonDescribePhotos_Click;
             //

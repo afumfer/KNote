@@ -81,6 +81,38 @@ public class ResourceContentInProcessTests
         Assert.AreEqual("fake-model", (await service.Notes.GetResourceAsync(photoId)).Entity.DescriptionModel);
     }
 
+    // 4.4c: a document is read (by the Server's reader) and summarized with the model, by someone who edits notes.
+    [TestMethod]
+    public async Task ADocument_IsSummarizedBySomeoneWhoEditsNotes_NotByAGuest()
+    {
+        Guid documentId;
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var note = (await service.Notes.HomeNotesAsync()).Entity.First();
+            var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+            {
+                NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_manual.pdf", Description = "manual.pdf", FileType = "application/pdf",
+                ContentArrayBytes = TestDocuments.Pdf("The manual of the QL.")
+            });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+            documentId = saved.Entity.ResourceId;
+        }
+        _chatClients.Script = () => [[new ChatResponseUpdate(ChatRole.Assistant, "The manual of the Sinclair QL.")]];
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+
+        var forbidden = await guest.PostAsync($"api/resources/{documentId}/summarize", null);
+        var summarized = await staff.PostAsync($"api/resources/{documentId}/summarize", null);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        var body = await summarized.Content.ReadAsStringAsync();
+        Assert.IsTrue(summarized.IsSuccessStatusCode, body);
+        Assert.AreEqual("The manual of the Sinclair QL.", JsonSerializer.Deserialize<Result<ResourceInfoDto>>(body, _json)!.Entity.Description);
+        Assert.AreEqual(0, _chatClients.LastTools.Count, "No tools.");
+        using var check = _factory.CreateServiceForRepository(0);
+        Assert.AreEqual(EnumExtractedState.Complete, (await check.ResourceContent.GetDocumentTextAsync(documentId)).Entity.State, "read first");
+    }
+
     // «Process pending resources» (4.3): only an Admin runs it, in the Server's queue; its progress until it ends, and what is
     // pending afterwards.
     [TestMethod]

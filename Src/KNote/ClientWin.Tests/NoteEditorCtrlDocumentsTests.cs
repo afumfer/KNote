@@ -1,4 +1,4 @@
-using KNote.ClientWin.Controllers;
+﻿using KNote.ClientWin.Controllers;
 using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Tests;
@@ -23,6 +23,8 @@ public class NoteEditorCtrlDocumentsTests
     {
         Assert.IsTrue(NoteEditorCtrl.CanReadNow(Saved("manual.pdf", "application/pdf")));
         Assert.IsTrue(NoteEditorCtrl.CanReadNow(Saved("letter.docx", "")));
+        // 4.4c: a saved document can also be summarized with the AI.
+        Assert.IsTrue(NoteEditorCtrl.CanDescribeNow(Saved("manual.pdf", "application/pdf")));
     }
 
     [TestMethod]

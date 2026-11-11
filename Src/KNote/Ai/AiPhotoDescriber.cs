@@ -15,10 +15,6 @@ namespace KNote.Ai;
 /// </summary>
 public static class AiPhotoDescriber
 {
-    // Measured in 4.0 with qwen3.5:9b: about 70 tokens per description. The cap stops a model that repeats itself; it is only
-    // given to Ollama, whose reasoning is turned off: a reasoning model of another provider would spend it thinking.
-    private const int OllamaMaxOutputTokens = 500;
-
     /// <summary>
     /// The model that describes photos here: the repository's recommended LLM if one of these providers has it, else
     /// the fallback (the default chat one). Message says why it can't (none, or a model that doesn't see images).
@@ -71,7 +67,9 @@ public static class AiPhotoDescriber
             return result;
         }
 
-        var system = await SystemPromptAsync(service, context.Entity, logger);
+        var system = await AiResourceTask.SystemPromptAsync(service, AiTaskCatalog.DescribePhoto,
+            new List<string> { context.Entity.NoteTopic, context.Entity.NoteText, context.Entity.PhotoDescription }.Concat(context.Entity.PersonDescriptions),
+            logger);
         List<ChatMessage> messages =
         [
             new(ChatRole.System, system),
@@ -81,23 +79,7 @@ public static class AiPhotoDescriber
                 new DataContent(image.Content, image.ContentType)])
         ];
 
-        // The temperature, the cap and the reasoning turned off were measured with Ollama (4.0), and only go to it: OpenAI's
-        // reasoning models answer 400 to a temperature, as the assistant, which never sends one.
-        var options = new ChatOptions();
-        if (provider.Provider == EnumAiProvider.Ollama)
-        {
-            options.Temperature = 0.2f;
-            options.MaxOutputTokens = OllamaMaxOutputTokens;
-            options.Reasoning = new ReasoningOptions { Effort = ReasoningEffort.None };
-        }
-
-        // Through a stream, as the assistant: a whole answer in one request would have to come before HttpClient's timeout.
-        var answer = new StringBuilder();
-        await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
-            foreach (var text in update.Contents.OfType<TextContent>())
-                answer.Append(text.Text);
-
-        var description = AiPhotoRules.CleanDescription(answer.ToString());
+        var description = AiPhotoRules.CleanDescription(await AiResourceTask.AnswerAsync(chatClient, provider, messages, cancellationToken));
         if (description.Length == 0)
         {
             result.AddErrorMessage($"The model {provider.Model} gave no description.");
@@ -114,28 +96,4 @@ public static class AiPhotoDescriber
         });
     }
 
-    // What the AI receives for the task, with the glossary terms of the note. Without it (an error), KNote's rules and instructions.
-    private static async Task<string> SystemPromptAsync(IKntService service, PhotoDescriptionContextDto context, ILogger logger)
-    {
-        try
-        {
-            var texts = new List<string> { context.NoteTopic, context.NoteText, context.PhotoDescription }.Concat(context.PersonDescriptions)
-                .Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-            var composed = await service.AtlasContext.ComposeAsync(new AiComposeRequestDto { TaskKey = AiTaskCatalog.DescribePhotoKey, Texts = texts });
-            if (composed.IsValid && composed.Entity != null)
-                return composed.Entity.Text;
-            logger?.LogWarning("The context of «Describe photo» could not be put together: {error}", composed.ErrorMessage);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogWarning(ex, "The context of «Describe photo» could not be put together.");
-        }
-
-        return AiPromptComposer.Compose(new AiPromptComposer.Parts
-        {
-            Task = AiTaskCatalog.DescribePhoto,
-            RepositoryName = service.RepositoryRef?.Name,
-            UserName = service.UserIdentityName
-        }).Text;
-    }
 }

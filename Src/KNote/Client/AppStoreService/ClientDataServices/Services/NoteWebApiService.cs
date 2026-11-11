@@ -147,6 +147,11 @@ public class NoteWebApiService : BaseService, INoteWebApiService
         SendAsync<ResourceInfoDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/describe?replace={(replace ? "true" : "false")}", null, ct),
             "Describe photo", cancellationToken: cancellationToken, notifyErrors: false);
 
+    // As DescribePhotoAsync: a summary at the end of «Describe with AI».
+    public Task<Result<ResourceInfoDto>> SummarizeDocumentAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default) =>
+        SendAsync<ResourceInfoDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/summarize?replace={(replace ? "true" : "false")}", null, ct),
+            "Summarize document", cancellationToken: cancellationToken, notifyErrors: false);
+
     public Task<Result<ResourceProcessingStatusDto>> GetResourceProcessingStatusAsync(CancellationToken cancellationToken = default) =>
         SendAsync<ResourceProcessingStatusDto>(ct => _httpClient.GetAsync("api/resources/status", ct),
             "Pending resources", cancellationToken: cancellationToken, notifyErrors: false);

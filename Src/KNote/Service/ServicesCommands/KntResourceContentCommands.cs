@@ -130,14 +130,22 @@ public class KntResourceContentGetProcessingStatusAsyncCommand : KntCommandServi
         if (!result.IsValid)
             return result;
 
-        var (pending, person) = ResourceProcessingRules.Count(resources);
+        var states = await KntResourceContent.GetTextStatesAsync(Service, result);
+        if (!result.IsValid)
+            return result;
+
+        var counts = ResourceProcessingRules.Count(resources);
         var state = await KntResourceProcessingState.ReadAsync(Service);
         result.Entity = new ResourceProcessingStatusDto
         {
-            PendingPhotos = pending,
-            PersonPhotos = person,
+            PendingPhotos = counts.PendingPhotos,
+            PersonPhotos = counts.PersonPhotos,
+            PendingDocuments = counts.PendingDocuments,
+            PersonDocuments = counts.PersonDocuments,
+            DocumentsToRead = ResourceProcessingRules.DocumentsToRead(states).Count,
             LastRunDateTime = state?.LastRunDateTime,
-            SecondsPerPhoto = state?.SecondsPerPhoto
+            SecondsPerPhoto = state?.SecondsPerPhoto,
+            SecondsPerDocument = state?.SecondsPerDocument
         };
         return result;
     }
@@ -154,7 +162,7 @@ public class KntResourceContentPrepareProcessingAsyncCommand : KntCommandService
     public override Result ValidateParam()
     {
         var result = new Result();
-        if (Param == null || !Param.Photos)
+        if (Param == null || !Param.Any)
             result.AddErrorMessage("Choose what to process.");
         return result;
     }
@@ -166,11 +174,16 @@ public class KntResourceContentPrepareProcessingAsyncCommand : KntCommandService
         var resources = await KntResourceContent.GetResourcesToDescribeAsync(Service, result);
         if (!result.IsValid)
             return result;
+        var states = Param.Documents ? await KntResourceContent.GetTextStatesAsync(Service, result) : new List<ResourceTextDto>();
+        if (!result.IsValid)
+            return result;
 
-        var (describe, lockThem) = ResourceProcessingRules.Plan(resources, Param);
+        var (describe, summarize, lockThem) = ResourceProcessingRules.Plan(resources, Param);
         var plan = new ResourceProcessingPlanDto
         {
             PhotosToDescribe = describe,
+            DocumentsToSummarize = summarize,
+            DocumentsToRead = ResourceProcessingRules.DocumentsToRead(states),
             ReplacePersonDescriptions = Param.PersonDescriptions == EnumPersonDescriptions.Replace
         };
 
@@ -198,7 +211,7 @@ public class KntResourceContentSaveProcessingRunAsyncCommand : KntCommandService
     public override Result ValidateParam()
     {
         var result = new Result();
-        if (Param == null || Param.PhotosDescribed < 0 || Param.Seconds < 0)
+        if (Param == null || Param.PhotosDescribed < 0 || Param.PhotoSeconds < 0 || Param.DocumentsSummarized < 0 || Param.DocumentSeconds < 0)
             result.AddErrorMessage("The run is not valid.");
         return result;
     }
@@ -208,7 +221,8 @@ public class KntResourceContentSaveProcessingRunAsyncCommand : KntCommandService
         // The pace changes only with a run that described something: a canceled one at the first photo says nothing.
         var state = await KntResourceProcessingState.ReadAsync(Service) ?? new ResourceProcessingStateDto();
         state.LastRunDateTime = DateTime.Now;
-        state.SecondsPerPhoto = ResourceProcessingRules.SecondsPerPhoto(Param.PhotosDescribed, Param.Seconds) ?? state.SecondsPerPhoto;
+        state.SecondsPerPhoto = ResourceProcessingRules.Pace(Param.PhotosDescribed, Param.PhotoSeconds) ?? state.SecondsPerPhoto;
+        state.SecondsPerDocument = ResourceProcessingRules.Pace(Param.DocumentsSummarized, Param.DocumentSeconds) ?? state.SecondsPerDocument;
         return await KntResourceProcessingState.WriteAsync(Service, state);
     }
 }
@@ -241,7 +255,7 @@ public class KntResourceContentReadDocumentAsyncCommand : KntCommandServiceBase<
                 result.AddErrorMessage("This installation can't read documents.");
                 return result;
             case EnumDocumentReadOutcome.NotAvailable:
-                result.AddErrorMessage("The file of the document is not available in this installation.");
+                result.AddErrorMessage(AiDocumentRules.FileNotAvailableMessage);
                 return result;
             case EnumDocumentReadOutcome.Changed:
                 result.AddErrorMessage("Its file was replaced while it was being read: read it again.");
@@ -261,6 +275,100 @@ public class KntResourceContentReadDocumentAsyncCommand : KntCommandServiceBase<
             State = read.State,
             Pages = pages.Count,
             PagesToTranscribe = pages.Count(p => p.NeedsTranscription)
+        };
+        return result;
+    }
+}
+
+// KNote Atlas, stage 4 (4.4c): what the AI receives to summarize a document. A document not read yet is read first (without AI),
+// and its text kept. Refused: a locked description, a document that can't be read, one whose file is not here, and a scanned
+// one without text (its summary waits for its transcription, 4.5).
+[KntAuthorize(EnumRoles.Staff)]
+public class KntResourceContentGetDocumentContextAsyncCommand : KntCommandServiceBase<Guid, Result<DocumentSummaryContextDto>>
+{
+    public KntResourceContentGetDocumentContextAsyncCommand(IKntService service, Guid resourceId) : base(service, resourceId)
+    {
+
+    }
+
+    public override async Task<Result<DocumentSummaryContextDto>> Execute()
+    {
+        var result = new Result<DocumentSummaryContextDto>();
+
+        var (resource, note) = await KntResourceContent.GetDescribableAsync(Service, Param, result);
+        if (!result.IsValid)
+            return result;
+        if (!DocumentTextRules.IsDocument(resource))
+        {
+            result.AddErrorMessage("It is not a document KNote reads (PDF, DOCX, ODT, TXT or MD).");
+            return result;
+        }
+        if (resource.DescriptionByUser)
+        {
+            result.AddErrorMessage("Its description is locked: the AI doesn't change it.");
+            return result;
+        }
+
+        var resText = await Repository.Notes.GetResourceTextAsync(Param);
+        if (!resText.IsValid)
+        {
+            result.AddListErrorMessage(resText.ListErrorMessage);
+            return result;
+        }
+        var text = resText.Entity;
+        if (text == null || text.State == EnumExtractedState.NotRead)
+        {
+            var (outcome, read) = await KntDocuments.ReadAndSaveAsync(Service, Param);
+            switch (outcome)
+            {
+                case EnumDocumentReadOutcome.NotAvailable:
+                    result.AddErrorMessage(AiDocumentRules.FileNotAvailableMessage);
+                    return result;
+                case EnumDocumentReadOutcome.NoReader:
+                    result.AddErrorMessage("This installation can't read documents.");
+                    return result;
+                case EnumDocumentReadOutcome.Changed:
+                    result.AddErrorMessage("Its file was replaced while it was being read: try again.");
+                    return result;
+                case EnumDocumentReadOutcome.NotADocument:
+                    result.AddErrorMessage("It is not a document KNote reads (PDF, DOCX, ODT, TXT or MD).");
+                    return result;
+            }
+            text = read;
+            // Its fragments of the semantic index change; the note itself doesn't (nor its date).
+            await KntSemanticIndexer.MarkStaleAsync(Service, note.NoteId);
+        }
+        if (text.State == EnumExtractedState.Unreadable)
+        {
+            result.AddErrorMessage(AiDocumentRules.UnreadableMessage);
+            return result;
+        }
+
+        var paged = DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(resource.FileType, resource.Name));
+        var documentText = AiDocumentRules.DocumentText(text.Text, paged);
+        if (documentText.Length == 0)
+        {
+            result.AddErrorMessage(text.State == EnumExtractedState.Partial ? AiDocumentRules.NeedsTranscriptionMessage : DocumentTexts.NothingRead);
+            return result;
+        }
+
+        var noteText = note.Description ?? "";
+        if (string.Equals(note.GetContentTypeExt().ForDescription, "html", StringComparison.OrdinalIgnoreCase))
+            noteText = Service.Notes.UtilHtmlToMarkdown(noteText);
+
+        // Without its content (a document kept in the database may be of 200 MB).
+        resource.ContentArrayBytes = null;
+        var info = resource.GetSimpleDto<ResourceInfoDto>();
+        info.ContentBase64 = null;
+        info.LoadedDescription = resource.Description;
+        result.Entity = new DocumentSummaryContextDto
+        {
+            Resource = info,
+            NoteTopic = note.Topic,
+            NoteText = AiPhotoRules.NoteText(noteText),
+            PersonDescription = AiDocumentRules.PersonDescription(info),
+            Pages = paged ? DocumentTextRules.Pages(text.Text).Count : 1,
+            DocumentText = documentText
         };
         return result;
     }
@@ -312,6 +420,16 @@ internal static class KntResourceContent
         if (!resources.IsValid)
             result.AddListErrorMessage(resources.ListErrorMessage);
         return resources.Entity ?? new List<ResourceInfoDto>();
+    }
+
+    // What was read of each resource of the notes that are not KNote's own, without its text.
+    public static async Task<List<ResourceTextDto>> GetTextStatesAsync(IKntService service, ResultBase result)
+    {
+        var excluded = await KntSystemNotes.GetSystemNoteTypeIdsAsync(service.Repository);
+        var states = await service.Repository.Notes.GetResourceTextStatesAsync(excluded);
+        if (!states.IsValid)
+            result.AddListErrorMessage(states.ListErrorMessage);
+        return states.Entity ?? new List<ResourceTextDto>();
     }
 
     public static async Task<(ResourceDto Resource, NoteDto Note)> GetDescribableAsync(IKntService service, Guid resourceId, ResultBase result)

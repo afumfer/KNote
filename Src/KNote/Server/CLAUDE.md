@@ -261,6 +261,8 @@ public class FoldersController : ControllerBase
   (`maxAllowedContentLength`, para IIS; la publicación lo completa con el `aspNetCore` de siempre). El alta antigua en
   base64 (`POST api/notes/resources`) sigue para los ficheros pequeños. El texto leído de un documento: `POST
   api/resources/{id}/read` (Staff+) y `GET api/resources/{id}/text` (cualquier usuario; su comienzo, `MaxViewerLength`).
+  El resumen breve de un documento con la IA (4.4c): `POST api/resources/{id}/summarize?replace=` (Staff+, `AiDocumentSummarizer`,
+  cualquier modelo de chat); el lote (`POST api/resources/process`) acepta `Documents` además de `Photos`.
 - **Editar un recurso** (`PUT api/notes/resources`, `ResourceInfoDto`): un recurso que ya existe solo cambia su
   descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
   fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el

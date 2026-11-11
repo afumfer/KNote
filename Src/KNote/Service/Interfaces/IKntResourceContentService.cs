@@ -16,6 +16,11 @@ public interface IKntResourceContentService
     Task<Result<PhotoDescriptionContextDto>> GetPhotoContextAsync(Guid resourceId);
 
     /// <summary>
+    /// What the AI receives to summarize a document (KNote Atlas, stage 4, 4.4c): reads it first if it was not read. Staff.
+    /// </summary>
+    Task<Result<DocumentSummaryContextDto>> GetDocumentContextAsync(Guid resourceId);
+
+    /// <summary>
     /// Writes the description the AI wrote of a resource, only if it is not locked and has not changed since it was read
     /// (Entity: the resource as it is now). Marks its note for the semantic index. Staff.
     /// </summary>

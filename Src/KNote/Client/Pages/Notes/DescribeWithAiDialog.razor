@@ -1,0 +1,94 @@
+@inject DialogService dialogService
+
+@* Before describing the photos and summarizing the documents of a note (or one of them) with the AI (KNote Atlas, stage 4,
+   4.2 and 4.4c): which model, whether it is paid (the files are sent to the provider), and what to do with the resources whose
+   description a person wrote and didn't lock. The result is the choice (EnumPersonDescriptions), or null if cancelled. *@
+
+<KntDialogFrame Icon="auto_awesome" Title="@Title" Subtitle="@NoteTopic">
+    <ChildContent>
+        <RadzenStack Gap="0.75rem">
+            <div>
+                @if (Single)
+                {
+                    <text>The @(AnyDocument ? "document" : "photo") will be @(AnyDocument ? "summarized" : "described") by <b>@Describer.Model</b>.</text>
+                }
+                else
+                {
+                    <text>@What will be processed by <b>@Describer.Model</b>, one after another.</text>
+                }
+            </div>
+            @if (AnyDocument)
+            {
+                <RadzenText TextStyle="TextStyle.Caption">A document not read yet is read first. A scanned one without text waits for the transcription of its pages.</RadzenText>
+            }
+            @if (Describer.IsPaid)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                    @Describer.Model is a paid model: @SentWhat sent to @Describer.Provider.
+                </RadzenAlert>
+            }
+            @if (PersonPhotos + PersonDocuments > 0)
+            {
+                @if (Single)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                        Its description was written by a person and is not locked: the AI will use it (its names and facts) to write its own, which replaces it. It can't be undone.
+                    </RadzenAlert>
+                }
+                else
+                {
+                    <div>@ResourceProcessingTexts.PersonDescriptions(PersonPhotos, PersonDocuments)</div>
+                    <RadzenRadioButtonList @bind-Value="@choice" TValue="EnumPersonDescriptions" Orientation="Orientation.Vertical">
+                        <Items>
+                            <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceSkip" Value="EnumPersonDescriptions.Skip" />
+                            <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceLock" Value="EnumPersonDescriptions.Lock" />
+                            <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceReplace" Value="EnumPersonDescriptions.Replace" />
+                        </Items>
+                    </RadzenRadioButtonList>
+                }
+            }
+        </RadzenStack>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => dialogService.Close(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+        <RadzenButton Text="@(Single && AnyDocument ? "Summarize" : "Describe")" Icon="auto_awesome" ButtonStyle="ButtonStyle.Primary"
+                      Click="() => dialogService.Close(Single ? EnumPersonDescriptions.Replace : choice)" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter] public string? NoteTopic { get; set; }
+    [Parameter] [EditorRequired] public ResourceDescriberDto Describer { get; set; } = null!;
+    // A single resource («Describe photo», «Summarize document»), or the resources of the note.
+    [Parameter] public bool Single { get; set; }
+    // The photos and the documents to process that have no description of a person, and the ones that have one.
+    [Parameter] public int Photos { get; set; }
+    [Parameter] public int PersonPhotos { get; set; }
+    [Parameter] public int Documents { get; set; }
+    [Parameter] public int PersonDocuments { get; set; }
+
+    private EnumPersonDescriptions choice = EnumPersonDescriptions.Skip;
+
+    private bool AnyDocument => Documents + PersonDocuments > 0;
+
+    private string Title => !Single ? ResourceProcessingTexts.DescribeWithAi : AnyDocument ? "Summarize document" : "Describe photo";
+
+    private string What
+    {
+        get
+        {
+            // Without a description of a person (the others, as chosen below).
+            var parts = new List<string>();
+            if (Photos > 0)
+                parts.Add(ResourceProcessingTexts.Photos(Photos));
+            if (Documents > 0)
+                parts.Add(ResourceProcessingTexts.Documents(Documents));
+            return parts.Count > 0 ? string.Join(" and ", parts) : "The resources chosen below";
+        }
+    }
+
+    private string SentWhat =>
+        Photos + PersonPhotos > 0 && Documents + PersonDocuments > 0 ? "the photos and the documents are"
+        : Documents + PersonDocuments > 0 ? (Single ? "the document is" : "the documents are")
+        : Single ? "the photo is" : "the photos are";
+}

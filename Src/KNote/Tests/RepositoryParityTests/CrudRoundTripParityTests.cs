@@ -268,6 +268,20 @@ public class CrudRoundTripParityTests
             (read.ResourceId, read.NoteId, read.FileType, read.State, read.Text));
         Assert.AreEqual(text, (await reader.Notes.GetResourceTextsAsync(noteId)).Entity.Single().Text);
 
+        // 4.4c: the states of the resources of the repository, without their text, and without the excluded note types.
+        var noteTypeId = Guid.NewGuid();
+        Assert.IsTrue((await writer.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = noteTypeId, Name = "@ExcludedType" })).IsValid);
+        var excludedNoteId = Guid.NewGuid();
+        Assert.IsTrue((await writer.Notes.AddAsync(new NoteDto { NoteId = excludedNoteId, Topic = "Excluded", FolderId = folderRes.Entity.FolderId,
+            NoteTypeId = noteTypeId, CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now })).IsValid);
+        Assert.IsTrue((await writer.Notes.AddResourceAsync(new ResourceDto { ResourceId = Guid.NewGuid(), NoteId = excludedNoteId,
+            Name = $"{Guid.NewGuid()}_hidden.pdf", Container = "R", Description = "hidden.pdf", FileType = "application/pdf" })).IsValid);
+        var states = (await reader.Notes.GetResourceTextStatesAsync(new List<Guid> { noteTypeId })).Entity;
+        var state = states.Single();
+        Assert.AreEqual((resource.ResourceId, noteId, resource.Name, "application/pdf", EnumExtractedState.Partial, (string?)null),
+            (state.ResourceId, state.NoteId, state.Name, state.FileType, state.State, state.Text));
+        Assert.AreEqual(2, (await reader.Notes.GetResourceTextStatesAsync()).Entity.Count);
+
         // Saving the resource with the other ORM, as saving its note does: the text stays.
         var stored = (await reader.Notes.GetResourceAsync(resource.ResourceId)).Entity;
         stored.Description = "The manual of the QL.";

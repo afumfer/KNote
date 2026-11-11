@@ -51,7 +51,7 @@ public class RepositoryResourcesCtrlTests
 
         Assert.IsTrue(await ctrl.LoadAsync(service, "Notes"));
 
-        Assert.AreEqual("3 photos without a description of its own · 2 with a description written by a person, not locked", ctrl.CountsText);
+        StringAssert.StartsWith(ctrl.CountsText, "Photos: 3 without a description of their own · 2 with one written by a person, not locked.");
         StringAssert.StartsWith(ctrl.LastRunText, "Last run: ");
         Assert.IsTrue(ctrl.HasPersonPhotos);
         Assert.IsTrue(ctrl.CanRun);
@@ -69,6 +69,21 @@ public class RepositoryResourcesCtrlTests
         Assert.IsTrue(ctrl.CanRun);
         ctrl.PersonDescriptions = EnumPersonDescriptions.Replace;
         Assert.IsTrue(ctrl.CanRun);
+    }
+
+    // 4.4c: documents to read are something to do, if the documents are chosen; the photos alone, not.
+    [TestMethod]
+    public async Task DocumentsToRead_AreSomethingToRun_IfTheDocumentsAreChosen()
+    {
+        var status = Status(pending: 0, person: 0);
+        status.DocumentsToRead = 2;
+        var (ctrl, _, service, _) = CreateCtrl(status);
+        await ctrl.LoadAsync(service, "Notes");
+
+        Assert.IsTrue(ctrl.CanRun);
+        ctrl.Documents = false;
+        Assert.IsFalse(ctrl.CanRun);
+        Assert.IsFalse(ctrl.Options.Documents);
     }
 
     [TestMethod]

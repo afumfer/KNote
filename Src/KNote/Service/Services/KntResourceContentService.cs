@@ -30,6 +30,9 @@ public class KntResourceContentService : KntServiceBase, IKntResourceContentServ
     public async Task<Result> SaveProcessingRunAsync(ResourceProcessingRunDto run) =>
         await ExecuteCommand(new KntResourceContentSaveProcessingRunAsyncCommand(Service, run));
 
+    public async Task<Result<DocumentSummaryContextDto>> GetDocumentContextAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntResourceContentGetDocumentContextAsyncCommand(Service, resourceId));
+
     public async Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId) =>
         await ExecuteCommand(new KntResourceContentReadDocumentAsyncCommand(Service, resourceId));
 

@@ -130,7 +130,8 @@ public static class AiPhotoRules
     public static string CleanDescription(string answer)
     {
         var text = OneLine(answer);
-        text = Regex.Replace(text, @"^\W*(description|descripción|descripcion)\W*:\W*", "", RegexOptions.IgnoreCase);
+        // The label a model puts before it (also «Summary», 4.4c).
+        text = Regex.Replace(text, @"^\W*(description|descripción|descripcion|summary|resumen)\W*:\W*", "", RegexOptions.IgnoreCase);
         text = Regex.Replace(text, @"(\*\*|__|^#+\s*)", "");
         text = text.Trim().Trim('"', '“', '”', '«', '»', '\'').Trim();
         if (text.Length <= MaxDescriptionLength)

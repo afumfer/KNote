@@ -12,11 +12,11 @@
             <span class="knt-resource-describing">@Describing</span>
             <RadzenButton Text="Cancel" Click="() => OnCancelDescribing.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small" />
         }
-        else if (Resources.Any(AiPhotoRules.CanDescribe))
+        else if (Resources.Any(r => AiPhotoRules.CanDescribe(r) || AiDocumentRules.CanSummarize(r)))
         {
-            <RadzenButton Text="Describe photos" Icon="auto_awesome" Click="() => OnDescribePhotos.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base"
+            <RadzenButton Text="@ResourceProcessingTexts.DescribeWithAi" Icon="auto_awesome" Click="() => OnDescribePhotos.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base"
                           Variant="Variant.Text" Size="ButtonSize.Small" Disabled="@Busy"
-                          MouseEnter="@(args => tooltipService.Open(args, "Describe the photos with the AI (those not locked)"))" />
+                          MouseEnter="@(args => tooltipService.Open(args, "Describe the photos and summarize the documents with the AI (those not locked)"))" />
         }
         <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
     </RadzenStack>
@@ -61,10 +61,11 @@ else
                     </div>
                 </div>
                 <div class="knt-resource-actions">
-                    @if (AiPhotoRules.CanDescribe(resource))
+                    @if (AiPhotoRules.CanDescribe(resource) || AiDocumentRules.CanSummarize(resource))
                     {
                         <RadzenButton Icon="auto_awesome" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
-                                      Click="@(() => OnDescribe.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Describe photo with the AI"))" />
+                                      Click="@(() => OnDescribe.InvokeAsync(resource))" Disabled="@Busy"
+                                      MouseEnter="@(args => tooltipService.Open(args, AiPhotoRules.IsPhoto(resource) ? "Describe photo with the AI" : "Summarize document with the AI"))" />
                     }
                     <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OnEdit.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
@@ -88,7 +89,7 @@ else
     [Parameter] public EventCallback OnNew { get; set; }
     // A change being saved (NoteForm): adding, editing and deleting wait for it.
     [Parameter] public bool Busy { get; set; }
-    // KNote Atlas, stage 4: describing the photos with the AI (Describing: its progress while it runs).
+    // KNote Atlas, stage 4: describing the photos and (4.4c) summarizing the documents with the AI (Describing: its progress while it runs).
     [Parameter] public EventCallback OnDescribePhotos { get; set; }
     [Parameter] public EventCallback<ResourceInfoDto> OnDescribe { get; set; }
     [Parameter] public EventCallback OnCancelDescribing { get; set; }

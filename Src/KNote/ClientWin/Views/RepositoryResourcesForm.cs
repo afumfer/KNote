@@ -27,6 +27,8 @@ public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
         radioSkip.Text = ResourceProcessingTexts.PersonChoiceSkip;
         radioLock.Text = ResourceProcessingTexts.PersonChoiceLock;
         radioReplace.Text = ResourceProcessingTexts.PersonChoiceReplace;
+        checkPhotos.Text = ResourceProcessingTexts.PhotosOption;
+        checkDocuments.Text = ResourceProcessingTexts.DocumentsOption;
     }
 
     #endregion
@@ -54,11 +56,12 @@ public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
         var progress = _ctrl.Progress;
         labelProgress.Text = _ctrl.ProgressText;
         progressBarRun.Visible = _ctrl.IsRunning;
-        if (progress != null && progress.Phase == EnumResourceProcessingPhase.Processing && progress.PhotosTotal > 0)
+        var (barValue, barMax) = progress == null ? (0, 0) : ResourceProcessingTexts.Bar(progress);
+        if (progress != null && progress.Phase == EnumResourceProcessingPhase.Processing && barMax > 0)
         {
             progressBarRun.Style = ProgressBarStyle.Continuous;
-            progressBarRun.Maximum = progress.PhotosTotal;
-            progressBarRun.Value = Math.Min(progress.PhotosDone, progress.PhotosTotal);
+            progressBarRun.Maximum = barMax;
+            progressBarRun.Value = Math.Min(barValue, barMax);
         }
         else
             progressBarRun.Style = ProgressBarStyle.Marquee;
@@ -69,7 +72,7 @@ public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
         foreach (var line in errors)
             listErrors.Items.Add(line);
 
-        radioSkip.Enabled = radioLock.Enabled = radioReplace.Enabled = !_ctrl.IsRunning;
+        radioSkip.Enabled = radioLock.Enabled = radioReplace.Enabled = checkPhotos.Enabled = checkDocuments.Enabled = !_ctrl.IsRunning;
         buttonRun.Enabled = _ctrl.CanRun;
         buttonCancelRun.Visible = _ctrl.IsRunning;
     }
@@ -86,6 +89,13 @@ public partial class RepositoryResourcesForm : KntForm, IViewResourceProcessing
     private void buttonCancelRun_Click(object sender, EventArgs e)
     {
         _ctrl.CancelRun();
+    }
+
+    private void checkProcess_CheckedChanged(object sender, EventArgs e)
+    {
+        _ctrl.Photos = checkPhotos.Checked;
+        _ctrl.Documents = checkDocuments.Checked;
+        RefreshView();
     }
 
     private void radioPersonDescriptions_CheckedChanged(object sender, EventArgs e)

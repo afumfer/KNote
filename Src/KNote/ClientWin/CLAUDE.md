@@ -722,6 +722,9 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   document», solo para un documento guardado (`NoteEditorCtrl.CanReadNow`). Muestra el texto **entero** (`DocumentTexts.Readable`),
   metido en la caja a trozos con una barra de progreso, y «Read document» / «Read again» (pregunta). Los ficheros de los
   recursos, hasta 200 MB (`ResourceFileRules.SizeError` al elegirlos, como la Web).
+- **El resumen de los documentos** (4.4c): «Describe ▾» del editor de la nota describe las fotos y resume los documentos
+  (`NoteEditorCtrl.DescribePhotosAsync`, con `AiDocumentSummarizer` para los documentos) y «Summarize the selected document»;
+  la sección *Process pending resources* (`RepositoryResourcesCtrl`) tiene las casillas «Photos» y «Documents» (`Options`).
 - Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
   `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
 

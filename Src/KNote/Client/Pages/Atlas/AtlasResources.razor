@@ -32,10 +32,21 @@
             }
         </RadzenStack>
 
-        @if (status.PersonPhotos > 0)
+        <RadzenStack Gap="0.25rem" class="rz-mt-2">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="ProcessPhotos" TValue="bool" @bind-Value="@photos" Disabled="@Running" />
+                <RadzenLabel Text="@ResourceProcessingTexts.PhotosOption" Component="ProcessPhotos" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="ProcessDocuments" TValue="bool" @bind-Value="@documents" Disabled="@Running" />
+                <RadzenLabel Text="@ResourceProcessingTexts.DocumentsOption" Component="ProcessDocuments" />
+            </RadzenStack>
+        </RadzenStack>
+
+        @if (ResourceProcessingTexts.PersonDescriptions(photos ? status.PersonPhotos : 0, documents ? status.PersonDocuments : 0) is string personText)
         {
             <div class="rz-mt-2">
-                <RadzenText TextStyle="TextStyle.Body2">@ResourceProcessingTexts.PersonPhotos(status.PersonPhotos)</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2">@personText</RadzenText>
                 <RadzenRadioButtonList @bind-Value="@choice" TValue="EnumPersonDescriptions" Orientation="Orientation.Vertical" Disabled="@Running">
                     <Items>
                         <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceSkip" Value="EnumPersonDescriptions.Skip" />
@@ -52,7 +63,8 @@
                 <RadzenText TextStyle="TextStyle.Body2">@ResourceProcessingTexts.Progress(progress)</RadzenText>
                 @if (progress.Phase == EnumResourceProcessingPhase.Processing)
                 {
-                    <RadzenProgressBar Value="@progress.PhotosDone" Max="@Math.Max(1, progress.PhotosTotal)" ShowValue="false" Style="height: 0.5rem;" />
+                    var (barValue, barMax) = ResourceProcessingTexts.Bar(progress);
+                    <RadzenProgressBar Value="@barValue" Max="@Math.Max(1, barMax)" ShowValue="false" Style="height: 0.5rem;" />
                 }
                 else if (Running)
                 {
@@ -89,6 +101,10 @@
     private ResourceProcessingStatusDto? status;
     private ResourceProcessingProgressDto? progress;
     private EnumPersonDescriptions choice = EnumPersonDescriptions.Skip;
+    private bool photos = true;
+    private bool documents = true;
+
+    private ResourceProcessingOptionsDto Options => new() { Photos = photos, Documents = documents, PersonDescriptions = choice };
     private bool loadFailed;
     private bool polling;
     private bool justFinished;
@@ -97,9 +113,8 @@
 
     private bool Running => progress != null && !progress.IsFinished;
 
-    // Something to do: photos to describe or, with «Keep them and lock them», descriptions to lock.
-    private bool CanRun => status != null
-        && (ResourceProcessingTexts.PhotosToDescribe(status, choice) > 0 || choice == EnumPersonDescriptions.Lock && status.PersonPhotos > 0);
+    // Something to do: photos to describe, documents to read or to summarize or, with «Keep them and lock them», descriptions to lock.
+    private bool CanRun => status != null && (photos || documents) && ResourceProcessingTexts.HasWork(status, Options);
 
     protected override async Task OnInitializedAsync()
     {
@@ -135,17 +150,19 @@
         var describer = await store.Notes.GetPhotoDescriberAsync();
         if (!describer.IsValid || describer.Entity == null)
             return;
-        if (!describer.Entity.Available)
+        // The photos need a model that sees images; the documents, any model.
+        var options = Options;
+        if (options.Photos ? !describer.Entity.Available : !describer.Entity.CanSummarize)
         {
             await dialogService.Alert(describer.Entity.Message, ResourceProcessingTexts.Title, new AlertOptions { OkButtonText = "OK" });
             return;
         }
-        var confirmed = await dialogService.Confirm(ResourceProcessingTexts.RunConfirmation(status, choice, describer.Entity), ResourceProcessingTexts.Title,
+        var confirmed = await dialogService.Confirm(ResourceProcessingTexts.RunConfirmation(status, options, describer.Entity), ResourceProcessingTexts.Title,
             new ConfirmOptions { OkButtonText = "Start", CancelButtonText = "Cancel" });
         if (confirmed != true)
             return;
 
-        var res = await store.Notes.ProcessResourcesAsync(new ResourceProcessingOptionsDto { Photos = true, PersonDescriptions = choice });
+        var res = await store.Notes.ProcessResourcesAsync(options);
         if (res.IsValid && res.Entity != null)
         {
             progress = res.Entity;

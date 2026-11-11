@@ -892,9 +892,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         var selected = SelectedResourceNow();
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Describe the photos of the note...", null, async (s, a) => await DescribePhotosAsync(null));
-        var single = menu.Items.Add("Describe the selected photo...", null, async (s, a) => await DescribePhotosAsync(selected));
-        single.Enabled = selected != null && AiPhotoRules.CanDescribe(selected);
+        menu.Items.Add("Describe the photos and summarize the documents of the note...", null, async (s, a) => await DescribePhotosAsync(null));
+        var single = menu.Items.Add(selected != null && DocumentTextRules.IsDocument(selected) ? "Summarize the selected document..." : "Describe the selected photo...",
+            null, async (s, a) => await DescribePhotosAsync(selected));
+        single.Enabled = selected != null && (AiPhotoRules.CanDescribe(selected) || AiDocumentRules.CanSummarize(selected));
         // KNote Atlas, stage 4 (4.4b): the text KNote read of a document, and «Read document» there.
         menu.Items.Add(new ToolStripSeparator());
         var documentText = menu.Items.Add("Text of the selected document...", null, (s, a) => ShowDocumentText(selected));
@@ -921,16 +922,20 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         form.ShowDialog(this);
     }
 
-    // single: one photo («Describe the selected photo»); null: the photos of the note, as AiPhotoRules.PlanForNote says.
+    // single: one photo or document («Describe the selected photo», «Summarize the selected document»); null: the photos and the
+    // documents of the note, as AiPhotoRules.PlanForNote and AiDocumentRules.PlanForNote say.
     private async Task DescribePhotosAsync(ResourceDto single)
     {
         var resources = _ctrl.Model.Resources;
         var candidates = single != null
             ? new List<ResourceDto> { single }
-            : resources.Where(r => AiPhotoRules.PlanForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
+            : resources.Where(r => AiDocumentRules.PlanResourceForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
         if (candidates.Count == 0)
         {
-            ShowInfo("There are no photos to describe: they are locked or already described by the AI.");
+            // What is decided here is what the note has now: with changes not saved, it may not be what will be saved.
+            var changed = resources.Any(r => (AiPhotoRules.IsPhoto(r) || AiDocumentRules.IsDocument(r)) && (r.IsNew() || r.IsDirty()));
+            ShowInfo("There are no photos to describe nor documents to summarize: they are locked or already done by the AI." +
+                (changed ? " If you changed some of them, save the note first." : ""));
             return;
         }
 
@@ -939,12 +944,15 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         candidates = candidates.Except(unsaved).ToList();
         if (candidates.Count == 0)
         {
-            ShowInfo("Save the note first: the photos to describe are new or have changes not saved.");
+            ShowInfo("Save the note first: the photos and documents are new or have changes not saved.");
             return;
         }
 
+        // The photos need a model that sees images; the documents, any model.
         var (provider, describer) = await _ctrl.GetPhotoDescriberAsync();
         if (!describer.Available)
+            candidates = describer.CanSummarize ? candidates.Where(r => !AiPhotoRules.IsPhoto(r)).ToList() : new List<ResourceDto>();
+        if (candidates.Count == 0)
         {
             ShowInfo(describer.Message);
             return;
@@ -956,10 +964,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         var errors = new List<string>();
         if (choice == EnumPersonDescriptions.Lock)
-            errors.AddRange(await _ctrl.LockDescriptionsAsync(candidates.Where(r => AiPhotoRules.PlanForNote(r, EnumPersonDescriptions.Lock) == EnumPhotoAction.Lock)));
+            errors.AddRange(await _ctrl.LockDescriptionsAsync(candidates.Where(r => AiDocumentRules.PlanResourceForNote(r, EnumPersonDescriptions.Lock) == EnumPhotoAction.Lock)));
         var photos = single != null
             ? candidates
-            : candidates.Where(r => AiPhotoRules.PlanForNote(r, choice.Value) == EnumPhotoAction.Describe).ToList();
+            : candidates.Where(r => AiDocumentRules.PlanResourceForNote(r, choice.Value) == EnumPhotoAction.Describe).ToList();
 
         // While it runs, the header shows the progress, and the resources can't be changed here.
         _describing = new CancellationTokenSource();
@@ -970,7 +978,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         foreach (var button in resourceButtons)
             button.Visible = false;
         buttonDescribePhotos.Text = "Cancel";
-        toolTipHelps.SetToolTip(buttonDescribePhotos, "Stop after the photo being described");
+        toolTipHelps.SetToolTip(buttonDescribePhotos, "Stop after the one being done");
         LayoutResourcesHeader();
         var described = 0;
         var cancelled = false;
@@ -995,34 +1003,47 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
                 resourceButtons[i].Visible = visible[i];
             buttonDescribePhotos.Text = text;
             buttonDescribePhotos.Enabled = true;
-            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos with the AI");
+            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos and summarize the documents with the AI");
             LayoutResourcesHeader();
 
             UpdatePreviewResource(_selectedResource);
-            var summary = $"{described} of {photos.Count} described" + (cancelled ? " (cancelled)." : ".");
+            var summary = $"{described} of {photos.Count} done" + (cancelled ? " (cancelled)." : ".");
             if (unsaved.Count > 0)
-                summary += $" {unsaved.Count} not described: new or with changes not saved.";
+                summary += $" {unsaved.Count} not done: new or with changes not saved.";
             if (errors.Count > 0)
                 summary += Environment.NewLine + Environment.NewLine + string.Join(Environment.NewLine, errors);
             ShowInfo(summary);
         }
     }
 
-    // The model, whether it is paid and, if some photos have a description a person wrote, what to do with them. Null: cancelled.
-    private EnumPersonDescriptions? AskHowToDescribe(ResourceDescriberDto describer, List<ResourceDto> photos, bool single)
+    // The model, whether it is paid and, if some photos or documents have a description a person wrote, what to do with them.
+    // Null: cancelled.
+    private EnumPersonDescriptions? AskHowToDescribe(ResourceDescriberDto describer, List<ResourceDto> resources, bool single)
     {
-        var persons = photos.Count(AiPhotoRules.HasPersonDescription);
+        var photos = resources.Where(AiPhotoRules.IsPhoto).ToList();
+        var documents = resources.Where(r => !AiPhotoRules.IsPhoto(r)).ToList();
+        var personPhotos = photos.Count(AiPhotoRules.HasPersonDescription);
+        var personDocuments = documents.Count(AiDocumentRules.HasPersonDescription);
+        var persons = personPhotos + personDocuments;
+        var isDocument = single && documents.Count > 0;
+        var what = new List<string>();
+        if (photos.Count - personPhotos > 0)
+            what.Add(ResourceProcessingTexts.Photos(photos.Count - personPhotos));
+        if (documents.Count - personDocuments > 0)
+            what.Add(ResourceProcessingTexts.Documents(documents.Count - personDocuments));
         var text = single
-            ? $"The photo will be described by {describer.Model}."
-            : $"{photos.Count - persons} photo(s) will be described by {describer.Model}, one after another.";
+            ? $"The {(isDocument ? "document will be summarized" : "photo will be described")} by {describer.Model}."
+            : $"{(what.Count > 0 ? string.Join(" and ", what) : "The resources chosen below")} will be processed by {describer.Model}, one after another.";
+        if (documents.Count > 0)
+            text += $"{Environment.NewLine}{Environment.NewLine}A document not read yet is read first. A scanned one without text waits for the transcription of its pages.";
         if (describer.IsPaid)
-            text += $"{Environment.NewLine}{Environment.NewLine}{describer.Model} is a paid model: the photos are sent to {describer.Provider}.";
+            text += $"{Environment.NewLine}{Environment.NewLine}{describer.Model} is a paid model: the {(photos.Count > 0 && documents.Count > 0 ? "photos and the documents" : photos.Count > 0 ? "photos" : "documents")} are sent to {describer.Provider}.";
 
-        var describe = new TaskDialogButton("Describe");
+        var describe = new TaskDialogButton(isDocument ? "Summarize" : "Describe");
         var page = new TaskDialogPage
         {
             Caption = KntConst.AppName,
-            Heading = single ? "Describe photo" : "Describe photos",
+            Heading = single ? (isDocument ? "Summarize document" : "Describe photo") : ResourceProcessingTexts.DescribeWithAi,
             Text = text,
             Buttons = { describe, TaskDialogButton.Cancel },
             DefaultButton = describe
@@ -1030,10 +1051,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         TaskDialogRadioButton skip = null, keep = null, replace = null;
         if (persons > 0 && single)
-            page.Text += $"{Environment.NewLine}{Environment.NewLine}Its description was written by a person and is not locked: the AI will use it (who is in the photo, where) to write its own, which replaces it. It can't be undone.";
+            page.Text += $"{Environment.NewLine}{Environment.NewLine}Its description was written by a person and is not locked: the AI will use it (its names and facts) to write its own, which replaces it. It can't be undone.";
         else if (persons > 0)
         {
-            page.Text += $"{Environment.NewLine}{Environment.NewLine}{persons} photo(s) have a description written by a person, not locked:";
+            page.Text += $"{Environment.NewLine}{Environment.NewLine}{ResourceProcessingTexts.PersonDescriptions(personPhotos, personDocuments)}";
             skip = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceSkip);
             keep = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceLock);
             replace = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceReplace);

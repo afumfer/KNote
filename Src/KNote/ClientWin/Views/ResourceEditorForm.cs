@@ -178,6 +178,9 @@ public partial class ResourceEditorForm : KntEditorForm, IViewEditor<ResourceDto
         _ctrl.Model.Name = varName;
         _ctrl.Model.Description = textDescription.Text;
         _ctrl.Model.DescriptionByUser = checkLockDescription.Checked;
+        // The model that will keep the description when it is saved (the Service decides the same): with a text of a person,
+        // none. Otherwise, until the note is saved, «Describe with AI» took it as done by the AI.
+        _ctrl.Model.DescriptionModel = ResourceDescriptionRules.ModelWhileEditing(_ctrl.Model.LoadedDescription, _loadedModel, textDescription.Text);
         _ctrl.Model.Order = _ctrl.Store.KntTextUtils.TextToInt(textOrder.Text);
         _ctrl.Model.FileType = varFileType;
         _ctrl.Model.Container = varContainer;

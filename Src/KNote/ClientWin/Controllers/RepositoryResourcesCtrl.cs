@@ -36,23 +36,29 @@ public class RepositoryResourcesCtrl : CtrlViewEmbeddableBase<IViewResourceProce
     // The choice for the descriptions written by people (the view's radio buttons).
     public EnumPersonDescriptions PersonDescriptions { get; set; } = EnumPersonDescriptions.Skip;
 
+    // What to process (the view's check boxes; 4.4c).
+    public bool Photos { get; set; } = true;
+    public bool Documents { get; set; } = true;
+
+    public ResourceProcessingOptionsDto Options => new() { Photos = Photos, Documents = Documents, PersonDescriptions = PersonDescriptions };
+
     // The run of this repository (running or the last one), or null.
     public ResourceProcessingProgressDto Progress => Store.ResourceProcessing.IsOf(Service) ? Store.ResourceProcessing.Progress : null;
 
     public bool IsRunning => Store.ResourceProcessing.IsRunning && Store.ResourceProcessing.IsOf(Service);
 
-    // Something to do: photos to describe or, with «Keep them and lock them», descriptions to lock.
-    public bool CanRun => Status != null && !Store.AtlasJobRunning
-        && (ResourceProcessingTexts.PhotosToDescribe(Status, PersonDescriptions) > 0
-            || PersonDescriptions == EnumPersonDescriptions.Lock && Status.PersonPhotos > 0);
+    // Something to do: photos to describe, documents to read or to summarize or, with «Keep them and lock them», descriptions to lock.
+    public bool CanRun => Status != null && !Store.AtlasJobRunning && Options.Any && ResourceProcessingTexts.HasWork(Status, Options);
 
-    public bool HasPersonPhotos => Status?.PersonPhotos > 0;
+    public bool HasPersonPhotos => PersonPhotosText.Length > 0;
 
     public string CountsText => Status == null ? "" : ResourceProcessingTexts.Counts(Status);
 
     public string LastRunText => Status == null ? "" : ResourceProcessingTexts.LastRun(Status) ?? "";
 
-    public string PersonPhotosText => HasPersonPhotos ? ResourceProcessingTexts.PersonPhotos(Status.PersonPhotos) : "";
+    // The resources with a description written by people, of the kinds chosen.
+    public string PersonPhotosText => Status == null ? ""
+        : ResourceProcessingTexts.PersonDescriptions(Photos ? Status.PersonPhotos : 0, Documents ? Status.PersonDocuments : 0) ?? "";
 
     public string WarningText =>
         Store.SemanticIndex.IsRunning
@@ -117,21 +123,22 @@ public class RepositoryResourcesCtrl : CtrlViewEmbeddableBase<IViewResourceProce
         if (!CanRun)
             return false;
 
+        // The photos need a model that sees images; the documents, any model.
+        var options = Options;
         var (provider, describer) = await Store.GetPhotoDescriberAsync(Service);
-        if (!describer.Available)
+        if (options.Photos ? !describer.Available : !describer.CanSummarize)
         {
             View.ShowInfo(describer.Message, ResourceProcessingTexts.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
             return false;
         }
 
-        var answer = View.ShowInfo(ResourceProcessingTexts.RunConfirmation(Status, PersonDescriptions, describer), ResourceProcessingTexts.Title,
+        var answer = View.ShowInfo(ResourceProcessingTexts.RunConfirmation(Status, options, describer), ResourceProcessingTexts.Title,
             MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
         if (answer != DialogResult.OK)
             return false;
 
         var index = await Service.SemanticSearch.GetIndexStatusAsync();
         var hasIndex = index.IsValid && index.Entity?.Status != EnumSemanticIndexStatus.None && index.Entity?.EmbeddingModelAvailable == true;
-        var options = new ResourceProcessingOptionsDto { Photos = true, PersonDescriptions = PersonDescriptions };
         if (!Store.ResourceProcessing.Start(Service, RepositoryName, provider, options, hasIndex))
             return false;
         View.RefreshView();

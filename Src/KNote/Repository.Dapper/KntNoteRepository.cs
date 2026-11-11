@@ -761,6 +761,26 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextStatesAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var notExcluded = excludedNoteTypeIds?.Count > 0 ? "(n.NoteTypeId IS NULL OR n.NoteTypeId NOT IN @excluded)" : "1 = 1";
+            var states = await db.QueryAsync<ResourceTextDto>(
+                $@"SELECT r.ResourceId, r.NoteId, r.[Name], r.FileType, r.ExtractedState AS State
+                FROM Resources r INNER JOIN Notes n ON n.NoteId = r.NoteId
+                WHERE {notExcluded}
+                ORDER BY n.NoteNumber, r.[Order], r.[Name]", new { excluded = excludedNoteTypeIds });
+            await CloseIsTempConnection(db);
+            return new Result<List<ResourceTextDto>> { Entity = states.ToList() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName)
     {
         try
