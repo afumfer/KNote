@@ -6,7 +6,20 @@
 
 <div class="knt-list-header">
     <span>@Resources.Count @(Resources.Count == 1 ? "resource" : "resources")</span>
-    <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        @if (Describing != null)
+        {
+            <span class="knt-resource-describing">@Describing</span>
+            <RadzenButton Text="Cancel" Click="() => OnCancelDescribing.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small" />
+        }
+        else if (Resources.Any(r => AiPhotoRules.CanDescribe(r) || AiDocumentRules.CanSummarize(r)))
+        {
+            <RadzenButton Text="@ResourceProcessingTexts.DescribeWithAi" Icon="auto_awesome" Click="() => OnDescribePhotos.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base"
+                          Variant="Variant.Text" Size="ButtonSize.Small" Disabled="@Busy"
+                          MouseEnter="@(args => tooltipService.Open(args, "Describe the photos and summarize the documents with the AI (those not locked)"))" />
+        }
+        <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
+    </RadzenStack>
 </div>
 
 @if (Resources.Count == 0)
@@ -28,7 +41,7 @@ else
                      @onclick="() => ViewAsync(resource)" title="@(CanView(resource) ? "View" : "Open")">
                     @if (image != null)
                     {
-                        <img src="@image" alt="@resource.Description" loading="lazy" />
+                        <img src="@image" alt="@resource.GetTitle()" loading="lazy" />
                     }
                     else
                     {
@@ -37,13 +50,23 @@ else
                     }
                 </div>
                 <div class="knt-resource-body">
-                    <div class="knt-resource-title">@(string.IsNullOrWhiteSpace(resource.Description) ? resource.NameOut : resource.Description)</div>
+                    <div class="knt-resource-title" title="@resource.Description">@resource.GetTitle()</div>
                     <div class="knt-resource-meta">
                         <span class="knt-resource-order">@resource.Order</span>
                         <span class="knt-resource-name">@resource.NameOut</span>
+                        @if (resource.DescriptionByUser)
+                        {
+                            <RadzenIcon Icon="lock" class="knt-resource-locked" title="Description locked: the AI won't change it" />
+                        }
                     </div>
                 </div>
                 <div class="knt-resource-actions">
+                    @if (AiPhotoRules.CanDescribe(resource) || AiDocumentRules.CanSummarize(resource))
+                    {
+                        <RadzenButton Icon="auto_awesome" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                      Click="@(() => OnDescribe.InvokeAsync(resource))" Disabled="@Busy"
+                                      MouseEnter="@(args => tooltipService.Open(args, AiPhotoRules.IsPhoto(resource) ? "Describe photo with the AI" : "Summarize document with the AI"))" />
+                    }
                     <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OnEdit.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
                     <RadzenButton Icon="open_in_new" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
@@ -66,6 +89,11 @@ else
     [Parameter] public EventCallback OnNew { get; set; }
     // A change being saved (NoteForm): adding, editing and deleting wait for it.
     [Parameter] public bool Busy { get; set; }
+    // KNote Atlas, stage 4: describing the photos and (4.4c) summarizing the documents with the AI (Describing: its progress while it runs).
+    [Parameter] public EventCallback OnDescribePhotos { get; set; }
+    [Parameter] public EventCallback<ResourceInfoDto> OnDescribe { get; set; }
+    [Parameter] public EventCallback OnCancelDescribing { get; set; }
+    [Parameter] public string? Describing { get; set; }
 
     [Inject] private IJSRuntime js { get; set; } = null!;
 
@@ -87,11 +115,13 @@ else
         return dot >= 0 && dot < name.Length - 1 ? name[(dot + 1)..].ToUpperInvariant() : "";
     }
 
-    // What the browser can show (an image, a PDF, a video, an audio or a text) is shown in this window
-    // (NoteResourceViewer), over the note; any other file opens in a new tab.
+    // Every resource is shown in this window (NoteResourceViewer), over the note: what the browser can show (an image, a PDF,
+    // a video, an audio or a text), the text of a document (KNote Atlas 4.4b) and, for any other file (a .doc, a .zip...), its
+    // description with «Open in a new tab». Only one without a URL nor an image is opened directly.
     private static bool CanView(ResourceInfoDto resource) =>
         ImageSource(resource) != null
-        || (KntFileTypes.KindOf(resource.FileType, resource.Name) != KntFileTypes.Kind.Other && !string.IsNullOrEmpty(resource.FullUrl));
+        || DocumentTextRules.IsDocument(resource)
+        || !string.IsNullOrEmpty(resource.FullUrl);
 
     private async Task ViewAsync(ResourceInfoDto resource)
     {

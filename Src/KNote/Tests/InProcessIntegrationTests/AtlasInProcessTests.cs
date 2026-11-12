@@ -134,8 +134,8 @@ public class AtlasInProcessTests
 
         var tasks = await ReadAsync<List<AtlasTaskPromptStatusDto>>(await guest.GetAsync("api/atlas/tasks"));
 
-        Assert.AreEqual(EnumAtlasTaskPromptState.Added, tasks.Single().State);
-        Assert.AreEqual(note.NoteId, tasks.Single().Note.NoteId);
+        Assert.AreEqual(EnumAtlasTaskPromptState.Added, tasks.Single(t => t.TaskKey == AiTaskCatalog.AssistantKey).State);
+        Assert.AreEqual(note.NoteId, tasks.Single(t => t.TaskKey == AiTaskCatalog.AssistantKey).Note.NoteId);
         Assert.AreEqual(HttpStatusCode.Forbidden, (await guest.PostAsJsonAsync("api/atlas/compose", new AiComposeRequestDto())).StatusCode);
     }
 

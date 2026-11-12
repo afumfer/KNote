@@ -8,7 +8,7 @@ using KNote.Model.Dto;
 namespace KNote.ClientWin.Tests;
 
 /// <summary>
-/// RepositoryAiModelsCtrl (KNote Atlas tab of the repository editor): it reads and saves the repository's models, a
+/// RepositoryAiModelsCtrl (Â«Repository modelsÂ» of the KNote Atlas window): it reads and saves the repository's models, a
 /// change of embedding model is confirmed first, the changes not saved are saved, discarded or kept when the editor
 /// is accepted, and the view says whether this installation has each model and whether it is a paid one.
 /// </summary>

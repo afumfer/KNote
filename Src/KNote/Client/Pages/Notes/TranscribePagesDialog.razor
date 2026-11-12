@@ -1,0 +1,44 @@
+@inject DialogService dialogService
+
+@* Before transcribing the scanned pages of a document with the AI (KNote Atlas, stage 4, 4.5b): how many pages (and the ones with
+   an OCR layer, which can be left out), with which model, how long and, with a paid model, that they are sent. The result is
+   whether to include the pages with an OCR layer (bool), or null if cancelled. *@
+
+<KntDialogFrame Icon="document_scanner" Title="@DocumentTexts.TranscribePages" Subtitle="@FileName">
+    <ChildContent>
+        <RadzenStack Gap="0.75rem">
+            <div>@DocumentTexts.TranscriptionConfirmation(Pages, Describer, SecondsPerPage)</div>
+            @if (Scanned.OcrPages.Count > 0)
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenCheckBox Name="TranscribeOcrPages" TValue="bool" @bind-Value="@withOcr" />
+                    <RadzenLabel Text="@($"{DocumentTexts.WithOcrPages} ({Scanned.OcrPages.Count})")" Component="TranscribeOcrPages" />
+                </RadzenStack>
+            }
+            @if (Describer.IsPaid)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                    @Describer.Model is a paid model: the pages are sent to @Describer.Provider.
+                </RadzenAlert>
+            }
+            <RadzenText TextStyle="TextStyle.Caption">@DocumentTexts.AutomaticTranscriptionHelp</RadzenText>
+        </RadzenStack>
+    </ChildContent>
+    <Footer>
+        <RadzenButton Text="Cancel" Click="() => dialogService.Close(null)" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" />
+        <RadzenButton Text="Transcribe" Icon="document_scanner" ButtonStyle="ButtonStyle.Primary" Disabled="@(Pages == 0)"
+                      Click="() => dialogService.Close(withOcr)" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter] public string? FileName { get; set; }
+    [Parameter] [EditorRequired] public ScannedDocumentDto Scanned { get; set; } = null!;
+    [Parameter] [EditorRequired] public ResourceDescriberDto Describer { get; set; } = null!;
+    // The pace of the last run of the repository (null: none yet).
+    [Parameter] public double? SecondsPerPage { get; set; }
+
+    private bool withOcr = true;
+
+    private int Pages => Scanned.PagesToTranscribe(withOcr).Count;
+}

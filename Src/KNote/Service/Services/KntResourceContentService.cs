@@ -1,0 +1,63 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using KNote.Model;
+using KNote.Model.Dto;
+using KNote.Service.Core;
+using KNote.Service.Interfaces;
+using KNote.Service.ServicesCommands;
+
+namespace KNote.Service.Services;
+
+public class KntResourceContentService : KntServiceBase, IKntResourceContentService
+{
+    public KntResourceContentService(IKntService service) : base(service)
+    {
+
+    }
+
+    public async Task<Result<PhotoDescriptionContextDto>> GetPhotoContextAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntResourceContentGetPhotoContextAsyncCommand(Service, resourceId));
+
+    public async Task<Result<ResourceInfoDto>> SaveAiDescriptionAsync(AiDescriptionSaveDto description) =>
+        await ExecuteCommand(new KntResourceContentSaveAiDescriptionAsyncCommand(Service, description));
+
+    public async Task<Result<ResourceProcessingStatusDto>> GetProcessingStatusAsync() =>
+        await ExecuteCommand(new KntResourceContentGetProcessingStatusAsyncCommand(Service));
+
+    public async Task<Result<ResourceProcessingPlanDto>> PrepareProcessingAsync(ResourceProcessingOptionsDto options) =>
+        await ExecuteCommand(new KntResourceContentPrepareProcessingAsyncCommand(Service, options));
+
+    public async Task<Result> SaveProcessingRunAsync(ResourceProcessingRunDto run) =>
+        await ExecuteCommand(new KntResourceContentSaveProcessingRunAsyncCommand(Service, run));
+
+    public async Task<Result<DocumentSummaryContextDto>> GetDocumentContextAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntResourceContentGetDocumentContextAsyncCommand(Service, resourceId));
+
+    public async Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntResourceContentReadDocumentAsyncCommand(Service, resourceId));
+
+    public async Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, int maxLength = 0) =>
+        await ExecuteCommand(new KntResourceContentGetDocumentTextAsyncCommand(Service, new DocumentTextRequest(resourceId, maxLength)));
+
+    public async Task<Result<List<ScannedDocumentDto>>> GetScannedDocumentsAsync(Guid? resourceId = null) =>
+        await ExecuteCommand(new KntResourceContentGetScannedDocumentsAsyncCommand(Service, resourceId));
+
+    public async Task<Result<ResourceTextDto>> GetDocumentToReadAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntResourceContentGetDocumentToReadAsyncCommand(Service, resourceId));
+
+    public async Task<Result<ResourceThumbnailDto>> DrawDocumentPageAsync(Guid resourceId, int page) =>
+        await ExecuteCommand(new KntResourceContentDrawDocumentPageAsyncCommand(Service, new DocumentPageRequest(resourceId, page)));
+
+    public async Task<Result<List<DocumentReadDto>>> GetNoteDocumentsAsync(Guid noteId) =>
+        await ExecuteCommand(new KntResourceContentGetNoteDocumentsAsyncCommand(Service, noteId));
+
+    public async Task<Result<ResourceDto>> GetPhotoFileAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntResourceContentGetPhotoFileAsyncCommand(Service, resourceId));
+
+    public async Task<Result<PageTranscriptionContextDto>> GetPageContextAsync(Guid resourceId, int page) =>
+        await ExecuteCommand(new KntResourceContentGetPageContextAsyncCommand(Service, new DocumentPageRequest(resourceId, page)));
+
+    public async Task<Result<DocumentReadDto>> SaveTranscriptionAsync(PageTranscriptionSaveDto transcription) =>
+        await ExecuteCommand(new KntResourceContentSaveTranscriptionAsyncCommand(Service, transcription));
+}

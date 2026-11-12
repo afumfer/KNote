@@ -107,6 +107,9 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         {
             Topic = string.IsNullOrWhiteSpace(textTopic.Text) ? null : textTopic.Text,
             Description = string.IsNullOrWhiteSpace(textDescription.Text) ? null : textDescription.Text,
+            // KNote Atlas 4.6a: its text also in the note's tasks and resources.
+            SearchInNoteTasks = checkDescriptionInTasks.Checked,
+            SearchInResources = checkDescriptionInResources.Checked,
             Tags = string.IsNullOrWhiteSpace(textTags.Text) ? null : textTags.Text,
             NoteTypeId = selectedNoteType == null || selectedNoteType.NoteTypeId == Guid.Empty ? null : selectedNoteType.NoteTypeId,
             FolderId = _folderId,
@@ -282,6 +285,8 @@ public partial class NotesFilterParamForm : KntForm, IViewEmbeddable
         textTopic.Text = "";
         textMeaningText.Text = "";
         textDescription.Text = "";
+        checkDescriptionInTasks.Checked = false;
+        checkDescriptionInResources.Checked = false;
         textTags.Text = "";
         textModifiedFrom.Text = "";
         textModifiedTo.Text = "";

@@ -178,6 +178,12 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await ExecuteCommand(command);
     }
 
+    public async Task<Result<ResourceInfoDto>> UploadResourceAsync(ResourceDto resource, Stream content, long length)
+    {
+        var command = new KntNotesUploadResourceAsyncCommand(Service, new KntResourceUploadParam(resource, content, length));
+        return await ExecuteCommand(command);
+    }
+
     public async Task<Result<ResourceDto>> DeleteResourceAsync(Guid id)
     {
         var command = new KntNotesDeleteResourceAsyncCommand(Service, id);
@@ -391,7 +397,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
         return await Repository.Notes.CompleteNoteAttributesAsync(attributesNotes, noteId, noteTypeId);
     }
 
-    public bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true)
+    public bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true, bool readContent = true)
     {        
         if (resource == null)
             return false;
@@ -428,7 +434,7 @@ public class KntNoteService : KntServiceBase, IKntNoteService
                     File.WriteAllBytes(file, resource.ContentArrayBytes);
             }
 
-            if (forceUpdateDto && !resource.ContentInDB)
+            if (forceUpdateDto && readContent && !resource.ContentInDB)
                 resource.ContentArrayBytes = File.ReadAllBytes(file);
         }
         catch (Exception ex)

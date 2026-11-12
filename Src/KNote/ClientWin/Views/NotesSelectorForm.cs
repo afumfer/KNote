@@ -32,6 +32,20 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
     private const string FragmentColumn = "Fragment";
     private Panel _panelMeaningNotice;
     private Label _labelMeaningNotice;
+    private Button _buttonUpdateIndex;
+    // KNote Atlas, stage 4 (D14): the photos or the documents found by meaning, a row for each one (ResourceSearchHitDto), with
+    // their thumbnail (photos), title and page, «Gallery» (the photos in a window, ResourceGalleryForm) and opening the resource.
+    private const string ThumbnailColumn = "Thumbnail";
+    private const string ResourceColumn = "Resource";
+    private const string PageColumn = "Page";
+    private const int ThumbnailSide = 48;
+    private Button _buttonGallery;
+    private ResourceGalleryForm _gallery;
+    private readonly Dictionary<Guid, Image> _thumbnails = new();
+    private int _thumbnailsVersion;
+    private ToolStripMenuItem _menuOpenResource;
+    private ToolStripMenuItem _menuOpenNote;
+    private ToolStripSeparator _menuResourceSeparator;
 
     #endregion
 
@@ -64,6 +78,7 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         dataGridNotes.ColumnWidthChanged += dataGridNotes_ColumnWidthChanged;
         dataGridNotes.DataBindingComplete += dataGridNotes_DataBindingComplete;
         _ctrl.Store.Events.Subscribe<NotesListViewOptionsChanged>(OnNotesListViewOptionsChanged);
+        _ctrl.Store.Events.Subscribe<SemanticIndexProgressChanged>(OnIndexProgressChanged);
 
         buttonUndoFilter.SetKntIcon(KntIcon.FilterClear);
         buttonUndoFilter.AlignToTextBox(textFilter);
@@ -119,7 +134,7 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
             OrderColNumber = FindColumnIndex(SimilarityColumn);
             AscendigOrderNotes = false;
         }
-        else if (OrderColNumber == 0 || IsMeaningColumn(OrderColNumber))
+        else if (OrderColNumber == 0 || IsMeaningColumn(OrderColNumber) || IsResourceColumn(OrderColNumber))
         {
             OrderColNumber = 1;
             AscendigOrderNotes = true;
@@ -130,8 +145,8 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         // after moving notes...) keeps it selected; a different list doesn't contain it and starts at row 0.
         RefreshDataGridNotes(_ctrl.SelectedEntity?.NoteId);
 
-        _labelMeaningNotice.Text = SemanticIndexTexts.PendingInSearch(_ctrl.PendingNotes);
-        _panelMeaningNotice.Visible = _ctrl.ByMeaning && _ctrl.PendingNotes > 0;
+        RefreshMeaningNotice();
+        RefreshResources();
 
         // Hack for refresh column 0 in modal form.
         dataGridNotes.Columns[0].Visible = false;
@@ -221,6 +236,12 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
 
     private void dataGridNotes_DoubleClick(object sender, EventArgs e)
     {
+        // A photo or a document found: the resource (its note, with «Open note»).
+        if (_ctrl.ByResources && SelectedHit() is ResourceSearchHitDto hit)
+        {
+            OpenResource(hit);
+            return;
+        }
         ActiveCurrentRow(false);
         _ctrl.NotifySelectedEntityDoubleClick();
     }
@@ -237,6 +258,8 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
 
     private void dataGridNotes_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
     {
+        if (IsResourceColumn(e.ColumnIndex))
+            return;
         OrderColNumber = e.ColumnIndex;
         _sortOrder = getSortOrder(OrderColNumber);
         RefreshDataGridNotes();
@@ -283,6 +306,10 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
     {
         FitDateColumns();
         FitTopicColumn();
+        // The photos found: rows as high as their thumbnail.
+        if (_ctrl.ResourceKind == EnumResourceKind.Photos)
+            foreach (DataGridViewRow row in dataGridNotes.Rows)
+                row.Height = LogicalToDeviceUnits(ThumbnailSide + 4);
     }
 
     private void textFilter_KeyDown(object sender, KeyEventArgs e)
@@ -427,6 +454,9 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         _ctrl.SelectedEntity = DataGridViewRowToNoteInfo(sr);
         if(notifySelectedEntity)            
             _ctrl.NotifySelectedEntity();
+        // The gallery shows the same photo selected.
+        if (_gallery is { IsDisposed: false } && BoundItem(sr.Index) is ResourceSearchHitDto hit)
+            _gallery.SelectHit(hit);
     }
 
     private void CoonfigureGridStd()
@@ -505,6 +535,31 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
             SortMode = DataGridViewColumnSortMode.Programmatic, Visible = false
         });
 
+        // KNote Atlas, stage 4 (D14): the resource of each row of a search of photos or documents (not sorted by their header).
+        var thumbnail = new DataGridViewImageColumn
+        {
+            Name = ThumbnailColumn, HeaderText = "", Width = LogicalToDeviceUnits(ThumbnailSide + 8),
+            ImageLayout = DataGridViewImageCellLayout.Zoom, SortMode = DataGridViewColumnSortMode.NotSortable, Visible = false
+        };
+        thumbnail.DefaultCellStyle.NullValue = null;
+        dataGridNotes.Columns.Add(thumbnail);
+        thumbnail.DisplayIndex = dataGridNotes.Columns["NoteNumber"].DisplayIndex;
+        var resourceColumn = new DataGridViewTextBoxColumn
+        {
+            Name = ResourceColumn, HeaderText = "Resource", Width = LogicalToDeviceUnits(220),
+            SortMode = DataGridViewColumnSortMode.NotSortable, Visible = false
+        };
+        dataGridNotes.Columns.Add(resourceColumn);
+        resourceColumn.DisplayIndex = dataGridNotes.Columns["Topic"].DisplayIndex;
+        var page = new DataGridViewTextBoxColumn
+        {
+            Name = PageColumn, HeaderText = "Page", Width = LogicalToDeviceUnits(50),
+            SortMode = DataGridViewColumnSortMode.NotSortable, Visible = false
+        };
+        page.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        dataGridNotes.Columns.Add(page);
+        page.DisplayIndex = resourceColumn.DisplayIndex + 1;
+
         foreach (DataGridViewColumn col in dataGridNotes.Columns)
         {
             if (col.Name != "Topic")
@@ -536,47 +591,210 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
         dataGridNotes.Columns["CreationDateTime"].Visible = !(compact || IsColumnHidden("CreationDateTime"));
         dataGridNotes.Columns[SimilarityColumn].Visible = _ctrl.ByMeaning;
         dataGridNotes.Columns[FragmentColumn].Visible = _ctrl.ByMeaning;
+        dataGridNotes.Columns[ThumbnailColumn].Visible = _ctrl.ResourceKind == EnumResourceKind.Photos;
+        dataGridNotes.Columns[ResourceColumn].Visible = _ctrl.ByResources;
+        dataGridNotes.Columns[PageColumn].Visible = _ctrl.ResourceKind == EnumResourceKind.Documents;
     }
 
     private bool IsMeaningColumn(int columnIndex) =>
         columnIndex >= 0 && columnIndex < dataGridNotes.Columns.Count
         && dataGridNotes.Columns[columnIndex].Name is SimilarityColumn or FragmentColumn;
 
+    private bool IsResourceColumn(int columnIndex) =>
+        columnIndex >= 0 && columnIndex < dataGridNotes.Columns.Count
+        && dataGridNotes.Columns[columnIndex].Name is ThumbnailColumn or ResourceColumn or PageColumn;
+
     private void dataGridNotes_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
     {
-        if (e.RowIndex < 0 || !IsMeaningColumn(e.ColumnIndex))
+        if (e.RowIndex < 0)
             return;
-        var hit = dataGridNotes.Rows[e.RowIndex].DataBoundItem as NoteSearchHitDto;
-        e.Value = hit == null ? "" : dataGridNotes.Columns[e.ColumnIndex].Name == SimilarityColumn ? hit.Similarity.ToString("0.00") : hit.Fragment;
+        if (IsResourceColumn(e.ColumnIndex))
+        {
+            var found = BoundItem(e.RowIndex) as ResourceSearchHitDto;
+            e.Value = dataGridNotes.Columns[e.ColumnIndex].Name switch
+            {
+                ThumbnailColumn => found == null ? null : _thumbnails.GetValueOrDefault(found.Resource.ResourceId),
+                ResourceColumn => found?.Resource.GetTitle() ?? "",
+                _ => found?.FragmentPage?.ToString() ?? ""
+            };
+            e.FormattingApplied = true;
+            return;
+        }
+        if (!IsMeaningColumn(e.ColumnIndex))
+            return;
+        var hit = BoundItem(e.RowIndex) as NoteSearchHitDto;
+        // A list of resources: the fragment alone (its resource and its page have their columns).
+        e.Value = hit == null ? "" : dataGridNotes.Columns[e.ColumnIndex].Name == SimilarityColumn ? hit.Similarity.ToString("0.00")
+            : hit is ResourceSearchHitDto ? hit.Fragment : hit.FragmentShown();
         e.FormattingApplied = true;
+    }
+
+    // The notice above the list: the notes not up to date (4.6b: why, and «Update index» for an Admin, enabled when no run of KNote
+    // Atlas is going on) and, with photos found, how many and «Gallery». The notes whose documents have no file here don't show it.
+    private void RefreshMeaningNotice()
+    {
+        var pending = _ctrl.ByMeaning && SemanticIndexTexts.ShowsPendingNotice(_ctrl.PendingNotes, _ctrl.NotesWithoutFiles);
+        var photos = _ctrl.ResourceKind == EnumResourceKind.Photos;
+        var count = _ctrl.ResourceHits.Count();
+        var canRun = _ctrl.CanRunIndex;
+        _labelMeaningNotice.Text = pending
+            ? SemanticIndexTexts.PendingInSearch(_ctrl.PendingNotes, _ctrl.NotesForFullRun, _ctrl.NotesWithoutFiles, canRun)
+                + (_ctrl.IndexRunning ? " The index is being brought up to date: the search is repeated when it ends." : "")
+            : photos ? $"{ResourceProcessingTexts.Photos(count)} found." : "";
+        _buttonUpdateIndex.Visible = pending && canRun;
+        _buttonUpdateIndex.Enabled = !_ctrl.Store.AtlasJobRunning;
+        _buttonGallery.Visible = photos && count > 0;
+        _panelMeaningNotice.Visible = pending || photos;
+    }
+
+    // A run of the index starts or ends: «Update index» is enabled again, and the notice says it.
+    private void OnIndexProgressChanged(SemanticIndexProgressChanged message)
+    {
+        if (!IsDisposed && message.Job.Progress?.IsFinished != false)
+            RefreshMeaningNotice();
+    }
+
+    // A list of resources: their thumbnails, one after another (the list may change meanwhile: a new version stops it), and the
+    // gallery, if it is open, with the same photos.
+    private void RefreshResources()
+    {
+        var version = ++_thumbnailsVersion;
+        if (_ctrl.ResourceKind == EnumResourceKind.Photos)
+            _ = LoadThumbnailsAsync(version);
+        if (_gallery is { IsDisposed: false })
+        {
+            if (_ctrl.ResourceKind == EnumResourceKind.Photos)
+                _gallery.Reload();
+            else
+                _gallery.Close();
+        }
+    }
+
+    private async Task LoadThumbnailsAsync(int version)
+    {
+        foreach (var hit in _ctrl.ResourceHits.ToList())
+        {
+            if (version != _thumbnailsVersion || IsDisposed)
+                return;
+            if (_thumbnails.ContainsKey(hit.Resource.ResourceId))
+                continue;
+            var bytes = await _ctrl.GetThumbnailAsync(hit, LogicalToDeviceUnits(ThumbnailSide) * 2);
+            if (version != _thumbnailsVersion || IsDisposed || bytes == null)
+                continue;
+            using var stream = new MemoryStream(bytes);
+            _thumbnails[hit.Resource.ResourceId] = Image.FromStream(stream);
+            dataGridNotes.InvalidateColumn(dataGridNotes.Columns[ThumbnailColumn].Index);
+        }
+    }
+
+    private ResourceSearchHitDto SelectedHit() =>
+        dataGridNotes.SelectedRows.Count > 0 ? BoundItem(dataGridNotes.SelectedRows[0].Index) as ResourceSearchHitDto : null;
+
+    // The note (or resource found) of a row, read from the list bound. While the list is being replaced by a shorter one, the grid
+    // still formats the current cell of the old one (a row that is not there any more): DataGridViewRow.DataBoundItem threw then.
+    private object BoundItem(int rowIndex) =>
+        rowIndex >= 0 && _source.List is { } list && rowIndex < list.Count ? list[rowIndex] : null;
+
+    /// <summary>Selects the row of a resource found (from the gallery).</summary>
+    public void SelectHit(ResourceSearchHitDto hit)
+    {
+        var row = dataGridNotes.Rows.Cast<DataGridViewRow>().FirstOrDefault(r => BoundItem(r.Index) == hit);
+        var firstVisibleColumn = dataGridNotes.Columns.GetFirstColumn(DataGridViewElementStates.Visible);
+        if (row == null || firstVisibleColumn == null || row.Selected)
+            return;
+        dataGridNotes.CurrentCell = row.Cells[firstVisibleColumn.Index];
+        dataGridNotes.ClearSelection();
+        row.Selected = true;
+    }
+
+    /// <summary>
+    /// Opens a resource found: a photo or a PDF (at the page of its fragment) in a window of the app, another document with its
+    /// program.
+    /// </summary>
+    public void OpenResource(ResourceSearchHitDto hit)
+    {
+        var (url, inApp) = _ctrl.ResourceToOpen(hit);
+        if (url == null)
+        {
+            ShowInfo(AiDocumentRules.FileNotAvailableMessage, KntConst.AppName);
+            return;
+        }
+        try
+        {
+            if (inApp)
+                new DocumentPageForm(url, hit.FragmentPage is int page ? $"{hit.Resource.GetTitle()} - {DocumentTexts.PageHeading(page)}" : hit.Resource.GetTitle())
+                    .Show(FindForm());
+            else
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            ShowInfo(ex.Message, KntConst.AppName);
+        }
+    }
+
+    /// <summary>Opens the note of a resource found, as a double click on a note does (from the gallery too).</summary>
+    public void OpenNote(ResourceSearchHitDto hit)
+    {
+        SelectHit(hit);
+        if (dataGridNotes.SelectedRows.Count == 0)
+            return;
+        ActiveCurrentRow(false);
+        _ctrl.NotifySelectedEntityDoubleClick();
+    }
+
+    private void ShowGallery()
+    {
+        if (_gallery is { IsDisposed: false })
+        {
+            _gallery.Activate();
+            return;
+        }
+        _gallery = new ResourceGalleryForm(_ctrl, this);
+        _gallery.Show(FindForm());
+        if (SelectedHit() is ResourceSearchHitDto hit)
+            _gallery.SelectHit(hit);
     }
 
     // Above the list (and its text filter): the notice, and «Update index», which searches again.
     private void CreateMeaningNotice()
     {
         _labelMeaningNotice = new Label { Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true };
-        var linkUpdateIndex = new LinkLabel { Dock = DockStyle.Right, AutoSize = true, Text = SemanticIndexTexts.UpdateIndex, TextAlign = ContentAlignment.MiddleRight };
-        linkUpdateIndex.LinkClicked += async (s, e) =>
+        // «Update index» (4.6b): the full indexing in the background (its progress in the status bar), and the search again when it ends.
+        var buttonUpdateIndex = _buttonUpdateIndex = NoticeButton(SemanticIndexTexts.UpdateIndex, KntIcon.Refresh, SemanticIndexTexts.UpdateIndexHelp);
+        buttonUpdateIndex.Click += (s, e) =>
         {
-            linkUpdateIndex.Enabled = false;
-            try
-            {
-                using (new WaitCursor())
-                    await _ctrl.UpdateIndexAsync();
-            }
-            finally
-            {
-                linkUpdateIndex.Enabled = true;
-            }
+            _ctrl.RunFullIndex();
+            RefreshMeaningNotice();
         };
+        _buttonGallery = NoticeButton("Gallery", KntIcon.Image, "The photos found, with big thumbnails, in a window");
+        _buttonGallery.Visible = false;
+        _buttonGallery.Click += (s, e) => ShowGallery();
         _panelMeaningNotice = new Panel
         {
-            Dock = DockStyle.Top, Height = LogicalToDeviceUnits(26), Visible = false,
-            Padding = new Padding(LogicalToDeviceUnits(4), 0, LogicalToDeviceUnits(4), 0)
+            Dock = DockStyle.Top, Height = LogicalToDeviceUnits(40), Visible = false,
+            Padding = new Padding(LogicalToDeviceUnits(4), LogicalToDeviceUnits(2), LogicalToDeviceUnits(4), LogicalToDeviceUnits(2))
         };
+        // Docked right: the last one added is the rightmost (z-order); the label fills what is left.
         _panelMeaningNotice.Controls.Add(_labelMeaningNotice);
-        _panelMeaningNotice.Controls.Add(linkUpdateIndex);
+        _panelMeaningNotice.Controls.Add(_buttonGallery);
+        _panelMeaningNotice.Controls.Add(new Panel { Dock = DockStyle.Right, Width = LogicalToDeviceUnits(6) });
+        _panelMeaningNotice.Controls.Add(buttonUpdateIndex);
         panelForm.Controls.Add(_panelMeaningNotice);
+    }
+
+    // A button of the notice, with its icon before its text.
+    private Button NoticeButton(string text, KntIcon icon, string tooltip)
+    {
+        var button = new Button
+        {
+            Dock = DockStyle.Right, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Text = text,
+            TextImageRelation = TextImageRelation.ImageBeforeText, UseVisualStyleBackColor = true,
+            Padding = new Padding(LogicalToDeviceUnits(2), 0, LogicalToDeviceUnits(2), 0)
+        };
+        button.SetKntIcon(icon);
+        new ToolTip().SetToolTip(button, tooltip);
+        return button;
     }
 
     private void OnNotesListViewOptionsChanged(NotesListViewOptionsChanged message)
@@ -607,6 +825,7 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
         _ctrl.Store.Events.Unsubscribe<NotesListViewOptionsChanged>(OnNotesListViewOptionsChanged);
+        _ctrl.Store.Events.Unsubscribe<SemanticIndexProgressChanged>(OnIndexProgressChanged);
         base.OnFormClosed(e);
     }
 
@@ -830,15 +1049,24 @@ public partial class NotesSelectorForm : KntForm, IViewNotesSelector
                         _menuToggleTextFilter = item;
                 }
 
-        if (_menuToggleTextFilter != null)
-            contextMenu.Opening += contextMenu_Opening;
+        // KNote Atlas, stage 4 (D14): a resource found, and its note.
+        _menuOpenResource = new ToolStripMenuItem("Open resource", null, (s, a) => { if (SelectedHit() is ResourceSearchHitDto hit) OpenResource(hit); });
+        _menuOpenNote = new ToolStripMenuItem("Open note", null, (s, a) => { if (SelectedHit() is ResourceSearchHitDto hit) OpenNote(hit); });
+        _menuResourceSeparator = new ToolStripSeparator();
+        contextMenu.Items.Insert(0, _menuResourceSeparator);
+        contextMenu.Items.Insert(0, _menuOpenNote);
+        contextMenu.Items.Insert(0, _menuOpenResource);
+        contextMenu.Opening += contextMenu_Opening;
 
         this.ResumeLayout();
     }
 
     private void contextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        _menuToggleTextFilter.Checked = _ctrl.EnableTextFilter;
+        if (_menuToggleTextFilter != null)
+            _menuToggleTextFilter.Checked = _ctrl.EnableTextFilter;
+        _menuOpenResource.Visible = _menuOpenNote.Visible = _ctrl.ByResources;
+        _menuResourceSeparator.Visible = _ctrl.ByResources && contextMenu.Items.Count > 3;
     }
 
     private void extension_Click(object sender, EventArgs e)

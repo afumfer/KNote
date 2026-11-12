@@ -27,7 +27,39 @@ public static class SemanticIndexTexts
         $"{pendingNotes} {(pendingNotes == 1 ? "note is" : "notes are")} not up to date in the semantic index: "
         + "they may be missing from the results or found by their previous content.";
 
+    /// <summary>
+    /// Whether a search by meaning shows its notice (4.6b): notes not up to date that a full indexing can bring up to date. The ones
+    /// whose documents have no file here can't be: they don't show it by themselves.
+    /// </summary>
+    public static bool ShowsPendingNotice(int pendingNotes, int notesWithoutFiles) => pendingNotes - notesWithoutFiles > 0;
+
+    /// <summary>
+    /// The notice (4.6b): the notes not up to date, how many wait for the full indexing, who can run it (an Admin, with «Update index»
+    /// beside it) and, besides, the notes with documents whose file is not in this installation.
+    /// </summary>
+    public static string PendingInSearch(int pendingNotes, int notesForFullRun, int notesWithoutFiles, bool canRunIndex)
+    {
+        var pending = Math.Max(0, pendingNotes - notesWithoutFiles);
+        var forFullRun = Math.Min(Math.Max(0, notesForFullRun), pending);
+        var text = PendingInSearch(pending);
+        if (forFullRun > 0)
+            text += $" {(forFullRun == pending ? (pending == 1 ? "It waits" : "They wait") : $"{forFullRun} of them {(forFullRun == 1 ? "waits" : "wait")}")} for the full " +
+                "indexing (documents not read yet, or too long).";
+        if (!canRunIndex)
+            text += " An Admin can bring the index up to date in KNote Atlas › Semantic index.";
+        if (notesWithoutFiles > 0)
+            text += $" Besides, {notesWithoutFiles} {(notesWithoutFiles == 1 ? "note has" : "notes have")} documents whose file is not in this installation.";
+        return text;
+    }
+
     public const string UpdateIndex = "Update index";
+
+    public const string UpdateIndexHelp = "Brings the whole semantic index up to date, as «Update now» of KNote Atlas › Semantic index, in the " +
+        "background (you can go on working), and searches again when it ends.";
+
+    public const string UpdateIndexQuestion = "Bring the whole semantic index of the repository up to date now? It runs in the background, as " +
+        "«Update now» of KNote Atlas › Semantic index: you can go on working, and the search is repeated when it ends. With a paid model, " +
+        "the texts of the notes are sent to its provider.";
 
     public static string Counts(SemanticIndexStatusDto status) =>
         $"{status.IndexedNotes} of {status.TotalNotes} notes indexed · {status.PendingNotes} pending · {status.Chunks} fragments";
@@ -46,7 +78,8 @@ public static class SemanticIndexTexts
         EnumSemanticIndexPhase.Preparing => "Preparing…",
         EnumSemanticIndexPhase.Indexing => $"{(progress.Rebuild ? "Rebuilding" : "Indexing")}: {progress.NotesDone} of {progress.NotesTotal} notes"
             + (progress.RemainingSeconds is double left && left > 0 ? $" · about {Duration(left)} left" : ""),
-        EnumSemanticIndexPhase.Completed => $"Done: {progress.NotesDone} notes in {Duration(progress.ElapsedSeconds)}.",
+        EnumSemanticIndexPhase.Completed => $"Done: {progress.NotesDone} notes in {Duration(progress.ElapsedSeconds)}"
+            + (progress.DocumentsNotAvailable > 0 ? $" · {progress.DocumentsNotAvailable} documents not available here" : "") + ".",
         EnumSemanticIndexPhase.Canceled => $"Canceled after {progress.NotesDone} notes: what is done is kept.",
         _ => $"Failed: {progress.Message}"
     };

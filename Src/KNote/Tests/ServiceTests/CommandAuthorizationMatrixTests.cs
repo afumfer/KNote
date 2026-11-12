@@ -55,6 +55,12 @@ public class CommandAuthorizationMatrixTests
             // search by meaning.
             "KntSemanticSearchGetIndexStatusAsyncCommand", "KntSemanticSearchRefreshPendingAsyncCommand",
             "KntSemanticSearchSearchAsyncCommand", "KntSemanticSearchGetSimilarNotesAsyncCommand",
+            // KNote Atlas, stage 4: what «Process pending resources» would process (counts, no content).
+            "KntResourceContentGetProcessingStatusAsyncCommand",
+            // KNote Atlas, stage 4: the text read of a document (the same notes the user sees).
+            "KntResourceContentGetDocumentTextAsyncCommand", "KntResourceContentGetPhotoFileAsyncCommand",
+            "KntResourceContentGetDocumentToReadAsyncCommand", "KntResourceContentDrawDocumentPageAsyncCommand",
+            "KntResourceContentGetNoteDocumentsAsyncCommand",
             // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
             "KntAtlasContextFindGlossaryTermsAsyncCommand",
@@ -70,7 +76,7 @@ public class CommandAuthorizationMatrixTests
             "KntFoldersUpdateOrderNotesAsyncCommand",
             "KntNotesNewAsyncCommand", "KntNotesNewExtendedAsyncCommand", "KntNotesSaveAsyncCommand",
             "KntNotesSaveExtendedAsyncCommand", "KntNotesDeleteAsyncCommand", "KntNotesDeleteExtendedAsyncCommand",
-            "KntNotesSaveResourceAsyncCommand", "KntNotesSaveResourceInfoAsyncCommand", "KntNotesDeleteResourceAsyncCommand",
+            "KntNotesSaveResourceAsyncCommand", "KntNotesSaveResourceInfoAsyncCommand", "KntNotesUploadResourceAsyncCommand", "KntNotesDeleteResourceAsyncCommand",
             "KntNotesDeleteResourceInfoAsyncCommand", "KntNotesSaveNoteTaskAsyncCommand", "KntNotesDeleteNoteTaskAsyncCommand",
             "KntNotesNewMessageAsyncCommand", "KntNotesSaveMessageAsyncCommand", "KntNotesDeleteMessageAsyncCommand", "KntNotesSaveTraceNoteAsyncCommand",
             "KntNotesDeleteTraceNoteAsyncCommand", "KntNotesSaveWindowAsyncCommand", "KntNotesGetAlarmNotesIdAsyncCommand",
@@ -93,6 +99,14 @@ public class CommandAuthorizationMatrixTests
         // KNote Atlas: what the AI receives, put together for the assistant (Staff, like the assistant).
         Add(nameof(EnumRoles.Staff), "KntAtlasContextComposeAsyncCommand");
 
+        // KNote Atlas, stage 4: describing a photo of a note with the AI (who edits the note's resources).
+        Add(nameof(EnumRoles.Staff),
+            "KntResourceContentGetPhotoContextAsyncCommand", "KntResourceContentSaveAiDescriptionAsyncCommand",
+            // ... and reading a document now.
+            "KntResourceContentReadDocumentAsyncCommand", "KntResourceContentGetDocumentContextAsyncCommand",
+            "KntResourceContentGetScannedDocumentsAsyncCommand", "KntResourceContentGetPageContextAsyncCommand",
+            "KntResourceContentSaveTranscriptionAsyncCommand");
+
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",
             // KNote Atlas: the search evaluation (it measures the repository's search).
@@ -109,6 +123,8 @@ public class CommandAuthorizationMatrixTests
             "KntSystemValueSaveAsyncCommand", "KntSystemValueDeleteAsyncCommand", "KntSystemValueSaveRepositoryNameAsyncCommand",
             "KntSystemValueSaveRepositoryAiModelsAsyncCommand",
             "KntSemanticSearchRunIndexAsyncCommand", "KntSemanticSearchDeleteModelIndexAsyncCommand",
+            // KNote Atlas, stage 4: «Process pending resources» (as the semantic index).
+            "KntResourceContentPrepareProcessingAsyncCommand", "KntResourceContentSaveProcessingRunAsyncCommand",
             "KntTraceNoteTypeSaveAsyncCommand", "KntTraceNoteTypeDeleteAsyncCommand",
             "KntUsersSaveAsyncCommand", "KntUsersDeleteAsyncCommand", "KntUsersCreateAsyncCommand",
             "KntUsersSetPasswordAsyncCommand", "KntUsersGetPasswordStampAsyncCommand");

@@ -6,7 +6,6 @@
 @using KNote.Client.Pages.Types
 @using KNote.Client.Pages.TraceNoteTypes
 @using KNote.Client.Pages.Local
-@using KNote.Client.Pages.Atlas
 
 @inject NavigationManager navigationManager
 @inject IStore store
@@ -42,10 +41,6 @@
 
                 <RadzenTabsItem Text="@TabText(KntSections.Attributes)" Icon="@KntSections.Attributes.Icon">
                     <AttributesIndex></AttributesIndex>
-                </RadzenTabsItem>
-
-                <RadzenTabsItem Text="@TabText(KntSections.Atlas)" Icon="@KntSections.Atlas.Icon">
-                    <AtlasIndex></AtlasIndex>
                 </RadzenTabsItem>
 
                 @if (localAdmin)

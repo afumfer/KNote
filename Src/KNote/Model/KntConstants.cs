@@ -17,6 +17,9 @@ public static class KntConst
     public static string License { get; private set; }
     public static string TagForMerging { get; private set; } = "[@NoteMerging]";    
     public static int MaxLenResourceFile { get; private set; } = 5120000;
+    // The files of the notes' resources (KNote Atlas, stage 4, D6: 200 MB in both apps, also kept in the database); the
+    // attachments of the assistant and the images of the chat room keep MaxLenResourceFile.
+    public static long MaxLenNoteResourceFile { get; private set; } = 200L * 1024 * 1024;
     public static string VirtualHostNameToFolderMapping = @"https://knote.resources";
     public static Dictionary<EnumKAttributeDataType, string> KAttributes { get; private set; }
     public static Dictionary<EnumAlarmType, string> AlarmType { get; private set; }   
@@ -97,6 +100,8 @@ public static class KntConst
     public static string AiLlmModelKey { get; private set; } = "AI_LLM_MODEL";
     // How the semantic index is (SemanticIndexStateDto, JSON), kept by the indexer.
     public static string AiIndexStateKey { get; private set; } = "AI_INDEX_STATE";
+    // The runs of «Process pending resources» (ResourceProcessingStateDto, JSON): the pace of the last one, for the estimates.
+    public static string AiResourcesStateKey { get; private set; } = "AI_RESOURCES_STATE";
 
     // The description the apps give a resource made from an image pasted from the clipboard. Like the file name, it says
     // nothing of the resource: the semantic index leaves out the resources without a description of their own.

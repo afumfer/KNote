@@ -503,6 +503,26 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var resources = new List<ResourceDto>();
+            const string sql = @"SELECT ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order], FileType,
+                    ContentInDB, NoteId
+                FROM Resources WHERE ResourceId IN @ids";
+            foreach (var ids in (resourceIds ?? new()).Distinct().Chunk(500))
+                resources.AddRange(await db.QueryAsync<ResourceDto>(sql, new { ids }));
+            await CloseIsTempConnection(db);
+            return new Result<List<ResourceDto>> { Entity = resources };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
     {
         try
@@ -512,9 +532,9 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             var db = GetOpenConnection();
 
             var sql = @"SELECT 
-                    ResourceId, [Name], Container, [Description], [Order], FileType, ContentInDB, ContentArrayBytes, NoteId 
+                    ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order], FileType, ContentInDB, ContentArrayBytes, NoteId
                 FROM Resources
-                WHERE NoteId = @idNote 
+                WHERE NoteId = @idNote
                 ORDER BY [Order], [Name];";
 
             var entity = await db.QueryAsync<ResourceDto>(sql.ToString(), new { idNote });
@@ -538,8 +558,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             
             var db = GetOpenConnection();
 
-            var sql = @"SELECT  ResourceId, [Name], Container, [Description], [Order], FileType, 
-                            ContentInDB, ContentArrayBytes, NoteId 
+            var sql = @"SELECT  ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order], FileType,
+                            ContentInDB, ContentArrayBytes, NoteId
                     FROM Resources 
                     WHERE ResourceId = @Id";
 
@@ -574,14 +594,14 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 entity.ContentArrayBytes = null;
 
             var sql = @"INSERT INTO Resources 
-                        (ResourceId, [Name], Container, [Description], [Order], 
+                        (ResourceId, [Name], Container, [Description], DescriptionByUser, DescriptionModel, [Order],
                             FileType, ContentInDB, ContentArrayBytes, NoteId)
-                        VALUES (@ResourceId, @Name, @Container, @Description, @Order, 
+                        VALUES (@ResourceId, @Name, @Container, @Description, @DescriptionByUser, @DescriptionModel, @Order,
                             @FileType, @ContentInDB, @ContentArrayBytes, @NoteId)";
 
             var r = await db.ExecuteAsync(sql.ToString(),
-                new { entity.ResourceId, entity.Name, entity.Container, 
-                    entity.Description, entity.Order, entity.FileType, 
+                new { entity.ResourceId, entity.Name, entity.Container,
+                    entity.Description, entity.DescriptionByUser, entity.DescriptionModel, entity.Order, entity.FileType,
                     entity.ContentInDB, entity.ContentArrayBytes, entity.NoteId });
                 
             if (r == 0)
@@ -615,8 +635,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             var sql = @"UPDATE Resources SET                                                
                         [Name] = @Name, 
                         Container = @Container, 
-                        [Description] = @Description, 
-                        [Order] = @Order, 
+                        [Description] = @Description,
+                        DescriptionByUser = @DescriptionByUser,
+                        DescriptionModel = @DescriptionModel,
+                        [Order] = @Order,
                         FileType = @FileType, 
                         ContentInDB = @ContentInDB, 
                         ContentArrayBytes = @ContentArrayBytes, 
@@ -628,6 +650,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     entity.Name,
                     entity.Container,
                     entity.Description,
+                    entity.DescriptionByUser,
+                    entity.DescriptionModel,
                     entity.Order,
                     entity.FileType,
                     entity.ContentInDB,
@@ -642,6 +666,166 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             await CloseIsTempConnection(db);
             
             return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> SaveResourceAiDescriptionAsync(Guid resourceId, string description, string model, string expectedDescription, string expectedName)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var db = GetOpenConnection();
+
+            var sql = @"UPDATE Resources SET [Description] = @description, DescriptionModel = @model
+                WHERE ResourceId = @resourceId AND DescriptionByUser = 0 AND [Name] = @expectedName
+                    AND (([Description] IS NULL AND @expectedDescription IS NULL) OR [Description] = @expectedDescription)";
+            var r = await db.ExecuteAsync(sql, new { resourceId, description, model, expectedDescription, expectedName });
+            result.Entity = r == 1;
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> LockResourceDescriptionAsync(Guid resourceId, string expectedDescription)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var db = GetOpenConnection();
+
+            var sql = @"UPDATE Resources SET DescriptionByUser = 1
+                WHERE ResourceId = @resourceId AND DescriptionByUser = 0 AND DescriptionModel IS NULL
+                    AND (([Description] IS NULL AND @expectedDescription IS NULL) OR [Description] = @expectedDescription)";
+            var r = await db.ExecuteAsync(sql, new { resourceId, expectedDescription });
+            result.Entity = r == 1;
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceInfoDto>>> GetResourcesToDescribeAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var result = new Result<List<ResourceInfoDto>>();
+
+            var db = GetOpenConnection();
+
+            var notExcluded = excludedNoteTypeIds?.Count > 0 ? "(n.NoteTypeId IS NULL OR n.NoteTypeId NOT IN @excluded)" : "1 = 1";
+            var sql = $@"SELECT r.ResourceId, r.[Name], r.Container, r.[Description], r.DescriptionByUser, r.DescriptionModel, r.[Order], r.FileType, r.NoteId
+                FROM Resources r INNER JOIN Notes n ON n.NoteId = r.NoteId
+                WHERE r.DescriptionByUser = 0 AND r.DescriptionModel IS NULL AND {notExcluded}
+                ORDER BY n.NoteNumber, r.[Order], r.[Name];";
+            var entity = await db.QueryAsync<ResourceInfoDto>(sql, new { excluded = excludedNoteTypeIds });
+            result.Entity = entity.ToList();
+
+            await CloseIsTempConnection(db);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    private const string ResourceTextColumns = "ResourceId, NoteId, [Name], FileType, ExtractedState AS State, ExtractedText AS Text";
+
+    public async Task<Result<ResourceTextDto>> GetResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var text = await db.QueryFirstOrDefaultAsync<ResourceTextDto>(
+                $"SELECT {ResourceTextColumns} FROM Resources WHERE ResourceId = @resourceId", new { resourceId });
+            await CloseIsTempConnection(db);
+            return new Result<ResourceTextDto> { Entity = text };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextsAsync(Guid noteId)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var texts = await db.QueryAsync<ResourceTextDto>(
+                $"SELECT {ResourceTextColumns} FROM Resources WHERE NoteId = @noteId ORDER BY [Order], [Name]", new { noteId });
+            await CloseIsTempConnection(db);
+            return new Result<List<ResourceTextDto>> { Entity = texts.ToList() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextStatesAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var notExcluded = excludedNoteTypeIds?.Count > 0 ? "(n.NoteTypeId IS NULL OR n.NoteTypeId NOT IN @excluded)" : "1 = 1";
+            var states = await db.QueryAsync<ResourceTextDto>(
+                $@"SELECT r.ResourceId, r.NoteId, r.[Name], r.FileType, r.ExtractedState AS State
+                FROM Resources r INNER JOIN Notes n ON n.NoteId = r.NoteId
+                WHERE {notExcluded}
+                ORDER BY n.NoteNumber, r.[Order], r.[Name]", new { excluded = excludedNoteTypeIds });
+            await CloseIsTempConnection(db);
+            return new Result<List<ResourceTextDto>> { Entity = states.ToList() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var r = await db.ExecuteAsync(
+                "UPDATE Resources SET ExtractedText = @text, ExtractedState = @state WHERE ResourceId = @resourceId AND [Name] = @expectedName",
+                new { resourceId, text, state = (int)state, expectedName });
+            await CloseIsTempConnection(db);
+            return new Result<bool> { Entity = r == 1 };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result> ClearResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            await db.ExecuteAsync("UPDATE Resources SET ExtractedText = NULL, ExtractedState = 0 WHERE ResourceId = @resourceId", new { resourceId });
+            await CloseIsTempConnection(db);
+            return new Result();
         }
         catch (Exception ex)
         {
@@ -1848,7 +2032,13 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             strWhere = AddAndToStringSQL(strWhere);
             var descriptionParam = $"wDescription{paramIndex++}";
             parameters.Add(descriptionParam, $"%{notesFilter.Description}%");
-            strWhere += $"Description{collate} LIKE @{descriptionParam} ";
+            // KNote Atlas, stage 4 (4.6a): also in the note's tasks and resources, if chosen.
+            var descriptionParts = new List<string> { $"Description{collate} LIKE @{descriptionParam}" };
+            if (notesFilter.SearchInNoteTasks)
+                descriptionParts.Add(NoteTasksCondition(descriptionParam, collate));
+            if (notesFilter.SearchInResources)
+                descriptionParts.Add(ResourcesCondition(descriptionParam, collate, notesFilter.ResourcesExcludedNoteTypeIds, parameters, ref paramIndex));
+            strWhere += "(" + string.Join(" OR ", descriptionParts) + ") ";
         }
 
         if (notesFilter.TaskUserId != null)
@@ -1910,8 +2100,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
     }
 
     // Positive (non-negated) match for one search token: Topic/Tags, optionally Description, and
-    // optionally any related NoteTasks row (1-to-n) whose own Tags/Description matches too.
-    private string BuildSearchTokenCondition(string token, string collate, bool searchDescription, bool searchInNoteTasks, DynamicParameters parameters, ref int paramIndex)
+    // optionally any related NoteTasks row (1-to-n) whose own Tags/Description matches too, and (KNote Atlas, D18) any
+    // resource whose description or text read matches.
+    private string BuildSearchTokenCondition(string token, string collate, bool searchDescription, bool searchInNoteTasks,
+        bool searchInResources, List<Guid> resourcesExcluded, DynamicParameters parameters, ref int paramIndex)
     {
         var tokenParam = $"tok{paramIndex++}";
         parameters.Add(tokenParam, $"%{token}%");
@@ -1926,14 +2118,17 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             parts.Add($"Description{collate} LIKE @{tokenParam}");
 
         if (searchInNoteTasks)
-            parts.Add($@"EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
-                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))");
+            parts.Add(NoteTasksCondition(tokenParam, collate));
+
+        if (searchInResources)
+            parts.Add(ResourcesCondition(tokenParam, collate, resourcesExcluded, parameters, ref paramIndex));
 
         return "(" + string.Join(" OR ", parts) + ")";
     }
 
     // Negated match (a "!token") for one search token: every field checked above must NOT match.
-    private string BuildSearchTokenNotCondition(string tokenNot, string collate, bool searchDescription, bool searchInNoteTasks, DynamicParameters parameters, ref int paramIndex)
+    private string BuildSearchTokenNotCondition(string tokenNot, string collate, bool searchDescription, bool searchInNoteTasks,
+        bool searchInResources, List<Guid> resourcesExcluded, DynamicParameters parameters, ref int paramIndex)
     {
         var tokenParam = $"tokNot{paramIndex++}";
         parameters.Add(tokenParam, $"%{tokenNot}%");
@@ -1948,10 +2143,32 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             parts.Add($"Description{collate} NOT LIKE @{tokenParam}");
 
         if (searchInNoteTasks)
-            parts.Add($@"NOT EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
-                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))");
+            parts.Add($"NOT {NoteTasksCondition(tokenParam, collate)}");
+
+        if (searchInResources)
+            parts.Add($"NOT {ResourcesCondition(tokenParam, collate, resourcesExcluded, parameters, ref paramIndex)}");
 
         return "(" + string.Join(" AND ", parts) + ")";
+    }
+
+    // A task of the note whose tags or description match.
+    private static string NoteTasksCondition(string tokenParam, string collate) =>
+        $@"EXISTS (SELECT 1 FROM NoteTasks WHERE [NoteTasks].NoteId = [Notes].NoteId
+                            AND ([NoteTasks].Tags{collate} LIKE @{tokenParam} OR [NoteTasks].Description{collate} LIKE @{tokenParam}))";
+
+    // KNote Atlas, stage 4 (D18): a resource of the note whose description or text read (also the transcriptions) matches; never
+    // the resources of the notes of the excluded types (the system ones: the attachments of the conversations).
+    private static string ResourcesCondition(string tokenParam, string collate, List<Guid> resourcesExcluded, DynamicParameters parameters, ref int paramIndex)
+    {
+        var excluded = "";
+        if (resourcesExcluded?.Count > 0)
+        {
+            var excludedParam = $"resExcluded{paramIndex++}";
+            parameters.Add(excludedParam, resourcesExcluded);
+            excluded = $" AND ([Notes].NoteTypeId IS NULL OR [Notes].NoteTypeId NOT IN @{excludedParam})";
+        }
+        return $@"(EXISTS (SELECT 1 FROM Resources WHERE [Resources].NoteId = [Notes].NoteId
+                            AND ([Resources].[Description]{collate} LIKE @{tokenParam} OR [Resources].ExtractedText{collate} LIKE @{tokenParam})){excluded})";
     }
 
     // Root folder id plus every descendant in its subtree, computed in-memory (same "load all
@@ -2177,13 +2394,9 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             }
             else
             {
-                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
-
-                // TODO: refactor this -----------------------------
-                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
-                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());
-                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
-                // --------------------------------------------------
+                var listTokens = ExtractListTokensSearch(notesSearch.TextSearch);
+                // The description only with its option (the token "***" that also turned it on is gone: KNote Atlas 4.6a).
+                var flagSearchDescription = notesSearch.SearchInDescription;
 
                 foreach (var token in listTokens)
                 {
@@ -2192,8 +2405,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
                     sqlWhere = AddAndToStringSQL(sqlWhere);
                     sqlWhere += token[0] != '!'
-                        ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " "
-                        : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks, parameters, ref paramIndex) + " ";
+                        ? BuildSearchTokenCondition(token, collate, flagSearchDescription, notesSearch.SearchInNoteTasks,
+                            notesSearch.SearchInResources, notesSearch.ResourcesExcludedNoteTypeIds, parameters, ref paramIndex) + " "
+                        : BuildSearchTokenNotCondition(token.Substring(1, token.Length - 1), collate, flagSearchDescription, notesSearch.SearchInNoteTasks,
+                            notesSearch.SearchInResources, notesSearch.ResourcesExcludedNoteTypeIds, parameters, ref paramIndex) + " ";
                 }
             }
 

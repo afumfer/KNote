@@ -51,7 +51,10 @@ public partial class KNoteAiTools
         if (_attachments.Count == 0)
             hidden.Add(AiActionRules.AttachFile);
         if (!ModelSeesImages)
+        {
             hidden.Add(ViewNoteImagesName);
+            hidden.Add(ViewDocumentPagesName);
+        }
         return GetTools().Where(t => !hidden.Contains(t.Name)).ToList();
     }
 
@@ -470,18 +473,35 @@ public partial class KNoteAiTools
         })).ToList();
     }
 
+    // KNote Atlas 4.7a: a document says whether it was read (read_document reads it anyway), its pages and the scanned ones still to
+    // transcribe.
     private async Task<List<string>> GetResourceRowsAsync(Guid noteId)
     {
         var response = await _service.Notes.GetResourcesInfoAsync(noteId);
         if (!response.IsValid)
             return new List<string> { $"Error getting resources: {response.ErrorMessage}" };
+        var documents = await _service.ResourceContent.GetNoteDocumentsAsync(noteId);
+        var read = ((documents.IsValid ? documents.Entity : null) ?? new List<DocumentReadDto>()).ToDictionary(d => d.ResourceId);
 
-        return (response.Entity ?? new List<ResourceInfoDto>()).Select(r => Row(new
+        return (response.Entity ?? new List<ResourceInfoDto>()).Select(r =>
         {
-            Name = r.NameOut ?? r.Name,
-            Type = EmptyToNull(r.FileType),
-            Description = EmptyToNull(r.Description)
-        })).ToList();
+            var document = read.GetValueOrDefault(r.ResourceId);
+            return Row(new
+            {
+                Name = r.NameOut ?? r.Name,
+                Title = r.GetTitle(),
+                Type = EmptyToNull(r.FileType),
+                Description = EmptyToNull(r.Description),
+                Document = document == null ? null : document.State switch
+                {
+                    EnumExtractedState.NotRead => "not read yet",
+                    EnumExtractedState.Unreadable => "can't be read",
+                    _ => "read"
+                },
+                Pages = document?.Pages > 0 ? document.Pages : (int?)null,
+                ScannedNotTranscribed = document?.PagesToTranscribe > 0 ? document.PagesToTranscribe : (int?)null
+            });
+        }).ToList();
     }
 
     private async Task<List<string>> GetRelationRowsAsync(Guid noteId)

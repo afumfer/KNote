@@ -1,0 +1,235 @@
+@* «Process pending resources» of the session's repository (KNote Atlas, stage 4, CU-25): what it would process, and running
+   it in the server's queue (one run of KNote Atlas at a time for the whole server), with the choice for the descriptions
+   written by people, its progress and its cancellation. A run goes on when the page is left; coming back shows its progress
+   again. When it ends, the server queues the update of the semantic index (its tab shows it). *@
+
+@implements IDisposable
+@inject IStore store
+@inject DialogService dialogService
+
+<KntFormSection Icon="@KntSections.AtlasResources.Icon" Title="@KntSections.AtlasResources.Text" Description="@ResourceProcessingTexts.Description">
+    @if (status == null)
+    {
+        @if (loadFailed)
+        {
+            <div class="knt-load-error">
+                <span class="knt-load-error-text">What is pending could not be read.</span>
+                <RadzenButton Text="Retry" Icon="refresh" Size="ButtonSize.Small" Click="RefreshAsync" />
+            </div>
+        }
+        else
+        {
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+        }
+    }
+    else
+    {
+        <RadzenStack Gap="0.25rem">
+            <RadzenText TextStyle="TextStyle.Body2"><b>@ResourceProcessingTexts.Counts(status)</b></RadzenText>
+            @if (ResourceProcessingTexts.LastRun(status) is string lastRun)
+            {
+                <RadzenText TextStyle="TextStyle.Body2">@lastRun</RadzenText>
+            }
+        </RadzenStack>
+
+        <RadzenStack Gap="0.25rem" class="rz-mt-2">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="ProcessPhotos" TValue="bool" @bind-Value="@photos" Disabled="@Running" />
+                <RadzenLabel Text="@ResourceProcessingTexts.PhotosOption" Component="ProcessPhotos" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="ProcessDocuments" TValue="bool" @bind-Value="@documents" Disabled="@Running" />
+                <RadzenLabel Text="@ResourceProcessingTexts.DocumentsOption" Component="ProcessDocuments" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox Name="ProcessPages" TValue="bool" @bind-Value="@pages" Disabled="@Running" />
+                <RadzenLabel Text="@ResourceProcessingTexts.ScannedPagesOption" Component="ProcessPages" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Style="padding-left: 1.75rem;">
+                <RadzenCheckBox Name="ProcessOcrPages" TValue="bool" @bind-Value="@ocrPages" Disabled="@(Running || !pages)" />
+                <RadzenLabel Text="@ResourceProcessingTexts.OcrPagesOption" Component="ProcessOcrPages" />
+            </RadzenStack>
+        </RadzenStack>
+
+        @if (ResourceProcessingTexts.PersonDescriptions(photos ? status.PersonPhotos : 0, documents ? status.PersonDocuments : 0) is string personText)
+        {
+            <div class="rz-mt-2">
+                <RadzenText TextStyle="TextStyle.Body2">@personText</RadzenText>
+                <RadzenRadioButtonList @bind-Value="@choice" TValue="EnumPersonDescriptions" Orientation="Orientation.Vertical" Disabled="@Running">
+                    <Items>
+                        <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceSkip" Value="EnumPersonDescriptions.Skip" />
+                        <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceLock" Value="EnumPersonDescriptions.Lock" />
+                        <RadzenRadioButtonListItem Text="@ResourceProcessingTexts.PersonChoiceReplace" Value="EnumPersonDescriptions.Replace" />
+                    </Items>
+                </RadzenRadioButtonList>
+            </div>
+        }
+
+        @if (progress != null && (Running || progress.Phase is EnumResourceProcessingPhase.Failed || progress.ErrorsCount > 0 || justFinished))
+        {
+            <div class="rz-mt-2">
+                <RadzenText TextStyle="TextStyle.Body2">@ResourceProcessingTexts.Progress(progress)</RadzenText>
+                @if (progress.Phase == EnumResourceProcessingPhase.Processing)
+                {
+                    var (barValue, barMax) = ResourceProcessingTexts.Bar(progress);
+                    <RadzenProgressBar Value="@barValue" Max="@Math.Max(1, barMax)" ShowValue="false" Style="height: 0.5rem;" />
+                }
+                else if (Running)
+                {
+                    <RadzenProgressBar Value="100" Mode="ProgressBarMode.Indeterminate" ShowValue="false" Style="height: 0.5rem;" />
+                }
+                @if (progress.Errors.Count > 0)
+                {
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-mt-1">@ResourceProcessingTexts.Errors(progress)</RadzenText>
+                    <ul class="rz-mt-0 rz-mb-0">
+                        @foreach (var error in progress.Errors)
+                        {
+                            <li><RadzenText TextStyle="TextStyle.Caption">@error</RadzenText></li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem" class="rz-mt-2">
+            @if (Running)
+            {
+                <RadzenButton Text="Cancel" Icon="stop" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="OnCancel" IsBusy="@acting.IsBusy" />
+            }
+            else
+            {
+                <RadzenButton Text="@ResourceProcessingTexts.Title" Icon="play_arrow" Size="ButtonSize.Small" Disabled="@(!CanRun)"
+                              Click="OnRun" IsBusy="@acting.IsBusy" />
+            }
+        </RadzenStack>
+    }
+</KntFormSection>
+
+@code {
+    private ResourceProcessingStatusDto? status;
+    private ResourceProcessingProgressDto? progress;
+    private EnumPersonDescriptions choice = EnumPersonDescriptions.Skip;
+    private bool photos = true;
+    private bool documents = true;
+    private bool pages = true;
+    private bool ocrPages = true;
+
+    private ResourceProcessingOptionsDto Options => new()
+    {
+        Photos = photos, Documents = documents, ScannedPages = pages, OcrPages = ocrPages, PersonDescriptions = choice
+    };
+    private bool loadFailed;
+    private bool polling;
+    private bool justFinished;
+    private readonly KntSingleFlight acting = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    private bool Running => progress != null && !progress.IsFinished;
+
+    // Something to do: photos to describe, documents to read or to summarize, scanned pages to transcribe or, with «Keep them and
+    // lock them», descriptions to lock.
+    private bool CanRun => status != null && Options.Any && ResourceProcessingTexts.HasWork(status, Options);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAsync();
+        // Closed meanwhile (another tab chosen): its token is not there any more.
+        if (disposal.IsCancellationRequested)
+            return;
+        var resProgress = await store.Notes.GetResourceProcessingProgressAsync(disposal.Token);
+        if (resProgress.IsValid && resProgress.Entity != null)
+        {
+            progress = resProgress.Entity;
+            StartPolling();
+        }
+    }
+
+    public async Task RefreshAsync()
+    {
+        loadFailed = false;
+        var res = await store.Notes.GetResourceProcessingStatusAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        loadFailed = !res.IsValid;
+        if (res.IsValid)
+            status = res.Entity;
+        StateHasChanged();
+    }
+
+    private Task OnRun() => acting.RunAsync(async () =>
+    {
+        if (status == null)
+            return;
+
+        var describer = await store.Notes.GetPhotoDescriberAsync();
+        if (!describer.IsValid || describer.Entity == null)
+            return;
+        // The photos and the scanned pages need a model that sees images; the documents, any model.
+        var options = Options;
+        if (options.NeedsImages ? !describer.Entity.Available : !describer.Entity.CanSummarize)
+        {
+            await dialogService.Alert(describer.Entity.Message, ResourceProcessingTexts.Title, new AlertOptions { OkButtonText = "OK" });
+            return;
+        }
+        var confirmed = await dialogService.Confirm(ResourceProcessingTexts.RunConfirmation(status, options, describer.Entity), ResourceProcessingTexts.Title,
+            new ConfirmOptions { OkButtonText = "Start", CancelButtonText = "Cancel" });
+        if (confirmed != true)
+            return;
+
+        var res = await store.Notes.ProcessResourcesAsync(options);
+        if (res.IsValid && res.Entity != null)
+        {
+            progress = res.Entity;
+            justFinished = false;
+            StartPolling();
+        }
+    });
+
+    private Task OnCancel() => acting.RunAsync(async () =>
+    {
+        await store.Notes.CancelResourceProcessingAsync();
+        await PollOnceAsync();
+    });
+
+    // Asks for the progress every second while the run goes on; at its end, what is pending again.
+    private async void StartPolling()
+    {
+        if (polling || !Running)
+            return;
+        polling = true;
+        try
+        {
+            while (Running && !disposal.IsCancellationRequested)
+            {
+                StateHasChanged();
+                await Task.Delay(1000, disposal.Token);
+                await PollOnceAsync();
+            }
+            if (!disposal.IsCancellationRequested)
+            {
+                justFinished = true;
+                await RefreshAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            polling = false;
+        }
+    }
+
+    private async Task PollOnceAsync()
+    {
+        var res = await store.Notes.GetResourceProcessingProgressAsync(disposal.Token);
+        if (res.IsValid && res.Entity != null)
+            progress = res.Entity;
+    }
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

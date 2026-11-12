@@ -301,6 +301,30 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var resources = new List<ResourceDto>();
+            foreach (var ids in (resourceIds ?? new()).Distinct().Chunk(500))
+                resources.AddRange(await ctx.Resources.AsNoTracking().Where(r => ids.Contains(r.ResourceId))
+                    .Select(r => new ResourceDto
+                    {
+                        ResourceId = r.ResourceId, Name = r.Name, Container = r.Container, Description = r.Description,
+                        DescriptionByUser = r.DescriptionByUser, DescriptionModel = r.DescriptionModel, Order = r.Order, FileType = r.FileType,
+                        ContentInDB = r.ContentInDB, NoteId = r.NoteId
+                    })
+                    .ToListAsync());
+            await CloseIsTempConnection(ctx);
+            return new Result<List<ResourceDto>> { Entity = resources };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid idNote)
     {
         try
@@ -422,6 +446,208 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             await CloseIsTempConnection(ctx);
             
             return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> SaveResourceAiDescriptionAsync(Guid resourceId, string description, string model, string expectedDescription, string expectedName)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var ctx = GetOpenConnection();
+            var written = await ctx.Resources
+                .Where(r => r.ResourceId == resourceId && !r.DescriptionByUser && r.Name == expectedName && r.Description == expectedDescription)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(r => r.Description, description)
+                    .SetProperty(r => r.DescriptionModel, model));
+            result.Entity = written == 1;
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> LockResourceDescriptionAsync(Guid resourceId, string expectedDescription)
+    {
+        try
+        {
+            var result = new Result<bool>();
+
+            var ctx = GetOpenConnection();
+            var locked = await ctx.Resources
+                .Where(r => r.ResourceId == resourceId && !r.DescriptionByUser && r.DescriptionModel == null && r.Description == expectedDescription)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.DescriptionByUser, true));
+            result.Entity = locked == 1;
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceInfoDto>>> GetResourcesToDescribeAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+
+            var notes = ctx.Notes.AsNoTracking();
+            if (excludedNoteTypeIds?.Count > 0)
+                notes = notes.Where(n => n.NoteTypeId == null || !excludedNoteTypeIds.Contains(n.NoteTypeId.Value));
+            var resources = await ctx.Resources.AsNoTracking()
+                .Where(r => !r.DescriptionByUser && r.DescriptionModel == null)
+                .Join(notes, r => r.NoteId, n => n.NoteId, (r, n) => new { r, n.NoteNumber })
+                .OrderBy(x => x.NoteNumber).ThenBy(x => x.r.Order).ThenBy(x => x.r.Name)
+                .Select(x => new ResourceInfoDto
+                {
+                    ResourceId = x.r.ResourceId, Name = x.r.Name, Container = x.r.Container, Description = x.r.Description,
+                    DescriptionByUser = x.r.DescriptionByUser, DescriptionModel = x.r.DescriptionModel, Order = x.r.Order,
+                    FileType = x.r.FileType, NoteId = x.r.NoteId
+                })
+                .ToListAsync();
+            var result = new Result<List<ResourceInfoDto>> { Entity = resources };
+
+            await CloseIsTempConnection(ctx);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    // The text of the documents is not in the EF model (KntSchemaUpdater, revision 10): EF would read it with every resource.
+    private sealed class ResourceTextRow
+    {
+        public Guid ResourceId { get; set; }
+        public Guid NoteId { get; set; }
+        public string Name { get; set; }
+        public string FileType { get; set; }
+        public int ExtractedState { get; set; }
+        public string ExtractedText { get; set; }
+
+        public ResourceTextDto ToDto() => new()
+        {
+            ResourceId = ResourceId, NoteId = NoteId, Name = Name, FileType = FileType,
+            State = (EnumExtractedState)ExtractedState, Text = ExtractedText
+        };
+    }
+
+    public async Task<Result<ResourceTextDto>> GetResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var rows = await ctx.Database.SqlQuery<ResourceTextRow>(
+                $"SELECT ResourceId, NoteId, Name, FileType, ExtractedState, ExtractedText FROM Resources WHERE ResourceId = {resourceId}").ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<ResourceTextDto> { Entity = rows.FirstOrDefault()?.ToDto() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextsAsync(Guid noteId)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var rows = await ctx.Database.SqlQuery<ResourceTextRow>(
+                $"SELECT ResourceId, NoteId, Name, FileType, ExtractedState, ExtractedText FROM Resources WHERE NoteId = {noteId}").ToListAsync();
+            var order = await ctx.Resources.AsNoTracking().Where(r => r.NoteId == noteId)
+                .Select(r => new { r.ResourceId, r.Order, r.Name }).ToListAsync();
+            await CloseIsTempConnection(ctx);
+            var position = order.OrderBy(r => r.Order).ThenBy(r => r.Name).Select((r, i) => (r.ResourceId, i)).ToDictionary(p => p.ResourceId, p => p.i);
+            return new Result<List<ResourceTextDto>>
+            {
+                Entity = rows.OrderBy(r => position.GetValueOrDefault(r.ResourceId)).Select(r => r.ToDto()).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    // The state of every resource (an unmapped column, KntSchemaUpdater revision 10), joined in memory with the resources of the
+    // notes that are not excluded.
+    private sealed class ResourceStateRow
+    {
+        public Guid ResourceId { get; set; }
+        public int ExtractedState { get; set; }
+    }
+
+    public async Task<Result<List<ResourceTextDto>>> GetResourceTextStatesAsync(List<Guid> excludedNoteTypeIds = null)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var notes = ctx.Notes.AsNoTracking();
+            if (excludedNoteTypeIds?.Count > 0)
+                notes = notes.Where(n => n.NoteTypeId == null || !excludedNoteTypeIds.Contains(n.NoteTypeId.Value));
+            var resources = await ctx.Resources.AsNoTracking()
+                .Join(notes, r => r.NoteId, n => n.NoteId, (r, n) => new { r.ResourceId, r.NoteId, r.Name, r.FileType, r.Order, n.NoteNumber })
+                .OrderBy(x => x.NoteNumber).ThenBy(x => x.Order).ThenBy(x => x.Name)
+                .ToListAsync();
+            var states = (await ctx.Database.SqlQuery<ResourceStateRow>($"SELECT ResourceId, ExtractedState FROM Resources").ToListAsync())
+                .ToDictionary(s => s.ResourceId, s => (EnumExtractedState)s.ExtractedState);
+            await CloseIsTempConnection(ctx);
+            return new Result<List<ResourceTextDto>>
+            {
+                Entity = resources.Select(r => new ResourceTextDto
+                {
+                    ResourceId = r.ResourceId, NoteId = r.NoteId, Name = r.Name, FileType = r.FileType,
+                    State = states.GetValueOrDefault(r.ResourceId)
+                }).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var written = await ctx.Database.ExecuteSqlAsync(
+                $"UPDATE Resources SET ExtractedText = {text}, ExtractedState = {(int)state} WHERE ResourceId = {resourceId} AND Name = {expectedName}");
+            await CloseIsTempConnection(ctx);
+            return new Result<bool> { Entity = written == 1 };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result> ClearResourceTextAsync(Guid resourceId)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            await ctx.Database.ExecuteSqlAsync($"UPDATE Resources SET ExtractedText = NULL, ExtractedState = 0 WHERE ResourceId = {resourceId}");
+            await CloseIsTempConnection(ctx);
+            return new Result();
         }
         catch (Exception ex)
         {
@@ -1644,9 +1870,23 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     : query.Where(n => EF.Functions.Like(n.Tags, $"%{notesFilter.Tags}%"));
 
             if (!string.IsNullOrEmpty(notesFilter.Description))
+            {
+                // KNote Atlas, stage 4 (4.6a): also in the note's tasks and resources, if chosen.
+                var text = notesFilter.Description;
+                var pattern = $"%{text}%";
+                var inTasks = notesFilter.SearchInNoteTasks;
+                var inResources = notesFilter.SearchInResources;
+                var resourceNotes = inResources ? await NotesWithResourcesMatchingAsync(ctx, pattern, isSqlServer) : new List<Guid>();
+                var excluded = notesFilter.ResourcesExcludedNoteTypeIds ?? new List<Guid>();
                 query = isSqlServer
-                    ? query.Where(n => EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(notesFilter.Description))
-                    : query.Where(n => EF.Functions.Like(n.Description, $"%{notesFilter.Description}%"));
+                    ? query.Where(n => EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(text)
+                                     || (inTasks && n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(text)
+                                                                       || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(text)))
+                                     || (inResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))))
+                    : query.Where(n => EF.Functions.Like(n.Description, pattern)
+                                     || (inTasks && n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, pattern) || EF.Functions.Like(t.Description, pattern)))
+                                     || (inResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))));
+            }
 
             if (notesFilter.TaskUserId != null)
                 query = query.Where(n => n.NoteTasks.Any(t => t.UserId == notesFilter.TaskUserId));
@@ -1740,6 +1980,19 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         return result;
     }
 
+    // KNote Atlas, stage 4 (D18): the notes with a resource whose description or text read (ExtractedText, out of the model of EF:
+    // read with SQL of its own, as GetResourceTextAsync) matches the pattern, accent-insensitive as the other conditions (on SQLite,
+    // the LIKE of KntSqliteAccentFunctions).
+    private static async Task<List<Guid>> NotesWithResourcesMatchingAsync(KntDbContext ctx, string pattern, bool isSqlServer) =>
+        await ctx.Database.SqlQueryRaw<Guid>(isSqlServer ? ResourcesMatchingSqlServer : ResourcesMatchingSqlite, pattern).ToListAsync();
+
+    // The pattern is a parameter ({0}); only the collation (AccentInsensitiveCollation) is in the text.
+    private const string ResourcesMatchingSqlServer =
+        "SELECT DISTINCT NoteId AS Value FROM Resources WHERE [Description] COLLATE Latin1_General_100_CI_AI_SC LIKE {0} " +
+        "OR ExtractedText COLLATE Latin1_General_100_CI_AI_SC LIKE {0}";
+    private const string ResourcesMatchingSqlite =
+        "SELECT DISTINCT NoteId AS Value FROM Resources WHERE [Description] LIKE {0} OR ExtractedText LIKE {0}";
+
     private async Task<Result<List<T>>> GetSearchPrivateAsync<T>(NotesSearchDto notesSearch) where T : NoteMinimalDto, new()
     {
         try
@@ -1760,15 +2013,14 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
             else
             {
-                var listTokensAll = ExtractListTokensSearch(notesSearch.TextSearch);
-
-                // TODO: refactor this -----------------------------
-                var listTokens = listTokensAll.Where(t => t != "***").Select(t => t).ToList();
-                var flagTextSearchDescription = (listTokensAll.Where(t => t == "***").Select(t => t).FirstOrDefault());
-                bool flagSearchDescription = (flagTextSearchDescription == "***") || notesSearch.SearchInDescription;
-                // --------------------------------------------------
+                var listTokens = ExtractListTokensSearch(notesSearch.TextSearch);
+                // The description only with its option (the token "***" that also turned it on is gone: KNote Atlas 4.6a).
+                var flagSearchDescription = notesSearch.SearchInDescription;
 
                 var searchInNoteTasks = notesSearch.SearchInNoteTasks;
+                // KNote Atlas, stage 4 (D18): the resources, read with SQL of its own (ExtractedText is out of the model of EF).
+                var searchInResources = notesSearch.SearchInResources;
+                var excluded = notesSearch.ResourcesExcludedNoteTypeIds ?? new List<Guid>();
 
                 foreach (var token in listTokens)
                 {
@@ -1778,31 +2030,37 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     if (token[0] != '!')
                     {
                         var pattern = $"%{token}%";
+                        var resourceNotes = searchInResources ? await NotesWithResourcesMatchingAsync(ctx, pattern, isSqlServer) : new List<Guid>();
                         query = isSqlServer
                             ? query.Where(n => EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(token)
                                              || EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(token)
                                              || (flagSearchDescription && EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(token))
                                              || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(token)
-                                                                                         || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(token))))
+                                                                                         || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(token)))
+                                             || (searchInResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))))
                             : query.Where(n => EF.Functions.Like(n.Topic, pattern)
                                              || EF.Functions.Like(n.Tags, pattern)
                                              || (flagSearchDescription && EF.Functions.Like(n.Description, pattern))
-                                             || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, pattern) || EF.Functions.Like(t.Description, pattern))));
+                                             || (searchInNoteTasks && n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, pattern) || EF.Functions.Like(t.Description, pattern)))
+                                             || (searchInResources && resourceNotes.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value))));
                     }
                     else
                     {
                         var tokenNot = token.Substring(1, token.Length - 1);
                         var patternNot = $"%{tokenNot}%";
+                        var resourceNotesNot = searchInResources ? await NotesWithResourcesMatchingAsync(ctx, patternNot, isSqlServer) : new List<Guid>();
                         query = isSqlServer
                             ? query.Where(n => !EF.Functions.Collate(n.Topic, AccentInsensitiveCollation).Contains(tokenNot)
                                              && !EF.Functions.Collate(n.Tags, AccentInsensitiveCollation).Contains(tokenNot)
                                              && (!flagSearchDescription || !EF.Functions.Collate(n.Description, AccentInsensitiveCollation).Contains(tokenNot))
                                              && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Collate(t.Tags, AccentInsensitiveCollation).Contains(tokenNot)
-                                                                                           || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(tokenNot))))
+                                                                                           || EF.Functions.Collate(t.Description, AccentInsensitiveCollation).Contains(tokenNot)))
+                                             && (!searchInResources || !(resourceNotesNot.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value)))))
                             : query.Where(n => !EF.Functions.Like(n.Topic, patternNot)
                                              && !EF.Functions.Like(n.Tags, patternNot)
                                              && (!flagSearchDescription || !EF.Functions.Like(n.Description, patternNot))
-                                             && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, patternNot) || EF.Functions.Like(t.Description, patternNot))));
+                                             && (!searchInNoteTasks || !n.NoteTasks.Any(t => EF.Functions.Like(t.Tags, patternNot) || EF.Functions.Like(t.Description, patternNot)))
+                                             && (!searchInResources || !(resourceNotesNot.Contains(n.NoteId) && (n.NoteTypeId == null || !excluded.Contains(n.NoteTypeId.Value)))));
                     }
                 }
             }

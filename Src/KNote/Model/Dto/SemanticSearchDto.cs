@@ -26,10 +26,22 @@ public class SemanticSearchRequestDto
 
     public NotesFilterDto Filter { get; set; }
 
+    // KNote Atlas, stage 4 (D14): All, the notes (as always); Photos or Documents, the resources of that kind
+    // (SemanticSearchResultDto.Resources), found only by their own fragments.
+    public EnumResourceKind ResourceKind { get; set; }
+
     // The filter by meaning: the text is its MeaningText.
     public static SemanticSearchRequestDto ForFilter(NotesFilterDto filter) => new() { Text = filter?.MeaningText, Filter = filter };
 
-    public override string ToString() => $"Text: {Text}, Filter: {(Filter != null ? "yes" : "no")}";
+    public override string ToString() => $"Text: {Text}, Filter: {(Filter != null ? "yes" : "no")}, Resources: {ResourceKind}";
+}
+
+/// <summary>What a search by meaning finds (KNote Atlas, stage 4, D14): the notes, or the photos or the documents.</summary>
+public enum EnumResourceKind
+{
+    All,
+    Photos,
+    Documents
 }
 
 /// <summary>
@@ -43,6 +55,26 @@ public class NoteSearchHitDto : NoteMinimalDto
     public string Fragment { get; set; }
 
     public NoteChunkSourceType FragmentSource { get; set; }
+
+    // KNote Atlas, stage 4 (D14): the file of the resource the fragment is of, and its page (null: not of a resource, or without
+    // pages), to say «in manual.pdf, p. 12».
+    public string FragmentResource { get; set; }
+
+    public int? FragmentPage { get; set; }
+
+    /// <summary>The fragment as the lists show it: after where it is, if it is of a resource («(in manual.pdf, p. 12) …»).</summary>
+    public string FragmentShown() =>
+        SemanticSearchRules.FragmentPlace(FragmentResource, FragmentPage) is string place ? $"({place}) {Fragment}" : Fragment;
+}
+
+/// <summary>
+/// A photo or a document found by meaning (KNote Atlas, stage 4, D14): the resource (without its file), and, as a note found,
+/// its note (number, topic...: a list of resources is shown with the lists of notes), the similarity of its best fragment and
+/// that fragment with its page.
+/// </summary>
+public class ResourceSearchHitDto : NoteSearchHitDto
+{
+    public ResourceInfoDto Resource { get; set; }
 }
 
 /// <summary>
@@ -52,6 +84,14 @@ public class NoteSearchHitDto : NoteMinimalDto
 public class SemanticSearchResultDto
 {
     public List<NoteSearchHitDto> Notes { get; set; } = new();
+
+    // Of the PendingNotes (4.6b): the ones the update before a search leaves for a full indexing (documents not read yet, too many
+    // fragments), and the ones that can't be brought up to date here, with a document not read whose file is not in this installation.
+    public int NotesForFullRun { get; set; }
+    public int NotesWithoutFiles { get; set; }
+
+    // With SemanticSearchRequestDto.ResourceKind Photos or Documents, the resources found (Notes is empty then).
+    public List<ResourceSearchHitDto> Resources { get; set; } = new();
 
     public int PendingNotes { get; set; }
 }

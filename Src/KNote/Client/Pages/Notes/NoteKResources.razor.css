@@ -70,6 +70,15 @@
     white-space: nowrap;
 }
 
+.knt-resource-describing {
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-resource-locked {
+    font-size: 0.875rem;
+}
+
 .knt-resource-meta {
     display: flex;
     align-items: center;

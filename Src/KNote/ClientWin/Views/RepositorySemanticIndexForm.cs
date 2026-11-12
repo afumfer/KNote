@@ -4,7 +4,7 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-// "Semantic index" tab of the repository editor (RepositorySemanticIndexCtrl): the status of the repository's index and
+// Section Â«Semantic indexÂ» of the KNote Atlas window (RepositorySemanticIndexCtrl): the status of the repository's index and
 // creating, updating or rebuilding it, with its progress. Always used embedded (PanelView()) inside RepositoryEditorForm's
 // TabPage, never shown as a window. The run is the Store's: closing the editor does not stop it.
 public partial class RepositorySemanticIndexForm : KntForm, IViewSemanticIndex

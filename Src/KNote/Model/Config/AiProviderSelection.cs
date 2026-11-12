@@ -22,4 +22,11 @@ public static class AiProviderSelection
         providers?.FirstOrDefault(p =>
             string.Equals(p.Provider, provider, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(p.Model, model, StringComparison.OrdinalIgnoreCase));
+
+    // The provider of a task of KNote Atlas (D13): one with the repository's recommended LLM if this installation has it,
+    // else the fallback (the default chat provider); null if there is none.
+    public static T ForRepository<T>(IEnumerable<T> providers, string recommendedModel, T fallback) where T : class, IAiProviderIdentity =>
+        (string.IsNullOrWhiteSpace(recommendedModel) ? null : providers?.FirstOrDefault(p =>
+            string.Equals(p.Model?.Trim(), recommendedModel.Trim(), StringComparison.OrdinalIgnoreCase)))
+        ?? fallback;
 }

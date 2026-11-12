@@ -34,6 +34,9 @@ namespace KNote.ClientWin.Views
             this.labelHelp = new System.Windows.Forms.Label();
             this.checkSearchInDescription = new System.Windows.Forms.CheckBox();
             this.checkSearchInNoteTasks = new System.Windows.Forms.CheckBox();
+            this.checkSearchInResources = new System.Windows.Forms.CheckBox();
+            this.labelResourceKind = new System.Windows.Forms.Label();
+            this.comboResourceKind = new System.Windows.Forms.ComboBox();
             this.labelSearchMode = new System.Windows.Forms.Label();
             this.radioSearchWords = new System.Windows.Forms.RadioButton();
             this.radioSearchMeaning = new System.Windows.Forms.RadioButton();
@@ -56,6 +59,9 @@ namespace KNote.ClientWin.Views
             // 
             this.panelForm.Controls.Add(this.checkSearchInDescription);
             this.panelForm.Controls.Add(this.checkSearchInNoteTasks);
+            this.panelForm.Controls.Add(this.checkSearchInResources);
+            this.panelForm.Controls.Add(this.labelResourceKind);
+            this.panelForm.Controls.Add(this.comboResourceKind);
             this.panelForm.Controls.Add(this.labelSearchMode);
             this.panelForm.Controls.Add(this.radioSearchWords);
             this.panelForm.Controls.Add(this.radioSearchMeaning);
@@ -106,10 +112,39 @@ namespace KNote.ClientWin.Views
             this.checkSearchInNoteTasks.Text = "Search in note tasks";
             this.checkSearchInNoteTasks.UseVisualStyleBackColor = true;
             //
+            // checkSearchInResources
+            //
+            this.checkSearchInResources.AutoSize = true;
+            this.checkSearchInResources.Location = new System.Drawing.Point(7, 229);
+            this.checkSearchInResources.Name = "checkSearchInResources";
+            this.checkSearchInResources.Size = new System.Drawing.Size(128, 19);
+            this.checkSearchInResources.TabIndex = 20;
+            this.checkSearchInResources.Text = "Search in resources";
+            this.checkSearchInResources.UseVisualStyleBackColor = true;
+            //
+            // labelResourceKind
+            //
+            this.labelResourceKind.AutoSize = true;
+            this.labelResourceKind.Location = new System.Drawing.Point(7, 287);
+            this.labelResourceKind.Name = "labelResourceKind";
+            this.labelResourceKind.Size = new System.Drawing.Size(31, 15);
+            this.labelResourceKind.TabIndex = 21;
+            this.labelResourceKind.Text = "Find:";
+            this.labelResourceKind.Visible = false;
+            //
+            // comboResourceKind
+            //
+            this.comboResourceKind.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboResourceKind.Location = new System.Drawing.Point(84, 283);
+            this.comboResourceKind.Name = "comboResourceKind";
+            this.comboResourceKind.Size = new System.Drawing.Size(137, 23);
+            this.comboResourceKind.TabIndex = 22;
+            this.comboResourceKind.Visible = false;
+            //
             // labelSearchMode
             //
             this.labelSearchMode.AutoSize = true;
-            this.labelSearchMode.Location = new System.Drawing.Point(7, 236);
+            this.labelSearchMode.Location = new System.Drawing.Point(7, 260);
             this.labelSearchMode.Name = "labelSearchMode";
             this.labelSearchMode.Size = new System.Drawing.Size(58, 15);
             this.labelSearchMode.TabIndex = 10;
@@ -120,7 +155,7 @@ namespace KNote.ClientWin.Views
             //
             this.radioSearchWords.AutoSize = true;
             this.radioSearchWords.Checked = true;
-            this.radioSearchWords.Location = new System.Drawing.Point(84, 234);
+            this.radioSearchWords.Location = new System.Drawing.Point(84, 258);
             this.radioSearchWords.Name = "radioSearchWords";
             this.radioSearchWords.Size = new System.Drawing.Size(59, 19);
             this.radioSearchWords.TabIndex = 11;
@@ -133,7 +168,7 @@ namespace KNote.ClientWin.Views
             // radioSearchMeaning
             //
             this.radioSearchMeaning.AutoSize = true;
-            this.radioSearchMeaning.Location = new System.Drawing.Point(152, 234);
+            this.radioSearchMeaning.Location = new System.Drawing.Point(152, 258);
             this.radioSearchMeaning.Name = "radioSearchMeaning";
             this.radioSearchMeaning.Size = new System.Drawing.Size(69, 19);
             this.radioSearchMeaning.TabIndex = 12;
@@ -277,6 +312,9 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkSearchInDescription;
         private System.Windows.Forms.CheckBox checkSearchInNoteTasks;
+        private System.Windows.Forms.CheckBox checkSearchInResources;
+        private System.Windows.Forms.Label labelResourceKind;
+        private System.Windows.Forms.ComboBox comboResourceKind;
         private System.Windows.Forms.Label labelSearchMode;
         private System.Windows.Forms.RadioButton radioSearchWords;
         private System.Windows.Forms.RadioButton radioSearchMeaning;

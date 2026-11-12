@@ -74,6 +74,9 @@ public partial class KNoteAiTools
         foreach (var tool in GetQueryTools())
             yield return tool;
 
+        foreach (var tool in GetDocumentTools())
+            yield return tool;
+
         foreach (var tool in GetActionTools())
             yield return tool;
     }

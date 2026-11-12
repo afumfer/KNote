@@ -17,7 +17,7 @@ public sealed class AiToolImages
 
     public void Add(Guid id, byte[] content, string contentType) => _images.TryAdd(id, new DataContent(content, contentType));
 
-    public ChatMessage ToMessage() => new(ChatRole.User, [new TextContent("[The images of view_note_images, in the order it gave.]"), .. _images.Values]);
+    public ChatMessage ToMessage() => new(ChatRole.User, [new TextContent("[The images of view_note_images or view_document_pages, in the order they gave.]"), .. _images.Values]);
 }
 
 // Right above the provider, under the function invocation: each call to the model of a turn gets the images found so far, after

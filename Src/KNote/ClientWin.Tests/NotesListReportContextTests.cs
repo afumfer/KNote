@@ -31,6 +31,9 @@ public class NotesListContextTests
         Assert.AreEqual("Search: kanote", context.Heading);
         Assert.AreEqual("Searched in: topic, description, tasks", context.Subheading);
         Assert.AreEqual("Notes - Search kanote - 2026-10-02", context.FileNameBase(new DateTime(2026, 10, 2)));
+        // KNote Atlas 4.6a.
+        Assert.AreEqual("Searched in: topic, resources",
+            new NotesListContext { Source = NotesListSource.Search, SearchText = "x", SearchInResources = true }.Subheading);
     }
 
     [TestMethod]

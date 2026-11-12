@@ -516,6 +516,117 @@ public class NotesQueryParityTests
         return ordered.ThenBy(n => n.NoteNumber).Select(n => n.NoteId).ToList();
     }
 
+    // KNote Atlas, stage 4 (D18, 4.6a): «Search in resources» finds a note by the description of a resource or by the text read of a
+    // document (accent-insensitive), only with the option; a "!word" leaves out the notes whose resources have it; the resources of
+    // the notes of the excluded types (the system ones) are not looked at, but those notes are still found by their topic.
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task GetSearchMinimalAsync_SearchInResources(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+        var folderId = (await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Resources search" })).Entity.FolderId;
+        var systemType = (await repo.NoteTypes.AddAsync(new NoteTypeDto { NoteTypeId = Guid.NewGuid(), Name = $"System {Guid.NewGuid():N}" })).Entity.NoteTypeId;
+        var marker = $"RESSEARCH{Guid.NewGuid():N}"[..20];
+
+        var byDescription = await AddNoteAsync(repo, folderId, $"{marker} photo");
+        await AddResourceAsync(repo, byDescription, "photo.png", "La abuela Cármen en la playa.", null);
+        var byText = await AddNoteAsync(repo, folderId, $"{marker} manual");
+        await AddResourceAsync(repo, byText, "manual.pdf", "manual.pdf", "Page one.\fERROR 0x80070005 in the second page.");
+        var plain = await AddNoteAsync(repo, folderId, $"{marker} plain");
+        var system = await AddNoteAsync(repo, folderId, $"{marker} session", systemType);
+        await AddResourceAsync(repo, system, "attachment.png", "carmen and 0x80070005", null);
+
+        async Task<List<Guid>> SearchAsync(string text, bool inResources) =>
+            (await repo.Notes.GetSearchMinimalAsync(new NotesSearchDto
+            {
+                TextSearch = $"{marker} {text}".Trim(), SearchInResources = inResources, ResourcesExcludedNoteTypeIds = [systemType]
+            })).Entity.Select(n => n.NoteId).ToList();
+
+        CollectionAssert.AreEquivalent(new[] { byDescription }, await SearchAsync("carmen", true), "the description, without accents");
+        CollectionAssert.AreEquivalent(new[] { byText }, await SearchAsync("0x80070005", true), "the text read; not the system note's");
+        Assert.AreEqual(0, (await SearchAsync("carmen", false)).Count, "without the option");
+        CollectionAssert.AreEquivalent(new[] { byText, plain, system }, await SearchAsync("!carmen", true));
+        CollectionAssert.AreEquivalent(new[] { byDescription, byText, plain, system }, await SearchAsync("!carmen", false));
+        CollectionAssert.AreEquivalent(new[] { system }, await SearchAsync("session", true), "by its topic, as always");
+    }
+
+    // 4.6a: the description only with its option; the token "***" that also turned it on is gone (a word as any other).
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task GetSearchMinimalAsync_TheDescription_OnlyWithItsOption(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+        var folderId = (await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Description search" })).Entity.FolderId;
+        var marker = $"DESCONLY{Guid.NewGuid():N}"[..20];
+        var noteId = await AddNoteAsync(repo, folderId, "A note");
+        var note = (await repo.Notes.GetAsync(noteId)).Entity;
+        note.Description = $"It says {marker}.";
+        Assert.IsTrue((await repo.Notes.UpdateAsync(note)).IsValid);
+
+        async Task<int> CountAsync(string text, bool inDescription) =>
+            (await repo.Notes.GetSearchMinimalAsync(new NotesSearchDto { TextSearch = text, SearchInDescription = inDescription })).Entity.Count;
+
+        Assert.AreEqual(1, await CountAsync(marker, true));
+        Assert.AreEqual(0, await CountAsync(marker, false));
+        Assert.AreEqual(0, await CountAsync($"*** {marker}", false), "*** doesn't turn it on");
+    }
+
+    // 4.6a: the filter's Description, also in the note's tasks and resources, if chosen.
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task GetFilterMinimalAsync_DescriptionAlsoInTasksAndResources(string orm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var repo = db.CreateRepository(orm);
+        var folderId = (await repo.Folders.AddAsync(new FolderDto { FolderId = Guid.NewGuid(), FolderNumber = 0, Name = "Filter description" })).Entity.FolderId;
+        var marker = $"FILTERDESC{Guid.NewGuid():N}"[..20];
+
+        var inNote = await AddNoteAsync(repo, folderId, "In the note");
+        var note = (await repo.Notes.GetAsync(inNote)).Entity;
+        note.Description = $"It says {marker}.";
+        Assert.IsTrue((await repo.Notes.UpdateAsync(note)).IsValid);
+        var inTask = await AddNoteAsync(repo, folderId, "In a task");
+        var task = await repo.Notes.AddNoteTaskAsync(new NoteTaskDto
+        {
+            NoteTaskId = Guid.NewGuid(), NoteId = inTask, UserId = (await repo.Users.GetByUserNameAsync("user1")).Entity.UserId, Description = $"Do {marker}", Tags = "", Priority = 1,
+            CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now
+        });
+        Assert.IsTrue(task.IsValid, task.ErrorMessage);
+        var inResource = await AddNoteAsync(repo, folderId, "In a resource");
+        await AddResourceAsync(repo, inResource, "doc.pdf", "doc.pdf", $"The text of {marker}.");
+
+        async Task<List<Guid>> FilterAsync(bool inTasks, bool inResources) =>
+            (await repo.Notes.GetFilterMinimalAsync(new NotesFilterDto
+            {
+                FolderId = folderId, Description = marker, SearchInNoteTasks = inTasks, SearchInResources = inResources
+            })).Entity.Select(n => n.NoteId).ToList();
+
+        CollectionAssert.AreEquivalent(new[] { inNote }, await FilterAsync(false, false));
+        CollectionAssert.AreEquivalent(new[] { inNote, inTask }, await FilterAsync(true, false));
+        CollectionAssert.AreEquivalent(new[] { inNote, inResource }, await FilterAsync(false, true));
+        CollectionAssert.AreEquivalent(new[] { inNote, inTask, inResource }, await FilterAsync(true, true));
+    }
+
+    private static async Task AddResourceAsync(KNote.Repository.IKntRepository repo, Guid noteId, string name, string description, string? text)
+    {
+        var resource = await repo.Notes.AddResourceAsync(new ResourceDto
+        {
+            ResourceId = Guid.NewGuid(), NoteId = noteId, Name = $"{Guid.NewGuid()}_{name}", Description = description, ContentInDB = true,
+            ContentArrayBytes = [1], FileType = name.EndsWith(".pdf") ? "application/pdf" : "image/png", Container = "KntResources"
+        });
+        Assert.IsTrue(resource.IsValid, resource.ErrorMessage);
+        if (text != null)
+        {
+            var saved = await repo.Notes.SaveResourceTextAsync(resource.Entity.ResourceId, text, EnumExtractedState.Complete, resource.Entity.Name);
+            Assert.IsTrue(saved.IsValid && saved.Entity, saved.ErrorMessage);
+        }
+    }
+
     private static async Task<Guid> AddNoteAsync(KNote.Repository.IKntRepository repo, Guid folderId, string topic, Guid? noteTypeId = null)
     {
         var noteRes = await repo.Notes.AddAsync(new NoteDto

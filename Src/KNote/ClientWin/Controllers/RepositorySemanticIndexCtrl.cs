@@ -6,11 +6,11 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Controllers;
 
 /// <summary>
-/// The "Semantic index" tab of the repository editor (RepositoryEditorCtrl, Management mode, CU-03): the status of the
+/// Section Â«Semantic indexÂ» of the KNote Atlas window (AtlasCtrl, CU-03): the status of the
 /// repository's semantic index and creating, updating or rebuilding it (Service.SemanticSearch), with its progress, its
 /// cancellation and the indexes of other models kept in the repository. The run is the Store's (Store.SemanticIndex,
 /// one at a time in the app): it goes on when the editor is closed, and opening it again shows its progress. Included
-/// in the repository editor (no [KntAuthorize]: it decides); the commands check the role (Admin to run).
+/// in the KNote Atlas window (no [KntAuthorize]: it decides); the commands check the role (Admin to run).
 /// </summary>
 public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticIndex>
 {
@@ -20,6 +20,7 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     {
         ControllerName = "Repository semantic index";
         Store.Events.Subscribe<SemanticIndexProgressChanged>(OnProgressChanged);
+        Store.Events.Subscribe<ResourceProcessingProgressChanged>(OnResourcesProgressChanged);
     }
 
     #endregion
@@ -40,7 +41,8 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     // Another repository's run: this one waits (one at a time in the app).
     public bool OtherRepositoryRunning => Store.SemanticIndex.IsRunning && !Store.SemanticIndex.IsOf(Service);
 
-    public bool CanRun => Status?.IndexKey != null && Status.EmbeddingModelAvailable && !Store.SemanticIndex.IsRunning;
+    // One run of KNote Atlas at a time in the app (the index or the resources: one Ollama).
+    public bool CanRun => Status?.IndexKey != null && Status.EmbeddingModelAvailable && !Store.AtlasJobRunning;
 
     public bool CanUpdate => CanRun && !(Status.Status == EnumSemanticIndexStatus.Ready && Status.PendingNotes == 0);
 
@@ -50,7 +52,7 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
 
     public string StatusText =>
         Status == null ? "" : Status.IndexKey == null
-            ? "The repository has no embedding model: choose one in the KNote Atlas tab to create its index."
+            ? "The repository has no embedding model: choose one in Â«Repository modelsÂ» to create its index."
             : $"{SemanticIndexTexts.Status(Status)} · model {Status.IndexKey}";
 
     public string CountsText => Status?.IndexKey == null ? "" : SemanticIndexTexts.Counts(Status);
@@ -62,7 +64,9 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
             ? $"This installation has no embeddings provider with the model {Status.EmbeddingModel}: the index cannot be created or updated here (Tools > Manage AI providers)."
             : OtherRepositoryRunning
                 ? $"The index of {Store.SemanticIndex.RepositoryName} is being created: one index at a time."
-                : "";
+                : Store.ResourceProcessing.IsRunning
+                    ? $"The resources of {Store.ResourceProcessing.RepositoryName} are being processed: one run of KNote Atlas at a time."
+                    : "";
 
     public string ProgressText => Progress is { } progress ? SemanticIndexTexts.Progress(progress) : "";
 
@@ -168,6 +172,7 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     public override void Dispose()
     {
         Store.Events.Unsubscribe<SemanticIndexProgressChanged>(OnProgressChanged);
+        Store.Events.Unsubscribe<ResourceProcessingProgressChanged>(OnResourcesProgressChanged);
         base.Dispose();
     }
 
@@ -179,6 +184,13 @@ public class RepositorySemanticIndexCtrl : CtrlViewEmbeddableBase<IViewSemanticI
     private bool IsPaidModel() =>
         Store.Settings.Ai.Providers.Any(p => p.IsEmbeddings && p.IsValid() && p.IsPaid
             && string.Equals(p.Model?.Trim(), Status?.EmbeddingModel, StringComparison.OrdinalIgnoreCase));
+
+    // A run of the resources holds this one back.
+    private void OnResourcesProgressChanged(ResourceProcessingProgressChanged e)
+    {
+        if (Service != null)
+            View.RefreshView();
+    }
 
     private async void OnProgressChanged(SemanticIndexProgressChanged e)
     {

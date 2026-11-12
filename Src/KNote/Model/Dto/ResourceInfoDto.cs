@@ -67,6 +67,44 @@ public class ResourceInfoDto : SmartModelDtoBase
         }
     }
 
+    // KNote Atlas, stage 4 (D12, ResourceDescriptionRules): the description is locked (a person's: the AI doesn't change
+    // it), and the model that wrote it (null: not the AI). The save command decides both: the model never comes from
+    // outside.
+    private bool _descriptionByUser;
+    public bool DescriptionByUser
+    {
+        get { return _descriptionByUser; }
+        set
+        {
+            if (_descriptionByUser != value)
+            {
+                _descriptionByUser = value;
+                OnPropertyChanged("DescriptionByUser");
+            }
+        }
+    }
+
+    private string _descriptionModel;
+    public string DescriptionModel
+    {
+        get { return _descriptionModel; }
+        set
+        {
+            if (_descriptionModel != value)
+            {
+                _descriptionModel = value;
+                OnPropertyChanged("DescriptionModel");
+            }
+        }
+    }
+
+    /// <summary>
+    /// The description the resource was read with (the Service sets it on every read, the editors keep it; not a column,
+    /// and it doesn't make the resource dirty). Saving compares the text with it: if it is the same, the saved one stays,
+    /// also if the AI wrote it meanwhile. Null: a resource not read from KNote (code that builds it).
+    /// </summary>
+    public string LoadedDescription { get; set; }
+
     private int _order;
     public int Order
     {
@@ -130,22 +168,30 @@ public class ResourceInfoDto : SmartModelDtoBase
 
     public string NameOut
     {
-        get
-        {
-            if (string.IsNullOrEmpty(Name))
-                return Name;
-            else
-            {
-                // Drop the note's guid prefix from the file name ("{guid}_{name}"; the file store may have written the
-                // guid's dashes as underscores).
-                if (Name.Length > 37 && Name[36] == '_' && Guid.TryParse(Name.Substring(0, 36).Replace('_', '-'), out _))
-                    return Name.Substring(37);
-                else
-                    return Name;
-            }
-        }
+        get { return FileNameOf(Name); }
         set { }
     }
+
+    /// <summary>
+    /// The file name of a resource without the note's guid prefix ("{guid}_{name}"; the file store may have written the
+    /// guid's dashes as underscores).
+    /// </summary>
+    public static string FileNameOf(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return name;
+        if (name.Length > 37 && name[36] == '_' && Guid.TryParse(name.Substring(0, 36).Replace('_', '-'), out _))
+            return name.Substring(37);
+        return name;
+    }
+
+    /// <summary>The short title: the first sentence of its description or, without one of its own, the file name.</summary>
+    public string GetTitle(int maxLength = ResourceDescriptionRules.TitleLength) =>
+        ResourceDescriptionRules.Title(Description, Name, maxLength);
+
+    /// <summary>Who wrote the description, to show under it.</summary>
+    public string GetDescriptionAuthor() =>
+        ResourceDescriptionRules.Author(Description, DescriptionByUser, DescriptionModel, Name);
 
     private string _fullUrl;
     public string FullUrl

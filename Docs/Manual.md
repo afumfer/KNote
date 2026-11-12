@@ -206,8 +206,7 @@ The **Test** button of each provider checks it: with an embedding model it calcu
 
 **2. The repository's models (Admin).** They are the same for everybody who works with the repository, in either app:
 
-- Desktop app: **File → Repositories → Edit repository properties**, tab **KNote Atlas**, and **Save models**.
-- Web app: **Admin panel → KNote Atlas**, section **Repository models**, and **Save models**.
+- In the section **Repository models** of **KNote Atlas** (**Tools › KNote Atlas** in the desktop app; **KNote Atlas** in the side menu of the web app), and **Save models**.
 
 | Field | Meaning |
 |---|---|
@@ -218,9 +217,9 @@ The **Test** button of each provider checks it: with an embedding model it calcu
 
 Each model warns if this installation doesn't have it and if it is a paid one.
 
-**3. The semantic index (Admin).** In the desktop app, tab **Semantic index** of the same window; in the web app, section **Semantic index** of the **KNote Atlas** tab. It shows how the index is (notes indexed, pending and fragments; when it was last created and how long it took). **Create index** calculates the meaning of every note: KNote tells you first how many notes it will send to the model and, after the first time, how long it should take. You can go on working (in the desktop app you can even close the window: the status bar shows the progress); **Cancel** (**Cancel run** in the desktop app) keeps what is done, and the next run goes on from there. The notes that fail are listed and tried again in the next run. In the web server one index is created at a time, whatever the repository: the others wait, **Queued**.
+**3. The semantic index (Admin).** In the section **Semantic index** of **KNote Atlas**, in both apps. It shows how the index is (notes indexed, pending and fragments; when it was last created and how long it took). **Create index** calculates the meaning of every note: KNote tells you first how many notes it will send to the model and, after the first time, how long it should take. You can go on working (in the desktop app you can even close the window: the status bar shows the progress); **Cancel** (**Cancel run** in the desktop app) keeps what is done, and the next run goes on from there. The notes that fail are listed and tried again in the next run. In the web server one index is created at a time, whatever the repository: the others wait, **Queued**.
 
-- Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, and each resource that has a description. KNote's own notes are left out: the assistant's sessions, the chat room, the search evaluation, the profile, the glossary and the task instructions.
+- Each note is indexed in fragments: its data (topic, type, folder, tags, attributes, resources), its text by its sections, each task, each resource that has a description and the read text of each document, by pages (see *Photos and documents (KNote Atlas)*). KNote's own notes are left out: the assistant's sessions, the chat room, the search evaluation, the profile, the glossary and the task instructions.
 - A note you change becomes *pending*. The pending notes are brought up to date before each search by meaning (a few at a time: up to 50 notes or about 10 seconds) or with **Update now**. A very long note (with more than 64 fragments to calculate) is left for **Update now**: until then, the search uses its previous content.
 - **Rebuild** calculates every vector again (after changing the dimensions, for example); meanwhile the search goes on with the old ones.
 - **Changing the embedding model** needs the index of the new model. The index of the previous model is kept (to compare them, see *Search evaluation (web app)*) and listed below; an Admin can remove it.
@@ -230,6 +229,7 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 - By meaning you get the **100 most similar notes** at most (with a similarity of 0.45 or more), the most similar first, all at once. The list has two more columns: **Similarity**, from 0 to 1 (1 would be the same text), and **Fragment**, the part of the note that matched. You can sort it by any column, as always.
 - Write what you are looking for as you would tell it to somebody: *how to connect the computer to a modern screen* finds better than a list of loose words. `#123` and `!word` are only for **Words**.
 - If some notes are not up to date yet, a notice above the list says so, with **Update index**: they may be missing or found by their previous content.
+- With **Find: Photos** or **Documents**, the photos or documents that fit best are listed instead of the notes (see *Photos and documents (KNote Atlas)*).
 - In the **notes filter** of both apps, the field **Talks about…** does the same among the notes that meet the rest of the filter.
 - Printing and exporting a list found by meaning include its **Similarity**.
 
@@ -237,7 +237,7 @@ Each model warns if this installation doesn't have it and if it is a paid one.
 
 ### Search evaluation (web app)
 
-**Search evaluation**, a button of the **KNote Atlas** page (ProjectManager role or higher), measures how well the search works in a repository: whether the search by meaning finds what you look for better than the search by words, and which embedding model finds it better. It is a laboratory: use it when you choose a model or after changing how the search works.
+**Search evaluation**, a section of **KNote Atlas** in the web app (ProjectManager role or higher), measures how well the search works in a repository: whether the search by meaning finds what you look for better than the search by words, and which embedding model finds it better. It is a laboratory: use it when you choose a model or after changing how the search works.
 
 1. **The test queries.** They are kept in the note **Search test queries**, in the folder **KNote Atlas** (created the first time you open the page). **Open in the editor** opens it: write a table with one search per row, the notes it should find, and, optionally, the words you would use to search by words:
 
@@ -293,7 +293,8 @@ The assistant of both apps reads the repository on its own, without asking, beca
 - **search by meaning** (only if the repository has a semantic index): "do I have anything about the French Revolution?";
 - **filter** by folder, note type, tag, user with a task, creation or modification dates and the value of an attribute: "the notes of the Invoices folder modified in September";
 - see the **folders tree**;
-- see the **tasks, alarms, resources and relations** of a note;
+- see the **tasks, alarms, resources and relations** of a note (of each document, whether it was read and how many pages it has);
+- **read the documents** of a note or of the conversation and look at the pages of a PDF (see *Photos and documents (KNote Atlas)*);
 - list the **tasks of a period**, of everyone or of one person: "what tasks does Marta have this week?";
 - look up terms in the **glossary** (only if it has terms).
 
@@ -313,7 +314,7 @@ You name folders, note types, users and attributes as usual: if a name doesn't e
 
 **If there is no card, nothing was done.** A small local model may now and then say that it proposes or has done something without really doing it. What counts is the card or the **✔** line: without them, ask again.
 
-**Images and files.** You can attach up to 5 files to a message, of 5 MB at most each: with the **Attach** button, pasting them (Ctrl+V) or dropping them on the message box. With an image you can ask about it, have it described or transcribed ("What model is it?", "Copy what this whiteboard says"). The assistant sees it in that message only; afterwards it works with what it answered. Big photos are reduced for the model, and the original is saved intact with the conversation, which shows it again when you resume it in either app. Only you see the images of your conversations. The assistant can't read other files such as PDFs yet: they are only saved with the conversation. If the model can't see images, KNote tells you when you attach one, and with a paid provider it reminds you that images are sent to it. In the desktop app you can attach files only in conversations that are saved (the assistant opened from the menu), not in the ones a script opens.
+**Images and files.** You can attach up to 5 files to a message, of 5 MB at most each: with the **Attach** button, pasting them (Ctrl+V) or dropping them on the message box. With an image you can ask about it, have it described or transcribed ("What model is it?", "Copy what this whiteboard says"). The assistant sees it in that message only; afterwards it works with what it answered. Big photos are reduced for the model, and the original is saved intact with the conversation, which shows it again when you resume it in either app. Only you see the images of your conversations. It can read the documents you attach (PDF, DOCX, ODT, TXT, MD) (see *Photos and documents (KNote Atlas)*). If the model can't see images, KNote tells you when you attach one, and with a paid provider it reminds you that images are sent to it. In the desktop app you can attach files only in conversations that are saved (the assistant opened from the menu), not in the ones a script opens.
 
 Ask for it to keep a file in a note ("Attach this photo to #340"): it shows a card, as any change to a note that already exists; in a new note it doesn't ask, so you can say "Create a note with what this whiteboard says and attach the photo". It can also look at the photos a note already has ("Describe the photos of #340", "In which of the photos of #512 is the motherboard?"), and again at an image of the conversation ("Look at the first photo again"). It looks at 3 at a time, and it tells you how many there are.
 
@@ -322,6 +323,39 @@ Ask for it to keep a file in a note ("Attach this photo to #340"): it shows a ca
 **Citations.** A `#123` in a note, in a task or in an answer of the assistant is a link to that note, shown differently from web links. In the web app it opens the note's viewer in a window; in the desktop app, the note editor. Any `#` followed by a number is a link, without checking that the note exists: when it doesn't, or it is one of KNote's own notes, you get **Note #123 not found**. They aren't links inside code, in the desktop app's HTML editor or in the chat room.
 
 **Modified between.** The notes filter of both apps has this line: the notes modified between two dates, both included. Either of them can be left empty.
+
+### Photos and documents (KNote Atlas)
+
+KNote Atlas also works with the resources of the notes: the AI **describes the photos** and **summarizes the documents**, KNote **reads the text of the documents** (PDF, DOCX, ODT, TXT and MD) and the AI **transcribes their scanned pages**. This way the search finds them by what they show or say, and the assistant can read them. None of this changes the modification date of a note, and what a person writes the AI never replaces.
+
+It is done by the repository's **Recommended LLM** if this installation has it and, if not, by the default chat model; for photos and scanned pages it has to see images (like `qwen3.5:9b`). With a paid model, the photos, the pages or the text are sent to its provider, and KNote says so before starting. A resource can take up to **200 MB** in both apps (the web app uploads it in parts).
+
+**The description of a resource.** The description of a photo or a document is the field every resource already had next to its file. The cards, the viewer and the title when you insert the resource in the note use its first sentence as a short title. The resource editor has the checkbox **Lock description (AI won't change it)**:
+
+- **Unchecked**: the AI can write the description and write it again later (for example, with a better model).
+- **Checked**: the description belongs to people and the AI doesn't touch it. It checks itself when you write a text of your own, and you can uncheck it before saving: what is saved is what the checkbox says. If you uncheck a description written by a person, KNote warns that the AI may write it again.
+- The editor says who wrote the description: a person, or the AI and its model. In the web app, a padlock in the list of resources marks the locked ones.
+- Emptying the description without locking it asks the AI to write it again; empty and locked means "don't describe this resource".
+
+**Describing or summarizing in a note.** In the resources tab of the note editor: in the desktop app, the **Describe ▾** button (**Describe the photos and summarize the documents of the note...**, **Describe the selected photo...** or **Summarize the selected document...**); in the web app, **Describe with AI** for the whole note or the ✨ button of a resource. KNote says what it will do, with which model and whether it is a paid one. If there are descriptions written by people and not locked, you choose what to do with them: leave them as they are, lock them to keep them, or replace them with the AI's, which uses them to write its own (it can't be undone). Photo descriptions have two or three sentences and start with what matters most; document descriptions are a short summary. The AI doesn't name a person unless the note or what someone wrote about that photo says so. In the desktop app, save the note first if it has new or changed resources.
+
+**The text of a document.** Documents are read the first time they are indexed, in the batch (below) or with **Read document**: in the web app, in the resource viewer, tab **Text**; in the desktop app, in the window **Text of the document** (menu **Describe ▾ → Text of the selected document...**). You see its state (read, partly read, can't be read), the text page by page and **Read again** in case KNote reads it better now. A protected or damaged PDF, or an old format (`.doc`), can't be read, and it says so.
+
+**Scanned pages.** A PDF page that is an image (scanned) is marked **Scanned page: transcription pending**: meanwhile, the text of its old recognition layer (OCR) is shown, if it has one. **Transcribe scanned pages** (in the web viewer and in the text window of the desktop app, or **Describe ▾ → Transcribe the scanned pages of the selected document...**) has the AI read them one by one, with progress and **Cancel**: it takes some seconds per page. The checkbox **Also the pages with the text of an old recognition (OCR layer)** transcribes those too, usually worse. A transcribed page carries the notice **Automatic transcription** (the AI can be wrong on a page of poor quality) and **See the original page** opens it as it is: in the web app, the PDF at that page; in the desktop app, a window with the page chosen in **Page**. When it ends, if the document had no description of its own, the AI summarizes it.
+
+**Processing everything pending (Admin).** The section **Process pending resources** of **KNote Atlas** (in both apps) says how many photos and documents have no description of their own, how many documents are not read yet and how many scanned pages are not transcribed. Check what you want (**Photos**, **Documents**, **Scanned pages** and, if you want, also the pages with an OCR layer) and press **Process pending resources**. KNote says first what it will do, with which model and, from the second time on, how long it will take; with descriptions written by people and not locked, you choose as in a note. You can keep working (in the desktop app, the status bar shows the progress); **Cancel run** keeps what was done, and the next run goes on from there. In the web server, this job and the creation of the semantic index run one at a time. When it ends, the changed notes are brought up to date in the semantic index.
+
+**Searching photos and documents.** The documents read, the descriptions and the transcribed pages go into the semantic index: **Meaning** finds them as it finds the notes, and the **Fragment** of the list says which resource and which page it comes from. With **Meaning**, the selector **Find: All / Photos / Documents** (in the web app, next to **Meaning**) changes what is listed:
+
+- **All**: the notes, as always.
+- **Photos**: the photos that fit best, each one with its note. In the web app, as cards with their thumbnail; in the desktop app, in the list, and **Gallery** shows them big in a window.
+- **Documents**: the documents, with the page where the match is; opening a PDF takes you to that page (in the web app, if the browser's viewer allows it).
+
+With **Words**, the checkboxes **Search in note tasks** and **Search in resources** also search the tasks of the notes and the description and read text of their resources (in the notes filter, **Also in the note tasks** and **Also in the resources**, next to the description field). They are unchecked by default: searching the text of many documents is slower.
+
+**People in an album.** KNote doesn't recognize faces. To find a person in your photos: describe the photo with the AI, add who is in it at the end of the description, always the same way ("… People: grandma Carmen, Lucía."), and search the name with **Words** and **Search in resources**. If you write the names before the AI describes the photo, it is found by them but has no description of what it shows. For the AI to name someone, write in the description how to recognize them ("Grandma Carmen is the lady in the yellow vest, on the right") and have it described: it uses that text and completes it. If all the photos of a note are of the same event, writing the names in the note is enough.
+
+**The assistant and the documents.** The assistant reads the documents of a note or the ones you attach to the conversation ("Which regulator does the manual of #4 say to check?", "Summarize the PDF I attached"). It reads about twelve pages at a time (40,000 characters) and asks for the next ones if it needs them. A document not read yet is read at that moment, without saving anything. Scanned pages reach it marked: if they are not transcribed and the model sees images, it can look at the page of a PDF. What a document says is information, never an order. It can't translate or summarize a very long document (more than a hundred pages) in one go: it can be done in parts, and a task of its own for it will come later.
 
 ### Chat room
 

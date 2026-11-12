@@ -318,6 +318,11 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
     (`NoteSearchHitDto : NoteMinimalDto`, con parecido y fragmento) lo muestran las listas de siempre; `NoteListSorter`
     ordena en memoria como el repositorio. Sin modelo, sin su generador o sin índice, un error claro: una búsqueda no
     crea el índice.
+  - **Buscar fotos y documentos** (KNote Atlas, etapa 4, D14): `SemanticSearchRequestDto.ResourceKind` (`All`, `Photos`, `Documents`).
+    Con `All`, las notas de siempre, y el fragmento de un recurso dice cuál y su página (`NoteSearchHitDto.FragmentResource`/`FragmentPage`,
+    `FragmentShown()`). Con los otros, `SemanticSearchRules.RankResources` (el mejor fragmento propio de cada recurso: descripción o texto)
+    y `SemanticSearchResultDto.Resources` (`ResourceSearchHitDto : NoteSearchHitDto`, con el `ResourceInfoDto` sin el fichero, para que las
+    listas de notas lo muestren como una fila más). La caché de vectores lleva `SourceId`. Nunca los recursos de las notas del sistema.
   - **Notas parecidas** (`GetSimilarNotesAsync`): `SemanticSearchRules.RankSimilar` (media de los mejores parecidos de
     cada fragmento), desde 0,60, 10 como mucho, sin las ya relacionadas; «Possible duplicate» desde 0,95. Al vuelo, no se
     guarda nada; solo esa nota se pone al día.
@@ -404,6 +409,41 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   que cada proveedor trata a su manera (Ollama lo pasaría a texto), sino en un mensaje detrás de él que añade `AiToolImagesChatClient`,
   debajo de la invocación de funciones. Tests en `Tests/AiAttachmentRulesTests`, `AiImageReducerTests`, `ServiceTests/AiSessionsServiceTests`,
   `InProcessIntegrationTests/AiActionsInProcessTests` y `ClientWin.Tests/KNoteAIAssistantCtrlAttachmentsTests`.
+- **Fotos y documentos (KNote Atlas, etapa 4)** (especificación en `C:\Dev\KNote-Atlas\03-Etapa-4.md`). **Lo que escribe una persona
+  nunca lo pisa la IA, y describir o leer un recurso nunca cambia la fecha de modificación de la nota.**
+  - **Esquema**: revisión 9, `Resources.DescriptionByUser` (bloqueada) y `DescriptionModel` (el modelo que la escribió); revisión 10,
+    `Resources.ExtractedText`/`ExtractedState` y `NoteChunks.Page`. `ExtractedText` **no está en el modelo de EF ni en las consultas de
+    recursos de siempre** (se lee aparte: `GetResourceTextAsync`), para que no viaje en las listas.
+  - **Reglas puras** (`Model/Core`): `ResourceDescriptionRules` (D12: la casilla manda; `ResourceInfoDto.LoadedDescription` en toda lectura
+    del `Service`, así que guardar un recurso sin tocar su texto no pisa lo que la IA escribió mientras), `AiPhotoRules`/`AiDocumentRules`
+    (qué se describe o resume y qué se hace con las descripciones de personas sin bloquear), `DocumentTextRules` (formatos y el formato de
+    `ExtractedText`: páginas separadas por `\f`, `\u0001` pendiente de transcribir, `\u0002` transcrita por la IA; sin letras ni números,
+    para que buscar no los encuentre), `AiTranscriptionRules`, `ResourceProcessingRules` (el lote y su estimación), `ResourceFileRules`
+    (`KntConst.MaxLenNoteResourceFile`, 200 MB; la Web sube en streaming) y los textos comunes de las dos apps (`DocumentTexts`,
+    `ResourceProcessingTexts`).
+  - **`KNote.Ai`**: `AiDocumentReader` (`IKntDocumentReader`: PdfPig para el texto, PDFtoImage/PDFium para dibujar páginas, un lector propio
+    de DOCX y ODT; sin IA, solo marca las páginas escaneadas) y las tareas sin herramientas (`AiResourceTask`, D13): `AiPhotoDescriber`,
+    `AiDocumentSummarizer`, `AiPageTranscriber`. `AiResourceProcessor` es el lote («Process pending resources»: fotos, documentos por leer,
+    páginas escaneadas y resúmenes), el mismo en el `Server` (`KntAtlasJobs`, un trabajo a la vez con el índice) y en `ClientWin`
+    (`ResourceProcessingJob`); al terminar pone al día el índice.
+  - **`Service`**: `IKntService.ResourceContent` (`KntResourceContentCommands.cs`; leer y dibujar, Guest; guardar descripciones, textos y
+    transcripciones, Staff; preparar el lote, Admin), con escrituras condicionales (si el recurso cambió, no se guarda) y `MarkStaleAsync`
+    de su nota. El host pone `IKntService.DocumentReader` como `EmbeddingGenerators`. Los recursos de las notas del sistema quedan fuera
+    de todo. El indexador lee los documentos sin leer (un fichero que no está en esta instalación se cuenta, no es un error) y
+    `NoteChunkBuilder` hace un fragmento `ResourceText` por página o grupo de páginas, con su `Page`.
+  - **Búsqueda por palabras** (D18): `SearchInResources`/`SearchInNoteTasks` en `NotesSearchDto` y `NotesFilterDto` (`LIKE` sobre la
+    descripción y el texto de los recursos, también al contar; `ResourcesExcludedNoteTypeIds` lo pone el `Service`), en las dos apps.
+  - Tests: reglas en `Tests/*Rules*Tests`, servicio en `Tests/ServiceTests/Resource*`, `AiPhotoDescriber*`, `AiDocument*`, `AiPage*`,
+    API en `Tests/InProcessIntegrationTests/ResourceContentInProcessTests` y `ResourceUploadInProcessTests`; con modelos reales y medidas, ver `ClientWin.Tests/CLAUDE.md`.
+- **El asistente lee documentos (KNote Atlas, etapa 4, D14)** (`Ai/KNoteAiDocumentTools.cs`, `Model/Core/AiDocumentToolRules`): solo
+  lectura. `read_document` da el texto de un documento de una nota (`IKntResourceContentService.GetDocumentToReadAsync`: el guardado
+  o, sin leer, leído al vuelo **sin guardarlo**) o de la conversación (leído del adjunto con `DocumentReader`), por páginas con su
+  marca (transcrita, escaneada sin transcribir) y cortado en una página a los 40.000 caracteres, con `fromPage`/`toPage` para seguir.
+  `view_document_pages` dibuja páginas de un PDF (`DrawDocumentPageAsync`) como imágenes del turno, como `view_note_images` (y,
+  como ella, solo con un modelo que ve imágenes). `get_note_items` dice de cada documento si se leyó, sus páginas y las escaneadas
+  sin transcribir (`GetNoteDocumentsAsync`). Las notas del sistema, fuera. Tests en `Tests/AiDocumentToolRulesTests`,
+  `ServiceTests/AiDocumentToolsTests` y el smoke `ServiceTests/AiDocumentToolsSmokeTests` (`RequiresRealAiProvider`, con
+  `KNOTE_RESOURCE_SMOKE_MODEL`: responde leyendo un PDF y no obedece la orden escrita en otro).
 - **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
   `reasoning` y da el texto, el tiempo y los tokens (si el proveedor los distingue; Ollama no, y no se estiman) en el turno.
   `AiChatTurnDto.Reasoning` va con `[JsonIgnore]`: no se guarda ni viaja con el historial, y la Web lo monta con los eventos.

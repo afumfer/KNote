@@ -57,7 +57,7 @@ try
     builder.Services.KntAddAiAssistant(builder.Configuration);
     builder.Services.KntAddPasswordReset(builder.Configuration);
     builder.Services.KntAddAlarms(builder.Configuration);
-    builder.Services.KntAddSemanticIndex();
+    builder.Services.KntAddAtlasJobs();
     builder.Services.KntAddRateLimits(builder.Configuration);
     builder.Services.KntAddForwardedHeaders(builder.Configuration);
     builder.Services.KntAddCors();

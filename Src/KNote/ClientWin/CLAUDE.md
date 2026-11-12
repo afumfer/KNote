@@ -653,15 +653,20 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
 ## KNote Atlas: contexto de la IA
 
 Etapa 1 (lógica en `Service`, ver «Contexto de la IA» en el `CLAUDE.md` raíz). **Tools › KNote Atlas** (debajo de «AI
-Assistant»): una sola ventana no modal, `AtlasContextCtrl` (`[KntAuthorize(Guest)]`) y `AtlasContextForm`, con las
-pestañas «Repository profile», «Glossary», «Task instructions» y «What the AI receives» (la tarea, un texto de prueba y
-el mensaje montado; un Guest no lo ve). Empieza en el repositorio activo y la lista de arriba elige otro entre los
+Assistant»): una sola ventana no modal, `AtlasCtrl` (`[KntAuthorize(Guest)]`) y `AtlasForm`, con **todo lo de la IA del
+repositorio** (4.3b): una lista a la izquierda (`EnumAtlasSection`, `ListBox` dibujado a mano: un `TabControl` vertical
+gira el texto) con *Repository models*, *AI personalization*, *Semantic index* y *Process pending resources*. Las tres del
+Admin son las vistas incrustadas de `AtlasCtrl.ModelsCtrl`, `SemanticIndexCtrl` y `ResourcesCtrl` (ver «KNote Atlas:
+búsqueda por significado»); solo se cargan para quien puede usarlas (`IsAvailable`, el rol de su comando) y las demás se
+ven en gris con quién puede (`WhoCanUse`, en el `ToolTip`). Los modelos sin guardar se preguntan antes de cambiar de
+repositorio o cerrar. Empieza en *AI personalization*: las pestañas «Repository profile», «Glossary», «Task instructions» y
+«What the AI receives» (la tarea, un texto de prueba y el mensaje montado; un Guest no lo ve). Empieza en el repositorio activo y la lista de arriba elige otro entre los
 enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
 otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»
 abre el `NoteEditorCtrl` de siempre y la ventana se refresca con su `SavedEntity` (el editor puede seguir abierto después
 de cerrarla: entonces no hace nada). `Views/AiPromptViewForm` (texto de solo lectura) es «See KNote's» y, en el asistente,
-**View › What the AI receives**. Una parte nueva (la política de ruido, etapa 2) es otra pestaña; si tiene lógica propia,
-un `Ctrl` embebido como las pestañas del editor de repositorio. Tests en `AtlasContextCtrlTests`.
+**View › What the AI receives**. Una parte nueva de KNote Atlas (etapas 2 y 3) es otra sección de la lista; si tiene lógica
+propia, un `Ctrl` incrustado como las del Admin. Tests en `AtlasCtrlTests`.
 
 **El asistente** (`KNoteAIAssistantCtrl`): antes de cada turno monta el mensaje de sistema con `AiAssistantContext`
 (`KNote.Ai`) y el `ServiceRef` de la conversación (`LastSystemPrompt`). `RootSystemChat` es solo la capa de
@@ -683,12 +688,14 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   `KNote.Ai`). Las listas de modelos de chat (asistente, `KntServerCOM`) solo usan los de tipo `Chat`. El generador de
   embeddings de la app es `Store.EmbeddingGenerators` (`AiEmbeddingGenerators` sobre `Settings.Ai.Providers`, leídos
   cada vez), que `Store.AddServiceRef` pone en cada servicio.
-- **Editor de repositorio** (`RepositoryEditorCtrl`, modo Management, Admin), dos pestañas, desactivadas al crear o
-  enlazar un repositorio: **KNote Atlas** (`RepositoryAiModelsCtrl`, editor incluido, sin `[KntAuthorize]`: los
-  modelos del repositorio con sus avisos y su propio «Save models»; con cambios sin guardar, «Accept» pregunta si
-  guardarlos y «Cancel» si descartarlos) y **Semantic index** (`RepositorySemanticIndexCtrl`, incluido: estado,
-  «Create index» / «Update now», «Rebuild», «Cancel run», progreso con errores, índices de otros modelos con «Remove
-  index»). Van en pestañas separadas porque el editor no tiene alto para los dos.
+- **Ventana KNote Atlas** (`AtlasCtrl`, ver «KNote Atlas: contexto de la IA»; hasta la 4.3, pestañas del editor de
+  repositorio), secciones del Admin: **Repository models** (`RepositoryAiModelsCtrl`, editor incluido, sin
+  `[KntAuthorize]`: los modelos del repositorio con sus avisos y su propio «Save models»; con cambios sin guardar, la
+  ventana pregunta antes de cambiar de repositorio o cerrarse), **Semantic index** (`RepositorySemanticIndexCtrl`,
+  incluido: estado, «Create index» / «Update now», «Rebuild», «Cancel run», progreso con errores, índices de otros
+  modelos con «Remove index») y **Process pending resources** (`RepositoryResourcesCtrl`, incluido, etapa 4: el lote con
+  `Store.ResourceProcessing`, que nunca corre a la vez que el índice: `Store.AtlasJobRunning`). Guardar los modelos
+  vuelve a leer el estado del índice.
 - **Indexado** (`Core/SemanticIndexJob`, `Store.SemanticIndex`): un trabajo a la vez en la app, del `Store` y no del
   editor (el editor se puede cerrar), en el thread pool con el `ServiceRef` del repositorio (el usuario y el rol de la
   app; la autorización de comandos está activa). Publica el progreso en `Store.Events`
@@ -702,7 +709,25 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   enlazadas, con `CellFormatting`; **`AutoGenerateColumns = false` después de configurarlas**: si no, el grid las
   regeneraba y movía los índices), ordenada por parecido, con el aviso de las notas sin poner al día y «Update index».
   **Filtro** (`NotesFilterParamCtrl`): «Talks about…», solo si el repositorio puede (oculto, los atributos ocupan su
-  sitio). Imprimir y exportar no llevan el fragmento.
+  sitio). Imprimir y exportar no llevan el fragmento. Las palabras en los recursos (4.6a, D18): «Search in resources» en la
+  búsqueda, junto a «Search in note tasks», y bajo «Description» del filtro, «Also in the note tasks» y «Also in the resources»;
+  las mismas opciones que la Web. Buscar fotos y documentos (4.6b, D14): «Find: All / Photos / Documents» en la búsqueda por significado
+  (`NotesSearchDto.ResourceKind`); `NotesSelectorCtrl` carga `ResourceSearchHitDto` como filas de la lista (`ByResources`, `ResourceHits`,
+  miniaturas con `GetThumbnailAsync`, cómo se abre con `ResourceToOpen`) y `NotesSelectorForm` muestra la miniatura, el recurso y la página;
+  doble clic abre el recurso (una foto o un PDF en `DocumentPageForm`, en su página; otro documento con su programa) y el menú contextual
+  tiene «Open resource» y «Open note». Con fotos, «Gallery» abre `Views/ResourceGalleryForm` (no modal, miniaturas grandes, sincronizada con
+  la lista; posición en `AppUserState.ResourceGalleryWindow`). Imprimir y exportar se niegan con una lista de recursos.
+- **«Update index»** del aviso (4.6b): para un Admin, `NotesSelectorCtrl.RunFullIndex` lanza `Store.SemanticIndex` (como «Update now»),
+  con su progreso en la barra de estado y el botón desactivado mientras corre un trabajo de KNote Atlas; al terminar, la búsqueda se
+  repite si la lista sigue siendo la misma (`_searchAfterIndex`, que anula cualquier carga nueva). El aviso (`SemanticIndexTexts.PendingInSearch`
+  con `NotesForFullRun`/`NotesWithoutFiles`) solo sale si hay pendientes que una indexación completa puede poner al día.
+- **Búsqueda y filtro largos** (4.6b, pedido por el propietario): la pestaña *Search/Filter* (`KNoteManagementCtrl.RefreshActiveFilterWithServiceRef`)
+  no usa el cursor de espera, sino `Views/WorkProgressForm` (`IViewKNoteManagement.ShowWorkInProgress`): una ventana sobre
+  la principal, que se muestra si dura más de 400 ms, con barra en movimiento y «Cancel». `NotesSelectorCtrl.LoadSearchEntities`/
+  `LoadFilteredEntities` reciben un `CancellationToken`: cancelado, la lista se queda como estaba (`LastLoadCanceled`); lo que hace el
+  repositorio no se para, solo no se usa. El árbol de carpetas sigue con el cursor de espera. `Core/WaitCursor` cuenta los vivos: el
+  árbol (`FoldersSelectorForm.RefreshView`, `async void`) acababa después del de `OnInitialized` y, al restaurar «el valor anterior»,
+  dejaba el cursor de espera para siempre.
 - **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las
   relaciones (creada en código, envuelve el `SplitContainer` del Designer), plegada si no hay índice utilizable o la nota
   es nueva; se calcula al abrir la pestaña y al cambiar de nota o de relaciones con ella abierta.
@@ -710,6 +735,20 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   «Relate» (no en el editor incrustado ni en modo consulta) abre el editor de relaciones con la nota elegida. Sin botón
   aparte en la vista previa: es el editor incrustado, que ya tiene la pestaña.
 - **Sin evaluación de la búsqueda**: el laboratorio («Search evaluation») es solo de la Web.
+- **El texto de un documento** (etapa 4, 4.4b): `Views/DocumentTextForm` (sin `Ctrl` propio: usa `NoteEditorCtrl`
+  `GetDocumentTextAsync`/`ReadDocumentAsync`), desde «Describe ▾» de los recursos del editor de la nota, «Text of the selected
+  document», solo para un documento guardado (`NoteEditorCtrl.CanReadNow`). Muestra el texto **entero** (`DocumentTexts.Readable`),
+  metido en la caja a trozos con una barra de progreso, y «Read document» / «Read again» (pregunta). Los ficheros de los
+  recursos, hasta 200 MB (`ResourceFileRules.SizeError` al elegirlos, como la Web).
+- **El resumen de los documentos** (4.4c): «Describe ▾» del editor de la nota describe las fotos y resume los documentos
+  (`NoteEditorCtrl.DescribePhotosAsync`, con `AiDocumentSummarizer` para los documentos) y «Summarize the selected document»;
+  la sección *Process pending resources* (`RepositoryResourcesCtrl`) tiene las casillas «Photos» y «Documents» (`Options`) y
+  (4.5a) «Scanned pages» y «Also the pages with… (OCR layer)» (`ScannedPages`, `OcrPages`).
+- **Transcribir un documento** (4.5b): «Transcribe scanned pages» en `DocumentTextForm` (y «Describe ▾», «Transcribe the scanned
+  pages of the selected document…», que abre esa ventana y empieza): `NoteEditorCtrl.TranscribePagesAsync` (página a página con
+  `AiPageTranscriber`; el botón cancela al momento, y cerrar la ventana también) y el resumen al final de un documento que lo
+  esperaba. El modelo sale de `NoteEditorCtrl.ChatClientFactory` (`internal`, para los tests). «See the original page» con el selector
+  de página (el cursor lo pone, `DocumentTexts.PageAt`) abre `Views/DocumentPageForm`: el PDF en esa página (WebView2, `#page=N`).
 - Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
   `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
 

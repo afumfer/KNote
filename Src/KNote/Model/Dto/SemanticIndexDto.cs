@@ -11,7 +11,9 @@ public enum NoteChunkSourceType
     Data = 0,
     Text = 1,
     Task = 2,
-    Resource = 3
+    Resource = 3,
+    // The text of a document of the note (KNote Atlas, stage 4, D8), by pages: SourceId is the resource, Page its page.
+    ResourceText = 4
 }
 
 /// <summary>
@@ -26,6 +28,8 @@ public class NoteChunkDto
     public NoteChunkSourceType SourceType { get; set; }
     public Guid SourceId { get; set; }
     public int ChunkIndex { get; set; }
+    // The page of the document of a fragment of type ResourceText (null in the others and in documents without pages).
+    public int? Page { get; set; }
     public string Content { get; set; }
     public string ContentHash { get; set; }
     public string SourceHash { get; set; }
@@ -44,6 +48,8 @@ public class NoteChunkVectorDto
     public Guid NoteChunkId { get; set; }
     public Guid NoteId { get; set; }
     public NoteChunkSourceType SourceType { get; set; }
+    // The task or the resource of the fragment (KNote Atlas, stage 4, D14: the search by resource), Guid.Empty for the note's own.
+    public Guid SourceId { get; set; }
     public float[] Vector { get; set; }
 }
 
@@ -157,6 +163,8 @@ public class SemanticIndexProgressDto
     public int NotesDone { get; set; }
     public int ChunksEmbedded { get; set; }
     public int ChunksReused { get; set; }
+    // Documents of the notes whose file is not in this installation (KNote Atlas, stage 4): not errors, they are read where it is.
+    public int DocumentsNotAvailable { get; set; }
     public int ErrorsCount { get; set; }
     // The first MaxErrors errors.
     public List<string> Errors { get; set; } = new();

@@ -138,7 +138,10 @@
                 <ChildContent>
                     @if (resources == null && !Note.IsNew())
                     {
-                        <p>Loading resources ...</p>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-p-4">
+                            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+                            <span>Loading the resources…</span>
+                        </RadzenStack>
                     }
                     else
                     {
@@ -146,7 +149,11 @@
                                         OnEdit="r => tabsSaving.RunAsync(() => OnEditResource(r))"
                                         OnDelete="r => tabsSaving.RunAsync(() => OnDeleteResource(r))"
                                         OnInsertInDesription="InsertInDescription"
-                                        OnNew="() => tabsSaving.RunAsync(OnNewResource)">
+                                        OnNew="() => tabsSaving.RunAsync(OnNewResource)"
+                                        OnDescribePhotos="() => tabsSaving.RunAsync(OnDescribePhotos)"
+                                        OnDescribe="r => tabsSaving.RunAsync(() => OnDescribePhoto(r))"
+                                        OnCancelDescribing="() => cancelDescribing = true"
+                                        Describing="@describing">
                         </NoteKResources>
                     }
                 </ChildContent>
@@ -463,8 +470,12 @@
 
     private async Task ShowPanel(int panel)
     {        
+        // Shown at once while they are read (after adding one, the list being read again).
         if (panel == 2 && resources == null && !Note.IsNew())
+        {
+            StateHasChanged();
             await LoadResourcesAsync();
+        }
 
         if (panel == 3 && tasks == null && !Note.IsNew())
             await LoadTasksAsync();
@@ -502,26 +513,15 @@
         }
         else
         {            
+            // The dialog uploads and saves it (KNote Atlas, stage 4, D6): the result is the resource saved.
             var resultDialog = await dialogService.OpenAsync<NoteResourceEditor>($"New resource and upload resource file",
-                   new Dictionary<string, object?>() { { "NoteTopic", Note.Topic } },
+                   new Dictionary<string, object?>() { { "NoteTopic", Note.Topic }, { "NoteId", Note.NoteId } },
                    KntDialogs.Framed(KntDialogs.Medium()));
 
-            if(resultDialog != null)
-            {                
-                resultDialog.NoteId = Note.NoteId;
-                resultDialog.Name = Note.NoteId.ToString() + "_" + resultDialog.Name;
-
-                var resultApi = await webApiService.Notes.SaveResourceAsync(resultDialog);
-                if (resultApi.IsValid)
-                {
-                    // Option 1. TODO: test this not refresh UI, ??
-                    //resources?.Add(resultApi.Entity);
-                    //StateHasChanged();
-
-                    // Option 2. Alternative implementation
-                    resources = null;
-                    await ShowPanel(2);
-                }
+            if (resultDialog != null)
+            {
+                resources = null;
+                await ShowPanel(2);
             }
         }
     }
@@ -548,7 +548,7 @@
     private async Task OnDeleteResource(ResourceInfoDto resource)
     {
         var confirmed = await dialogService.Confirm(
-            $"Are you sure you want to delete the resource - {resource.Description} -?", "Delete resource",
+            $"Are you sure you want to delete the resource - {resource.GetTitle()} -?", "Delete resource",
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
         if (confirmed != true)
             return;
@@ -566,13 +566,140 @@
         }
     }
 
+    // KNote Atlas, stage 4 (4.2): the photos described with the AI, one per request, with their progress; Cancel stops after
+    // the one being described. What to do with each one is AiPhotoRules.PlanForNote (and, 4.4c, AiDocumentRules.PlanForNote).
+    private string? describing;
+    private bool cancelDescribing;
+
+    private async Task OnDescribePhotos()
+    {
+        // KNote Atlas 4.4c: the photos and the documents (AiDocumentRules.PlanResourceForNote).
+        var list = resources ?? new();
+        var toDescribe = list.Where(r => AiDocumentRules.PlanResourceForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
+        if (toDescribe.Count == 0)
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = ResourceProcessingTexts.DescribeWithAi,
+                Detail = "There are no photos to describe nor documents to summarize: they are locked or already done by the AI.", Duration = 8000 });
+            return;
+        }
+
+        var describer = await DescriberAsync(toDescribe.Any(AiPhotoRules.IsPhoto), toDescribe.Any(r => !AiPhotoRules.IsPhoto(r)));
+        if (describer == null)
+            return;
+        // A model that doesn't see images: only the documents.
+        if (!describer.Available)
+            toDescribe = toDescribe.Where(r => !AiPhotoRules.IsPhoto(r)).ToList();
+
+        var photos = toDescribe.Where(AiPhotoRules.IsPhoto).ToList();
+        var documents = toDescribe.Where(r => !AiPhotoRules.IsPhoto(r)).ToList();
+        var personPhotos = photos.Count(AiPhotoRules.HasPersonDescription);
+        var personDocuments = documents.Count(AiDocumentRules.HasPersonDescription);
+        var choice = await dialogService.OpenAsync<DescribeWithAiDialog>(ResourceProcessingTexts.DescribeWithAi,
+            new Dictionary<string, object?> { { "NoteTopic", Note.Topic }, { "Describer", describer },
+                { "Photos", photos.Count - personPhotos }, { "PersonPhotos", personPhotos },
+                { "Documents", documents.Count - personDocuments }, { "PersonDocuments", personDocuments } },
+            KntDialogs.Framed(KntDialogs.Medium()));
+        if (choice is not EnumPersonDescriptions chosen)
+            return;
+
+        // The ones kept: locked as they are (the resource editor's saving, with the text it was read with).
+        foreach (var resource in toDescribe.Where(r => AiDocumentRules.PlanResourceForNote(r, chosen) == EnumPhotoAction.Lock))
+        {
+            var locked = resource.GetSimpleDto<ResourceInfoDto>();
+            locked.ContentBase64 = null;
+            locked.LoadedDescription = resource.Description;
+            locked.DescriptionByUser = true;
+            await webApiService.Notes.SaveResourceAsync(locked);
+        }
+
+        await DescribeAsync(toDescribe.Where(r => AiDocumentRules.PlanResourceForNote(r, chosen) == EnumPhotoAction.Describe).ToList());
+    }
+
+    // «Describe photo» or «Summarize document»: also one the AI already did (again, maybe with another model).
+    private async Task OnDescribePhoto(ResourceInfoDto resource)
+    {
+        var photo = AiPhotoRules.IsPhoto(resource);
+        var describer = await DescriberAsync(photo, !photo);
+        if (describer == null)
+            return;
+
+        var person = photo ? AiPhotoRules.HasPersonDescription(resource) : AiDocumentRules.HasPersonDescription(resource);
+        var choice = await dialogService.OpenAsync<DescribeWithAiDialog>(photo ? "Describe photo" : "Summarize document",
+            new Dictionary<string, object?> { { "NoteTopic", resource.GetTitle() }, { "Describer", describer }, { "Single", true },
+                { photo ? "Photos" : "Documents", person ? 0 : 1 }, { photo ? "PersonPhotos" : "PersonDocuments", person ? 1 : 0 } },
+            KntDialogs.Framed(KntDialogs.Medium()));
+        if (choice is EnumPersonDescriptions)
+            await DescribeAsync([resource]);
+    }
+
+    // The model that describes the photos and summarizes the documents, or null (and why not, notified). The photos need one
+    // that sees images; the documents, any model.
+    private async Task<ResourceDescriberDto?> DescriberAsync(bool photos, bool documents)
+    {
+        var describer = await webApiService.Notes.GetPhotoDescriberAsync();
+        if (!describer.IsValid)
+            return null;
+        if (!(photos && describer.Entity.Available || documents && describer.Entity.CanSummarize))
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = ResourceProcessingTexts.DescribeWithAi,
+                Detail = describer.Entity.Message, Duration = 12000 });
+            return null;
+        }
+        return describer.Entity;
+    }
+
+    // One per request, with its progress; Cancel stops after the one being done.
+    private async Task DescribeAsync(List<ResourceInfoDto> items)
+    {
+        cancelDescribing = false;
+        var done = 0;
+        var errors = new List<string>();
+        try
+        {
+            for (var i = 0; i < items.Count && !cancelDescribing; i++)
+            {
+                var photo = AiPhotoRules.IsPhoto(items[i]);
+                describing = items.Count > 1 ? $"Describing {i + 1} of {items.Count}…"
+                    : photo ? "Describing the photo…" : "Summarizing the document…";
+                StateHasChanged();
+
+                var res = photo
+                    ? await webApiService.Notes.DescribePhotoAsync(items[i].ResourceId, replace: true, disposal.Token)
+                    : await webApiService.Notes.SummarizeDocumentAsync(items[i].ResourceId, replace: true, disposal.Token);
+                if (res.IsValid)
+                    done++;
+                else
+                    errors.Add($"{items[i].GetTitle()}: {res.ErrorMessage}");
+            }
+        }
+        finally
+        {
+            describing = null;
+        }
+
+        resources = null;
+        await ShowPanel(2);
+
+        var detail = $"{done} of {items.Count} done" + (cancelDescribing ? " (cancelled)." : ".");
+        if (errors.Count > 0)
+            detail += " " + string.Join(" ", errors);
+        notificationService.Notify(new NotificationMessage
+        {
+            Severity = errors.Count > 0 ? NotificationSeverity.Warning : NotificationSeverity.Success,
+            Summary = items.Count == 1 ? (AiPhotoRules.IsPhoto(items[0]) ? "Describe photo" : "Summarize document") : ResourceProcessingTexts.DescribeWithAi,
+            Detail = detail, Duration = errors.Count > 0 ? 20000 : 6000
+        });
+    }
+
     // Where the cursor of the description was (it is in another tab, left when this one was chosen), and the
     // description is shown again, with its cursor after the resource.
     private void InsertInDescription(ResourceInfoDto resource)
     {
+        // The title, made safe for the link: a description may have quotes or brackets.
+        var title = ResourceDescriptionRules.ForLink(resource.GetTitle());
         var markdown = KntFileTypes.IsImage(resource.FileType, resource.Name)
-            ? "![alt text](" + resource.FullUrl + " '" + resource.Description + "' )"
-            : "<a href=" + resource.FullUrl + " target='_blank'>" + resource.Description + "</a>";
+            ? "![alt text](" + resource.FullUrl + " '" + title + "' )"
+            : "<a href=" + resource.FullUrl + " target='_blank'>" + title + "</a>";
         Note.Description = descriptionState.InsertBlock(Note.Description, markdown);
 
         tabsSelectedIndex = 0;

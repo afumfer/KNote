@@ -532,19 +532,22 @@ public partial class PostItEditorForm : KntForm, IViewPostItEditor<NoteDto>
     private void InsertResourceLink(ResourceDto resource, bool prependSeparator = false)
     {
         var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(resource.Container, resource.Name);
+        // The title, made safe for the link: a description may have quotes or brackets.
+        var title = ResourceDescriptionRules.ForLink(resource.GetTitle());
+        var fileName = ResourceDescriptionRules.ForLink(resource.NameOut);
 
         if (kntEditView.ContentType == "html")
         {
             string strLink = resource.FileType.Contains("image") ?
-                $"<img src='{tmpFile}' alt='{resource.Description}'/>" :
-                $"<a href='{tmpFile}' target='_blank'>{resource.NameOut}</a>";
+                $"<img src='{tmpFile}' alt='{title}'/>" :
+                $"<a href='{tmpFile}' target='_blank'>{fileName}</a>";
             kntEditView.HtmlContentControl.SelectedHtml = strLink;
             kntEditView.HtmlContentControl.Focus();
         }
         else
         {
             string strLink = resource.FileType.Contains("image") ?
-                $"![alt text]({tmpFile} '{resource.Description}')" : $"[{resource.NameOut}]({tmpFile} '{resource.Description}')";
+                $"![alt text]({tmpFile} '{title}')" : $"[{fileName}]({tmpFile} '{title}')";
             // Same rationale as NoteEditorForm.InsertLinkSelectedResource: several files dropped
             // at once insert one after another at the same caret, so a blank line between them
             // keeps the list readable.

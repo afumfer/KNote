@@ -1,0 +1,42 @@
+/* The tabs' pages start right below the tabs' top edge, as in the admin panel. */
+.knt-atlas ::deep .rz-tabview-panel {
+    padding: 0.5rem 1rem 1rem;
+    min-width: 0;
+}
+
+.knt-atlas-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.knt-atlas-tab ::deep .knt-atlas-tab-lock {
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+/* The list of tabs: wide enough for «Process pending resources» with its icon. */
+.knt-atlas ::deep .rz-tabview-left > .rz-tabview-nav {
+    min-width: 17rem;
+}
+
+/* A disabled tab still says who can use it (its title). */
+.knt-atlas ::deep .rz-tabview-nav .rz-state-disabled {
+    pointer-events: auto;
+    cursor: not-allowed;
+}
+
+/* Narrow screens: the tabs go on top, in a row that scrolls, so the page keeps its width. */
+@media (max-width: 767.98px) {
+    .knt-atlas ::deep .rz-tabview-left {
+        flex-direction: column;
+    }
+
+    .knt-atlas ::deep .rz-tabview-left > .rz-tabview-nav {
+        min-width: 0;
+        flex-direction: row;
+        overflow-x: auto;
+        max-width: 100%;
+    }
+}

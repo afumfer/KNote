@@ -7,7 +7,7 @@
 @inject DialogService dialogService
 @inject TooltipService tooltipService
 
-<KntFormSection Icon="travel_explore" Title="Semantic index"
+<KntFormSection Icon="@KntSections.AtlasSemanticIndex.Icon" Title="@KntSections.AtlasSemanticIndex.Text"
                 Description="The meaning of every note (its data, text, tasks and described resources), calculated with the repository's embedding model, that the search by meaning uses. The notes that change are updated before each search by meaning or with Update now.">
     @if (status == null)
     {
@@ -119,9 +119,14 @@
     protected override async Task OnInitializedAsync()
     {
         var resInstallation = await store.SemanticSearch.GetInstallationModelsAsync(disposal.Token);
+        // Closed meanwhile (another tab chosen): its token is not there any more.
+        if (disposal.IsCancellationRequested)
+            return;
         if (resInstallation.IsValid && resInstallation.Entity != null)
             installation = resInstallation.Entity;
         await RefreshAsync();
+        if (disposal.IsCancellationRequested)
+            return;
         var resProgress = await store.SemanticSearch.GetIndexProgressAsync(disposal.Token);
         if (resProgress.IsValid && resProgress.Entity != null)
         {

@@ -1,0 +1,291 @@
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+using KNote.Model;
+using KNote.Model.Dto;
+using KNote.Server.Ai;
+using KNote.Tests.Helpers;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace KNote.Tests.InProcessIntegrationTests;
+
+/// <summary>
+/// api/resources (KNote Atlas, 4.2): the model that would describe the photos, and describing one with the roles of the user.
+/// The model is a ScriptedAiChatClientProvider.
+/// </summary>
+[TestClass]
+public class ResourceContentInProcessTests
+{
+    private const string Password = "InProcess-Photos-Password-1!";
+
+    private static KNoteWebApplicationFactory _factory = null!;
+    private static HttpClient _admin = null!;
+    private static readonly ScriptedAiChatClientProvider _chatClients = new();
+    private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
+
+    [ClassInitialize]
+    public static async Task ClassInitialize(TestContext context)
+    {
+        (_factory, _admin) = await InProcessTestHost.CreateAuthenticatedClientAsync(factory =>
+        {
+            factory.AppConfiguration["RateLimits:SignInPerMinute"] = "1000";
+            factory.AppConfiguration["ai:providers:0:alias"] = "Fake provider";
+            factory.AppConfiguration["ai:providers:0:provider"] = EnumAiProvider.OpenAI;
+            factory.AppConfiguration["ai:providers:0:model"] = "fake-model";
+            factory.AppConfiguration["ai:providers:0:apiKey"] = "test-key";
+            factory.TestServices = services => services.AddSingleton<IAiChatClientProvider>(_chatClients);
+        });
+    }
+
+    [ClassCleanup]
+    public static async Task ClassCleanup()
+    {
+        _admin.Dispose();
+        await _factory.DisposeAsync();
+    }
+
+    [TestMethod]
+    public async Task TheDescriber_IsTheModelOfThisServer()
+    {
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+
+        var response = await staff.GetAsync("api/resources/describer");
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.IsTrue(response.IsSuccessStatusCode, body);
+        var describer = JsonSerializer.Deserialize<Result<ResourceDescriberDto>>(body, _json)!.Entity;
+        Assert.AreEqual("fake-model", describer.Model);
+        Assert.IsTrue(describer.IsPaid);
+        Assert.IsTrue(describer.Available);
+    }
+
+    [TestMethod]
+    public async Task APhoto_IsDescribedBySomeoneWhoEditsNotes_NotByAGuest()
+    {
+        var photoId = await AddPhotoAsync();
+        _chatClients.Script = () => [[new ChatResponseUpdate(ChatRole.Assistant, "A blue square.")]];
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+
+        var forbidden = await guest.PostAsync($"api/resources/{photoId}/describe", null);
+        var described = await staff.PostAsync($"api/resources/{photoId}/describe", null);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        var body = await described.Content.ReadAsStringAsync();
+        Assert.IsTrue(described.IsSuccessStatusCode, body);
+        Assert.AreEqual("A blue square.", JsonSerializer.Deserialize<Result<ResourceInfoDto>>(body, _json)!.Entity.Description);
+        Assert.AreEqual(0, _chatClients.LastTools.Count, "No tools.");
+        using var service = _factory.CreateServiceForRepository(0);
+        Assert.AreEqual("fake-model", (await service.Notes.GetResourceAsync(photoId)).Entity.DescriptionModel);
+    }
+
+    // 4.4c: a document is read (by the Server's reader) and summarized with the model, by someone who edits notes.
+    [TestMethod]
+    public async Task ADocument_IsSummarizedBySomeoneWhoEditsNotes_NotByAGuest()
+    {
+        Guid documentId;
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var note = (await service.Notes.HomeNotesAsync()).Entity.First();
+            var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+            {
+                NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_manual.pdf", Description = "manual.pdf", FileType = "application/pdf",
+                ContentArrayBytes = TestDocuments.Pdf("The manual of the QL.")
+            });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+            documentId = saved.Entity.ResourceId;
+        }
+        _chatClients.Script = () => [[new ChatResponseUpdate(ChatRole.Assistant, "The manual of the Sinclair QL.")]];
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+
+        var forbidden = await guest.PostAsync($"api/resources/{documentId}/summarize", null);
+        var summarized = await staff.PostAsync($"api/resources/{documentId}/summarize", null);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        var body = await summarized.Content.ReadAsStringAsync();
+        Assert.IsTrue(summarized.IsSuccessStatusCode, body);
+        Assert.AreEqual("The manual of the Sinclair QL.", JsonSerializer.Deserialize<Result<ResourceInfoDto>>(body, _json)!.Entity.Description);
+        Assert.AreEqual(0, _chatClients.LastTools.Count, "No tools.");
+        using var check = _factory.CreateServiceForRepository(0);
+        Assert.AreEqual(EnumExtractedState.Complete, (await check.ResourceContent.GetDocumentTextAsync(documentId)).Entity.State, "read first");
+    }
+
+    // «Process pending resources» (4.3): only an Admin runs it, in the Server's queue; its progress until it ends, and what is
+    // pending afterwards.
+    [TestMethod]
+    public async Task ProcessPendingResources_IsAnAdminRun_InTheServersQueue()
+    {
+        var photoId = await AddPhotoAsync();
+        _chatClients.Script = () => Enumerable.Range(0, 100).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "A blue square.") }).ToList();
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        var options = new ResourceProcessingOptionsDto { Photos = true, PersonDescriptions = EnumPersonDescriptions.Skip };
+
+        var status = await staff.GetAsync("api/resources/status");
+        var forbidden = await staff.PostAsJsonAsync("api/resources/process", options);
+        var started = await _admin.PostAsJsonAsync("api/resources/process", options);
+
+        Assert.IsTrue(status.IsSuccessStatusCode, await status.Content.ReadAsStringAsync());
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        var body = await started.Content.ReadAsStringAsync();
+        Assert.IsTrue(started.IsSuccessStatusCode, body);
+
+        ResourceProcessingProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            var res = await _admin.GetFromJsonAsync<Result<ResourceProcessingProgressDto>>("api/resources/process/progress", _json);
+            progress = res!.Entity;
+        }
+        Assert.AreEqual(EnumResourceProcessingPhase.Completed, progress!.Phase, progress.Message);
+        Assert.IsTrue(progress.PhotosDescribed >= 1);
+        Assert.AreEqual("fake-model", progress.Model);
+        using var service = _factory.CreateServiceForRepository(0);
+        Assert.AreEqual("A blue square.", (await service.Notes.GetResourceAsync(photoId)).Entity.Description);
+        Assert.AreEqual(0, (await service.ResourceContent.GetProcessingStatusAsync()).Entity.PendingPhotos);
+    }
+
+    // 4.5b: the scanned pages of one document, one per request, by someone who edits notes; not by a guest.
+    [TestMethod]
+    public async Task AScannedPage_IsTranscribedBySomeoneWhoEditsNotes_NotByAGuest()
+    {
+        Guid scanId;
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var note = (await service.Notes.HomeNotesAsync()).Entity.First();
+            var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+            {
+                NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_one.pdf", Description = "one.pdf", FileType = "application/pdf",
+                ContentArrayBytes = TestDocuments.ScannedPdf("PAGE ONE", "OCR:PAGE TWO")
+            });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+            scanId = saved.Entity.ResourceId;
+        }
+        _chatClients.Script = () => [[new ChatResponseUpdate(ChatRole.Assistant, "Page one, transcribed.")]];
+        using var staff = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+        Assert.IsTrue((await staff.PostAsync($"api/resources/{scanId}/read", null)).IsSuccessStatusCode);
+
+        var forbiddenScanned = await guest.GetAsync($"api/resources/{scanId}/scanned");
+        var forbidden = await guest.PostAsync($"api/resources/{scanId}/transcribe?page=1", null);
+        var scanned = await staff.GetFromJsonAsync<Result<ScannedDocumentDto>>($"api/resources/{scanId}/scanned", _json);
+        var transcribed = await staff.PostAsync($"api/resources/{scanId}/transcribe?page=1", null);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbiddenScanned.StatusCode);
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        CollectionAssert.AreEqual(new[] { 1, 2 }, scanned!.Entity.PendingPages);
+        CollectionAssert.AreEqual(new[] { 2 }, scanned.Entity.OcrPages);
+        var body = await transcribed.Content.ReadAsStringAsync();
+        Assert.IsTrue(transcribed.IsSuccessStatusCode, body);
+        Assert.AreEqual(1, JsonSerializer.Deserialize<Result<DocumentReadDto>>(body, _json)!.Entity.PagesToTranscribe);
+        Assert.AreEqual(0, _chatClients.LastTools.Count, "No tools.");
+        using var check = _factory.CreateServiceForRepository(0);
+        var page = DocumentTextRules.Pages((await check.ResourceContent.GetDocumentTextAsync(scanId)).Entity.Text)[0];
+        Assert.AreEqual((true, "Page one, transcribed."), (page.Transcribed, page.Text));
+    }
+
+    // 4.5: the batch transcribes the scanned pages (also of a document it reads in the run) with the model of the Server.
+    [TestMethod]
+    public async Task ProcessPendingResources_TranscribesTheScannedPages()
+    {
+        Guid scanId;
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var note = (await service.Notes.HomeNotesAsync()).Entity.First();
+            var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+            {
+                NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_scan.pdf", Description = "scan.pdf", FileType = "application/pdf",
+                ContentArrayBytes = TestDocuments.ScannedPdf("A SCANNED PAGE")
+            });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+            scanId = saved.Entity.ResourceId;
+        }
+        _chatClients.Script = () => Enumerable.Range(0, 100).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "A transcribed page.") }).ToList();
+        var options = new ResourceProcessingOptionsDto { Photos = false, Documents = false, ScannedPages = true };
+
+        var started = await _admin.PostAsJsonAsync("api/resources/process", options);
+
+        Assert.IsTrue(started.IsSuccessStatusCode, await started.Content.ReadAsStringAsync());
+        ResourceProcessingProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            var res = await _admin.GetFromJsonAsync<Result<ResourceProcessingProgressDto>>("api/resources/process/progress", _json);
+            progress = res!.Entity;
+        }
+        Assert.AreEqual(EnumResourceProcessingPhase.Completed, progress!.Phase, progress.Message);
+        Assert.IsTrue(progress.PagesTranscribed >= 1, string.Join(" ", progress.Errors));
+        Assert.AreEqual(0, _chatClients.LastTools.Count, "No tools.");
+        using var check = _factory.CreateServiceForRepository(0);
+        var text = (await check.ResourceContent.GetDocumentTextAsync(scanId)).Entity;
+        Assert.AreEqual(EnumExtractedState.Complete, text.State);
+        var page = DocumentTextRules.Pages(text.Text).Single();
+        Assert.AreEqual((true, "A transcribed page."), (page.Transcribed, page.Text));
+    }
+
+    // 4.6b: the thumbnail of a photo, for anyone signed in (a guest too), reduced; not without a session, nor of a file that is not a photo.
+    [TestMethod]
+    public async Task TheThumbnailOfAPhoto_IsForAnyoneSignedIn()
+    {
+        var photoId = await AddPhotoAsync();
+        using var guest = await NewClientAsync(nameof(EnumRoles.Guest));
+        using var anonymous = _factory.CreateClient();
+        anonymous.BaseAddress = _admin.BaseAddress;
+
+        var thumbnail = await guest.GetFromJsonAsync<Result<ResourceThumbnailDto>>($"api/resources/{photoId}/thumbnail", _json);
+        var refused = await anonymous.GetAsync($"api/resources/{photoId}/thumbnail");
+
+        Assert.IsTrue(thumbnail!.IsValid, thumbnail.ErrorMessage);
+        StringAssert.StartsWith(thumbnail.Entity.ContentType, "image/", "a small photo stays as it is");
+        StringAssert.StartsWith(thumbnail.Entity.DataUrl, $"data:{thumbnail.Entity.ContentType};base64,");
+        Assert.AreEqual(HttpStatusCode.Unauthorized, refused.StatusCode);
+    }
+
+    private static async Task<Guid> AddPhotoAsync()
+    {
+        using var service = _factory.CreateServiceForRepository(0);
+        var note = (await service.Notes.HomeNotesAsync()).Entity.First();
+        var saved = await service.Notes.SaveResourceAsync(new ResourceDto
+        {
+            NoteId = note.NoteId, Name = $"{Guid.NewGuid()}_square.png", Description = "square.png", FileType = "image/png", ContentArrayBytes = Png()
+        });
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+        return saved.Entity.ResourceId;
+    }
+
+    private static byte[] Png()
+    {
+        using var bitmap = new SkiaSharp.SKBitmap(64, 48);
+        bitmap.Erase(SkiaSharp.SKColors.Blue);
+        using var image = SkiaSharp.SKImage.FromBitmap(bitmap);
+        using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Png, 100);
+        return data.ToArray();
+    }
+
+    private static async Task<HttpClient> NewClientAsync(string role)
+    {
+        var id = Guid.NewGuid();
+        var userName = $"pho-{id:N}"[..24];
+        using (var service = _factory.CreateServiceForRepository(0))
+        {
+            var res = await service.Users.CreateAsync(new UserRegisterDto
+            {
+                UserName = userName,
+                EMail = $"{id:N}@knote.tests",
+                FullName = $"Photos user {id:N}"[..24],
+                RoleDefinition = role,
+                Password = Password
+            });
+            Assert.IsTrue(res.IsValid, res.ErrorMessage);
+        }
+
+        var client = _factory.CreateClient();
+        var token = await (await client.PostAsJsonAsync("api/users/login", new UserCredentialsDto { UserName = userName, Password = Password }))
+            .Content.ReadFromJsonAsync<UserTokenDto>();
+        Assert.IsTrue(token!.success, token.error);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token.token);
+        return client;
+    }
+}

@@ -22,6 +22,7 @@ internal class FakeKntService : IKntService
     public FakeKntFolderService FoldersFake { get; } = new();
     public FakeKntAiSessionService AiSessionsFake { get; } = new();
     public FakeKntSemanticSearchService SemanticSearchFake { get; } = new();
+    public FakeKntResourceContentService ResourceContentFake { get; } = new();
     public FakeKntAtlasContextService AtlasContextFake { get; } = new();
     public FakeKntSystemValuesService SystemValuesFake { get; } = new();
 
@@ -41,6 +42,8 @@ internal class FakeKntService : IKntService
 
     public IKntRepository Repository => throw new NotSupportedException();
     public IKntEmbeddingGenerators? EmbeddingGenerators { get; set; }
+
+    public IKntDocumentReader? DocumentReader { get; set; }
     public IKntUserService Users => UsersFake;
     public IKntKAttributeService KAttributes => KAttributesFake;
     public IKntSystemValuesService SystemValues => SystemValuesFake;
@@ -52,6 +55,7 @@ internal class FakeKntService : IKntService
     public IKntChatRoomService ChatRooms => throw new NotSupportedException();
     public IKntSemanticSearchService SemanticSearch => SemanticSearchFake;
     public IKntAtlasContextService AtlasContext => AtlasContextFake;
+    public IKntResourceContentService ResourceContent => ResourceContentFake;
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();

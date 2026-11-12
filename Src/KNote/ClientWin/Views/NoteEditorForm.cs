@@ -113,8 +113,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         // SplitterDistance recalculation in FixSplitterDistances(). Reposition explicitly
         // instead, driven by the header panel's own Resize (fires on load, DPI change and
         // splitter drag alike), so it always reflects the panel's real runtime width.
-        panelResourcesLeftHeader.Resize += (s, e) => AlignButtonsRight(panelResourcesLeftHeader, 3, 3,
-            buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource);
+        panelResourcesLeftHeader.Resize += (s, e) => LayoutResourcesHeader();
         panelTasksHeader.Resize += (s, e) => AlignButtonsRight(panelTasksHeader, 4, 1,
             buttonTaskAdd, buttonTaskDelete, buttonTaskEdit);
         panelTraceFromHeader.Resize += (s, e) => AlignButtonsRight(panelTraceFromHeader, 3, 3,
@@ -201,6 +200,22 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             btn.Left = right - btn.Width;
             right = btn.Left - spacing;
         }
+    }
+
+    // While the photos are described only «Cancel» is shown, at the right. The label (the progress, then) is cut with «…»
+    // before the buttons, so that it never goes under them.
+    private void LayoutResourcesHeader()
+    {
+        if (_describing != null)
+            AlignButtonsRight(panelResourcesLeftHeader, 3, 3, buttonDescribePhotos);
+        else
+            AlignButtonsRight(panelResourcesLeftHeader, 3, 3,
+                buttonDescribePhotos, buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource);
+
+        label12.AutoSize = false;
+        label12.AutoEllipsis = true;
+        label12.Height = label12.PreferredHeight;
+        label12.Width = Math.Max(0, buttonDescribePhotos.Left - label12.Left - LogicalToDeviceUnits(4));
     }
 
     private void PlaceExpandContentLabel()
@@ -329,6 +344,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private async void NoteEditorForm_FormClosing(object sender, FormClosingEventArgs e)
     {
+        // Describing photos: it stops after the one being described (what is done is kept).
+        _describing?.Cancel();
+
         if (!ViewFinalized)
         {
             var savedOk = await SaveModel();
@@ -858,6 +876,206 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
     }
 
+    #region Describe photos (KNote Atlas, stage 4)
+
+    // While it runs, the button cancels (after the photo being described).
+    private CancellationTokenSource _describing;
+
+    private void buttonDescribePhotos_Click(object sender, EventArgs e)
+    {
+        if (_describing != null)
+        {
+            _describing.Cancel();
+            buttonDescribePhotos.Enabled = false;
+            return;
+        }
+
+        var selected = SelectedResourceNow();
+        var menu = new ContextMenuStrip();
+        menu.Items.Add("Describe the photos and summarize the documents of the note...", null, async (s, a) => await DescribePhotosAsync(null));
+        var single = menu.Items.Add(selected != null && DocumentTextRules.IsDocument(selected) ? "Summarize the selected document..." : "Describe the selected photo...",
+            null, async (s, a) => await DescribePhotosAsync(selected));
+        single.Enabled = selected != null && (AiPhotoRules.CanDescribe(selected) || AiDocumentRules.CanSummarize(selected));
+        // KNote Atlas, stage 4 (4.4b): the text KNote read of a document, and «Read document» there.
+        menu.Items.Add(new ToolStripSeparator());
+        var documentText = menu.Items.Add("Text of the selected document...", null, (s, a) => ShowDocumentText(selected));
+        documentText.Enabled = selected != null && DocumentTextRules.IsDocument(selected);
+        // 4.5b: its scanned pages, in the same window (it starts when shown).
+        var transcribe = menu.Items.Add("Transcribe the scanned pages of the selected document...", null, (s, a) => ShowDocumentText(selected, transcribe: true));
+        transcribe.Enabled = selected != null && DocumentTextRules.FormatOf(selected.FileType, selected.Name) == EnumDocumentFormat.Pdf;
+        menu.Closed += (s, a) => BeginInvoke(menu.Dispose);
+        menu.Show(buttonDescribePhotos, new Point(0, buttonDescribePhotos.Height));
+    }
+
+    // The resource selected, as the note has it now: saving the note replaces its resources by the saved ones, and the one
+    // selected before would still be new or changed (the AI and «Read document» asked to save it again).
+    private ResourceDto SelectedResourceNow() =>
+        _selectedResource == null ? null
+            : _ctrl.Model.Resources.FirstOrDefault(r => r.ResourceId == _selectedResource.ResourceId) ?? _selectedResource;
+
+    // Its text is the one of the repository: a document new or with changes here has to be saved first. transcribe: «Transcribe
+    // the scanned pages of the selected document» (4.5b).
+    private void ShowDocumentText(ResourceDto document, bool transcribe = false)
+    {
+        if (!NoteEditorCtrl.CanReadNow(document))
+        {
+            ShowInfo("Save the note first: the document is new or has changes not saved.");
+            return;
+        }
+        using var form = new DocumentTextForm(_ctrl, document, transcribe);
+        form.ShowDialog(this);
+        // Its summary may have been written when its pages were transcribed.
+        UpdatePreviewResource(_selectedResource);
+    }
+
+    // single: one photo or document («Describe the selected photo», «Summarize the selected document»); null: the photos and the
+    // documents of the note, as AiPhotoRules.PlanForNote and AiDocumentRules.PlanForNote say.
+    private async Task DescribePhotosAsync(ResourceDto single)
+    {
+        var resources = _ctrl.Model.Resources;
+        var candidates = single != null
+            ? new List<ResourceDto> { single }
+            : resources.Where(r => AiDocumentRules.PlanResourceForNote(r, EnumPersonDescriptions.Replace) == EnumPhotoAction.Describe).ToList();
+        if (candidates.Count == 0)
+        {
+            // What is decided here is what the note has now: with changes not saved, it may not be what will be saved.
+            var changed = resources.Any(r => (AiPhotoRules.IsPhoto(r) || AiDocumentRules.IsDocument(r)) && (r.IsNew() || r.IsDirty()));
+            ShowInfo("There are no photos to describe nor documents to summarize: they are locked or already done by the AI." +
+                (changed ? " If you changed some of them, save the note first." : ""));
+            return;
+        }
+
+        // The AI writes in the repository: what is new or changed here has to be saved first.
+        var unsaved = candidates.Where(r => !NoteEditorCtrl.CanDescribeNow(r)).ToList();
+        candidates = candidates.Except(unsaved).ToList();
+        if (candidates.Count == 0)
+        {
+            ShowInfo("Save the note first: the photos and documents are new or have changes not saved.");
+            return;
+        }
+
+        // The photos need a model that sees images; the documents, any model.
+        var (provider, describer) = await _ctrl.GetPhotoDescriberAsync();
+        if (!describer.Available)
+            candidates = describer.CanSummarize ? candidates.Where(r => !AiPhotoRules.IsPhoto(r)).ToList() : new List<ResourceDto>();
+        if (candidates.Count == 0)
+        {
+            ShowInfo(describer.Message);
+            return;
+        }
+
+        var choice = AskHowToDescribe(describer, candidates, single != null);
+        if (choice == null)
+            return;
+
+        var errors = new List<string>();
+        if (choice == EnumPersonDescriptions.Lock)
+            errors.AddRange(await _ctrl.LockDescriptionsAsync(candidates.Where(r => AiDocumentRules.PlanResourceForNote(r, EnumPersonDescriptions.Lock) == EnumPhotoAction.Lock)));
+        var photos = single != null
+            ? candidates
+            : candidates.Where(r => AiDocumentRules.PlanResourceForNote(r, choice.Value) == EnumPhotoAction.Describe).ToList();
+
+        // While it runs, the header shows the progress, and the resources can't be changed here.
+        _describing = new CancellationTokenSource();
+        var text = buttonDescribePhotos.Text;
+        var header = label12.Text;
+        Control[] resourceButtons = [buttonResourceAdd, buttonResourceDelete, buttonResourceEdit, buttonInsertLink, buttonSaveResource];
+        var visible = resourceButtons.Select(b => b.Visible).ToArray();
+        foreach (var button in resourceButtons)
+            button.Visible = false;
+        buttonDescribePhotos.Text = "Cancel";
+        toolTipHelps.SetToolTip(buttonDescribePhotos, "Stop after the one being done");
+        LayoutResourcesHeader();
+        var described = 0;
+        var cancelled = false;
+        try
+        {
+            var progress = new Progress<string>(message => { if (!IsDisposed) label12.Text = message; });
+            (described, var describeErrors) = await _ctrl.DescribePhotosAsync(provider, photos, progress, _describing.Token);
+            errors.AddRange(describeErrors);
+        }
+        finally
+        {
+            cancelled = _describing.IsCancellationRequested;
+            _describing.Dispose();
+            _describing = null;
+        }
+
+        // The editor may have been closed meanwhile.
+        if (!IsDisposed)
+        {
+            label12.Text = header;
+            for (var i = 0; i < resourceButtons.Length; i++)
+                resourceButtons[i].Visible = visible[i];
+            buttonDescribePhotos.Text = text;
+            buttonDescribePhotos.Enabled = true;
+            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos and summarize the documents with the AI");
+            LayoutResourcesHeader();
+
+            UpdatePreviewResource(_selectedResource);
+            var summary = $"{described} of {photos.Count} done" + (cancelled ? " (cancelled)." : ".");
+            if (unsaved.Count > 0)
+                summary += $" {unsaved.Count} not done: new or with changes not saved.";
+            if (errors.Count > 0)
+                summary += Environment.NewLine + Environment.NewLine + string.Join(Environment.NewLine, errors);
+            ShowInfo(summary);
+        }
+    }
+
+    // The model, whether it is paid and, if some photos or documents have a description a person wrote, what to do with them.
+    // Null: cancelled.
+    private EnumPersonDescriptions? AskHowToDescribe(ResourceDescriberDto describer, List<ResourceDto> resources, bool single)
+    {
+        var photos = resources.Where(AiPhotoRules.IsPhoto).ToList();
+        var documents = resources.Where(r => !AiPhotoRules.IsPhoto(r)).ToList();
+        var personPhotos = photos.Count(AiPhotoRules.HasPersonDescription);
+        var personDocuments = documents.Count(AiDocumentRules.HasPersonDescription);
+        var persons = personPhotos + personDocuments;
+        var isDocument = single && documents.Count > 0;
+        var what = new List<string>();
+        if (photos.Count - personPhotos > 0)
+            what.Add(ResourceProcessingTexts.Photos(photos.Count - personPhotos));
+        if (documents.Count - personDocuments > 0)
+            what.Add(ResourceProcessingTexts.Documents(documents.Count - personDocuments));
+        var text = single
+            ? $"The {(isDocument ? "document will be summarized" : "photo will be described")} by {describer.Model}."
+            : $"{(what.Count > 0 ? string.Join(" and ", what) : "The resources chosen below")} will be processed by {describer.Model}, one after another.";
+        if (documents.Count > 0)
+            text += $"{Environment.NewLine}{Environment.NewLine}A document not read yet is read first. A scanned one without text waits for the transcription of its pages.";
+        if (describer.IsPaid)
+            text += $"{Environment.NewLine}{Environment.NewLine}{describer.Model} is a paid model: the {(photos.Count > 0 && documents.Count > 0 ? "photos and the documents" : photos.Count > 0 ? "photos" : "documents")} are sent to {describer.Provider}.";
+
+        var describe = new TaskDialogButton(isDocument ? "Summarize" : "Describe");
+        var page = new TaskDialogPage
+        {
+            Caption = KntConst.AppName,
+            Heading = single ? (isDocument ? "Summarize document" : "Describe photo") : ResourceProcessingTexts.DescribeWithAi,
+            Text = text,
+            Buttons = { describe, TaskDialogButton.Cancel },
+            DefaultButton = describe
+        };
+
+        TaskDialogRadioButton skip = null, keep = null, replace = null;
+        if (persons > 0 && single)
+            page.Text += $"{Environment.NewLine}{Environment.NewLine}Its description was written by a person and is not locked: the AI will use it (its names and facts) to write its own, which replaces it. It can't be undone.";
+        else if (persons > 0)
+        {
+            page.Text += $"{Environment.NewLine}{Environment.NewLine}{ResourceProcessingTexts.PersonDescriptions(personPhotos, personDocuments)}";
+            skip = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceSkip);
+            keep = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceLock);
+            replace = page.RadioButtons.Add(ResourceProcessingTexts.PersonChoiceReplace);
+            skip.Checked = true;
+        }
+
+        if (TaskDialog.ShowDialog(this, page) != describe)
+            return null;
+        if (single || persons == 0 || replace?.Checked == true)
+            return EnumPersonDescriptions.Replace;
+        return keep?.Checked == true ? EnumPersonDescriptions.Lock : EnumPersonDescriptions.Skip;
+    }
+
+    #endregion
+
     private void buttonInsertLink_Click(object sender, EventArgs e)
     {
         if (listViewResources.SelectedItems.Count == 0)
@@ -977,6 +1195,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             buttonTaskAdd.Visible = false;
             buttonTaskDelete.Visible = false;
             buttonTaskEdit.Visible = false;
+            buttonDescribePhotos.Visible = false;
             buttonResourceAdd.Visible = false;
             buttonResourceDelete.Visible = false;
             buttonResourceEdit.Visible = false;
@@ -1508,7 +1727,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         if (_selectedResource == null)
             return;
 
-        textDescriptionResource.Text = _selectedResource.Description;
+        // The whole description; who wrote it is only in the resource's editor.
+        textDescriptionResource.Text = ResourceDescriptionRules.HasOwnDescription(_selectedResource.Description, _selectedResource.Name)
+            ? _selectedResource.Description : "";
 
         if (_ctrl.Store.KntTextUtils.IsSupportedFileTypeForPreview(_selectedResource.FileType))
         {
@@ -1933,21 +2154,24 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         var tmpFile = _ctrl.Service.Notes.UtilGetResourceFileUrl(_selectedResource.Container, _selectedResource.Name);
+        // The title, made safe for the link: a description may have quotes or brackets.
+        var title = ResourceDescriptionRules.ForLink(_selectedResource.GetTitle());
+        var fileName = ResourceDescriptionRules.ForLink(_selectedResource.NameOut);
 
         tabNoteData.SelectedIndex = 0;
 
         if (!buttonViewHtml.Enabled)
         {
             string strLink = (_selectedResource.FileType.Contains("image")) ?
-                $"<img src='{tmpFile}' alt='{_selectedResource.Description}'/>" :
-                $"<a href='{tmpFile}' target='_blank'>{_selectedResource.NameOut}</a>";
+                $"<img src='{tmpFile}' alt='{title}'/>" :
+                $"<a href='{tmpFile}' target='_blank'>{fileName}</a>";
             kntEditView.HtmlContentControl.SelectedHtml = strLink;
             kntEditView.HtmlContentControl.Focus();
         }
         else
         {
             string strLink = (_selectedResource.FileType.Contains("image")) ?
-                $"![alt text]({tmpFile} '{_selectedResource.Description}')" : $"[{_selectedResource.NameOut}]({tmpFile} '{_selectedResource.Description}')";
+                $"![alt text]({tmpFile} '{title}')" : $"[{fileName}]({tmpFile} '{title}')";
             // Dropping several files at once inserts them one after another at the same caret
             // position (each insertion advances it) - a blank line between them (not just after
             // the first) keeps the list readable instead of running the links together. A plain

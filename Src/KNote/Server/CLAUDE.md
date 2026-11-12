@@ -254,6 +254,28 @@ public class FoldersController : ControllerBase
   api/notes/alarms/{id}`: Staff+, como los comandos. Las reglas, en `KMessageDto.Validate` (fecha obligatoria; "cada N
   minutos" con minutos). Guardar una alarma no recalcula el estado de la nota ("Alarms pending", `InternalTags`): lo hace
   el guardado de la nota, como con las tareas. Tests en `NoteAlarmsInProcessTests`.
+- **Miniatura de una foto** (KNote Atlas 4.6b, `GET api/resources/{id}/thumbnail`, cualquiera con sesión): `ResourceContent.GetPhotoFileAsync`
+  (nunca de una nota del sistema) reducida con `AiImageReducer` (lado mayor 320) en un `ResourceThumbnailDto`, que la Web dibuja como
+  `data:`. La búsqueda de recursos va por `api/semantic/search` con `ResourceKind`.
+- **Opciones de la búsqueda por palabras** (KNote Atlas 4.6a, D18): `GET api/notes/search` admite `searchInDescription`,
+  `searchInNoteTasks` y `searchInResources` (`NotesSearchParam`, apagadas sin ellas), como la búsqueda de `ClientWin`; el filtro las
+  lleva en `NotesFilterDto` (`SearchInNoteTasks`, `SearchInResources`, para su campo `Description`). La condición de los recursos
+  no mira los de las notas del sistema: lo pone el `Service` (`ResourcesExcludedNoteTypeIds`). Los informes de una búsqueda llevan
+  las mismas opciones (`NotesListReportRequestDto`).
+- **Subir un recurso** (KNote Atlas 4.4b, `POST api/notes/{id}/resources/upload`, Staff+): un formulario multipart
+  (`file`, `description`, `loadedDescription`, `descriptionByUser`, `order`) que el navegador envía desde el disco, de hasta
+  200 MB (`KntConst.MaxLenNoteResourceFile`); `Notes.UploadResourceAsync` lo escribe a la carpeta de recursos sin cargarlo
+  entero (o en memoria con `ContentInDB`). Límites: `[RequestSizeLimit]` del endpoint (Kestrel) y **`Server/web.config`**
+  (`maxAllowedContentLength`, para IIS; la publicación lo completa con el `aspNetCore` de siempre). El alta antigua en
+  base64 (`POST api/notes/resources`) sigue para los ficheros pequeños. El texto leído de un documento: `POST
+  api/resources/{id}/read` (Staff+) y `GET api/resources/{id}/text` (cualquier usuario; su comienzo, `MaxViewerLength`).
+  El resumen breve de un documento con la IA (4.4c): `POST api/resources/{id}/summarize?replace=` (Staff+, `AiDocumentSummarizer`,
+  cualquier modelo de chat); el lote (`POST api/resources/process`) acepta `Documents` además de `Photos`, y (4.5a)
+  `ScannedPages`/`OcrPages`: transcribe las páginas escaneadas con `AiPageTranscriber` (un modelo que vea imágenes, como las
+  fotos: `options.NeedsImages`). PDFium dibuja las páginas en el `Server` (`IKntDocumentReader.DrawPage`, de `KNote.Ai`): en un
+  sistema donde no carga, las páginas dan un error claro y lo demás sigue. Un documento (4.5b): `GET api/resources/{id}/scanned`
+  (sus páginas pendientes, `ScannedDocumentDto`; `null` si no hay) y `POST api/resources/{id}/transcribe?page=N` (una página por
+  petición, como las fotos; Staff+, `EnforceAuthorization`).
 - **Editar un recurso** (`PUT api/notes/resources`, `ResourceInfoDto`): un recurso que ya existe solo cambia su
   descripción y su orden (`KntNotesSaveResourceInfoAsyncCommand` parte del guardado); no hace falta reenviar el
   fichero (`ResourceInfoDto` solo exige `ContentBase64` a un recurso nuevo), y se conservan el fichero y el
@@ -377,16 +399,17 @@ repositorio de la sesión.
   laboratorio de evaluación, una consulta por petición). `NotesController.Search`/`Filter` no cambian. Los informes
   (`api/reports`) de una lista por significado repiten la búsqueda (`NotesListReportRequestDto.SearchMode`) y llevan la
   columna Similarity.
-- **Trabajos de índice** (`Helpers/SemanticIndexJobs`, `KntAddSemanticIndex`, `BackgroundService` singleton): **una cola
-  para todo el Server y un trabajo a la vez**, sea del repositorio que sea (con un solo Ollama, dos a la vez solo
-  compiten por el modelo), y un trabajo por repositorio, en marcha o en cola (pedir otro devuelve el que hay; los que
+- **Trabajos de KNote Atlas** (`Helpers/KntAtlasJobs`, `KntAddAtlasJobs`, `BackgroundService` singleton; hasta la 4.3,
+  `SemanticIndexJobs`): el índice semántico y «Process pending resources» (etapa 4, `api/resources/process`, Admin, con
+  `AiResourceProcessor`). **Una cola para todo el Server y un trabajo a la vez**, sea del repositorio y del tipo que sea
+  (con un solo Ollama, dos a la vez solo compiten por el modelo), y un trabajo por repositorio y tipo, en marcha o en cola (pedir otro devuelve el que hay; los que
   esperan salen «Queued» con su posición). Cada trabajo crea **su propio** `IKntService` del repositorio con el usuario
   que lo pidió (el de la petición se libera al terminarla) y los modelos del Server. El progreso del último trabajo de
   cada repositorio se guarda en memoria; cada usuario ve y cancela solo el del repositorio de su sesión. Un trabajo que
   falla no para la cola. Mientras un repositorio tiene un trabajo, su búsqueda no pone pendientes al día.
 - **KNote Local**: `api/local` guarda `kind` y `contextWindow` de los proveedores y `POST api/local/ai/test` prueba uno
   (`AiProviderTester`; sin clave, con la guardada).
-- Tests: `Tests/InProcessIntegrationTests/SemanticIndexInProcessTests`, `SemanticIndexJobsTests`,
+- Tests: `Tests/InProcessIntegrationTests/SemanticIndexInProcessTests`, `KntAtlasJobsTests`, `ResourceContentInProcessTests`,
   `SemanticSearchInProcessTests` (modelos) y `SearchByMeaningInProcessTests` (búsqueda, parecidas, informes y
   evaluación), con un generador falso (`TestServices` de `KNoteWebApplicationFactory`).
 

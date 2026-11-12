@@ -76,6 +76,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<ResourceDto>> GetResourceAsync(Guid resourceId) => throw new NotSupportedException();
     public Task<Result<ResourceDto>> SaveResourceAsync(ResourceDto entity, bool forceNew = false) => throw new NotSupportedException();
     public Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto resourceInfo, bool forceNew = false) => throw new NotSupportedException();
+    public Task<Result<ResourceInfoDto>> UploadResourceAsync(ResourceDto resource, System.IO.Stream content, long length) => throw new NotSupportedException();
     public Task<Result<ResourceDto>> DeleteResourceAsync(Guid resourceId) => throw new NotSupportedException();
     public Task<Result<ResourceInfoDto>> DeleteResourceInfoAsync(Guid id) => throw new NotSupportedException();
     public Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId) => throw new NotSupportedException();
@@ -108,7 +109,7 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<List<NoteKAttributeDto>> UtilCompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null) => throw new NotSupportedException();
     public string UtilGetNoteStatus(List<NoteTaskDto> tasks, List<KMessageDto> messages) => throw new NotSupportedException();
     public (string, string) UtilGetResourceUrls(ResourceDto resource) => throw new NotSupportedException();
-    public bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true) => throw new NotSupportedException();
+    public bool UtilManageResourceContent(ResourceDto resource, bool forceUpdateDto = true, bool readContent = true) => throw new NotSupportedException();
     public string UtilGetResourceFilePath(ResourceDto resource) =>
         (UtilGetResourceFilePathImpl ?? throw new NotSupportedException($"{nameof(UtilGetResourceFilePath)} not configured for this test"))(resource);
     public string UtilGetResourceFileUrl(string container, string fileName) => throw new NotSupportedException();

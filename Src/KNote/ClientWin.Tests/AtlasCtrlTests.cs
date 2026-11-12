@@ -9,11 +9,13 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Tests;
 
 /// <summary>
-/// AtlasContextCtrl (Tools › KNote Atlas): the window reads the profile, the glossary, the tasks and what the AI receives
-/// of one repository, the user chooses the repository there, and each button depends on the role of its command.
+/// AtlasCtrl (Tools › KNote Atlas): the window reads the profile, the glossary, the tasks and what the AI receives
+/// of one repository, the user chooses the repository there, and each button depends on the role of its command. Its
+/// sections (4.3b): the AI models, the semantic index and the pending resources only for an Admin (and only read for
+/// one), and the AI models not saved asked about before choosing another repository.
 /// </summary>
 [TestClass]
-public class AtlasContextCtrlTests
+public class AtlasCtrlTests
 {
     // A linked repository whose context answers with these values and remembers what it was asked.
     private sealed class Repository
@@ -35,6 +37,23 @@ public class AtlasContextCtrlTests
                 return Task.FromResult(new Result<AiComposedPromptDto>(Composed));
             };
 
+            // The sections of the Admin.
+            service.SystemValuesFake.GetRepositoryAiModelsAsyncImpl = () =>
+            {
+                ModelReads++;
+                return Task.FromResult(new Result<RepositoryAiModelsDto>(new RepositoryAiModelsDto()));
+            };
+            service.SemanticSearchFake.GetIndexStatusAsyncImpl = () =>
+            {
+                IndexReads++;
+                return Task.FromResult(new Result<SemanticIndexStatusDto>(new SemanticIndexStatusDto()));
+            };
+            service.ResourceContentFake.GetProcessingStatusAsyncImpl = () =>
+            {
+                ResourceReads++;
+                return Task.FromResult(new Result<ResourceProcessingStatusDto>(new ResourceProcessingStatusDto()));
+            };
+
             Ref = TestServiceRefFactory.CreateWithFakeService(service);
             store.AddServiceRef(Ref);
             store.Security.SetRepositoryRole(service, role);
@@ -47,19 +66,30 @@ public class AtlasContextCtrlTests
         public List<AtlasTaskPromptStatusDto> Tasks { get; } = new();
         public AiComposedPromptDto Composed { get; } = new();
         public int Reads { get; private set; }
+        public int ModelReads { get; private set; }
+        public int IndexReads { get; private set; }
+        public int ResourceReads { get; private set; }
         public List<AiComposeRequestDto> ComposeRequests { get; } = new();
     }
 
-    private static (AtlasContextCtrl Ctrl, FakeBaseView View, Repository First, Repository Second) CreateCtrl(EnumRoles role = EnumRoles.Admin)
+    // The view of the AI models of the last window created.
+    private FakeEditorView<RepositoryAiModelsDto> modelsView = null!;
+
+    private (AtlasCtrl Ctrl, FakeBaseView View, Repository First, Repository Second) CreateCtrl(EnumRoles role = EnumRoles.Admin)
     {
         var factoryViews = new TestFactoryViews();
         var view = new FakeBaseView();
-        factoryViews.Registry.Register<AtlasContextCtrl, IViewBase>(_ => view);
+        factoryViews.Registry.Register<AtlasCtrl, IViewBase>(_ => view);
+        modelsView = new FakeEditorView<RepositoryAiModelsDto>();
+        var models = modelsView;
+        factoryViews.Registry.Register<RepositoryAiModelsCtrl, IViewEditorEmbeddable<RepositoryAiModelsDto>>(_ => models);
+        factoryViews.Registry.Register<RepositorySemanticIndexCtrl, IViewSemanticIndex>(_ => new FakeSemanticIndexView());
+        factoryViews.Registry.Register<RepositoryResourcesCtrl, IViewResourceProcessing>(_ => new FakeResourceProcessingView());
         var store = new Store(factoryViews);
         var first = new Repository(store, role);
         var second = new Repository(store, role);
 
-        var ctrl = new AtlasContextCtrl(store);
+        var ctrl = new AtlasCtrl(store);
         ctrl.Run();
         return (ctrl, view, first, second);
     }
@@ -192,12 +222,65 @@ public class AtlasContextCtrlTests
     }
 
     [TestMethod]
+    [DataRow(EnumRoles.Guest)]
+    [DataRow(EnumRoles.Staff)]
+    [DataRow(EnumRoles.ProjectManager)]
+    public async Task TheSectionsOfTheAdmin_AreNotForOtherRoles_NorRead(EnumRoles role)
+    {
+        var (ctrl, _, first, _) = CreateCtrl(role);
+        ctrl.Section = EnumAtlasSection.SemanticIndex;
+
+        await ctrl.LoadAsync();
+
+        Assert.IsTrue(ctrl.IsAvailable(EnumAtlasSection.Personalization));
+        Assert.IsFalse(ctrl.IsAvailable(EnumAtlasSection.Models) || ctrl.IsAvailable(EnumAtlasSection.SemanticIndex)
+            || ctrl.IsAvailable(EnumAtlasSection.Resources));
+        Assert.AreEqual(EnumAtlasSection.Personalization, ctrl.Section, "a section that can't be used is not shown");
+        Assert.AreEqual(0, first.ModelReads + first.IndexReads + first.ResourceReads);
+        StringAssert.Contains(AtlasCtrl.WhoCanUse(EnumAtlasSection.SemanticIndex), "Admin");
+    }
+
+    [TestMethod]
+    public async Task AnAdmin_HasEverySection_AndEachOneReadsItsRepository()
+    {
+        var (ctrl, _, first, second) = CreateCtrl(EnumRoles.Admin);
+
+        await ctrl.LoadAsync();
+        await ctrl.SelectRepositoryAsync(second.Ref);
+
+        Assert.IsTrue(AtlasCtrl.Sections.All(ctrl.IsAvailable));
+        Assert.AreEqual(EnumAtlasSection.Personalization, ctrl.Section, "it starts in the one everybody can use");
+        Assert.AreEqual((1, 1, 1), (first.ModelReads, first.IndexReads, first.ResourceReads));
+        Assert.AreEqual((1, 1, 1), (second.ModelReads, second.IndexReads, second.ResourceReads));
+        Assert.AreSame(second.Ref.Service, ctrl.SemanticIndexCtrl.Service);
+        Assert.AreSame(second.Ref.Service, ctrl.ResourcesCtrl.Service);
+    }
+
+    [TestMethod]
+    [DataRow(DialogResult.Cancel, false)]
+    [DataRow(DialogResult.No, true)]
+    public async Task AiModelsNotSaved_AreAskedAbout_BeforeChoosingAnotherRepository(DialogResult answer, bool changes)
+    {
+        var (ctrl, _, first, second) = CreateCtrl(EnumRoles.Admin);
+        await ctrl.LoadAsync();
+        modelsView.RefreshModelImpl = () => ctrl.ModelsCtrl.Model.LlmModel = "qwen3.5:9b";
+        modelsView.ShowInfoImpl = (_, buttons) => buttons == MessageBoxButtons.YesNoCancel ? answer : DialogResult.OK;
+        Assert.IsTrue(ctrl.HasPendingChanges);
+
+        var changed = await ctrl.SelectRepositoryAsync(second.Ref);
+
+        StringAssert.Contains(modelsView.ShownInfo.Single(), "not saved");
+        Assert.AreEqual(changes, changed);
+        Assert.AreEqual(changes ? second.Ref : first.Ref, ctrl.ServiceRef);
+    }
+
+    [TestMethod]
     public void KNoteInstructions_AreTheFixedRulesAndTheDefaultOnes()
     {
-        var text = AtlasContextCtrl.KNoteInstructions(AiTaskCatalog.AssistantKey);
+        var text = AtlasCtrl.KNoteInstructions(AiTaskCatalog.AssistantKey);
 
         StringAssert.Contains(text, AiTaskCatalog.Assistant.FixedRules);
         StringAssert.Contains(text, AiTaskCatalog.Assistant.DefaultInstructions);
-        Assert.AreEqual("", AtlasContextCtrl.KNoteInstructions("Unknown"));
+        Assert.AreEqual("", AtlasCtrl.KNoteInstructions("Unknown"));
     }
 }

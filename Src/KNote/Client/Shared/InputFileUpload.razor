@@ -6,16 +6,22 @@
 @implements IAsyncDisposable
 
 @* Zone to choose a file: click it, drop a file on it or paste one (js/filePaste.js). Once chosen, it shows the
-   file (its image, or an icon of its kind), its name and size. *@
+   file (its image, or an icon of its kind), its name and size. The file is not read here (KNote Atlas, stage 4, D6: up to
+   200 MB): it stays in its input (Input), from where the browser sends it (INoteWebApiService.UploadResourceAsync). Only a
+   small image is read, for its preview. *@
 
-<div @ref="fileDropContainer" class="knt-dropzone @HoverClass @(fileSelected != null ? "knt-dropzone-chosen" : null)" tabindex="0"
+<div @ref="fileDropContainer" class="knt-dropzone @HoverClass @(fileSelected != null ? "knt-dropzone-chosen" : null) @(Disabled ? "knt-dropzone-disabled" : null)" tabindex="0"
      @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ondragover="OnDragEnter" @ondrop="OnDragLeave">
-    <InputFile OnChange="LoadFile" @ref="inputFile" class="knt-dropzone-input" title="" />
+    <InputFile OnChange="LoadFile" @ref="inputFile" class="knt-dropzone-input" title="" disabled="@Disabled" />
     @if (fileSelected == null)
     {
         <RadzenIcon Icon="cloud_upload" class="knt-dropzone-icon" />
         <div class="knt-dropzone-title">Drop a file here, paste it, or click to choose it</div>
-        <div class="knt-dropzone-text">Up to @KntFileTypes.Size(KntConst.MaxLenResourceFile).</div>
+        <div class="knt-dropzone-text">Up to @ResourceFileRules.MaxSizeText.</div>
+        @if (error != null)
+        {
+            <div class="knt-dropzone-error">@error</div>
+        }
     }
     else
     {
@@ -37,13 +43,19 @@
 </div>
 
 @code {
-    [Parameter] public EventCallback<KntFileInfo> OnSelectedFile { get; set; }
-    [Parameter] public string? ContentBase64 { get; set; }
+    // The file chosen, or null if the one chosen can't be a resource (empty or too big: it says why).
+    [Parameter] public EventCallback<KntFileInfo?> OnSelectedFile { get; set; }
+    // While it is being sent: another file can't be chosen.
+    [Parameter] public bool Disabled { get; set; }
 
     private InputFile inputFile = null!;
     private ElementReference fileDropContainer;
 
     private KntFileInfo? fileSelected;
+    private string? error;
+
+    /// <summary>The input with the file chosen, from where it is sent.</summary>
+    public ElementReference Input => inputFile.Element!.Value;
 
     private string? HoverClass;
     private string? imgSrc;
@@ -68,29 +80,37 @@
 
     async Task LoadFile(InputFileChangeEventArgs e)
     {
-        foreach(var file in e.GetMultipleFiles())
+        var file = e.File;
+        HoverClass = string.Empty;
+        imgSrc = null;
+
+        error = ResourceFileRules.SizeError(file.Name, file.Size);
+        if (error != null)
+        {
+            fileSelected = null;
+            await OnSelectedFile.InvokeAsync(null);
+            StateHasChanged();
+            return;
+        }
+
+        fileSelected = new KntFileInfo
+        {
+            Name = file.Name,
+            Type = file.ContentType,
+            Size = file.Size,
+            LastModifiedDate = file.LastModified.DateTime
+        };
+
+        if (KntFileTypes.IsImage(file.ContentType) && file.Size <= KntConst.MaxLenResourceFile)
         {
             using var stream = file.OpenReadStream(KntConst.MaxLenResourceFile);
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
-
-            ContentBase64 = Convert.ToBase64String(ms.ToArray());
-
-            fileSelected = new KntFileInfo
-                {
-                    Name = file.Name,
-                    Type = file.ContentType,
-                    Size = file.Size,
-                    LastModifiedDate = file.LastModified.DateTime,
-                    ContentBase64 = ContentBase64
-                };
-
-            imgSrc = KntFileTypes.IsImage(fileSelected.Type) ? $"data:{fileSelected.Type};base64,{ContentBase64}" : null;
-            HoverClass = string.Empty;
-
-            await OnSelectedFile.InvokeAsync(fileSelected);
-            StateHasChanged();
+            imgSrc = $"data:{file.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
         }
+
+        await OnSelectedFile.InvokeAsync(fileSelected);
+        StateHasChanged();
     }
 
     public async ValueTask DisposeAsync()

@@ -83,7 +83,7 @@
                     @if (note is NoteSearchHitDto { Fragment.Length: > 0 } hit)
                     {
                         <RadzenText TagName="TagName.Span" class="knt-notes-grid-muted knt-notes-grid-fragment"
-                                    MouseEnter="@(args => tooltipService.Open(args, hit.Fragment, FragmentTooltip))">@hit.Fragment</RadzenText>
+                                    MouseEnter="@(args => tooltipService.Open(args, hit.FragmentShown(), FragmentTooltip))">@hit.FragmentShown()</RadzenText>
                     }
                 </Template>
             </RadzenDataGridColumn>

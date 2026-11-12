@@ -1,5 +1,7 @@
 ﻿using KNote.Model;
 using KNote.Model.Dto;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace KNote.Client.AppStoreService.ClientDataServices;
 
@@ -19,6 +21,34 @@ public interface INoteWebApiService
     Task<Result<List<ResourceInfoDto>>> GetResourcesAsync(Guid noteId, CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> SaveResourceAsync(ResourceInfoDto entity, CancellationToken cancellationToken = default);
     Task<Result<ResourceInfoDto>> DeleteResourceAsync(Guid resourceId, CancellationToken cancellationToken = default);
+    // KNote Atlas, stage 4: the model that describes photos, and describing one (replace: also a person's description).
+    Task<Result<ResourceDescriberDto>> GetPhotoDescriberAsync(CancellationToken cancellationToken = default);
+    Task<Result<ResourceInfoDto>> DescribePhotoAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
+    Task<Result<ResourceInfoDto>> SummarizeDocumentAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default);
+
+    // KNote Atlas 4.6b: the thumbnail of a photo (the search of photos).
+    Task<Result<ResourceThumbnailDto>> GetThumbnailAsync(Guid resourceId, CancellationToken cancellationToken = default);
+
+    // KNote Atlas 4.5b: the scanned pages of a document pending of a transcription (Entity null: none), and transcribing one.
+    Task<Result<ScannedDocumentDto>> GetScannedPagesAsync(Guid resourceId, CancellationToken cancellationToken = default);
+
+    Task<Result<DocumentReadDto>> TranscribePageAsync(Guid resourceId, int page, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// A new resource of a note (resource: its NoteId, description, lock and order) with the file chosen in an InputFile,
+    /// sent by the browser from the disk (js/kntUpload.js; KNote Atlas, stage 4, D6), with its progress (sent, total bytes).
+    /// Canceling stops the upload: nothing is saved.
+    /// </summary>
+    Task<Result<ResourceInfoDto>> UploadResourceAsync(IJSRuntime js, ElementReference input, ResourceInfoDto resource,
+        IProgress<(long Sent, long Total)>? progress = null, CancellationToken cancellationToken = default);
+    Task<Result<DocumentReadDto>> ReadDocumentAsync(Guid resourceId, CancellationToken cancellationToken = default);
+    // Its beginning: what the Web shows (DocumentTextRules.MaxViewerLength).
+    Task<Result<ResourceTextDto>> GetDocumentTextAsync(Guid resourceId, CancellationToken cancellationToken = default);
+    // «Process pending resources» of the session's repository (Admin to run): what it would process, and its run.
+    Task<Result<ResourceProcessingStatusDto>> GetResourceProcessingStatusAsync(CancellationToken cancellationToken = default);
+    Task<Result<ResourceProcessingProgressDto>> ProcessResourcesAsync(ResourceProcessingOptionsDto options);
+    Task<Result<ResourceProcessingProgressDto>> GetResourceProcessingProgressAsync(CancellationToken cancellationToken = default);
+    Task<Result<bool>> CancelResourceProcessingAsync();
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId, CancellationToken cancellationToken = default);
     // The tasks panel: the tasks of a time window by column, or a page of one column.
     Task<Result<TasksPanelDto>> GetTasksPanelAsync(TasksPanelFilterDto filter, CancellationToken cancellationToken = default);

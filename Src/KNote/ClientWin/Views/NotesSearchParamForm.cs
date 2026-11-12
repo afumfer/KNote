@@ -80,7 +80,11 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
                 TextSearch = textTextSearch.Text,
                 SearchInDescription = checkSearchInDescription.Checked,
                 SearchInNoteTasks = checkSearchInNoteTasks.Checked,
-                Mode = radioSearchMeaning.Visible && radioSearchMeaning.Checked ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words
+                SearchInResources = checkSearchInResources.Checked,
+                Mode = radioSearchMeaning.Visible && radioSearchMeaning.Checked ? EnumNotesSearchMode.Meaning : EnumNotesSearchMode.Words,
+                // KNote Atlas 4.6b: by meaning, the notes, or the photos or the documents.
+                ResourceKind = radioSearchMeaning.Visible && radioSearchMeaning.Checked && comboResourceKind.SelectedItem is EnumResourceKind kind
+                    ? kind : EnumResourceKind.All
             }
         };
 
@@ -92,6 +96,8 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
     {
         checkSearchInDescription.Enabled = radioSearchWords.Checked;
         checkSearchInNoteTasks.Enabled = radioSearchWords.Checked;
+        checkSearchInResources.Enabled = radioSearchWords.Checked;
+        comboResourceKind.Enabled = radioSearchMeaning.Checked;
     }
 
     private void buttonAccept_Click(object sender, EventArgs e)
@@ -116,6 +122,12 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         comboRepositories.ValueMember = "IdServiceRef";
         comboRepositories.DisplayMember = "Name";
         comboRepositories.SelectedIndex = comboRepositories.Items.Count > 0 ? 0 : -1;
+
+        comboResourceKind.Items.Clear();
+        foreach (var kind in Enum.GetValues<EnumResourceKind>())
+            comboResourceKind.Items.Add(kind);
+        comboResourceKind.SelectedIndex = 0;
+        comboResourceKind.Enabled = radioSearchMeaning.Checked;
     }
 
     // «Search by» (words or meaning) only where the repository chosen can search by meaning.
@@ -129,6 +141,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         labelSearchMode.Visible = canSearchByMeaning;
         radioSearchWords.Visible = canSearchByMeaning;
         radioSearchMeaning.Visible = canSearchByMeaning;
+        labelResourceKind.Visible = comboResourceKind.Visible = canSearchByMeaning;
         if (!canSearchByMeaning)
             radioSearchWords.Checked = true;
     }
@@ -138,6 +151,7 @@ public partial class NotesSearchParamForm : KntForm, IViewEmbeddable
         textTextSearch.Text = "";
         checkSearchInDescription.Checked = true;
         checkSearchInNoteTasks.Checked = false;
+        checkSearchInResources.Checked = false;
     }
 
     private void textTextSearch_KeyUp(object sender, KeyEventArgs e)

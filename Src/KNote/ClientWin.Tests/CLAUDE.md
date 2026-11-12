@@ -160,6 +160,45 @@ y la prueba del botón «Test» (`AiProviderTester`). Usa el host de Ollama de l
 `ollama pull qwen3-embedding:0.6b`); sin host o con el host caído, `Inconclusive`. Los tests de servicio no usan
 modelos reales: tienen un generador falso y determinista (`Tests/Helpers/FakeEmbeddingGenerators`).
 
+**Fotos y documentos (KNote Atlas, etapa 4)**. `ResourceLibrariesTests` (capa 1, sin modelo) comprueba lo que la etapa espera
+de PdfPig, PDFtoImage y la lectura de DOCX y ODT, con documentos creados en el propio test (`Helpers/ResourceProbe`): pásalos
+tras subir esos paquetes. `ResourceVisionSmokeTests` (capa 2) hace que un modelo real de Ollama describa una foto y transcriba
+una página, con razonamiento y sin él. `ResourceVisionMeasure` mide con ficheros reales del propietario, por pasadas: solo corre
+con `KNOTE_RESOURCE_MEASURE_FOLDER` (carpeta con `photos/`, `scans/` y `text/`; opcional `KNOTE_RESOURCE_MEASURE_CONTEXT`), guarda
+cada elemento al terminarlo, sigue donde iba si se corta y deja `results/report.html` en esa carpeta, **fuera del repositorio**,
+porque contiene lo que dicen los ficheros. Filtra siempre por nombre, sin usar toda la categoría, que llamaría también a
+los proveedores de pago configurados:
+```powershell
+$env:KNOTE_RESOURCE_SMOKE_MODEL = "qwen3.5:9b"   # si no, el modelo de AiProviderSmokeTests:Ollama:Model
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionSmokeTests"
+$env:KNOTE_RESOURCE_MEASURE_FOLDER = "C:\Dev\KNote-Atlas\Medidas-Etapa-4"
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionMeasure.Documents"
+dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~ResourceVisionMeasure.PassA"
+```
+Los resúmenes de los documentos (4.4c): `ResourceSummaryMeasure` (`Summaries`: 4.000, 8.000 y 16.000 caracteres de cada documento de
+`text/`; `Languages`: el idioma del resumen), con la misma carpeta y fuera del repositorio; y `Tests/ServiceTests/AiDocumentSummarizerSmokeTests`
+(el camino de producción, con `KNOTE_RESOURCE_SMOKE_MODEL`). Filtra por nombre, como los demás.
+«Search in resources» (4.6a, D18): `ResourceSearchMeasure` mide la búsqueda por palabras con la opción y sin ella, y el filtro, en las
+dos ORM, contra una **copia** de un repositorio real (`KNOTE_SEARCH_MEASURE_DB`: un SQLite o una cadena de SQL Server; abrirlo pone al día
+su esquema), con las palabras de `KNOTE_SEARCH_MEASURE_WORDS` (separadas por `|`) y los resultados en `results\search-resources.*`.
+La transcripción de las páginas escaneadas (4.5): `ResourceTranscriptionMeasure` (las mismas páginas de `scans/` que la 4.0, por el camino
+de producción: dibujo, tarea, opciones y limpieza; cuenta las imágenes inventadas, los bloques de código y las páginas cortadas; resultados
+en `results\transcriptions*`) y `Tests/ServiceTests/AiPageTranscriberSmokeTests`, con las mismas variables.
+El camino de producción de las fotos (`AiPhotoDescriber`: repositorio, contexto de la tarea y guardado condicional) tiene su smoke
+test en `Tests/ServiceTests/AiPhotoDescriberSmokeTests`, con la misma variable `KNOTE_RESOURCE_SMOKE_MODEL` (sin ella, Inconclusive):
+`dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiPhotoDescriberSmokeTests"`.
+El asistente que lee documentos (4.7a): `Tests/ServiceTests/AiDocumentToolsSmokeTests` (responde leyendo un PDF de una nota y no obedece
+la orden escrita en otro), con la misma variable: `dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiDocumentToolsSmokeTests"`.
+La medida de la etapa (4.7b): `Stage4Measure`, contra una **copia** ya procesada de un repositorio real (fotos descritas, documentos leídos,
+escaneadas transcritas, índice al día): `KNOTE_STAGE4_MEASURE_DB` (un SQLite o una cadena de SQL Server), `KNOTE_STAGE4_MEASURE_RESOURCES`
+(la carpeta raíz de sus recursos, solo se lee) y `KNOTE_RESOURCE_MEASURE_FOLDER`; opcionales `KNOTE_STAGE4_MEASURE_QUERIES` (separadas por
+`|`) y `KNOTE_STAGE4_MEASURE_SEED` (la misma da la misma muestra). `Photos` y `Pages` dejan en `results\stage4-photos.html` y
+`stage4-pages.html` 30 fotos y 20 páginas transcritas al azar para valorarlas en el navegador (cuenta arriba, «Copy the results»);
+`Index` deja en `results\stage4-index.md`/`.json` lo que ocupa la etapa, la caché de vectores (fragmentos por tipo, memoria, primera
+búsqueda en frío) y los tiempos de la búsqueda por significado (All, Photos, Documents), con el proveedor de embeddings de los tests
+(el host de `AiProviderSmokeTests:Ollama`) y el modelo del repositorio:
+`dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~Stage4Measure"`.
+
 ## Cómo configurar las ApiKeys para correr la Capa 2
 
 `Helpers/AiTestConfig.cs` resuelve cada proveedor con la misma precedencia que usa producción

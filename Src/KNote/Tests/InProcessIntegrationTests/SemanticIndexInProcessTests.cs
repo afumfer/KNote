@@ -11,7 +11,7 @@ namespace KNote.Tests.InProcessIntegrationTests;
 
 /// <summary>
 /// The semantic index through the API (api/semantic, KNote Atlas 0.3), with a fake embedding model in the Server: an
-/// Admin creates it in the background (SemanticIndexJobs) and follows its progress, any user reads its status, and a
+/// Admin creates it in the background (KntAtlasJobs) and follows its progress, any user reads its status, and a
 /// Guest can neither create, cancel nor remove indexes.
 /// </summary>
 [TestClass]

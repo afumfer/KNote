@@ -122,6 +122,7 @@
             listViewResources = new ListView();
             panelResourcesLeftHeader = new Panel();
             label12 = new Label();
+            buttonDescribePhotos = new Button();
             buttonResourceAdd = new Button();
             buttonResourceDelete = new Button();
             buttonResourceEdit = new Button();
@@ -1072,6 +1073,7 @@
             // panelResourcesLeftHeader
             // 
             panelResourcesLeftHeader.Controls.Add(label12);
+            panelResourcesLeftHeader.Controls.Add(buttonDescribePhotos);
             panelResourcesLeftHeader.Controls.Add(buttonResourceAdd);
             panelResourcesLeftHeader.Controls.Add(buttonResourceDelete);
             panelResourcesLeftHeader.Controls.Add(buttonResourceEdit);
@@ -1092,9 +1094,22 @@
             label12.Size = new Size(63, 15);
             label12.TabIndex = 5;
             label12.Text = "Resources:";
-            // 
+            //
+            // buttonDescribePhotos
+            //
+            buttonDescribePhotos.Anchor = AnchorStyles.Top;
+            buttonDescribePhotos.Font = new Font("Segoe UI", 8.25F);
+            buttonDescribePhotos.Location = new Point(127, 6);
+            buttonDescribePhotos.Name = "buttonDescribePhotos";
+            buttonDescribePhotos.Size = new Size(77, 26);
+            buttonDescribePhotos.TabIndex = 9;
+            buttonDescribePhotos.Text = "Describe ▾";
+            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos and summarize the documents with the AI");
+            buttonDescribePhotos.UseVisualStyleBackColor = true;
+            buttonDescribePhotos.Click += buttonDescribePhotos_Click;
+            //
             // buttonResourceAdd
-            // 
+            //
             buttonResourceAdd.Anchor = AnchorStyles.Top;
             buttonResourceAdd.Font = new Font("Segoe UI", 8.25F);
             buttonResourceAdd.Location = new Point(207, 6);
@@ -1193,10 +1208,11 @@
             // textDescriptionResource
             // 
             textDescriptionResource.Dock = DockStyle.Bottom;
-            textDescriptionResource.Location = new Point(0, 515);
+            textDescriptionResource.Location = new Point(0, 498);
             textDescriptionResource.Multiline = true;
             textDescriptionResource.Name = "textDescriptionResource";
-            textDescriptionResource.Size = new Size(398, 47);
+            textDescriptionResource.ScrollBars = ScrollBars.Vertical;
+            textDescriptionResource.Size = new Size(398, 64);
             textDescriptionResource.TabIndex = 3;
             // 
             // panelResourcesRightHeader
@@ -1205,13 +1221,14 @@
             panelResourcesRightHeader.Dock = DockStyle.Top;
             panelResourcesRightHeader.Location = new Point(0, 0);
             panelResourcesRightHeader.Name = "panelResourcesRightHeader";
+            panelResourcesRightHeader.Padding = new Padding(0, 13, 13, 0);
             panelResourcesRightHeader.Size = new Size(398, 34);
             panelResourcesRightHeader.TabIndex = 0;
             // 
             // labelPreview
             // 
-            labelPreview.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelPreview.AutoSize = true;
+            labelPreview.Dock = DockStyle.Right;
             labelPreview.Location = new Point(286, 13);
             labelPreview.Name = "labelPreview";
             labelPreview.Size = new Size(99, 15);
@@ -1753,6 +1770,7 @@
         private Label label10;
         private Button buttonResourceEdit;
         private Button buttonResourceDelete;
+        private Button buttonDescribePhotos;
         private Button buttonResourceAdd;
         private Label label12;
         private Button buttonTraceToEdit;

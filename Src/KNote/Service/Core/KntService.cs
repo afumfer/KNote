@@ -57,6 +57,8 @@ public class KntService : IKntService, IDisposable
 
     public IKntEmbeddingGenerators EmbeddingGenerators { get; set; }
 
+    public IKntDocumentReader DocumentReader { get; set; }
+
     private IKntUserService _users;
     public IKntUserService Users
     {
@@ -175,6 +177,17 @@ public class KntService : IKntService, IDisposable
             if (_atlasContext == null)
                 _atlasContext = new KntAtlasContextService(this);
             return _atlasContext;
+        }
+    }
+
+    private IKntResourceContentService _resourceContent;
+    public IKntResourceContentService ResourceContent
+    {
+        get
+        {
+            if (_resourceContent == null)
+                _resourceContent = new KntResourceContentService(this);
+            return _resourceContent;
         }
     }
 

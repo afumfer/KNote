@@ -1,4 +1,5 @@
-﻿using KNote.ClientWin.Core;
+﻿using KNote.Ai;
+using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Views;
 using KNote.Model;
@@ -763,6 +764,13 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
             var fileName = Service.ReplaceSpecialCharacters(Path.GetFileName(filePath));
 
+            // KNote Atlas, stage 4 (D6): the same limit as the Web.
+            if (ResourceFileRules.SizeError(Path.GetFileName(filePath), new FileInfo(filePath).Length) is string sizeError)
+            {
+                View.ShowInfo(sizeError, KntConst.AppName);
+                return null;
+            }
+
             var newResource = new ResourceDto();
             newResource.SetIsNew(true);
             newResource.ResourceId = Guid.NewGuid();
@@ -804,6 +812,193 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         else
             return Task.FromResult<ResourceDto>(null);
     }
+
+    #region Describe photos (KNote Atlas, stage 4)
+
+    // The model that describes the photos (Store.GetPhotoDescriberAsync).
+    public Task<(AiProviderRef Provider, ResourceDescriberDto Info)> GetPhotoDescriberAsync() => Store.GetPhotoDescriberAsync(Service);
+
+    // Only the photos and the documents (4.4c) already saved and without changes of this editor: the AI writes in the repository.
+    public static bool CanDescribeNow(ResourceDto resource) =>
+        (AiPhotoRules.CanDescribe(resource) || AiDocumentRules.CanSummarize(resource)) && !resource.IsNew() && !resource.IsDirty();
+
+    // Locks the descriptions people wrote (the choice «Keep them and lock them»), as the resource editor saves.
+    public async Task<List<string>> LockDescriptionsAsync(IEnumerable<ResourceDto> resources)
+    {
+        var errors = new List<string>();
+        foreach (var resource in resources)
+        {
+            resource.DescriptionByUser = true;
+            var saved = await Service.Notes.SaveResourceAsync(resource);
+            if (saved.IsValid)
+                resource.SetIsDirty(false);
+            else
+                errors.Add($"{resource.GetTitle()}: {saved.ErrorMessage}");
+        }
+        return errors;
+    }
+
+    // Describes the photos and summarizes the documents (4.4c) one after another (progress: "2 of 5"); cancelling stops after the
+    // one being done. Each one done is updated in this editor, without making it dirty: saving the note keeps it
+    // (ResourceInfoDto.LoadedDescription).
+    public async Task<(int Described, List<string> Errors)> DescribePhotosAsync(AiProviderRef provider, IReadOnlyList<ResourceDto> photos,
+        IProgress<string> progress, CancellationToken cancellationToken)
+    {
+        var chatClient = ChatClientFactory(provider);
+        var described = 0;
+        var errors = new List<string>();
+        for (var i = 0; i < photos.Count && !cancellationToken.IsCancellationRequested; i++)
+        {
+            var photo = photos[i];
+            var isPhoto = AiPhotoRules.IsPhoto(photo);
+            progress?.Report(photos.Count > 1 ? $"Describing {i + 1} of {photos.Count}…"
+                : isPhoto ? "Describing the photo…" : "Summarizing the document…");
+            try
+            {
+                var res = isPhoto
+                    ? await AiPhotoDescriber.DescribeAsync(Service, chatClient, provider, photo.ResourceId, replacePersonDescription: true,
+                        Store.Logger, cancellationToken)
+                    : await AiDocumentSummarizer.SummarizeAsync(Service, chatClient, provider, photo.ResourceId, replacePersonDescription: true,
+                        Store.Logger, cancellationToken);
+                if (!res.IsValid)
+                {
+                    errors.Add($"{photo.GetTitle()}: {res.ErrorMessage}");
+                    continue;
+                }
+
+                photo.Description = res.Entity.Description;
+                photo.DescriptionModel = res.Entity.DescriptionModel;
+                photo.DescriptionByUser = res.Entity.DescriptionByUser;
+                photo.LoadedDescription = res.Entity.Description;
+                photo.SetIsDirty(false);
+                described++;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"{photo.GetTitle()}: {ex.Message}");
+            }
+        }
+        return (described, errors);
+    }
+
+    #endregion
+
+    #region The text of the documents (KNote Atlas, stage 4, 4.4b)
+
+    // A document already saved and without changes of this editor: its text is the one of the repository.
+    public static bool CanReadNow(ResourceDto resource) =>
+        resource != null && DocumentTextRules.IsDocument(resource) && !resource.IsNew() && !resource.IsDirty();
+
+    // Its whole text (ClientWin shows it all; the Web, its beginning).
+    public Task<Result<ResourceTextDto>> GetDocumentTextAsync(ResourceDto resource) =>
+        Service.ResourceContent.GetDocumentTextAsync(resource.ResourceId);
+
+    // Reads it and keeps its text (also when it was read: the reader may read it better now). Staff (the command checks it).
+    public Task<Result<DocumentReadDto>> ReadDocumentAsync(ResourceDto resource) =>
+        Service.ResourceContent.ReadDocumentAsync(resource.ResourceId);
+
+    #endregion
+
+    #region The scanned pages of a document (KNote Atlas, stage 4, 4.5b)
+
+    // The client of the model (the tests give their own).
+    internal Func<AiProviderRef, Microsoft.Extensions.AI.IChatClient> ChatClientFactory { get; set; } = provider => AiChatClientFactory.Create(provider);
+
+    // Its scanned pages pending of a transcription (Entity null: none).
+    public async Task<Result<ScannedDocumentDto>> GetScannedPagesAsync(ResourceDto resource)
+    {
+        var scanned = await Service.ResourceContent.GetScannedDocumentsAsync(resource.ResourceId);
+        var result = new Result<ScannedDocumentDto> { Entity = scanned.Entity?.FirstOrDefault() };
+        result.AddListErrorMessage(scanned.ListErrorMessage);
+        return result;
+    }
+
+    // The pace of the last run of «Process pending resources» of the repository, for the estimate (null: none yet).
+    public async Task<double?> GetSecondsPerPageAsync()
+    {
+        var status = await Service.ResourceContent.GetProcessingStatusAsync();
+        return status.IsValid ? status.Entity?.SecondsPerPage : null;
+    }
+
+    // Transcribes these pages one after another (progress: the pages done and the text); canceling stops at once (the page being
+    // done is not kept). A document whose summary waited for its pages (AiDocumentRules.WaitsForSummary) is summarized at the
+    // end, as decided by the owner, and updated in this editor without making it dirty.
+    public async Task<(int Transcribed, List<string> Errors, bool Summarized)> TranscribePagesAsync(AiProviderRef provider, ResourceDto document,
+        IReadOnlyList<int> pages, IProgress<(int Done, string Text)> progress, CancellationToken cancellationToken)
+    {
+        var chatClient = ChatClientFactory(provider);
+        var transcribed = 0;
+        var errors = new List<string>();
+        for (var i = 0; i < pages.Count && !cancellationToken.IsCancellationRequested; i++)
+        {
+            progress?.Report((i, DocumentTexts.TranscriptionProgress(i, pages.Count)));
+            try
+            {
+                var res = await AiPageTranscriber.TranscribeAsync(Service, chatClient, provider, document.ResourceId, pages[i], Store.Logger, cancellationToken);
+                if (res.IsValid)
+                    transcribed++;
+                else if (!res.ListErrorMessage.Contains(AiTranscriptionRules.NotPendingMessage))
+                {
+                    errors.Add($"{DocumentTexts.PageHeading(pages[i])}: {res.ErrorMessage}");
+                    if (res.ListErrorMessage.Contains(AiDocumentRules.FileNotAvailableMessage))
+                        break;
+                }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"{DocumentTexts.PageHeading(pages[i])}: {ex.Message}");
+            }
+        }
+
+        var summarized = false;
+        if (!cancellationToken.IsCancellationRequested && transcribed > 0 && AiDocumentRules.WaitsForSummary(document))
+        {
+            progress?.Report((pages.Count, "Summarizing the document…"));
+            try
+            {
+                var res = await AiDocumentSummarizer.SummarizeAsync(Service, chatClient, provider, document.ResourceId,
+                    replacePersonDescription: false, Store.Logger, cancellationToken);
+                if (res.IsValid)
+                {
+                    document.Description = res.Entity.Description;
+                    document.DescriptionModel = res.Entity.DescriptionModel;
+                    document.DescriptionByUser = res.Entity.DescriptionByUser;
+                    document.LoadedDescription = res.Entity.Description;
+                    document.SetIsDirty(false);
+                    summarized = true;
+                }
+                else
+                    errors.Add(res.ErrorMessage);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+            }
+            catch (Exception ex)
+            {
+                errors.Add(ex.Message);
+            }
+        }
+        return (transcribed, errors, summarized);
+    }
+
+    // Where a page of the PDF is shown («See the original page»): its file here or, without it, its URL; at the page with #page=N,
+    // which the PDF viewer of WebView2 follows.
+    public string OriginalPageUrl(ResourceDto document, int page)
+    {
+        var path = Service.Notes.UtilGetResourceFilePath(document);
+        var url = !string.IsNullOrEmpty(path) && File.Exists(path) ? new Uri(path).AbsoluteUri : document.FullUrl;
+        return string.IsNullOrEmpty(url) ? null : $"{url}#page={page}";
+    }
+
+    #endregion
 
     public bool DeleteResource(Guid resourceId)
     {

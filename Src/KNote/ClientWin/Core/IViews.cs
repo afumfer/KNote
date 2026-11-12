@@ -124,9 +124,16 @@ public interface IViewFileExport : IViewBase
     string PromptForSaveFile(string title, string filter, string initialDirectory, string fileName);
 }
 
-// The semantic index of the repository editor (RepositorySemanticIndexCtrl): RefreshView shows its status,
+// The semantic index of the KNote Atlas window (RepositorySemanticIndexCtrl): RefreshView shows its status,
 // RefreshProgress the progress of its run (Store.SemanticIndex).
 public interface IViewSemanticIndex : IViewEmbeddable
+{
+    void RefreshProgress();
+}
+
+// «Process pending resources» of the repository editor (RepositoryResourcesCtrl): RefreshView shows what it would process,
+// RefreshProgress the progress of its run (Store.ResourceProcessing).
+public interface IViewResourceProcessing : IViewEmbeddable
 {
     void RefreshProgress();
 }
@@ -140,8 +147,12 @@ public interface IViewKNoteManagement : IViewBase
     void ReportProgressKNoteManagement(int porcentaje);
     void SetVisibleProgressBar(bool visible);
 
-    // The run of the semantic index in the status bar (SemanticIndexJob.StatusBarText): null hides it.
+    // The run of KNote Atlas in the status bar (SemanticIndexJob or ResourceProcessingJob.StatusBarText): null hides it.
     void ShowSemanticIndexProgress(string text);
+
+    // A long work over this window (a search or a filter of the notes list, KNote Atlas 4.6b): what is being done, a moving bar and
+    // «Cancel», which cancels the source given (WorkProgressForm). Disposing the result ends it.
+    IDisposable ShowWorkInProgress(string title, string text, CancellationTokenSource cancellation);
 
     // Single-value input prompt (backed by ReadVarForm), used by KNoteManagementCtrl.ChangeTags so the
     // controller doesn't have to reference a concrete WinForms Form to ask the user for the tag text.

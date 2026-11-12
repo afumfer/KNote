@@ -18,6 +18,13 @@ public class NotesFilterDto : SmartModelDtoBase // NotesSearchDto
     public string Tags { get; set; }        
     public string Description { get; set; }
 
+    // KNote Atlas, stage 4 (4.6a, D18): the text of Description is also looked for in the tags and the description of the note's
+    // tasks, and in the description and the text read of its resources (not of the notes of ResourcesExcludedNoteTypeIds, the
+    // system ones, set by the Service).
+    public bool SearchInNoteTasks { get; set; }
+    public bool SearchInResources { get; set; }
+    public List<Guid> ResourcesExcludedNoteTypeIds { get; set; }
+
     public List<AtrFilterDto> AttributesFilter { get; set; } = new List<AtrFilterDto>();
 
     // Only notes with at least one NoteTask assigned to this user.

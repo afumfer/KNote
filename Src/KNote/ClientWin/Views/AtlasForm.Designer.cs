@@ -1,6 +1,6 @@
 namespace KNote.ClientWin.Views
 {
-    partial class AtlasContextForm
+    partial class AtlasForm
     {
         /// <summary>
         /// Required designer variable.
@@ -31,6 +31,12 @@ namespace KNote.ClientWin.Views
             labelHelp = new Label();
             labelRepository = new Label();
             comboRepositories = new ComboBox();
+            listSections = new ListBox();
+            panelSections = new Panel();
+            panelPersonalization = new Panel();
+            panelModels = new Panel();
+            panelSemanticIndex = new Panel();
+            panelResources = new Panel();
             tabContext = new TabControl();
             tabProfile = new TabPage();
             labelProfileHelp = new Label();
@@ -66,21 +72,23 @@ namespace KNote.ClientWin.Views
             tabGlossary.SuspendLayout();
             tabTasks.SuspendLayout();
             tabPrompt.SuspendLayout();
+            panelSections.SuspendLayout();
+            panelPersonalization.SuspendLayout();
             SuspendLayout();
             //
             // labelHelp
             //
             labelHelp.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            labelHelp.Location = new Point(12, 10);
+            labelHelp.Location = new Point(0, 0);
             labelHelp.Name = "labelHelp";
-            labelHelp.Size = new Size(696, 50);
+            labelHelp.Size = new Size(658, 50);
             labelHelp.TabIndex = 0;
             labelHelp.Text = "KNote Atlas gives the AI the context of a repository: what it is for, its vocabulary and how you want it to work. The profile, the glossary and the instructions are notes of the folder «KNote Atlas», written in the note editor; only a ProjectManager or an Admin saves them.";
             //
             // labelRepository
             //
             labelRepository.AutoSize = true;
-            labelRepository.Location = new Point(12, 68);
+            labelRepository.Location = new Point(12, 15);
             labelRepository.Name = "labelRepository";
             labelRepository.Size = new Size(65, 15);
             labelRepository.TabIndex = 1;
@@ -90,10 +98,71 @@ namespace KNote.ClientWin.Views
             //
             comboRepositories.DropDownStyle = ComboBoxStyle.DropDownList;
             comboRepositories.FormattingEnabled = true;
-            comboRepositories.Location = new Point(90, 64);
+            comboRepositories.Location = new Point(90, 11);
             comboRepositories.Name = "comboRepositories";
             comboRepositories.Size = new Size(280, 23);
             comboRepositories.TabIndex = 2;
+            //
+            // listSections
+            //
+            listSections.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            listSections.DrawMode = DrawMode.OwnerDrawFixed;
+            listSections.FormattingEnabled = true;
+            listSections.IntegralHeight = false;
+            listSections.ItemHeight = 24;
+            listSections.Location = new Point(12, 44);
+            listSections.Name = "listSections";
+            listSections.Size = new Size(210, 508);
+            listSections.TabIndex = 3;
+            //
+            // panelSections
+            //
+            panelSections.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelSections.Controls.Add(panelPersonalization);
+            panelSections.Controls.Add(panelModels);
+            panelSections.Controls.Add(panelSemanticIndex);
+            panelSections.Controls.Add(panelResources);
+            panelSections.Location = new Point(230, 44);
+            panelSections.Name = "panelSections";
+            panelSections.Size = new Size(658, 508);
+            panelSections.TabIndex = 4;
+            //
+            // panelPersonalization
+            //
+            panelPersonalization.Controls.Add(tabContext);
+            panelPersonalization.Controls.Add(labelHelp);
+            panelPersonalization.Dock = DockStyle.Fill;
+            panelPersonalization.Location = new Point(0, 0);
+            panelPersonalization.Name = "panelPersonalization";
+            panelPersonalization.Size = new Size(658, 508);
+            panelPersonalization.TabIndex = 0;
+            //
+            // panelModels
+            //
+            panelModels.Dock = DockStyle.Fill;
+            panelModels.Location = new Point(0, 0);
+            panelModels.Name = "panelModels";
+            panelModels.Size = new Size(658, 508);
+            panelModels.TabIndex = 1;
+            panelModels.Visible = false;
+            //
+            // panelSemanticIndex
+            //
+            panelSemanticIndex.Dock = DockStyle.Fill;
+            panelSemanticIndex.Location = new Point(0, 0);
+            panelSemanticIndex.Name = "panelSemanticIndex";
+            panelSemanticIndex.Size = new Size(658, 508);
+            panelSemanticIndex.TabIndex = 2;
+            panelSemanticIndex.Visible = false;
+            //
+            // panelResources
+            //
+            panelResources.Dock = DockStyle.Fill;
+            panelResources.Location = new Point(0, 0);
+            panelResources.Name = "panelResources";
+            panelResources.Size = new Size(658, 508);
+            panelResources.TabIndex = 3;
+            panelResources.Visible = false;
             //
             // tabContext
             //
@@ -102,10 +171,10 @@ namespace KNote.ClientWin.Views
             tabContext.Controls.Add(tabGlossary);
             tabContext.Controls.Add(tabTasks);
             tabContext.Controls.Add(tabPrompt);
-            tabContext.Location = new Point(12, 96);
+            tabContext.Location = new Point(0, 56);
             tabContext.Name = "tabContext";
             tabContext.SelectedIndex = 0;
-            tabContext.Size = new Size(696, 416);
+            tabContext.Size = new Size(658, 452);
             tabContext.TabIndex = 3;
             //
             // tabProfile
@@ -408,7 +477,7 @@ namespace KNote.ClientWin.Views
             //
             buttonClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonClose.DialogResult = DialogResult.Cancel;
-            buttonClose.Location = new Point(632, 520);
+            buttonClose.Location = new Point(812, 560);
             buttonClose.Name = "buttonClose";
             buttonClose.Size = new Size(76, 29);
             buttonClose.TabIndex = 4;
@@ -416,19 +485,19 @@ namespace KNote.ClientWin.Views
             buttonClose.UseVisualStyleBackColor = true;
             buttonClose.Click += buttonClose_Click;
             //
-            // AtlasContextForm
+            // AtlasForm
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonClose;
-            ClientSize = new Size(720, 560);
+            ClientSize = new Size(900, 600);
             Controls.Add(buttonClose);
-            Controls.Add(tabContext);
+            Controls.Add(panelSections);
+            Controls.Add(listSections);
             Controls.Add(comboRepositories);
             Controls.Add(labelRepository);
-            Controls.Add(labelHelp);
-            MinimumSize = new Size(640, 480);
-            Name = "AtlasContextForm";
+            MinimumSize = new Size(800, 520);
+            Name = "AtlasForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "KNote Atlas";
             tabContext.ResumeLayout(false);
@@ -437,6 +506,8 @@ namespace KNote.ClientWin.Views
             tabTasks.ResumeLayout(false);
             tabPrompt.ResumeLayout(false);
             tabPrompt.PerformLayout();
+            panelPersonalization.ResumeLayout(false);
+            panelSections.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -446,6 +517,12 @@ namespace KNote.ClientWin.Views
         private Label labelHelp;
         private Label labelRepository;
         private ComboBox comboRepositories;
+        private ListBox listSections;
+        private Panel panelSections;
+        private Panel panelPersonalization;
+        private Panel panelModels;
+        private Panel panelSemanticIndex;
+        private Panel panelResources;
         private TabControl tabContext;
         private TabPage tabProfile;
         private Label labelProfileHelp;

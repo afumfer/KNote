@@ -65,6 +65,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
                     SourceType = (int)c.SourceType,
                     SourceId = c.SourceId,
                     ChunkIndex = c.ChunkIndex,
+                    Page = c.Page,
                     Content = c.Content,
                     ContentHash = c.ContentHash,
                     SourceHash = c.SourceHash,
@@ -219,7 +220,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
             if (changedSince != null)
                 query = query.Where(c => c.IndexedDateTime >= changedSince.Value);
             var rows = await query
-                .Select(c => new { c.NoteChunkId, c.NoteId, c.SourceType, c.Vector })
+                .Select(c => new { c.NoteChunkId, c.NoteId, c.SourceType, c.SourceId, c.Vector })
                 .ToListAsync();
             var result = new Result<List<NoteChunkVectorDto>>
             {
@@ -228,6 +229,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
                     NoteChunkId = r.NoteChunkId,
                     NoteId = r.NoteId,
                     SourceType = (NoteChunkSourceType)r.SourceType,
+                    SourceId = r.SourceId,
                     Vector = EmbeddingVector.FromBytes(r.Vector)
                 }).ToList()
             };
@@ -286,6 +288,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
                         SourceType = c.SourceType,
                         SourceId = c.SourceId,
                         ChunkIndex = c.ChunkIndex,
+                        Page = c.Page,
                         Content = c.Content,
                         ContentHash = c.ContentHash,
                         SourceHash = c.SourceHash,
@@ -348,6 +351,7 @@ public class KntSemanticIndexRepository : KntRepositoryEFBase, IKntSemanticIndex
         SourceType = (NoteChunkSourceType)row.SourceType,
         SourceId = row.SourceId,
         ChunkIndex = row.ChunkIndex,
+        Page = row.Page,
         Content = row.Content,
         ContentHash = row.ContentHash,
         SourceHash = row.SourceHash,

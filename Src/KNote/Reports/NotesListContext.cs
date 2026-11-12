@@ -34,6 +34,9 @@ public class NotesListContext
 
     public bool SearchInNoteTasks { get; set; }
 
+    // KNote Atlas, stage 4 (D18).
+    public bool SearchInResources { get; set; }
+
     // Search by meaning (KNote Atlas): the most similar notes, not the ones with the words.
     public bool SearchByMeaning { get; set; }
 
@@ -96,7 +99,16 @@ public class NotesListContext
         if (!string.IsNullOrWhiteSpace(notesFilter.Topic))
             criteria.Add(new ReportMetaItem("Topic", notesFilter.Topic.Trim()));
         if (!string.IsNullOrWhiteSpace(notesFilter.Description))
-            criteria.Add(new ReportMetaItem("Description", notesFilter.Description.Trim()));
+        {
+            // 4.6a: where else it was looked for.
+            var also = new List<string>();
+            if (notesFilter.SearchInNoteTasks)
+                also.Add("the tasks");
+            if (notesFilter.SearchInResources)
+                also.Add("the resources");
+            criteria.Add(new ReportMetaItem("Description",
+                notesFilter.Description.Trim() + (also.Count > 0 ? $" (also in {string.Join(" and ", also)})" : "")));
+        }
         if (!string.IsNullOrWhiteSpace(notesFilter.Tags))
             criteria.Add(new ReportMetaItem("Tags", notesFilter.Tags.Trim()));
 
@@ -140,6 +152,8 @@ public class NotesListContext
                 scope.Add("description");
             if (SearchInNoteTasks)
                 scope.Add("tasks");
+            if (SearchInResources)
+                scope.Add("resources");
             return string.Join(", ", scope);
         }
     }

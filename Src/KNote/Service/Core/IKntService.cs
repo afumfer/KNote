@@ -53,6 +53,12 @@ public interface IKntService : IDisposable
     /// </summary>
     IKntEmbeddingGenerators EmbeddingGenerators { get; set; }
 
+    /// <summary>
+    /// The reader of the documents of this installation (KNote Atlas, stage 4, D7), given by the host as EmbeddingGenerators.
+    /// Null: the documents are not read here.
+    /// </summary>
+    IKntDocumentReader DocumentReader { get; set; }
+
     IKntUserService Users { get; }
     IKntKAttributeService KAttributes { get; }
     IKntSystemValuesService SystemValues { get; }
@@ -64,6 +70,7 @@ public interface IKntService : IDisposable
     IKntChatRoomService ChatRooms { get; }
     IKntSemanticSearchService SemanticSearch { get; }
     IKntAtlasContextService AtlasContext { get; }
+    IKntResourceContentService ResourceContent { get; }
     IKntMessageBroker MessageBroker { get; }
 
     string GetSystemVariable(string scope, string variable);

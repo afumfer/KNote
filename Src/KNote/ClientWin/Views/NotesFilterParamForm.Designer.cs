@@ -53,6 +53,8 @@ namespace KNote.ClientWin.Views
             this.textTags = new System.Windows.Forms.TextBox();
             this.labelTags = new System.Windows.Forms.Label();
             this.textDescription = new System.Windows.Forms.TextBox();
+            this.checkDescriptionInTasks = new System.Windows.Forms.CheckBox();
+            this.checkDescriptionInResources = new System.Windows.Forms.CheckBox();
             this.labelDescription = new System.Windows.Forms.Label();
             this.textTopic = new System.Windows.Forms.TextBox();
             this.labelTopic = new System.Windows.Forms.Label();
@@ -93,6 +95,8 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.textTags);
             this.panelForm.Controls.Add(this.labelTags);
             this.panelForm.Controls.Add(this.textDescription);
+            this.panelForm.Controls.Add(this.checkDescriptionInTasks);
+            this.panelForm.Controls.Add(this.checkDescriptionInResources);
             this.panelForm.Controls.Add(this.labelDescription);
             this.panelForm.Controls.Add(this.textTopic);
             this.panelForm.Controls.Add(this.labelTopic);
@@ -105,7 +109,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
-            this.panelForm.Size = new System.Drawing.Size(437, 630);
+            this.panelForm.Size = new System.Drawing.Size(437, 654);
             this.panelForm.TabIndex = 0;
             //
             // listViewAttributes
@@ -118,7 +122,7 @@ namespace KNote.ClientWin.Views
             this.columnValue});
             this.listViewAttributes.FullRowSelect = true;
             this.listViewAttributes.HideSelection = false;
-            this.listViewAttributes.Location = new System.Drawing.Point(7, 464);
+            this.listViewAttributes.Location = new System.Drawing.Point(7, 488);
             this.listViewAttributes.MultiSelect = false;
             this.listViewAttributes.Name = "listViewAttributes";
             this.listViewAttributes.Size = new System.Drawing.Size(424, 95);
@@ -129,7 +133,7 @@ namespace KNote.ClientWin.Views
             // labelModified
             //
             this.labelModified.AutoSize = true;
-            this.labelModified.Location = new System.Drawing.Point(7, 406);
+            this.labelModified.Location = new System.Drawing.Point(7, 430);
             this.labelModified.Name = "labelModified";
             this.labelModified.Size = new System.Drawing.Size(103, 15);
             this.labelModified.TabIndex = 25;
@@ -137,14 +141,14 @@ namespace KNote.ClientWin.Views
             //
             // textModifiedFrom
             //
-            this.textModifiedFrom.Location = new System.Drawing.Point(121, 402);
+            this.textModifiedFrom.Location = new System.Drawing.Point(121, 426);
             this.textModifiedFrom.Name = "textModifiedFrom";
             this.textModifiedFrom.Size = new System.Drawing.Size(120, 23);
             this.textModifiedFrom.TabIndex = 26;
             //
             // buttonModifiedFrom
             //
-            this.buttonModifiedFrom.Location = new System.Drawing.Point(243, 402);
+            this.buttonModifiedFrom.Location = new System.Drawing.Point(243, 426);
             this.buttonModifiedFrom.Name = "buttonModifiedFrom";
             this.buttonModifiedFrom.Size = new System.Drawing.Size(27, 23);
             this.buttonModifiedFrom.TabIndex = 27;
@@ -154,14 +158,14 @@ namespace KNote.ClientWin.Views
             //
             // textModifiedTo
             //
-            this.textModifiedTo.Location = new System.Drawing.Point(282, 402);
+            this.textModifiedTo.Location = new System.Drawing.Point(282, 426);
             this.textModifiedTo.Name = "textModifiedTo";
             this.textModifiedTo.Size = new System.Drawing.Size(120, 23);
             this.textModifiedTo.TabIndex = 28;
             //
             // buttonModifiedTo
             //
-            this.buttonModifiedTo.Location = new System.Drawing.Point(404, 402);
+            this.buttonModifiedTo.Location = new System.Drawing.Point(404, 426);
             this.buttonModifiedTo.Name = "buttonModifiedTo";
             this.buttonModifiedTo.Size = new System.Drawing.Size(27, 23);
             this.buttonModifiedTo.TabIndex = 29;
@@ -173,7 +177,7 @@ namespace KNote.ClientWin.Views
             //
             this.labelMeaningText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.labelMeaningText.AutoSize = true;
-            this.labelMeaningText.Location = new System.Drawing.Point(7, 567);
+            this.labelMeaningText.Location = new System.Drawing.Point(7, 591);
             this.labelMeaningText.Name = "labelMeaningText";
             this.labelMeaningText.Size = new System.Drawing.Size(80, 15);
             this.labelMeaningText.TabIndex = 23;
@@ -183,7 +187,7 @@ namespace KNote.ClientWin.Views
             //
             this.textMeaningText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textMeaningText.Location = new System.Drawing.Point(7, 585);
+            this.textMeaningText.Location = new System.Drawing.Point(7, 609);
             this.textMeaningText.MaxLength = 1000;
             this.textMeaningText.Name = "textMeaningText";
             this.textMeaningText.Size = new System.Drawing.Size(424, 23);
@@ -202,7 +206,7 @@ namespace KNote.ClientWin.Views
             // buttonRemoveAttribute
             //
             this.buttonRemoveAttribute.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRemoveAttribute.Location = new System.Drawing.Point(401, 437);
+            this.buttonRemoveAttribute.Location = new System.Drawing.Point(401, 461);
             this.buttonRemoveAttribute.Name = "buttonRemoveAttribute";
             this.buttonRemoveAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonRemoveAttribute.TabIndex = 21;
@@ -212,7 +216,7 @@ namespace KNote.ClientWin.Views
             // buttonAddAttribute
             //
             this.buttonAddAttribute.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAddAttribute.Location = new System.Drawing.Point(373, 437);
+            this.buttonAddAttribute.Location = new System.Drawing.Point(373, 461);
             this.buttonAddAttribute.Name = "buttonAddAttribute";
             this.buttonAddAttribute.Size = new System.Drawing.Size(27, 23);
             this.buttonAddAttribute.TabIndex = 20;
@@ -222,7 +226,7 @@ namespace KNote.ClientWin.Views
             // labelAttributes
             //
             this.labelAttributes.AutoSize = true;
-            this.labelAttributes.Location = new System.Drawing.Point(7, 441);
+            this.labelAttributes.Location = new System.Drawing.Point(7, 465);
             this.labelAttributes.Name = "labelAttributes";
             this.labelAttributes.Size = new System.Drawing.Size(67, 15);
             this.labelAttributes.TabIndex = 19;
@@ -231,7 +235,7 @@ namespace KNote.ClientWin.Views
             // buttonFolderSelect
             //
             this.buttonFolderSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonFolderSelect.Location = new System.Drawing.Point(401, 346);
+            this.buttonFolderSelect.Location = new System.Drawing.Point(401, 370);
             this.buttonFolderSelect.Name = "buttonFolderSelect";
             this.buttonFolderSelect.Size = new System.Drawing.Size(27, 26);
             this.buttonFolderSelect.TabIndex = 17;
@@ -242,7 +246,7 @@ namespace KNote.ClientWin.Views
             // buttonFolderClear
             //
             this.buttonFolderClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonFolderClear.Location = new System.Drawing.Point(369, 346);
+            this.buttonFolderClear.Location = new System.Drawing.Point(369, 370);
             this.buttonFolderClear.Name = "buttonFolderClear";
             this.buttonFolderClear.Size = new System.Drawing.Size(27, 26);
             this.buttonFolderClear.TabIndex = 16;
@@ -255,7 +259,7 @@ namespace KNote.ClientWin.Views
             this.textFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textFolder.Enabled = false;
-            this.textFolder.Location = new System.Drawing.Point(7, 348);
+            this.textFolder.Location = new System.Drawing.Point(7, 372);
             this.textFolder.Name = "textFolder";
             this.textFolder.Size = new System.Drawing.Size(357, 23);
             this.textFolder.TabIndex = 15;
@@ -264,7 +268,7 @@ namespace KNote.ClientWin.Views
             //
             this.checkIncludeChildFolders.AutoSize = true;
             this.checkIncludeChildFolders.Enabled = false;
-            this.checkIncludeChildFolders.Location = new System.Drawing.Point(7, 377);
+            this.checkIncludeChildFolders.Location = new System.Drawing.Point(7, 401);
             this.checkIncludeChildFolders.Name = "checkIncludeChildFolders";
             this.checkIncludeChildFolders.Size = new System.Drawing.Size(105, 19);
             this.checkIncludeChildFolders.TabIndex = 18;
@@ -274,7 +278,7 @@ namespace KNote.ClientWin.Views
             // labelFolder
             //
             this.labelFolder.AutoSize = true;
-            this.labelFolder.Location = new System.Drawing.Point(7, 330);
+            this.labelFolder.Location = new System.Drawing.Point(7, 354);
             this.labelFolder.Name = "labelFolder";
             this.labelFolder.Size = new System.Drawing.Size(45, 15);
             this.labelFolder.TabIndex = 14;
@@ -286,7 +290,7 @@ namespace KNote.ClientWin.Views
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboNoteType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboNoteType.FormattingEnabled = true;
-            this.comboNoteType.Location = new System.Drawing.Point(7, 299);
+            this.comboNoteType.Location = new System.Drawing.Point(7, 323);
             this.comboNoteType.Name = "comboNoteType";
             this.comboNoteType.Size = new System.Drawing.Size(424, 23);
             this.comboNoteType.TabIndex = 13;
@@ -294,7 +298,7 @@ namespace KNote.ClientWin.Views
             // labelNoteType
             //
             this.labelNoteType.AutoSize = true;
-            this.labelNoteType.Location = new System.Drawing.Point(7, 281);
+            this.labelNoteType.Location = new System.Drawing.Point(7, 305);
             this.labelNoteType.Name = "labelNoteType";
             this.labelNoteType.Size = new System.Drawing.Size(68, 15);
             this.labelNoteType.TabIndex = 12;
@@ -304,7 +308,7 @@ namespace KNote.ClientWin.Views
             //
             this.textTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textTags.Location = new System.Drawing.Point(7, 250);
+            this.textTags.Location = new System.Drawing.Point(7, 274);
             this.textTags.Name = "textTags";
             this.textTags.Size = new System.Drawing.Size(424, 23);
             this.textTags.TabIndex = 11;
@@ -312,7 +316,7 @@ namespace KNote.ClientWin.Views
             // labelTags
             //
             this.labelTags.AutoSize = true;
-            this.labelTags.Location = new System.Drawing.Point(7, 232);
+            this.labelTags.Location = new System.Drawing.Point(7, 256);
             this.labelTags.Name = "labelTags";
             this.labelTags.Size = new System.Drawing.Size(35, 15);
             this.labelTags.TabIndex = 10;
@@ -326,6 +330,26 @@ namespace KNote.ClientWin.Views
             this.textDescription.Name = "textDescription";
             this.textDescription.Size = new System.Drawing.Size(424, 23);
             this.textDescription.TabIndex = 9;
+            // 
+            // checkDescriptionInTasks
+            // 
+            this.checkDescriptionInTasks.AutoSize = true;
+            this.checkDescriptionInTasks.Location = new System.Drawing.Point(7, 228);
+            this.checkDescriptionInTasks.Name = "checkDescriptionInTasks";
+            this.checkDescriptionInTasks.Size = new System.Drawing.Size(145, 19);
+            this.checkDescriptionInTasks.TabIndex = 30;
+            this.checkDescriptionInTasks.Text = "Also in the note tasks";
+            this.checkDescriptionInTasks.UseVisualStyleBackColor = true;
+            // 
+            // checkDescriptionInResources
+            // 
+            this.checkDescriptionInResources.AutoSize = true;
+            this.checkDescriptionInResources.Location = new System.Drawing.Point(170, 228);
+            this.checkDescriptionInResources.Name = "checkDescriptionInResources";
+            this.checkDescriptionInResources.Size = new System.Drawing.Size(145, 19);
+            this.checkDescriptionInResources.TabIndex = 31;
+            this.checkDescriptionInResources.Text = "Also in the resources";
+            this.checkDescriptionInResources.UseVisualStyleBackColor = true;
             //
             // labelDescription
             //
@@ -424,7 +448,7 @@ namespace KNote.ClientWin.Views
             this.panelBottom.Controls.Add(this.buttonCancel);
             this.panelBottom.Controls.Add(this.buttonAccept);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 630);
+            this.panelBottom.Location = new System.Drawing.Point(0, 654);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(437, 50);
             this.panelBottom.TabIndex = 1;
@@ -455,7 +479,7 @@ namespace KNote.ClientWin.Views
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(437, 680);
+            this.ClientSize = new System.Drawing.Size(437, 704);
             this.Controls.Add(this.panelForm);
             this.Controls.Add(this.panelBottom);
             this.MaximizeBox = false;
@@ -490,6 +514,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textTopic;
         private System.Windows.Forms.Label labelDescription;
         private System.Windows.Forms.TextBox textDescription;
+        private System.Windows.Forms.CheckBox checkDescriptionInTasks;
+        private System.Windows.Forms.CheckBox checkDescriptionInResources;
         private System.Windows.Forms.Label labelTags;
         private System.Windows.Forms.TextBox textTags;
         private System.Windows.Forms.Label labelNoteType;

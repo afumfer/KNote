@@ -22,6 +22,9 @@ public class NoteChunk
 
     public int ChunkIndex { get; set; }
 
+    // The page of a fragment of a document (KNote Atlas, stage 4, D8); null in the others.
+    public int? Page { get; set; }
+
     [Required]
     public string Content { get; set; }
 

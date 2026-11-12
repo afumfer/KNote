@@ -136,6 +136,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         Store.Events.Subscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
         Store.Events.Subscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
         Store.Events.Subscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
+        Store.Events.Subscribe<ResourceProcessingProgressChanged>(ResourceProcessing_ProgressChanged);
     }
 
     private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
@@ -215,35 +216,50 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     private static string NoteCaption(NoteMinimalDto note) => $"'{note.Topic}' (#{note.NoteNumber})";
 
+    // KNote Atlas 4.6b: a search or a filter may take long (the repository grows, the search by meaning brings the index up to date
+    // first): instead of the wait cursor, its progress in a window with «Cancel» (shown only if it lasts). Canceled, the list stays as
+    // it was. The folders tree doesn't need it: its notes are found by their folder.
     private async Task RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef selectedNotesInServiceRef)
     {
-        View.ActivateWaitState();
-
         SelectMode = EnumSelectMode.Filters;
 
         var isFilter = selectedNotesInServiceRef?.NotesFilter != null;
+        var search = selectedNotesInServiceRef?.NotesSearch;
+        var byMeaning = isFilter ? selectedNotesInServiceRef.NotesFilter.HasMeaningText : search?.Mode == EnumNotesSearchMode.Meaning;
         var description = isFilter
             ? await BuildFilterDescription(selectedNotesInServiceRef.ServiceRef, selectedNotesInServiceRef.NotesFilter)
-            : selectedNotesInServiceRef?.NotesSearch?.Mode == EnumNotesSearchMode.Meaning
-                ? $"{selectedNotesInServiceRef.NotesSearch.TextSearch} (by meaning)"
-                : selectedNotesInServiceRef?.NotesSearch?.TextSearch;
+            : search?.Mode == EnumNotesSearchMode.Meaning
+                ? $"{search.TextSearch} (by meaning{(search.ResourceKind == EnumResourceKind.All ? "" : $", {search.ResourceKind.ToString().ToLowerInvariant()}")})"
+                : search?.TextSearch;
 
         NotifyMessage($"Loading notes filter: {description}");
 
-        FolderPath = $"Notes filter: {description}";
-
         _selectedNoteInfo = null;
         NoteEditorCtrl.View.CleanView();
-        if (isFilter)
-            await NotesSelectorCtrl.LoadFilteredEntities(selectedNotesInServiceRef.ServiceRef?.Service, selectedNotesInServiceRef.NotesFilter);
-        else
-            await NotesSelectorCtrl.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, selectedNotesInServiceRef?.NotesSearch);
+
+        using var cancellation = new CancellationTokenSource();
+        var what = isFilter ? "Filtering the notes" : "Searching the notes";
+        var text = $"{what}: {description}" + (byMeaning ? Environment.NewLine + "The semantic index is brought up to date first." : "");
+        using (View.ShowWorkInProgress(isFilter ? "Filter" : "Search", text, cancellation))
+        {
+            if (isFilter)
+                await NotesSelectorCtrl.LoadFilteredEntities(selectedNotesInServiceRef.ServiceRef?.Service, selectedNotesInServiceRef.NotesFilter,
+                    cancellationToken: cancellation.Token);
+            else
+                await NotesSelectorCtrl.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, search, cancellationToken: cancellation.Token);
+        }
+
+        if (NotesSelectorCtrl.LastLoadCanceled)
+        {
+            NotifyMessage($"Notes filter canceled: {description}");
+            return;
+        }
+
+        FolderPath = $"Notes filter: {description}";
         CountNotes = NotesSelectorCtrl.ListEntities?.Count;
 
         View.ShowInfo(null);
         NotifyMessage($"Loaded notes filter {description}");
-
-        View.DeactivateWaitState();
     }
 
     private async Task<string> BuildFilterDescription(ServiceRef serviceRef, NotesFilterDto notesFilter)
@@ -279,11 +295,14 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         View.ShowInfo(null);
     }
 
-    // The run of the semantic index goes on when the repository editor is closed: the status bar shows it.
-    private void SemanticIndex_ProgressChanged(SemanticIndexProgressChanged e)
-    {
-        View.ShowSemanticIndexProgress(e.Job.StatusBarText);
-    }
+    // The runs of KNote Atlas (the semantic index, the resources) go on when the repository editor is closed: the status
+    // bar shows the one running.
+    private void SemanticIndex_ProgressChanged(SemanticIndexProgressChanged e) => ShowAtlasJobProgress();
+
+    private void ResourceProcessing_ProgressChanged(ResourceProcessingProgressChanged e) => ShowAtlasJobProgress();
+
+    private void ShowAtlasJobProgress() =>
+        View.ShowSemanticIndexProgress(Store.SemanticIndex.StatusBarText ?? Store.ResourceProcessing.StatusBarText);
 
     public override void Dispose()
     {
@@ -303,9 +322,11 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         Store.Events.Unsubscribe<EntitySaved<FolderDto>>(FolderEditorCtrl_SavedEntity);
         Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
         Store.Events.Unsubscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
+        Store.Events.Unsubscribe<ResourceProcessingProgressChanged>(ResourceProcessing_ProgressChanged);
 
-        // The app closes: the run of the semantic index stops (what is done is kept).
+        // The app closes: the runs of KNote Atlas stop (what is done is kept).
         Store.SemanticIndex.Cancel();
+        Store.ResourceProcessing.Cancel();
 
         base.Dispose();
     }
@@ -997,7 +1018,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     // KNote Atlas: the context of the AI, starting in the active repository.
     public async Task ShowAtlasContextAsync()
     {
-        var atlasCtrl = new AtlasContextCtrl(Store);
+        var atlasCtrl = new AtlasCtrl(Store);
         if (atlasCtrl.Service == null)
         {
             View.ShowInfo("There is no repository to work in.");
@@ -1673,8 +1694,19 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     // Prints the notes list as the user is seeing it (columns, order, text filter), headed by the folder
     // path or the search/filter summary, through the report preview (print or save as PDF).
+    // KNote Atlas, stage 4 (D14, decided by the owner): the reports are of notes, not of the photos or the documents found.
+    private bool RefusedForResources()
+    {
+        if (NotesSelectorCtrl?.ByResources != true)
+            return false;
+        View.ShowInfo("A list of photos or documents found can't be printed or exported: search the notes («All») to do it.");
+        return true;
+    }
+
     public async Task PrintNotesList()
     {
+        if (RefusedForResources())
+            return;
         try
         {
             var snapshot = NotesSelectorCtrl.GetDisplayedNotes();
@@ -1706,6 +1738,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     // listed, after a cover and a table of contents, through the report preview (print or save as PDF).
     public async Task PrintNotesBook()
     {
+        if (RefusedForResources())
+            return;
         try
         {
             var snapshot = NotesSelectorCtrl.GetDisplayedNotes();
@@ -1780,6 +1814,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     // Exports the notes list as the user is seeing it to a CSV file (see NotesListCsvExportCtrl).
     public async Task ExportNotesListToCsv()
     {
+        if (RefusedForResources())
+            return;
         var exportCtrl = new NotesListCsvExportCtrl(Store)
         {
             Service = SelectedServiceRef?.Service,
@@ -1821,6 +1857,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             context.SearchText = notesSearch?.TextSearch?.Trim();
             context.SearchInDescription = notesSearch?.SearchInDescription ?? false;
             context.SearchInNoteTasks = notesSearch?.SearchInNoteTasks ?? false;
+            context.SearchInResources = notesSearch?.SearchInResources ?? false;
             context.SearchByMeaning = notesSearch?.Mode == EnumNotesSearchMode.Meaning;
         }
 

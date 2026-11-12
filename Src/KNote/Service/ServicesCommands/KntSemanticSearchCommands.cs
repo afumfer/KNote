@@ -232,6 +232,20 @@ public class KntSemanticSearchSearchAsyncCommand : KntCommandServiceBase<Semanti
         if (notes == null)
             return result;
 
+        // KNote Atlas, stage 4 (D14): the photos or the documents, by their own fragments.
+        if (Param.ResourceKind != EnumResourceKind.All)
+        {
+            var kinds = await KntSemanticSearcher.ResourceKindsAsync(Service, result);
+            if (!result.IsValid)
+                return result;
+            var resourceMatches = SemanticSearchRules.RankResources(snapshot.Chunks, query,
+                    (resourceId, noteId) => notes.ContainsKey(noteId) && kinds.GetValueOrDefault(resourceId) == Param.ResourceKind)
+                .Take(SemanticSearchRules.MaxResults)
+                .ToList();
+            result.Entity = await KntSemanticSearcher.ResourceResultAsync(Service, index, resourceMatches, notes, result);
+            return result;
+        }
+
         var matches = SemanticSearchRules.Rank(snapshot.Chunks, query, SemanticSearchRules.MinSimilarity, notes.ContainsKey)
             .Take(SemanticSearchRules.MaxResults)
             .ToList();

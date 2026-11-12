@@ -235,13 +235,32 @@ Etapa 0 de KNote Atlas (la lógica está en `Service`, ver «Índice semántico�
 (`SemanticIndexTexts.CanSearch` sobre `GetIndexStatusAsync`: hay filas y el Server tiene su modelo); los textos del
 estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexTexts`, comunes con `ClientWin`.
 
-- **Administración** (pestaña **KNote Atlas** de `Admin.razor`, `KntSections.Atlas`, Admin): `AtlasIndex` con dos
-  secciones que leen y guardan cada una lo suyo: `AtlasRepositoryModels` (los modelos del repositorio, con los avisos de
-  modelo que el Server no tiene o que es de pago, de `installation-models`) y `AtlasSemanticIndex` (estado, «Create
-  index» / «Update now», «Rebuild», «Cancel», el progreso con sus errores, que se consulta mientras dura, y los índices
-  de otros modelos con su botón para borrarlos). Guardar los modelos vuelve a leer el estado del índice.
+- **La página KNote Atlas** (`Pages/Atlas/Atlas.razor`, rutas `atlas` y `atlas/evaluation`, `KntSections.Atlas`, una
+  entrada del menú lateral para cualquier usuario con sesión; 4.3b): todo lo de la IA del repositorio en `RadzenTabs` a la
+  izquierda (arriba en pantallas estrechas, `Atlas.razor.css`), una pestaña por parte y cada una para su rol: *Repository
+  models* (`AtlasRepositoryModels`, Admin), *AI personalization* (`AtlasPersonalization`, todos), *Semantic index*
+  (`AtlasSemanticIndex`, Admin), *Process pending resources* (`AtlasResources`, Admin) y *Search evaluation*
+  (`SearchEvaluation`, ProjectManager). Las que el usuario no puede usar se ven deshabilitadas con un candado y su `title`
+  dice quién puede, y **su contenido no se dibuja** (no pide nada al Server). Solo se dibuja la pestaña elegida
+  (`RadzenTabs` por defecto), así que cada una lee su estado al abrirse; la elegida va en la dirección (`?tab=models`,
+  `personalization`, `index`, `resources`, `evaluation`) y en `localStorage` (`knt-atlas-tab`); `atlas/evaluation` abre
+  la suya. Sin nada, *AI personalization*. Las pestañas de `KntSections` (`AtlasModels`...) dan el texto y el icono.
+- `AtlasRepositoryModels`: los modelos del repositorio, con los avisos de modelo que el Server no tiene o que es de pago
+  (`installation-models`). `AtlasSemanticIndex`: estado, «Create index» / «Update now», «Rebuild», «Cancel», el progreso
+  con sus errores, que se consulta mientras dura, y los índices de otros modelos con su botón para borrarlos.
+  `AtlasResources` (etapa 4): «Process pending resources» (`api/resources`), con los textos de `ResourceProcessingTexts`.
 - **Búsqueda** (`NotesSearch.razor`): selector «Words / Meaning» (`RadzenSelectBar`); el modo va en la URL
-  (`mode=meaning`) y en la posición de la lista. Por significado no hay paginación en el Server: `KntMeaningSearchPages`
+  (`mode=meaning`) y en la posición de la lista. En «Words» (4.6a, D18, las mismas que `ClientWin`): «Search in note description»,
+  «Search in note tasks» y «Search in resources», **todas desmarcadas por defecto** (decidido por el propietario, aunque en
+  `ClientWin` la de la descripción viene marcada); van en la URL (`inDescription`, `inTasks`, `inResources`) y en la clave de la
+  lista (`OptionsKeyMark` y tres 0/1), para que cada búsqueda tenga su posición. El filtro tiene, bajo «Description», «Also in the
+  note tasks» y «Also in the resources». En «Meaning» (4.6b, D14), «All / Photos / Documents» (`kind` en la URL, `KindKeyMark` en la
+  clave de la lista): con fotos o documentos, `ResourceSearchResults` sustituye a `NotesGrid` (galería de tarjetas con miniaturas pedidas
+  una a una a `api/resources/{id}/thumbnail`, o filas con la página), la vista previa es la de la nota del recurso elegido, doble clic
+  abre `NoteResourceViewer` (con `Page`: un PDF en esa página) y «Open note» su nota; sin «Delete» ni imprimir y exportar.
+  El aviso de las notas no puestas al día es `SemanticPendingNotice` (búsqueda y filtro): por qué están pendientes y, para un Admin,
+  «Update index», que lanza la indexación completa en la cola del `Server` (`RunIndexAsync`, como «Update now»), muestra su progreso y,
+  al terminar, la página repite la búsqueda si la lista es la misma (`ListKey`). Por significado no hay paginación en el Server: `KntMeaningSearchPages`
   hace la búsqueda con la primera página que pide `NotesGrid` y le da las demás en memoria, ordenadas con
   `NoteListSorter` (sin orden, de más a menos parecida). `NotesGrid.ShowSimilarity` añade las columnas «Similarity» y
   «Fragment» (no se ordenan con su cabecera). Encima, el aviso de las notas sin poner al día con «Update index» (la
@@ -252,21 +271,20 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   clic o Enter la abre). En `NoteForm`, debajo de las relaciones de la pestaña «Trace notes» (se calcula al abrir la
   pestaña), con «Relate», que abre `NoteTraceNoteEditor` con la nota ya elegida y al guardar vuelve a calcular. En
   `NoteViewer`, el botón «Similar notes» abre `NoteSimilarNotesDialog` (sin «Relate»).
-- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, ruta `atlas/evaluation`, `KntSections.SearchEvaluation`, botón
-  de la cabecera de la página KNote Atlas, solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
+- **Search evaluation** (`Pages/Atlas/SearchEvaluation`, pestaña de la página KNote Atlas, `KntSections.SearchEvaluation`,
+  solo para ProjectManager y Admin): la nota de consultas de prueba con sus problemas («Open in the editor»,
   «Read again»), las casillas de los índices cuyo modelo tiene el Server y «Also without the query instruction»,
   «Evaluate» (una petición por consulta, con progreso y «Cancel», que deja el informe de las hechas), el informe
   (`SearchEvaluationReport.Markdown`, mostrado con `ViewMarkdown`) y «Save as note». No existe en `ClientWin`.
-- **Contexto de la IA** (etapa 1, `IStore.Atlas` = `AtlasWebApiService`, `api/atlas`): la página `Pages/Atlas/AtlasContext`
-  (ruta `atlas`, `KntSections.AtlasContext`, una entrada del menú lateral para cualquier usuario con sesión), con una
-  sección por parte que lee lo suyo (`KntLatestRequest`, Retry con `AtlasLoadError`): `AtlasProfileSection` y
+- **Contexto de la IA** (etapa 1, `IStore.Atlas` = `AtlasWebApiService`, `api/atlas`): la pestaña *AI personalization*
+  (`Pages/Atlas/AtlasPersonalization`), con una sección por parte que lee lo suyo (`KntLatestRequest`, Retry con `AtlasLoadError`): `AtlasProfileSection` y
   `AtlasGlossarySection` lado a lado, `AtlasTaskPromptsSection` y `AtlasPromptSection` («What the AI receives», Staff+: la
   tarea, un texto de prueba y el texto tal cual se envía, `AtlasPromptText`, con su resumen, `AiPromptComposer.Summary`).
   La nota se edita en el editor de siempre en su propia ventana (`KntWindows.OpenEditAsync`); crearla abre esa ventana
-  justo después de la respuesta. Tras crear o rellenar una nota, la sección avisa a la página (`Changed`), que recalcula
-  «What the AI receives»; con `KntWindows.NoteSaved` la página vuelve a leer todas las secciones. Los botones de crear y
-  personalizar se ven con `AuthorizeView` (ProjectManager, Admin). «See KNote's» es `AtlasKNoteInstructionsDialog`. Si la
-  página crece con las etapas siguientes, se pasa a pestañas como las de `Admin`.
+  justo después de la respuesta. Tras crear o rellenar una nota, la sección avisa a la pestaña (`Changed`), que recalcula
+  «What the AI receives»; con `KntWindows.NoteSaved` la pestaña vuelve a leer todas las secciones. Los botones de crear y
+  personalizar se ven con `AuthorizeView` (ProjectManager, Admin). «See KNote's» es `AtlasKNoteInstructionsDialog`. Una
+  parte nueva de KNote Atlas (etapas 2 y 3) es otra pestaña de la página.
 
 ## Interfaz de usuario: Radzen.Blazor
 
@@ -471,14 +489,31 @@ Patrones ya establecidos que hay que seguir:
   `DescriptionBlocked`): bloqueado, la descripción solo se ve (sin editor). La Web no menciona `ClientWin` en la
   interfaz. Las pestañas de recursos y tareas se cargan al abrir la nota y otra vez si cambia (`OnParametersSetAsync`
   por `NoteId`, p. ej. tras "Save and new").
+- **Subir un recurso** (KNote Atlas 4.4b): `InputFileUpload` no lee el fichero (solo una imagen pequeña, para verla): el
+  diálogo `NoteResourceEditor` lo envía con `IStore.Notes.UploadResourceAsync`, que usa `js/kntUpload.js` (`XMLHttpRequest`
+  con el `input` del fichero, el token y el progreso, y `cancel`), y se cierra con el recurso ya guardado. Hasta 200 MB
+  (`ResourceFileRules`). **El texto de un documento**: `NoteResourceViewer` tiene «File / Text» para los documentos
+  (`DocumentTextRules.IsDocument`; un DOCX o un ODT abre en «Text»), con las páginas, las escaneadas marcadas, «Showing pages
+  1–N of M» y «Read document» (Staff+, `KntAccess` al pulsar; si ya se leyó, pregunta). Textos de `DocumentTexts`.
+- **«Describe with AI»** (4.4c, antes «Describe photos»): `NoteForm` describe las fotos y resume los documentos de la nota con
+  `DescribeWithAiDialog` (cuenta unos y otros) y una petición por recurso (`DescribePhotoAsync` / `SummarizeDocumentAsync`); la
+  tarjeta de un documento tiene «Summarize document». El lote (`AtlasResources`) tiene las casillas «Photos» y «Documents» y
+  (4.5a) «Scanned pages», con «Also the pages with… (OCR layer)» debajo, desactivada sin la anterior.
+- **Transcribir un documento** (4.5b): en `NoteResourceViewer`, vista «Text» de un PDF con páginas escaneadas, «Transcribe scanned
+  pages» (Staff+): `TranscribePagesDialog` (páginas, la casilla de las de OCR, estimación y modelo) y una petición por página
+  (`TranscribePageAsync`) con su progreso y «Cancel» (tras la página en curso; cerrar el visor también para). Si el documento
+  esperaba su resumen (`AiDocumentRules.WaitsForSummary`), se resume al final y se actualiza el `ResourceInfoDto` de la tarjeta.
+  Las páginas transcritas llevan «Automatic transcription» y «See the original page», que muestra el PDF en `#page=N`.
 - **Recursos de la nota** (`NoteKResources`, galería; `NoteResourceEditor`, diálogo de alta y edición): al editar
   un recurso solo cambian su descripción y su orden; el fichero no se cambia ni se reenvía (`Server` conserva el
   fichero y el contenido guardado en la BD, ver `Server/CLAUDE.md`). Al pulsar un recurso se ve en la misma ventana
   de la nota (`NoteResourceViewer`, casi a ventana completa): imagen (ajustada o a su tamaño), PDF (visor del
   navegador), vídeo, audio o texto (en un `iframe` con `sandbox`: un fichero guardado como texto puede ser HTML). Los
-  demás se abren en otra pestaña: la ventana de la nota es emergente y no tiene pestañas, así que se abren en la
+  demás (un `.doc`, un `.zip`...) también abren el visor, con su descripción y «Open in a new tab» (4.4b; antes se
+  descargaban al pulsarlos): la ventana de la nota es emergente y no tiene pestañas, así que se abren en la
   ventana principal. El tipo se deduce del MIME o, si no lo hay, de la extensión (`KntFileTypes.KindOf`: `ClientWin`
-  solo guarda el tipo de unos pocos ficheros).
+  solo guarda el tipo de unos pocos ficheros). La lista de la pestaña (`api/notes/{id}/resources`) no trae los ficheros
+  (solo una imagen pequeña guardada en la BD): las imágenes se ven por su URL.
 - **Tareas de la nota** (`NoteKTasks`), como en `ClientWin`: la lista (por prioridad y tema) y, al lado, la tarea
   seleccionada con sus datos y su descripción en HTML (`ViewMarkdown`: Markdown largo, con imágenes), en un
   `RadzenSplitter` con tamaños guardados (`KntPaneSizes`, clave `KNoteNoteTasksPanes`); en una ventana estrecha la
