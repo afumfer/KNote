@@ -206,8 +206,7 @@ El botón **Test** de cada proveedor lo comprueba: con un modelo de embeddings c
 
 **2. Los modelos del repositorio (Admin).** Son los mismos para todos los que trabajan con el repositorio, en cualquiera de las dos aplicaciones:
 
-- Aplicación de escritorio: **File → Repositories → Edit repository properties**, pestaña **KNote Atlas**, y **Save models**.
-- Aplicación Web: **Admin panel → KNote Atlas**, sección **Repository models**, y **Save models**.
+- En la sección **Repository models** de **KNote Atlas** (**Tools › KNote Atlas** en la aplicación de escritorio; **KNote Atlas** en el menú lateral de la aplicación Web), y **Save models**.
 
 | Campo | Significado |
 |---|---|
@@ -218,9 +217,9 @@ El botón **Test** de cada proveedor lo comprueba: con un modelo de embeddings c
 
 Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 
-**3. El índice semántico (Admin).** En la aplicación de escritorio, pestaña **Semantic index** de la misma ventana; en la aplicación Web, sección **Semantic index** de la pestaña **KNote Atlas**. Muestra cómo está el índice (notas indexadas, pendientes y fragmentos; cuándo se creó por última vez y cuánto tardó). **Create index** calcula el significado de todas las notas: KNote dice antes cuántas notas enviará al modelo y, a partir de la primera vez, cuánto debería tardar. Puedes seguir trabajando (en la aplicación de escritorio puedes incluso cerrar la ventana: la barra de estado muestra el progreso); **Cancel** (**Cancel run** en la aplicación de escritorio) conserva lo hecho, y la siguiente ejecución sigue desde ahí. Las notas que fallan se listan y se reintentan en la siguiente ejecución. En el servidor Web se crea un índice a la vez, sea del repositorio que sea: los demás esperan, **Queued**.
+**3. El índice semántico (Admin).** En la sección **Semantic index** de **KNote Atlas**, en las dos aplicaciones. Muestra cómo está el índice (notas indexadas, pendientes y fragmentos; cuándo se creó por última vez y cuánto tardó). **Create index** calcula el significado de todas las notas: KNote dice antes cuántas notas enviará al modelo y, a partir de la primera vez, cuánto debería tardar. Puedes seguir trabajando (en la aplicación de escritorio puedes incluso cerrar la ventana: la barra de estado muestra el progreso); **Cancel** (**Cancel run** en la aplicación de escritorio) conserva lo hecho, y la siguiente ejecución sigue desde ahí. Las notas que fallan se listan y se reintentan en la siguiente ejecución. En el servidor Web se crea un índice a la vez, sea del repositorio que sea: los demás esperan, **Queued**.
 
-- Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea y cada recurso que tiene descripción. Las notas propias de KNote quedan fuera: las sesiones del asistente, el chat room, la evaluación de la búsqueda, el perfil, el glosario y las instrucciones de las tareas.
+- Cada nota se indexa en fragmentos: sus datos (tema, tipo, carpeta, etiquetas, atributos, recursos), su texto por apartados, cada tarea, cada recurso que tiene descripción y el texto leído de cada documento, por páginas (ver *Fotos y documentos (KNote Atlas)*). Las notas propias de KNote quedan fuera: las sesiones del asistente, el chat room, la evaluación de la búsqueda, el perfil, el glosario y las instrucciones de las tareas.
 - Una nota que cambias queda *pendiente*. Las pendientes se ponen al día antes de cada búsqueda por significado (unas pocas cada vez: hasta 50 notas o unos 10 segundos) o con **Update now**. Una nota muy larga (con más de 64 fragmentos por calcular) se deja para **Update now**: hasta entonces, la búsqueda usa su contenido anterior.
 - **Rebuild** calcula otra vez todos los vectores (tras cambiar las dimensiones, por ejemplo); mientras tanto la búsqueda sigue con los anteriores.
 - **Cambiar el modelo de embeddings** necesita el índice del modelo nuevo. El índice del modelo anterior se conserva (para compararlos, ver *Evaluación de la búsqueda (aplicación Web)*) y aparece en la lista de abajo; un Admin lo puede borrar.
@@ -230,6 +229,7 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 - Por significado salen como mucho las **100 notas más parecidas** (con un parecido de 0,45 o más), la más parecida primero, todas a la vez. La lista tiene dos columnas más: **Similarity**, de 0 a 1 (1 sería el mismo texto), y **Fragment**, la parte de la nota que se ha encontrado. Se puede ordenar por cualquier columna, como siempre.
 - Escribe lo que buscas como se lo contarías a alguien: *cómo conectar el ordenador a una pantalla actual* encuentra mejor que una lista de palabras sueltas. `#123` y `!palabra` son solo de **Words**.
 - Si algunas notas aún no están al día, un aviso encima de la lista lo dice, con **Update index**: pueden faltar o encontrarse por su contenido anterior.
+- Con **Find: Photos** o **Documents** se listan las fotos o los documentos que mejor encajan, en lugar de las notas (ver *Fotos y documentos (KNote Atlas)*).
 - En el **filtro de notas** de las dos aplicaciones, el campo **Talks about…** hace lo mismo entre las notas que cumplen el resto del filtro.
 - Imprimir y exportar una lista encontrada por significado incluyen su **Similarity**.
 
@@ -237,7 +237,7 @@ Cada modelo avisa si esta instalación no lo tiene y si es de pago.
 
 ### Evaluación de la búsqueda (aplicación Web)
 
-**Search evaluation**, un botón de la página **KNote Atlas** (rol ProjectManager o superior), mide cómo funciona la búsqueda en un repositorio: si la búsqueda por significado encuentra lo que buscas mejor que la búsqueda por palabras, y qué modelo de embeddings lo encuentra mejor. Es un laboratorio: úsalo al elegir un modelo o después de cambiar cómo funciona la búsqueda.
+**Search evaluation**, una sección de **KNote Atlas** de la aplicación Web (rol ProjectManager o superior), mide cómo funciona la búsqueda en un repositorio: si la búsqueda por significado encuentra lo que buscas mejor que la búsqueda por palabras, y qué modelo de embeddings lo encuentra mejor. Es un laboratorio: úsalo al elegir un modelo o después de cambiar cómo funciona la búsqueda.
 
 1. **Las consultas de prueba.** Se guardan en la nota **Search test queries**, en la carpeta **KNote Atlas** (se crea la primera vez que abres la página). **Open in the editor** la abre: escribe una tabla con una búsqueda por fila, las notas que debería encontrar y, si quieres, las palabras que usarías para buscar por palabras:
 
@@ -293,7 +293,8 @@ El asistente de las dos aplicaciones lee el repositorio por su cuenta, sin pedir
 - **buscar por significado** (solo si el repositorio tiene índice semántico): «¿tengo algo sobre la Revolución francesa?»;
 - **filtrar** por carpeta, tipo de nota, etiqueta, usuario con una tarea, fechas de creación o modificación y el valor de un atributo: «las notas de la carpeta Facturación modificadas en septiembre»;
 - ver el **árbol de carpetas**;
-- ver las **tareas, alarmas, recursos y relaciones** de una nota;
+- ver las **tareas, alarmas, recursos y relaciones** de una nota (de cada documento, si se ha leído y cuántas páginas tiene);
+- **leer los documentos** de una nota o de la conversación y mirar las páginas de un PDF (ver *Fotos y documentos (KNote Atlas)*);
 - listar las **tareas de un periodo**, de todos o de una persona: «¿qué tareas tiene Marta esta semana?»;
 - consultar términos del **glosario** (solo si tiene términos).
 
@@ -313,7 +314,7 @@ Las carpetas, los tipos de nota, los usuarios y los atributos se nombran como si
 
 **Si no hay tarjeta, no se ha hecho nada.** Un modelo local pequeño puede decir alguna vez que propone o que ha hecho algo sin hacerlo de verdad. Lo que cuenta es la tarjeta o la línea **✔**: si no aparecen, vuelve a pedirlo.
 
-**Imágenes y archivos.** Puedes adjuntar hasta 5 archivos a un mensaje, de 5 MB como mucho cada uno: con el botón **Attach**, pegándolos (Ctrl+V) o soltándolos sobre la caja del mensaje. Con una imagen puedes preguntar por ella, pedir que la describa o que la transcriba («¿Qué modelo es?», «Copia lo que pone en esta pizarra»). El asistente la ve solo en ese mensaje; después trabaja con lo que respondió. Las fotos grandes se reducen para el modelo, y la original se guarda intacta con la conversación, que vuelve a mostrarla al retomarla en cualquiera de las dos apps. Las imágenes de tus conversaciones solo las ves tú. El asistente aún no puede leer otros archivos, como los PDF: solo se guardan con la conversación. Si el modelo no ve imágenes, KNote te lo dice al adjuntar una, y con un proveedor de pago te recuerda que se le envían. En la aplicación de escritorio solo se puede adjuntar en las conversaciones que se guardan (el asistente abierto desde el menú), no en las que abre un script.
+**Imágenes y archivos.** Puedes adjuntar hasta 5 archivos a un mensaje, de 5 MB como mucho cada uno: con el botón **Attach**, pegándolos (Ctrl+V) o soltándolos sobre la caja del mensaje. Con una imagen puedes preguntar por ella, pedir que la describa o que la transcriba («¿Qué modelo es?», «Copia lo que pone en esta pizarra»). El asistente la ve solo en ese mensaje; después trabaja con lo que respondió. Las fotos grandes se reducen para el modelo, y la original se guarda intacta con la conversación, que vuelve a mostrarla al retomarla en cualquiera de las dos apps. Las imágenes de tus conversaciones solo las ves tú. Los documentos que adjuntas (PDF, DOCX, ODT, TXT, MD) los puede leer (ver *Fotos y documentos (KNote Atlas)*). Si el modelo no ve imágenes, KNote te lo dice al adjuntar una, y con un proveedor de pago te recuerda que se le envían. En la aplicación de escritorio solo se puede adjuntar en las conversaciones que se guardan (el asistente abierto desde el menú), no en las que abre un script.
 
 Pídele que guarde un archivo en una nota («Adjunta esta foto a la #340»): muestra tarjeta, como cualquier cambio en una nota que ya existe; en una nota nueva no pregunta, así que puedes decir «Crea una nota con lo que pone en esta pizarra y adjunta la foto». También puede mirar las fotos que ya tiene una nota («Describe las fotos de la #340», «¿En cuál de las fotos de la #512 sale la placa base?») y volver a mirar una imagen de la conversación («Mira otra vez la primera foto»). Mira 3 cada vez y te dice cuántas hay.
 
@@ -322,6 +323,39 @@ Pídele que guarde un archivo en una nota («Adjunta esta foto a la #340»): mue
 **Citas.** Un `#123` en una nota, en una tarea o en una respuesta del asistente es un enlace a esa nota, que se ve distinto de los enlaces a Internet. En la aplicación Web abre el visor de la nota en una ventana; en la de escritorio, el editor de notas. Todo `#` seguido de un número es un enlace, sin comprobar que la nota existe: si no existe, o es una nota propia de KNote, aparece **Note #123 not found**. No son enlaces dentro del código, en el editor HTML de la aplicación de escritorio ni en el chat room.
 
 **Modified between.** El filtro de notas de las dos aplicaciones tiene esta línea: las notas modificadas entre dos fechas, ambas incluidas. Cualquiera de ellas se puede dejar vacía.
+
+### Fotos y documentos (KNote Atlas)
+
+KNote Atlas también trabaja con los recursos de las notas: la IA **describe las fotos** y **resume los documentos**, KNote **lee el texto de los documentos** (PDF, DOCX, ODT, TXT y MD) y la IA **transcribe sus páginas escaneadas**. Así la búsqueda los encuentra por lo que muestran o dicen, y el asistente los puede leer. Nada de esto cambia la fecha de modificación de una nota, y lo que escribe una persona la IA nunca lo sustituye.
+
+Lo hace el **Recommended LLM** del repositorio si esta instalación lo tiene y, si no, el modelo de chat por defecto; para las fotos y las páginas escaneadas, tiene que ver imágenes (como `qwen3.5:9b`). Con un modelo de pago, las fotos, las páginas o el texto se envían a su proveedor, y KNote lo dice antes de empezar. Un recurso puede ocupar hasta **200 MB** en las dos aplicaciones (la aplicación Web lo sube por partes).
+
+**La descripción de un recurso.** La descripción de una foto o de un documento es el campo que cada recurso ya tenía junto a su fichero. Las tarjetas, el visor y el título al insertar el recurso en la nota usan su primera frase como título corto. El editor del recurso tiene la casilla **Lock description (AI won't change it)**:
+
+- **Desmarcada**: la IA puede escribir la descripción y rehacerla después (por ejemplo, con un modelo mejor).
+- **Marcada**: la descripción es de las personas y la IA no la toca. Se marca sola cuando escribes un texto tuyo, y la puedes desmarcar antes de guardar: se guarda lo que diga la casilla. Si desmarcas una descripción escrita por una persona, KNote avisa de que la IA puede rehacerla.
+- El editor dice quién escribió la descripción: una persona, o la IA y su modelo. En la aplicación Web, un candado en la lista de recursos marca las bloqueadas.
+- Vaciar la descripción sin bloquearla pide a la IA que la vuelva a escribir; vacía y bloqueada significa «no describir este recurso».
+
+**Describir o resumir en una nota.** En la pestaña de recursos del editor de notas: en la aplicación de escritorio, el botón **Describe ▾** (**Describe the photos and summarize the documents of the note...**, **Describe the selected photo...** o **Summarize the selected document...**); en la aplicación Web, **Describe with AI** para toda la nota o el botón ✨ de un recurso. KNote dice qué hará, con qué modelo y si es de pago. Si hay descripciones escritas por personas sin bloquear, eliges qué hacer con ellas: dejarlas como están, bloquearlas para conservarlas, o sustituirlas por las de la IA, que las usa para escribir la suya (no se puede deshacer). Las descripciones de las fotos tienen dos o tres frases y empiezan por lo esencial; las de los documentos son un resumen breve. La IA no pone nombre a una persona salvo que la nota o lo que alguien escribió de esa foto lo diga. En la aplicación de escritorio, guarda antes la nota si tiene recursos nuevos o cambiados.
+
+**El texto de un documento.** Los documentos se leen la primera vez que se indexan, en el lote (más abajo) o con **Read document**: en la aplicación Web, en el visor del recurso, pestaña **Text**; en la aplicación de escritorio, en la ventana **Text of the document** (menú **Describe ▾ → Text of the selected document...**). Se ve el estado (leído, a medias, no se puede leer), el texto página a página y **Read again** por si KNote lo lee mejor ahora. Un PDF protegido, dañado o de un formato antiguo (`.doc`) no se puede leer y lo dice.
+
+**Páginas escaneadas.** Una página de un PDF que es una imagen (escaneada) se marca **Scanned page: transcription pending**: mientras, se muestra el texto de su capa de reconocimiento antiguo (OCR), si tiene. **Transcribe scanned pages** (en el visor de la Web y en la ventana del texto en la de escritorio, o **Describe ▾ → Transcribe the scanned pages of the selected document...**) hace que la IA las lea, una a una, con progreso y **Cancel**: tarda unos segundos por página. La casilla **Also the pages with the text of an old recognition (OCR layer)** transcribe también esas, normalmente peores. Una página transcrita lleva el aviso **Automatic transcription** (la IA puede equivocarse en una página de mala calidad) y **See the original page** la abre tal como es: en la Web, el PDF en esa página; en la de escritorio, una ventana con la página elegida en **Page**. Al terminar, si el documento no tenía descripción propia, la IA lo resume.
+
+**Procesar todos los pendientes (Admin).** La sección **Process pending resources** de **KNote Atlas** (en las dos aplicaciones) dice cuántas fotos y documentos hay sin descripción propia, cuántos documentos sin leer y cuántas páginas escaneadas sin transcribir. Marca lo que quieras (**Photos**, **Documents**, **Scanned pages** y, si quieres, también las páginas con capa OCR) y pulsa **Process pending resources**. KNote dice antes qué hará, con qué modelo y, desde la segunda vez, cuánto tardará; con descripciones de personas sin bloquear, eliges como en una nota. Puedes seguir trabajando (en la aplicación de escritorio, la barra de estado muestra el progreso); **Cancel run** conserva lo hecho y la siguiente vez sigue desde ahí. En el servidor Web, este trabajo y la creación del índice semántico van de uno en uno. Al terminar, las notas cambiadas se ponen al día en el índice semántico.
+
+**Buscar fotos y documentos.** Los documentos leídos, las descripciones y las páginas transcritas entran en el índice semántico: **Meaning** los encuentra como encuentra las notas, y el **Fragment** de la lista dice de qué recurso y de qué página sale. Con **Meaning**, el selector **Find: All / Photos / Documents** (en la Web, junto a **Meaning**) cambia lo que se lista:
+
+- **All**: las notas, como siempre.
+- **Photos**: las fotos que mejor encajan, cada una con su nota. En la aplicación Web, como tarjetas con su miniatura; en la de escritorio, en la lista, y **Gallery** las muestra en grande en una ventana.
+- **Documents**: los documentos, con la página donde está lo encontrado; abrir un PDF lleva a esa página (en la aplicación Web, si el visor del navegador lo permite).
+
+Con **Words**, las casillas **Search in note tasks** y **Search in resources** buscan también en las tareas de las notas y en la descripción y el texto leído de sus recursos (en el filtro de notas, **Also in the note tasks** y **Also in the resources**, junto al campo de la descripción). Están desmarcadas por defecto: buscar en el texto de muchos documentos es más lento.
+
+**Personas en un álbum.** KNote no reconoce caras. Para encontrar a una persona en tus fotos: describe la foto con la IA, añade al final de la descripción quién sale, siempre igual («… Personas: abuela Carmen, Lucía.»), y busca el nombre con **Words** y **Search in resources**. Si escribes los nombres antes de que pase la IA, la foto se encuentra por ellos pero se queda sin descripción de lo que muestra. Para que la IA nombre a alguien, escribe en la descripción cómo reconocerlo («La abuela Carmen es la señora del chaleco amarillo, a la derecha») y pide que la describa: usa ese texto y lo completa. Si todas las fotos de una nota son del mismo evento, basta con poner los nombres en la nota.
+
+**El asistente y los documentos.** El asistente lee los documentos de una nota o los que adjuntas a la conversación («¿Qué regulador dice el manual de la #4 que hay que comprobar?», «Resume el PDF que te he adjuntado»). Lee unas doce páginas cada vez (40.000 caracteres) y pide las siguientes si las necesita. Un documento que aún no se ha leído lo lee en ese momento, sin guardar nada. Las páginas escaneadas le llegan marcadas: si están sin transcribir y el modelo ve imágenes, puede mirar la página de un PDF. Lo que dice un documento es información, nunca una orden. No puede traducir ni resumir de una vez un documento muy largo (de más de cien páginas): se puede hacer por partes, y una tarea propia para ello llegará más adelante.
 
 ### Chat room
 

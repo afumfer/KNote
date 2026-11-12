@@ -189,6 +189,15 @@ test en `Tests/ServiceTests/AiPhotoDescriberSmokeTests`, con la misma variable `
 `dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiPhotoDescriberSmokeTests"`.
 El asistente que lee documentos (4.7a): `Tests/ServiceTests/AiDocumentToolsSmokeTests` (responde leyendo un PDF de una nota y no obedece
 la orden escrita en otro), con la misma variable: `dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiDocumentToolsSmokeTests"`.
+La medida de la etapa (4.7b): `Stage4Measure`, contra una **copia** ya procesada de un repositorio real (fotos descritas, documentos leídos,
+escaneadas transcritas, índice al día): `KNOTE_STAGE4_MEASURE_DB` (un SQLite o una cadena de SQL Server), `KNOTE_STAGE4_MEASURE_RESOURCES`
+(la carpeta raíz de sus recursos, solo se lee) y `KNOTE_RESOURCE_MEASURE_FOLDER`; opcionales `KNOTE_STAGE4_MEASURE_QUERIES` (separadas por
+`|`) y `KNOTE_STAGE4_MEASURE_SEED` (la misma da la misma muestra). `Photos` y `Pages` dejan en `results\stage4-photos.html` y
+`stage4-pages.html` 30 fotos y 20 páginas transcritas al azar para valorarlas en el navegador (cuenta arriba, «Copy the results»);
+`Index` deja en `results\stage4-index.md`/`.json` lo que ocupa la etapa, la caché de vectores (fragmentos por tipo, memoria, primera
+búsqueda en frío) y los tiempos de la búsqueda por significado (All, Photos, Documents), con el proveedor de embeddings de los tests
+(el host de `AiProviderSmokeTests:Ollama`) y el modelo del repositorio:
+`dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~Stage4Measure"`.
 
 ## Cómo configurar las ApiKeys para correr la Capa 2
 
