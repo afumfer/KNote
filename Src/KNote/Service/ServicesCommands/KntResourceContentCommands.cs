@@ -277,6 +277,167 @@ public class KntResourceContentGetScannedDocumentsAsyncCommand : KntCommandServi
     }
 }
 
+// KNote Atlas, stage 4 (D14, 4.7a): the text of a document for the assistant (read_document), whole: the one kept or, not read yet,
+// read now and NOT kept (decided by the owner: the assistant only reads). Refused: one that can't be read, one whose file is not here.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntResourceContentGetDocumentToReadAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceTextDto>>
+{
+    public KntResourceContentGetDocumentToReadAsyncCommand(IKntService service, Guid resourceId) : base(service, resourceId)
+    {
+
+    }
+
+    public override async Task<Result<ResourceTextDto>> Execute()
+    {
+        var result = new Result<ResourceTextDto>();
+
+        var (resource, _) = await KntResourceContent.GetDescribableAsync(Service, Param, result);
+        if (!result.IsValid)
+            return result;
+        var format = DocumentTextRules.FormatOf(resource.FileType, resource.Name);
+        if (format == EnumDocumentFormat.None)
+        {
+            result.AddErrorMessage("It is not a document KNote reads (PDF, DOCX, ODT, TXT or MD).");
+            return result;
+        }
+
+        var kept = await Repository.Notes.GetResourceTextAsync(Param);
+        if (!kept.IsValid)
+        {
+            result.AddListErrorMessage(kept.ListErrorMessage);
+            return result;
+        }
+        var text = kept.Entity;
+        if (text == null || text.State == EnumExtractedState.NotRead)
+        {
+            if (Service.DocumentReader == null)
+            {
+                result.AddErrorMessage("This installation can't read documents.");
+                return result;
+            }
+            using var content = KntDocuments.OpenContent(Service, resource);
+            if (content == null)
+            {
+                result.AddErrorMessage(AiDocumentRules.FileNotAvailableMessage);
+                return result;
+            }
+            try
+            {
+                var pages = await Task.Run(() => Service.DocumentReader.Read(content, format));
+                text = new ResourceTextDto
+                {
+                    ResourceId = resource.ResourceId, NoteId = resource.NoteId, Name = resource.Name, FileType = resource.FileType,
+                    State = DocumentTextRules.StateOf(pages), Text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format))
+                };
+            }
+            catch (KntDocumentUnreadableException)
+            {
+                result.AddErrorMessage(AiDocumentRules.UnreadableMessage);
+                return result;
+            }
+        }
+        if (text.State == EnumExtractedState.Unreadable)
+        {
+            result.AddErrorMessage(AiDocumentRules.UnreadableMessage);
+            return result;
+        }
+
+        result.Entity = text;
+        return result;
+    }
+}
+
+// KNote Atlas, stage 4 (D14, 4.7a): a page of a PDF drawn, for the assistant (view_document_pages), from its file without loading it whole.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntResourceContentDrawDocumentPageAsyncCommand : KntCommandServiceBase<DocumentPageRequest, Result<ResourceThumbnailDto>>
+{
+    public KntResourceContentDrawDocumentPageAsyncCommand(IKntService service, DocumentPageRequest request) : base(service, request)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null || Param.ResourceId == Guid.Empty || Param.Page < 1)
+            result.AddErrorMessage("The resource and the page are required.");
+        return result;
+    }
+
+    public override async Task<Result<ResourceThumbnailDto>> Execute()
+    {
+        var result = new Result<ResourceThumbnailDto>();
+
+        var (resource, _) = await KntResourceContent.GetDescribableAsync(Service, Param.ResourceId, result);
+        if (!result.IsValid)
+            return result;
+        if (DocumentTextRules.FormatOf(resource.FileType, resource.Name) != EnumDocumentFormat.Pdf)
+        {
+            result.AddErrorMessage("Only the pages of a PDF can be looked at.");
+            return result;
+        }
+        if (Service.DocumentReader == null)
+        {
+            result.AddErrorMessage("This installation can't read documents.");
+            return result;
+        }
+        using var content = KntDocuments.OpenContent(Service, resource);
+        if (content == null)
+        {
+            result.AddErrorMessage(AiDocumentRules.FileNotAvailableMessage);
+            return result;
+        }
+        try
+        {
+            var image = await Task.Run(() => Service.DocumentReader.DrawPage(content, Param.Page, AiTranscriptionRules.PageImageSide));
+            result.Entity = new ResourceThumbnailDto { ContentType = "image/jpeg", ContentBase64 = Convert.ToBase64String(image) };
+        }
+        catch (Exception ex) when (ex is KntDocumentUnreadableException or PlatformNotSupportedException)
+        {
+            result.AddErrorMessage(ex.Message);
+        }
+        return result;
+    }
+}
+
+// KNote Atlas, stage 4 (D14, 4.7a): what was read of each document of a note (get_note_items): its state, its pages and the scanned
+// ones still to transcribe, in the order of the resources. Not of KNote's own notes.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntResourceContentGetNoteDocumentsAsyncCommand : KntCommandServiceBase<Guid, Result<List<DocumentReadDto>>>
+{
+    public KntResourceContentGetNoteDocumentsAsyncCommand(IKntService service, Guid noteId) : base(service, noteId)
+    {
+
+    }
+
+    public override async Task<Result<List<DocumentReadDto>>> Execute()
+    {
+        var result = new Result<List<DocumentReadDto>>();
+
+        var note = await Service.Notes.GetAsync(Param);
+        if (!note.IsValid || note.Entity == null)
+        {
+            result.AddErrorMessage("The note does not exist.");
+            return result;
+        }
+        if (KntConst.IsSystemNoteType(note.Entity.NoteTypeDto?.Name))
+        {
+            result.AddErrorMessage("The resources of KNote's own notes are not described.");
+            return result;
+        }
+
+        result.Entity = (await KntDocuments.GetDocumentsAsync(Service, Param)).Select(d =>
+        {
+            var pages = DocumentTextRules.Pages(d.Text);
+            return new DocumentReadDto
+            {
+                ResourceId = d.ResourceId, State = d.State, Pages = pages.Count, PagesToTranscribe = pages.Count(p => p.NeedsTranscription)
+            };
+        }).ToList();
+        return result;
+    }
+}
+
 // KNote Atlas, stage 4 (D14): a photo with its file, to draw its thumbnail in the search of photos.
 [KntAuthorize(EnumRoles.Guest)]
 public class KntResourceContentGetPhotoFileAsyncCommand : KntCommandServiceBase<Guid, Result<ResourceDto>>

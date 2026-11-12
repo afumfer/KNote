@@ -59,6 +59,8 @@ public class CommandAuthorizationMatrixTests
             "KntResourceContentGetProcessingStatusAsyncCommand",
             // KNote Atlas, stage 4: the text read of a document (the same notes the user sees).
             "KntResourceContentGetDocumentTextAsyncCommand", "KntResourceContentGetPhotoFileAsyncCommand",
+            "KntResourceContentGetDocumentToReadAsyncCommand", "KntResourceContentDrawDocumentPageAsyncCommand",
+            "KntResourceContentGetNoteDocumentsAsyncCommand",
             // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
             "KntAtlasContextFindGlossaryTermsAsyncCommand",

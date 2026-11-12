@@ -97,7 +97,7 @@ public class AiQueryToolsTests
         CollectionAssert.IsSubsetOf(new[] { "search_notes", "get_note_details", "create_task", "filter_notes", "get_folder_tree", "get_note_items", "get_tasks" }, before);
         CollectionAssert.Contains(after, "find_notes_about");
         CollectionAssert.Contains(after, "lookup_glossary");
-        Assert.AreEqual(22, after.Count, "view_note_images comes in, and attach_file only with files in the conversation.");
+        Assert.AreEqual(24, after.Count, "view_note_images, read_document and view_document_pages come in, and attach_file only with files in the conversation.");
     }
 
     [TestMethod]

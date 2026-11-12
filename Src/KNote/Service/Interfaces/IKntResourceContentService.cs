@@ -60,6 +60,17 @@ public interface IKntResourceContentService
     /// </summary>
     Task<Result<ResourceDto>> GetPhotoFileAsync(Guid resourceId);
 
+    /// <summary>
+    /// The text of a document for the assistant (4.7a, read_document): the one kept or, not read yet, read now and not kept. Guest.
+    /// </summary>
+    Task<Result<ResourceTextDto>> GetDocumentToReadAsync(Guid resourceId);
+
+    /// <summary>A page of a PDF drawn, for the assistant (4.7a, view_document_pages). Guest.</summary>
+    Task<Result<ResourceThumbnailDto>> DrawDocumentPageAsync(Guid resourceId, int page);
+
+    /// <summary>What was read of each document of a note (4.7a, get_note_items): its state, pages and scanned pages to transcribe. Guest.</summary>
+    Task<Result<List<DocumentReadDto>>> GetNoteDocumentsAsync(Guid noteId);
+
     /// <summary>A scanned page pending of a transcription, drawn, to transcribe it (4.5). Staff.</summary>
     Task<Result<PageTranscriptionContextDto>> GetPageContextAsync(Guid resourceId, int page);
 

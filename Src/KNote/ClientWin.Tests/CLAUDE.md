@@ -187,6 +187,8 @@ en `results\transcriptions*`) y `Tests/ServiceTests/AiPageTranscriberSmokeTests`
 El camino de producción de las fotos (`AiPhotoDescriber`: repositorio, contexto de la tarea y guardado condicional) tiene su smoke
 test en `Tests/ServiceTests/AiPhotoDescriberSmokeTests`, con la misma variable `KNOTE_RESOURCE_SMOKE_MODEL` (sin ella, Inconclusive):
 `dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiPhotoDescriberSmokeTests"`.
+El asistente que lee documentos (4.7a): `Tests/ServiceTests/AiDocumentToolsSmokeTests` (responde leyendo un PDF de una nota y no obedece
+la orden escrita en otro), con la misma variable: `dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiDocumentToolsSmokeTests"`.
 
 ## Cómo configurar las ApiKeys para correr la Capa 2
 

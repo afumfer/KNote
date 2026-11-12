@@ -409,6 +409,15 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   que cada proveedor trata a su manera (Ollama lo pasaría a texto), sino en un mensaje detrás de él que añade `AiToolImagesChatClient`,
   debajo de la invocación de funciones. Tests en `Tests/AiAttachmentRulesTests`, `AiImageReducerTests`, `ServiceTests/AiSessionsServiceTests`,
   `InProcessIntegrationTests/AiActionsInProcessTests` y `ClientWin.Tests/KNoteAIAssistantCtrlAttachmentsTests`.
+- **El asistente lee documentos (KNote Atlas, etapa 4, D14)** (`Ai/KNoteAiDocumentTools.cs`, `Model/Core/AiDocumentToolRules`): solo
+  lectura. `read_document` da el texto de un documento de una nota (`IKntResourceContentService.GetDocumentToReadAsync`: el guardado
+  o, sin leer, leído al vuelo **sin guardarlo**) o de la conversación (leído del adjunto con `DocumentReader`), por páginas con su
+  marca (transcrita, escaneada sin transcribir) y cortado en una página a los 40.000 caracteres, con `fromPage`/`toPage` para seguir.
+  `view_document_pages` dibuja páginas de un PDF (`DrawDocumentPageAsync`) como imágenes del turno, como `view_note_images` (y,
+  como ella, solo con un modelo que ve imágenes). `get_note_items` dice de cada documento si se leyó, sus páginas y las escaneadas
+  sin transcribir (`GetNoteDocumentsAsync`). Las notas del sistema, fuera. Tests en `Tests/AiDocumentToolRulesTests`,
+  `ServiceTests/AiDocumentToolsTests` y el smoke `ServiceTests/AiDocumentToolsSmokeTests` (`RequiresRealAiProvider`, con
+  `KNOTE_RESOURCE_SMOKE_MODEL`: responde leyendo un PDF y no obedece la orden escrita en otro).
 - **Razonamiento del modelo (KNote Atlas, etapa 1)**: `AiChatTurnStreamer` separa `TextReasoningContent` en eventos
   `reasoning` y da el texto, el tiempo y los tokens (si el proveedor los distingue; Ollama no, y no se estiman) en el turno.
   `AiChatTurnDto.Reasoning` va con `[JsonIgnore]`: no se guarda ni viaja con el historial, y la Web lo monta con los eventos.
