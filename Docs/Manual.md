@@ -322,7 +322,7 @@ Ask for it to keep a file in a note ("Attach this photo to #340"): it shows a ca
 
 **Citations.** A `#123` in a note, in a task or in an answer of the assistant is a link to that note, shown differently from web links. In the web app it opens the note's viewer in a window; in the desktop app, the note editor. Any `#` followed by a number is a link, without checking that the note exists: when it doesn't, or it is one of KNote's own notes, you get **Note #123 not found**. They aren't links inside code, in the desktop app's HTML editor or in the chat room.
 
-**Modified between.** The notes filter of both apps has this line: the notes modified between two dates, both included. Either of them can be left empty.
+**Modified between.** The notes filter of both apps has this line: the notes modified between two dates, both included. Either of them can be left empty. A note is modified when it is saved, moved to another folder or its tags change; adding or changing its resources, tasks, alarms or relations doesn't change its modification date.
 
 ### Photos and documents (KNote Atlas)
 

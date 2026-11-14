@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.IO;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Service.Core;
 using Microsoft.Extensions.Logging;
 
@@ -318,8 +319,10 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
     {
         Result<NoteDto> res;
 
+        var stored = Param.NoteId == Guid.Empty ? null : (await Repository.Notes.GetAsync(Param.NoteId)).Entity;
+
         // KNote Atlas: the notes of its context only by ProjectManager and Admin (the type it gets and the one it had).
-        var previousTypeId = Param.NoteId == Guid.Empty ? null : (await Repository.Notes.GetAsync(Param.NoteId)).Entity?.NoteTypeId;
+        var previousTypeId = stored?.NoteTypeId;
         if (!await KntAtlasNotes.CanWriteAsync(Service, Param.NoteTypeId, previousTypeId))
         {
             res = new Result<NoteDto>();
@@ -340,14 +343,21 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
                 Param.InternalTags = Service.Notes.UtilGetNoteStatus((await Service.Notes.GetNoteTasksAsync(Param.NoteId)).Entity, (await Service.Notes.GetMessagesAsync(Param.NoteId)).Entity);
             }
 
-            var resExist = await Repository.Notes.GetAsync(Param.NoteId);
-            if (resExist.Entity == null)
+            if (stored == null)
             {
                 res = await Repository.Notes.AddAsync(Param);
             }
             else
             {
-                res = await Repository.Notes.UpdateAsync(Param);
+                // Modified only if its own data changed against what is stored, whatever the editor marked (KNote Atlas,
+                // stage 2, D6): its status, its tasks, alarms, resources or relations alone keep its date.
+                var changedField = NoteChangeRules.ChangedField(stored, Param);
+                if (changedField != null)
+                    Service.Logger?.LogTrace("Note {noteNumber} modified: its {field} changed", stored.NoteNumber, changedField);
+                else
+                    Param.ModificationDateTime = stored.ModificationDateTime;
+
+                res = await Repository.Notes.UpdateAsync(Param, keepModificationDate: changedField == null);
                 if (res.IsValid)
                     await KntSemanticIndexer.MarkStaleAsync(Service, Param.NoteId);
             }
@@ -370,6 +380,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
 
         Param.InternalTags = Service.Notes.UtilGetNoteStatus(Param.Tasks, Param.Messages);
 
+        // Whether it is «modified» (its date) is decided by KntNotesSaveAsyncCommand against what is stored.
         if (Param.IsDirty())
         {
             var resNote = await Service.Notes.SaveAsync(Param.GetSimpleDto<NoteDto>(), false);

@@ -230,6 +230,18 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   dos** (`TasksPanelServiceTests` compara cada tarea devuelta con `TaskPanelRules`). Las tareas de las notas del sistema
   (`@ChatSessions`, `@KNoteChatRoom`) nunca salen en el panel. Tests en `Tests/AlarmOccurrencesTests`,
   `TasksWindowTests`, `TaskPanelRulesTests` y `Tests/ServiceTests/AlarmsCalendarServiceTests`/`TasksPanelServiceTests`.
+- **Fecha de modificación de una nota** (KNote Atlas, etapa 2, D6; la usan el filtro «Modified between» y los resúmenes
+  de un periodo): solo la cambian los datos propios de la nota (tema, texto, etiquetas, tipo, carpeta, atributos), igual
+  en la Web, `ClientWin` y el asistente. Moverla y cambiar sus etiquetas (`PatchFolderAsync`/`PatchChangeTagsAsync`) la
+  cambian; sus recursos, tareas, alarmas, relaciones, su ventana de post-it y lo que escribe la IA en los recursos, no.
+  Lo decide un solo punto, `KntNotesSaveAsyncCommand` (por donde guardan una nota existente las tres), **comparando con lo
+  guardado** (`Model/Core/NoteChangeRules`: sin valor = vacío, CR LF = LF, sin los espacios del final, como `SameText` de
+  la Web; el estado, `InternalTags`, no cuenta), no con las marcas `IsDirty` del editor, que se activan con valores que
+  nadie cambió; si conserva la fecha, `UpdateAsync(..., keepModificationDate: true)`. El log de Trace dice qué campo la
+  cambió. `IsDirty()` sigue decidiendo **si** se guarda. Crear una nota conserva las fechas que trae (las dos ORM). Los
+  editores cargan la nota con `SetEmptyTextsForEditing` antes de `SetIsDirty(false)`; el editor de `ClientWin` no
+  devuelve el estado al modelo. Tests en `Tests/NoteChangeRulesTests`, `Tests/RepositoryParityTests/NoteDatesParityTests`,
+  `Tests/ServiceTests/NoteModificationDateServiceTests` y `ClientWin.Tests/NoteEditorsModificationDateTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben

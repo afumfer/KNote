@@ -249,8 +249,11 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
                 try
                 {
-                    entity.CreationDateTime = DateTime.Now;
-                    entity.ModificationDateTime = DateTime.Now;
+                    // As in EF: the dates it receives are kept (an import keeps the original ones).
+                    if (entity.CreationDateTime == DateTime.MinValue)
+                        entity.CreationDateTime = DateTime.Now;
+                    if (entity.ModificationDateTime == DateTime.MinValue)
+                        entity.ModificationDateTime = DateTime.Now;
                     if (autoNumber)
                         entity.NoteNumber = GetNextNoteNumber(db);
 
@@ -344,7 +347,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
+    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false)
     {
         try
         {
@@ -354,7 +357,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             {
                 var db = GetOpenConnection();
 
-                entity.ModificationDateTime = DateTime.Now;
+                if (!keepModificationDate)
+                    entity.ModificationDateTime = DateTime.Now;
 
                 var sql = @"UPDATE [Notes] SET 
                                 NoteId = @NoteId, 
@@ -1855,15 +1859,18 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             var db = GetOpenConnection();
 
-            var sql = @"UPDATE Notes SET                         
-                    FolderId = @FolderId  
+            // Moving a note modifies it (KNote Atlas, stage 2, D6).
+            var sql = @"UPDATE Notes SET
+                    FolderId = @FolderId,
+                    ModificationDateTime = @ModificationDateTime
                 WHERE NoteId = @NoteId";
 
             var r = await db.ExecuteAsync(sql.ToString(),
                 new
-                {                        
+                {
                     NoteId = noteId,
                     FolderId = folderId,
+                    ModificationDateTime = DateTime.Now
                 });
 
             if (r == 0)
@@ -1902,8 +1909,9 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 actualTag = (actualTag.Replace(oldTag, newTag));
             actualTag = actualTag.Trim();
 
-            sql = @"UPDATE Notes SET Tags = @NewTag  WHERE NoteId = @NoteId";
-            var r = await db.ExecuteAsync(sql.ToString(), new { NoteId = noteId, NewTag = actualTag });
+            // Changing its tags modifies the note (KNote Atlas, stage 2, D6).
+            sql = @"UPDATE Notes SET Tags = @NewTag, ModificationDateTime = @ModificationDateTime WHERE NoteId = @NoteId";
+            var r = await db.ExecuteAsync(sql.ToString(), new { NoteId = noteId, NewTag = actualTag, ModificationDateTime = DateTime.Now });
             if (r == 0)
                 result.AddErrorMessage("Entity not updated");
 

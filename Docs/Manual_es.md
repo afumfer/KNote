@@ -322,7 +322,7 @@ Pídele que guarde un archivo en una nota («Adjunta esta foto a la #340»): mue
 
 **Citas.** Un `#123` en una nota, en una tarea o en una respuesta del asistente es un enlace a esa nota, que se ve distinto de los enlaces a Internet. En la aplicación Web abre el visor de la nota en una ventana; en la de escritorio, el editor de notas. Todo `#` seguido de un número es un enlace, sin comprobar que la nota existe: si no existe, o es una nota propia de KNote, aparece **Note #123 not found**. No son enlaces dentro del código, en el editor HTML de la aplicación de escritorio ni en el chat room.
 
-**Modified between.** El filtro de notas de las dos aplicaciones tiene esta línea: las notas modificadas entre dos fechas, ambas incluidas. Cualquiera de ellas se puede dejar vacía.
+**Modified between.** El filtro de notas de las dos aplicaciones tiene esta línea: las notas modificadas entre dos fechas, ambas incluidas. Cualquiera de ellas se puede dejar vacía. Una nota se modifica al guardarla, moverla a otra carpeta o cambiar sus etiquetas; añadir o cambiar sus recursos, tareas, alarmas o relaciones no cambia su fecha de modificación.
 
 ### Fotos y documentos (KNote Atlas)
 

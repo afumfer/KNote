@@ -120,6 +120,7 @@ else
         if (result.IsValid)
         {
             note = result.Entity;
+            note.SetEmptyTextsForEditing();
             note.SetIsDirty(false);
             showForm = true;
         }

@@ -160,6 +160,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
             Service = service;
 
             Model = (await Service.Notes.GetExtendedAsync(noteId)).Entity;
+            Model.SetEmptyTextsForEditing();
             Model.SetIsDirty(false);
             if(refreshView)
                 View.RefreshView();

@@ -1761,7 +1761,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         _ctrl.Model.Tags = textTags.Text;
-        _ctrl.Model.InternalTags = textStatus.Text;
+        // The status (InternalTags) is not read back: textStatus only shows it, and the Service computes it from the tasks
+        // and alarms when the note is saved. Writing it here made a status change look like a change of the note (KNote
+        // Atlas, stage 2, D6).
 
         if (!ct.DescriptionBlocked)
         {

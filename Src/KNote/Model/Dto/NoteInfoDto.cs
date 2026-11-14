@@ -92,6 +92,19 @@ public class NoteInfoDto : NoteMinimalDto
 
     #endregion
 
+    /// <summary>
+    /// Its texts with no value as empty texts, as an editor shows and gives them back: done when the note is loaded to be
+    /// edited (before SetIsDirty(false)), so that an empty box is not a change of the note (KNote Atlas, stage 2, D6).
+    /// </summary>
+    public void SetEmptyTextsForEditing()
+    {
+        Topic ??= "";
+        Description ??= "";
+        Tags ??= "";
+        InternalTags ??= "";
+        Script ??= "";
+    }
+
     #region Util ContentTypeExt
 
     public ContentTypeExt GetContentTypeExt()

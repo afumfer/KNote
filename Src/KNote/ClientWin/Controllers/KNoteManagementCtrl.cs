@@ -1114,6 +1114,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             View.ShowInfo(resNoteForSaveTask.ErrorMessage);
             return;
         }
+        // As read, nothing of the note changed: only the task is added, so it isn't «modified» (KNote Atlas, stage 2, D6).
+        resNoteForSaveTask.Entity.SetIsDirty(false);
         resNoteForSaveTask.Entity.Tasks.Add(task);
 
         // Refused (e.g. a Guest in this repository) or failed: the reason is in the result.

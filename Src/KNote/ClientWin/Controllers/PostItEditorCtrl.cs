@@ -111,6 +111,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
             Service = service;
 
             Model = (await Service.Notes.GetAsync(noteId)).Entity;
+            Model.SetEmptyTextsForEditing();
             Model.SetIsDirty(false);
 
             FolderWithServiceRef = new FolderWithServiceRef { ServiceRef = Store.GetServiceRef(service.IdServiceRef), FolderInfo = Model?.FolderDto };
@@ -267,26 +268,31 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
                 return false;
             }
 
-            var response = await Service.Notes.SaveAsync(Model);
-
-            if (response.IsValid)
+            // Only its window changed (moved, resized, its colors): the note isn't saved, so it isn't «modified» (KNote Atlas,
+            // stage 2, D6 and D8).
+            if (Model.IsDirty() || isNew)
             {
-                Model = response.Entity;
+                var response = await Service.Notes.SaveAsync(Model);
 
-                Model.SetIsDirty(false);
-                Model.SetIsNew(false);
+                if (response.IsValid)
+                {
+                    Model = response.Entity;
 
-                if (!isNew)
-                    OnSavedEntity(response.Entity);
+                    Model.SetIsDirty(false);
+                    Model.SetIsNew(false);
+
+                    if (!isNew)
+                        OnSavedEntity(response.Entity);
+                    else
+                        OnAddedEntity(response.Entity);
+
+                    await FlushPendingResources();
+                }
                 else
-                    OnAddedEntity(response.Entity);
-
-                await FlushPendingResources();
-            }
-            else
-            {
-                View.ShowInfo(response.ErrorMessage);
-                success = false;
+                {
+                    View.ShowInfo(response.ErrorMessage);
+                    success = false;
+                }
             }
 
             if (WindowPostIt != null)
