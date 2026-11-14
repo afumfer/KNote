@@ -191,6 +191,9 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntSummaryService _summaries;
+    public IKntSummaryService Summaries => _summaries ??= new KntSummaryService(this);
+
     public RepositoryRef RepositoryRef
     {
         get { return _repository.RepositoryRef; }

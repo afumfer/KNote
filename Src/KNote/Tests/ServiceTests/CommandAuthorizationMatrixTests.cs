@@ -61,6 +61,8 @@ public class CommandAuthorizationMatrixTests
             "KntResourceContentGetDocumentTextAsyncCommand", "KntResourceContentGetPhotoFileAsyncCommand",
             "KntResourceContentGetDocumentToReadAsyncCommand", "KntResourceContentDrawDocumentPageAsyncCommand",
             "KntResourceContentGetNoteDocumentsAsyncCommand",
+            // KNote Atlas, stage 2: the pace of the models in the summaries (for the estimates).
+            "KntSummaryGetStateAsyncCommand",
             // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
             "KntAtlasContextFindGlossaryTermsAsyncCommand",
@@ -106,6 +108,10 @@ public class CommandAuthorizationMatrixTests
             "KntResourceContentReadDocumentAsyncCommand", "KntResourceContentGetDocumentContextAsyncCommand",
             "KntResourceContentGetScannedDocumentsAsyncCommand", "KntResourceContentGetPageContextAsyncCommand",
             "KntResourceContentSaveTranscriptionAsyncCommand");
+
+        // KNote Atlas, stage 2: summarizing a long document of a note in a new note (who edits the notes).
+        Add(nameof(EnumRoles.Staff),
+            "KntSummaryPrepareDocumentAsyncCommand", "KntSummarySaveDocumentSummaryAsyncCommand");
 
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",

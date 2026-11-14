@@ -475,6 +475,22 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   del proveedor (`WebSearchToolCallContent`) y añade al final de la respuesta, como «Sources:», las citas (`CitationAnnotation`) que
   no están ya en el texto (`SourcesSection`). Tests en `Tests/AiWebSearchTests`, `InProcessIntegrationTests/WebSearchInProcessTests` y
   los `WebSearch_*` de `RequiresRealAiProvider`.
+- **Resumir un documento largo (KNote Atlas, etapa 2, CU-43)** (`IKntService.Summaries`, comandos en `KntSummaryCommands.cs`;
+  especificación en `C:\Dev\KNote-Atlas\03-Etapa-2.md`, D11, D17, D18, D21 y § 5.1). **El motor** es `Ai/AiSummaryEngine`,
+  genérico sobre piezas (`Model/Core/SummaryPieces`: las páginas de un PDF con su etiqueta «p. N», o trozos por párrafos sin
+  ella): lotes que caben en el contexto (`SummaryBatches`, unos 4 caracteres por token), apuntes de cada lote, «resúmenes de
+  resúmenes» mientras no caben juntos y la redacción final, con las tareas sin herramientas de la etapa 4 (`AiResourceTask`) y la
+  tarea `SummarizeLongDocument`; la 2.5 lo usará con notas sin cambiarlo. **KNote fija el contexto** de esas llamadas
+  (`Ai/AiSummaryContext`: el «Context size» del proveedor o min(`/api/show`, 8.192) en Ollama; 32.000 en OpenAI y Anthropic).
+  `Ai/AiDocumentProcessor` estima (`SummaryEstimate`, con el ritmo por modelo de `AI_SUMMARY_STATE`) y resume: el resultado va a
+  una **nota nueva** `@KNoteSummary` (no del sistema, D5) en la carpeta de la nota del documento, relacionada con ella
+  (`@DerivedFrom`, de la nota nueva a la del documento), con la versión original de la IA adjunta y bloqueada; los textos, en
+  `LongDocumentRules`. La nota del documento no cambia (ni su fecha). Cancelado o fallido, no se guarda nada; un documento cambiado
+  mientras se resumía, tampoco. Las páginas escaneadas sin texto se dejan fuera y la nota lo dice. Trabajos: `KntAtlasJobs`
+  (`DocumentProcess`, uno por usuario) y `Store.DocumentProcessing` en `ClientWin`. Tests en `Tests/SummaryRulesTests`,
+  `ServiceTests/DocumentSummaryServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`, `KntAtlasJobsTests` y
+  `ClientWin.Tests/DocumentProcessingJobTests`; con un modelo real, `ServiceTests/AiDocumentProcessorSmokeTests` y la medida
+  `ServiceTests/LongDocumentMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

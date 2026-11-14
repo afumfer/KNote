@@ -199,6 +199,21 @@ búsqueda en frío) y los tiempos de la búsqueda por significado (All, Photos, 
 (el host de `AiProviderSmokeTests:Ollama`) y el modelo del repositorio:
 `dotnet test ClientWin.Tests/KNote.ClientWin.Tests.csproj --filter "FullyQualifiedName~Stage4Measure"`.
 
+**Documentos largos (KNote Atlas, etapa 2, 2.1a)**: `Tests/ServiceTests/AiDocumentProcessorSmokeTests` (un manual de 12 páginas con
+contexto de 4.096 tokens, así se lee en varios lotes: cita las páginas y no obedece la orden escrita en una de ellas) y la medida
+`Tests/ServiceTests/LongDocumentMeasure`, con un documento real del propietario (`KNOTE_LONGDOC_MEASURE_FILE`; opcionales
+`KNOTE_LONGDOC_MEASURE_CONTEXTS`, tokens separados por `|`, 8192 por defecto; `KNOTE_LONGDOC_MEASURE_LENGTH`, `Short`/`Medium`/`Long`;
+`KNOTE_LONGDOC_MEASURE_LANGUAGE`): lo lee como las apps, lo resume con cada contexto y deja en `results\longdoc-*.md` (bajo
+`KNOTE_RESOURCE_MEASURE_FOLDER` o junto al documento, **fuera del repositorio**) las llamadas, el tiempo, el ritmo y la nota.
+Los dos con `KNOTE_RESOURCE_SMOKE_MODEL`:
+```powershell
+$env:KNOTE_RESOURCE_SMOKE_MODEL = "qwen3.5:9b"
+dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiDocumentProcessorSmokeTests"
+$env:KNOTE_LONGDOC_MEASURE_FILE = "C:\Dev\KNote-Atlas\Medidas-Etapa-2\manual.pdf"
+$env:KNOTE_LONGDOC_MEASURE_CONTEXTS = "8192|16384"
+dotnet test KNoteTest.slnx --filter "FullyQualifiedName~LongDocumentMeasure"
+```
+
 ## Cómo configurar las ApiKeys para correr la Capa 2
 
 `Helpers/AiTestConfig.cs` resuelve cada proveedor con la misma precedencia que usa producción

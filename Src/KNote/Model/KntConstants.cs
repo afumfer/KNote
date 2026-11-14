@@ -67,6 +67,12 @@ public static class KntConst
     public static string TaskPromptModeAttributeName { get; private set; } = "Mode";
     public static string TaskPromptActiveAttributeName { get; private set; } = "Active";
 
+    // The summaries KNote Atlas writes (stage 2): of a period, a subject or a long document. Not a system note type (D5): they
+    // are searched, read, cited and corrected as any note, only left out of what is summarized (D4). Each one is related to
+    // where it comes from with a trace note of this type (D17, D21).
+    public static string SummaryTag { get; private set; } = "@KNoteSummary";
+    public static string DerivedFromTraceNoteType { get; private set; } = "@DerivedFrom";
+
     // The note types of KNote's own notes: out of the tasks panel, of the semantic index, of the tools of the AI and of the
     // citations (they only link users to those notes, keep private conversations, or are KNote Atlas' test queries and
     // reports, which would find themselves, or the context it gives the AI: profile, glossary and task instructions).
@@ -102,6 +108,8 @@ public static class KntConst
     public static string AiIndexStateKey { get; private set; } = "AI_INDEX_STATE";
     // The runs of «Process pending resources» (ResourceProcessingStateDto, JSON): the pace of the last one, for the estimates.
     public static string AiResourcesStateKey { get; private set; } = "AI_RESOURCES_STATE";
+    // The summaries (KNote Atlas, stage 2, SummaryStateDto, JSON): the pace of each model, for the estimates (D18).
+    public static string AiSummaryStateKey { get; private set; } = "AI_SUMMARY_STATE";
 
     // The description the apps give a resource made from an image pasted from the clipboard. Like the file name, it says
     // nothing of the resource: the semantic index leaves out the resources without a description of their own.

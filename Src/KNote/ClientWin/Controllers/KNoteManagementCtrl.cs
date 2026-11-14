@@ -327,6 +327,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         // The app closes: the runs of KNote Atlas stop (what is done is kept).
         Store.SemanticIndex.Cancel();
         Store.ResourceProcessing.Cancel();
+        Store.DocumentProcessing.Cancel();
 
         base.Dispose();
     }

@@ -413,6 +413,19 @@ repositorio de la sesión.
   `SemanticSearchInProcessTests` (modelos) y `SearchByMeaningInProcessTests` (búsqueda, parecidas, informes y
   evaluación), con un generador falso (`TestServices` de `KNoteWebApplicationFactory`).
 
+## KNote Atlas: resúmenes (`SummaryController`, `api/summaries`)
+
+Etapa 2 (la lógica en `Service` y `KNote.Ai`, ver «Resumir un documento largo» en el `CLAUDE.md` raíz). Staff+, en el repositorio
+de la sesión, con `EnforceAuthorization` como el asistente. El modelo es el proveedor de chat de `ProviderAlias` o, sin él, el
+predeterminado del Server.
+
+- `POST documents/estimate` (`DocumentProcessRequestDto` → `DocumentProcessEstimateDto`: páginas, llamadas, contexto, páginas
+  escaneadas sin texto y, con el ritmo del modelo, el tiempo).
+- `POST documents` encola el resumen en `KntAtlasJobs` (tipo `DocumentProcess`, **uno por usuario**: la clave de la cola es
+  repositorio + tipo + dueño, `KntAtlasJob.OwnerKey`; el índice y los recursos siguen con uno por repositorio), `GET
+  documents/progress` (el del usuario: en marcha, en cola o el último; `null`, ninguno) y `POST documents/cancel`. Al terminar
+  bien, si el repositorio tiene índice, encola su puesta al día.
+
 ## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
 
 El contrato (rutas, métodos y eventos) está en `Model/Dto/ChatRoomHubContract`, compartido con `Client` y `ClientWin`.

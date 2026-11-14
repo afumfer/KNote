@@ -81,3 +81,9 @@ public record SemanticIndexProgressChanged(SemanticIndexJob Job);
 /// ends: the KNote Atlas window and the status bar of the main window show it.
 /// </summary>
 public record ResourceProcessingProgressChanged(ResourceProcessingJob Job);
+
+/// <summary>
+/// Published by Store.DocumentProcessing (on the UI thread) when its summary of a long document starts, goes on or ends (KNote
+/// Atlas, stage 2): its window and the status bar of the main window show it.
+/// </summary>
+public record DocumentProcessingProgressChanged(DocumentProcessingJob Job);

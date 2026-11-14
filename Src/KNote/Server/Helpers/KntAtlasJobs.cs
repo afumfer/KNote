@@ -27,7 +27,9 @@ public static class KntAtlasJobsExtensions
 public enum EnumAtlasJobKind
 {
     SemanticIndex,
-    Resources
+    Resources,
+    // KNote Atlas, stage 2 (D18): a summary of a long document, one per user.
+    DocumentProcess
 }
 
 /// <summary>
@@ -46,13 +48,16 @@ public class KntAtlasJobs : BackgroundService
         CancellationToken cancellationToken);
     public delegate Task<Result<ResourceProcessingProgressDto>> ResourcesRunner(ResourceProcessingJob job,
         IProgress<ResourceProcessingProgressDto> progress, CancellationToken cancellationToken);
+    public delegate Task<Result<DocumentProcessProgressDto>> DocumentRunner(DocumentProcessJob job,
+        IProgress<DocumentProcessProgressDto> progress, CancellationToken cancellationToken);
 
     private readonly object _lock = new();
     private readonly List<KntAtlasJob> _queue = new();
-    private readonly Dictionary<(Guid, EnumAtlasJobKind), KntAtlasJob> _lastJobs = new();
+    private readonly Dictionary<(Guid, EnumAtlasJobKind, string), KntAtlasJob> _lastJobs = new();
     private readonly SemaphoreSlim _queued = new(0);
     private readonly IndexRunner _indexRunner;
     private readonly ResourcesRunner _resourcesRunner;
+    private readonly DocumentRunner _documentRunner;
     private readonly ILogger<KntAtlasJobs> _logger;
 
     public KntAtlasJobs(KntRepositories repositories, IAiChatClientProvider chatClients, ILogger<KntAtlasJobs> logger,
@@ -63,14 +68,18 @@ public class KntAtlasJobs : BackgroundService
         _indexRunner = (job, progress, cancellationToken) => RunIndexWithServiceAsync(repositories, generators, job, progress, cancellationToken);
         _resourcesRunner = (job, progress, cancellationToken) =>
             RunResourcesWithServiceAsync(repositories, generators, chatClients, job, progress, cancellationToken);
+        _documentRunner = (job, progress, cancellationToken) =>
+            RunDocumentWithServiceAsync(repositories, generators, chatClients, job, progress, cancellationToken);
     }
 
     private readonly IKntDocumentReader _documentReader;
 
-    public KntAtlasJobs(IndexRunner indexRunner, ResourcesRunner resourcesRunner, ILogger<KntAtlasJobs> logger)
+    public KntAtlasJobs(IndexRunner indexRunner, ResourcesRunner resourcesRunner, ILogger<KntAtlasJobs> logger,
+        DocumentRunner documentRunner = null)
     {
         _indexRunner = indexRunner;
         _resourcesRunner = resourcesRunner;
+        _documentRunner = documentRunner;
         _logger = logger;
     }
 
@@ -129,11 +138,41 @@ public class KntAtlasJobs : BackgroundService
 
     #endregion
 
+    #region Long documents (stage 2)
+
+    /// <summary>
+    /// Queues the summary of a long document with this model for this user, or gives the one the user already has in the
+    /// repository (running or queued): each user has their own (D18).
+    /// </summary>
+    public DocumentProcessProgressDto EnqueueDocument(Guid repositoryId, string repositoryName, string userName,
+        AiProviderRef provider, DocumentProcessRequestDto request) =>
+        (DocumentProcessProgressDto)Enqueue(new DocumentProcessJob(repositoryId, userName, provider, request)
+        {
+            Progress = new DocumentProcessProgressDto
+            {
+                RepositoryId = repositoryId,
+                RepositoryName = repositoryName,
+                RequestedBy = userName,
+                ResourceId = request.ResourceId,
+                Model = provider?.Model,
+                Phase = EnumDocumentProcessPhase.Queued
+            }
+        });
+
+    /// <summary>The progress of the user's summary of a document in the repository (running, queued or the last one), or null.</summary>
+    public DocumentProcessProgressDto GetDocumentProgress(Guid repositoryId, string userName) =>
+        (DocumentProcessProgressDto)GetProgress(repositoryId, EnumAtlasJobKind.DocumentProcess, userName);
+
+    /// <summary>Cancels the user's summary of a document: a queued one leaves the queue, a running one stops after its call.</summary>
+    public bool CancelDocument(Guid repositoryId, string userName) => Cancel(repositoryId, EnumAtlasJobKind.DocumentProcess, userName);
+
+    #endregion
+
     private object Enqueue(KntAtlasJob job)
     {
         lock (_lock)
         {
-            var key = (job.RepositoryId, job.Kind);
+            var key = (job.RepositoryId, job.Kind, job.OwnerKey);
             if (_lastJobs.TryGetValue(key, out var current) && !current.IsFinished)
                 return Snapshot(current);
 
@@ -144,23 +183,23 @@ public class KntAtlasJobs : BackgroundService
         }
     }
 
-    private object GetProgress(Guid repositoryId, EnumAtlasJobKind kind)
+    private object GetProgress(Guid repositoryId, EnumAtlasJobKind kind, string owner = null)
     {
         lock (_lock)
-            return _lastJobs.TryGetValue((repositoryId, kind), out var job) ? Snapshot(job) : null;
+            return _lastJobs.TryGetValue((repositoryId, kind, owner), out var job) ? Snapshot(job) : null;
     }
 
-    private bool IsBusy(Guid repositoryId, EnumAtlasJobKind kind)
+    private bool IsBusy(Guid repositoryId, EnumAtlasJobKind kind, string owner = null)
     {
         lock (_lock)
-            return _lastJobs.TryGetValue((repositoryId, kind), out var job) && !job.IsFinished;
+            return _lastJobs.TryGetValue((repositoryId, kind, owner), out var job) && !job.IsFinished;
     }
 
-    private bool Cancel(Guid repositoryId, EnumAtlasJobKind kind)
+    private bool Cancel(Guid repositoryId, EnumAtlasJobKind kind, string owner = null)
     {
         lock (_lock)
         {
-            if (!_lastJobs.TryGetValue((repositoryId, kind), out var job) || job.IsFinished)
+            if (!_lastJobs.TryGetValue((repositoryId, kind, owner), out var job) || job.IsFinished)
                 return false;
 
             if (_queue.Remove(job))
@@ -237,6 +276,23 @@ public class KntAtlasJobs : BackgroundService
                         EnqueueIndex(resources.RepositoryId, resources.Progress.RepositoryName, resources.UserName, false);
                     break;
                 }
+                case DocumentProcessJob document:
+                {
+                    var progress = new JobProgress<DocumentProcessProgressDto>(this, document, (current, value) =>
+                    {
+                        value.RepositoryId = current.RepositoryId;
+                        value.RepositoryName = current.RepositoryName ?? value.RepositoryName;
+                        value.RequestedBy = current.RequestedBy;
+                        value.Model ??= current.Model;
+                        document.Progress = value;
+                    }, () => document.Progress, p => p.Copy());
+                    var result = await _documentRunner(document, progress, cancellation.Token);
+                    progress.Report(result.Entity ?? new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Failed, Message = result.ErrorMessage });
+                    // The new note, for the search by meaning.
+                    if (result.Entity?.Phase == EnumDocumentProcessPhase.Completed && document.HasSemanticIndex)
+                        EnqueueIndex(document.RepositoryId, document.Progress.RepositoryName, document.UserName, false);
+                    break;
+                }
             }
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
@@ -292,6 +348,28 @@ public class KntAtlasJobs : BackgroundService
         return await AiResourceProcessor.ProcessAsync(service, chatClient, job.Provider, job.Options, progress, _logger, cancellationToken);
     }
 
+    private async Task<Result<DocumentProcessProgressDto>> RunDocumentWithServiceAsync(KntRepositories repositories,
+        IKntEmbeddingGenerators generators, IAiChatClientProvider chatClients, DocumentProcessJob job,
+        IProgress<DocumentProcessProgressDto> progress, CancellationToken cancellationToken)
+    {
+        var repository = repositories.Find(job.RepositoryId);
+        if (repository == null)
+            return NoRepository(new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Failed });
+
+        using var service = repositories.CreateService(repository, job.UserName, null);
+        service.EmbeddingGenerators = generators;
+        service.DocumentReader = _documentReader;
+        service.Logger = _logger;
+        // The roles of the commands apply, as in a request of the assistant.
+        service.EnforceAuthorization = true;
+
+        var index = await service.SemanticSearch.GetIndexStatusAsync();
+        job.HasSemanticIndex = index.IsValid && index.Entity?.Status != EnumSemanticIndexStatus.None;
+
+        return await AiDocumentProcessor.SummarizeAsync(service, provider => chatClients.Create(provider, []), job.Provider, job.Request,
+            progress, _logger, cancellationToken);
+    }
+
     private static Result<T> NoRepository<T>(T failed)
     {
         var result = new Result<T>(failed);
@@ -344,6 +422,8 @@ public abstract class KntAtlasJob
     public abstract EnumAtlasJobKind Kind { get; }
     public Guid RepositoryId { get; }
     public string UserName { get; }
+    // Whose run it is, besides the repository and the kind: null, of the repository (one for all); the user, one per user (D18).
+    public virtual string OwnerKey => null;
     public CancellationTokenSource Cancellation { get; } = new();
 
     internal abstract bool IsFinished { get; }
@@ -405,6 +485,41 @@ public sealed class ResourceProcessingJob : KntAtlasJob
     internal override void MarkFailed(string message)
     {
         Progress.Phase = EnumResourceProcessingPhase.Failed;
+        Progress.Message = message;
+    }
+
+    internal override object Snapshot(int queuePosition)
+    {
+        var progress = Progress.Copy();
+        progress.QueuePosition = queuePosition;
+        return progress;
+    }
+}
+
+public sealed class DocumentProcessJob : KntAtlasJob
+{
+    public DocumentProcessJob(Guid repositoryId, string userName, AiProviderRef provider, DocumentProcessRequestDto request)
+        : base(repositoryId, userName)
+    {
+        Provider = provider;
+        Request = request;
+    }
+
+    public override EnumAtlasJobKind Kind => EnumAtlasJobKind.DocumentProcess;
+    public override string OwnerKey => UserName;
+    public AiProviderRef Provider { get; }
+    public DocumentProcessRequestDto Request { get; }
+    public DocumentProcessProgressDto Progress { get; set; }
+    // Whether the repository has a semantic index (its update is queued when the summary is kept).
+    public bool HasSemanticIndex { get; set; }
+
+    internal override bool IsFinished => Progress.IsFinished;
+    internal override void MarkPreparing() => Progress.Phase = EnumDocumentProcessPhase.Preparing;
+    internal override void MarkCanceled() => Progress.Phase = EnumDocumentProcessPhase.Canceled;
+
+    internal override void MarkFailed(string message)
+    {
+        Progress.Phase = EnumDocumentProcessPhase.Failed;
         Progress.Message = message;
     }
 
