@@ -481,7 +481,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   ella): lotes que caben en el contexto (`SummaryBatches`, unos 4 caracteres por token), apuntes de cada lote, «resúmenes de
   resúmenes» mientras no caben juntos y la redacción final, con las tareas sin herramientas de la etapa 4 (`AiResourceTask`) y la
   tarea `SummarizeLongDocument`; la 2.5 lo usará con notas sin cambiarlo. **KNote fija el contexto** de esas llamadas
-  (`Ai/AiSummaryContext`: el «Context size» del proveedor o min(`/api/show`, 8.192) en Ollama; 32.000 en OpenAI y Anthropic).
+  (`Ai/AiSummaryContext`: el «Context size» del proveedor o min(`/api/show`, 16.384) en Ollama; 32.000 en OpenAI y Anthropic).
   `Ai/AiDocumentProcessor` estima (`SummaryEstimate`, con el ritmo por modelo de `AI_SUMMARY_STATE`) y resume: el resultado va a
   una **nota nueva** `@KNoteSummary` (no del sistema, D5) en la carpeta de la nota del documento, relacionada con ella
   (`@DerivedFrom`, de la nota nueva a la del documento), con la versión original de la IA adjunta y bloqueada; los textos, en

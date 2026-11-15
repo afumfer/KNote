@@ -40,6 +40,18 @@ public static class WindowPlacement
         return new Rectangle(x, y, width, height);
     }
 
+    /// <summary>
+    /// Places <paramref name="form"/>, before it is shown, centered on <paramref name="over"/> (kept on a screen). For the windows that
+    /// aren't modal: FormStartPosition.CenterParent only centers a window shown with ShowDialog.
+    /// </summary>
+    public static void CenterOn(Form form, Form over)
+    {
+        var area = over.Bounds;
+        form.StartPosition = FormStartPosition.Manual;
+        form.Bounds = EnsureVisible(new Rectangle(
+            area.Left + (area.Width - form.Width) / 2, area.Top + (area.Height - form.Height) / 2, form.Width, form.Height));
+    }
+
     private static long DistanceSquared(Point point, Rectangle area)
     {
         long dx = point.X < area.Left ? area.Left - point.X : point.X > area.Right ? point.X - area.Right : 0;

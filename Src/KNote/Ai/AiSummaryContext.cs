@@ -5,12 +5,12 @@ namespace KNote.Ai;
 /// <summary>
 /// The context KNote fixes in the calls of the summaries (KNote Atlas, stage 2, D11): without num_ctx, Ollama doesn't use the
 /// model's context but its own, which its server decides and may be much smaller, and it cuts what doesn't fit without saying it.
-/// Ollama: the provider's «Context size» or, without it, the smaller of the model's longest one (/api/show) and 8,192. OpenAI and
+/// Ollama: the provider's «Context size» or, without it, the smaller of the model's longest one (/api/show) and 16,384 (measured in 2.1a1). OpenAI and
 /// Anthropic: a fixed one, kept small for its cost (2.1a). The assistant doesn't change.
 /// </summary>
 public static class AiSummaryContext
 {
-    public const int OllamaDefaultTokens = 8_192;
+    public const int OllamaDefaultTokens = 16_384;
     public const int PaidTokens = 32_000;
 
     public static async Task<int> TokensAsync(AiProviderRef provider, CancellationToken cancellationToken = default)

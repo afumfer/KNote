@@ -903,6 +903,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         // 4.5b: its scanned pages, in the same window (it starts when shown).
         var transcribe = menu.Items.Add("Transcribe the scanned pages of the selected document...", null, (s, a) => ShowDocumentText(selected, transcribe: true));
         transcribe.Enabled = selected != null && DocumentTextRules.FormatOf(selected.FileType, selected.Name) == EnumDocumentFormat.Pdf;
+        // KNote Atlas, stage 2 (2.1a2): the summary of the whole document in a new note.
+        var summarize = menu.Items.Add(SummaryTexts.MenuItem, null, async (s, a) => await ShowLongDocumentSummaryAsync(selected));
+        summarize.Enabled = selected != null && DocumentTextRules.IsDocument(selected);
         menu.Closed += (s, a) => BeginInvoke(menu.Dispose);
         menu.Show(buttonDescribePhotos, new Point(0, buttonDescribePhotos.Height));
     }
@@ -912,6 +915,17 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     private ResourceDto SelectedResourceNow() =>
         _selectedResource == null ? null
             : _ctrl.Model.Resources.FirstOrDefault(r => r.ResourceId == _selectedResource.ResourceId) ?? _selectedResource;
+
+    // As its text, the summary reads the document of the repository: a document new or with changes here has to be saved first.
+    private async Task ShowLongDocumentSummaryAsync(ResourceDto document)
+    {
+        if (!NoteEditorCtrl.CanReadNow(document))
+        {
+            ShowInfo("Save the note first: the document is new or has changes not saved.");
+            return;
+        }
+        await _ctrl.ShowLongDocumentSummaryAsync(document, () => ShowDocumentText(document, transcribe: true));
+    }
 
     // Its text is the one of the repository: a document new or with changes here has to be saved first. transcribe: «Transcribe
     // the scanned pages of the selected document» (4.5b).

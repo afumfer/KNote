@@ -504,6 +504,15 @@ Patrones ya establecidos que hay que seguir:
   (`TranscribePageAsync`) con su progreso y «Cancel» (tras la página en curso; cerrar el visor también para). Si el documento
   esperaba su resumen (`AiDocumentRules.WaitsForSummary`), se resume al final y se actualiza el `ResourceInfoDto` de la tarjeta.
   Las páginas transcritas llevan «Automatic transcription» y «See the original page», que muestra el PDF en `#page=N`.
+- **Resumir un documento largo** (KNote Atlas, etapa 2, 2.1a2): «Summarize document…» en el pie de `NoteResourceViewer` y el botón
+  `summarize` de la tarjeta de un documento en `NoteKResources` (Staff+, `KntAccess` al pulsar) abren `LongDocumentSummaryDialog`
+  (`IStore.Summaries`, `api/summaries`): idioma (`RadzenAutoComplete` sobre `SummaryTexts.Languages`, texto libre; el último del
+  repositorio en `localStorage`, `KNoteSummaryLanguage:{RepositoryId}`), extensión y modelo (el recomendado del repositorio, alias
+  vacío, que resuelve el `Server`, u otro de `GetProvidersAsync`); «Estimate», «Generate» y el progreso, pedido cada 1,5 s sin
+  notificar errores. El trabajo está en la cola del `Server` (uno por usuario): sigue si se cierra el diálogo y, al abrirlo otra vez,
+  se ve. «Open the note» al terminar (`KntWindows.OpenEditAsync`, en el mismo clic). «Transcribe them first» cierra el diálogo con
+  `TranscribeResult`: el visor pasa a «Text» y transcribe; desde la tarjeta se abre el visor con `StartInText`. Textos en
+  `Model/Core/SummaryTexts`, comunes con `ClientWin`.
 - **Recursos de la nota** (`NoteKResources`, galería; `NoteResourceEditor`, diálogo de alta y edición): al editar
   un recurso solo cambian su descripción y su orden; el fichero no se cambia ni se reenvía (`Server` conserva el
   fichero y el contenido guardado en la BD, ver `Server/CLAUDE.md`). Al pulsar un recurso se ve en la misma ventana

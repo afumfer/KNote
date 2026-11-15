@@ -48,7 +48,7 @@ public class SummaryController : ControllerBase
     public Task<IActionResult> EstimateDocument([FromBody] DocumentProcessRequestDto request, CancellationToken cancellationToken) =>
         RunAsync(nameof(EstimateDocument), async () =>
         {
-            var (provider, error) = Provider(request);
+            var (provider, error) = await ProviderAsync(request);
             if (error != null)
                 return error.As<DocumentProcessEstimateDto>();
 
@@ -60,15 +60,15 @@ public class SummaryController : ControllerBase
     [HttpPost("documents")]
     [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> SummarizeDocument([FromBody] DocumentProcessRequestDto request) =>
-        RunAsync(nameof(SummarizeDocument), () =>
+        RunAsync(nameof(SummarizeDocument), async () =>
         {
-            var (provider, error) = Provider(request);
+            var (provider, error) = await ProviderAsync(request);
             if (error != null)
-                return Task.FromResult(error.As<DocumentProcessProgressDto>());
+                return error.As<DocumentProcessProgressDto>();
 
             var repository = _repositories.ForUser(User);
-            return Task.FromResult(new Result<DocumentProcessProgressDto>(
-                _jobs.EnqueueDocument(repository.RepositoryId, repository.RepositoryRef.Name, User?.Identity?.Name, provider, request)));
+            return new Result<DocumentProcessProgressDto>(
+                _jobs.EnqueueDocument(repository.RepositoryId, repository.RepositoryRef.Name, User?.Identity?.Name, provider, request));
         });
 
     // The user's summary of a document in this repository: running, queued or the last one (null, none).
@@ -82,8 +82,8 @@ public class SummaryController : ControllerBase
     public IActionResult CancelDocument() =>
         Ok(new Result<bool>(_jobs.CancelDocument(_repositories.ForUser(User).RepositoryId, User?.Identity?.Name)));
 
-    // The chat provider asked for, or the default one.
-    private (AiProviderRef Provider, Result Error) Provider(DocumentProcessRequestDto request)
+    // The chat provider asked for or, without one, the repository's recommended LLM if this Server has it, else the default one.
+    private async Task<(AiProviderRef Provider, Result Error)> ProviderAsync(DocumentProcessRequestDto request)
     {
         var error = new Result();
         if (request == null || request.ResourceId == Guid.Empty)
@@ -92,7 +92,14 @@ public class SummaryController : ControllerBase
             return (null, error);
         }
 
-        var provider = string.IsNullOrWhiteSpace(request.ProviderAlias) ? _providers.Default : _providers.Find(request.ProviderAlias);
+        AiProviderRef provider;
+        if (string.IsNullOrWhiteSpace(request.ProviderAlias))
+        {
+            var models = await _service.SystemValues.GetRepositoryAiModelsAsync();
+            provider = AiProviderSelection.ForRepository(_providers.ChatProviders, models.Entity?.LlmModel, _providers.Default);
+        }
+        else
+            provider = _providers.Find(request.ProviderAlias);
         if (provider == null)
         {
             error.AddErrorMessage(string.IsNullOrWhiteSpace(request.ProviderAlias)

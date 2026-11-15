@@ -50,6 +50,8 @@ public class ControllerAuthorizationMatrixTests
         ["RepositoryResourcesCtrl"] = Included,
         // KNote Atlas: the window of the context of the AI (any user; its buttons ask the role of each command).
         ["AtlasCtrl"] = Requirement(EnumRoles.Guest, AuthorizationScope.Repository),
+        // KNote Atlas, stage 2: summarizing a long document of a note in a new note (who edits the notes).
+        ["LongDocumentSummaryCtrl"] = Requirement(EnumRoles.Staff, AuthorizationScope.Repository),
 
         // Depends on its EditorMode (see RepositoryEditorModes_RequireTheirOwnRole).
         ["RepositoryEditorCtrl"] = Included,

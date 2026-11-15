@@ -117,6 +117,9 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private ISummaryWebApiService? _summaries;
+    public ISummaryWebApiService Summaries => _summaries ??= new SummaryWebApiService(AppState, _httpClient);
+
     private IAiAssistantWebApiService? _aiAssistant;
     public IAiAssistantWebApiService AiAssistant
     {

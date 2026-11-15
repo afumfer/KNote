@@ -1,5 +1,6 @@
 ﻿@inject TooltipService tooltipService
 @inject DialogService dialogService
+@inject KNote.Client.Auth.KntAccess access
 
 @* The note's resources as a gallery: a card for each, with its image (any image type) or an icon of its kind of
    file, its description and name, and its actions (view, edit, open, insert in the description, delete). *@
@@ -66,6 +67,12 @@ else
                         <RadzenButton Icon="auto_awesome" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                       Click="@(() => OnDescribe.InvokeAsync(resource))" Disabled="@Busy"
                                       MouseEnter="@(args => tooltipService.Open(args, AiPhotoRules.IsPhoto(resource) ? "Describe photo with the AI" : "Summarize document with the AI"))" />
+                    }
+                    @if (DocumentTextRules.IsDocument(resource) && resource.ResourceId != Guid.Empty)
+                    {
+                        <RadzenButton Icon="summarize" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                      Click="@(() => SummarizeAsync(resource))" Disabled="@Busy"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Summarize the whole document in a new note"))" />
                     }
                     <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OnEdit.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
@@ -134,6 +141,21 @@ else
         await dialogService.OpenAsync<NoteResourceViewer>("View resource",
             new Dictionary<string, object?> { { "Resource", resource } }, NoteResourceViewer.Options());
     }
+
+    // KNote Atlas, stage 2 (2.1a2): the summary of the whole document in a new note. «Transcribe them first» opens the viewer with
+    // its text, where its scanned pages are transcribed.
+    private async Task SummarizeAsync(ResourceInfoDto resource)
+    {
+        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Summarizing documents"))
+            return;
+        var result = await dialogService.OpenAsync<LongDocumentSummaryDialog>(SummaryTexts.Title,
+            new Dictionary<string, object?> { { "Resource", resource } }, KntDialogs.Framed(KntDialogs.Medium()));
+        if (result as string == LongDocumentSummaryDialog.TranscribeResult)
+            await dialogService.OpenAsync<NoteResourceViewer>("View resource",
+                new Dictionary<string, object?> { { "Resource", resource }, { "StartInText", true } }, NoteResourceViewer.Options());
+    }
+
+    [CascadingParameter] private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthenticationState { get; set; } = null!;
 
     private async Task OpenAsync(ResourceInfoDto resource) =>
         await js.InvokeVoidAsync("open", resource.FullUrl, "_blank", "noopener");

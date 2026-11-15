@@ -169,7 +169,7 @@ namespace KNote.ClientWin.Views
             Controls.Add(labelState);
             Controls.Add(labelFile);
             MinimizeBox = false;
-            MinimumSize = new Size(480, 320);
+            MinimumSize = new Size(580, 320);
             Name = "DocumentTextForm";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;

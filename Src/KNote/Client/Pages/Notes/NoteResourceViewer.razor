@@ -156,6 +156,11 @@
         </div>
     </ChildContent>
     <Footer>
+        @if (isDocument)
+        {
+            <RadzenButton Text="@(SummaryTexts.Title + "…")" Icon="summarize" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                          class="knt-footer-start" Disabled="@transcribingFlight.IsBusy" Click="OnSummarize" />
+        }
         <RadzenButton Text="Open in a new tab" Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
                       Disabled="@string.IsNullOrEmpty(Resource.FullUrl)" Click="OpenAsync" />
         <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Primary" Click="() => dialogService.Close(null)" />
@@ -166,6 +171,8 @@
     [Parameter] [EditorRequired] public ResourceInfoDto Resource { get; set; } = null!;
     // KNote Atlas 4.6b: the page to show of a PDF (the page of the fragment found by the search).
     [Parameter] public int? Page { get; set; }
+    // KNote Atlas, stage 2 (2.1a2): open with the text of the document (to transcribe its scanned pages, «Transcribe them first»).
+    [Parameter] public bool StartInText { get; set; }
 
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
@@ -228,7 +235,7 @@
         if (Page is int page && page > 0 && pdfPage == 0 && kind == KntFileTypes.Kind.Pdf)
             pdfPage = page;
         // A document the browser can't show (DOCX, ODT) opens with its text.
-        if (isDocument && kind == KntFileTypes.Kind.Other && !showText)
+        if (isDocument && (kind == KntFileTypes.Kind.Other || StartInText) && !showText)
         {
             showText = true;
             await LoadTextAsync();
@@ -291,6 +298,20 @@
     }
 
     private Task OnTranscribe() => transcribingFlight.RunAsync(TranscribeAsync);
+
+    // KNote Atlas, stage 2 (2.1a2): the summary of the whole document in a new note; «Transcribe them first» transcribes here.
+    private async Task OnSummarize()
+    {
+        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Summarizing documents"))
+            return;
+        var result = await dialogService.OpenAsync<LongDocumentSummaryDialog>(SummaryTexts.Title,
+            new Dictionary<string, object?> { { "Resource", Resource } }, KntDialogs.Framed(KntDialogs.Medium()));
+        if (result as string == LongDocumentSummaryDialog.TranscribeResult && !disposal.IsCancellationRequested)
+        {
+            await OnShowTextChanged(true);
+            await OnTranscribe();
+        }
+    }
 
     private async Task TranscribeAsync()
     {

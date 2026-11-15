@@ -44,6 +44,24 @@ public partial class DocumentTextForm : KntForm
         buttonTranscribe.Text = DocumentTexts.TranscribePages;
         buttonOriginalPage.Text = DocumentTexts.SeeOriginalPage;
         labelPage.Visible = numericPage.Visible = buttonOriginalPage.Visible = _isPdf;
+
+        // KNote Atlas, stage 2 (2.1a2): the summary of the whole document, in its own window; «Transcribe them first» transcribes here.
+        // Left of «Close»: on the left are the page controls of a PDF.
+        var summarizeWidth = LogicalToDeviceUnits(150);
+        var buttonSummarize = new Button
+        {
+            Text = SummaryTexts.Title + "...",
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
+            Location = new Point(buttonClose.Left - LogicalToDeviceUnits(6) - summarizeWidth, buttonClose.Top),
+            Size = new Size(summarizeWidth, buttonClose.Height),
+            UseVisualStyleBackColor = true
+        };
+        buttonSummarize.Click += async (_, _) => await _ctrl.ShowLongDocumentSummaryAsync(_resource, () =>
+        {
+            if (!IsDisposed && buttonTranscribe.Visible)
+                buttonTranscribe.PerformClick();
+        });
+        Controls.Add(buttonSummarize);
     }
 
     protected override async void OnShown(EventArgs e)

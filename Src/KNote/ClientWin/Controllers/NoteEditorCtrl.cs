@@ -816,6 +816,19 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
     #region Describe photos (KNote Atlas, stage 4)
 
+    /// <summary>
+    /// «Summarize document» (KNote Atlas, stage 2) for a document of this note already saved: its window, not modal.
+    /// transcribe: what «Transcribe them first» does (the window with the transcription of the document).
+    /// </summary>
+    public async Task ShowLongDocumentSummaryAsync(ResourceDto document, Action transcribe)
+    {
+        var summary = new LongDocumentSummaryCtrl(Store);
+        await summary.LoadAsync(Store.GetServiceRef(Service.IdServiceRef), document);
+        if (transcribe != null)
+            summary.TranscribeRequested += (_, _) => transcribe();
+        summary.Run();
+    }
+
     // The model that describes the photos (Store.GetPhotoDescriberAsync).
     public Task<(AiProviderRef Provider, ResourceDescriberDto Info)> GetPhotoDescriberAsync() => Store.GetPhotoDescriberAsync(Service);
 

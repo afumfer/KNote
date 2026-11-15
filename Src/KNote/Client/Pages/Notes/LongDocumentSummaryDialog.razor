@@ -1,0 +1,247 @@
+@using KNote.Client.Auth
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject DialogService dialogService
+@inject IStore store
+@inject IJSRuntime js
+@inject KntWindows kntWindows
+@inject AuthenticationStateProvider authenticationStateProvider
+
+@implements IDisposable
+
+@* «Summarize document» (KNote Atlas, stage 2, CU-43, 2.1a2): the summary of a long document of a note in a new note, with the
+   language (a list or free text; the last one of the repository, in the browser), the length and the model (the repository's
+   recommended one, or another chat provider of the Server). «Estimate», «Generate» and its progress, asked to the Server every
+   second or two: the run is in the Server's queue (one per user) and goes on if the dialog is closed; opened again, it shows it.
+   «Open the note» at the end. Result: "transcribe" if «Transcribe them first» was chosen, else null. *@
+
+<KntDialogFrame Icon="summarize" Title="@SummaryTexts.Title" Subtitle="@Resource.NameOut">
+    <ChildContent>
+        <RadzenStack Gap="1rem">
+            <RadzenText TextStyle="TextStyle.Body2">@SummaryTexts.Intro</RadzenText>
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeSM="6">
+                    <KntField Label="Language" Component="SummaryLanguage" Help="@SummaryTexts.LanguageHelp">
+                        <RadzenAutoComplete Name="SummaryLanguage" @bind-Value="@language" Data="@SummaryTexts.Languages" Disabled="@Running"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" MinLength="0" OpenOnFocus="true" />
+                    </KntField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeSM="6">
+                    <KntField Label="Length" Component="SummaryLength">
+                        <RadzenDropDown Name="SummaryLength" TValue="EnumSummaryLength" @bind-Value="@length" Data="@lengths" Disabled="@Running"
+                                        TextProperty="Text" ValueProperty="Value" />
+                    </KntField>
+                </RadzenColumn>
+            </RadzenRow>
+            <KntField Label="Model" Component="SummaryModel">
+                <RadzenDropDown Name="SummaryModel" TValue="string" @bind-Value="@providerAlias" Data="@models" Disabled="@Running"
+                                TextProperty="Text" ValueProperty="Value" />
+            </KntField>
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenButton Text="@SummaryTexts.Estimate" Icon="calculate" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                              IsBusy="@estimating.IsBusy" BusyText="Estimating…" Disabled="@Running" Click="OnEstimate" />
+            </RadzenStack>
+            @if (estimateError != null)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">@estimateError</RadzenAlert>
+            }
+            else if (estimate != null)
+            {
+                <RadzenStack Gap="0.25rem">
+                    @foreach (var line in SummaryTexts.EstimateLines(estimate, ProviderName))
+                    {
+                        <RadzenText TextStyle="TextStyle.Body2">@line</RadzenText>
+                    }
+                </RadzenStack>
+                @if (estimate.MissingPages.Count > 0)
+                {
+                    <div>
+                        <RadzenButton Text="@SummaryTexts.TranscribeFirst" Icon="document_scanner" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                                      Size="ButtonSize.Small" Disabled="@Running" Click="() => CloseDialog(TranscribeResult)" />
+                    </div>
+                }
+            }
+
+            @if (progress != null)
+            {
+                <RadzenStack Gap="0.25rem">
+                    @if (Running)
+                    {
+                        <RadzenProgressBar Value="@(SummaryTexts.Share(progress) * 100)" ShowValue="false" Mode="@(progress.CallsTotal > 0 ? ProgressBarMode.Determinate : ProgressBarMode.Indeterminate)" />
+                    }
+                    <RadzenText TextStyle="TextStyle.Body2" class="@(progress.Phase == EnumDocumentProcessPhase.Failed ? "rz-color-danger" : "")">
+                        @SummaryTexts.Progress(progress)
+                    </RadzenText>
+                    @if (Running)
+                    {
+                        <RadzenText TextStyle="TextStyle.Caption">@SummaryTexts.Running</RadzenText>
+                    }
+                </RadzenStack>
+            }
+        </RadzenStack>
+    </ChildContent>
+    <Footer>
+        @if (progress?.Phase == EnumDocumentProcessPhase.Completed && progress.NoteId is Guid noteId)
+        {
+            <RadzenButton Text="@SummaryTexts.OpenNote" Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                          class="knt-footer-start" Click="() => kntWindows.OpenEditAsync(noteId)" />
+        }
+        @if (Running)
+        {
+            <RadzenButton Text="@SummaryTexts.Cancel" Icon="stop" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                          IsBusy="@canceling.IsBusy" Click="OnCancel" />
+        }
+        <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => CloseDialog(null)" />
+        <RadzenButton Text="@SummaryTexts.Generate" Icon="summarize" ButtonStyle="ButtonStyle.Primary"
+                      IsBusy="@starting.IsBusy" Disabled="@Running" Click="OnGenerate" />
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    public const string TranscribeResult = "transcribe";
+
+    [Parameter] [EditorRequired] public ResourceInfoDto Resource { get; set; } = null!;
+
+    private sealed record Option<T>(string Text, T Value);
+
+    private readonly List<Option<EnumSummaryLength>> lengths = SummaryTexts.Lengths.Select(l => new Option<EnumSummaryLength>(SummaryTexts.LengthText(l), l)).ToList();
+    private List<Option<string?>> models = [new("The repository's recommended model", null)];
+    private List<AiProviderInfoDto> providers = [];
+
+    private string language = "";
+    private EnumSummaryLength length = EnumSummaryLength.Medium;
+    private string? providerAlias;
+    private DocumentProcessEstimateDto? estimate;
+    private string? estimateError;
+    private DocumentProcessProgressDto? progress;
+    private string? repositoryId;
+    private bool closed;
+
+    private readonly KntSingleFlight estimating = new();
+    private readonly KntSingleFlight starting = new();
+    private readonly KntSingleFlight canceling = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    // The run of the Server is of this document (the user may have another one going on).
+    private bool Running => progress is { IsFinished: false } && progress.ResourceId == Resource.ResourceId;
+
+    private string? ProviderName => providers.FirstOrDefault(p => p.Alias == providerAlias)?.Provider ?? providers.FirstOrDefault(p => p.IsDefault)?.Provider;
+
+    private string LanguageKey => $"KNoteSummaryLanguage:{repositoryId}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateProvider.GetAuthenticationStateAsync()).User;
+        repositoryId = user.FindFirst(KntConst.RepositoryClaimType)?.Value;
+        try
+        {
+            language = await js.LocalStorageGetItem(LanguageKey) ?? "";
+        }
+        catch (JSException)
+        {
+            language = "";
+        }
+
+        var listed = await store.AiAssistant.GetProvidersAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (listed.IsValid)
+        {
+            providers = listed.Entity;
+            models = [new("The repository's recommended model", null), .. providers.Select(p => new Option<string?>($"{p.Alias} ({p.Model})", p.Alias))];
+        }
+
+        // A summary of this document already going on (or the last one): its progress.
+        var current = await store.Summaries.GetDocumentProgressAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (current.IsValid && current.Entity?.ResourceId == Resource.ResourceId)
+        {
+            progress = current.Entity;
+            if (Running)
+                _ = FollowAsync();
+        }
+    }
+
+    private DocumentProcessRequestDto Request() => new()
+    {
+        ResourceId = Resource.ResourceId,
+        ProviderAlias = providerAlias,
+        Language = language?.Trim(),
+        Length = length
+    };
+
+    private Task OnEstimate() => estimating.RunAsync(async () =>
+    {
+        estimate = null;
+        estimateError = null;
+        var result = await store.Summaries.EstimateDocumentAsync(Request(), disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (result.IsValid)
+            estimate = result.Entity;
+        else
+            estimateError = result.ErrorMessage;
+    });
+
+    private Task OnGenerate() => starting.RunAsync(async () =>
+    {
+        var result = await store.Summaries.SummarizeDocumentAsync(Request(), disposal.Token);
+        if (disposal.IsCancellationRequested || !result.IsValid)
+            return;
+        try
+        {
+            await js.LocalStorageSetItem(LanguageKey, language?.Trim() ?? "");
+        }
+        catch (JSException)
+        {
+        }
+        progress = result.Entity;
+        if (progress?.ResourceId != Resource.ResourceId)
+            progress = new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Failed, Message = "You have another summary going on: wait until it ends." };
+        else
+            _ = FollowAsync();
+    });
+
+    private Task OnCancel() => canceling.RunAsync(async () =>
+    {
+        await store.Summaries.CancelDocumentAsync(disposal.Token);
+    });
+
+    // The progress of the run, every second and a half, until it ends or the dialog is closed.
+    private async Task FollowAsync()
+    {
+        try
+        {
+            while (!disposal.IsCancellationRequested && Running)
+            {
+                await Task.Delay(1500, disposal.Token);
+                var current = await store.Summaries.GetDocumentProgressAsync(disposal.Token);
+                if (disposal.IsCancellationRequested)
+                    return;
+                if (current.IsValid && current.Entity?.ResourceId == Resource.ResourceId)
+                    progress = current.Entity;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private void CloseDialog(string? result)
+    {
+        if (closed)
+            return;
+        closed = true;
+        dialogService.Close(result);
+    }
+
+    public void Dispose()
+    {
+        closed = true;
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

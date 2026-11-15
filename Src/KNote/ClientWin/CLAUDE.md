@@ -749,6 +749,16 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   `AiPageTranscriber`; el botón cancela al momento, y cerrar la ventana también) y el resumen al final de un documento que lo
   esperaba. El modelo sale de `NoteEditorCtrl.ChatClientFactory` (`internal`, para los tests). «See the original page» con el selector
   de página (el cursor lo pone, `DocumentTexts.PageAt`) abre `Views/DocumentPageForm`: el PDF en esa página (WebView2, `#page=N`).
+- **Resumir un documento largo** (etapa 2, 2.1a2): «Describe ▾ → Summarize the whole document...» y el botón «Summarize document...»
+  de `DocumentTextForm` llaman a `NoteEditorCtrl.ShowLongDocumentSummaryAsync`, que abre `LongDocumentSummaryCtrl`
+  (`[KntAuthorize(Staff)]`, `IViewLongDocumentSummary`, `Views/LongDocumentSummaryForm`, no modal): idioma (lista de
+  `SummaryTexts.Languages` y texto libre; el último del repositorio en `AppUserState.Session.SummaryLanguages`), extensión y modelo
+  (por defecto el de `Store.GetPhotoDescriberAsync`: el LLM recomendado del repositorio o el último elegido); «Estimate»
+  (`AiDocumentProcessor.EstimateAsync`), «Generate» (`Store.DocumentProcessing`, nunca con otro trabajo de KNote Atlas: el aviso
+  `SummaryTexts.OtherRunning`), el progreso por `DocumentProcessingProgressChanged` y en la barra de estado de la ventana principal,
+  «Cancel» y «Open the note» (`NoteEditorCtrl`). Cerrar la ventana no para el trabajo; abrirla otra vez para ese documento lo muestra.
+  «Transcribe them first» lanza `TranscribeRequested`, que abre `DocumentTextForm` transcribiendo. `SaveSettings` es `internal` para
+  los tests (`Store.SaveConfig` escribe la configuración real). Tests en `LongDocumentSummaryCtrlTests` y `DocumentProcessingJobTests`.
 - Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
   `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
 
