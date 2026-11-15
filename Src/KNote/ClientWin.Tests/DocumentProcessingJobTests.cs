@@ -34,7 +34,7 @@ public class DocumentProcessingJobTests
 
         Assert.IsTrue(store.DocumentProcessing.IsRunning);
         Assert.IsTrue(store.AtlasJobRunning, "no other run of KNote Atlas meanwhile");
-        Assert.AreEqual("Summarizing manual.pdf: 3/12", store.DocumentProcessing.StatusBarText);
+        Assert.AreEqual("Extended summary of manual.pdf: 3/12", store.DocumentProcessing.StatusBarText);
 
         release.SetResult(new Result<DocumentProcessProgressDto>(new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Completed, NoteNumber = 42 }));
         await store.DocumentProcessing.Completion;

@@ -69,8 +69,8 @@ public class AiDocumentProcessorSmokeTests
 
             Assert.IsTrue(run.IsValid, run.ErrorMessage);
             var translation = (await service.Summaries.GetDocumentTranslationsAsync(resourceId)).Entity.Single();
-            var file = await service.Notes.GetResourceAsync(translation.TranslationResourceId);
-            var translated = DocumentTextRules.Pages(System.Text.Encoding.UTF8.GetString(file.Entity.ContentArrayBytes));
+            var note = await service.Notes.GetAsync(translation.NoteId);
+            var translated = DocumentTranslationRules.TranslatedPages(DocumentTranslationRules.Body(note.Entity.Description));
             Console.WriteLine($"{run.Entity.CallsDone} calls, {run.Entity.ElapsedSeconds:0} s\n" + string.Join("\n----\n", translated.Select(p => p.Text)));
             Assert.HasCount(3, translated, "the pages of the document");
             StringAssert.Contains(translated[0].Text, "ZX81");

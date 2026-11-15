@@ -67,7 +67,7 @@ public class DocumentSummaryServiceTests
         Assert.AreEqual(EnumDocumentProcessPhase.Completed, run.Entity.Phase);
         Assert.AreEqual(8_192, used!.ContextWindow, "KNote fixes the context of the calls (D11)");
         var summary = (await service.Notes.GetExtendedAsync(run.Entity.NoteId!.Value)).Entity;
-        Assert.AreEqual("Summary of manual.pdf", summary.Topic);
+        Assert.AreEqual("Extended summary of manual.pdf", summary.Topic);
         Assert.AreEqual(KntConst.SummaryTag, summary.NoteTypeDto.Name);
         Assert.AreEqual(folderId, summary.FolderId, "in the folder of the note of the document");
         var source = (await service.Notes.GetAsync(noteId)).Entity;
@@ -80,7 +80,7 @@ public class DocumentSummaryServiceTests
 
         var original = summary.Resources.Single();
         Assert.IsTrue(original.DescriptionByUser, "locked: the stage 4 doesn't describe it");
-        StringAssert.EndsWith(original.Name, "Summary of manual.pdf (original).md");
+        StringAssert.EndsWith(original.Name, "Extended summary of manual.pdf (original).md");
         var file = (await service.Notes.GetResourceAsync(original.ResourceId)).Entity;
         Assert.AreEqual("The QL manual explains how it boots (p. 1).", System.Text.Encoding.UTF8.GetString(file.ContentArrayBytes));
 

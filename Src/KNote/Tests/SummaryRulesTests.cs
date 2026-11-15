@@ -123,10 +123,10 @@ public class SummaryRulesTests
 
         var text = LongDocumentRules.NoteDescription(document, summary, new DateTime(2026, 11, 14));
 
-        StringAssert.StartsWith(text, "> Summary of the document **manual.pdf** of the note #42, 120 pages · qwen3.5:9b · 2026-11-14 · Spanish");
+        StringAssert.StartsWith(text, "> Extended summary of the document **manual.pdf** of the note #42, 120 pages · qwen3.5:9b · 2026-11-14 · Spanish");
         StringAssert.Contains(text, "Scanned pages not read, without text yet: 3, 7–9.");
         StringAssert.EndsWith(text, "\n\nThe summary.");
-        Assert.AreEqual("Summary of manual.pdf", LongDocumentRules.NoteTopic("manual.pdf"));
+        Assert.AreEqual("Extended summary of manual.pdf", LongDocumentRules.NoteTopic("manual.pdf"));
         Assert.AreEqual("1, 3–5, 9", LongDocumentRules.Ranges([9, 1, 3, 4, 5, 4]));
     }
 }

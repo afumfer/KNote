@@ -112,7 +112,9 @@
     margin-top: 1.25rem;
 }
 
+/* Not part of the text selected to copy it to the description (2.1b2): KNote's, not the document's. */
 .knt-document-text-page-heading {
+    user-select: none;
     display: flex;
     flex-wrap: wrap;
     align-items: center;

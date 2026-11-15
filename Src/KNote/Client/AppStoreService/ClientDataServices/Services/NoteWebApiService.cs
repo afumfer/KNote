@@ -150,7 +150,7 @@ public class NoteWebApiService : BaseService, INoteWebApiService
     // As DescribePhotoAsync: a summary at the end of «Describe with AI».
     public Task<Result<ResourceInfoDto>> SummarizeDocumentAsync(Guid resourceId, bool replace, CancellationToken cancellationToken = default) =>
         SendAsync<ResourceInfoDto>(ct => _httpClient.PostAsync($"api/resources/{resourceId}/summarize?replace={(replace ? "true" : "false")}", null, ct),
-            "Summarize document", cancellationToken: cancellationToken, notifyErrors: false);
+            "Short summary of the document", cancellationToken: cancellationToken, notifyErrors: false);
 
     public Task<Result<ResourceThumbnailDto>> GetThumbnailAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
         SendAsync<ResourceThumbnailDto>(ct => _httpClient.GetAsync($"api/resources/{resourceId}/thumbnail", ct),

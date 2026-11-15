@@ -18,9 +18,9 @@ public sealed record TranslationPart(int Page, string Text, bool FirstOfPage, bo
 /// <summary>
 /// How a long document of a note is translated (KNote Atlas, stage 2, CU-43, D21, 2.1b): its parts, fixed by its text alone so that a
 /// translation can go on with another model or context («Continue»); the calls (one per page of a document with pages, so that the
-/// translation keeps its pages; the parts that fit together, without them); the file of the translation (a page break between pages,
-/// no title added); what is asked; a part that comes back too short; and the note of the translation, with a hidden comment that says
-/// how far it went. In English, as KNote's interface.
+/// translation keeps its pages; the parts that fit together, without them); the translation in the text of its note (2.1b2: a heading
+/// before each page, no title added); what is asked; a part that comes back too short; and the note of the translation, with a hidden
+/// comment that says how far it went. In English, as KNote's interface.
 /// </summary>
 public static class DocumentTranslationRules
 {
@@ -123,20 +123,75 @@ public static class DocumentTranslationRules
     /// <summary>The characters to translate from the part <paramref name="from"/> on.</summary>
     public static int CharactersFrom(IReadOnlyList<TranslationPart> parts, int from) => parts.Skip(Math.Max(0, from)).Sum(p => p.Text.Length);
 
-    /// <summary>What goes in the file before a part: a page break before a page (but the first one of the document), else a blank line.</summary>
-    public static string Separator(IReadOnlyList<TranslationPart> parts, int index) =>
-        index == 0 ? "" : parts[index].Page > 0 && parts[index].FirstOfPage ? DocumentTextRules.PageSeparator.ToString() : "\n\n";
+    /// <summary>
+    /// What goes in the text of the note before a part (2.1b2: the translation is the note's text): a heading with its page before a
+    /// page (PageHeading), else a blank line; nothing before the first part of a document without pages.
+    /// </summary>
+    public static string Separator(IReadOnlyList<TranslationPart> parts, int index)
+    {
+        var before = index == 0 ? "" : "\n\n";
+        return parts[index].Page > 0 && parts[index].FirstOfPage ? $"{before}{PageHeading(parts[index].Page)}\n\n" : before;
+    }
 
-    /// <summary>What a range of parts is in the file: its translation, or the lines of an empty or scanned page.</summary>
-    public static string FileText(IReadOnlyList<TranslationPart> parts, (int From, int To) range, string translation)
+    /// <summary>
+    /// The heading of a page in the translation: it says where each page starts, and the index makes a fragment of each page (the
+    /// fragments of a note's text go by its Markdown sections).
+    /// </summary>
+    public static string PageHeading(int page) => $"#### p. {page}";
+
+    /// <summary>The pages of a translation (Body), by their headings: each page and its text. Without headings, none.</summary>
+    public static List<(int Page, string Text)> TranslatedPages(string body)
+    {
+        var pages = new List<(int Page, StringBuilder Text)>();
+        foreach (var line in (body ?? "").Replace("\r\n", "\n").Split('\n'))
+        {
+            var heading = PageHeadingRegex.Match(line);
+            if (heading.Success)
+                pages.Add((int.Parse(heading.Groups[1].Value), new StringBuilder()));
+            else if (pages.Count > 0)
+                pages[^1].Text.Append(line).Append('\n');
+        }
+        return pages.Select(p => (p.Page, p.Text.ToString().Trim())).ToList();
+    }
+
+    private static readonly Regex PageHeadingRegex = new(@"^#### p\. (\d+)\s*$", RegexOptions.Compiled);
+
+    /// <summary>What a range of parts is in the text of the note: its translation, or the line of a scanned page.</summary>
+    public static string PartText(IReadOnlyList<TranslationPart> parts, (int From, int To) range, string translation)
     {
         var text = new StringBuilder(Separator(parts, range.From));
         if (HasText(parts, range))
-            text.Append(translation);
+            text.Append(KeepLines(translation));
         else if (parts[range.From].Missing)
             text.Append(MissingPageText(parts[range.From].Page));
         return text.ToString();
     }
+
+    /// <summary>
+    /// A translation with its lines kept when it is shown as Markdown (2.1b2): each line followed by another one of the same paragraph
+    /// ends with a line break of Markdown (two spaces), so that a program listing keeps its lines, as in the original, whatever the
+    /// model does (asked for code blocks, qwen3.5:9b wrote none). Not inside a code block, if the model wrote one.
+    /// </summary>
+    public static string KeepLines(string translation)
+    {
+        var lines = (translation ?? "").Replace("\r\n", "\n").Split('\n');
+        var inCode = false;
+        for (var i = 0; i < lines.Length; i++)
+        {
+            if (IsFence(lines[i]))
+            {
+                inCode = !inCode;
+                continue;
+            }
+            if (inCode || i + 1 >= lines.Length || string.IsNullOrWhiteSpace(lines[i]) || string.IsNullOrWhiteSpace(lines[i + 1])
+                || IsFence(lines[i + 1]) || lines[i].EndsWith("  ") || lines[i].EndsWith('\\'))
+                continue;
+            lines[i] += "  ";
+        }
+        return string.Join('\n', lines);
+    }
+
+    private static bool IsFence(string line) => line.TrimStart().StartsWith("```") || line.TrimStart().StartsWith("~~~");
 
     public static string MissingPageText(int page) => $"[Page {page}: scanned, without text yet: not translated.]";
 
@@ -197,18 +252,13 @@ public static class DocumentTranslationRules
 
     public static string NoteTopic(string fileName, string language) => $"Translation of {fileName} into {language?.Trim()}";
 
-    /// <summary>The name of the document with the translation: the original's, with the language, in Markdown.</summary>
-    public static string FileName(string fileName, string language) =>
-        $"{Path.GetFileNameWithoutExtension(fileName ?? "document")} ({language?.Trim()}).md";
-
-    public static string FileDescription(string fileName, string language, string model) =>
-        $"Translation of {fileName} into {language?.Trim()}, by the AI ({model}).";
-
     /// <summary>
-    /// The text of the note of the translation: where it comes from (the note of the document, cited), the language, the model and
-    /// the date; how far it went (and how to go on); the scanned pages not translated; and the hidden comment that lets it go on.
+    /// The text of the note of the translation (2.1b2: the translation goes in it, as a summary): a header (where it comes from, the
+    /// note of the document cited, the language, the model and the date; how far it went and how to go on; the scanned pages not
+    /// translated), the translation, and the hidden comment that lets it go on.
     /// </summary>
-    public static string NoteDescription(DocumentTranslationDto translation, string fileName, int sourceNoteNumber, IReadOnlyCollection<int> missingPages, DateTime date)
+    public static string NoteDescription(DocumentTranslationDto translation, string fileName, int sourceNoteNumber, IReadOnlyCollection<int> missingPages,
+        DateTime date, string body)
     {
         var text = new StringBuilder();
         text.Append($"> Translation of the document **{fileName}** of the note #{sourceNoteNumber} into **{translation.Language?.Trim()}**");
@@ -216,9 +266,25 @@ public static class DocumentTranslationRules
         text.Append($"> {Status(translation)}");
         if (missingPages?.Count > 0)
             text.Append($"\n>\n> Scanned pages without text, not translated: {LongDocumentRules.Ranges(missingPages)}.");
-        text.Append($"\n\nThe translation is the attached document «{FileName(fileName, translation.Language)}».\n\n");
+        text.Append("\n\n");
+        var translated = (body ?? "").TrimEnd();
+        if (translated.Length > 0)
+            text.Append(translated).Append("\n\n");
         text.Append(Marker(translation));
         return text.ToString();
+    }
+
+    /// <summary>
+    /// The translation in the text of a note of a translation: without its header (the quoted lines at the start) and its hidden
+    /// comment. What somebody changed in it is kept: the next part is added after it.
+    /// </summary>
+    public static string Body(string description)
+    {
+        var lines = MarkerRegex.Replace((description ?? "").Replace("\r\n", "\n").Replace('\r', '\n'), "").Split('\n');
+        var start = 0;
+        while (start < lines.Length && lines[start].TrimStart().StartsWith('>'))
+            start++;
+        return string.Join('\n', lines.Skip(start)).Trim('\n').TrimEnd();
     }
 
     /// <summary>How far a translation went, in a line.</summary>
@@ -249,7 +315,8 @@ public static class DocumentTranslationRules
         try
         {
             var translation = JsonSerializer.Deserialize<DocumentTranslationDto>(match.Groups[1].Value, JsonOptions);
-            return translation == null || translation.ResourceId == Guid.Empty || translation.Parts <= 0 ? null : translation;
+            return translation == null || translation.Format != DocumentTranslationDto.CurrentFormat || translation.ResourceId == Guid.Empty
+                || translation.Parts <= 0 ? null : translation;
         }
         catch (JsonException)
         {

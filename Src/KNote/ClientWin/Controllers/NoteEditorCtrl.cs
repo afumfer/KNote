@@ -817,13 +817,13 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
     #region Describe photos (KNote Atlas, stage 4)
 
     /// <summary>
-    /// «Summarize document» (KNote Atlas, stage 2) for a document of this note already saved: its window, not modal.
-    /// transcribe: what «Transcribe them first» does (the window with the transcription of the document).
+    /// «Summarize document» or «Translate document» (KNote Atlas, stage 2) for a document of this note already saved: its window, not
+    /// modal. transcribe: what «Transcribe them first» does (the window with the transcription of the document).
     /// </summary>
-    public async Task ShowLongDocumentSummaryAsync(ResourceDto document, Action transcribe)
+    public async Task ShowLongDocumentSummaryAsync(ResourceDto document, Action transcribe, EnumDocumentProcessKind kind = EnumDocumentProcessKind.Summarize)
     {
         var summary = new LongDocumentSummaryCtrl(Store);
-        await summary.LoadAsync(Store.GetServiceRef(Service.IdServiceRef), document);
+        await summary.LoadAsync(Store.GetServiceRef(Service.IdServiceRef), document, kind);
         if (transcribe != null)
             summary.TranscribeRequested += (_, _) => transcribe();
         summary.Run();
@@ -866,7 +866,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
             var photo = photos[i];
             var isPhoto = AiPhotoRules.IsPhoto(photo);
             progress?.Report(photos.Count > 1 ? $"Describing {i + 1} of {photos.Count}…"
-                : isPhoto ? "Describing the photo…" : "Summarizing the document…");
+                : isPhoto ? "Describing the photo…" : "Writing the short summary of the document…");
             try
             {
                 var res = isPhoto
@@ -975,7 +975,7 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         var summarized = false;
         if (!cancellationToken.IsCancellationRequested && transcribed > 0 && AiDocumentRules.WaitsForSummary(document))
         {
-            progress?.Report((pages.Count, "Summarizing the document…"));
+            progress?.Report((pages.Count, "Writing the short summary of the document…"));
             try
             {
                 var res = await AiDocumentSummarizer.SummarizeAsync(Service, chatClient, provider, document.ResourceId,

@@ -84,14 +84,13 @@ public class LongDocumentMeasure
             Assert.IsNotNull(run.Entity?.NoteId, run.ErrorMessage);
 
             var translation = (await service.Summaries.GetDocumentTranslationsAsync(document.ResourceId)).Entity.First();
-            var file = (await service.Notes.GetResourceAsync(translation.TranslationResourceId)).Entity;
-            var translatedText = Encoding.UTF8.GetString(file.ContentArrayBytes);
+            var translatedText = DocumentTranslationRules.Body((await service.Notes.GetAsync(translation.NoteId)).Entity.Description);
             var original = (await service.ResourceContent.GetDocumentTextAsync(document.ResourceId)).Entity.Text;
             var characters = DocumentTranslationRules.CharactersFrom(DocumentTranslationRules.Parts(original, translation.Paged), 0)
                 - DocumentTranslationRules.CharactersFrom(DocumentTranslationRules.Parts(original, translation.Paged), translation.NextPart);
             var pace = (await service.Summaries.GetStateAsync()).Entity.TranslationSecondsPer1000Characters.GetValueOrDefault(provider.Model);
             var originalPages = DocumentTextRules.Pages(original);
-            var translatedPages = DocumentTextRules.Pages(translatedText);
+            var translatedPages = DocumentTranslationRules.TranslatedPages(translatedText);
 
             var report = new StringBuilder();
             report.AppendLine($"# {document.Name} · {provider.Model} · context {context} · translated into {language}");
@@ -101,6 +100,7 @@ public class LongDocumentMeasure
             report.AppendLine($"- Done: {run.Entity.CallsDone} calls, {translatedPages.Count} pages ({characters:N0} characters) in {run.Entity.ElapsedSeconds:0} s "
                 + $"({run.Entity.ElapsedSeconds / Math.Max(1, run.Entity.CallsDone):0.0} s per call); pace {pace:0.00} s per 1,000 characters.");
             report.AppendLine($"- Parts marked as maybe incomplete: {CountOf(translatedText, DocumentTranslationRules.IncompleteLine)}.");
+            report.AppendLine($"- Markdown code blocks (listings): {CountOf(translatedText, "```") / 2}.");
             report.AppendLine($"- Whole document at this pace: about {DocumentTranslationRules.CharactersFrom(DocumentTranslationRules.Parts(original, translation.Paged), 0) / 1000.0 * pace / 60:0} min.");
             for (var i = 0; i < translatedPages.Count; i++)
             {

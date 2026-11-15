@@ -171,7 +171,7 @@ public class DocumentTranslationSaveDto
     public int NextPart { get; set; }
     // The page of the next part (a document with pages).
     public int? NextPage { get; set; }
-    // What is added to the translation, as it goes in its file (with its page breaks).
+    // What is added to the translation, as it goes in the text of its note (with the headings of its pages).
     public string Text { get; set; }
     // To keep the pace of the model, with the last part (D18).
     public int CharactersTranslated { get; set; }
@@ -184,16 +184,20 @@ public class DocumentTranslationSaveDto
 }
 
 /// <summary>
-/// A translation of a document (2.1b): where it is (its note and the document attached to it) and how far it went. It is what the
-/// note of the translation keeps in a hidden comment (DocumentTranslationRules.Marker): without it, it can't go on.
+/// A translation of a document (2.1b): where it is (its note, whose text it is) and how far it went. It is what the note of the
+/// translation keeps in a hidden comment (DocumentTranslationRules.Marker): without it, it can't go on.
 /// </summary>
 public class DocumentTranslationDto
 {
+    // 2.1b2: the translation is the text of its note (with 2.1b1 it was a document attached to it: those can't go on).
+    public const int CurrentFormat = 2;
+
+    // Without it (0), a marker of 2.1b1.
+    public int Format { get; set; }
     public Guid ResourceId { get; set; }
     public string ResourceName { get; set; }
     public Guid NoteId { get; set; }
     public int NoteNumber { get; set; }
-    public Guid TranslationResourceId { get; set; }
     public string Language { get; set; }
     public string Model { get; set; }
     public bool Paged { get; set; }

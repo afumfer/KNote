@@ -48,7 +48,7 @@ namespace KNote.ClientWin.Views
             labelFile.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             labelFile.Location = new Point(12, 10);
             labelFile.Name = "labelFile";
-            labelFile.Size = new Size(676, 20);
+            labelFile.Size = new Size(816, 20);
             labelFile.TabIndex = 0;
             labelFile.Text = "File";
             //
@@ -58,14 +58,14 @@ namespace KNote.ClientWin.Views
             labelState.ForeColor = SystemColors.GrayText;
             labelState.Location = new Point(12, 32);
             labelState.Name = "labelState";
-            labelState.Size = new Size(384, 34);
+            labelState.Size = new Size(524, 34);
             labelState.TabIndex = 1;
             labelState.Text = "State";
             //
             // buttonRead
             //
             buttonRead.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonRead.Location = new Point(578, 34);
+            buttonRead.Location = new Point(718, 34);
             buttonRead.Name = "buttonRead";
             buttonRead.Size = new Size(110, 29);
             buttonRead.TabIndex = 2;
@@ -78,7 +78,7 @@ namespace KNote.ClientWin.Views
             progressLoad.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             progressLoad.Location = new Point(12, 70);
             progressLoad.Name = "progressLoad";
-            progressLoad.Size = new Size(676, 6);
+            progressLoad.Size = new Size(816, 6);
             progressLoad.TabIndex = 3;
             //
             // textDocument
@@ -92,7 +92,7 @@ namespace KNote.ClientWin.Views
             textDocument.Name = "textDocument";
             textDocument.ReadOnly = true;
             textDocument.ScrollBars = ScrollBars.Vertical;
-            textDocument.Size = new Size(676, 382);
+            textDocument.Size = new Size(816, 382);
             textDocument.TabIndex = 4;
             textDocument.WordWrap = true;
             textDocument.Click += textDocument_CaretMoved;
@@ -102,7 +102,7 @@ namespace KNote.ClientWin.Views
             //
             buttonClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonClose.DialogResult = DialogResult.Cancel;
-            buttonClose.Location = new Point(612, 474);
+            buttonClose.Location = new Point(752, 474);
             buttonClose.Name = "buttonClose";
             buttonClose.Size = new Size(76, 29);
             buttonClose.TabIndex = 5;
@@ -112,7 +112,7 @@ namespace KNote.ClientWin.Views
             // buttonTranscribe
             //
             buttonTranscribe.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonTranscribe.Location = new Point(402, 34);
+            buttonTranscribe.Location = new Point(542, 34);
             buttonTranscribe.Name = "buttonTranscribe";
             buttonTranscribe.Size = new Size(170, 29);
             buttonTranscribe.TabIndex = 6;
@@ -157,7 +157,7 @@ namespace KNote.ClientWin.Views
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonClose;
-            ClientSize = new Size(700, 515);
+            ClientSize = new Size(840, 515);
             Controls.Add(buttonOriginalPage);
             Controls.Add(numericPage);
             Controls.Add(labelPage);
@@ -169,7 +169,7 @@ namespace KNote.ClientWin.Views
             Controls.Add(labelState);
             Controls.Add(labelFile);
             MinimizeBox = false;
-            MinimumSize = new Size(580, 320);
+            MinimumSize = new Size(840, 320);
             Name = "DocumentTextForm";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;

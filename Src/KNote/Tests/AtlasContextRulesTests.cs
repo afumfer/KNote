@@ -227,5 +227,15 @@ public class AtlasContextRulesTests
         Assert.IsNull(AiTaskCatalog.Find("Summary"));
     }
 
+    // 2.1b2: «Short summary» and «Extended summary»; the notes of instructions written before keep the former name in «Task».
+    [TestMethod]
+    public void AiTaskCatalog_FindsATask_ByAFormerName()
+    {
+        Assert.AreSame(AiTaskCatalog.SummarizeDocument, AiTaskCatalog.Find("Summarize document"));
+        Assert.AreSame(AiTaskCatalog.SummarizeDocument, AiTaskCatalog.Find("Short summary of a document"));
+        Assert.AreSame(AiTaskCatalog.SummarizeLongDocument, AiTaskCatalog.Find("summarize long document"));
+        Assert.AreSame(AiTaskCatalog.SummarizeLongDocument, AiTaskCatalog.Find("Extended summary of a document"));
+    }
+
     #endregion
 }

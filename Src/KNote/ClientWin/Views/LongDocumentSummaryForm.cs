@@ -6,9 +6,10 @@ using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Views;
 
-// KNote Atlas, stage 2 (2.1a2): «Summarize document», the view of LongDocumentSummaryCtrl. Not modal: the summary runs in the Store
-// and goes on if the window is closed; opened again, it shows it. Language (a list or free text), length and model; «Estimate»,
-// «Generate», its progress, «Cancel» and, at the end, «Open the note».
+// KNote Atlas, stage 2: «Summarize document» (2.1a2) and «Translate document» (2.1b2), the view of LongDocumentSummaryCtrl. Not modal:
+// the run is in the Store and goes on if the window is closed; opened again, it shows it. Language (a list or free text), length (of a
+// summary) or the translation not finished with «Continue» (of a translation), and model; «Estimate», «Generate», its progress, «Cancel»
+// and, at the end, «Open the note».
 public partial class LongDocumentSummaryForm : KntForm, IViewLongDocumentSummary
 {
     private readonly LongDocumentSummaryCtrl _ctrl;
@@ -22,8 +23,10 @@ public partial class LongDocumentSummaryForm : KntForm, IViewLongDocumentSummary
     public LongDocumentSummaryForm(LongDocumentSummaryCtrl ctrl) : this()
     {
         _ctrl = ctrl;
-        labelIntro.Text = SummaryTexts.Intro;
-        labelLanguageHelp.Text = SummaryTexts.LanguageHelp;
+        labelIntro.Text = SummaryTexts.IntroOf(ctrl.Kind);
+        labelLanguageHelp.Text = SummaryTexts.LanguageHelpOf(ctrl.Kind);
+        buttonContinue.Text = SummaryTexts.Continue;
+        labelLength.Visible = comboLength.Visible = !ctrl.IsTranslation;
         buttonEstimate.Text = SummaryTexts.Estimate;
         buttonGenerate.Text = SummaryTexts.Generate;
         buttonCancelRun.Text = SummaryTexts.Cancel;
@@ -56,7 +59,7 @@ public partial class LongDocumentSummaryForm : KntForm, IViewLongDocumentSummary
     protected override void ModelToControls()
     {
         _loading = true;
-        Text = $"{SummaryTexts.Title} · {_ctrl.ServiceRef?.Name}";
+        Text = $"{SummaryTexts.TitleOf(_ctrl.Kind)} · {_ctrl.ServiceRef?.Name}";
         labelFile.Text = _ctrl.FileName;
         comboLanguage.Text = _ctrl.Language;
         comboLength.SelectedIndex = Math.Max(0, SummaryTexts.Lengths.ToList().IndexOf(_ctrl.Length));
@@ -70,6 +73,7 @@ public partial class LongDocumentSummaryForm : KntForm, IViewLongDocumentSummary
         labelEstimate.Text = _ctrl.EstimateError
             ?? (estimate == null ? "" : string.Join(Environment.NewLine, SummaryTexts.EstimateLines(estimate, _ctrl.Provider?.Provider)));
         buttonTranscribeFirst.Visible = estimate?.MissingPages?.Count > 0;
+        labelUnfinished.Text = _ctrl.Unfinished is { } unfinished ? SummaryTexts.Unfinished(unfinished) : "";
 
         RefreshProgress();
     }
@@ -84,14 +88,17 @@ public partial class LongDocumentSummaryForm : KntForm, IViewLongDocumentSummary
         progressRun.Visible = running;
         progressRun.Value = (int)Math.Round(SummaryTexts.Share(progress) * 100);
         labelProgress.Text = progress == null ? (_ctrl.OtherRunning ? SummaryTexts.OtherRunning : "")
-            : running ? $"{SummaryTexts.Progress(progress)}{Environment.NewLine}{SummaryTexts.Running}"
+            : running ? $"{SummaryTexts.Progress(progress)}{Environment.NewLine}{SummaryTexts.RunningOf(_ctrl.Kind)}"
+            : _ctrl.OtherRunning ? $"{SummaryTexts.Progress(progress)}{Environment.NewLine}{(_ctrl.IndexRunning ? SummaryTexts.IndexRunning : SummaryTexts.OtherRunning)}"
             : SummaryTexts.Progress(progress);
         labelProgress.ForeColor = progress?.Phase == EnumDocumentProcessPhase.Failed ? Color.Firebrick : SystemColors.ControlText;
 
         comboLanguage.Enabled = comboLength.Enabled = comboModel.Enabled = buttonEstimate.Enabled = !running;
         buttonGenerate.Enabled = !running && !_ctrl.OtherRunning && _ctrl.Provider != null;
         buttonCancelRun.Visible = running;
-        buttonOpenNote.Visible = !running && progress?.Phase == EnumDocumentProcessPhase.Completed && progress.NoteId != null;
+        buttonOpenNote.Visible = !running && SummaryTexts.HasNote(progress);
+        labelUnfinished.Visible = buttonContinue.Visible = _ctrl.Unfinished != null;
+        buttonContinue.Enabled = buttonGenerate.Enabled;
     }
 
     private async void buttonEstimate_Click(object sender, EventArgs e)
@@ -114,6 +121,13 @@ public partial class LongDocumentSummaryForm : KntForm, IViewLongDocumentSummary
     {
         buttonGenerate.Enabled = false;
         if (!await _ctrl.GenerateAsync() && !IsDisposed)
+            RefreshProgress();
+    }
+
+    private async void buttonContinue_Click(object sender, EventArgs e)
+    {
+        buttonContinue.Enabled = buttonGenerate.Enabled = false;
+        if (!await _ctrl.ContinueAsync() && !IsDisposed)
             RefreshProgress();
     }
 

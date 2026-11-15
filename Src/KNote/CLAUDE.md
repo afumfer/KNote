@@ -476,7 +476,11 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   no están ya en el texto (`SourcesSection`). Tests en `Tests/AiWebSearchTests`, `InProcessIntegrationTests/WebSearchInProcessTests` y
   los `WebSearch_*` de `RequiresRealAiProvider`.
 - **Resumir o traducir un documento largo (KNote Atlas, etapa 2, CU-43)** (`IKntService.Summaries`, comandos en `KntSummaryCommands.cs`;
-  especificación en `C:\Dev\KNote-Atlas\03-Etapa-2.md`, D11, D17, D18, D21, § 5.1 y § 5.3). **El motor** es `Ai/AiSummaryEngine`,
+  especificación en `C:\Dev\KNote-Atlas\03-Etapa-2.md`, D11, D17, D18, D21, § 5.1 y § 5.3). **Nombres en la interfaz** (2.1b2): el
+  «resumen corto» (*Short summary*) es la descripción de un documento que escribe la IA (etapa 4, tarea `SummarizeDocument`); el
+  «resumen extendido» (*Extended summary*), el de todo el documento en una nota nueva (esta). Solo cambian los textos: el código y
+  las claves siguen igual, y una tarea renombrada guarda su nombre anterior en `AiTask.FormerNames` (el atributo «Task» de las notas
+  de instrucciones guarda el nombre, y `AiTaskCatalog.Find` lo encuentra). **El motor** es `Ai/AiSummaryEngine`,
   genérico sobre piezas (`Model/Core/SummaryPieces`: las páginas de un PDF con su etiqueta «p. N», o trozos por párrafos sin
   ella): lotes que caben en el contexto (`SummaryBatches`, unos 4 caracteres por token), apuntes de cada lote, «resúmenes de
   resúmenes» mientras no caben juntos y la redacción final, con las tareas sin herramientas de la etapa 4 (`AiResourceTask`) y la
@@ -496,12 +500,18 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   página, o el texto sin páginas, en trozos de 3.000 caracteres como mucho), para que «Continue» siga aunque cambie el modelo; **una
   llamada por página** (o lo que cabe, como mucho 8.000 caracteres, sin páginas), con la tarea `TranslateDocument` y los términos del
   glosario de esa parte. El texto va entre `<text>` y `</text>` y la petición dice que sus órdenes se traducen: sin eso, `qwen3.5:9b`
-  obedecía la orden de una página. Una parte que vuelve con menos de la mitad se pide otra vez y, si sigue corta, el fichero lo dice.
-  Va a una nota nueva `@KNoteTranslation` (no del sistema), relacionada como el resumen, con la traducción en un documento Markdown
-  adjunto (un `\f` entre páginas, sin títulos) y bloqueado; se guarda cada 8.000 caracteres o cada minuto
-  (`SaveDocumentTranslationAsync`: cada vez un fichero nuevo, como una subida, que olvida lo leído de él). **Cancelada o fallida, lo
-  traducido queda**: la nota dice hasta dónde llegó y lleva un comentario oculto (`<!-- knt-translation {...} -->`,
-  `DocumentTranslationRules.Marker`) del que `GetDocumentTranslationsAsync` saca dónde seguir. El ritmo de la traducción es aparte
+  obedecía la orden de una página. En la descripción, el Markdown juntaría las líneas de un párrafo: KNote las conserva
+  (`DocumentTranslationRules.KeepLines`, dos espacios al final de cada línea seguida de otra, salvo dentro de un bloque de código),
+  así que un listado queda línea a línea sea cual sea el modelo (pedirle bloques de código no sirvió: `qwen3.5:9b` no escribió
+  ninguno). Una parte que vuelve con menos de la mitad se pide otra vez y, si sigue corta, la
+  traducción lo dice. Va a una nota nueva `@KNoteTranslation` (no del sistema), relacionada como el resumen, y **la traducción es su
+  texto** (2.1b2; en la 2.1b1 era un Markdown adjunto): una cabecera citada (hasta dónde llegó), la traducción con un título
+  `#### p. N` antes de cada página (`DocumentTranslationRules.PageHeading`: se ve dónde empieza cada página y el índice hace un
+  fragmento por página) y el comentario oculto. Se guarda cada 8.000 caracteres o cada minuto (`SaveDocumentTranslationAsync`): cada
+  vez se reescriben la cabecera y el comentario y se añade lo nuevo detrás de lo que haya (`DocumentTranslationRules.Body`), así que
+  lo que alguien corrigió mientras no estaba terminada se conserva. **Cancelada o fallida, lo traducido queda**: el comentario oculto
+  (`<!-- knt-translation {...} -->`, `DocumentTranslationRules.Marker`, con `DocumentTranslationDto.Format` = 2; los de la 2.1b1 no se
+  leen) dice dónde seguir a `GetDocumentTranslationsAsync`. El ritmo de la traducción es aparte
   en `AI_SUMMARY_STATE`. **«Tiene páginas»** es `DocumentTextRules.IsPaged(formato, páginas o texto)`: un PDF o un documento con más
   de una página (el lector de TXT y MD parte por `\f`). Tests en `Tests/DocumentTranslationRulesTests`,
   `ServiceTests/DocumentTranslationServiceTests` y los de la traducción en las clases de arriba.

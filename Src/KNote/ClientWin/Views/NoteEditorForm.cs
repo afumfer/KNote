@@ -892,8 +892,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         var selected = SelectedResourceNow();
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Describe the photos and summarize the documents of the note...", null, async (s, a) => await DescribePhotosAsync(null));
-        var single = menu.Items.Add(selected != null && DocumentTextRules.IsDocument(selected) ? "Summarize the selected document..." : "Describe the selected photo...",
+        menu.Items.Add("Describe the photos and write the short summaries of the documents of the note...", null, async (s, a) => await DescribePhotosAsync(null));
+        var single = menu.Items.Add(selected != null && DocumentTextRules.IsDocument(selected) ? "Short summary of the selected document..." : "Describe the selected photo...",
             null, async (s, a) => await DescribePhotosAsync(selected));
         single.Enabled = selected != null && (AiPhotoRules.CanDescribe(selected) || AiDocumentRules.CanSummarize(selected));
         // KNote Atlas, stage 4 (4.4b): the text KNote read of a document, and «Read document» there.
@@ -906,6 +906,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         // KNote Atlas, stage 2 (2.1a2): the summary of the whole document in a new note.
         var summarize = menu.Items.Add(SummaryTexts.MenuItem, null, async (s, a) => await ShowLongDocumentSummaryAsync(selected));
         summarize.Enabled = selected != null && DocumentTextRules.IsDocument(selected);
+        // 2.1b2: its translation in a new note.
+        var translate = menu.Items.Add(SummaryTexts.TranslateMenuItem, null,
+            async (s, a) => await ShowLongDocumentSummaryAsync(selected, EnumDocumentProcessKind.Translate));
+        translate.Enabled = summarize.Enabled;
         menu.Closed += (s, a) => BeginInvoke(menu.Dispose);
         menu.Show(buttonDescribePhotos, new Point(0, buttonDescribePhotos.Height));
     }
@@ -916,15 +920,16 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _selectedResource == null ? null
             : _ctrl.Model.Resources.FirstOrDefault(r => r.ResourceId == _selectedResource.ResourceId) ?? _selectedResource;
 
-    // As its text, the summary reads the document of the repository: a document new or with changes here has to be saved first.
-    private async Task ShowLongDocumentSummaryAsync(ResourceDto document)
+    // As its text, the summary or the translation reads the document of the repository: a document new or with changes here has to
+    // be saved first.
+    private async Task ShowLongDocumentSummaryAsync(ResourceDto document, EnumDocumentProcessKind kind = EnumDocumentProcessKind.Summarize)
     {
         if (!NoteEditorCtrl.CanReadNow(document))
         {
             ShowInfo("Save the note first: the document is new or has changes not saved.");
             return;
         }
-        await _ctrl.ShowLongDocumentSummaryAsync(document, () => ShowDocumentText(document, transcribe: true));
+        await _ctrl.ShowLongDocumentSummaryAsync(document, () => ShowDocumentText(document, transcribe: true), kind);
     }
 
     // Its text is the one of the repository: a document new or with changes here has to be saved first. transcribe: «Transcribe
@@ -936,13 +941,13 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             ShowInfo("Save the note first: the document is new or has changes not saved.");
             return;
         }
-        using var form = new DocumentTextForm(_ctrl, document, transcribe);
+        using var form = new DocumentTextForm(_ctrl, document, transcribe, _ctrl.EditMode ? InsertTextInDescription : null);
         form.ShowDialog(this);
         // Its summary may have been written when its pages were transcribed.
         UpdatePreviewResource(_selectedResource);
     }
 
-    // single: one photo or document («Describe the selected photo», «Summarize the selected document»); null: the photos and the
+    // single: one photo or document («Describe the selected photo», «Short summary of the selected document»); null: the photos and the
     // documents of the note, as AiPhotoRules.PlanForNote and AiDocumentRules.PlanForNote say.
     private async Task DescribePhotosAsync(ResourceDto single)
     {
@@ -954,7 +959,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             // What is decided here is what the note has now: with changes not saved, it may not be what will be saved.
             var changed = resources.Any(r => (AiPhotoRules.IsPhoto(r) || AiDocumentRules.IsDocument(r)) && (r.IsNew() || r.IsDirty()));
-            ShowInfo("There are no photos to describe nor documents to summarize: they are locked or already done by the AI." +
+            ShowInfo("There are no photos to describe nor documents without a short summary: they are locked or already done by the AI." +
                 (changed ? " If you changed some of them, save the note first." : ""));
             return;
         }
@@ -1023,7 +1028,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
                 resourceButtons[i].Visible = visible[i];
             buttonDescribePhotos.Text = text;
             buttonDescribePhotos.Enabled = true;
-            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos and summarize the documents with the AI");
+            toolTipHelps.SetToolTip(buttonDescribePhotos, "Describe the photos and write the short summaries of the documents with the AI");
             LayoutResourcesHeader();
 
             UpdatePreviewResource(_selectedResource);
@@ -1052,7 +1057,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         if (documents.Count - personDocuments > 0)
             what.Add(ResourceProcessingTexts.Documents(documents.Count - personDocuments));
         var text = single
-            ? $"The {(isDocument ? "document will be summarized" : "photo will be described")} by {describer.Model}."
+            ? $"The {(isDocument ? "short summary of the document will be written" : "photo will be described")} by {describer.Model}."
             : $"{(what.Count > 0 ? string.Join(" and ", what) : "The resources chosen below")} will be processed by {describer.Model}, one after another.";
         if (documents.Count > 0)
             text += $"{Environment.NewLine}{Environment.NewLine}A document not read yet is read first. A scanned one without text waits for the transcription of its pages.";
@@ -1063,7 +1068,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var page = new TaskDialogPage
         {
             Caption = KntConst.AppName,
-            Heading = single ? (isDocument ? "Summarize document" : "Describe photo") : ResourceProcessingTexts.DescribeWithAi,
+            Heading = single ? (isDocument ? "Short summary of the document" : "Describe photo") : ResourceProcessingTexts.DescribeWithAi,
             Text = text,
             Buttons = { describe, TaskDialogButton.Cancel },
             DefaultButton = describe
@@ -2317,6 +2322,37 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             kntEditView.MarkdownContentControl.SelectionStart = selStart + noteTemplate.Description.Length;
             kntEditView.MarkdownContentControl.BeginInvoke(new Action(() => kntEditView.MarkdownContentControl.ScrollToCaret()));
         }
+    }
+
+    // KNote Atlas, stage 2 (2.1b2): the text selected in the text of a document of the note (DocumentTextForm), copied to the
+    // description where its cursor is, in its own paragraph; from the navigation view, the Markdown editor is opened first. The note
+    // is saved as always. Null if done, or why not.
+    private string InsertTextInDescription(string selected)
+    {
+        if (!_ctrl.EditMode)
+            return "The note is open to read: it can't be changed here.";
+        if (_ctrl.Model.GetContentTypeExt().DescriptionBlocked)
+            return "This note is locked and cannot be edited.";
+        var text = DocumentTexts.ForDescription(selected);
+        if (text.Length == 0)
+            return DocumentTexts.SelectTextFirst;
+
+        if (!buttonNavigate.Enabled)
+            buttonEditMarkdown_Click(this, EventArgs.Empty);
+        tabNoteData.SelectedIndex = 0;
+
+        if (!buttonViewHtml.Enabled)
+            kntEditView.HtmlContentControl.SelectedHtml =
+                string.Join("", text.Split("\n\n").Select(p => $"<p>{System.Net.WebUtility.HtmlEncode(p).Replace("\n", "<br>")}</p>"));
+        else
+        {
+            var box = kntEditView.MarkdownContentControl;
+            var (newText, caret) = DocumentTexts.InsertBlock(box.Text, box.SelectionStart + box.SelectionLength, text, Environment.NewLine);
+            box.Text = newText;
+            box.SelectionStart = caret;
+            box.BeginInvoke(new Action(() => box.ScrollToCaret()));
+        }
+        return null;
     }
 
     private async Task InsertCode()

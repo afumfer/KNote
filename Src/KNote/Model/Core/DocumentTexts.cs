@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using KNote.Model.Dto;
 
 namespace KNote.Model;
@@ -73,7 +75,7 @@ public static class DocumentTexts
         var text = canceled
             ? $"Canceled after {ResourceProcessingTexts.Pages(transcribed)} transcribed: what is done is kept."
             : $"{transcribed} of {total} scanned pages transcribed.";
-        return summarized ? text + " The document was summarized too." : text;
+        return summarized ? text + " Its short summary was written too." : text;
     }
 
     /// <summary>
@@ -128,5 +130,39 @@ public static class DocumentTexts
             text.Append('\n');
         }
         return text.ToString().TrimEnd().Replace("\n", "\r\n");
+    }
+
+    // KNote Atlas, stage 2 (2.1b2): the text selected in the text of a document, copied to the description of its note.
+    public const string CopyToDescription = "Copy to description";
+    public const string CopyToDescriptionHelp = "Copy the selected text to the description of the note, where its cursor is";
+    public const string SelectTextFirst = "Select some text of the document first.";
+    public const string CopiedToDescription = "Copied to the description: save the note to keep it.";
+
+    /// <summary>
+    /// The text selected, as it goes to the description: without what KNote shows around it (the headings of the pages and the marks
+    /// of the scanned or transcribed ones) nor control characters, its line breaks as LF; empty if nothing is left.
+    /// </summary>
+    public static string ForDescription(string selected)
+    {
+        var lines = (selected ?? "").Replace("\r\n", "\n").Replace('\r', '\n').Split('\n')
+            .Where(l => !l.StartsWith(PageHeadingMark, StringComparison.Ordinal) && l != $"[{ScannedPage}]" && l != $"[{AutomaticTranscription}]")
+            .Select(l => new string(l.Where(c => c == '\t' || !char.IsControl(c)).ToArray()));
+        return Regex.Replace(string.Join('\n', lines), @"\n{3,}", "\n\n").Trim();
+    }
+
+    /// <summary>
+    /// A text with a block inserted at a position, in its own paragraph (a blank line before and after it, unless there is one),
+    /// with the line breaks of the text (newLine), and where the cursor goes: after the block.
+    /// </summary>
+    public static (string Text, int Caret) InsertBlock(string text, int at, string block, string newLine = "\n")
+    {
+        text ??= "";
+        at = Math.Clamp(at, 0, text.Length);
+        block = (block ?? "").Replace("\r\n", "\n").Replace("\n", newLine);
+        var before = text[..at];
+        var after = text[at..];
+        var lead = at == 0 || before.EndsWith(newLine + newLine) ? "" : before.EndsWith(newLine) ? newLine : newLine + newLine;
+        var trail = after.Length == 0 || after.StartsWith(newLine + newLine) ? "" : after.StartsWith(newLine) ? newLine : newLine + newLine;
+        return (before + lead + block + trail + after, at + lead.Length + block.Length);
     }
 }

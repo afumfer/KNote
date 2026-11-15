@@ -190,10 +190,10 @@ public class KntSummarySaveDocumentSummaryAsyncCommand : KntCommandServiceBase<D
 }
 
 // KNote Atlas, stage 2 (CU-43, D21, 2.1b): a part of the translation of a document. The first one creates the note of the translation
-// (@KNoteTranslation, in the folder of the note of the document and related to it, with the translation as a Markdown document attached
-// and locked); the next ones are added to that document, only if it goes on from where it was. Each one gives the document a file of its
-// own (as an upload: what was read of it is forgotten). The note keeps how far it went in a hidden comment (DocumentTranslationRules.Marker).
-// The note of the document is not touched (nor its date).
+// (@KNoteTranslation, in the folder of the note of the document and related to it, with the translation as its text, 2.1b2); the next
+// ones are added to that text, only if it goes on from where it was: its header is written again and what somebody changed in the
+// translation is kept. The note keeps how far it went in a hidden comment (DocumentTranslationRules.Marker). The note of the document
+// is not touched (nor its date).
 [KntAuthorize(EnumRoles.Staff)]
 public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBase<DocumentTranslationSaveDto, Result<NoteDto>>
 {
@@ -252,6 +252,7 @@ public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBa
 
     private DocumentTranslationDto State(ResourceDto resource) => new()
     {
+        Format = DocumentTranslationDto.CurrentFormat,
         ResourceId = resource.ResourceId,
         ResourceName = resource.Name,
         Language = Param.Language.Trim(),
@@ -287,19 +288,11 @@ public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBa
 
         var translation = newNote.Entity;
         translation.Topic = DocumentTranslationRules.NoteTopic(resource.NameOut, Param.Language);
-        translation.Description = "";
+        translation.Description = Description(State(resource), resource, note, Param.Text);
         translation.Tags = "";
         translation.NoteTypeId = typeId;
         translation.FolderId = note.FolderId;
         translation.FolderDto = note.FolderDto;
-        translation.Resources.Add(new ResourceDto
-        {
-            Name = $"{Guid.NewGuid()}_{DocumentTranslationRules.FileName(resource.NameOut, Param.Language)}",
-            Description = DocumentTranslationRules.FileDescription(resource.NameOut, Param.Language, Param.Model),
-            DescriptionByUser = true,
-            FileType = "text/markdown",
-            ContentArrayBytes = Encoding.UTF8.GetBytes(Param.Text)
-        });
         translation.TraceNotesTo.Add(new TraceNoteDto { ToId = note.NoteId, TraceNoteTypeId = derivedFromId, Weight = 1.0 });
 
         var saved = await Service.Notes.SaveExtendedAsync(translation);
@@ -308,11 +301,7 @@ public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBa
             result.AddListErrorMessage(saved.ListErrorMessage);
             return null;
         }
-
-        // Its document has its id now: the note says where the translation is and how far it went.
-        var state = State(resource);
-        state.TranslationResourceId = saved.Entity.Resources.Single().ResourceId;
-        return await SaveStateAsync(saved.Entity.GetSimpleDto<NoteDto>(), state, resource, note, result);
+        return saved.Entity.GetSimpleDto<NoteDto>();
     }
 
     private async Task<NoteDto> AddAsync(Guid noteId, ResourceDto resource, NoteDto note, Result<NoteDto> result)
@@ -328,34 +317,8 @@ public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBa
             return null;
         }
 
-        var resFile = await Service.Notes.GetResourceAsync(stored.TranslationResourceId);
-        var file = resFile.IsValid ? resFile.Entity : null;
-        if (file == null || file.NoteId != noteId || file.ContentArrayBytes == null)
-        {
-            result.AddErrorMessage(KntSummaryTexts.TranslationChanged);
-            return null;
-        }
-
-        // A file of its own each time: the files of the resources are never written over.
-        file.ContentArrayBytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(file.ContentArrayBytes) + Param.Text);
-        file.Name = $"{Guid.NewGuid()}_{DocumentTranslationRules.FileName(resource.NameOut, Param.Language)}";
-        file.Description = DocumentTranslationRules.FileDescription(resource.NameOut, Param.Language, Param.Model);
-        file.DescriptionByUser = true;
-        var savedFile = await Service.Notes.SaveResourceAsync(file);
-        if (!savedFile.IsValid)
-        {
-            result.AddListErrorMessage(savedFile.ListErrorMessage);
-            return null;
-        }
-
-        var state = State(resource);
-        state.TranslationResourceId = stored.TranslationResourceId;
-        return await SaveStateAsync(translation, state, resource, note, result);
-    }
-
-    private async Task<NoteDto> SaveStateAsync(NoteDto translation, DocumentTranslationDto state, ResourceDto resource, NoteDto note, Result<NoteDto> result)
-    {
-        translation.Description = DocumentTranslationRules.NoteDescription(state, resource.NameOut, note.NoteNumber, Param.MissingPages, DateTime.Now);
+        // What was translated (with what somebody changed in it) and the new part, under the header of now.
+        translation.Description = Description(State(resource), resource, note, DocumentTranslationRules.Body(translation.Description) + Param.Text);
         var saved = await Service.Notes.SaveAsync(translation);
         if (!saved.IsValid)
         {
@@ -364,6 +327,9 @@ public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBa
         }
         return saved.Entity;
     }
+
+    private string Description(DocumentTranslationDto state, ResourceDto resource, NoteDto note, string body) =>
+        DocumentTranslationRules.NoteDescription(state, resource.NameOut, note.NoteNumber, Param.MissingPages, DateTime.Now, body);
 }
 
 // KNote Atlas, stage 2 (2.1b): the translations of a document (the notes @KNoteTranslation related to its note whose hidden comment

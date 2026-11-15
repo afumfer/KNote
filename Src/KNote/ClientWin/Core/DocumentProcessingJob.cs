@@ -58,9 +58,9 @@ public class DocumentProcessingJob
                 return progress.Page is int page
                     ? $"Translating {progress.FileName}: page {page}/{progress.PagesCount}"
                     : $"Translating {progress.FileName}: {progress.CallsDone}/{progress.CallsTotal}";
-            var what = progress.Kind == EnumDocumentProcessKind.Translate ? "Translation" : "Summary";
+            var what = progress.Kind == EnumDocumentProcessKind.Translate ? "Translation" : "Extended summary";
             return progress.Phase is EnumDocumentProcessPhase.Reading or EnumDocumentProcessPhase.Joining or EnumDocumentProcessPhase.Writing
-                ? $"Summarizing {progress.FileName}: {progress.CallsDone}/{progress.CallsTotal}"
+                ? $"Extended summary of {progress.FileName}: {progress.CallsDone}/{progress.CallsTotal}"
                 : $"{what} of {progress.FileName ?? "a document"}: {progress.Phase.ToString().ToLowerInvariant()}";
         }
     }

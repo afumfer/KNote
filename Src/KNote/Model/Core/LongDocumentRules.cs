@@ -54,7 +54,7 @@ public static class LongDocumentRules
     }
 
     /// <summary>The topic of the note with the summary.</summary>
-    public static string NoteTopic(string fileName) => $"Summary of {fileName}";
+    public static string NoteTopic(string fileName) => $"Extended summary of {fileName}";
 
     /// <summary>
     /// The text of the note with the summary: a line with where it comes from (the note of the document, cited, and its pages),
@@ -63,7 +63,7 @@ public static class LongDocumentRules
     public static string NoteDescription(DocumentToSummarizeDto document, DocumentSummarySaveDto summary, DateTime date)
     {
         var header = new StringBuilder();
-        header.Append($"> Summary of the document **{document.FileName}** of the note #{document.NoteNumber}");
+        header.Append($"> Extended summary of the document **{document.FileName}** of the note #{document.NoteNumber}");
         if (document.Paged)
             header.Append($", {document.PagesCount} pages");
         header.Append($" · {summary.Model} · {date:yyyy-MM-dd}");
@@ -91,10 +91,10 @@ public static class LongDocumentRules
     }
 
     /// <summary>The name of the resource with the summary as the AI wrote it (D17), and its description.</summary>
-    public static string OriginalFileName(string fileName) => $"Summary of {fileName} (original).md";
+    public static string OriginalFileName(string fileName) => $"Extended summary of {fileName} (original).md";
 
     public static string OriginalDescription(string model, DateTime date) =>
-        $"The summary as the AI wrote it ({model}, {date:yyyy-MM-dd}), before anybody changed it.";
+        $"The extended summary as the AI wrote it ({model}, {date:yyyy-MM-dd}), before anybody changed it.";
 
     // The pages of a batch, as « (pages 3–9)», or nothing without pages.
     private static string Span(IReadOnlyList<SummaryPiece> pieces)

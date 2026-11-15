@@ -379,7 +379,7 @@ public static class AiDocumentProcessor
                     translated += source.Length;
                     callsDone++;
                 }
-                pending.Append(DocumentTranslationRules.FileText(plan.Parts, call, translation));
+                pending.Append(DocumentTranslationRules.PartText(plan.Parts, call, translation));
                 next = call.To;
 
                 if (pending.Length >= DocumentTranslationRules.SaveEveryCharacters || clock.Elapsed - lastSave >= DocumentTranslationRules.SaveEvery)
@@ -410,7 +410,7 @@ public static class AiDocumentProcessor
         }
     }
 
-    // A part translated: asked again once if it comes back clearly shorter than its original; if still short, it is said in the file.
+    // A part translated: asked again once if it comes back clearly shorter than its original; if still short, it is said in the translation.
     private static async Task<string> TranslatePartAsync(IChatClient chatClient, AiProviderRef provider, string systemPrompt, string request,
         string source, CancellationToken cancellationToken)
     {

@@ -7,13 +7,13 @@ using KNote.Model.Dto;
 namespace KNote.Model;
 
 /// <summary>
-/// The texts of the summary of a long document in both apps (KNote Atlas, stage 2, 2.1a2): the window or dialog «Summarize document»,
-/// its estimate and its progress. In English, as KNote's interface.
+/// The texts of the summary (2.1a2) and of the translation (2.1b2) of a long document in both apps (KNote Atlas, stage 2): the window or
+/// dialog «Extended summary» / «Translate document», its estimate and its progress. In English, as KNote's interface.
 /// </summary>
 public static class SummaryTexts
 {
-    public const string Title = "Summarize document";
-    public const string MenuItem = "Summarize the whole document...";
+    public const string Title = "Extended summary";
+    public const string MenuItem = "Extended summary of the document...";
     public const string Estimate = "Estimate";
     public const string Generate = "Generate";
     public const string Cancel = "Cancel";
@@ -21,10 +21,48 @@ public static class SummaryTexts
     public const string TranscribeFirst = "Transcribe them first";
     public const string LanguageHelp = "Empty: the language of the document.";
     public const string Intro =
-        "The AI reads the whole document by parts and writes its summary in a new note, next to the note of the document and related " +
+        "The AI reads the whole document by parts and writes its extended summary in a new note, next to the note of the document and related " +
         "to it. The note of the document doesn't change.";
-    public const string Running = "A summary is being written: it goes on if you close this window.";
+    public const string Running = "An extended summary is being written: it goes on if you close this window.";
     public const string OtherRunning = "Another task of KNote Atlas is running: wait until it ends.";
+    public const string IndexRunning = "Updating the search index: wait until it ends.";
+
+    // The translation (2.1b2).
+    public const string TranslateTitle = "Translate document";
+    public const string TranslateMenuItem = "Translate the whole document...";
+    public const string Continue = "Continue";
+    public const string TranslateLanguageHelp = "The language to translate it into.";
+    public const string TranslateIntro =
+        "The AI translates the whole document page by page into the text of a new note, next to the note of the document and related " +
+        "to it. The note of the document doesn't change. If it stops, «Continue» goes on with it.";
+    public const string TranslateRunning = "A translation is being written: it goes on if you close this window.";
+
+    public static string TitleOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateTitle : Title;
+
+    public static string IntroOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateIntro : Intro;
+
+    public static string RunningOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateRunning : Running;
+
+    public static string LanguageHelpOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateLanguageHelp : LanguageHelp;
+
+    /// <summary>A translation not finished of the document, in a line: its language, how far it went and its note.</summary>
+    public static string Unfinished(DocumentTranslationDto translation) =>
+        $"Not finished: {translation.Language}, {Done(translation)} (note #{translation.NoteNumber}).";
+
+    /// <summary>The question before starting a translation into the language of one not finished.</summary>
+    public static string ContinueInstead(DocumentTranslationDto translation) =>
+        $"There is a translation into {translation.Language} not finished (note #{translation.NoteNumber}, {Done(translation)}).\n\n" +
+        "Continue it instead of starting another one? (No: start another one.)";
+
+    /// <summary>Whether «Open the note» has a note to open: the summary or the translation done, or what was translated of one stopped.</summary>
+    public static bool HasNote(DocumentProcessProgressDto progress) =>
+        progress?.NoteId != null && (progress.Phase == EnumDocumentProcessPhase.Completed
+            || (progress.Kind == EnumDocumentProcessKind.Translate && progress.Phase is EnumDocumentProcessPhase.Canceled or EnumDocumentProcessPhase.Failed));
+
+    private static string Done(DocumentTranslationDto translation) =>
+        translation.Paged
+            ? (translation.NextPage ?? 1) > 1 ? $"pages 1–{translation.NextPage - 1} of {translation.PagesCount}" : $"part of the page 1 of {translation.PagesCount}"
+            : $"{translation.NextPart} of {translation.Parts} parts";
 
     // The languages offered (any other can be written).
     public static IReadOnlyList<string> Languages { get; } = new[] { "English", "Spanish", "French", "German", "Italian", "Portuguese" };
@@ -47,7 +85,7 @@ public static class SummaryTexts
                 ? $"{estimate.Pages} pages, {estimate.Characters:N0} characters: {Calls(estimate.Calls)} to the model."
                 : $"{estimate.Characters:N0} characters: {Calls(estimate.Calls)} to the model.",
             estimate.Seconds is double seconds ? $"About {Duration(seconds)} with {estimate.Model}."
-                : $"{estimate.Model}: no time yet, its first {(estimate.Kind == EnumDocumentProcessKind.Translate ? "translation" : "summary")} will say its pace."
+                : $"{estimate.Model}: no time yet, its first {(estimate.Kind == EnumDocumentProcessKind.Translate ? "translation" : "extended summary")} will say its pace."
         };
         if (estimate.FromPage is int fromPage)
             lines.Insert(0, $"It goes on from the page {fromPage}.");
@@ -72,7 +110,7 @@ public static class SummaryTexts
             EnumDocumentProcessPhase.Preparing => "Preparing the document",
             EnumDocumentProcessPhase.Reading => $"Reading the document: {progress.CallsDone} of {progress.CallsTotal}",
             EnumDocumentProcessPhase.Joining => $"Joining its notes: {progress.CallsDone} of {progress.CallsTotal}",
-            EnumDocumentProcessPhase.Writing => "Writing the summary",
+            EnumDocumentProcessPhase.Writing => "Writing the extended summary",
             EnumDocumentProcessPhase.Saving => "Saving the note",
             EnumDocumentProcessPhase.Translating => progress.Page is int page
                 ? $"Translating: page {page} of {progress.PagesCount}"
@@ -102,5 +140,5 @@ public static class SummaryTexts
 
     private static string Calls(int calls) => calls == 1 ? "1 call" : $"{calls} calls";
 
-    private static string What(DocumentProcessProgressDto progress) => progress.Kind == EnumDocumentProcessKind.Translate ? "translation" : "summary";
+    private static string What(DocumentProcessProgressDto progress) => progress.Kind == EnumDocumentProcessKind.Translate ? "translation" : "extended summary";
 }

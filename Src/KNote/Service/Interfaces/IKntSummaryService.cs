@@ -31,8 +31,8 @@ public interface IKntSummaryService
 
     /// <summary>
     /// Keeps a part of the translation of a document (2.1b): the first one creates the note of the type @KNoteTranslation in the folder
-    /// of the note of the document, related to it (@DerivedFrom), with the translation as a Markdown document attached; the next ones
-    /// are added to it, only if it goes on from where it was. Only if the document is still the one that was read. Staff.
+    /// of the note of the document, related to it (@DerivedFrom), with the translation as its text (2.1b2); the next ones are added
+    /// to that text, only if it goes on from where it was. Only if the document is still the one that was read. Staff.
     /// </summary>
     Task<Result<NoteDto>> SaveDocumentTranslationAsync(DocumentTranslationSaveDto translation);
 

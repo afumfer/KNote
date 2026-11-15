@@ -35,6 +35,8 @@ namespace KNote.ClientWin.Views
             labelLanguageHelp = new Label();
             labelLength = new Label();
             comboLength = new ComboBox();
+            labelUnfinished = new Label();
+            buttonContinue = new Button();
             labelModel = new Label();
             comboModel = new ComboBox();
             buttonEstimate = new Button();
@@ -111,6 +113,27 @@ namespace KNote.ClientWin.Views
             comboLength.Name = "comboLength";
             comboLength.Size = new Size(260, 23);
             comboLength.TabIndex = 6;
+            //
+            // labelUnfinished
+            //
+            labelUnfinished.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelUnfinished.AutoEllipsis = true;
+            labelUnfinished.Location = new Point(12, 126);
+            labelUnfinished.Name = "labelUnfinished";
+            labelUnfinished.Size = new Size(536, 15);
+            labelUnfinished.TabIndex = 18;
+            labelUnfinished.Visible = false;
+            //
+            // buttonContinue
+            //
+            buttonContinue.Location = new Point(12, 143);
+            buttonContinue.Name = "buttonContinue";
+            buttonContinue.Size = new Size(100, 27);
+            buttonContinue.TabIndex = 19;
+            buttonContinue.Text = "Continue";
+            buttonContinue.UseVisualStyleBackColor = true;
+            buttonContinue.Visible = false;
+            buttonContinue.Click += buttonContinue_Click;
             //
             // labelModel
             //
@@ -234,6 +257,8 @@ namespace KNote.ClientWin.Views
             Controls.Add(labelLanguageHelp);
             Controls.Add(labelLength);
             Controls.Add(comboLength);
+            Controls.Add(labelUnfinished);
+            Controls.Add(buttonContinue);
             Controls.Add(labelModel);
             Controls.Add(comboModel);
             Controls.Add(buttonEstimate);
@@ -248,7 +273,7 @@ namespace KNote.ClientWin.Views
             MinimumSize = new Size(500, 500);
             Name = "LongDocumentSummaryForm";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Summarize document";
+            Text = "Extended summary";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -258,6 +283,8 @@ namespace KNote.ClientWin.Views
         private Label labelFile;
         private Label labelIntro;
         private Label labelLanguage;
+        private Label labelUnfinished;
+        private Button buttonContinue;
         private ComboBox comboLanguage;
         private Label labelLanguageHelp;
         private Label labelLength;

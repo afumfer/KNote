@@ -100,7 +100,7 @@ public class ResourceProcessingRulesTests
             new ResourceProcessingOptionsDto { Documents = false, ScannedPages = false, PersonDescriptions = EnumPersonDescriptions.Lock },
             new ResourceDescriberDto { Model = "qwen3.5:9b" });
 
-        StringAssert.Contains(replace, "The AI describes 12 photos and summarizes 5 documents with the model gpt-test.");
+        StringAssert.Contains(replace, "The AI describes 12 photos and writes the short summary of 5 documents with the model gpt-test.");
         StringAssert.Contains(replace, "KNote reads the text of 6 documents first (without the AI), and their scanned pages are transcribed too.");
         StringAssert.Contains(replace, "It should take about 46 s.");
         StringAssert.Contains(replace, "gpt-test is a paid model: these photos and documents are sent");
@@ -140,7 +140,7 @@ public class ResourceProcessingRulesTests
         };
 
         Assert.AreEqual("Done: 3 photos described in 9 s · 2 locked · 1 not available here.", ResourceProcessingTexts.Progress(photos));
-        Assert.AreEqual("Done: 2 documents summarized, 3 documents read in 9 s · 1 document scanned, waiting for transcription.",
+        Assert.AreEqual("Done: 2 documents with a short summary, 3 documents read in 9 s · 1 document scanned, waiting for transcription.",
             ResourceProcessingTexts.Progress(documents));
         Assert.AreEqual("Reading documents: 1 of 3", ResourceProcessingTexts.Progress(reading));
         Assert.AreEqual((1, 3), ResourceProcessingTexts.Bar(reading));

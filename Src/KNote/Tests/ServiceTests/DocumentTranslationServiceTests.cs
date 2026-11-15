@@ -13,9 +13,9 @@ namespace KNote.Tests.ServiceTests;
 
 /// <summary>
 /// The translation of a long document of a note (KNote Atlas, stage 2, 2.1b, CU-43, D21) with a repository and a fake model: the new
-/// note (type, folder, relation, the translation attached with the pages of the document), the note of the document untouched,
-/// canceling (what was translated stays) and «Continue», a part that comes back too short, a document replaced meanwhile, a document
-/// without pages, the estimate and the pace, and the translation read again by pages. Dapper and EF.
+/// note (type, folder, relation, the translation as its text with a heading before each page, 2.1b2), the note of the document
+/// untouched, canceling (what was translated stays) and «Continue» (keeping what somebody changed in it), a part that comes back too
+/// short, a document replaced meanwhile, a document without pages, and the estimate and the pace. Dapper and EF.
 /// </summary>
 [TestClass]
 public class DocumentTranslationServiceTests
@@ -54,7 +54,7 @@ public class DocumentTranslationServiceTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
-    public async Task TheTranslation_GoesToANewNote_WithTheDocumentAttached_ByPages(string orm)
+    public async Task TheTranslation_GoesToTheTextOfANewNote_ByPages(string orm)
     {
         Open(orm);
         var (noteId, folderId, resourceId) = await AddDocumentAsync("QL manual", $"The QL boots.{Page}It has two microdrives.");
@@ -77,10 +77,9 @@ public class DocumentTranslationServiceTests
         Assert.AreEqual(noteId, relation.ToId);
         Assert.AreEqual(KntConst.DerivedFromTraceNoteType, (await service.TraceNoteTypes.GetAsync(relation.TraceNoteTypeId!.Value)).Entity.Name);
 
-        var document = translation.Resources.Single();
-        Assert.IsTrue(document.DescriptionByUser, "locked: the stage 4 doesn't describe it");
-        StringAssert.EndsWith(document.Name, "manual (Spanish).md");
-        Assert.AreEqual($"El QL arranca.{Page}Tiene dos microdrives.", await FileTextAsync(document.ResourceId));
+        Assert.IsEmpty(translation.Resources, "nothing attached");
+        Assert.AreEqual("#### p. 1\n\nEl QL arranca.\n\n#### p. 2\n\nTiene dos microdrives.", DocumentTranslationRules.Body(translation.Description));
+        StringAssert.StartsWith(translation.Description, "> Translation of the document **manual.pdf**");
 
         Assert.AreEqual(NoteDate, (await service.Notes.GetAsync(noteId)).Entity.ModificationDateTime, "the note of the document is not modified");
         Assert.HasCount(2, model.Requests, "a call per page");
@@ -92,7 +91,7 @@ public class DocumentTranslationServiceTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
-    public async Task Canceling_KeepsWhatWasTranslated_AndContinue_EndsIt(string orm)
+    public async Task Canceling_KeepsWhatWasTranslated_AndContinue_EndsIt_WithWhatSomebodyChanged(string orm)
     {
         Open(orm);
         var pages = string.Join(Page, Enumerable.Range(1, 6).Select(i => $"Page {i}. " + new string('x', 2_500)));
@@ -114,8 +113,13 @@ public class DocumentTranslationServiceTests
         Assert.IsFalse(left.Finished);
         Assert.AreEqual(4, left.NextPart);
         Assert.AreEqual(5, left.NextPage);
-        StringAssert.Contains((await service.Notes.GetAsync(left.NoteId)).Entity.Description, "Translated: pages 1–4 of 6. Not finished");
-        Assert.HasCount(4, DocumentTextRules.Pages(await FileTextAsync(left.TranslationResourceId)));
+        var leftNote = (await service.Notes.GetAsync(left.NoteId)).Entity;
+        StringAssert.Contains(leftNote.Description, "Translated: pages 1–4 of 6. Not finished");
+        Assert.AreEqual(4, Headings(leftNote.Description));
+
+        // Somebody corrects the translation meanwhile.
+        leftNote.Description = leftNote.Description.Replace("Página 2.", "Página 2 (corregida).");
+        Assert.IsTrue((await service.Notes.SaveAsync(leftNote)).IsValid);
 
         var estimate = await AiDocumentProcessor.EstimateAsync(service, Ollama(), new DocumentProcessRequestDto
         {
@@ -133,8 +137,11 @@ public class DocumentTranslationServiceTests
         StringAssert.Contains(second.Requests[0].Text, "(p. 5)");
         Assert.HasCount(2, second.Requests);
         StringAssert.EndsWith(second.Requests[0].Text, "Translate the text between <text> and </text> into Spanish.", "in the language it was started with");
-        var file = DocumentTextRules.Pages(await FileTextAsync(left.TranslationResourceId));
-        CollectionAssert.AreEqual(Enumerable.Range(1, 6).Select(i => $"Página {i}").ToArray(), file.Select(p => p.Text[..p.Text.IndexOf('.')]).ToArray());
+        var done = (await service.Notes.GetAsync(left.NoteId)).Entity.Description;
+        Assert.AreEqual(6, Headings(done));
+        StringAssert.Contains(done, "Página 2 (corregida).", "what somebody changed is kept");
+        StringAssert.Contains(done, "#### p. 6\n\nPágina 6.");
+        StringAssert.Contains(done, "Translated: all the 6 pages.");
         Assert.HasCount(2, (await service.Notes.GetByFolderAsync(folderId)).Entity, "the document's note and its translation");
         Assert.IsTrue((await service.Summaries.GetDocumentTranslationsAsync(resourceId)).Entity.Single().Finished);
     }
@@ -152,7 +159,7 @@ public class DocumentTranslationServiceTests
         Assert.AreEqual(EnumDocumentProcessPhase.Completed, run.Entity.Phase, run.ErrorMessage);
         Assert.HasCount(2, model.Requests, "asked again once");
         var translation = (await service.Summaries.GetDocumentTranslationsAsync(resourceId)).Entity.Single();
-        Assert.AreEqual($"Corto.\n\n{DocumentTranslationRules.IncompleteLine}", await FileTextAsync(translation.TranslationResourceId));
+        Assert.AreEqual($"#### p. 1\n\nCorto.\n\n{DocumentTranslationRules.IncompleteLine}", await TranslationAsync(translation.NoteId));
     }
 
     [TestMethod]
@@ -177,7 +184,7 @@ public class DocumentTranslationServiceTests
     }
 
     [TestMethod]
-    public async Task ADocumentWithoutPages_IsTranslatedInPartsThatFit_AndKeepsNoPages()
+    public async Task ADocumentWithoutPages_IsTranslatedInPartsThatFit_WithoutHeadings()
     {
         Open("EntityFramework");
         var text = string.Join("\n\n", Enumerable.Range(1, 4).Select(i => $"Part {i}. " + new string('x', 2_800)));
@@ -191,8 +198,9 @@ public class DocumentTranslationServiceTests
         Assert.HasCount(2, model.Requests, "two parts of about 2,800 fit in a call of 8,000");
         Assert.IsFalse(model.Requests[0].Text.Contains("(p. "));
         var translation = (await service.Summaries.GetDocumentTranslationsAsync(resourceId)).Entity.Single();
-        var file = await FileTextAsync(translation.TranslationResourceId);
-        Assert.IsFalse(file.Contains(Page), "no pages");
+        var translated = await TranslationAsync(translation.NoteId);
+        Assert.IsFalse(translated.Contains("#### p."), "no pages");
+        StringAssert.StartsWith(translated, "Traducido ");
         StringAssert.Contains((await service.Notes.GetAsync(translation.NoteId)).Entity.Description, "Translated: all of it.");
     }
 
@@ -230,24 +238,6 @@ public class DocumentTranslationServiceTests
         StringAssert.Contains(estimate.ErrorMessage, KntSummaryTexts.LanguageRequired);
     }
 
-    // D21: the stage 4 reads the translation of a document with pages by its pages (the index cites them, the viewers show them).
-    [TestMethod]
-    public async Task TheTranslation_IsReadAgainByPages()
-    {
-        Open("EntityFramework");
-        service.DocumentReader = new AiDocumentReader();
-        var (_, _, resourceId) = await AddDocumentAsync("QL manual", $"The QL boots.{Page}It has two microdrives.");
-        await AiDocumentProcessor.ProcessAsync(service, _ => new FakeModel(r => r.Contains("(p. 1)") ? "Uno." : "Dos."), Ollama(),
-            new DocumentProcessRequestDto { ResourceId = resourceId, Kind = EnumDocumentProcessKind.Translate, Language = "Spanish" });
-        var translation = (await service.Summaries.GetDocumentTranslationsAsync(resourceId)).Entity.Single();
-
-        var read = await service.ResourceContent.ReadDocumentAsync(translation.TranslationResourceId);
-        var text = await service.ResourceContent.GetDocumentTextAsync(translation.TranslationResourceId);
-
-        Assert.IsTrue(read.IsValid, read.ErrorMessage);
-        CollectionAssert.AreEqual(new[] { "Uno.", "Dos." }, DocumentTextRules.Pages(text.Entity.Text).Select(p => p.Text).ToArray());
-    }
-
     [TestMethod]
     public async Task OnlyStaff_KeepsATranslation()
     {
@@ -274,11 +264,11 @@ public class DocumentTranslationServiceTests
         return $"Página {number}. " + new string('y', 2_000);
     }
 
-    private async Task<string> FileTextAsync(Guid resourceId)
-    {
-        var file = (await service.Notes.GetResourceAsync(resourceId)).Entity;
-        return Encoding.UTF8.GetString(file.ContentArrayBytes);
-    }
+    // The translation in the text of its note.
+    private async Task<string> TranslationAsync(Guid noteId) => DocumentTranslationRules.Body((await service.Notes.GetAsync(noteId)).Entity.Description);
+
+    private static int Headings(string description) =>
+        description.Replace("\r\n", "\n").Split('\n').Count(l => l.StartsWith("#### p. ", StringComparison.Ordinal));
 
     private sealed record Request(string System, string Text, ChatOptions? Options);
 

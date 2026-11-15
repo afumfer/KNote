@@ -134,6 +134,27 @@ public class LongDocumentSummaryCtrlTests
         await store.ResourceProcessing.Completion;
     }
 
+    // Found by hand (2.1b2): after a translation canceled, the job updates the index with its note; «Continue» stayed disabled until
+    // another control refreshed the window, because it didn't hear when that run ended.
+    [TestMethod]
+    public async Task TheWindow_IsRefreshed_WhenAnotherRunOfKNoteAtlasEnds()
+    {
+        var (ctrl, view, service, store, document) = Create();
+        await ctrl.LoadAsync(TestServiceRefFactory.CreateWithFakeService(service), document);
+        ctrl.Run();
+        var held = new TaskCompletionSource<Result<ResourceProcessingProgressDto>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        store.ResourceProcessing.Runner = (_, _, _, _, _) => held.Task;
+        Assert.IsTrue(store.ResourceProcessing.Start(service, "Notes", new AiProviderRef(), new ResourceProcessingOptionsDto(), false));
+        var whileRunning = view.RefreshProgressCallCount;
+        Assert.IsTrue(ctrl.OtherRunning);
+
+        held.SetResult(new Result<ResourceProcessingProgressDto>(new ResourceProcessingProgressDto { Phase = EnumResourceProcessingPhase.Completed }));
+        await store.ResourceProcessing.Completion;
+
+        Assert.IsFalse(ctrl.OtherRunning);
+        Assert.IsGreaterThan(whileRunning, view.RefreshProgressCallCount, "the window hears that it ended");
+    }
+
     // Found by hand (2.1a2): the window opened without its models, its lengths or its language.
     [TestMethod]
     public async Task Run_ShowsWhatLoadPrepared_InTheView()
@@ -145,6 +166,87 @@ public class LongDocumentSummaryCtrlTests
 
         Assert.AreEqual(1, view.ShowViewCallCount);
         Assert.IsGreaterThanOrEqualTo(1, view.RefreshViewCallCount, "the view shows the models, the length and the language");
+    }
+
+    // 2.1b2: «Translate document», the same window: its own language, no length, «Continue» and the question before another one.
+    [TestMethod]
+    public async Task ATranslation_ProposesItsOwnLanguage_AndContinue_GoesOnWithTheOneNotFinished()
+    {
+        var (ctrl, view, service, store, document) = Create();
+        var serviceRef = TestServiceRefFactory.CreateWithFakeService(service);
+        store.State.Session.SummaryLanguages.Add(new RepositoryLanguageState { RepositoryId = serviceRef.RepositoryId, Language = "" });
+        store.State.Session.TranslationLanguages.Add(new RepositoryLanguageState { RepositoryId = serviceRef.RepositoryId, Language = "French" });
+        var unfinished = new DocumentTranslationDto
+        {
+            ResourceId = document.ResourceId, NoteId = Guid.NewGuid(), NoteNumber = 123, Language = "Spanish", Paged = true, PagesCount = 138,
+            Parts = 150, NextPart = 45, NextPage = 41
+        };
+        service.SummariesFake.GetDocumentTranslationsAsyncImpl = _ => Task.FromResult(new Result<List<DocumentTranslationDto>>(new() { unfinished }));
+        service.SemanticSearchFake.GetIndexStatusAsyncImpl = () => Task.FromResult(new Result<SemanticIndexStatusDto>(new SemanticIndexStatusDto { Status = EnumSemanticIndexStatus.None }));
+        DocumentProcessRequestDto? asked = null;
+        var release = new TaskCompletionSource<Result<DocumentProcessProgressDto>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        store.DocumentProcessing.Runner = (_, _, request, _, _) =>
+        {
+            asked = request;
+            started.TrySetResult();
+            return release.Task;
+        };
+
+        await ctrl.LoadAsync(serviceRef, document, EnumDocumentProcessKind.Translate);
+
+        Assert.AreEqual("French", ctrl.Language, "the language of the last translation, not of the last summary");
+        Assert.AreSame(unfinished, ctrl.Unfinished);
+        StringAssert.Contains(SummaryTexts.Unfinished(ctrl.Unfinished), "Spanish, pages 1–40 of 138 (note #123)");
+
+        Assert.IsTrue(await ctrl.ContinueAsync());
+        await started.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.AreEqual(EnumDocumentProcessKind.Translate, asked!.Kind);
+        Assert.AreEqual(unfinished.NoteId, asked.ContinueNoteId);
+        Assert.AreEqual("Spanish", store.State.Session.TranslationLanguages.Single().Language, "in its language");
+
+        release.SetResult(new Result<DocumentProcessProgressDto>(new DocumentProcessProgressDto
+        {
+            Kind = EnumDocumentProcessKind.Translate, Phase = EnumDocumentProcessPhase.Canceled, NoteId = unfinished.NoteId, NoteNumber = 123
+        }));
+        await store.DocumentProcessing.Completion;
+        Assert.IsTrue(SummaryTexts.HasNote(ctrl.Progress), "what was translated can be opened");
+    }
+
+    [TestMethod]
+    public async Task ATranslation_NeedsALanguage_AndAsksBeforeAnotherOneIntoTheLanguageOfOneNotFinished()
+    {
+        var (ctrl, view, service, store, document) = Create();
+        var serviceRef = TestServiceRefFactory.CreateWithFakeService(service);
+        var unfinished = new DocumentTranslationDto { ResourceId = document.ResourceId, NoteId = Guid.NewGuid(), NoteNumber = 7, Language = "Spanish", Parts = 10, NextPart = 3 };
+        service.SummariesFake.GetDocumentTranslationsAsyncImpl = _ => Task.FromResult(new Result<List<DocumentTranslationDto>>(new() { unfinished }));
+        service.SemanticSearchFake.GetIndexStatusAsyncImpl = () => Task.FromResult(new Result<SemanticIndexStatusDto>(new SemanticIndexStatusDto { Status = EnumSemanticIndexStatus.None }));
+        var requests = new List<DocumentProcessRequestDto>();
+        store.DocumentProcessing.Runner = (_, _, request, _, _) =>
+        {
+            requests.Add(request);
+            return Task.FromResult(new Result<DocumentProcessProgressDto>(new DocumentProcessProgressDto { Kind = request.Kind, Phase = EnumDocumentProcessPhase.Completed }));
+        };
+        await ctrl.LoadAsync(serviceRef, document, EnumDocumentProcessKind.Translate);
+
+        ctrl.Language = " ";
+        Assert.IsFalse(await ctrl.GenerateAsync());
+        Assert.AreEqual(KNote.Service.ServicesCommands.KntSummaryTexts.LanguageRequired, view.LastShownInfo);
+
+        ctrl.Language = "spanish";
+        view.NextShowInfoResult = DialogResult.Cancel;
+        Assert.IsFalse(await ctrl.GenerateAsync(), "canceled: nothing starts");
+        Assert.AreEqual(SummaryTexts.ContinueInstead(unfinished), view.LastShownInfo);
+
+        view.NextShowInfoResult = DialogResult.No;
+        Assert.IsTrue(await ctrl.GenerateAsync());
+        await store.DocumentProcessing.Completion;
+        Assert.IsNull(requests.Single().ContinueNoteId, "No: another one");
+
+        view.NextShowInfoResult = DialogResult.Yes;
+        Assert.IsTrue(await ctrl.GenerateAsync());
+        await store.DocumentProcessing.Completion;
+        Assert.AreEqual(unfinished.NoteId, requests[1].ContinueNoteId, "Yes: that one goes on");
     }
 
     [TestMethod]

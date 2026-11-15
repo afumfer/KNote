@@ -18,13 +18,13 @@ public static class AiDocumentRules
     public const int MaxDocumentTextLength = 16_000;
 
     // A document whose text can't be summarized yet: scanned, its pages wait for a transcription (stage 4.5).
-    public const string NeedsTranscriptionMessage = "The document is scanned: its summary waits for the transcription of its pages.";
+    public const string NeedsTranscriptionMessage = "The document is scanned: its short summary waits for the transcription of its pages.";
     public const string UnreadableMessage = "The document can't be read: it is protected, encrypted or damaged.";
     public const string FileNotAvailableMessage = "The file of the document is not available in this installation.";
 
     public static bool IsDocument(ResourceInfoDto resource) => DocumentTextRules.IsDocument(resource);
 
-    /// <summary>Whether «Summarize document» is offered for a resource: a document whose description is not locked.</summary>
+    /// <summary>Whether «Short summary of the document» is offered for a resource: a document whose description is not locked.</summary>
     public static bool CanSummarize(ResourceInfoDto resource) => IsDocument(resource) && !resource.DescriptionByUser;
 
     /// <summary>A document whose description a person wrote and didn't lock: summarizing it would replace that text.</summary>

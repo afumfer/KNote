@@ -24,6 +24,10 @@ public partial class DocumentTextForm : KntForm
     private string _readable = "";
     private CancellationTokenSource _loading;
     private CancellationTokenSource _transcribing;
+    // 2.1b2: the selected text to the description of the note (null if the note can't be changed); it says why not, or null.
+    private readonly Func<string, string> _copyToDescription;
+    private Button _buttonCopy;
+    private readonly ToolTip _toolTip = new();
 
     public DocumentTextForm()
     {
@@ -31,8 +35,10 @@ public partial class DocumentTextForm : KntForm
     }
 
     // transcribe: «Transcribe the scanned pages of the selected document» of the note's editor, which starts it when shown.
-    public DocumentTextForm(NoteEditorCtrl ctrl, ResourceDto resource, bool transcribe = false) : this()
+    // copyToDescription: «Copy to description» (2.1b2), only when the note can be changed.
+    public DocumentTextForm(NoteEditorCtrl ctrl, ResourceDto resource, bool transcribe = false, Func<string, string> copyToDescription = null) : this()
     {
+        _copyToDescription = copyToDescription;
         _ctrl = ctrl;
         _resource = resource;
         var format = DocumentTextRules.FormatOf(resource.FileType, resource.Name);
@@ -45,23 +51,64 @@ public partial class DocumentTextForm : KntForm
         buttonOriginalPage.Text = DocumentTexts.SeeOriginalPage;
         labelPage.Visible = numericPage.Visible = buttonOriginalPage.Visible = _isPdf;
 
-        // KNote Atlas, stage 2 (2.1a2): the summary of the whole document, in its own window; «Transcribe them first» transcribes here.
-        // Left of «Close»: on the left are the page controls of a PDF.
-        var summarizeWidth = LogicalToDeviceUnits(150);
-        var buttonSummarize = new Button
+        // KNote Atlas, stage 2: the summary (2.1a2) and the translation (2.1b2) of the whole document, each in its own window;
+        // «Transcribe them first» transcribes here. Left of «Close»: on the left are the page controls of a PDF.
+        var buttonTranslate = AddDocumentButton(SummaryTexts.TranslateTitle + "...", buttonClose.Left, EnumDocumentProcessKind.Translate);
+        AddDocumentButton(SummaryTexts.Title + "...", buttonTranslate.Left, EnumDocumentProcessKind.Summarize);
+        if (copyToDescription != null)
+            AddCopyButton();
+    }
+
+    // «Copy to description» (2.1b2): at the left, after the page controls of a PDF; enabled with some text selected.
+    private void AddCopyButton()
+    {
+        _buttonCopy = new Button
         {
-            Text = SummaryTexts.Title + "...",
+            Text = DocumentTexts.CopyToDescription,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+            Location = new Point(_isPdf ? buttonOriginalPage.Right + LogicalToDeviceUnits(6) : labelPage.Left, buttonClose.Top),
+            Size = new Size(LogicalToDeviceUnits(140), buttonClose.Height),
+            UseVisualStyleBackColor = true,
+            Enabled = false
+        };
+        _toolTip.SetToolTip(_buttonCopy, DocumentTexts.CopyToDescriptionHelp);
+        _buttonCopy.Click += (_, _) =>
+        {
+            var why = _copyToDescription(textDocument.SelectedText);
+            if (why != null)
+                ShowInfo(why, DocumentTexts.CopyToDescription);
+            else
+                _toolTip.Show(DocumentTexts.CopiedToDescription, _buttonCopy, 0, -_buttonCopy.Height, 3000);
+        };
+        textDocument.MouseUp += (_, _) => RefreshCopyButton();
+        Controls.Add(_buttonCopy);
+    }
+
+    private void RefreshCopyButton()
+    {
+        if (_buttonCopy != null)
+            _buttonCopy.Enabled = textDocument.SelectionLength > 0;
+    }
+
+    // A button at the left of another one that opens «Summarize document» or «Translate document».
+    private Button AddDocumentButton(string text, int rightOf, EnumDocumentProcessKind kind)
+    {
+        var width = LogicalToDeviceUnits(140);
+        var button = new Button
+        {
+            Text = text,
             Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-            Location = new Point(buttonClose.Left - LogicalToDeviceUnits(6) - summarizeWidth, buttonClose.Top),
-            Size = new Size(summarizeWidth, buttonClose.Height),
+            Location = new Point(rightOf - LogicalToDeviceUnits(6) - width, buttonClose.Top),
+            Size = new Size(width, buttonClose.Height),
             UseVisualStyleBackColor = true
         };
-        buttonSummarize.Click += async (_, _) => await _ctrl.ShowLongDocumentSummaryAsync(_resource, () =>
+        button.Click += async (_, _) => await _ctrl.ShowLongDocumentSummaryAsync(_resource, () =>
         {
             if (!IsDisposed && buttonTranscribe.Visible)
                 buttonTranscribe.PerformClick();
-        });
-        Controls.Add(buttonSummarize);
+        }, kind);
+        Controls.Add(button);
+        return button;
     }
 
     protected override async void OnShown(EventArgs e)
@@ -284,6 +331,7 @@ public partial class DocumentTextForm : KntForm
     // The page where the cursor is.
     private void textDocument_CaretMoved(object sender, EventArgs e)
     {
+        RefreshCopyButton();
         if (!_isPdf || DocumentTexts.PageAt(_readable, textDocument.SelectionStart) is not int number)
             return;
         numericPage.Value = Math.Clamp(number, (int)numericPage.Minimum, (int)numericPage.Maximum);

@@ -9,29 +9,44 @@
 
 @implements IDisposable
 
-@* «Summarize document» (KNote Atlas, stage 2, CU-43, 2.1a2): the summary of a long document of a note in a new note, with the
-   language (a list or free text; the last one of the repository, in the browser), the length and the model (the repository's
-   recommended one, or another chat provider of the Server). «Estimate», «Generate» and its progress, asked to the Server every
-   second or two: the run is in the Server's queue (one per user) and goes on if the dialog is closed; opened again, it shows it.
-   «Open the note» at the end. Result: "transcribe" if «Transcribe them first» was chosen, else null. *@
+@* «Summarize document» (KNote Atlas, stage 2, CU-43, 2.1a2) and «Translate document» (2.1b2): the summary or the translation of a long
+   document of a note in a new note, with the language (a list or free text; the last one of the repository for each, in the browser),
+   the length (of a summary) and the model (the repository's recommended one, or another chat provider of the Server). A translation
+   not finished of the document can go on («Continue»); starting another one into its language asks first. «Estimate», «Generate» and
+   its progress, asked to the Server every second and a half: the run is in the Server's queue (one per user) and goes on if the dialog
+   is closed; opened again, it shows it. «Open the note» at the end (of a translation stopped, too: what was translated is kept).
+   Result: "transcribe" if «Transcribe them first» was chosen, else null. *@
 
-<KntDialogFrame Icon="summarize" Title="@SummaryTexts.Title" Subtitle="@Resource.NameOut">
+<KntDialogFrame Icon="@(IsTranslation ? "translate" : "summarize")" Title="@SummaryTexts.TitleOf(Kind)" Subtitle="@Resource.NameOut">
     <ChildContent>
         <RadzenStack Gap="1rem">
-            <RadzenText TextStyle="TextStyle.Body2">@SummaryTexts.Intro</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2">@SummaryTexts.IntroOf(Kind)</RadzenText>
+            @if (Unfinished is { } unfinished)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.Wrap" Gap="0.5rem">
+                        <span>@SummaryTexts.Unfinished(unfinished)</span>
+                        <RadzenButton Text="@SummaryTexts.Continue" Icon="play_arrow" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                                      IsBusy="@starting.IsBusy" Disabled="@Running" Click="OnContinue" />
+                    </RadzenStack>
+                </RadzenAlert>
+            }
             <RadzenRow Gap="1rem">
                 <RadzenColumn Size="12" SizeSM="6">
-                    <KntField Label="Language" Component="SummaryLanguage" Help="@SummaryTexts.LanguageHelp">
+                    <KntField Label="Language" Component="SummaryLanguage" Help="@SummaryTexts.LanguageHelpOf(Kind)">
                         <RadzenAutoComplete Name="SummaryLanguage" @bind-Value="@language" Data="@SummaryTexts.Languages" Disabled="@Running"
                                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" MinLength="0" OpenOnFocus="true" />
                     </KntField>
                 </RadzenColumn>
-                <RadzenColumn Size="12" SizeSM="6">
-                    <KntField Label="Length" Component="SummaryLength">
-                        <RadzenDropDown Name="SummaryLength" TValue="EnumSummaryLength" @bind-Value="@length" Data="@lengths" Disabled="@Running"
-                                        TextProperty="Text" ValueProperty="Value" />
-                    </KntField>
-                </RadzenColumn>
+                @if (!IsTranslation)
+                {
+                    <RadzenColumn Size="12" SizeSM="6">
+                        <KntField Label="Length" Component="SummaryLength">
+                            <RadzenDropDown Name="SummaryLength" TValue="EnumSummaryLength" @bind-Value="@length" Data="@lengths" Disabled="@Running"
+                                            TextProperty="Text" ValueProperty="Value" />
+                        </KntField>
+                    </RadzenColumn>
+                }
             </RadzenRow>
             <KntField Label="Model" Component="SummaryModel">
                 <RadzenDropDown Name="SummaryModel" TValue="string" @bind-Value="@providerAlias" Data="@models" Disabled="@Running"
@@ -75,14 +90,14 @@
                     </RadzenText>
                     @if (Running)
                     {
-                        <RadzenText TextStyle="TextStyle.Caption">@SummaryTexts.Running</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Caption">@SummaryTexts.RunningOf(Kind)</RadzenText>
                     }
                 </RadzenStack>
             }
         </RadzenStack>
     </ChildContent>
     <Footer>
-        @if (progress?.Phase == EnumDocumentProcessPhase.Completed && progress.NoteId is Guid noteId)
+        @if (!Running && SummaryTexts.HasNote(progress) && progress?.NoteId is Guid noteId)
         {
             <RadzenButton Text="@SummaryTexts.OpenNote" Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
                           class="knt-footer-start" Click="() => kntWindows.OpenEditAsync(noteId)" />
@@ -93,8 +108,8 @@
                           IsBusy="@canceling.IsBusy" Click="OnCancel" />
         }
         <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => CloseDialog(null)" />
-        <RadzenButton Text="@SummaryTexts.Generate" Icon="summarize" ButtonStyle="ButtonStyle.Primary"
-                      IsBusy="@starting.IsBusy" Disabled="@Running" Click="OnGenerate" />
+        <RadzenButton Text="@SummaryTexts.Generate" Icon="@(IsTranslation ? "translate" : "summarize")" ButtonStyle="ButtonStyle.Primary"
+                      IsBusy="@starting.IsBusy" Disabled="@(Running || (IsTranslation && string.IsNullOrWhiteSpace(language)))" Click="OnGenerate" />
     </Footer>
 </KntDialogFrame>
 
@@ -103,11 +118,14 @@
 
     [Parameter] [EditorRequired] public ResourceInfoDto Resource { get; set; } = null!;
 
+    [Parameter] public EnumDocumentProcessKind Kind { get; set; } = EnumDocumentProcessKind.Summarize;
+
     private sealed record Option<T>(string Text, T Value);
 
     private readonly List<Option<EnumSummaryLength>> lengths = SummaryTexts.Lengths.Select(l => new Option<EnumSummaryLength>(SummaryTexts.LengthText(l), l)).ToList();
     private List<Option<string?>> models = [new("The repository's recommended model", null)];
     private List<AiProviderInfoDto> providers = [];
+    private List<DocumentTranslationDto> translations = [];
 
     private string language = "";
     private EnumSummaryLength length = EnumSummaryLength.Medium;
@@ -123,12 +141,19 @@
     private readonly KntSingleFlight canceling = new();
     private readonly CancellationTokenSource disposal = new();
 
-    // The run of the Server is of this document (the user may have another one going on).
-    private bool Running => progress is { IsFinished: false } && progress.ResourceId == Resource.ResourceId;
+    private bool IsTranslation => Kind == EnumDocumentProcessKind.Translate;
+
+    // The translation not finished of the document (the last one), which «Continue» goes on with.
+    private DocumentTranslationDto? Unfinished => IsTranslation ? translations.FirstOrDefault(t => !t.Finished) : null;
+
+    // The run of the Server is of this document and of this kind (the user may have another one going on).
+    private bool Running => progress is { IsFinished: false } && IsOfThisDialog(progress);
+
+    private bool IsOfThisDialog(DocumentProcessProgressDto? run) => run?.ResourceId == Resource.ResourceId && run.Kind == Kind;
 
     private string? ProviderName => providers.FirstOrDefault(p => p.Alias == providerAlias)?.Provider ?? providers.FirstOrDefault(p => p.IsDefault)?.Provider;
 
-    private string LanguageKey => $"KNoteSummaryLanguage:{repositoryId}";
+    private string LanguageKey => $"{(IsTranslation ? "KNoteTranslationLanguage" : "KNoteSummaryLanguage")}:{repositoryId}";
 
     protected override async Task OnInitializedAsync()
     {
@@ -152,11 +177,13 @@
             models = [new("The repository's recommended model", null), .. providers.Select(p => new Option<string?>($"{p.Alias} ({p.Model})", p.Alias))];
         }
 
-        // A summary of this document already going on (or the last one): its progress.
+        await LoadTranslationsAsync();
+
+        // A run of this document already going on (or the last one): its progress.
         var current = await store.Summaries.GetDocumentProgressAsync(disposal.Token);
         if (disposal.IsCancellationRequested)
             return;
-        if (current.IsValid && current.Entity?.ResourceId == Resource.ResourceId)
+        if (current.IsValid && IsOfThisDialog(current.Entity))
         {
             progress = current.Entity;
             if (Running)
@@ -164,12 +191,24 @@
         }
     }
 
-    private DocumentProcessRequestDto Request() => new()
+    // The translations of the document: the one not finished can go on.
+    private async Task LoadTranslationsAsync()
+    {
+        if (!IsTranslation)
+            return;
+        var listed = await store.Summaries.GetDocumentTranslationsAsync(Resource.ResourceId, disposal.Token);
+        if (!disposal.IsCancellationRequested && listed.IsValid)
+            translations = listed.Entity ?? [];
+    }
+
+    private DocumentProcessRequestDto Request(Guid? continueNoteId = null) => new()
     {
         ResourceId = Resource.ResourceId,
+        Kind = Kind,
         ProviderAlias = providerAlias,
         Language = language?.Trim(),
-        Length = length
+        Length = length,
+        ContinueNoteId = continueNoteId
     };
 
     private Task OnEstimate() => estimating.RunAsync(async () =>
@@ -185,9 +224,33 @@
             estimateError = result.ErrorMessage;
     });
 
+    // A translation into the language of one not finished asks first whether to continue that one (closing the question, nothing).
     private Task OnGenerate() => starting.RunAsync(async () =>
     {
-        var result = await store.Summaries.SummarizeDocumentAsync(Request(), disposal.Token);
+        Guid? continueNoteId = null;
+        if (Unfinished is { } unfinished && string.Equals(unfinished.Language?.Trim(), language?.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            var answer = await dialogService.Confirm(SummaryTexts.ContinueInstead(unfinished), SummaryTexts.TranslateTitle,
+                new ConfirmOptions { OkButtonText = "Continue it", CancelButtonText = "Start another one" });
+            if (answer == null)
+                return;
+            if (answer == true)
+                continueNoteId = unfinished.NoteId;
+        }
+        await StartAsync(Request(continueNoteId));
+    });
+
+    private Task OnContinue() => starting.RunAsync(async () =>
+    {
+        if (Unfinished is not { } unfinished)
+            return;
+        language = unfinished.Language;
+        await StartAsync(Request(unfinished.NoteId));
+    });
+
+    private async Task StartAsync(DocumentProcessRequestDto request)
+    {
+        var result = await store.Summaries.SummarizeDocumentAsync(request, disposal.Token);
         if (disposal.IsCancellationRequested || !result.IsValid)
             return;
         try
@@ -198,18 +261,23 @@
         {
         }
         progress = result.Entity;
-        if (progress?.ResourceId != Resource.ResourceId)
-            progress = new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Failed, Message = "You have another summary going on: wait until it ends." };
+        if (!IsOfThisDialog(progress))
+            progress = new DocumentProcessProgressDto
+            {
+                Kind = Kind, ResourceId = Resource.ResourceId, Phase = EnumDocumentProcessPhase.Failed,
+                Message = "You have another extended summary or translation going on: wait until it ends."
+            };
         else
             _ = FollowAsync();
-    });
+    }
 
     private Task OnCancel() => canceling.RunAsync(async () =>
     {
         await store.Summaries.CancelDocumentAsync(disposal.Token);
     });
 
-    // The progress of the run, every second and a half, until it ends or the dialog is closed.
+    // The progress of the run, every second and a half, until it ends or the dialog is closed. A translation that stopped: how far it
+    // went, for «Continue».
     private async Task FollowAsync()
     {
         try
@@ -220,8 +288,10 @@
                 var current = await store.Summaries.GetDocumentProgressAsync(disposal.Token);
                 if (disposal.IsCancellationRequested)
                     return;
-                if (current.IsValid && current.Entity?.ResourceId == Resource.ResourceId)
+                if (current.IsValid && IsOfThisDialog(current.Entity))
                     progress = current.Entity;
+                if (!Running)
+                    await LoadTranslationsAsync();
                 await InvokeAsync(StateHasChanged);
             }
         }

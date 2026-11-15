@@ -17,7 +17,7 @@
         {
             <RadzenButton Text="@ResourceProcessingTexts.DescribeWithAi" Icon="auto_awesome" Click="() => OnDescribePhotos.InvokeAsync(null)" ButtonStyle="ButtonStyle.Base"
                           Variant="Variant.Text" Size="ButtonSize.Small" Disabled="@Busy"
-                          MouseEnter="@(args => tooltipService.Open(args, "Describe the photos and summarize the documents with the AI (those not locked)"))" />
+                          MouseEnter="@(args => tooltipService.Open(args, "Describe the photos and write the short summaries of the documents with the AI (those not locked)"))" />
         }
         <RadzenButton Text="Add resource" Icon="upload_file" Click="() => OnNew.InvokeAsync(null)" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Disabled="@Busy" />
     </RadzenStack>
@@ -66,13 +66,16 @@ else
                     {
                         <RadzenButton Icon="auto_awesome" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                       Click="@(() => OnDescribe.InvokeAsync(resource))" Disabled="@Busy"
-                                      MouseEnter="@(args => tooltipService.Open(args, AiPhotoRules.IsPhoto(resource) ? "Describe photo with the AI" : "Summarize document with the AI"))" />
+                                      MouseEnter="@(args => tooltipService.Open(args, AiPhotoRules.IsPhoto(resource) ? "Describe photo with the AI" : "Short summary of the document with the AI"))" />
                     }
                     @if (DocumentTextRules.IsDocument(resource) && resource.ResourceId != Guid.Empty)
                     {
                         <RadzenButton Icon="summarize" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
-                                      Click="@(() => SummarizeAsync(resource))" Disabled="@Busy"
-                                      MouseEnter="@(args => tooltipService.Open(args, "Summarize the whole document in a new note"))" />
+                                      Click="@(() => SummarizeAsync(resource, EnumDocumentProcessKind.Summarize))" Disabled="@Busy"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Extended summary of the whole document in a new note"))" />
+                        <RadzenButton Icon="translate" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                      Click="@(() => SummarizeAsync(resource, EnumDocumentProcessKind.Translate))" Disabled="@Busy"
+                                      MouseEnter="@(args => tooltipService.Open(args, "Translate the whole document into a new note"))" />
                     }
                     <RadzenButton Icon="edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
                                   Click="@(() => OnEdit.InvokeAsync(resource))" Disabled="@Busy" MouseEnter="@(args => tooltipService.Open(args, "Edit resource"))" />
@@ -93,6 +96,8 @@ else
     [Parameter] public EventCallback<ResourceInfoDto> OnEdit { get; set; }
     [Parameter] public EventCallback<ResourceInfoDto> OnDelete { get; set; }
     [Parameter] public EventCallback<ResourceInfoDto> OnInsertInDesription { get; set; }
+    // KNote Atlas, stage 2 (2.1b2): the text selected in the viewer of a document, to the description («Copy to description»).
+    [Parameter] public EventCallback<string> OnCopyToDescription { get; set; }
     [Parameter] public EventCallback OnNew { get; set; }
     // A change being saved (NoteForm): adding, editing and deleting wait for it.
     [Parameter] public bool Busy { get; set; }
@@ -138,21 +143,25 @@ else
             return;
         }
 
-        await dialogService.OpenAsync<NoteResourceViewer>("View resource",
-            new Dictionary<string, object?> { { "Resource", resource } }, NoteResourceViewer.Options());
+        await dialogService.OpenAsync<NoteResourceViewer>("View resource", ViewerParameters(resource), NoteResourceViewer.Options());
     }
 
-    // KNote Atlas, stage 2 (2.1a2): the summary of the whole document in a new note. «Transcribe them first» opens the viewer with
-    // its text, where its scanned pages are transcribed.
-    private async Task SummarizeAsync(ResourceInfoDto resource)
+    private Dictionary<string, object?> ViewerParameters(ResourceInfoDto resource, bool startInText = false) => new()
     {
-        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Summarizing documents"))
+        { "Resource", resource }, { "StartInText", startInText }, { "OnCopyToDescription", OnCopyToDescription }
+    };
+
+    // KNote Atlas, stage 2: the summary (2.1a2) or the translation (2.1b2) of the whole document in a new note. «Transcribe them first»
+    // opens the viewer with its text, where its scanned pages are transcribed.
+    private async Task SummarizeAsync(ResourceInfoDto resource, EnumDocumentProcessKind kind)
+    {
+        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff,
+                kind == EnumDocumentProcessKind.Translate ? "Translating documents" : "Summarizing documents"))
             return;
-        var result = await dialogService.OpenAsync<LongDocumentSummaryDialog>(SummaryTexts.Title,
-            new Dictionary<string, object?> { { "Resource", resource } }, KntDialogs.Framed(KntDialogs.Medium()));
+        var result = await dialogService.OpenAsync<LongDocumentSummaryDialog>(SummaryTexts.TitleOf(kind),
+            new Dictionary<string, object?> { { "Resource", resource }, { "Kind", kind } }, KntDialogs.Framed(KntDialogs.Medium()));
         if (result as string == LongDocumentSummaryDialog.TranscribeResult)
-            await dialogService.OpenAsync<NoteResourceViewer>("View resource",
-                new Dictionary<string, object?> { { "Resource", resource }, { "StartInText", true } }, NoteResourceViewer.Options());
+            await dialogService.OpenAsync<NoteResourceViewer>("View resource", ViewerParameters(resource, startInText: true), NoteResourceViewer.Options());
     }
 
     [CascadingParameter] private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> AuthenticationState { get; set; } = null!;

@@ -18,7 +18,7 @@ public class SummaryWebApiService : BaseService, ISummaryWebApiService
 
     public Task<Result<DocumentProcessProgressDto>> SummarizeDocumentAsync(DocumentProcessRequestDto request, CancellationToken cancellationToken = default) =>
         SendAsync<DocumentProcessProgressDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/documents", request, ct),
-            "Summarize document", cancellationToken: cancellationToken);
+            "Summarize or translate document", cancellationToken: cancellationToken);
 
     public Task<Result<DocumentProcessProgressDto>> GetDocumentProgressAsync(CancellationToken cancellationToken = default) =>
         SendAsync<DocumentProcessProgressDto>(ct => _httpClient.GetAsync("api/summaries/documents/progress", ct),
@@ -27,4 +27,8 @@ public class SummaryWebApiService : BaseService, ISummaryWebApiService
     public Task<Result<bool>> CancelDocumentAsync(CancellationToken cancellationToken = default) =>
         SendAsync<bool>(ct => _httpClient.PostAsync("api/summaries/documents/cancel", null, ct),
             "Cancel the summary", cancellationToken: cancellationToken);
+
+    public Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
+        SendAsync<List<DocumentTranslationDto>>(ct => _httpClient.GetAsync($"api/summaries/documents/{resourceId}/translations", ct),
+            "Translations of the document", cancellationToken: cancellationToken);
 }
