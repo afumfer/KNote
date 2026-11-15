@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -6,7 +7,7 @@ using KNote.Model.Dto;
 namespace KNote.Service.Interfaces;
 
 /// <summary>
-/// The summaries of KNote Atlas (stage 2): for now, of a long document of a note (CU-43, D21). The AI writes in KNote.Ai
+/// The summaries of KNote Atlas (stage 2): for now, of a long document of a note (CU-43, D21), and its translations (2.1b). The AI writes in KNote.Ai
 /// (AiDocumentProcessor); here, what it reads and where it is kept. The result always goes to a new note: the note of the
 /// document is never touched, nor its date. The documents of KNote's own notes are left out.
 /// </summary>
@@ -27,4 +28,14 @@ public interface IKntSummaryService
     /// is still the one that was read. Staff.
     /// </summary>
     Task<Result<NoteDto>> SaveDocumentSummaryAsync(DocumentSummarySaveDto summary);
+
+    /// <summary>
+    /// Keeps a part of the translation of a document (2.1b): the first one creates the note of the type @KNoteTranslation in the folder
+    /// of the note of the document, related to it (@DerivedFrom), with the translation as a Markdown document attached; the next ones
+    /// are added to it, only if it goes on from where it was. Only if the document is still the one that was read. Staff.
+    /// </summary>
+    Task<Result<NoteDto>> SaveDocumentTranslationAsync(DocumentTranslationSaveDto translation);
+
+    /// <summary>The translations of a document, the last one first, finished or not («Continue»). Guest.</summary>
+    Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId);
 }

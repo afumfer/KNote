@@ -91,6 +91,46 @@ public class SummaryInProcessTests
         StringAssert.EndsWith(summary.Description, "The manual of the Sinclair QL.");
     }
 
+    // 2.1b: the translation, a run of the same queue, and the translations of the document («Continue»).
+    [TestMethod]
+    public async Task ADocument_IsTranslatedInANewNote_AndItsTranslationsAreListed()
+    {
+        var (noteId, documentId) = await AddDocumentAsync();
+        _chatClients.Script = () => Enumerable.Range(0, 20).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "El manual del QL. Explica cómo arrancarlo.") }).ToList();
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        var (guest, _) = await NewClientAsync(nameof(EnumRoles.Guest));
+        using var __ = guest;
+        var request = new DocumentProcessRequestDto { ResourceId = documentId, Kind = EnumDocumentProcessKind.Translate, Language = "Spanish" };
+
+        var noLanguage = await staff.PostAsJsonAsync("api/summaries/documents/estimate", new DocumentProcessRequestDto { ResourceId = documentId, Kind = EnumDocumentProcessKind.Translate });
+        var started = await staff.PostAsJsonAsync("api/summaries/documents", request);
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, noLanguage.StatusCode);
+        Assert.IsTrue(started.IsSuccessStatusCode, await started.Content.ReadAsStringAsync());
+        DocumentProcessProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            progress = (await staff.GetFromJsonAsync<Result<DocumentProcessProgressDto>>("api/summaries/documents/progress", _json))!.Entity;
+        }
+        Assert.AreEqual(EnumDocumentProcessPhase.Completed, progress!.Phase, progress.Message);
+        Assert.AreEqual(EnumDocumentProcessKind.Translate, progress.Kind);
+
+        var forbidden = await guest.GetAsync($"api/summaries/documents/{documentId}/translations");
+        var translations = (await staff.GetFromJsonAsync<Result<List<DocumentTranslationDto>>>($"api/summaries/documents/{documentId}/translations", _json))!.Entity;
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        var translation = translations.Single();
+        Assert.AreEqual(progress.NoteId, translation.NoteId);
+        Assert.IsTrue(translation.Finished);
+        Assert.AreEqual("Spanish", translation.Language);
+        using var service = _factory.CreateServiceForRepository(0);
+        var note = (await service.Notes.GetExtendedAsync(translation.NoteId)).Entity;
+        Assert.AreEqual(KntConst.TranslationTag, note.NoteTypeDto.Name);
+        Assert.AreEqual(noteId, note.TraceNotesTo.Single().ToId);
+    }
+
     [TestMethod]
     public async Task AModelThisServerDoesntHave_IsSaid()
     {

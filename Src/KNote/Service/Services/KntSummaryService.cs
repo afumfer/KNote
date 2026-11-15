@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -23,4 +24,10 @@ public class KntSummaryService : KntServiceBase, IKntSummaryService
 
     public async Task<Result<NoteDto>> SaveDocumentSummaryAsync(DocumentSummarySaveDto summary) =>
         await ExecuteCommand(new KntSummarySaveDocumentSummaryAsyncCommand(Service, summary));
+
+    public async Task<Result<NoteDto>> SaveDocumentTranslationAsync(DocumentTranslationSaveDto translation) =>
+        await ExecuteCommand(new KntSummarySaveDocumentTranslationAsyncCommand(Service, translation));
+
+    public async Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId) =>
+        await ExecuteCommand(new KntSummaryGetDocumentTranslationsAsyncCommand(Service, resourceId));
 }

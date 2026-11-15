@@ -14,9 +14,9 @@ using Microsoft.Extensions.Logging;
 
 namespace KNote.Server.Controllers;
 
-// KNote Atlas, stage 2: the summaries, in the session's repository. 2.1a: the summary of a long document of a note (CU-43), a run of
-// KntAtlasJobs of the user who asks (one per user, D18), with a chat model of the Server (the default one, or the alias asked
-// for). The roles of the commands apply (EnforceAuthorization), as in the assistant.
+// KNote Atlas, stage 2: the summaries, in the session's repository. 2.1a: the summary of a long document of a note (CU-43), and
+// 2.1b its translation, a run of KntAtlasJobs of the user who asks (one per user, D18), with a chat model of the Server (the
+// default one, or the alias asked for). The roles of the commands apply (EnforceAuthorization), as in the assistant.
 [Authorize]
 [ApiController]
 [Route("api/summaries")]
@@ -42,7 +42,7 @@ public class SummaryController : ControllerBase
         _logger = logger;
     }
 
-    // What the summary of a document would take (pages, calls and time).
+    // What the summary or the translation of a document would take (pages, calls and time).
     [HttpPost("documents/estimate")]
     [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> EstimateDocument([FromBody] DocumentProcessRequestDto request, CancellationToken cancellationToken) =>
@@ -56,7 +56,7 @@ public class SummaryController : ControllerBase
             return await AiDocumentProcessor.EstimateAsync(_service, provider, request, _logger, cancellationToken);
         });
 
-    // Queues the summary of a document for the user (or gives the one the user already has in this repository).
+    // Queues the summary or the translation of a document for the user (or gives the one the user already has in this repository).
     [HttpPost("documents")]
     [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> SummarizeDocument([FromBody] DocumentProcessRequestDto request) =>
@@ -76,6 +76,16 @@ public class SummaryController : ControllerBase
     [Authorize(Roles = StaffRoles)]
     public IActionResult GetDocumentProgress() =>
         Ok(new Result<DocumentProcessProgressDto>(_jobs.GetDocumentProgress(_repositories.ForUser(User).RepositoryId, User?.Identity?.Name)));
+
+    // The translations of a document, the last one first (2.1b: «Continue» goes on with one not finished).
+    [HttpGet("documents/{resourceId:guid}/translations")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> GetDocumentTranslations(Guid resourceId) =>
+        RunAsync(nameof(GetDocumentTranslations), async () =>
+        {
+            _service.EnforceAuthorization = true;
+            return await _service.Summaries.GetDocumentTranslationsAsync(resourceId);
+        });
 
     [HttpPost("documents/cancel")]
     [Authorize(Roles = StaffRoles)]
@@ -103,7 +113,7 @@ public class SummaryController : ControllerBase
         if (provider == null)
         {
             error.AddErrorMessage(string.IsNullOrWhiteSpace(request.ProviderAlias)
-                ? "This Server has no AI model to summarize: configure a chat provider."
+                ? "This Server has no AI model to summarize or translate: configure a chat provider."
                 : $"The AI provider «{request.ProviderAlias}» is not configured in this Server.");
             return (null, error);
         }

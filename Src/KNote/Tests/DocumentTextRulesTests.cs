@@ -26,11 +26,15 @@ public class DocumentTextRulesTests
     }
 
     [TestMethod]
-    public void OnlyAPdf_HasPages()
+    public void APdf_OrADocumentOfSeveralPages_HasPages()
     {
-        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Pdf));
-        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Docx));
-        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Text));
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Pdf, 1));
+        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Docx, 1));
+        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, 1));
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, 2), "a TXT with page breaks (stage 2, D21)");
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Pdf, "One page"));
+        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, "One page"));
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, $"One{DocumentTextRules.PageSeparator}Two"));
     }
 
     [TestMethod]

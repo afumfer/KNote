@@ -16,7 +16,7 @@ public partial class DocumentTextForm : KntForm
 
     private readonly NoteEditorCtrl _ctrl;
     private readonly ResourceDto _resource;
-    private readonly bool _paged;
+    private readonly EnumDocumentFormat _format;
     private readonly bool _isPdf;
     private readonly bool _transcribeWhenShown;
     private EnumExtractedState _state;
@@ -36,7 +36,7 @@ public partial class DocumentTextForm : KntForm
         _ctrl = ctrl;
         _resource = resource;
         var format = DocumentTextRules.FormatOf(resource.FileType, resource.Name);
-        _paged = DocumentTextRules.IsPaged(format);
+        _format = format;
         _isPdf = format == EnumDocumentFormat.Pdf;
         _transcribeWhenShown = transcribe;
         Text = $"{resource.GetTitle()} - text";
@@ -104,7 +104,7 @@ public partial class DocumentTextForm : KntForm
 
         _state = result.Entity.State;
         var pages = DocumentTextRules.Pages(result.Entity.Text);
-        var text = await Task.Run(() => DocumentTexts.Readable(result.Entity.Text, _paged));
+        var text = await Task.Run(() => DocumentTexts.Readable(result.Entity.Text, DocumentTextRules.IsPaged(_format, result.Entity.Text)));
         if (loading.IsCancellationRequested || IsDisposed)
             return;
 

@@ -56,7 +56,7 @@ public partial class KNoteAiTools
         var (text, readError) = await document.ReadAsync();
         if (readError != null)
             return readError;
-        return AiDocumentToolRules.ForModel(document.FileName, text.Text, DocumentTextRules.IsPaged(document.Format), fromPage, toPage);
+        return AiDocumentToolRules.ForModel(document.FileName, text.Text, DocumentTextRules.IsPaged(document.Format, text.Text), fromPage, toPage);
     }
 
     [Description("Looks at pages of a PDF of a note or of the conversation.")]
@@ -175,7 +175,7 @@ public partial class KNoteAiTools
                     return (new ResourceTextDto
                     {
                         ResourceId = file.ResourceId, Name = file.FileName, FileType = file.ContentType,
-                        State = DocumentTextRules.StateOf(pages), Text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format))
+                        State = DocumentTextRules.StateOf(pages), Text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format, pages.Count))
                     }, null);
                 }
                 catch (KNote.Service.Core.KntDocumentUnreadableException)

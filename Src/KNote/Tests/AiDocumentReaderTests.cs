@@ -72,6 +72,18 @@ public class AiDocumentReaderTests
         Assert.AreEqual("Ñandú", withMark.Text);
     }
 
+    // Stage 2 (D21): the translation of a document with pages keeps them with page breaks, and it is read by pages.
+    [TestMethod]
+    public void AText_WithPageBreaks_IsReadByPages()
+    {
+        var pages = Read(Encoding.UTF8.GetBytes("Uno\nlínea\fDos\f\fCuatro\f"), EnumDocumentFormat.Text);
+
+        CollectionAssert.AreEqual(new[] { "Uno\nlínea", "Dos", "", "Cuatro" }, pages.Select(p => p.Text).ToArray());
+        CollectionAssert.AreEqual(new[] { 1, 2, 3, 4 }, pages.Select(p => p.Number).ToArray());
+        var kept = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(EnumDocumentFormat.Text, pages.Count));
+        Assert.HasCount(4, DocumentTextRules.Pages(kept));
+    }
+
     [TestMethod]
     public void AnEncryptedOdt_ADamagedPdf_OrADocxThatIsNotAZip_CantBeRead()
     {

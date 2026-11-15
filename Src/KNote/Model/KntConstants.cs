@@ -72,6 +72,8 @@ public static class KntConst
     // where it comes from with a trace note of this type (D17, D21).
     public static string SummaryTag { get; private set; } = "@KNoteSummary";
     public static string DerivedFromTraceNoteType { get; private set; } = "@DerivedFrom";
+    // The translations of a long document (CU-43, D21): as the summaries, notes of the people's own, with the translation attached.
+    public static string TranslationTag { get; private set; } = "@KNoteTranslation";
 
     // The note types of KNote's own notes: out of the tasks panel, of the semantic index, of the tools of the AI and of the
     // citations (they only link users to those notes, keep private conversations, or are KNote Atlas' test queries and

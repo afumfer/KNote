@@ -6,7 +6,7 @@ using KNote.Model.Dto;
 namespace KNote.ClientWin.Tests;
 
 /// <summary>
-/// Store.DocumentProcessing (KNote Atlas, stage 2, 2.1a): the summary of a long document in ClientWin, one at a time and never
+/// Store.DocumentProcessing (KNote Atlas, stage 2, 2.1a and 2.1b): the summary or the translation of a long document in ClientWin, one at a time and never
 /// with another run of KNote Atlas, with its progress published on Store.Events and in the status bar, and its end.
 /// </summary>
 [TestClass]
@@ -44,6 +44,36 @@ public class DocumentProcessingJobTests
         Assert.AreEqual(42, store.DocumentProcessing.Progress.NoteNumber);
         Assert.AreEqual("Notes", store.DocumentProcessing.Progress.RepositoryName);
         Assert.IsGreaterThanOrEqualTo(2, published);
+    }
+
+    // 2.1b: a translation, the same job; canceled, what was translated is in its note.
+    [TestMethod]
+    public async Task ATranslation_SaysItsPage_AndCanceledKeepsItsNote()
+    {
+        var store = new Store(new TestFactoryViews());
+        var release = new TaskCompletionSource<Result<DocumentProcessProgressDto>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var reported = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        store.DocumentProcessing.Runner = (_, _, request, progress, _) =>
+        {
+            progress.Report(new DocumentProcessProgressDto
+            {
+                Kind = request.Kind, FileName = "manual.pdf", Phase = EnumDocumentProcessPhase.Translating, Page = 41, PagesCount = 138
+            });
+            reported.TrySetResult();
+            return release.Task;
+        };
+
+        Assert.IsTrue(store.DocumentProcessing.Start(new FakeKntService(), "Notes", new AiProviderRef { Model = "qwen3.5:9b" },
+            new DocumentProcessRequestDto { ResourceId = Guid.NewGuid(), Kind = EnumDocumentProcessKind.Translate, Language = "Spanish" }, hasSemanticIndex: false));
+        await reported.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.AreEqual("Translating manual.pdf: page 41/138", store.DocumentProcessing.StatusBarText);
+
+        release.SetResult(new Result<DocumentProcessProgressDto>(new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Canceled, NoteNumber = 43 }));
+        await store.DocumentProcessing.Completion;
+
+        Assert.AreEqual(EnumDocumentProcessKind.Translate, store.DocumentProcessing.Progress.Kind);
+        Assert.AreEqual("Canceled: what was translated is in the note #43; «Continue» goes on with it.", SummaryTexts.Progress(store.DocumentProcessing.Progress));
     }
 
     [TestMethod]

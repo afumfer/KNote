@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,7 +58,7 @@ public class KntSummaryPrepareDocumentAsyncCommand : KntCommandServiceBase<Guid,
             return result;
         }
 
-        var paged = DocumentTextRules.IsPaged(format);
+        var paged = DocumentTextRules.IsPaged(format, text.Text);
         var pages = DocumentTextRules.Pages(text.Text);
         result.Entity = new DocumentToSummarizeDto
         {
@@ -148,7 +149,7 @@ public class KntSummarySaveDocumentSummaryAsyncCommand : KntCommandServiceBase<D
         var document = new DocumentToSummarizeDto
         {
             FileName = resource.NameOut,
-            Paged = DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(resource.FileType, resource.Name)),
+            Paged = DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(resource.FileType, resource.Name), Param.PagesCount),
             PagesCount = Param.PagesCount,
             NoteNumber = note.NoteNumber
         };
@@ -188,12 +189,235 @@ public class KntSummarySaveDocumentSummaryAsyncCommand : KntCommandServiceBase<D
     }
 }
 
+// KNote Atlas, stage 2 (CU-43, D21, 2.1b): a part of the translation of a document. The first one creates the note of the translation
+// (@KNoteTranslation, in the folder of the note of the document and related to it, with the translation as a Markdown document attached
+// and locked); the next ones are added to that document, only if it goes on from where it was. Each one gives the document a file of its
+// own (as an upload: what was read of it is forgotten). The note keeps how far it went in a hidden comment (DocumentTranslationRules.Marker).
+// The note of the document is not touched (nor its date).
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBase<DocumentTranslationSaveDto, Result<NoteDto>>
+{
+    private const string BypassReason = "KNote Atlas: the type of the translations and of their relations (stage 2)";
+
+    public KntSummarySaveDocumentTranslationAsyncCommand(IKntService service, DocumentTranslationSaveDto translation) : base(service, translation)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null || Param.ResourceId == Guid.Empty)
+            result.AddErrorMessage("The document is required.");
+        else if (string.IsNullOrWhiteSpace(Param.Language))
+            result.AddErrorMessage(KntSummaryTexts.LanguageRequired);
+        else if (string.IsNullOrWhiteSpace(Param.Model))
+            result.AddErrorMessage("The model that translated is required.");
+        else if (Param.Text == null || Param.Parts <= 0 || Param.FromPart < 0 || Param.NextPart <= Param.FromPart || Param.NextPart > Param.Parts)
+            result.AddErrorMessage("The part of the translation is not valid.");
+        return result;
+    }
+
+    public override async Task<Result<NoteDto>> Execute()
+    {
+        var result = new Result<NoteDto>();
+
+        var (resource, note) = await KntResourceContent.GetDescribableAsync(Service, Param.ResourceId, result);
+        if (!result.IsValid)
+            return result;
+        if (resource.Name != Param.ExpectedResourceName)
+        {
+            result.AddErrorMessage(KntSummaryTexts.DocumentChanged);
+            return result;
+        }
+
+        var saved = Param.NoteId is Guid noteId
+            ? await AddAsync(noteId, resource, note, result)
+            : await CreateAsync(resource, note, result);
+        if (!result.IsValid)
+            return result;
+
+        // The pace of the model, for the next estimates (D18).
+        if (SummaryEstimate.Pace(Param.CharactersTranslated, Param.Seconds) is double pace)
+        {
+            var state = await KntSummaryState.ReadAsync(Service) ?? new SummaryStateDto();
+            state.TranslationSecondsPer1000Characters[Param.Model] = pace;
+            state.LastRunDateTime = DateTime.Now;
+            await KntSummaryState.WriteAsync(Service, state);
+        }
+
+        result.Entity = saved;
+        return result;
+    }
+
+    private DocumentTranslationDto State(ResourceDto resource) => new()
+    {
+        ResourceId = resource.ResourceId,
+        ResourceName = resource.Name,
+        Language = Param.Language.Trim(),
+        Model = Param.Model,
+        Paged = Param.Paged,
+        PagesCount = Param.PagesCount,
+        Parts = Param.Parts,
+        NextPart = Param.NextPart,
+        NextPage = Param.NextPage
+    };
+
+    private async Task<NoteDto> CreateAsync(ResourceDto resource, NoteDto note, Result<NoteDto> result)
+    {
+        if (Param.FromPart != 0)
+        {
+            result.AddErrorMessage(KntSummaryTexts.TranslationChanged);
+            return null;
+        }
+
+        var typeId = await KntSystemNotes.EnsureNoteTypeAsync(Service, KntConst.TranslationTag,
+            "Translations written by KNote Atlas", BypassReason, result);
+        var derivedFromId = await KntSystemNotes.EnsureTraceNoteTypeAsync(Service, KntConst.DerivedFromTraceNoteType,
+            "Where a summary of KNote Atlas comes from", BypassReason, result);
+        if (!result.IsValid)
+            return null;
+
+        var newNote = await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = typeId });
+        if (!newNote.IsValid)
+        {
+            result.AddListErrorMessage(newNote.ListErrorMessage);
+            return null;
+        }
+
+        var translation = newNote.Entity;
+        translation.Topic = DocumentTranslationRules.NoteTopic(resource.NameOut, Param.Language);
+        translation.Description = "";
+        translation.Tags = "";
+        translation.NoteTypeId = typeId;
+        translation.FolderId = note.FolderId;
+        translation.FolderDto = note.FolderDto;
+        translation.Resources.Add(new ResourceDto
+        {
+            Name = $"{Guid.NewGuid()}_{DocumentTranslationRules.FileName(resource.NameOut, Param.Language)}",
+            Description = DocumentTranslationRules.FileDescription(resource.NameOut, Param.Language, Param.Model),
+            DescriptionByUser = true,
+            FileType = "text/markdown",
+            ContentArrayBytes = Encoding.UTF8.GetBytes(Param.Text)
+        });
+        translation.TraceNotesTo.Add(new TraceNoteDto { ToId = note.NoteId, TraceNoteTypeId = derivedFromId, Weight = 1.0 });
+
+        var saved = await Service.Notes.SaveExtendedAsync(translation);
+        if (!saved.IsValid)
+        {
+            result.AddListErrorMessage(saved.ListErrorMessage);
+            return null;
+        }
+
+        // Its document has its id now: the note says where the translation is and how far it went.
+        var state = State(resource);
+        state.TranslationResourceId = saved.Entity.Resources.Single().ResourceId;
+        return await SaveStateAsync(saved.Entity.GetSimpleDto<NoteDto>(), state, resource, note, result);
+    }
+
+    private async Task<NoteDto> AddAsync(Guid noteId, ResourceDto resource, NoteDto note, Result<NoteDto> result)
+    {
+        var resTranslation = await Service.Notes.GetAsync(noteId);
+        var translation = resTranslation.IsValid ? resTranslation.Entity : null;
+        var stored = translation?.NoteTypeDto?.Name == KntConst.TranslationTag ? DocumentTranslationRules.ReadMarker(translation.Description) : null;
+        if (stored == null || stored.ResourceId != resource.ResourceId || stored.ResourceName != resource.Name
+            || stored.NextPart != Param.FromPart || stored.Parts != Param.Parts
+            || !string.Equals(stored.Language, Param.Language.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            result.AddErrorMessage(KntSummaryTexts.TranslationChanged);
+            return null;
+        }
+
+        var resFile = await Service.Notes.GetResourceAsync(stored.TranslationResourceId);
+        var file = resFile.IsValid ? resFile.Entity : null;
+        if (file == null || file.NoteId != noteId || file.ContentArrayBytes == null)
+        {
+            result.AddErrorMessage(KntSummaryTexts.TranslationChanged);
+            return null;
+        }
+
+        // A file of its own each time: the files of the resources are never written over.
+        file.ContentArrayBytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(file.ContentArrayBytes) + Param.Text);
+        file.Name = $"{Guid.NewGuid()}_{DocumentTranslationRules.FileName(resource.NameOut, Param.Language)}";
+        file.Description = DocumentTranslationRules.FileDescription(resource.NameOut, Param.Language, Param.Model);
+        file.DescriptionByUser = true;
+        var savedFile = await Service.Notes.SaveResourceAsync(file);
+        if (!savedFile.IsValid)
+        {
+            result.AddListErrorMessage(savedFile.ListErrorMessage);
+            return null;
+        }
+
+        var state = State(resource);
+        state.TranslationResourceId = stored.TranslationResourceId;
+        return await SaveStateAsync(translation, state, resource, note, result);
+    }
+
+    private async Task<NoteDto> SaveStateAsync(NoteDto translation, DocumentTranslationDto state, ResourceDto resource, NoteDto note, Result<NoteDto> result)
+    {
+        translation.Description = DocumentTranslationRules.NoteDescription(state, resource.NameOut, note.NoteNumber, Param.MissingPages, DateTime.Now);
+        var saved = await Service.Notes.SaveAsync(translation);
+        if (!saved.IsValid)
+        {
+            result.AddListErrorMessage(saved.ListErrorMessage);
+            return null;
+        }
+        return saved.Entity;
+    }
+}
+
+// KNote Atlas, stage 2 (2.1b): the translations of a document (the notes @KNoteTranslation related to its note whose hidden comment
+// says that document), the last one first, to go on with one that is not finished («Continue»).
+[KntAuthorize(EnumRoles.Guest)]
+public class KntSummaryGetDocumentTranslationsAsyncCommand : KntCommandServiceBase<Guid, Result<List<DocumentTranslationDto>>>
+{
+    public KntSummaryGetDocumentTranslationsAsyncCommand(IKntService service, Guid resourceId) : base(service, resourceId)
+    {
+
+    }
+
+    public override async Task<Result<List<DocumentTranslationDto>>> Execute()
+    {
+        var result = new Result<List<DocumentTranslationDto>>();
+
+        var (resource, note) = await KntResourceContent.GetDescribableAsync(Service, Param, result);
+        if (!result.IsValid)
+            return result;
+
+        var relations = await Service.Notes.GetTraceNotesFromAsync(note.NoteId);
+        if (!relations.IsValid)
+        {
+            result.AddListErrorMessage(relations.ListErrorMessage);
+            return result;
+        }
+
+        var translations = new List<DocumentTranslationDto>();
+        foreach (var fromId in (relations.Entity ?? new()).Select(r => r.FromId).Distinct())
+        {
+            var from = await Service.Notes.GetAsync(fromId);
+            if (!from.IsValid || from.Entity?.NoteTypeDto?.Name != KntConst.TranslationTag)
+                continue;
+            var translation = DocumentTranslationRules.ReadMarker(from.Entity.Description);
+            if (translation == null || translation.ResourceId != resource.ResourceId)
+                continue;
+            translation.NoteId = from.Entity.NoteId;
+            translation.NoteNumber = from.Entity.NoteNumber;
+            translations.Add(translation);
+        }
+
+        result.Entity = translations.OrderByDescending(t => t.NoteNumber).ToList();
+        return result;
+    }
+}
+
 // The texts of the commands of the summaries, common to both apps.
 public static class KntSummaryTexts
 {
     public const string NotADocument = "It is not a document KNote reads (PDF, DOCX, ODT, TXT or MD).";
     public const string NoText = "The document has no text to summarize: if it is scanned, transcribe its pages first.";
-    public const string DocumentChanged = "The document was replaced while it was being summarized: nothing was saved.";
+    public const string DocumentChanged = "The document was replaced while it was being processed: nothing was saved.";
+    public const string LanguageRequired = "The language of the translation is required.";
+    public const string TranslationChanged = "The translation is not where it was left (its note or its document changed): start it again.";
 
     public static string ReadError(EnumDocumentReadOutcome outcome) => outcome switch
     {

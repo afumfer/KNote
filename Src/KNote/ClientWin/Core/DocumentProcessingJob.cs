@@ -6,11 +6,12 @@ using KNote.Service.Core;
 namespace KNote.ClientWin.Core;
 
 /// <summary>
-/// The summary of a long document of ClientWin (KNote Atlas, stage 2, CU-43, D18), one at a time in the app and never with another
+/// The summary or the translation (2.1b) of a long document of ClientWin (KNote Atlas, stage 2, CU-43, D18), one at a time in the app and never with another
 /// run of KNote Atlas (Store.AtlasJobRunning: one Ollama). Like ResourceProcessingJob, it belongs to the Store, not to the window
 /// that starts it; its progress is published on Store.Events (DocumentProcessingProgressChanged, on the UI thread, a few times a
 /// second at most). It runs in the thread pool with the repository's service (the app's user and role). Canceled when the app
-/// closes: nothing is kept. When it keeps the summary in a repository with a semantic index, it starts the update of the index.
+/// closes: nothing of a summary is kept (what was translated, is). When it keeps a note in a repository with a semantic index, it starts
+/// the update of the index.
 /// </summary>
 public class DocumentProcessingJob
 {
@@ -53,9 +54,14 @@ public class DocumentProcessingJob
             var progress = Progress;
             if (!IsRunning || progress == null)
                 return null;
+            if (progress.Phase == EnumDocumentProcessPhase.Translating)
+                return progress.Page is int page
+                    ? $"Translating {progress.FileName}: page {page}/{progress.PagesCount}"
+                    : $"Translating {progress.FileName}: {progress.CallsDone}/{progress.CallsTotal}";
+            var what = progress.Kind == EnumDocumentProcessKind.Translate ? "Translation" : "Summary";
             return progress.Phase is EnumDocumentProcessPhase.Reading or EnumDocumentProcessPhase.Joining or EnumDocumentProcessPhase.Writing
                 ? $"Summarizing {progress.FileName}: {progress.CallsDone}/{progress.CallsTotal}"
-                : $"Summary of {progress.FileName ?? "a document"}: {progress.Phase.ToString().ToLowerInvariant()}";
+                : $"{what} of {progress.FileName ?? "a document"}: {progress.Phase.ToString().ToLowerInvariant()}";
         }
     }
 
@@ -65,12 +71,12 @@ public class DocumentProcessingJob
     // The run itself (the tests give their own; by default, AiDocumentProcessor with a client of the provider).
     internal Func<IKntService, AiProviderRef, DocumentProcessRequestDto, IProgress<DocumentProcessProgressDto>, CancellationToken,
         Task<Result<DocumentProcessProgressDto>>> Runner { get; set; } = (service, provider, request, progress, cancellationToken) =>
-            AiDocumentProcessor.SummarizeAsync(service, p => AiChatClientFactory.Create(p), provider, request, progress, service.Logger, cancellationToken);
+            AiDocumentProcessor.ProcessAsync(service, p => AiChatClientFactory.Create(p), provider, request, progress, service.Logger, cancellationToken);
 
     public bool IsOf(IKntService service) => Service != null && service != null && Service.IdServiceRef == service.IdServiceRef;
 
     /// <summary>
-    /// Starts the summary of a document of the repository of the service with this model: false if there is a run of KNote Atlas
+    /// Starts the summary or the translation of a document of the repository of the service with this model: false if there is a run of KNote Atlas
     /// going on (of any repository). hasSemanticIndex: whether to update the index when it ends.
     /// </summary>
     public bool Start(IKntService service, string repositoryName, AiProviderRef provider, DocumentProcessRequestDto request, bool hasSemanticIndex)
@@ -86,7 +92,8 @@ public class DocumentProcessingJob
         lock (_lock)
             _progress = new DocumentProcessProgressDto
             {
-                RepositoryName = repositoryName, ResourceId = request.ResourceId, Model = provider?.Model, Phase = EnumDocumentProcessPhase.Preparing
+                Kind = request.Kind, RepositoryName = repositoryName, ResourceId = request.ResourceId, Model = provider?.Model,
+                Phase = EnumDocumentProcessPhase.Preparing
             };
         Publish(force: true);
 
@@ -116,6 +123,7 @@ public class DocumentProcessingJob
             final = new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Failed, Message = ex.InnerException?.Message ?? ex.Message };
         }
 
+        final.Kind = request.Kind;
         final.RepositoryName = RepositoryName;
         final.ResourceId = request.ResourceId;
         lock (_lock)
@@ -123,8 +131,8 @@ public class DocumentProcessingJob
         IsRunning = false;
         cancellation.Dispose();
 
-        // The new note, for the search by meaning (on the UI thread, as a click).
-        if (final.Phase == EnumDocumentProcessPhase.Completed && hasSemanticIndex)
+        // The new note (also what was translated of a translation canceled), for the search by meaning (on the UI thread, as a click).
+        if (final.NoteId != null && hasSemanticIndex)
             Post(() => _semanticIndex.Start(service, RepositoryName, rebuild: false));
         Publish(force: true);
     }

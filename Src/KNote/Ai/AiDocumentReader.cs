@@ -17,7 +17,7 @@ namespace KNote.Ai;
 /// KNote's reader of documents (KNote Atlas, stage 4, D4, D5, D7), measured in 4.0: PdfPig for the PDF (the text of each page
 /// in reading order, ContentOrderTextExtractor: Page.Text joins the words as they come in the file), and a reader of its own
 /// for DOCX and ODT, a zip with the text in an XML (no package: DocumentFormat.OpenXml gave the same text), with a row of a
-/// table per line. TXT and MD, in UTF-8 or, if they are not, in Latin-1. No AI: a scanned page is only marked
+/// table per line. TXT and MD, in UTF-8 or, if they are not, in Latin-1, by pages if they have page breaks (stage 2). No AI: a scanned page is only marked
 /// (DocumentTextRules.NeedsTranscription), with the text of its OCR layer if it has one. Whatever makes a document unreadable
 /// (protected, encrypted, damaged) is KntDocumentUnreadableException; a failure reading the stream is not.
 /// </summary>
@@ -38,7 +38,7 @@ public sealed class AiDocumentReader : IKntDocumentReader
                 EnumDocumentFormat.Pdf => ReadPdf(content),
                 EnumDocumentFormat.Docx => OnePage(ReadZippedText(content, Docx)),
                 EnumDocumentFormat.Odt => OnePage(ReadOdt(content)),
-                EnumDocumentFormat.Text => OnePage(ReadText(content)),
+                EnumDocumentFormat.Text => TextPages(ReadText(content)),
                 _ => throw new KntDocumentUnreadableException("It is not a document KNote reads.")
             };
         }
@@ -243,6 +243,14 @@ public sealed class AiDocumentReader : IKntDocumentReader
     #endregion
 
     #region TXT and MD
+
+    // Its pages, if it has page breaks (KNote Atlas, stage 2, D21: the translations of a document with pages keep them so); one
+    // page without them. A break at the end doesn't start a page.
+    private static List<DocumentPageDto> TextPages(string text)
+    {
+        var pages = text.TrimEnd(DocumentTextRules.PageSeparator).Split(DocumentTextRules.PageSeparator);
+        return pages.Select((page, i) => new DocumentPageDto { Number = i + 1, Text = page }).ToList();
+    }
 
     private static string ReadText(Stream content)
     {

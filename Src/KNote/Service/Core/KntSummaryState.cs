@@ -23,6 +23,7 @@ internal static class KntSummaryState
             var state = JsonSerializer.Deserialize<SummaryStateDto>(json, JsonOptions);
             if (state != null)
                 state.SecondsPer1000Characters ??= new();
+                state.TranslationSecondsPer1000Characters ??= new();
             return state;
         }
         catch (JsonException)

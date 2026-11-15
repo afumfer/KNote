@@ -97,7 +97,7 @@ internal static class KntDocuments
             var previous = await service.Repository.Notes.GetResourceTextAsync(resourceId);
             if (previous.IsValid && previous.Entity?.Text != null)
                 pages = DocumentTextRules.KeepTranscriptions(previous.Entity.Text, pages);
-            text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format));
+            text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format, pages.Count));
             state = DocumentTextRules.StateOf(pages);
         }
         catch (KntDocumentUnreadableException ex)

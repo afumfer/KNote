@@ -153,6 +153,7 @@ public class KntAtlasJobs : BackgroundService
                 RepositoryId = repositoryId,
                 RepositoryName = repositoryName,
                 RequestedBy = userName,
+                Kind = request.Kind,
                 ResourceId = request.ResourceId,
                 Model = provider?.Model,
                 Phase = EnumDocumentProcessPhase.Queued
@@ -288,8 +289,8 @@ public class KntAtlasJobs : BackgroundService
                     }, () => document.Progress, p => p.Copy());
                     var result = await _documentRunner(document, progress, cancellation.Token);
                     progress.Report(result.Entity ?? new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Failed, Message = result.ErrorMessage });
-                    // The new note, for the search by meaning.
-                    if (result.Entity?.Phase == EnumDocumentProcessPhase.Completed && document.HasSemanticIndex)
+                    // The new note (also what was translated of a translation canceled), for the search by meaning.
+                    if (result.Entity?.NoteId != null && document.HasSemanticIndex)
                         EnqueueIndex(document.RepositoryId, document.Progress.RepositoryName, document.UserName, false);
                     break;
                 }
@@ -366,7 +367,7 @@ public class KntAtlasJobs : BackgroundService
         var index = await service.SemanticSearch.GetIndexStatusAsync();
         job.HasSemanticIndex = index.IsValid && index.Entity?.Status != EnumSemanticIndexStatus.None;
 
-        return await AiDocumentProcessor.SummarizeAsync(service, provider => chatClients.Create(provider, []), job.Provider, job.Request,
+        return await AiDocumentProcessor.ProcessAsync(service, provider => chatClients.Create(provider, []), job.Provider, job.Request,
             progress, _logger, cancellationToken);
     }
 

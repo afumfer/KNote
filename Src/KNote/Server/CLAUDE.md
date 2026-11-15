@@ -415,7 +415,7 @@ repositorio de la sesión.
 
 ## KNote Atlas: resúmenes (`SummaryController`, `api/summaries`)
 
-Etapa 2 (la lógica en `Service` y `KNote.Ai`, ver «Resumir un documento largo» en el `CLAUDE.md` raíz). Staff+, en el repositorio
+Etapa 2 (la lógica en `Service` y `KNote.Ai`, ver «Resumir o traducir un documento largo» en el `CLAUDE.md` raíz). Staff+, en el repositorio
 de la sesión, con `EnforceAuthorization` como el asistente. El modelo es el proveedor de chat de `ProviderAlias` o, sin él, el
 predeterminado del Server.
 
@@ -424,7 +424,9 @@ predeterminado del Server.
 - `POST documents` encola el resumen en `KntAtlasJobs` (tipo `DocumentProcess`, **uno por usuario**: la clave de la cola es
   repositorio + tipo + dueño, `KntAtlasJob.OwnerKey`; el índice y los recursos siguen con uno por repositorio), `GET
   documents/progress` (el del usuario: en marcha, en cola o el último; `null`, ninguno) y `POST documents/cancel`. Al terminar
-  bien, si el repositorio tiene índice, encola su puesta al día.
+  con una nota (también una traducción cancelada, que guarda lo traducido), si el repositorio tiene índice, encola su puesta al día.
+- Resumir o traducir lo dice `DocumentProcessRequestDto.Kind` (2.1b), en las mismas rutas; `ContinueNoteId` sigue una traducción.
+  `GET documents/{resourceId}/translations` da las traducciones de un documento, la última primero, terminadas o no («Continue»).
 
 ## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
 

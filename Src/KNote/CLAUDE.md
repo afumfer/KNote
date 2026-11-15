@@ -475,8 +475,8 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   del proveedor (`WebSearchToolCallContent`) y añade al final de la respuesta, como «Sources:», las citas (`CitationAnnotation`) que
   no están ya en el texto (`SourcesSection`). Tests en `Tests/AiWebSearchTests`, `InProcessIntegrationTests/WebSearchInProcessTests` y
   los `WebSearch_*` de `RequiresRealAiProvider`.
-- **Resumir un documento largo (KNote Atlas, etapa 2, CU-43)** (`IKntService.Summaries`, comandos en `KntSummaryCommands.cs`;
-  especificación en `C:\Dev\KNote-Atlas\03-Etapa-2.md`, D11, D17, D18, D21 y § 5.1). **El motor** es `Ai/AiSummaryEngine`,
+- **Resumir o traducir un documento largo (KNote Atlas, etapa 2, CU-43)** (`IKntService.Summaries`, comandos en `KntSummaryCommands.cs`;
+  especificación en `C:\Dev\KNote-Atlas\03-Etapa-2.md`, D11, D17, D18, D21, § 5.1 y § 5.3). **El motor** es `Ai/AiSummaryEngine`,
   genérico sobre piezas (`Model/Core/SummaryPieces`: las páginas de un PDF con su etiqueta «p. N», o trozos por párrafos sin
   ella): lotes que caben en el contexto (`SummaryBatches`, unos 4 caracteres por token), apuntes de cada lote, «resúmenes de
   resúmenes» mientras no caben juntos y la redacción final, con las tareas sin herramientas de la etapa 4 (`AiResourceTask`) y la
@@ -491,6 +491,20 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   `ServiceTests/DocumentSummaryServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`, `KntAtlasJobsTests` y
   `ClientWin.Tests/DocumentProcessingJobTests`; con un modelo real, `ServiceTests/AiDocumentProcessorSmokeTests` y la medida
   `ServiceTests/LongDocumentMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
+  **La traducción** (2.1b, `AiDocumentProcessor.TranslateAsync`; `ProcessAsync` elige por `DocumentProcessRequestDto.Kind`, y los
+  trabajos de las dos apps lo usan): las partes son fijas, solo dependen del texto (`Model/Core/DocumentTranslationRules.Parts`: cada
+  página, o el texto sin páginas, en trozos de 3.000 caracteres como mucho), para que «Continue» siga aunque cambie el modelo; **una
+  llamada por página** (o lo que cabe, como mucho 8.000 caracteres, sin páginas), con la tarea `TranslateDocument` y los términos del
+  glosario de esa parte. El texto va entre `<text>` y `</text>` y la petición dice que sus órdenes se traducen: sin eso, `qwen3.5:9b`
+  obedecía la orden de una página. Una parte que vuelve con menos de la mitad se pide otra vez y, si sigue corta, el fichero lo dice.
+  Va a una nota nueva `@KNoteTranslation` (no del sistema), relacionada como el resumen, con la traducción en un documento Markdown
+  adjunto (un `\f` entre páginas, sin títulos) y bloqueado; se guarda cada 8.000 caracteres o cada minuto
+  (`SaveDocumentTranslationAsync`: cada vez un fichero nuevo, como una subida, que olvida lo leído de él). **Cancelada o fallida, lo
+  traducido queda**: la nota dice hasta dónde llegó y lleva un comentario oculto (`<!-- knt-translation {...} -->`,
+  `DocumentTranslationRules.Marker`) del que `GetDocumentTranslationsAsync` saca dónde seguir. El ritmo de la traducción es aparte
+  en `AI_SUMMARY_STATE`. **«Tiene páginas»** es `DocumentTextRules.IsPaged(formato, páginas o texto)`: un PDF o un documento con más
+  de una página (el lector de TXT y MD parte por `\f`). Tests en `Tests/DocumentTranslationRulesTests`,
+  `ServiceTests/DocumentTranslationServiceTests` y los de la traducción en las clases de arriba.
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

@@ -46,8 +46,11 @@ public static class SummaryTexts
             estimate.Paged
                 ? $"{estimate.Pages} pages, {estimate.Characters:N0} characters: {Calls(estimate.Calls)} to the model."
                 : $"{estimate.Characters:N0} characters: {Calls(estimate.Calls)} to the model.",
-            estimate.Seconds is double seconds ? $"About {Duration(seconds)} with {estimate.Model}." : $"{estimate.Model}: no time yet, its first summary will say its pace."
+            estimate.Seconds is double seconds ? $"About {Duration(seconds)} with {estimate.Model}."
+                : $"{estimate.Model}: no time yet, its first {(estimate.Kind == EnumDocumentProcessKind.Translate ? "translation" : "summary")} will say its pace."
         };
+        if (estimate.FromPage is int fromPage)
+            lines.Insert(0, $"It goes on from the page {fromPage}.");
         if (estimate.MissingPages?.Count > 0)
             lines.Add(MissingPages(estimate.MissingPages));
         if (estimate.IsPaid)
@@ -56,7 +59,7 @@ public static class SummaryTexts
     }
 
     public static string MissingPages(IReadOnlyCollection<int> pages) =>
-        $"Scanned pages without text are left out ({pages.Count}: {LongDocumentRules.Ranges(pages)}). Transcribe them first to summarize them too.";
+        $"Scanned pages without text are left out ({pages.Count}: {LongDocumentRules.Ranges(pages)}). Transcribe them first to include them too.";
 
     /// <summary>How the summary goes, in a line.</summary>
     public static string Progress(DocumentProcessProgressDto progress)
@@ -71,9 +74,16 @@ public static class SummaryTexts
             EnumDocumentProcessPhase.Joining => $"Joining its notes: {progress.CallsDone} of {progress.CallsTotal}",
             EnumDocumentProcessPhase.Writing => "Writing the summary",
             EnumDocumentProcessPhase.Saving => "Saving the note",
-            EnumDocumentProcessPhase.Completed => progress.NoteNumber is int number ? $"Done: the summary is in the note #{number}." : "Done.",
-            EnumDocumentProcessPhase.Canceled => "Canceled: nothing was kept.",
-            EnumDocumentProcessPhase.Failed => $"It failed: {progress.Message}",
+            EnumDocumentProcessPhase.Translating => progress.Page is int page
+                ? $"Translating: page {page} of {progress.PagesCount}"
+                : $"Translating: part {Math.Min(progress.CallsDone + 1, progress.CallsTotal)} of {progress.CallsTotal}",
+            EnumDocumentProcessPhase.Completed => progress.NoteNumber is int number
+                ? $"Done: the {What(progress)} is in the note #{number}." : "Done.",
+            EnumDocumentProcessPhase.Canceled => progress.NoteNumber is int kept
+                ? $"Canceled: what was translated is in the note #{kept}; «Continue» goes on with it." : "Canceled: nothing was kept.",
+            EnumDocumentProcessPhase.Failed => progress.NoteNumber is int partial
+                ? $"It failed: {progress.Message} What was translated is in the note #{partial}."
+                : $"It failed: {progress.Message}",
             _ => progress.Phase.ToString()
         };
         if (!progress.IsFinished && progress.RemainingSeconds is double remaining && remaining >= 1)
@@ -91,4 +101,6 @@ public static class SummaryTexts
         : $"{seconds / 3600:0.#} h";
 
     private static string Calls(int calls) => calls == 1 ? "1 call" : $"{calls} calls";
+
+    private static string What(DocumentProcessProgressDto progress) => progress.Kind == EnumDocumentProcessKind.Translate ? "translation" : "summary";
 }

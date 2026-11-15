@@ -18,4 +18,13 @@ internal class FakeKntSummaryService : IKntSummaryService
 
     public Task<Result<NoteDto>> SaveDocumentSummaryAsync(DocumentSummarySaveDto summary) =>
         (SaveDocumentSummaryAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveDocumentSummaryAsync)} not configured for this test"))(summary);
+
+    public Func<DocumentTranslationSaveDto, Task<Result<NoteDto>>>? SaveDocumentTranslationAsyncImpl { get; set; }
+    public Func<Guid, Task<Result<List<DocumentTranslationDto>>>>? GetDocumentTranslationsAsyncImpl { get; set; }
+
+    public Task<Result<NoteDto>> SaveDocumentTranslationAsync(DocumentTranslationSaveDto translation) =>
+        (SaveDocumentTranslationAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveDocumentTranslationAsync)} not configured for this test"))(translation);
+
+    public Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId) =>
+        (GetDocumentTranslationsAsyncImpl ?? throw new NotSupportedException($"{nameof(GetDocumentTranslationsAsync)} not configured for this test"))(resourceId);
 }

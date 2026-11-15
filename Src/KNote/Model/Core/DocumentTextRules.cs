@@ -72,8 +72,15 @@ public static class DocumentTextRules
 
     public static bool IsDocument(ResourceInfoDto resource) => resource != null && IsDocument(resource.FileType, resource.Name);
 
-    /// <summary>Whether its fragments have a page: only a PDF's (a DOCX or an ODT depends on how it is laid out).</summary>
-    public static bool IsPaged(EnumDocumentFormat format) => format == EnumDocumentFormat.Pdf;
+    /// <summary>
+    /// Whether a document has pages (stage 2, D21): a PDF, or one read in more than one page (a TXT or an MD with page breaks, as
+    /// the translations of KNote Atlas). A DOCX or an ODT never: its pages depend on how it is laid out.
+    /// </summary>
+    public static bool IsPaged(EnumDocumentFormat format, int pagesCount) => format == EnumDocumentFormat.Pdf || pagesCount > 1;
+
+    /// <summary>Whether the kept text of a document (Resources.ExtractedText) has pages: a PDF's, or one with page breaks.</summary>
+    public static bool IsPaged(EnumDocumentFormat format, string extractedText) =>
+        format == EnumDocumentFormat.Pdf || (extractedText?.Contains(PageSeparator) ?? false);
 
     /// <summary>Whether a page of a PDF is scanned (D1): almost no letters and an image, or an image that covers almost all of it.</summary>
     public static bool NeedsTranscription(int letters, int images, double largestImageCoverage) =>
