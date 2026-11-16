@@ -10,6 +10,11 @@ namespace KNote.Ai;
 // Shared by ClientWin and Server, like AiChatClientFactory.
 public static class AiEmbeddingGeneratorFactory
 {
+    // The longest an Ollama call for vectors can take. HttpClient's 100 s by default were not enough for a batch of
+    // KntSemanticIndexer.EmbeddingBatchSize fragments on a computer without a GPU: the note failed and the work of its other
+    // batches was lost. Canceling a run or a search stops it before (their CancellationToken).
+    public static readonly TimeSpan OllamaTimeout = TimeSpan.FromMinutes(10);
+
     public static IEmbeddingGenerator<string, Embedding<float>> Create(AiProviderRef providerRef)
     {
         if (providerRef is null)
@@ -17,7 +22,8 @@ public static class AiEmbeddingGeneratorFactory
 
         return providerRef.Provider switch
         {
-            EnumAiProvider.Ollama => new OllamaApiClient(providerRef.Host, providerRef.Model),
+            EnumAiProvider.Ollama => new OllamaApiClient(
+                new HttpClient { BaseAddress = new Uri(providerRef.Host), Timeout = OllamaTimeout }, providerRef.Model),
 
             EnumAiProvider.OpenAI => new OpenAI.Embeddings.EmbeddingClient(providerRef.Model,
                 AiChatClientFactory.ResolveApiKey(providerRef, "OPENAI_API_KEY")).AsIEmbeddingGenerator(),

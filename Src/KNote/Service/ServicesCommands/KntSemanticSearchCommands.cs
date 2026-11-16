@@ -102,6 +102,7 @@ public class KntSemanticSearchRunIndexAsyncCommand : KntCommandServiceBase<Seman
         {
             Rebuild = Param.Rebuild,
             KeepState = true,
+            RetryFailedNotes = true,
             Progress = Param.Progress,
             CancellationToken = Param.CancellationToken
         });
@@ -202,24 +203,24 @@ public class KntSemanticSearchSearchAsyncCommand : KntCommandServiceBase<Semanti
         if (index == null)
             return result;
 
-        // D8. Its failures (a note, the provider) do not stop the search: the vectors there are serve.
-        await KntSemanticIndexer.RunAsync(Service, new KntSemanticIndexer.Options
-        {
-            SkipIfBusy = true,
-            MaxNotes = SemanticIndexRefreshRequest.DefaultMaxNotes,
-            MaxDuration = SemanticIndexRefreshRequest.DefaultMaxDuration,
-            MaxChunksPerNote = KntSemanticIndexer.QuickRefreshMaxChunks,
-            CancellationToken = _cancellationToken
-        });
+        // D8. Its failures (a note, the provider) do not stop the search: the vectors there are serve. Not when the same search
+        // is only shown again (BringIndexUpToDate false).
+        if (Param.BringIndexUpToDate)
+            await KntSemanticIndexer.RunAsync(Service, new KntSemanticIndexer.Options
+            {
+                SkipIfBusy = true,
+                MaxNotes = SemanticIndexRefreshRequest.DefaultMaxNotes,
+                MaxDuration = SemanticIndexRefreshRequest.DefaultMaxDuration,
+                MaxChunksPerNote = KntSemanticIndexer.QuickRefreshMaxChunks,
+                CancellationToken = _cancellationToken
+            });
 
         float[] query;
         try
         {
             var models = index.Models;
-            var vectors = await index.Generator.GenerateAsync(new[] { SemanticSearchRules.QueryText(models.QueryInstruction, Param.Text) }, _cancellationToken);
-            if (vectors == null || vectors.Count != 1)
-                throw new KntServiceException($"The model gave {vectors?.Count ?? 0} vectors for 1 text.");
-            query = EmbeddingVector.Normalize(vectors[0], models.EmbeddingDimensions);
+            query = await KntQueryVectorCache.GetAsync(index.Generator, SemanticSearchRules.QueryText(models.QueryInstruction, Param.Text),
+                models.EmbeddingDimensions, _cancellationToken);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

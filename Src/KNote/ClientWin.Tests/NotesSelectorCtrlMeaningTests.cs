@@ -165,4 +165,20 @@ public class NotesSelectorCtrlMeaningTests
         Assert.AreEqual(2, requests.Count);
         Assert.IsTrue(requests.All(r => r.Text == "keyboard"));
     }
+
+    // Back to the Search/Filter tab, the same search is shown again without bringing the index up to date (with a slow model
+    // every return waited for it); «Update index» always brings it up to date.
+    [TestMethod]
+    public async Task ASearchShownAgain_DoesNotBringTheIndexUpToDate_UpdateIndexDoes()
+    {
+        var (ctrl, service, requests) = CreateCtrl();
+
+        await ctrl.LoadSearchEntities(service, new NotesSearchDto { TextSearch = "keyboard", Mode = EnumNotesSearchMode.Meaning }, refreshView: false,
+            bringIndexUpToDate: false);
+        await ctrl.UpdateIndexAsync();
+        await ctrl.LoadFilteredEntities(service, new NotesFilterDto { MeaningText = "monitor" }, refreshView: false, bringIndexUpToDate: false);
+        await ctrl.LoadFilteredEntities(service, new NotesFilterDto { MeaningText = "monitor" }, refreshView: false);
+
+        CollectionAssert.AreEqual(new[] { false, true, false, true }, requests.Select(r => r.BringIndexUpToDate).ToList());
+    }
 }

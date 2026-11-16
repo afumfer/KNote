@@ -725,7 +725,11 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   no usa el cursor de espera, sino `Views/WorkProgressForm` (`IViewKNoteManagement.ShowWorkInProgress`): una ventana sobre
   la principal, que se muestra si dura más de 400 ms, con barra en movimiento y «Cancel». `NotesSelectorCtrl.LoadSearchEntities`/
   `LoadFilteredEntities` reciben un `CancellationToken`: cancelado, la lista se queda como estaba (`LastLoadCanceled`); lo que hace el
-  repositorio no se para, solo no se usa. El árbol de carpetas sigue con el cursor de espera. `Core/WaitCursor` cuenta los vivos: el
+  repositorio no se para, solo no se usa. Volver a la pestaña (`GoActiveFilter`) repite la última búsqueda o filtro con
+  `bringIndexUpToDate: false` (sin la puesta al día del índice; «Update index» y una búsqueda nueva sí la hacen): con Ollama sin GPU,
+  cada vuelta esperaba a esa puesta al día. Los menús **Folders explorer**/**Search panel** (F11, Mayús+F11) solo cambian
+  `tabExplorers.SelectedIndex`: su `SelectedIndexChanged` carga la lista (si `SelectTab` lo llamaban también los menús, la cargaba dos
+  veces, dos búsquedas a la vez). El árbol de carpetas sigue con el cursor de espera. `Core/WaitCursor` cuenta los vivos: el
   árbol (`FoldersSelectorForm.RefreshView`, `async void`) acababa después del de `OnInitialized` y, al restaurar «el valor anterior»,
   dejaba el cursor de espera para siempre.
 - **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las

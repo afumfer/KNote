@@ -409,15 +409,12 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         }
         else if (menuSel == menuFoldersExplorer)
         {
-            if (tabExplorers.SelectedIndex == 0)
-                return;
-            await SelectTab(0);
+            // The tab's SelectedIndexChanged loads its list (calling SelectTab here too loaded it twice).
+            tabExplorers.SelectedIndex = 0;
         }
         else if (menuSel == menuSearchPanel)
         {
-            if (tabExplorers.SelectedIndex == 1)
-                return;
-            await SelectTab(1);
+            tabExplorers.SelectedIndex = 1;
         }
         else if (menuSel == menuHeaderPanelVisible)
         {
@@ -611,11 +608,12 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         statusLabelMenuHint.Visible = !menuManagement.Visible;
     }
 
+    // Only from tabExplorers_SelectedIndexChanged: the menus change the tab and the event comes here once. A search by meaning
+    // shown again is not repeated against the index (GoActiveFilter).
     private async Task SelectTab(int tabIndex)
     {
         if (tabIndex == 0)
         {
-            tabExplorers.SelectedTab = tabExplorers.TabPages[0];
             menuFoldersExplorer.Checked = true;
             menuSearchPanel.Checked = false;
             _ctrl.Store.State.ManagementWindow.Panels.FoldersExplorer = true;
@@ -623,7 +621,6 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         }
         else if (tabIndex == 1)
         {
-            tabExplorers.SelectedTab = tabExplorers.TabPages[1];
             menuFoldersExplorer.Checked = false;
             menuSearchPanel.Checked = true;
             _ctrl.Store.State.ManagementWindow.Panels.FoldersExplorer = false;

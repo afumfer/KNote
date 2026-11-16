@@ -46,7 +46,7 @@ public class SemanticResourceRulesTests
     public void TheNotice_SaysWhyTheNotesArePending_AndWhoCanUpdateThem()
     {
         Assert.AreEqual("2 notes are not up to date in the semantic index: they may be missing from the results or found by their previous " +
-            "content. 1 of them waits for the full indexing (documents not read yet, or too long).",
+            "content. 1 of them waits for the full indexing (documents not read yet, too long, or failed several times here).",
             SemanticIndexTexts.PendingInSearch(2, 1, 0, canRunIndex: true));
         StringAssert.Contains(SemanticIndexTexts.PendingInSearch(1, 1, 0, true), "It waits for the full indexing");
         StringAssert.EndsWith(SemanticIndexTexts.PendingInSearch(1, 0, 0, false), "An Admin can bring the index up to date in KNote Atlas › Semantic index.");

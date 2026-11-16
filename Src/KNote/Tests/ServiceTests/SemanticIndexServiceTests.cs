@@ -255,7 +255,7 @@ public class SemanticIndexServiceTests
     }
 
     [TestMethod]
-    public async Task ANoteThatFails_IsCounted_AndTriedAgainUpToThreeTimes()
+    public async Task ANoteThatFails_IsCounted_TheQuickUpdatesTryItUpToThreeTimes_AndAFullRunAlways()
     {
         using var fixture = await SemanticIndexFixture.CreateAsync();
         var broken = await fixture.AddNoteAsync("BROKEN note", "Text.");
@@ -271,9 +271,14 @@ public class SemanticIndexServiceTests
 
         Assert.AreEqual(1, (await fixture.RunAsync()).ErrorsCount);
         Assert.AreEqual(1, (await fixture.RunAsync()).ErrorsCount);
+        fixture.Models.Reset();
+        var quick = (await fixture.Service.SemanticSearch.RefreshPendingAsync(new SemanticIndexRefreshRequest())).Entity;
+        Assert.AreEqual(0, quick.ErrorsCount, "the quick updates don't try it again in this process");
+        Assert.AreEqual(0, quick.NotesDone);
+        Assert.AreEqual(0, fixture.Models.Calls);
+
         var fourth = await fixture.RunAsync();
-        Assert.AreEqual(0, fourth.ErrorsCount, "not tried again in this process");
-        Assert.AreEqual(0, fourth.NotesDone);
+        Assert.AreEqual(1, fourth.ErrorsCount, "a full run always tries it, and says why it fails");
     }
 
     [TestMethod]

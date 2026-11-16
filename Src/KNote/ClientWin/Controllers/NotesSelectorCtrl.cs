@@ -180,8 +180,10 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
     // the list stays as it was (LastLoadCanceled). What the repository is doing is not stopped: its result is not used.
     public bool LastLoadCanceled { get; private set; }
 
+    // bringIndexUpToDate (by meaning): false, the same search shown again, without the update of the index before it
+    // (SemanticSearchRequestDto.BringIndexUpToDate). «Update index» always brings it up to date.
     public async Task<bool> LoadSearchEntities(IKntService service, NotesSearchDto notesSearch, bool refreshView = true,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool bringIndexUpToDate = true)
     {
         bool resLoad = false;
         LastLoadCanceled = false;
@@ -199,7 +201,10 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
             else if (notesSearch.Mode == EnumNotesSearchMode.Meaning)
             {
                 (response, found) = await SearchByMeaningAsync(service,
-                    new SemanticSearchRequestDto { Text = notesSearch.TextSearch, ResourceKind = notesSearch.ResourceKind }, cancellationToken);
+                    new SemanticSearchRequestDto
+                    {
+                        Text = notesSearch.TextSearch, ResourceKind = notesSearch.ResourceKind, BringIndexUpToDate = bringIndexUpToDate
+                    }, cancellationToken);
             }
             else
             {
@@ -242,7 +247,7 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
     }
 
     public async Task<bool> LoadFilteredEntities(IKntService service, NotesFilterDto notesFilter, bool refreshView = true,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool bringIndexUpToDate = true)
     {
         bool resLoad = false;
         LastLoadCanceled = false;
@@ -258,7 +263,9 @@ public class NotesSelectorCtrl : CtrlSyncableSelectorBase<IViewNotesSelector, No
             }
             else if (notesFilter.HasMeaningText)
             {
-                (response, found) = await SearchByMeaningAsync(service, SemanticSearchRequestDto.ForFilter(notesFilter), cancellationToken);
+                var request = SemanticSearchRequestDto.ForFilter(notesFilter);
+                request.BringIndexUpToDate = bringIndexUpToDate;
+                (response, found) = await SearchByMeaningAsync(service, request, cancellationToken);
             }
             else
             {
