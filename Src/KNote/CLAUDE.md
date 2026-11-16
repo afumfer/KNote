@@ -545,6 +545,25 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   lee todas las notas con una consulta ligera, `IKntNoteRepository.GetClassificationsAsync` (id, número, carpeta, tipo y etiquetas;
   Dapper y EF, con paridad en `Tests/RepositoryParityTests/NoteClassificationsParityTests`). Guardarla no cambia ninguna nota. Tests en
   `Tests/NoiseRulesTests`, `ServiceTests/NoisePolicyServiceTests` y `InProcessIntegrationTests/SummaryInProcessTests`.
+- **Selección de un resumen (KNote Atlas, etapa 2, 2.3, CU-15, D6-D10, S1-S7)** (`IKntSummaryService.PrepareSelectionAsync` y
+  `SaveRelevanceCorrectionsAsync`, Staff; `Service/Core/KntNoteSelection`), sin IA y sin escribir nada: las notas **modificadas en el
+  periodo** (días enteros) **o con una tarea que empezó** (`StartDate` o, sin ella, su creación) **o terminó en él**
+  (`IKntNoteRepository.GetSelectionSourcesAsync`, con su texto y cuántas tareas, con actividad, recursos y relaciones en los dos sentidos;
+  Dapper y EF con paridad en `Tests/RepositoryParityTests/NoteSelectionSourcesParityTests`) y, con «y», de una carpeta y sus
+  subcarpetas, con palabras clave (la búsqueda por palabras en el tema y el texto) y «Talks about…» (por significado entre las del
+  periodo, desde 0,45, sin el tope de 100). Cada nota la decide `Model/Core/NoteRelevanceRules` (In / Doubtful / Out, con su motivo
+  en palabras y una puntuación que ordena las listas), la primera que decide: las notas de KNote (solo se cuentan, `KNoteNotes`) →
+  la corrección de una persona → la política de ruido y las etiquetas (`NoiseRules`) → las señales (tareas con actividad, citas `#n`
+  desde otras notas de la selección, relaciones, recursos y el tamaño del texto limpio con `Model/NoteReadingCleaner`: menos de 10
+  palabras y creada y dejada el mismo día, fuera; menos de 40, dudosa). `ComputedDecision` es lo que decide KNote sin la corrección:
+  `NoteRelevanceRules.CorrectionFor` da lo que guarda «Review selection» al cambiar una casilla (o quitar la corrección).
+  **Las correcciones van en la nota del sistema «Note relevance»** (`@KNoteRelevance`, en «KNote Atlas», `Model/Core/RelevanceNote`: dos
+  tablas legibles y una marca oculta por fila, `<!-- knt-relevance {...} -->`, de la que se leen; `Service/Core/KntRelevanceNotes`):
+  una por repositorio, compartida, la última vale; escrituras una a una por base de datos y releyendo la nota; al escribirla se quitan
+  las filas de notas borradas. Es una nota protegida (`KntAtlasNotes.ProtectedNoteTypeNames`): a mano, solo ProjectManager y Admin;
+  el comando la escribe para un Staff dentro de `KntAuthorizationBypass`, **que también salta esa regla de guardado**
+  (`KntAtlasNotes.CanWriteAsync`). Las personas nunca tocan sus notas al corregir. Tests en `Tests/NoteReadingCleanerTests`,
+  `NoteRelevanceRulesTests`, `RelevanceNoteTests`, `ServiceTests/NoteSelectionServiceTests` y `InProcessIntegrationTests/SummaryInProcessTests`.
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

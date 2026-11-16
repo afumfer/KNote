@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -39,4 +40,10 @@ public class KntSummaryService : KntServiceBase, IKntSummaryService
 
     public async Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy) =>
         await ExecuteCommand(new KntSummaryCountNoiseAsyncCommand(Service, policy));
+
+    public async Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default) =>
+        await ExecuteCommand(new KntSummaryPrepareSelectionAsyncCommand(Service, request, cancellationToken));
+
+    public async Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes) =>
+        await ExecuteCommand(new KntSummarySaveRelevanceCorrectionsAsyncCommand(Service, changes));
 }

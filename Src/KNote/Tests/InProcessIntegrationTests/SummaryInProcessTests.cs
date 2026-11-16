@@ -116,6 +116,41 @@ public class SummaryInProcessTests
         Assert.IsGreaterThan(0, counted.Notes);
     }
 
+    // 2.3 (CU-15): the selection of a summary and the corrections of «Review selection», for a Staff; not for a Guest.
+    [TestMethod]
+    public async Task TheSelection_AndItsCorrections_AreForAStaff()
+    {
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        var (guest, _) = await NewClientAsync(nameof(EnumRoles.Guest));
+        using var __ = guest;
+        using var service = _factory.CreateServiceForRepository(0);
+        var note = (await service.Notes.NewAsync()).Entity;
+        note.Topic = $"Selection {Guid.NewGuid():N}";
+        note.Description = string.Join(" ", Enumerable.Range(1, 60).Select(i => $"word{i}"));
+        note.FolderId = (await service.Folders.GetHomeAsync()).Entity.FolderId;
+        var saved = await service.Notes.SaveAsync(note);
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+        note = saved.Entity;
+        var request = new NoteSelectionRequestDto { From = DateTime.Today, To = DateTime.Today };
+
+        var refused = await guest.PostAsJsonAsync("api/summaries/selection", request);
+        var answer = await staff.PostAsJsonAsync("api/summaries/selection", request);
+        var corrected = await staff.PostAsJsonAsync("api/summaries/relevance/corrections", new RelevanceCorrectionsSaveDto
+        {
+            Changes = { new RelevanceCorrectionChangeDto { NoteId = note.NoteId, Decision = EnumSelectionDecision.Out } }
+        });
+        var again = await staff.PostAsJsonAsync("api/summaries/selection", request);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, refused.StatusCode);
+        var body = await answer.Content.ReadAsStringAsync();
+        Assert.IsTrue(answer.IsSuccessStatusCode, body);
+        Assert.AreEqual(EnumSelectionDecision.In, JsonSerializer.Deserialize<Result<NoteSelectionResultDto>>(body, _json)!.Entity.Notes.Single(n => n.NoteId == note.NoteId).Decision);
+        Assert.IsTrue(corrected.IsSuccessStatusCode, await corrected.Content.ReadAsStringAsync());
+        var corrections = JsonSerializer.Deserialize<Result<NoteSelectionResultDto>>(await again.Content.ReadAsStringAsync(), _json)!.Entity;
+        Assert.AreEqual(EnumSelectionSource.Correction, corrections.Notes.Single(n => n.NoteId == note.NoteId).Source);
+    }
+
     // 2.1b2b: process_document of the assistant, accepted in its card, queues the same run for the user of the conversation.
     [TestMethod]
     public async Task TheAssistant_StartsTheSummaryOfADocument_WhenItsCardIsAccepted()

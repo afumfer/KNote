@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Core;
@@ -437,6 +438,70 @@ public class KntSummaryCountNoiseAsyncCommand : KntCommandServiceBase<NoisePolic
         }
         var context = await KntNoisePolicy.LoadContextAsync(Service);
         result.Entity = NoiseRules.Count(notes.Entity, context.Clean(Param), context.KNoteNoteTypeIds, context.KNoteFolderIds);
+        return result;
+    }
+}
+
+// KNote Atlas, stage 2 (2.3, CU-15): the selection of the notes of a summary, without the AI (KntNoteSelection); nothing is written.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummaryPrepareSelectionAsyncCommand : KntCommandServiceBase<NoteSelectionRequestDto, Result<NoteSelectionResultDto>>
+{
+    private readonly CancellationToken _cancellationToken;
+
+    public KntSummaryPrepareSelectionAsyncCommand(IKntService service, NoteSelectionRequestDto request, CancellationToken cancellationToken)
+        : base(service, request)
+    {
+        _cancellationToken = cancellationToken;
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null)
+            result.AddErrorMessage("The period of the selection is required.");
+        else if (Param.To.Date < Param.From.Date)
+            result.AddErrorMessage(KntNoteSelection.PeriodError);
+        return result;
+    }
+
+    public override async Task<Result<NoteSelectionResultDto>> Execute()
+    {
+        var result = new Result<NoteSelectionResultDto>();
+        result.Entity = await KntNoteSelection.BuildAsync(Service, Param, _cancellationToken, result);
+        return result;
+    }
+}
+
+// The changes of «Review selection» kept in «Note relevance» (KntRelevanceNotes, D10, S3, S4): a Staff writes that protected
+// system note through this command (inside KntAuthorizationBypass); a change of a note of KNote's own is not kept.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummarySaveRelevanceCorrectionsAsyncCommand : KntCommandServiceBase<RelevanceCorrectionsSaveDto, Result<List<RelevanceCorrectionDto>>>
+{
+    public KntSummarySaveRelevanceCorrectionsAsyncCommand(IKntService service, RelevanceCorrectionsSaveDto changes) : base(service, changes)
+    {
+
+    }
+
+    public override async Task<Result<List<RelevanceCorrectionDto>>> Execute()
+    {
+        var result = new Result<List<RelevanceCorrectionDto>>();
+        var changes = (Param?.Changes ?? new List<RelevanceCorrectionChangeDto>())
+            .GroupBy(c => c.NoteId).Select(g => g.Last()).ToList();
+
+        // KNote's own notes are always out: they are not corrected.
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var notes = await Repository.Notes.GetClassificationsAsync();
+        if (!notes.IsValid)
+        {
+            result.AddListErrorMessage(notes.ListErrorMessage);
+            return result;
+        }
+        var kNoteNotes = notes.Entity
+            .Where(n => (n.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)) || context.KNoteFolderIds.Contains(n.FolderId))
+            .Select(n => n.NoteId).ToHashSet();
+        changes = changes.Where(c => !kNoteNotes.Contains(c.NoteId)).ToList();
+
+        result.Entity = await KntRelevanceNotes.SaveCorrectionsAsync(Service, changes, result);
         return result;
     }
 }

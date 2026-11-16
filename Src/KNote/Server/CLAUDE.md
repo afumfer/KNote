@@ -434,6 +434,8 @@ predeterminado del Server.
 - **Política de ruido** (2.2): `GET noise-policy` y `POST noise-policy/count` (el recuento de una política sin guardar), para cualquier
   usuario con sesión (`[Authorize]` de la clase); `POST noise-policy` la guarda, `[Authorize(Roles = "ProjectManager, Admin")]`, y
   devuelve lo que se guardó (sin los ids que no existen ni los de KNote).
+- **Selección** (2.3): `POST selection` (`NoteSelectionRequestDto` → `NoteSelectionResultDto`, sin IA, cancelada si se cierra la petición) y
+  `POST relevance/corrections` (los cambios de «Review selection», guardados en «Note relevance»), Staff+, con `EnforceAuthorization`.
 
 ## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
 

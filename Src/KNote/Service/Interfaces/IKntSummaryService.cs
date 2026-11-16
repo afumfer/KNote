@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -47,4 +48,12 @@ public interface IKntSummaryService
 
     /// <summary>How many notes this policy (saved or not) leaves out of the summaries, and why. Guest.</summary>
     Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy);
+
+    /// <summary>The selection of the notes of a summary (2.3, CU-15), each one with its decision and reason, without the AI; nothing is
+    /// written. Staff.</summary>
+    Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default);
+
+    /// <summary>Keeps the changes of «Review selection» in «Note relevance» (created the first time), for the current user; it gives
+    /// the corrections as they are kept. Staff.</summary>
+    Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes);
 }

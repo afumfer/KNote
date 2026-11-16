@@ -1,0 +1,171 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using KNote.Model;
+using KNote.Model.Core;
+using KNote.Model.Dto;
+using KNote.Service.Interfaces;
+
+namespace KNote.Service.Core;
+
+/// <summary>
+/// The selection of the notes of a summary (KNote Atlas, stage 2, 2.3, CU-15, chapters 29, 30 and 33), without the AI: the notes
+/// modified in the period or with task activity in it (the repository's query, D6) and, combined with «and», of a folder and its
+/// subfolders, with some words (the search by words of always, in the topic and the text) and about something (by meaning, among
+/// the notes of the period, from the minimum similarity of the search, without its cap of 100: S7). Each one is decided by
+/// NoteRelevanceRules with the noise policy, the tags, the corrections of «Note relevance» and its signals; KNote's own notes are
+/// only counted. Nothing is written.
+/// </summary>
+internal static class KntNoteSelection
+{
+    public const string PeriodError = "The end of the period is before its start.";
+
+    public static async Task<NoteSelectionResultDto> BuildAsync(IKntService service, NoteSelectionRequestDto request,
+        CancellationToken cancellationToken, ResultBase result)
+    {
+        var from = request.From.Date;
+        var to = request.To.Date.AddDays(1);
+        if (to <= from)
+        {
+            result.AddErrorMessage(PeriodError);
+            return null;
+        }
+
+        var resSources = await service.Repository.Notes.GetSelectionSourcesAsync(from, to);
+        if (!resSources.IsValid)
+        {
+            result.AddListErrorMessage(resSources.ListErrorMessage);
+            return null;
+        }
+        var sources = resSources.Entity;
+
+        var resFolders = await service.Repository.Folders.GetAllAsync();
+        var folders = (resFolders.IsValid ? resFolders.Entity : null) ?? new List<FolderInfoDto>();
+        if (request.FolderId is Guid folderId)
+        {
+            var subtree = Subtree(folders, folderId);
+            sources = sources.Where(s => subtree.Contains(s.FolderId)).ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Keywords) && sources.Count > 0)
+        {
+            var found = await service.Notes.GetSearchMinimalAsync(new NotesSearchDto { TextSearch = request.Keywords, SearchInDescription = true });
+            if (!found.IsValid)
+            {
+                result.AddListErrorMessage(found.ListErrorMessage);
+                return null;
+            }
+            var ids = found.Entity.Select(n => n.NoteId).ToHashSet();
+            sources = sources.Where(s => ids.Contains(s.NoteId)).ToList();
+        }
+
+        var meaningUsed = !string.IsNullOrWhiteSpace(request.MeaningText);
+        if (meaningUsed && sources.Count > 0)
+        {
+            var ids = await AboutAsync(service, request.MeaningText, sources.Select(s => s.NoteId).ToHashSet(), cancellationToken, result);
+            if (ids == null)
+                return null;
+            sources = sources.Where(s => ids.Contains(s.NoteId)).ToList();
+        }
+
+        var context = await KntNoisePolicy.LoadContextAsync(service);
+        var policy = context.Clean(await KntNoisePolicy.ReadAsync(service));
+        var corrections = (await KntRelevanceNotes.ReadAsync(service, result)).Corrections.ToDictionary(c => c.NoteId);
+        if (!result.IsValid)
+            return null;
+
+        var selection = new NoteSelectionResultDto { MeaningUsed = meaningUsed };
+        var notes = new List<(NoteSelectionSourceDto Source, EnumNoiseReason Noise, string Text)>();
+        foreach (var source in sources)
+        {
+            var noise = NoiseRules.Classify(new NoteClassificationDto
+            {
+                NoteId = source.NoteId, NoteNumber = source.NoteNumber, FolderId = source.FolderId, NoteTypeId = source.NoteTypeId, Tags = source.Tags
+            }, policy, context.KNoteNoteTypeIds, context.KNoteFolderIds);
+            if (noise == EnumNoiseReason.KNoteNote)
+            {
+                selection.KNoteNotes++;
+                continue;
+            }
+            notes.Add((source, noise, NoteReadingCleaner.Clean(Markdown(service, source))));
+        }
+
+        // The citations #n between the notes of the selection (one per citing note, not itself).
+        var citedBy = new Dictionary<int, int>();
+        foreach (var (source, _, text) in notes)
+            foreach (var number in NoteCitationLinker.CitedNumbers(text).Where(n => n != source.NoteNumber))
+                citedBy[number] = citedBy.GetValueOrDefault(number) + 1;
+
+        var folderNames = folders.ToDictionary(f => f.FolderId, f => f.Name);
+        foreach (var (source, noise, text) in notes)
+        {
+            var note = new NoteSelectionDto
+            {
+                NoteId = source.NoteId, NoteNumber = source.NoteNumber, Topic = source.Topic, FolderId = source.FolderId,
+                FolderName = folderNames.GetValueOrDefault(source.FolderId), ModificationDateTime = source.ModificationDateTime
+            };
+            var signals = NoteRelevanceRules.SignalsOf(source, text, citedBy.GetValueOrDefault(source.NoteNumber));
+            NoteRelevanceRules.Decide(note, noise, signals, corrections.GetValueOrDefault(source.NoteId));
+            selection.Notes.Add(note);
+        }
+        selection.Notes = NoteRelevanceRules.Order(selection.Notes);
+        return selection;
+    }
+
+    // The folder and its subfolders.
+    private static HashSet<Guid> Subtree(List<FolderInfoDto> folders, Guid folderId)
+    {
+        var children = folders.Where(f => f.ParentId != null).ToLookup(f => f.ParentId.Value, f => f.FolderId);
+        var result = new HashSet<Guid> { folderId };
+        var pending = new Queue<Guid>(new[] { folderId });
+        while (pending.Count > 0)
+            foreach (var child in children[pending.Dequeue()])
+                if (result.Add(child))
+                    pending.Enqueue(child);
+        return result;
+    }
+
+    // The notes among candidates about text, by meaning (the index brought up to date first, as the search).
+    private static async Task<HashSet<Guid>> AboutAsync(IKntService service, string text, HashSet<Guid> candidates,
+        CancellationToken cancellationToken, ResultBase result)
+    {
+        var index = await KntSemanticSearcher.OpenAsync(service, result);
+        if (index == null)
+            return null;
+
+        await KntSemanticIndexer.RunAsync(service, new KntSemanticIndexer.Options
+        {
+            SkipIfBusy = true,
+            MaxNotes = SemanticIndexRefreshRequest.DefaultMaxNotes,
+            MaxDuration = SemanticIndexRefreshRequest.DefaultMaxDuration,
+            MaxChunksPerNote = KntSemanticIndexer.QuickRefreshMaxChunks,
+            CancellationToken = cancellationToken
+        });
+
+        float[] query;
+        try
+        {
+            query = await KntQueryVectorCache.GetAsync(index.Generator, SemanticSearchRules.QueryText(index.Models.QueryInstruction, text),
+                index.Models.EmbeddingDimensions, cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            result.AddErrorMessage($"The model {index.Models.EmbeddingModel} could not calculate the vector of «{text}»: {ex.Message}");
+            return null;
+        }
+
+        var snapshot = await KntSemanticSearcher.VectorsAsync(service, index, cancellationToken);
+        return SemanticSearchRules.Rank(snapshot.Chunks, query, SemanticSearchRules.MinSimilarity, candidates.Contains)
+            .Select(m => m.NoteId).ToHashSet();
+    }
+
+    // The text of a note as it is read: Markdown (an HTML note converted).
+    private static string Markdown(IKntService service, NoteSelectionSourceDto source)
+    {
+        var html = source.ContentType != null
+            && string.Equals(new NoteInfoDto { ContentType = source.ContentType }.GetContentTypeExt().ForDescription, "html", StringComparison.OrdinalIgnoreCase);
+        return html ? service.Notes.UtilHtmlToMarkdown(source.Description ?? "") : source.Description ?? "";
+    }
+}

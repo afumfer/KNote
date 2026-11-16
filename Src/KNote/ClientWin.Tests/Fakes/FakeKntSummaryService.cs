@@ -40,4 +40,13 @@ internal class FakeKntSummaryService : IKntSummaryService
 
     public Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy) =>
         (CountNoiseAsyncImpl ?? throw new NotSupportedException($"{nameof(CountNoiseAsync)} not configured for this test"))(policy);
+
+    public Func<NoteSelectionRequestDto, CancellationToken, Task<Result<NoteSelectionResultDto>>>? PrepareSelectionAsyncImpl { get; set; }
+    public Func<RelevanceCorrectionsSaveDto, Task<Result<List<RelevanceCorrectionDto>>>>? SaveRelevanceCorrectionsAsyncImpl { get; set; }
+
+    public Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default) =>
+        (PrepareSelectionAsyncImpl ?? throw new NotSupportedException($"{nameof(PrepareSelectionAsync)} not configured for this test"))(request, cancellationToken);
+
+    public Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes) =>
+        (SaveRelevanceCorrectionsAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRelevanceCorrectionsAsync)} not configured for this test"))(changes);
 }

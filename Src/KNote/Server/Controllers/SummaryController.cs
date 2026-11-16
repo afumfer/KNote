@@ -107,6 +107,26 @@ public class SummaryController : ControllerBase
     public Task<IActionResult> CountNoise([FromBody] NoisePolicyDto policy) =>
         RunAsync(nameof(CountNoise), () => _service.Summaries.CountNoiseAsync(policy ?? new NoisePolicyDto()));
 
+    // KNote Atlas 2.3 (CU-15): the selection of the notes of a summary, without the AI, and the changes of «Review selection», kept
+    // in «Note relevance». Staff+, with the roles of the commands (EnforceAuthorization).
+    [HttpPost("selection")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> PrepareSelection([FromBody] NoteSelectionRequestDto request, CancellationToken cancellationToken) =>
+        RunAsync(nameof(PrepareSelection), () =>
+        {
+            _service.EnforceAuthorization = true;
+            return _service.Summaries.PrepareSelectionAsync(request, cancellationToken);
+        });
+
+    [HttpPost("relevance/corrections")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> SaveRelevanceCorrections([FromBody] RelevanceCorrectionsSaveDto changes) =>
+        RunAsync(nameof(SaveRelevanceCorrections), () =>
+        {
+            _service.EnforceAuthorization = true;
+            return _service.Summaries.SaveRelevanceCorrectionsAsync(changes ?? new RelevanceCorrectionsSaveDto());
+        });
+
     // The chat provider asked for or, without one, the repository's recommended LLM if this Server has it, else the default one.
     private async Task<(AiProviderRef Provider, Result Error)> ProviderAsync(DocumentProcessRequestDto request)
     {

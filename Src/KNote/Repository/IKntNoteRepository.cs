@@ -70,6 +70,9 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<int>> CountNotesInFolderAsync(Guid folderId);
     // KNote Atlas 2.2: every note with what the noise policy needs (its folder, its type and its tags), without its texts.
     Task<Result<List<NoteClassificationDto>>> GetClassificationsAsync();
+    // KNote Atlas 2.3 (D6): the notes modified in [from, to) or with a task that started (StartDate or, without it, its creation) or
+    // ended (EndDate) in it, with their texts and how many tasks (and with activity in it), resources and relations (both ways).
+    Task<Result<List<NoteSelectionSourceDto>>> GetSelectionSourcesAsync(DateTime from, DateTime to);
     Task<Result<int>> CountMessagesByUserAsync(Guid userId);
     Task<Result<int>> CountWindowsByUserAsync(Guid userId);
     Task<Result<int>> CountTasksByUserAsync(Guid userId);

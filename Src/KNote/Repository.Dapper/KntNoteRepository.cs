@@ -1623,6 +1623,34 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<NoteSelectionSourceDto>>> GetSelectionSourcesAsync(DateTime from, DateTime to)
+    {
+        try
+        {
+            // The conditions on the tasks without COALESCE, for the indexes of NoteTasks.StartDate/EndDate (revision 6).
+            const string activity = @"((t.StartDate >= @from AND t.StartDate < @to)
+                OR (t.StartDate IS NULL AND t.CreationDateTime >= @from AND t.CreationDateTime < @to)
+                OR (t.EndDate >= @from AND t.EndDate < @to))";
+            var sql = $@"SELECT n.NoteId, n.NoteNumber, n.Topic, n.Description, n.ContentType, n.Tags, n.FolderId, n.NoteTypeId,
+                    n.CreationDateTime, n.ModificationDateTime,
+                    (SELECT COUNT(*) FROM NoteTasks t WHERE t.NoteId = n.NoteId) AS Tasks,
+                    (SELECT COUNT(*) FROM NoteTasks t WHERE t.NoteId = n.NoteId AND {activity}) AS TasksWithActivity,
+                    (SELECT COUNT(*) FROM Resources r WHERE r.NoteId = n.NoteId) AS Resources,
+                    (SELECT COUNT(*) FROM TraceNotes tr WHERE tr.FromId = n.NoteId OR tr.ToId = n.NoteId) AS Relations
+                FROM Notes n
+                WHERE (n.ModificationDateTime >= @from AND n.ModificationDateTime < @to)
+                    OR EXISTS (SELECT 1 FROM NoteTasks t WHERE t.NoteId = n.NoteId AND {activity});";
+            var db = GetOpenConnection();
+            var rows = await db.QueryAsync<NoteSelectionSourceDto>(sql, new { from, to });
+            await CloseIsTempConnection(db);
+            return new Result<List<NoteSelectionSourceDto>>(rows.ToList());
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try

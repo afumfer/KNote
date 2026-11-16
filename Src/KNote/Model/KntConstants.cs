@@ -74,13 +74,18 @@ public static class KntConst
     public static string DerivedFromTraceNoteType { get; private set; } = "@DerivedFrom";
     // The translations of a long document (CU-43, D21): as the summaries, notes of the people's own, with the translation attached.
     public static string TranslationTag { get; private set; } = "@KNoteTranslation";
+    // «Note relevance» (stage 2, chapter 30, D10): the corrections of the selection of the summaries made by people and the
+    // classification of the doubtful notes by the AI, in the folder «KNote Atlas». Written by KNote, never by hand.
+    public static string RelevanceTag { get; private set; } = "@KNoteRelevance";
+    public static string RelevanceTopic { get; private set; } = "Note relevance";
 
     // The note types of KNote's own notes: out of the tasks panel, of the semantic index, of the tools of the AI and of the
     // citations (they only link users to those notes, keep private conversations, or are KNote Atlas' test queries and
-    // reports, which would find themselves, or the context it gives the AI: profile, glossary and task instructions).
+    // reports, which would find themselves, or the context it gives the AI: profile, glossary and task instructions, or the
+    // relevance of the notes for the summaries).
     public static IReadOnlyList<string> SystemNoteTypeNames { get; } = new[]
     {
-        ChatSessionsTag, ChatRoomTag, TestQueriesTag, SearchEvaluationTag, ProfileTag, GlossaryTag, TaskPromptTag
+        ChatSessionsTag, ChatRoomTag, TestQueriesTag, SearchEvaluationTag, ProfileTag, GlossaryTag, TaskPromptTag, RelevanceTag
     };
 
     // The folders of those notes.

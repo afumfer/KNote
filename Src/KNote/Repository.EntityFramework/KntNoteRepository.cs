@@ -1291,6 +1291,41 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<NoteSelectionSourceDto>>> GetSelectionSourcesAsync(DateTime from, DateTime to)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            // The conditions on the tasks without COALESCE, as Dapper's, for the indexes of NoteTasks.StartDate/EndDate.
+            var rows = await ctx.Notes.AsNoTracking()
+                .Where(n => (n.ModificationDateTime >= from && n.ModificationDateTime < to)
+                    || ctx.NoteTasks.Any(t => t.NoteId == n.NoteId
+                        && ((t.StartDate >= from && t.StartDate < to)
+                            || (t.StartDate == null && t.CreationDateTime >= from && t.CreationDateTime < to)
+                            || (t.EndDate >= from && t.EndDate < to))))
+                .Select(n => new NoteSelectionSourceDto
+                {
+                    NoteId = n.NoteId, NoteNumber = n.NoteNumber, Topic = n.Topic, Description = n.Description, ContentType = n.ContentType,
+                    Tags = n.Tags, FolderId = n.FolderId, NoteTypeId = n.NoteTypeId,
+                    CreationDateTime = n.CreationDateTime, ModificationDateTime = n.ModificationDateTime,
+                    Tasks = ctx.NoteTasks.Count(t => t.NoteId == n.NoteId),
+                    TasksWithActivity = ctx.NoteTasks.Count(t => t.NoteId == n.NoteId
+                        && ((t.StartDate >= from && t.StartDate < to)
+                            || (t.StartDate == null && t.CreationDateTime >= from && t.CreationDateTime < to)
+                            || (t.EndDate >= from && t.EndDate < to))),
+                    Resources = ctx.Resources.Count(r => r.NoteId == n.NoteId),
+                    Relations = ctx.TraceNotes.Count(tr => tr.FromId == n.NoteId || tr.ToId == n.NoteId)
+                })
+                .ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<List<NoteSelectionSourceDto>>(rows);
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try
