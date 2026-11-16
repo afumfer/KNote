@@ -282,7 +282,7 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         if (!ChatView && _ctrl.PendingActions.Count > 0)
         {
             var actions = _ctrl.PendingActions;
-            var answer = ShowInfo($"The assistant wants to do this:\n\n{string.Join("\n", actions.Select(a => a.Text))}", "AI assistant", MessageBoxButtons.YesNo);
+            var answer = ShowInfo($"The assistant wants to do this:\n\n{string.Join("\n\n", actions.Select(AiActionRules.PlainCardText))}", "AI assistant", MessageBoxButtons.YesNo);
             await AnswerActionsAsync(answer == DialogResult.Yes ? actions.Select(a => a.ActionId).ToList() : new List<Guid>(), false);
         }
     }

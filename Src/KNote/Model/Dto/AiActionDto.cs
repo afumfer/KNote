@@ -63,4 +63,11 @@ public class AiActionDto
     // The other note of a relation, and its type if it has one.
     public Guid? TargetNoteId { get; set; }
     public Guid? TraceNoteTypeId { get; set; }
+
+    // process_document (KNote Atlas 2.1b2b): its document is ResourceId (of the note NoteId); summary or translation, the language,
+    // the length of a summary, and the translation not finished it goes on with.
+    public EnumDocumentProcessKind? ProcessKind { get; set; }
+    public string Language { get; set; }
+    public EnumSummaryLength? Length { get; set; }
+    public Guid? ContinueNoteId { get; set; }
 }

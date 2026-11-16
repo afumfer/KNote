@@ -29,18 +29,25 @@ public class AiAssistantController : ControllerBase
     private readonly IKntService _service;
     private readonly AiProvidersCatalog _providers;
     private readonly IAiChatClientProvider _chatClients;
+    private readonly KntAtlasJobs _jobs;
+    private readonly KntRepositories _repositories;
     private readonly ILogger<AiAssistantController> _logger;
 
     public AiAssistantController(IKntService service, IHttpContextAccessor httpContextAccessor, AiProvidersCatalog providers,
-        IAiChatClientProvider chatClients, ILogger<AiAssistantController> logger)
+        IAiChatClientProvider chatClients, KntAtlasJobs jobs, KntRepositories repositories, ILogger<AiAssistantController> logger)
     {
         _service = service;
         _service.Logger = logger;
         _service.UserIdentityName = httpContextAccessor.HttpContext.User?.Identity?.Name;
         _providers = providers;
         _chatClients = chatClients;
+        _jobs = jobs;
+        _repositories = repositories;
         _logger = logger;
     }
+
+    // The host of the tools of a request: process_document (KNote Atlas 2.1b2b) queues its run for the user, in the session's repository.
+    private ServerAiToolsHost ToolsHost() => new(_service, _jobs, _providers, _repositories, User);
 
     [HttpGet("providers")]
     public IActionResult GetProviders()
@@ -96,7 +103,7 @@ public class AiAssistantController : ControllerBase
         {
             // What the tools do goes through the roles of the commands, as in ClientWin (D4): the rest of the API has its own.
             _service.EnforceAuthorization = true;
-            var toolsHost = new ServerAiToolsHost(_service);
+            var toolsHost = ToolsHost();
             var tools = new KNoteAiTools(_service, toolsHost);
             tools.BeginTurn(request.History, request.AutoApprovedActionKinds, request.SessionNoteId, request.Attachments);
             tools.ModelSeesImages = await AiModelCapabilities.SupportsImagesAsync(providerRef, cancellationToken);
@@ -127,7 +134,7 @@ public class AiAssistantController : ControllerBase
         try
         {
             _service.EnforceAuthorization = true;
-            await new KNoteAiTools(_service, new ServerAiToolsHost(_service)).ExecuteActionsAsync(actions ?? new());
+            await new KNoteAiTools(_service, ToolsHost()).ExecuteActionsAsync(actions ?? new());
             return Ok(new Result<List<AiActionDto>>(actions ?? new()));
         }
         catch (Exception ex)

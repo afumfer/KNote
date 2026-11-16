@@ -50,6 +50,8 @@ public partial class KNoteAiTools
             hidden.AddRange(AiActionRules.Kinds);
         if (_attachments.Count == 0)
             hidden.Add(AiActionRules.AttachFile);
+        if (!_host.CanProcessDocuments)
+            hidden.Add(AiActionRules.ProcessDocument);
         if (!ModelSeesImages)
         {
             hidden.Add(ViewNoteImagesName);

@@ -767,6 +767,10 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   «Open the note» también tras cancelar o fallar una traducción (`SummaryTexts.HasNote`). La ventana escucha también los trabajos del
   índice y de los recursos (`OnOtherJobChanged`): al terminar, el trabajo pone al día el índice con la nota nueva y, sin eso, «Generate»
   y «Continue» seguían desactivados hasta tocar otro control; mientras, dice `SummaryTexts.IndexRunning`.
+  **Desde el asistente** (2.1b2b, `process_document`): `Core/KNoteAiToolsHost` (con el repositorio del asistente) da el modelo de la
+  ventana (`Store.GetPhotoDescriberAsync`) y, aceptada la tarjeta, lanza `Store.DocumentProcessing` en el hilo de la UI (como un clic:
+  el trabajo publica ahí su progreso); con otro trabajo de KNote Atlas en marcha, falla con `SummaryTexts.OtherRunning`. Tests en
+  `KNoteAiToolsHostDocumentTests`.
   **Copiar a la descripción** (2.1b2): `DocumentTextForm` recibe de `NoteEditorForm` (solo en modo edición) `InsertTextInDescription`,
   y su botón «Copy to description» (activo con texto seleccionado) le pasa la selección: limpia (`DocumentTexts.ForDescription`, sin
   los títulos de las páginas ni sus marcas), se inserta en el cursor en un párrafo propio (`DocumentTexts.InsertBlock`; en HTML, como
@@ -795,7 +799,7 @@ Lo que hace el modelo («Thinking…», «Using search_notes») se ve como en la
 El razonamiento va plegado encima de la respuesta (`AiChatHtml`); `replaceLast` lo deja abierto entre repintados.
 Las acciones: la tarjeta es HTML de `AiChatHtml` y responde con `postMessage('knt-actions:...')`, que `AiChatWebRenderer`
 convierte en `ActionsAnswered`; `KNoteAIAssistantCtrl.AnswerActionsAsync` ejecuta lo aceptado. En la vista Markdown, sin
-tarjeta, se pregunta con un cuadro de diálogo (todo o nada). `KNoteAiToolsHost.CanChangeNote` no deja cambiar una nota abierta
+tarjeta, se pregunta con un cuadro de diálogo (todo o nada) que dice lo mismo que la tarjeta (`AiActionRules.PlainCardText`: la estimación de `process_document`, el texto nuevo de `replace_note_text`). `KNoteAiToolsHost.CanChangeNote` no deja cambiar una nota abierta
 en un editor (`Store.IsNoteBeingEdited`: al guardar pisaría el cambio) y `OnNoteChanged` publica `EntitySaved<NoteExtendedDto>`.
 
 - **Archivos del mensaje** (`KNoteAIAssistantCtrl.PendingAttachments`, solo con `PersistSession`): el botón **Attach**, Ctrl+V

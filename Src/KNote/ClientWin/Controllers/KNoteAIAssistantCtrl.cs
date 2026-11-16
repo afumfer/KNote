@@ -523,7 +523,7 @@ public class KNoteAIAssistantCtrl : CtrlBase
             var tools = _tools ?? new KNoteAiTools(ServiceRef.Service, new KNoteAiToolsHost(Store, ServiceRef));
             await tools.ExecuteActionsAsync(toRun);
             if (dontAskAgain)
-                _autoApprovedKinds.UnionWith(toRun.Select(a => a.Kind));
+                _autoApprovedKinds.UnionWith(AiActionRules.ApprovedKinds(toRun));
         }
 
         await SaveAnsweredTurnAsync();

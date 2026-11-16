@@ -58,6 +58,13 @@ public partial class KNoteAiTools
 
     private async Task ExecuteActionAsync(IKntService service, AiActionDto action)
     {
+        // It doesn't change the note of the document: the application starts it in the background (2.1b2b).
+        if (action.Kind == AiActionRules.ProcessDocument)
+        {
+            await StartDocumentProcessAsync(service, action);
+            return;
+        }
+
         if (action.NoteId is Guid noteId && !_host.CanChangeNote(noteId))
         {
             action.Status = EnumAiActionStatus.Failed;
@@ -165,6 +172,8 @@ public partial class KNoteAiTools
             Description = "Creates a new folder, inside the one asked for or else inside Home. It is proposed to the user, who has to " +
                 "confirm it: until then it is not done, and a note cannot go in it yet."
         });
+
+        yield return GetProcessDocumentTool();
     }
 
     private async Task<bool> CanActAsync()

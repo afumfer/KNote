@@ -380,7 +380,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   `Tests/ServiceTests/AiQueryToolsTests`, llamando a las herramientas por nombre como el modelo.
 - **Acciones del asistente (KNote Atlas, etapa 1)** (`Ai/KNoteAiActionTools.cs`, `Model/Core/AiActionRules`,
   `Service/Core/KntAiActionExecutor`). `create_note` se hace al momento; las demás (`append_to_note`, `replace_note_text`, `move_note`, `set_tags`, `add_task`,
-  `add_alarm`, `add_email_alarm`, `set_attribute`, `relate_notes`, `create_folder`) solo se proponen: la
+  `add_alarm`, `add_email_alarm`, `set_attribute`, `relate_notes`, `create_folder`, `process_document`) solo se proponen: la
   herramienta añade un `AiActionDto` a `TurnActions` y le dice al modelo que está pendiente. El turno lleva sus acciones
   (`AiChatTurnDto.Actions`) y la app muestra la tarjeta: lo aceptado lo ejecuta `KNoteAiTools.ExecuteActionsAsync`, no el
   modelo, con los comandos de siempre y los roles del usuario (el `Server` pone `EnforceAuthorization` en `chat` y `actions`).
@@ -407,6 +407,16 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   script. Una acción nueva necesita su caso en el ejecutor, su `KindName` y entrar en `Kinds`. Se guarda en el comentario oculto de la conversación sin los datos para ejecutarla, y
   lo propuesto sin responder se lee como `NotConfirmed`. Tests en `Tests/AiActionRulesTests`,
   `Tests/ServiceTests/AiActionToolsTests` y `Tests/InProcessIntegrationTests/AiActionsInProcessTests`.
+  **`process_document`** (KNote Atlas 2.1b2b, D22; `Ai/KNoteAiProcessDocumentTool.cs`, `Model/Core/AiDocumentProcessRules`): el resumen
+  extendido o la traducción de un documento de una nota. **Siempre con tarjeta**, también con su tipo aprobado, y sin «Don't ask again»
+  (`AiActionRules.CanBeApproved`/`CanDontAskAgain`/`ApprovedKinds`, que usan las dos apps): tarda y, con un modelo de pago, cuesta. La
+  tarjeta lleva la estimación (`Content`, `CardText`) con el modelo que da el host (`IKNoteAiToolsHost.GetDocumentModelAsync`: el LLM
+  recomendado del repositorio, como la ventana); solo documentos de notas (un adjunto de la conversación, primero `attach_file`); una
+  traducción sin terminar a ese idioma sigue (`ContinueNoteId`). No pasa por `KntAiActionExecutor`: aceptada,
+  `IKNoteAiToolsHost.StartDocumentProcessAsync` la lanza en segundo plano (el `Server`, en `KntAtlasJobs` para el usuario de la petición;
+  `ClientWin`, `Store.DocumentProcessing`) y al modelo se le dice que solo empezó (`AiActionRules.Outcome`/`Line`). Solo se ofrece si el
+  host puede (`CanProcessDocuments`). Tests en `Tests/ServiceTests/AiProcessDocumentToolTests`, `InProcessIntegrationTests/SummaryInProcessTests`
+  y `ClientWin.Tests/KNoteAiToolsHostDocumentTests`.
 - **Imágenes y archivos del asistente (KNote Atlas, etapa 1)** (`IKntAiSessionService.AddAttachmentAsync`/`GetAttachmentAsync`,
   `Model/Core/AiAttachmentRules`, `Ai/AiTurnAttachments`, `Ai/AiImageReducer`, `Ai/AiModelCapabilities`). Al enviar, cada archivo se
   guarda como recurso de la nota de la sesión (la crea si no existe) y `AiChatRequestDto` solo lleva su referencia; `AiTurnAttachments`

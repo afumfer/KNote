@@ -91,6 +91,37 @@ public class SummaryInProcessTests
         StringAssert.EndsWith(summary.Description, "The manual of the Sinclair QL.");
     }
 
+    // 2.1b2b: process_document of the assistant, accepted in its card, queues the same run for the user of the conversation.
+    [TestMethod]
+    public async Task TheAssistant_StartsTheSummaryOfADocument_WhenItsCardIsAccepted()
+    {
+        var (_, documentId) = await AddDocumentAsync();
+        _chatClients.Script = () => Enumerable.Range(0, 20).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "The manual of the Sinclair QL.") }).ToList();
+        var (staff, staffName) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        var action = new AiActionDto
+        {
+            Kind = AiActionRules.ProcessDocument, Text = "Write an extended summary of manual.pdf", ResourceId = documentId,
+            ProcessKind = EnumDocumentProcessKind.Summarize, Length = EnumSummaryLength.Short
+        };
+
+        var answer = await staff.PostAsJsonAsync("api/aiassistant/actions", new List<AiActionDto> { action });
+
+        var body = await answer.Content.ReadAsStringAsync();
+        Assert.IsTrue(answer.IsSuccessStatusCode, body);
+        var ran = JsonSerializer.Deserialize<Result<List<AiActionDto>>>(body, _json)!.Entity.Single();
+        Assert.AreEqual(EnumAiActionStatus.Done, ran.Status, ran.Result);
+        DocumentProcessProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            progress = (await staff.GetFromJsonAsync<Result<DocumentProcessProgressDto>>("api/summaries/documents/progress", _json))!.Entity;
+        }
+        Assert.AreEqual(EnumDocumentProcessPhase.Completed, progress!.Phase, progress.Message);
+        Assert.AreEqual(staffName, progress.RequestedBy);
+        Assert.AreEqual(documentId, progress.ResourceId);
+    }
+
     // 2.1b: the translation, a run of the same queue, and the translations of the document («Continue»).
     [TestMethod]
     public async Task ADocument_IsTranslatedInANewNote_AndItsTranslationsAreListed()

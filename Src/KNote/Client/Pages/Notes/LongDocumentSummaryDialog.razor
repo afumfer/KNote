@@ -265,7 +265,7 @@
             progress = new DocumentProcessProgressDto
             {
                 Kind = Kind, ResourceId = Resource.ResourceId, Phase = EnumDocumentProcessPhase.Failed,
-                Message = "You have another extended summary or translation going on: wait until it ends."
+                Message = SummaryTexts.YoursRunning
             };
         else
             _ = FollowAsync();

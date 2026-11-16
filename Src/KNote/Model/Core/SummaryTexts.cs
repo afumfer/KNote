@@ -26,6 +26,7 @@ public static class SummaryTexts
     public const string Running = "An extended summary is being written: it goes on if you close this window.";
     public const string OtherRunning = "Another task of KNote Atlas is running: wait until it ends.";
     public const string IndexRunning = "Updating the search index: wait until it ends.";
+    public const string YoursRunning = "You have another extended summary or translation going on: wait until it ends.";
 
     // The translation (2.1b2).
     public const string TranslateTitle = "Translate document";

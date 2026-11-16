@@ -209,7 +209,11 @@ otro de 3 páginas, página a página, que traduce esa orden en lugar de obedece
 `LongDocumentMeasure.Translate` traduce las primeras páginas (`KNOTE_LONGDOC_MEASURE_PAGES`, 20 por defecto, `all` el documento entero; se para ahí como
 «Cancel») al idioma de `KNOTE_LONGDOC_MEASURE_LANGUAGE` (español por defecto) y deja cada página junto a su traducción para juzgarlas,
 con el ritmo, el tiempo estimado del documento entero y las partes marcadas como incompletas.
-Los dos con `KNOTE_RESOURCE_SMOKE_MODEL`:
+`Tests/ServiceTests/AiProcessDocumentSmokeTests` (2.1b2b) hace al asistente, con su mensaje de sistema y sus herramientas de siempre,
+peticiones de resumen extendido y de traducción de un documento largo de una nota (`KNOTE_SMOKE_RUNS` veces cada una, 2 por defecto) y
+cuenta en cuántas propone `process_document` en vez de leerlo y resumirlo él (con `qwen3.5:9b`, 12 de 12 tras afinar las descripciones de
+`process_document` y `read_document`; antes, 7 de 8).
+Los tres con `KNOTE_RESOURCE_SMOKE_MODEL`:
 ```powershell
 $env:KNOTE_RESOURCE_SMOKE_MODEL = "qwen3.5:9b"
 dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiDocumentProcessorSmokeTests"

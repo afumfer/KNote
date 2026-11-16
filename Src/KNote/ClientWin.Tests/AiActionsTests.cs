@@ -43,6 +43,23 @@ public class AiActionsTests
     }
 
     [TestMethod]
+    public void AssistantMessage_ProcessDocument_ShowsItsCard_WithTheEstimate_AndNoDontAskAgain()
+    {
+        var action = new AiActionDto
+        {
+            Kind = AiActionRules.ProcessDocument, Text = "Write an extended summary of manual.pdf (#12), short, in a new note",
+            Content = "3 pages, 600 characters: 2 calls to the model.\n\nIt runs in the background."
+        };
+
+        var html = AiChatHtml.AssistantMessage(new AiChatTurnDto { Answer = "It waits in the card.", Actions = { action } }, "Provider");
+
+        StringAssert.Contains(html, "The assistant wants to do this:");
+        StringAssert.Contains(html, $"data-action=\"{action.ActionId}\"");
+        StringAssert.Contains(html, "2 calls to the model.");
+        Assert.IsFalse(html.Contains("dont-ask"), "no «Don't ask again»");
+    }
+
+    [TestMethod]
     public void AssistantMessage_OnceAnswered_ShowsItsLine_AndNoCard()
     {
         var action = Proposed();

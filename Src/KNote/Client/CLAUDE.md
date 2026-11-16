@@ -626,7 +626,9 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Acciones del asistente**: `AiChatView` muestra las líneas del registro y, en el último turno, `AiActionsCard` con lo
   propuesto; `AIAssistant.OnActionsAnswered` rechaza lo no aceptado, ejecuta lo demás (`IStore.AiAssistant.RunActionsAsync`),
   guarda la sesión y, si se aceptó algo, envía el turno de continuación (`SendTurnAsync` con `automatic`, cuya pregunta no se
-  muestra). Enviar un mensaje con la tarjeta abierta la rechaza. Las notas cambiadas se avisan con `NotifyNoteSavedAsync`.
+  muestra). Enviar un mensaje con la tarjeta abierta la rechaza. Las notas cambiadas se avisan con `NotifyNoteSavedAsync`. La casilla
+  «Don't ask again» solo sale si algo de la tarjeta se puede aprobar (`AiActionRules.CanDontAskAgain`: `process_document`, nunca) y
+  aprueba `AiActionRules.ApprovedKinds`.
 - **Archivos del asistente**: `js/aiAttachments.js` (pegar, soltar y elegir) los da a `AIAssistant.OnAttachment`; quedan en `pendingFiles`
   hasta que el turno se responde, y `SaveFilesAsync` los sube antes de enviar (`Saved`: si el modelo falla no se suben otra vez).
   `AiAttachmentsView` pide las imágenes por `GetAttachmentPreviewAsync` y las dibuja como `data:`: la URL de un recurso se sirve sin

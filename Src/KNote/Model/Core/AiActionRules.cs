@@ -35,6 +35,9 @@ public static class AiActionRules
     public const string SetAttribute = "set_attribute";
     public const string RelateNotes = "relate_notes";
     public const string CreateFolder = "create_folder";
+    // KNote Atlas, stage 2 (2.1b2b, D22): the extended summary or the translation of a document of a note, a run of the app in the
+    // background (the host starts it). Always with its card: it takes long and, with a paid model, it costs.
+    public const string ProcessDocument = "process_document";
 
     // create_task is not one of them: it is the assistant's old tool, recorded when it is done. It runs on its own.
     public const string CreateTask = "create_task";
@@ -45,7 +48,8 @@ public static class AiActionRules
     // The tools of the actions, which are offered from this role on.
     public static IReadOnlyList<string> Kinds { get; } = new[]
     {
-        CreateNote, AppendToNote, ReplaceNoteText, MoveNote, AttachFile, SetTags, AddTask, AddAlarm, AddEmailAlarm, SetAttribute, RelateNotes, CreateFolder
+        CreateNote, AppendToNote, ReplaceNoteText, MoveNote, AttachFile, SetTags, AddTask, AddAlarm, AddEmailAlarm, SetAttribute, RelateNotes, CreateFolder,
+        ProcessDocument
     };
 
     public const EnumRoles MinRole = EnumRoles.Staff;
@@ -60,7 +64,7 @@ public static class AiActionRules
     public static EnumAiActionLevel LevelOf(string kind) => kind switch
     {
         CreateNote => EnumAiActionLevel.Create,
-        CreateFolder or AddEmailAlarm or ReplaceNoteText => EnumAiActionLevel.Structure,
+        CreateFolder or AddEmailAlarm or ReplaceNoteText or ProcessDocument => EnumAiActionLevel.Structure,
         _ => EnumAiActionLevel.Change
     };
 
@@ -74,7 +78,20 @@ public static class AiActionRules
 
     /// <summary>Whether it waits for the card. Completing a note of this conversation is creating, but what goes out of KNote always asks.</summary>
     public static bool NeedsCard(string kind, bool approved, bool onNewNote) =>
-        NeedsConfirmation(kind) && !approved && !(onNewNote && LevelOf(kind) == EnumAiActionLevel.Change);
+        !CanBeApproved(kind) || NeedsConfirmation(kind) && !approved && !(onNewNote && LevelOf(kind) == EnumAiActionLevel.Change);
+
+    /// <summary>
+    /// Whether «Don't ask again» can approve a kind for the conversation. Not the processing of a document (D22): each one takes long
+    /// and, with a paid model, it costs.
+    /// </summary>
+    public static bool CanBeApproved(string kind) => kind != ProcessDocument;
+
+    /// <summary>Whether the card has the box «Don't ask again»: only if something in it can be approved.</summary>
+    public static bool CanDontAskAgain(IEnumerable<AiActionDto> actions) => actions.Any(a => CanBeApproved(a.Kind));
+
+    /// <summary>The kinds the box of a card approves: those accepted in it that can be approved.</summary>
+    public static IEnumerable<string> ApprovedKinds(IEnumerable<AiActionDto> accepted) =>
+        accepted.Select(a => a.Kind).Where(CanBeApproved).Distinct();
 
     /// <summary>
     /// The same action again. Small models repeat a call, in the same turn or in the one that goes on after the card, and with
@@ -94,7 +111,7 @@ public static class AiActionRules
     /// <summary>The box of the card. It approves only the kinds accepted in that card, so it says which.</summary>
     public static string DontAskAgainText(IEnumerable<AiActionDto> actions)
     {
-        var kinds = actions.Select(a => a.Kind).Distinct().ToList();
+        var kinds = actions.Select(a => a.Kind).Where(CanBeApproved).Distinct().ToList();
         var what = kinds.Count == 1 ? KindName(kinds[0]) : "these kinds of change";
         return $"Don't ask again for {what} in this conversation";
     }
@@ -112,6 +129,7 @@ public static class AiActionRules
         SetAttribute => "attributes",
         RelateNotes => "note relations",
         CreateFolder => "new folders",
+        ProcessDocument => "summaries and translations of documents",
         _ => "this kind of change"
     };
 
@@ -121,6 +139,9 @@ public static class AiActionRules
     /// </summary>
     public static string CardText(AiActionDto action)
     {
+        // The estimate of a summary or a translation (its pages, its calls, its time and whether a paid model is sent the document).
+        if (action.Kind == ProcessDocument)
+            return string.IsNullOrWhiteSpace(action.Content) ? action.Text : $"{action.Text}.\n\n{action.Content}";
         if (action.Kind != ReplaceNoteText)
             return action.Text;
 
@@ -129,12 +150,19 @@ public static class AiActionRules
         return $"{action.Text}. **What it has now is lost, and this cannot be undone.** The new text:\n\n{shown}";
     }
 
+    /// <summary>
+    /// What the card says, for a question without the card (the Markdown view of ClientWin's assistant, a message box): the same,
+    /// without the marks of the bold. Without it, the question gave only the line (2.1b2b: not the estimate of process_document).
+    /// </summary>
+    public static string PlainCardText(AiActionDto action) => CardText(action).Replace("**", "");
+
     /// <summary>A mark of the text of a note, to know when a replacement runs that it is still the one the card was shown for.</summary>
     public static string TextStamp(string text) => NoteChunkBuilder.Hash((text ?? "").Trim());
 
     /// <summary>A line of the record of the conversation.</summary>
     public static string Line(AiActionDto action) => action.Status switch
     {
+        EnumAiActionStatus.Done when action.Kind == ProcessDocument => $"▶ Started: {action.Text}",
         EnumAiActionStatus.Done => $"✔ {action.Text}",
         EnumAiActionStatus.Failed => $"✖ {action.Text}: {action.Result}",
         EnumAiActionStatus.Rejected => $"✖ Rejected: {action.Text}",
@@ -145,6 +173,7 @@ public static class AiActionRules
     /// <summary>What the tool call of an action answers in the history of the conversation: how it ended.</summary>
     public static string Outcome(AiActionDto action) => action.Status switch
     {
+        EnumAiActionStatus.Done when action.Kind == ProcessDocument => $"{Core.AiDocumentProcessRules.Started} {action.Text}",
         EnumAiActionStatus.Done => $"Done: {action.Text}",
         EnumAiActionStatus.Failed => $"Failed: {action.Text} ({action.Result})",
         EnumAiActionStatus.Rejected => $"Rejected by the user, not done: {action.Text}",
