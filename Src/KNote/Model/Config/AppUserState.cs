@@ -61,6 +61,13 @@ public class SessionState
     // The AI assistant shows the usage of each answer (tokens, time) below it.
     public bool AiAssistantShowModelInfo { get; set; } = true;
 
+    // The language of the last summary of each repository (KNote Atlas, stage 2, D14), by its RepositoryId: the one proposed
+    // the next time. Empty: the language of the document.
+    public List<RepositoryLanguageState> SummaryLanguages { get; set; } = new();
+
+    // The language of the last translation of each repository (2.1b2): the one proposed the next time.
+    public List<RepositoryLanguageState> TranslationLanguages { get; set; } = new();
+
     // Set automatically when a connection attempt to the chat hub fails, so the app stops retrying (and
     // freezing) on every startup until the user fixes the chat room settings or signs in again from Options.
     public bool ChatHubAutoConnectDisabled { get; set; }
@@ -168,4 +175,12 @@ public class ReportsState
     // Folder the user last saved a report to (PDF from the report preview, CSV export of the notes list),
     // proposed again by the next save dialog. Empty means "never saved yet" (the Documents folder is used).
     public string LastExportFolder { get; set; }
+}
+
+[Serializable]
+public class RepositoryLanguageState
+{
+    public Guid RepositoryId { get; set; }
+
+    public string Language { get; set; }
 }

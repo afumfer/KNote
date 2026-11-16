@@ -10,10 +10,13 @@
             <ViewMarkdown MarkdownContent="@AiActionRules.CardText(action)" DisableHtml="true" />
         </div>
     }
-    <div class="ai-action">
-        <RadzenCheckBox TValue="bool" @bind-Value="dontAskAgain" Name="DontAskAgain" />
-        <RadzenLabel Text="@AiActionRules.DontAskAgainText(Actions)" Component="DontAskAgain" />
-    </div>
+    @if (AiActionRules.CanDontAskAgain(Actions))
+    {
+        <div class="ai-action">
+            <RadzenCheckBox TValue="bool" @bind-Value="dontAskAgain" Name="DontAskAgain" />
+            <RadzenLabel Text="@AiActionRules.DontAskAgainText(Actions)" Component="DontAskAgain" />
+        </div>
+    }
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
         <RadzenButton Text="Reject" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Disabled="@Disabled"
                       Click="@(() => Answered.InvokeAsync(new AiActionsAnswer(new List<Guid>(), false)))" />

@@ -81,7 +81,7 @@ public class ResourceSummaryMeasure
             {
                 using var stream = File.OpenRead(path);
                 var read = new AiDocumentReader().Read(stream, format);
-                extracted = DocumentTextRules.Compose(read, DocumentTextRules.IsPaged(format));
+                extracted = DocumentTextRules.Compose(read, DocumentTextRules.IsPaged(format, read.Count));
                 pages = read.Count;
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ public class ResourceSummaryMeasure
                 var row = new Row { Item = item, File = fileName, Length = length, Pages = pages };
                 try
                 {
-                    var documentText = AiDocumentRules.DocumentText(extracted, DocumentTextRules.IsPaged(format), length);
+                    var documentText = AiDocumentRules.DocumentText(extracted, DocumentTextRules.IsPaged(format, pages), length);
                     row.CharsSent = documentText.Length;
                     var request = AiDocumentRules.Request(note, "", fileName, pages, documentText);
                     await RunAsync(client, system, request, row);
@@ -149,7 +149,7 @@ public class ResourceSummaryMeasure
             var format = DocumentTextRules.FormatOf("", fileName);
             using var stream = File.OpenRead(path);
             var read = new AiDocumentReader().Read(stream, format);
-            var text = AiDocumentRules.DocumentText(DocumentTextRules.Compose(read, DocumentTextRules.IsPaged(format)), DocumentTextRules.IsPaged(format));
+            var text = AiDocumentRules.DocumentText(DocumentTextRules.Compose(read, DocumentTextRules.IsPaged(format, read.Count)), DocumentTextRules.IsPaged(format, read.Count));
             var request = AiDocumentRules.Request(note, "", fileName, read.Count, text);
             var named = request[..request.LastIndexOf("Summarize this document", StringComparison.Ordinal)] +
                 $"Summarize this document in two or three sentences, without mentioning the note. Write in the language of the topic of the note («{note}»).";

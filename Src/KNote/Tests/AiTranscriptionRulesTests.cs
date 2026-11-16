@@ -173,7 +173,7 @@ public class AiTranscriptionRulesTests
         Assert.IsFalse(DocumentTexts.TranscriptionConfirmation(12, local, null).Contains("take about"), "without a pace, no estimate");
         StringAssert.Contains(DocumentTexts.TranscriptionConfirmation(1, paid, null), "gpt-test is a paid model: the pages are sent to its provider.");
         Assert.AreEqual("Transcribing page 3 of 12…", DocumentTexts.TranscriptionProgress(2, 12));
-        Assert.AreEqual("11 of 12 scanned pages transcribed. The document was summarized too.", DocumentTexts.TranscriptionResult(11, 12, false, true));
+        Assert.AreEqual("11 of 12 scanned pages transcribed. Its short summary was written too.", DocumentTexts.TranscriptionResult(11, 12, false, true));
         Assert.AreEqual("Canceled after 4 scanned pages transcribed: what is done is kept.", DocumentTexts.TranscriptionResult(4, 12, true, false));
     }
 

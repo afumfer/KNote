@@ -537,7 +537,7 @@
                 action.Result = ran != null ? ran.Result : res.ErrorMessage;
             }
             if (answer.DontAskAgain)
-                autoApprovedKinds.UnionWith(accepted.Select(a => a.Kind));
+                autoApprovedKinds.UnionWith(AiActionRules.ApprovedKinds(accepted));
             await NotifyChangedNotesAsync(accepted);
         }
 

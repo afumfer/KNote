@@ -5,6 +5,7 @@
 @inject IStore store
 @inject KntAccess access
 @inject NotificationService notificationService
+@inject TooltipService tooltipService
 
 @implements IDisposable
 
@@ -54,9 +55,15 @@
                                           ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
                                           IsBusy="@reading.IsBusy" BusyText="Reading…" Disabled="@(text == null && !loadFailed || transcribingFlight.IsBusy)"
                                           Click="OnReadDocument" />
+                            @if (OnCopyToDescription.HasDelegate && pages.Count > 0)
+                            {
+                                <RadzenButton Text="@DocumentTexts.CopyToDescription" Icon="content_paste_go"
+                                              ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small" Click="OnCopy"
+                                              MouseEnter="@(args => tooltipService.Open(args, DocumentTexts.CopyToDescriptionHelp))" />
+                            }
                         }
                     </div>
-                    <div class="knt-document-text-body">
+                    <div class="knt-document-text-body" @ref="textBody">
                         @if (text == null && !loadFailed)
                         {
                             <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
@@ -156,6 +163,13 @@
         </div>
     </ChildContent>
     <Footer>
+        @if (isDocument)
+        {
+            <RadzenButton Text="@(SummaryTexts.Title + "…")" Icon="summarize" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                          Disabled="@transcribingFlight.IsBusy" Click="() => OnSummarize(EnumDocumentProcessKind.Summarize)" />
+            <RadzenButton Text="@(SummaryTexts.TranslateTitle + "…")" Icon="translate" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
+                          class="knt-footer-start" Disabled="@transcribingFlight.IsBusy" Click="() => OnSummarize(EnumDocumentProcessKind.Translate)" />
+        }
         <RadzenButton Text="Open in a new tab" Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text"
                       Disabled="@string.IsNullOrEmpty(Resource.FullUrl)" Click="OpenAsync" />
         <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Primary" Click="() => dialogService.Close(null)" />
@@ -166,6 +180,11 @@
     [Parameter] [EditorRequired] public ResourceInfoDto Resource { get; set; } = null!;
     // KNote Atlas 4.6b: the page to show of a PDF (the page of the fragment found by the search).
     [Parameter] public int? Page { get; set; }
+    // KNote Atlas, stage 2 (2.1a2): open with the text of the document (to transcribe its scanned pages, «Transcribe them first»).
+    [Parameter] public bool StartInText { get; set; }
+    // KNote Atlas, stage 2 (2.1b2): the text selected copied to the description of the note («Copy to description»); only from the
+    // editor of a note that can be changed, which says what it did.
+    [Parameter] public EventCallback<string> OnCopyToDescription { get; set; }
 
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
@@ -182,6 +201,8 @@
     private readonly KntLatestRequest textRequest = new();
     private readonly KntSingleFlight reading = new();
     private readonly CancellationTokenSource disposal = new();
+    private ElementReference textBody;
+    private IJSObjectReference? elementsModule;
 
     // KNote Atlas, stage 4 (4.5b): transcribing the scanned pages, and the page of the PDF shown.
     private readonly KntSingleFlight transcribingFlight = new();
@@ -224,11 +245,12 @@
 
         var format = DocumentTextRules.FormatOf(Resource.FileType, Resource.Name);
         isDocument = format != EnumDocumentFormat.None;
-        paged = DocumentTextRules.IsPaged(format);
+        // Its pages are known with its text (a TXT may have them): until then, a PDF's.
+        paged = DocumentTextRules.IsPaged(format, 0);
         if (Page is int page && page > 0 && pdfPage == 0 && kind == KntFileTypes.Kind.Pdf)
             pdfPage = page;
         // A document the browser can't show (DOCX, ODT) opens with its text.
-        if (isDocument && kind == KntFileTypes.Kind.Other && !showText)
+        if (isDocument && (kind == KntFileTypes.Kind.Other || StartInText) && !showText)
         {
             showText = true;
             await LoadTextAsync();
@@ -253,6 +275,7 @@
         {
             text = result.Value.Entity;
             pages = DocumentTextRules.Pages(text.Text);
+            paged = DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(Resource.FileType, Resource.Name), text.Text);
         }
         else
             loadFailed = true;
@@ -291,6 +314,22 @@
     }
 
     private Task OnTranscribe() => transcribingFlight.RunAsync(TranscribeAsync);
+
+    // KNote Atlas, stage 2: the summary (2.1a2) or the translation (2.1b2) of the whole document in a new note; «Transcribe them first»
+    // transcribes here.
+    private async Task OnSummarize(EnumDocumentProcessKind kind)
+    {
+        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff,
+                kind == EnumDocumentProcessKind.Translate ? "Translating documents" : "Summarizing documents"))
+            return;
+        var result = await dialogService.OpenAsync<LongDocumentSummaryDialog>(SummaryTexts.TitleOf(kind),
+            new Dictionary<string, object?> { { "Resource", Resource }, { "Kind", kind } }, KntDialogs.Framed(KntDialogs.Medium()));
+        if (result as string == LongDocumentSummaryDialog.TranscribeResult && !disposal.IsCancellationRequested)
+        {
+            await OnShowTextChanged(true);
+            await OnTranscribe();
+        }
+    }
 
     private async Task TranscribeAsync()
     {
@@ -359,7 +398,7 @@
             // Its summary waited for its pages (decided by the owner): in the same process.
             if (!cancelTranscribing && !disposal.IsCancellationRequested && transcribed > 0 && AiDocumentRules.WaitsForSummary(Resource))
             {
-                transcribeStep = "Summarizing the document…";
+                transcribeStep = "Writing the short summary of the document…";
                 StateHasChanged();
                 var summary = await store.Notes.SummarizeDocumentAsync(Resource.ResourceId, replace: false);
                 if (summary.IsValid)
@@ -393,6 +432,24 @@
 
     private async Task OpenAsync() =>
         await js.InvokeVoidAsync("open", Resource.FullUrl, "_blank", "noopener");
+
+    // «Copy to description» (2.1b2): the text selected in the text of the document (without the headings of its pages).
+    private async Task OnCopy()
+    {
+        elementsModule ??= await js.ImportModuleAsync("./js/kntElements.js", store.AppState);
+        if (elementsModule == null)
+            return;
+        var selected = DocumentTexts.ForDescription(await elementsModule.InvokeAsync<string>("selectedTextIn", textBody));
+        if (selected.Length == 0)
+        {
+            notificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Info, Summary = DocumentTexts.CopyToDescription, Detail = DocumentTexts.SelectTextFirst, Duration = 4000
+            });
+            return;
+        }
+        await OnCopyToDescription.InvokeAsync(selected);
+    }
 
     public void Dispose()
     {

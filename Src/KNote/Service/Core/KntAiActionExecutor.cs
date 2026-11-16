@@ -262,8 +262,8 @@ public static class KntAiActionExecutor
         return null;
     }
 
-    // The status of a note comes from its tasks and alarms, and is written when the note is saved. If this fails, what was
-    // added is there all the same: the next save of the note puts it right.
+    // The status of a note comes from its tasks and alarms, and is written when the note is saved (which keeps its date: only
+    // its status changed). If this fails, what was added is there all the same: the next save of the note puts it right.
     private static Task UpdateNoteStatusAsync(IKntService service, NoteDto note) => service.Notes.SaveAsync(note);
 
     private static async Task<string> SetAttributeAsync(IKntService service, AiActionDto action)

@@ -149,6 +149,7 @@
                                         OnEdit="r => tabsSaving.RunAsync(() => OnEditResource(r))"
                                         OnDelete="r => tabsSaving.RunAsync(() => OnDeleteResource(r))"
                                         OnInsertInDesription="InsertInDescription"
+                                        OnCopyToDescription="CopyToDescription"
                                         OnNew="() => tabsSaving.RunAsync(OnNewResource)"
                                         OnDescribePhotos="() => tabsSaving.RunAsync(OnDescribePhotos)"
                                         OnDescribe="r => tabsSaving.RunAsync(() => OnDescribePhoto(r))"
@@ -579,7 +580,7 @@
         if (toDescribe.Count == 0)
         {
             notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = ResourceProcessingTexts.DescribeWithAi,
-                Detail = "There are no photos to describe nor documents to summarize: they are locked or already done by the AI.", Duration = 8000 });
+                Detail = "There are no photos to describe nor documents without a short summary: they are locked or already done by the AI.", Duration = 8000 });
             return;
         }
 
@@ -615,7 +616,7 @@
         await DescribeAsync(toDescribe.Where(r => AiDocumentRules.PlanResourceForNote(r, chosen) == EnumPhotoAction.Describe).ToList());
     }
 
-    // «Describe photo» or «Summarize document»: also one the AI already did (again, maybe with another model).
+    // «Describe photo» or «Short summary of the document»: also one the AI already did (again, maybe with another model).
     private async Task OnDescribePhoto(ResourceInfoDto resource)
     {
         var photo = AiPhotoRules.IsPhoto(resource);
@@ -624,7 +625,7 @@
             return;
 
         var person = photo ? AiPhotoRules.HasPersonDescription(resource) : AiDocumentRules.HasPersonDescription(resource);
-        var choice = await dialogService.OpenAsync<DescribeWithAiDialog>(photo ? "Describe photo" : "Summarize document",
+        var choice = await dialogService.OpenAsync<DescribeWithAiDialog>(photo ? "Describe photo" : "Short summary of the document",
             new Dictionary<string, object?> { { "NoteTopic", resource.GetTitle() }, { "Describer", describer }, { "Single", true },
                 { photo ? "Photos" : "Documents", person ? 0 : 1 }, { photo ? "PersonPhotos" : "PersonDocuments", person ? 1 : 0 } },
             KntDialogs.Framed(KntDialogs.Medium()));
@@ -660,7 +661,7 @@
             {
                 var photo = AiPhotoRules.IsPhoto(items[i]);
                 describing = items.Count > 1 ? $"Describing {i + 1} of {items.Count}…"
-                    : photo ? "Describing the photo…" : "Summarizing the document…";
+                    : photo ? "Describing the photo…" : "Writing the short summary of the document…";
                 StateHasChanged();
 
                 var res = photo
@@ -686,7 +687,7 @@
         notificationService.Notify(new NotificationMessage
         {
             Severity = errors.Count > 0 ? NotificationSeverity.Warning : NotificationSeverity.Success,
-            Summary = items.Count == 1 ? (AiPhotoRules.IsPhoto(items[0]) ? "Describe photo" : "Summarize document") : ResourceProcessingTexts.DescribeWithAi,
+            Summary = items.Count == 1 ? (AiPhotoRules.IsPhoto(items[0]) ? "Describe photo" : "Short summary of the document") : ResourceProcessingTexts.DescribeWithAi,
             Detail = detail, Duration = errors.Count > 0 ? 20000 : 6000
         });
     }
@@ -705,6 +706,24 @@
         tabsSelectedIndex = 0;
         StateHasChanged();
     }
+
+    // KNote Atlas, stage 2 (2.1b2): the text selected in the text of a document of the note (its viewer, «Copy to description»),
+    // where the cursor of the description was, in its own paragraph. The viewer stays open; the note is saved as always.
+    private void CopyToDescription(string text)
+    {
+        if (ContentLocked)
+        {
+            NotifyCopy(NotificationSeverity.Warning, "The content of the note is locked: unlock it in «Record» to change it.");
+            return;
+        }
+        Note.Description = descriptionState.InsertBlock(Note.Description, text);
+        tabsSelectedIndex = 0;
+        StateHasChanged();
+        NotifyCopy(NotificationSeverity.Success, DocumentTexts.CopiedToDescription);
+    }
+
+    private void NotifyCopy(NotificationSeverity severity, string detail) =>
+        notificationService.Notify(new NotificationMessage { Severity = severity, Summary = DocumentTexts.CopyToDescription, Detail = detail, Duration = 5000 });
 
     #endregion
 

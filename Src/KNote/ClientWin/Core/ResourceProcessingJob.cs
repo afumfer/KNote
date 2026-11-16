@@ -59,7 +59,7 @@ public class ResourceProcessingJob
             {
                 EnumResourceProcessingStep.ReadingDocuments => "Reading documents",
                 EnumResourceProcessingStep.Pages => "Transcribing scanned pages",
-                EnumResourceProcessingStep.Documents => "Summarizing documents",
+                EnumResourceProcessingStep.Documents => "Short summaries of documents",
                 _ => "Describing photos"
             };
             return $"{what} of {RepositoryName}: {done}/{total}";

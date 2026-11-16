@@ -1,3 +1,4 @@
+using KNote.ClientWin.Utils;
 using KNote.Model;
 
 namespace KNote.ClientWin.Views;
@@ -74,6 +75,7 @@ public class WorkProgressForm : KntForm
                     return;
                 _form = new WorkProgressForm(title, text, cancellation);
                 _owner.Enabled = false;
+                WindowPlacement.CenterOn(_form, _owner);
                 _form.Show(_owner);
             };
             _timer.Start();

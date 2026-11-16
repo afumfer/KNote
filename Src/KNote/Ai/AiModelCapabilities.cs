@@ -36,4 +36,36 @@ public static class AiModelCapabilities
             return true;
         }
     }
+
+    private static readonly ConcurrentDictionary<string, int?> ContextLengths = new();
+
+    /// <summary>
+    /// The longest context of an Ollama model, as /api/show says it ({architecture}.context_length; KNote Atlas, stage 2, D11), or
+    /// null if Ollama doesn't say it or can't be asked.
+    /// </summary>
+    public static async Task<int?> ContextLengthAsync(AiProviderRef provider, CancellationToken cancellationToken = default)
+    {
+        if (provider?.Provider != EnumAiProvider.Ollama)
+            return null;
+
+        var key = $"{provider.Host}|{provider.Model}";
+        if (ContextLengths.TryGetValue(key, out var known))
+            return known;
+
+        try
+        {
+            using var client = new OllamaApiClient(provider.Host);
+            var model = await client.ShowModelAsync(provider.Model, cancellationToken);
+            var info = model?.Info;
+            if (info?.ExtraInfo == null)
+                return null;
+
+            var entry = info.ExtraInfo.FirstOrDefault(e => e.Key.EndsWith(".context_length", StringComparison.Ordinal));
+            return ContextLengths[key] = entry.Value != null && int.TryParse(entry.Value.ToString(), out var length) && length > 0 ? length : null;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return null;
+        }
+    }
 }

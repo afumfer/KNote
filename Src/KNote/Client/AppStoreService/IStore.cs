@@ -23,6 +23,7 @@ public interface IStore
     ILocalWebApiService Local { get; }
     ISemanticSearchWebApiService SemanticSearch { get; }
     IAtlasWebApiService Atlas { get; }
+    ISummaryWebApiService Summaries { get; }
 
     ChatRoomHub ChatRoom { get; }
 }

@@ -71,6 +71,7 @@ public interface IKntService : IDisposable
     IKntSemanticSearchService SemanticSearch { get; }
     IKntAtlasContextService AtlasContext { get; }
     IKntResourceContentService ResourceContent { get; }
+    IKntSummaryService Summaries { get; }
     IKntMessageBroker MessageBroker { get; }
 
     string GetSystemVariable(string scope, string variable);

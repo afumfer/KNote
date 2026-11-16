@@ -230,6 +230,18 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   dos** (`TasksPanelServiceTests` compara cada tarea devuelta con `TaskPanelRules`). Las tareas de las notas del sistema
   (`@ChatSessions`, `@KNoteChatRoom`) nunca salen en el panel. Tests en `Tests/AlarmOccurrencesTests`,
   `TasksWindowTests`, `TaskPanelRulesTests` y `Tests/ServiceTests/AlarmsCalendarServiceTests`/`TasksPanelServiceTests`.
+- **Fecha de modificación de una nota** (KNote Atlas, etapa 2, D6; la usan el filtro «Modified between» y los resúmenes
+  de un periodo): solo la cambian los datos propios de la nota (tema, texto, etiquetas, tipo, carpeta, atributos), igual
+  en la Web, `ClientWin` y el asistente. Moverla y cambiar sus etiquetas (`PatchFolderAsync`/`PatchChangeTagsAsync`) la
+  cambian; sus recursos, tareas, alarmas, relaciones, su ventana de post-it y lo que escribe la IA en los recursos, no.
+  Lo decide un solo punto, `KntNotesSaveAsyncCommand` (por donde guardan una nota existente las tres), **comparando con lo
+  guardado** (`Model/Core/NoteChangeRules`: sin valor = vacío, CR LF = LF, sin los espacios del final, como `SameText` de
+  la Web; el estado, `InternalTags`, no cuenta), no con las marcas `IsDirty` del editor, que se activan con valores que
+  nadie cambió; si conserva la fecha, `UpdateAsync(..., keepModificationDate: true)`. El log de Trace dice qué campo la
+  cambió. `IsDirty()` sigue decidiendo **si** se guarda. Crear una nota conserva las fechas que trae (las dos ORM). Los
+  editores cargan la nota con `SetEmptyTextsForEditing` antes de `SetIsDirty(false)`; el editor de `ClientWin` no
+  devuelve el estado al modelo. Tests en `Tests/NoteChangeRulesTests`, `Tests/RepositoryParityTests/NoteDatesParityTests`,
+  `Tests/ServiceTests/NoteModificationDateServiceTests` y `ClientWin.Tests/NoteEditorsModificationDateTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben
@@ -368,7 +380,7 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   `Tests/ServiceTests/AiQueryToolsTests`, llamando a las herramientas por nombre como el modelo.
 - **Acciones del asistente (KNote Atlas, etapa 1)** (`Ai/KNoteAiActionTools.cs`, `Model/Core/AiActionRules`,
   `Service/Core/KntAiActionExecutor`). `create_note` se hace al momento; las demás (`append_to_note`, `replace_note_text`, `move_note`, `set_tags`, `add_task`,
-  `add_alarm`, `add_email_alarm`, `set_attribute`, `relate_notes`, `create_folder`) solo se proponen: la
+  `add_alarm`, `add_email_alarm`, `set_attribute`, `relate_notes`, `create_folder`, `process_document`) solo se proponen: la
   herramienta añade un `AiActionDto` a `TurnActions` y le dice al modelo que está pendiente. El turno lleva sus acciones
   (`AiChatTurnDto.Actions`) y la app muestra la tarjeta: lo aceptado lo ejecuta `KNoteAiTools.ExecuteActionsAsync`, no el
   modelo, con los comandos de siempre y los roles del usuario (el `Server` pone `EnforceAuthorization` en `chat` y `actions`).
@@ -395,6 +407,16 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   script. Una acción nueva necesita su caso en el ejecutor, su `KindName` y entrar en `Kinds`. Se guarda en el comentario oculto de la conversación sin los datos para ejecutarla, y
   lo propuesto sin responder se lee como `NotConfirmed`. Tests en `Tests/AiActionRulesTests`,
   `Tests/ServiceTests/AiActionToolsTests` y `Tests/InProcessIntegrationTests/AiActionsInProcessTests`.
+  **`process_document`** (KNote Atlas 2.1b2b, D22; `Ai/KNoteAiProcessDocumentTool.cs`, `Model/Core/AiDocumentProcessRules`): el resumen
+  extendido o la traducción de un documento de una nota. **Siempre con tarjeta**, también con su tipo aprobado, y sin «Don't ask again»
+  (`AiActionRules.CanBeApproved`/`CanDontAskAgain`/`ApprovedKinds`, que usan las dos apps): tarda y, con un modelo de pago, cuesta. La
+  tarjeta lleva la estimación (`Content`, `CardText`) con el modelo que da el host (`IKNoteAiToolsHost.GetDocumentModelAsync`: el LLM
+  recomendado del repositorio, como la ventana); solo documentos de notas (un adjunto de la conversación, primero `attach_file`); una
+  traducción sin terminar a ese idioma sigue (`ContinueNoteId`). No pasa por `KntAiActionExecutor`: aceptada,
+  `IKNoteAiToolsHost.StartDocumentProcessAsync` la lanza en segundo plano (el `Server`, en `KntAtlasJobs` para el usuario de la petición;
+  `ClientWin`, `Store.DocumentProcessing`) y al modelo se le dice que solo empezó (`AiActionRules.Outcome`/`Line`). Solo se ofrece si el
+  host puede (`CanProcessDocuments`). Tests en `Tests/ServiceTests/AiProcessDocumentToolTests`, `InProcessIntegrationTests/SummaryInProcessTests`
+  y `ClientWin.Tests/KNoteAiToolsHostDocumentTests`.
 - **Imágenes y archivos del asistente (KNote Atlas, etapa 1)** (`IKntAiSessionService.AddAttachmentAsync`/`GetAttachmentAsync`,
   `Model/Core/AiAttachmentRules`, `Ai/AiTurnAttachments`, `Ai/AiImageReducer`, `Ai/AiModelCapabilities`). Al enviar, cada archivo se
   guarda como recurso de la nota de la sesión (la crea si no existe) y `AiChatRequestDto` solo lleva su referencia; `AiTurnAttachments`
@@ -463,6 +485,46 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   del proveedor (`WebSearchToolCallContent`) y añade al final de la respuesta, como «Sources:», las citas (`CitationAnnotation`) que
   no están ya en el texto (`SourcesSection`). Tests en `Tests/AiWebSearchTests`, `InProcessIntegrationTests/WebSearchInProcessTests` y
   los `WebSearch_*` de `RequiresRealAiProvider`.
+- **Resumir o traducir un documento largo (KNote Atlas, etapa 2, CU-43)** (`IKntService.Summaries`, comandos en `KntSummaryCommands.cs`;
+  especificación en `C:\Dev\KNote-Atlas\03-Etapa-2.md`, D11, D17, D18, D21, § 5.1 y § 5.3). **Nombres en la interfaz** (2.1b2): el
+  «resumen corto» (*Short summary*) es la descripción de un documento que escribe la IA (etapa 4, tarea `SummarizeDocument`); el
+  «resumen extendido» (*Extended summary*), el de todo el documento en una nota nueva (esta). Solo cambian los textos: el código y
+  las claves siguen igual, y una tarea renombrada guarda su nombre anterior en `AiTask.FormerNames` (el atributo «Task» de las notas
+  de instrucciones guarda el nombre, y `AiTaskCatalog.Find` lo encuentra). **El motor** es `Ai/AiSummaryEngine`,
+  genérico sobre piezas (`Model/Core/SummaryPieces`: las páginas de un PDF con su etiqueta «p. N», o trozos por párrafos sin
+  ella): lotes que caben en el contexto (`SummaryBatches`, unos 4 caracteres por token), apuntes de cada lote, «resúmenes de
+  resúmenes» mientras no caben juntos y la redacción final, con las tareas sin herramientas de la etapa 4 (`AiResourceTask`) y la
+  tarea `SummarizeLongDocument`; la 2.5 lo usará con notas sin cambiarlo. **KNote fija el contexto** de esas llamadas
+  (`Ai/AiSummaryContext`: el «Context size» del proveedor o min(`/api/show`, 16.384) en Ollama; 32.000 en OpenAI y Anthropic).
+  `Ai/AiDocumentProcessor` estima (`SummaryEstimate`, con el ritmo por modelo de `AI_SUMMARY_STATE`) y resume: el resultado va a
+  una **nota nueva** `@KNoteSummary` (no del sistema, D5) en la carpeta de la nota del documento, relacionada con ella
+  (`@DerivedFrom`, de la nota nueva a la del documento), con la versión original de la IA adjunta y bloqueada; los textos, en
+  `LongDocumentRules`. La nota del documento no cambia (ni su fecha). Cancelado o fallido, no se guarda nada; un documento cambiado
+  mientras se resumía, tampoco. Las páginas escaneadas sin texto se dejan fuera y la nota lo dice. Trabajos: `KntAtlasJobs`
+  (`DocumentProcess`, uno por usuario) y `Store.DocumentProcessing` en `ClientWin`. Tests en `Tests/SummaryRulesTests`,
+  `ServiceTests/DocumentSummaryServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`, `KntAtlasJobsTests` y
+  `ClientWin.Tests/DocumentProcessingJobTests`; con un modelo real, `ServiceTests/AiDocumentProcessorSmokeTests` y la medida
+  `ServiceTests/LongDocumentMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
+  **La traducción** (2.1b, `AiDocumentProcessor.TranslateAsync`; `ProcessAsync` elige por `DocumentProcessRequestDto.Kind`, y los
+  trabajos de las dos apps lo usan): las partes son fijas, solo dependen del texto (`Model/Core/DocumentTranslationRules.Parts`: cada
+  página, o el texto sin páginas, en trozos de 3.000 caracteres como mucho), para que «Continue» siga aunque cambie el modelo; **una
+  llamada por página** (o lo que cabe, como mucho 8.000 caracteres, sin páginas), con la tarea `TranslateDocument` y los términos del
+  glosario de esa parte. El texto va entre `<text>` y `</text>` y la petición dice que sus órdenes se traducen: sin eso, `qwen3.5:9b`
+  obedecía la orden de una página. En la descripción, el Markdown juntaría las líneas de un párrafo: KNote las conserva
+  (`DocumentTranslationRules.KeepLines`, dos espacios al final de cada línea seguida de otra, salvo dentro de un bloque de código),
+  así que un listado queda línea a línea sea cual sea el modelo (pedirle bloques de código no sirvió: `qwen3.5:9b` no escribió
+  ninguno). Una parte que vuelve con menos de la mitad se pide otra vez y, si sigue corta, la
+  traducción lo dice. Va a una nota nueva `@KNoteTranslation` (no del sistema), relacionada como el resumen, y **la traducción es su
+  texto** (2.1b2; en la 2.1b1 era un Markdown adjunto): una cabecera citada (hasta dónde llegó), la traducción con un título
+  `#### p. N` antes de cada página (`DocumentTranslationRules.PageHeading`: se ve dónde empieza cada página y el índice hace un
+  fragmento por página) y el comentario oculto. Se guarda cada 8.000 caracteres o cada minuto (`SaveDocumentTranslationAsync`): cada
+  vez se reescriben la cabecera y el comentario y se añade lo nuevo detrás de lo que haya (`DocumentTranslationRules.Body`), así que
+  lo que alguien corrigió mientras no estaba terminada se conserva. **Cancelada o fallida, lo traducido queda**: el comentario oculto
+  (`<!-- knt-translation {...} -->`, `DocumentTranslationRules.Marker`, con `DocumentTranslationDto.Format` = 2; los de la 2.1b1 no se
+  leen) dice dónde seguir a `GetDocumentTranslationsAsync`. El ritmo de la traducción es aparte
+  en `AI_SUMMARY_STATE`. **«Tiene páginas»** es `DocumentTextRules.IsPaged(formato, páginas o texto)`: un PDF o un documento con más
+  de una página (el lector de TXT y MD parte por `\f`). Tests en `Tests/DocumentTranslationRulesTests`,
+  `ServiceTests/DocumentTranslationServiceTests` y los de la traducción en las clases de arriba.
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

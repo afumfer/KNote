@@ -26,11 +26,15 @@ public class DocumentTextRulesTests
     }
 
     [TestMethod]
-    public void OnlyAPdf_HasPages()
+    public void APdf_OrADocumentOfSeveralPages_HasPages()
     {
-        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Pdf));
-        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Docx));
-        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Text));
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Pdf, 1));
+        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Docx, 1));
+        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, 1));
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, 2), "a TXT with page breaks (stage 2, D21)");
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Pdf, "One page"));
+        Assert.IsFalse(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, "One page"));
+        Assert.IsTrue(DocumentTextRules.IsPaged(EnumDocumentFormat.Text, $"One{DocumentTextRules.PageSeparator}Two"));
     }
 
     [TestMethod]
@@ -96,6 +100,20 @@ public class DocumentTextRulesTests
 
         Assert.AreEqual($"── Page 1 ──\r\nFirst.\r\n\r\n── Page 2 ──\r\n[{DocumentTexts.ScannedPage}]", DocumentTexts.Readable(text, paged: true));
         Assert.AreEqual("One\r\nletter.", DocumentTexts.Readable("One\nletter.", paged: false));
+    }
+
+    // 2.1b2: «Copy to description», the text selected without what KNote shows around it, in its own paragraph where the cursor is.
+    [TestMethod]
+    public void TheTextCopiedToTheDescription_LosesKNotesHeadingsAndMarks_AndGoesInItsOwnParagraph()
+    {
+        var selected = $"end of one.\r\n\r\n── Page 2 ──\r\n[{DocumentTexts.AutomaticTranscription}]\r\nSecond\u0002 page.\r\n\r\n\r\n";
+
+        Assert.AreEqual("end of one.\n\nSecond page.", DocumentTexts.ForDescription(selected));
+        Assert.AreEqual("", DocumentTexts.ForDescription($"── Page 3 ──\r\n[{DocumentTexts.ScannedPage}]"));
+
+        Assert.AreEqual(("Before\n\nNew\n\nafter", 11), DocumentTexts.InsertBlock("Before\nafter", 6, "New"));
+        Assert.AreEqual(("New", 3), DocumentTexts.InsertBlock("", 0, "New"));
+        Assert.AreEqual(("One\r\n\r\nA\r\nB", 11), DocumentTexts.InsertBlock("One\r\n", 5, "A\nB", "\r\n"), "with the line breaks of the text");
     }
 
     [TestMethod]

@@ -413,6 +413,25 @@ repositorio de la sesión.
   `SemanticSearchInProcessTests` (modelos) y `SearchByMeaningInProcessTests` (búsqueda, parecidas, informes y
   evaluación), con un generador falso (`TestServices` de `KNoteWebApplicationFactory`).
 
+## KNote Atlas: resúmenes (`SummaryController`, `api/summaries`)
+
+Etapa 2 (la lógica en `Service` y `KNote.Ai`, ver «Resumir o traducir un documento largo» en el `CLAUDE.md` raíz). Staff+, en el repositorio
+de la sesión, con `EnforceAuthorization` como el asistente. El modelo es el proveedor de chat de `ProviderAlias` o, sin él, el
+predeterminado del Server.
+
+- `POST documents/estimate` (`DocumentProcessRequestDto` → `DocumentProcessEstimateDto`: páginas, llamadas, contexto, páginas
+  escaneadas sin texto y, con el ritmo del modelo, el tiempo).
+- `POST documents` encola el resumen en `KntAtlasJobs` (tipo `DocumentProcess`, **uno por usuario**: la clave de la cola es
+  repositorio + tipo + dueño, `KntAtlasJob.OwnerKey`; el índice y los recursos siguen con uno por repositorio), `GET
+  documents/progress` (el del usuario: en marcha, en cola o el último; `null`, ninguno) y `POST documents/cancel`. Al terminar
+  con una nota (también una traducción cancelada, que guarda lo traducido), si el repositorio tiene índice, encola su puesta al día.
+- Resumir o traducir lo dice `DocumentProcessRequestDto.Kind` (2.1b), en las mismas rutas; `ContinueNoteId` sigue una traducción.
+  `GET documents/{resourceId}/translations` da las traducciones de un documento, la última primero, terminadas o no («Continue»).
+- **Desde el asistente** (2.1b2b, `process_document`): `AiAssistantController` crea `ServerAiToolsHost` con `KntAtlasJobs`,
+  `AiProvidersCatalog`, `KntRepositories` y el usuario de la petición; aceptada la tarjeta (`POST api/aiassistant/actions`), el host
+  encola el mismo trabajo para ese usuario en el repositorio de su sesión, con el modelo de `SummaryController` sin alias (el LLM
+  recomendado del repositorio o el predeterminado). Con otro suyo en marcha o en cola, falla con `SummaryTexts.YoursRunning`.
+
 ## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
 
 El contrato (rutas, métodos y eventos) está en `Model/Dto/ChatRoomHubContract`, compartido con `Client` y `ClientWin`.

@@ -741,7 +741,7 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   metido en la caja a trozos con una barra de progreso, y «Read document» / «Read again» (pregunta). Los ficheros de los
   recursos, hasta 200 MB (`ResourceFileRules.SizeError` al elegirlos, como la Web).
 - **El resumen de los documentos** (4.4c): «Describe ▾» del editor de la nota describe las fotos y resume los documentos
-  (`NoteEditorCtrl.DescribePhotosAsync`, con `AiDocumentSummarizer` para los documentos) y «Summarize the selected document»;
+  (`NoteEditorCtrl.DescribePhotosAsync`, con `AiDocumentSummarizer` para los documentos) y «Short summary of the selected document»;
   la sección *Process pending resources* (`RepositoryResourcesCtrl`) tiene las casillas «Photos» y «Documents» (`Options`) y
   (4.5a) «Scanned pages» y «Also the pages with… (OCR layer)» (`ScannedPages`, `OcrPages`).
 - **Transcribir un documento** (4.5b): «Transcribe scanned pages» en `DocumentTextForm` (y «Describe ▾», «Transcribe the scanned
@@ -749,6 +749,32 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   `AiPageTranscriber`; el botón cancela al momento, y cerrar la ventana también) y el resumen al final de un documento que lo
   esperaba. El modelo sale de `NoteEditorCtrl.ChatClientFactory` (`internal`, para los tests). «See the original page» con el selector
   de página (el cursor lo pone, `DocumentTexts.PageAt`) abre `Views/DocumentPageForm`: el PDF en esa página (WebView2, `#page=N`).
+- **Resumir un documento largo** (etapa 2, 2.1a2): «Describe ▾ → Extended summary of the document...» y el botón «Extended summary...»
+  de `DocumentTextForm` llaman a `NoteEditorCtrl.ShowLongDocumentSummaryAsync`, que abre `LongDocumentSummaryCtrl`
+  (`[KntAuthorize(Staff)]`, `IViewLongDocumentSummary`, `Views/LongDocumentSummaryForm`, no modal): idioma (lista de
+  `SummaryTexts.Languages` y texto libre; el último del repositorio en `AppUserState.Session.SummaryLanguages`), extensión y modelo
+  (por defecto el de `Store.GetPhotoDescriberAsync`: el LLM recomendado del repositorio o el último elegido); «Estimate»
+  (`AiDocumentProcessor.EstimateAsync`), «Generate» (`Store.DocumentProcessing`, nunca con otro trabajo de KNote Atlas: el aviso
+  `SummaryTexts.OtherRunning`), el progreso por `DocumentProcessingProgressChanged` y en la barra de estado de la ventana principal,
+  «Cancel» y «Open the note» (`NoteEditorCtrl`). Cerrar la ventana no para el trabajo; abrirla otra vez para ese documento lo muestra.
+  «Transcribe them first» lanza `TranscribeRequested`, que abre `DocumentTextForm` transcribiendo. `SaveSettings` es `internal` para
+  los tests (`Store.SaveConfig` escribe la configuración real). Tests en `LongDocumentSummaryCtrlTests` y `DocumentProcessingJobTests`.
+  **Traducir** (2.1b2): «Describe ▾ → Translate the whole document...» y el botón «Translate document...» de `DocumentTextForm` abren
+  el mismo `Ctrl` con `LoadAsync(..., EnumDocumentProcessKind.Translate)`: sin extensión (la vista oculta «Length» y en su sitio pone la
+  traducción sin terminar con «Continue»), idioma obligatorio y propio (`AppUserState.Session.TranslationLanguages`). `ContinueAsync`
+  sigue la última sin terminar (`GetDocumentTranslationsAsync`); `GenerateAsync` al idioma de esa pregunta antes (Sí: continuar; No:
+  otra; Cancelar: nada). `Progress` es el del documento y del mismo tipo; tras una traducción que para, recarga las traducciones.
+  «Open the note» también tras cancelar o fallar una traducción (`SummaryTexts.HasNote`). La ventana escucha también los trabajos del
+  índice y de los recursos (`OnOtherJobChanged`): al terminar, el trabajo pone al día el índice con la nota nueva y, sin eso, «Generate»
+  y «Continue» seguían desactivados hasta tocar otro control; mientras, dice `SummaryTexts.IndexRunning`.
+  **Desde el asistente** (2.1b2b, `process_document`): `Core/KNoteAiToolsHost` (con el repositorio del asistente) da el modelo de la
+  ventana (`Store.GetPhotoDescriberAsync`) y, aceptada la tarjeta, lanza `Store.DocumentProcessing` en el hilo de la UI (como un clic:
+  el trabajo publica ahí su progreso); con otro trabajo de KNote Atlas en marcha, falla con `SummaryTexts.OtherRunning`. Tests en
+  `KNoteAiToolsHostDocumentTests`.
+  **Copiar a la descripción** (2.1b2): `DocumentTextForm` recibe de `NoteEditorForm` (solo en modo edición) `InsertTextInDescription`,
+  y su botón «Copy to description» (activo con texto seleccionado) le pasa la selección: limpia (`DocumentTexts.ForDescription`, sin
+  los títulos de las páginas ni sus marcas), se inserta en el cursor en un párrafo propio (`DocumentTexts.InsertBlock`; en HTML, como
+  párrafos) y desde la vista de navegación abre antes el editor Markdown. No si la descripción está bloqueada.
 - Tests: `RepositoryAiModelsCtrlTests`, `RepositorySemanticIndexCtrlTests`, `NotesSelectorCtrlMeaningTests`,
   `NoteEditorCtrlSimilarNotesTests`, `AiEmbeddingGeneratorsTests` y sus filas de `ControllerAuthorizationMatrixTests`.
 
@@ -773,7 +799,7 @@ Lo que hace el modelo («Thinking…», «Using search_notes») se ve como en la
 El razonamiento va plegado encima de la respuesta (`AiChatHtml`); `replaceLast` lo deja abierto entre repintados.
 Las acciones: la tarjeta es HTML de `AiChatHtml` y responde con `postMessage('knt-actions:...')`, que `AiChatWebRenderer`
 convierte en `ActionsAnswered`; `KNoteAIAssistantCtrl.AnswerActionsAsync` ejecuta lo aceptado. En la vista Markdown, sin
-tarjeta, se pregunta con un cuadro de diálogo (todo o nada). `KNoteAiToolsHost.CanChangeNote` no deja cambiar una nota abierta
+tarjeta, se pregunta con un cuadro de diálogo (todo o nada) que dice lo mismo que la tarjeta (`AiActionRules.PlainCardText`: la estimación de `process_document`, el texto nuevo de `replace_note_text`). `KNoteAiToolsHost.CanChangeNote` no deja cambiar una nota abierta
 en un editor (`Store.IsNoteBeingEdited`: al guardar pisaría el cambio) y `OnNoteChanged` publica `EntitySaved<NoteExtendedDto>`.
 
 - **Archivos del mensaje** (`KNoteAIAssistantCtrl.PendingAttachments`, solo con `PersistSession`): el botón **Attach**, Ctrl+V

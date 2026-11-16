@@ -19,7 +19,9 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch);
     Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);        
     Task<Result<NoteDto>> AddAsync(NoteDto entity);
-    Task<Result<NoteDto>> UpdateAsync(NoteDto entity);
+    // keepModificationDate: only what belongs to the note but isn't its own data changed (its status, from its tasks and alarms):
+    // it isn't «modified» (KNote Atlas, stage 2, D6).
+    Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false);
     Task<Result> DeleteAsync(Guid id);
     Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
     Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);

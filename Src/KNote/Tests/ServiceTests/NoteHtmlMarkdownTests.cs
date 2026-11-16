@@ -54,6 +54,15 @@ public class NoteHtmlMarkdownTests
         Assert.IsTrue(shown.Contains("font-weight: bold"), shown);
     }
 
+    // KNote Atlas 2.1b2: the lines of a translation (DocumentTranslationRules.KeepLines) are shown as lines, not joined.
+    [TestMethod]
+    public void TheLinesKeptOfATranslation_AreShownAsLines()
+    {
+        var shown = service.Notes.UtilMarkdownToHtml(KNote.Model.Core.DocumentTranslationRules.KeepLines("100 REMark AVANCE\n110 DIM P(11)"));
+
+        StringAssert.Contains(shown, "100 REMark AVANCE<br");
+    }
+
     [TestMethod]
     public void HtmlToMarkdown_WithoutStyles_IsPlainMarkdown()
     {

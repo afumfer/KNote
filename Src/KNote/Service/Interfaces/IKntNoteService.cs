@@ -29,6 +29,7 @@ public interface IKntNoteService
     Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch);
     Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);
     Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entity = null);
+    // An existing note keeps its modification date unless its own data changed (NoteChangeRules, KNote Atlas, stage 2, D6).
     Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true);
     Task<Result<NoteExtendedDto>> SaveExtendedAsync(NoteExtendedDto entity);       
     Task<Result<NoteDto>> DeleteAsync(Guid noteId);

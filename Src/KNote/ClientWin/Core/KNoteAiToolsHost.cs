@@ -1,5 +1,6 @@
 using KNote.Ai;
 using KNote.ClientWin.Controllers;
+using KNote.Model;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 
@@ -98,6 +99,43 @@ public class KNoteAiToolsHost : IKNoteAiToolsHost
         var note = await service.Notes.GetExtendedAsync(noteId);
         if (note.IsValid && note.Entity != null)
             _store.Events.Publish(new EntitySaved<NoteExtendedDto>(note.Entity));
+    }
+
+    // KNote Atlas 2.1b2b (process_document): the run of «Extended summary» / «Translate document» (Store.DocumentProcessing), in the
+    // assistant's repository; the status bar of the main window shows it, and its window shows it when opened for the document.
+    public bool CanProcessDocuments => _repository != null;
+
+    // As LongDocumentSummaryCtrl: the repository's recommended LLM or the last one chosen, else the first chat provider.
+    public async Task<AiProviderRef> GetDocumentModelAsync(IKntService service)
+    {
+        var (provider, _) = await _store.GetPhotoDescriberAsync(service);
+        return provider ?? _store.Settings.Ai.Providers.FirstOrDefault(p => p.IsChat);
+    }
+
+    public async Task<string> StartDocumentProcessAsync(IKntService service, AiProviderRef provider, DocumentProcessRequestDto request)
+    {
+        if (_repository == null)
+            return "The assistant has no repository.";
+
+        var index = await service.SemanticSearch.GetIndexStatusAsync();
+        var hasIndex = index.IsValid && index.Entity?.Status != EnumSemanticIndexStatus.None;
+
+        // On the UI thread, as a click in its window: the job publishes its progress there.
+        bool Start() => _store.DocumentProcessing.Start(service, _repository.Name, provider, request, hasIndex);
+        bool started;
+        if (_uiContext == null || SynchronizationContext.Current == _uiContext)
+            started = Start();
+        else
+        {
+            var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _uiContext.Post(_ =>
+            {
+                try { done.SetResult(Start()); }
+                catch (Exception ex) { done.SetException(ex); }
+            }, null);
+            started = await done.Task;
+        }
+        return started ? null : SummaryTexts.OtherRunning;
     }
 
     private async Task ShowNoteForEditingAsync(IKntService service, Guid noteId)

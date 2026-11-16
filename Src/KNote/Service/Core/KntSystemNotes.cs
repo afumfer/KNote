@@ -69,6 +69,36 @@ internal static class KntSystemNotes
                 return resSave.Entity?.NoteTypeId ?? Guid.Empty;
             });
 
+    // A type of trace note of KNote (@DerivedFrom, stage 2): created the first time, as the note types.
+    public static Task<Guid> EnsureTraceNoteTypeAsync(IKntService service, string name, string description,
+        string bypassReason, ResultBase result) =>
+        FindOrCreateAsync(service, result,
+            find: async () =>
+            {
+                var resTypes = await service.TraceNoteTypes.GetAllAsync();
+                if (!resTypes.IsValid)
+                {
+                    result.AddListErrorMessage(resTypes.ListErrorMessage);
+                    return Guid.Empty;
+                }
+                return resTypes.Entity?.FirstOrDefault(t => t.Name == name)?.TraceNoteTypeId ?? Guid.Empty;
+            },
+            create: async () =>
+            {
+                Result<TraceNoteTypeDto> resSave;
+                using (KntAuthorizationBypass.Begin(service, bypassReason))
+                {
+                    resSave = await service.TraceNoteTypes.SaveAsync(new TraceNoteTypeDto
+                    {
+                        Name = name,
+                        Description = description
+                    });
+                }
+                if (!resSave.IsValid)
+                    result.AddListErrorMessage(resSave.ListErrorMessage);
+                return resSave.Entity?.TraceNoteTypeId ?? Guid.Empty;
+            });
+
     // A text attribute or, with tabulatedValues, one of those values (EnumKAttributeDataType.TabulatedValue); dataType
     // for another kind (Bool...).
     public static Task<Guid> EnsureAttributeAsync(IKntService service, Guid noteTypeId, string name,

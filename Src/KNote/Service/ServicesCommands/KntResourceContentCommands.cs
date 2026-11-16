@@ -327,7 +327,7 @@ public class KntResourceContentGetDocumentToReadAsyncCommand : KntCommandService
                 text = new ResourceTextDto
                 {
                     ResourceId = resource.ResourceId, NoteId = resource.NoteId, Name = resource.Name, FileType = resource.FileType,
-                    State = DocumentTextRules.StateOf(pages), Text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format))
+                    State = DocumentTextRules.StateOf(pages), Text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format, pages.Count))
                 };
             }
             catch (KntDocumentUnreadableException)
@@ -728,7 +728,7 @@ public class KntResourceContentGetDocumentContextAsyncCommand : KntCommandServic
             return result;
         }
 
-        var paged = DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(resource.FileType, resource.Name));
+        var paged = DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(resource.FileType, resource.Name), text.Text);
         var documentText = AiDocumentRules.DocumentText(text.Text, paged);
         if (documentText.Length == 0)
         {

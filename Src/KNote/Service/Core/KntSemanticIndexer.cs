@@ -522,7 +522,7 @@ internal static class KntSemanticIndexer
 
                 if (text.State is EnumExtractedState.Partial or EnumExtractedState.Complete && !string.IsNullOrEmpty(text.Text))
                     documents.Add(new NoteChunkDocument(text.ResourceId, ResourceInfoDto.FileNameOf(text.Name),
-                        DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(text.FileType, text.Name)), text.Text));
+                        DocumentTextRules.IsPaged(DocumentTextRules.FormatOf(text.FileType, text.Name), text.Text), text.Text));
             }
             return (documents, notRead);
         }

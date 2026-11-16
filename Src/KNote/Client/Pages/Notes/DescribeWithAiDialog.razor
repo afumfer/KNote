@@ -59,7 +59,7 @@
 @code {
     [Parameter] public string? NoteTopic { get; set; }
     [Parameter] [EditorRequired] public ResourceDescriberDto Describer { get; set; } = null!;
-    // A single resource («Describe photo», «Summarize document»), or the resources of the note.
+    // A single resource («Describe photo», «Short summary of the document»), or the resources of the note.
     [Parameter] public bool Single { get; set; }
     // The photos and the documents to process that have no description of a person, and the ones that have one.
     [Parameter] public int Photos { get; set; }
@@ -71,7 +71,7 @@
 
     private bool AnyDocument => Documents + PersonDocuments > 0;
 
-    private string Title => !Single ? ResourceProcessingTexts.DescribeWithAi : AnyDocument ? "Summarize document" : "Describe photo";
+    private string Title => !Single ? ResourceProcessingTexts.DescribeWithAi : AnyDocument ? "Short summary of the document" : "Describe photo";
 
     private string What
     {

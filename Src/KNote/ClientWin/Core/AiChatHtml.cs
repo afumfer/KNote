@@ -60,7 +60,7 @@ public static class AiChatHtml
               const card = answer.closest('.actions-card');
               const accepted = answer.dataset.answer === 'accept'
                 ? [...card.querySelectorAll('input[data-action]:checked')].map(i => i.dataset.action) : [];
-              const dontAsk = answer.dataset.answer === 'accept' && card.querySelector('input.dont-ask').checked;
+              const dontAsk = answer.dataset.answer === 'accept' && card.querySelector('input.dont-ask')?.checked === true;
               card.querySelectorAll('input, button').forEach(c => c.disabled = true);
               window.chrome.webview.postMessage('knt-actions:' + JSON.stringify({ accepted, dontAsk }));
               return;
@@ -191,7 +191,8 @@ public static class AiChatHtml
         html.Append("<div class=\"actions-card\"><div class=\"card-title\">The assistant wants to do this:</div>");
         foreach (var action in proposed)
             html.Append($"<div class=\"action\"><input type=\"checkbox\" checked data-action=\"{action.ActionId}\"><div>{MarkdownToHtml(AiActionRules.CardText(action))}</div></div>");
-        html.Append($"<label class=\"action\"><input type=\"checkbox\" class=\"dont-ask\"><span>{AiActionRules.DontAskAgainText(proposed)}</span></label>");
+        if (AiActionRules.CanDontAskAgain(proposed))
+            html.Append($"<label class=\"action\"><input type=\"checkbox\" class=\"dont-ask\"><span>{AiActionRules.DontAskAgainText(proposed)}</span></label>");
         html.Append("<div class=\"card-buttons\"><button data-answer=\"reject\">Reject</button><button data-answer=\"accept\" class=\"primary\">Accept</button></div></div>");
         return html.ToString();
     }

@@ -497,13 +497,32 @@ Patrones ya establecidos que hay que seguir:
   1–N of M» y «Read document» (Staff+, `KntAccess` al pulsar; si ya se leyó, pregunta). Textos de `DocumentTexts`.
 - **«Describe with AI»** (4.4c, antes «Describe photos»): `NoteForm` describe las fotos y resume los documentos de la nota con
   `DescribeWithAiDialog` (cuenta unos y otros) y una petición por recurso (`DescribePhotoAsync` / `SummarizeDocumentAsync`); la
-  tarjeta de un documento tiene «Summarize document». El lote (`AtlasResources`) tiene las casillas «Photos» y «Documents» y
+  tarjeta de un documento tiene «Short summary of the document». El lote (`AtlasResources`) tiene las casillas «Photos» y «Documents» y
   (4.5a) «Scanned pages», con «Also the pages with… (OCR layer)» debajo, desactivada sin la anterior.
 - **Transcribir un documento** (4.5b): en `NoteResourceViewer`, vista «Text» de un PDF con páginas escaneadas, «Transcribe scanned
   pages» (Staff+): `TranscribePagesDialog` (páginas, la casilla de las de OCR, estimación y modelo) y una petición por página
   (`TranscribePageAsync`) con su progreso y «Cancel» (tras la página en curso; cerrar el visor también para). Si el documento
   esperaba su resumen (`AiDocumentRules.WaitsForSummary`), se resume al final y se actualiza el `ResourceInfoDto` de la tarjeta.
   Las páginas transcritas llevan «Automatic transcription» y «See the original page», que muestra el PDF en `#page=N`.
+- **Resumir un documento largo** (KNote Atlas, etapa 2, 2.1a2; «Extended summary» desde la 2.1b2): «Extended summary…» en el pie de `NoteResourceViewer` y el botón
+  `summarize` de la tarjeta de un documento en `NoteKResources` (Staff+, `KntAccess` al pulsar) abren `LongDocumentSummaryDialog`
+  (`IStore.Summaries`, `api/summaries`): idioma (`RadzenAutoComplete` sobre `SummaryTexts.Languages`, texto libre; el último del
+  repositorio en `localStorage`, `KNoteSummaryLanguage:{RepositoryId}`), extensión y modelo (el recomendado del repositorio, alias
+  vacío, que resuelve el `Server`, u otro de `GetProvidersAsync`); «Estimate», «Generate» y el progreso, pedido cada 1,5 s sin
+  notificar errores. El trabajo está en la cola del `Server` (uno por usuario): sigue si se cierra el diálogo y, al abrirlo otra vez,
+  se ve. «Open the note» al terminar (`KntWindows.OpenEditAsync`, en el mismo clic). «Transcribe them first» cierra el diálogo con
+  `TranscribeResult`: el visor pasa a «Text» y transcribe; desde la tarjeta se abre el visor con `StartInText`. Textos en
+  `Model/Core/SummaryTexts`, comunes con `ClientWin`.
+  **Traducir** (2.1b2): «Translate document…» junto a «Extended summary…» en el pie del visor y el botón `translate` de la tarjeta
+  abren el mismo diálogo con `Kind = Translate`: sin extensión, idioma obligatorio («Generate» desactivado sin él; el último en
+  `KNoteTranslationLanguage:{RepositoryId}`). Con una traducción sin terminar del documento (`GetDocumentTranslationsAsync`, la última
+  primero) muestra «Not finished…» con «Continue» (`ContinueNoteId`, en su idioma); «Generate» al idioma de esa pregunta antes con
+  `dialogService.Confirm` (cerrar la pregunta no hace nada). El progreso es del diálogo si es del documento **y** del mismo tipo;
+  «Open the note» también tras cancelar o fallar una traducción (`SummaryTexts.HasNote`), y al parar se recargan las traducciones.
+  **Copiar a la descripción** (2.1b2): abierto desde el editor (`NoteKResources.OnCopyToDescription` → `NoteForm.CopyToDescription`), el
+  visor tiene «Copy to description» en la vista «Text»: lee la selección dentro del texto (`kntElements.js`, `selectedTextIn`; los títulos
+  de las páginas llevan `user-select: none`), la limpia con `DocumentTexts.ForDescription` y `NoteForm` la inserta con
+  `descriptionState.InsertBlock`, como un recurso (no si el contenido está bloqueado). Desde los resultados de la búsqueda, no está.
 - **Recursos de la nota** (`NoteKResources`, galería; `NoteResourceEditor`, diálogo de alta y edición): al editar
   un recurso solo cambian su descripción y su orden; el fichero no se cambia ni se reenvía (`Server` conserva el
   fichero y el contenido guardado en la BD, ver `Server/CLAUDE.md`). Al pulsar un recurso se ve en la misma ventana
@@ -607,7 +626,9 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
 - **Acciones del asistente**: `AiChatView` muestra las líneas del registro y, en el último turno, `AiActionsCard` con lo
   propuesto; `AIAssistant.OnActionsAnswered` rechaza lo no aceptado, ejecuta lo demás (`IStore.AiAssistant.RunActionsAsync`),
   guarda la sesión y, si se aceptó algo, envía el turno de continuación (`SendTurnAsync` con `automatic`, cuya pregunta no se
-  muestra). Enviar un mensaje con la tarjeta abierta la rechaza. Las notas cambiadas se avisan con `NotifyNoteSavedAsync`.
+  muestra). Enviar un mensaje con la tarjeta abierta la rechaza. Las notas cambiadas se avisan con `NotifyNoteSavedAsync`. La casilla
+  «Don't ask again» solo sale si algo de la tarjeta se puede aprobar (`AiActionRules.CanDontAskAgain`: `process_document`, nunca) y
+  aprueba `AiActionRules.ApprovedKinds`.
 - **Archivos del asistente**: `js/aiAttachments.js` (pegar, soltar y elegir) los da a `AIAssistant.OnAttachment`; quedan en `pendingFiles`
   hasta que el turno se responde, y `SaveFilesAsync` los sube antes de enviar (`Saved`: si el modelo falla no se suben otra vez).
   `AiAttachmentsView` pide las imágenes por `GetAttachmentPreviewAsync` y las dibuja como `data:`: la URL de un recurso se sirve sin

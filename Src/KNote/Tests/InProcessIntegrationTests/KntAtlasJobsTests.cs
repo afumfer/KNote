@@ -226,4 +226,45 @@ public class KntAtlasJobsTests
         await WaitForAsync(() => !jobs.IsIndexBusy(repositoryId));
         await jobs.StopAsync(CancellationToken.None);
     }
+
+    // KNote Atlas, stage 2 (D18): the summaries of documents are one per user, in the same queue; each user sees and cancels
+    // their own.
+    [TestMethod]
+    public async Task TheSummariesOfDocuments_AreOnePerUser_InTheSameQueue()
+    {
+        var release = new TaskCompletionSource<Result<DocumentProcessProgressDto>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var started = new List<string>();
+        var jobs = new KntAtlasJobs(new HeldRuns().RunAsync, NoResources, NullLogger<KntAtlasJobs>.Instance,
+            async (job, progress, cancellationToken) =>
+            {
+                lock (started)
+                    started.Add(job.UserName);
+                progress.Report(new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Reading, CallsTotal = 5 });
+                if (job.UserName == "ana")
+                    using (cancellationToken.Register(() => release.TrySetCanceled(cancellationToken)))
+                        return await release.Task;
+                return new Result<DocumentProcessProgressDto>(new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Completed, NoteNumber = 7 });
+            });
+        await jobs.StartAsync(CancellationToken.None);
+        var repositoryId = Guid.NewGuid();
+        var provider = new AiProviderRef { Model = "m" };
+
+        jobs.EnqueueDocument(repositoryId, "Repo", "ana", provider, new DocumentProcessRequestDto { ResourceId = Guid.NewGuid() });
+        await WaitForAsync(() => { lock (started) return started.Contains("ana"); });
+        var again = jobs.EnqueueDocument(repositoryId, "Repo", "ana", provider, new DocumentProcessRequestDto { ResourceId = Guid.NewGuid() });
+        var luis = jobs.EnqueueDocument(repositoryId, "Repo", "luis", provider, new DocumentProcessRequestDto { ResourceId = Guid.NewGuid() });
+
+        Assert.AreEqual(EnumDocumentProcessPhase.Reading, again.Phase, "the one she already has");
+        Assert.AreEqual(EnumDocumentProcessPhase.Queued, luis.Phase, "his own, waiting in the queue");
+        Assert.AreEqual(1, luis.QueuePosition);
+        Assert.IsNull(jobs.GetDocumentProgress(repositoryId, "eva"));
+        Assert.IsFalse(jobs.CancelDocument(repositoryId, "eva"), "nothing of hers to cancel");
+
+        Assert.IsTrue(jobs.CancelDocument(repositoryId, "ana"));
+        await WaitForAsync(() => jobs.GetDocumentProgress(repositoryId, "luis")?.Phase == EnumDocumentProcessPhase.Completed);
+        Assert.AreEqual(EnumDocumentProcessPhase.Canceled, jobs.GetDocumentProgress(repositoryId, "ana")!.Phase);
+        Assert.AreEqual(7, jobs.GetDocumentProgress(repositoryId, "luis")!.NoteNumber);
+        Assert.AreEqual("luis", jobs.GetDocumentProgress(repositoryId, "luis")!.RequestedBy);
+        await jobs.StopAsync(CancellationToken.None);
+    }
 }

@@ -22,7 +22,8 @@ public partial class KNoteAiTools
             Description = "Reads a document attached to a note (PDF, DOCX, ODT, TXT or MD) or, without a note, one the user attached to " +
                 "this conversation. Gives its text by pages, " + $"{AiDocumentToolRules.MaxTextLength:N0} characters at most each time: " +
                 "it says how many pages there are and how to ask for the next ones. The scanned pages say whether the AI transcribed them; " +
-                "the ones not transcribed yet can be looked at with view_document_pages. Use get_note_items to see the documents of a note."
+                "the ones not transcribed yet can be looked at with view_document_pages. Use get_note_items to see the documents of a note. " +
+                "For an extended summary or a translation of a whole document of a note, in a new note, use process_document instead."
         });
 
         yield return AIFunctionFactory.Create(ViewDocumentPagesAsync, new AIFunctionFactoryOptions
@@ -56,7 +57,7 @@ public partial class KNoteAiTools
         var (text, readError) = await document.ReadAsync();
         if (readError != null)
             return readError;
-        return AiDocumentToolRules.ForModel(document.FileName, text.Text, DocumentTextRules.IsPaged(document.Format), fromPage, toPage);
+        return AiDocumentToolRules.ForModel(document.FileName, text.Text, DocumentTextRules.IsPaged(document.Format, text.Text), fromPage, toPage);
     }
 
     [Description("Looks at pages of a PDF of a note or of the conversation.")]
@@ -175,7 +176,7 @@ public partial class KNoteAiTools
                     return (new ResourceTextDto
                     {
                         ResourceId = file.ResourceId, Name = file.FileName, FileType = file.ContentType,
-                        State = DocumentTextRules.StateOf(pages), Text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format))
+                        State = DocumentTextRules.StateOf(pages), Text = DocumentTextRules.Compose(pages, DocumentTextRules.IsPaged(format, pages.Count))
                     }, null);
                 }
                 catch (KNote.Service.Core.KntDocumentUnreadableException)

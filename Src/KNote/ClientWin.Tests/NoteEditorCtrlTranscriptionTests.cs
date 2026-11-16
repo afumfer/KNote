@@ -108,7 +108,7 @@ public class NoteEditorCtrlTranscriptionTests
         Assert.IsTrue(summarized);
         Assert.AreEqual((1, "A text.", "qwen3.5:9b"), (calls.Summaries, document.Description, document.DescriptionModel));
         Assert.IsFalse(document.IsDirty(), "updated without making the editor dirty");
-        CollectionAssert.AreEqual(new[] { "Transcribing page 1 of 2…", "Transcribing page 2 of 2…", "Summarizing the document…" }, steps);
+        CollectionAssert.AreEqual(new[] { "Transcribing page 1 of 2…", "Transcribing page 2 of 2…", "Writing the short summary of the document…" }, steps);
     }
 
     [TestMethod]

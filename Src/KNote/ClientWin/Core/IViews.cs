@@ -186,6 +186,12 @@ public interface IViewChat : IViewBase
     void VisibleView(bool visible);
 }
 
+// LongDocumentSummaryCtrl's view (KNote Atlas, stage 2): RefreshView shows everything again; RefreshProgress, only the run.
+public interface IViewLongDocumentSummary : IViewBase
+{
+    void RefreshProgress();
+}
+
 // KntChatCtrl's view: the chat room. RefreshView shows everything again; the others, only what changed.
 public interface IViewChatRoom : IViewChat
 {

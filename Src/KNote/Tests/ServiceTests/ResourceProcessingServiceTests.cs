@@ -77,8 +77,9 @@ public class ResourceProcessingServiceTests
         var sea = await AddResourceAsync(noteId, "sea.png");
         var grandma = await AddResourceAsync(noteId, "grandma.png", "La abuela Carmen en Cádiz.");
         var model = new FakeModel("A blue photo.");
-        // Saving a resource with Dapper changes the date of its note (not with EF): the run must not change it again.
+        // Saving its resources didn't change the date of the note (NoteModificationDateServiceTests); the run doesn't either.
         var noteDate = (await service.Repository.Notes.GetAsync(noteId)).Entity.ModificationDateTime;
+        Assert.AreEqual(NoteDate, noteDate);
 
         var run = await AiResourceProcessor.ProcessAsync(service, model, Ollama,
             new ResourceProcessingOptionsDto { PersonDescriptions = EnumPersonDescriptions.Lock });

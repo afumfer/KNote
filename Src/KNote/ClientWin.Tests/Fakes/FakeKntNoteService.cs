@@ -24,6 +24,9 @@ internal class FakeKntNoteService : IKntNoteService
     public Func<string, string>? UtilSanitizeHtmlImpl { get; set; }
     public Func<ResourceDto, string>? UtilGetResourceFilePathImpl { get; set; }
     public Func<Guid, Task<Result<NoteDto>>>? GetByIdAsyncImpl { get; set; }
+    public Func<NoteDto, Task<Result<NoteDto>>>? SaveAsyncImpl { get; set; }
+    public Func<Guid, Guid, Task<Result<WindowDto>>>? GetWindowAsyncImpl { get; set; }
+    public Func<WindowDto, Task<Result<WindowDto>>>? SaveWindowAsyncImpl { get; set; }
     public Func<int, Task<Result<NoteDto>>>? GetByNumberAsyncImpl { get; set; }
     public Func<NoteInfoDto, Task<Result<NoteExtendedDto>>>? NewExtendedAsyncImpl { get; set; }
     public Func<NotesFilterDto, Task<Result<List<NoteInfoDto>>>>? GetFilterAsyncImpl { get; set; }
@@ -69,7 +72,8 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null) => throw new NotSupportedException();
     public Task<Result<NoteExtendedDto>> NewExtendedAsync(NoteInfoDto entity = null) =>
         (NewExtendedAsyncImpl ?? throw new NotSupportedException($"{nameof(NewExtendedAsync)} not configured for this test"))(entity);
-    public Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true) => throw new NotSupportedException();
+    public Task<Result<NoteDto>> SaveAsync(NoteDto entity, bool updateStatus = true) =>
+        (SaveAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveAsync)} not configured for this test"))(entity);
     public Task<Result<NoteDto>> DeleteAsync(Guid noteId) => throw new NotSupportedException();
     public Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId) => throw new NotSupportedException();
     public Task<Result<List<ResourceInfoDto>>> GetResourcesInfoAsync(Guid noteId) => throw new NotSupportedException();
@@ -96,8 +100,10 @@ internal class FakeKntNoteService : IKntNoteService
     public Task<Result<TraceNoteDto>> SaveTraceNoteAsync(TraceNoteDto entity, bool forceNew = false) =>
         (SaveTraceNoteAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveTraceNoteAsync)} not configured for this test"))(entity, forceNew);
     public Task<Result<TraceNoteDto>> DeleteTraceNoteAsync(Guid traceNoteId) => throw new NotSupportedException();
-    public Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId) => throw new NotSupportedException();
-    public Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false) => throw new NotSupportedException();
+    public Task<Result<WindowDto>> GetWindowAsync(Guid noteId, Guid userId) =>
+        (GetWindowAsyncImpl ?? throw new NotSupportedException($"{nameof(GetWindowAsync)} not configured for this test"))(noteId, userId);
+    public Task<Result<WindowDto>> SaveWindowAsync(WindowDto entity, bool forceNew = false) =>
+        (SaveWindowAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveWindowAsync)} not configured for this test"))(entity);
     public Task<Result<List<Guid>>> GetVisibleNotesIdAsync(string userName) => throw new NotSupportedException();
     public Task<Result<List<Guid>>> GetAlarmNotesIdAsync(string userName, EnumNotificationType? notificationType = null) => throw new NotSupportedException();
     public Task<Result<List<KMessageDto>>> ConsumeDueAlarmsAsync(EnumNotificationType notificationType) => throw new NotSupportedException();

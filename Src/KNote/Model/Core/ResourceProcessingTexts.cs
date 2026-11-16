@@ -12,13 +12,13 @@ public static class ResourceProcessingTexts
     public const string Title = "Process pending resources";
     public const string DescribeWithAi = "Describe with AI";
 
-    public const string Description = "The AI describes the photos and summarizes the documents of the notes that have no description " +
+    public const string Description = "The AI describes the photos and writes the short summaries of the documents of the notes that have no description " +
         "of their own, KNote reads the text of the documents not read yet and the AI transcribes their scanned pages, so that the " +
         "search finds them by what they show or say. What a person wrote and locked is never changed, and none of this changes the " +
         "date of a note.";
 
     public const string PhotosOption = "Photos: describe them";
-    public const string DocumentsOption = "Documents: read their text and summarize them";
+    public const string DocumentsOption = "Documents: read their text and write their short summary";
     public const string ScannedPagesOption = "Scanned pages: transcribe them (slow: some seconds per page)";
     public const string OcrPagesOption = "Also the pages with the text of an old recognition (OCR layer), usually worse";
 
@@ -94,7 +94,7 @@ public static class ResourceProcessingTexts
         if (pages > 0)
             parts.Add($"transcribes {Pages(pages)}");
         if (documents > 0)
-            parts.Add($"summarizes {Documents(documents)}");
+            parts.Add($"writes the short summary of {Documents(documents)}");
         var ai = parts.Count > 0 ? $"The AI {Join(parts)} with the model {describer.Model}." : "";
         var read = (options.Documents || options.ScannedPages) && status.DocumentsToRead > 0
             ? $" KNote reads the text of {Documents(status.DocumentsToRead)} first (without the AI)"
@@ -131,7 +131,7 @@ public static class ResourceProcessingTexts
         {
             EnumResourceProcessingStep.ReadingDocuments => $"Reading documents: {progress.DocumentsRead} of {progress.DocumentsToReadTotal}",
             EnumResourceProcessingStep.Pages => $"Transcribing scanned pages: {progress.PagesDone} of {progress.PagesTotal}",
-            EnumResourceProcessingStep.Documents => $"Summarizing documents: {progress.DocumentsDone} of {progress.DocumentsTotal}",
+            EnumResourceProcessingStep.Documents => $"Short summaries of documents: {progress.DocumentsDone} of {progress.DocumentsTotal}",
             _ => $"Describing photos: {progress.PhotosDone} of {progress.PhotosTotal}"
         } + (progress.RemainingSeconds is double left && left > 0 ? $" · about {SemanticIndexTexts.Duration(left)} left" : ""),
         EnumResourceProcessingPhase.Completed => $"Done: {Done(progress)} in {SemanticIndexTexts.Duration(progress.ElapsedSeconds)}" + Extra(progress) + ".",
@@ -157,7 +157,7 @@ public static class ResourceProcessingTexts
         if (progress.PhotosTotal > 0 || progress.DocumentsTotal == 0 && progress.DocumentsToReadTotal == 0 && progress.PagesTotal == 0)
             parts.Add($"{Photos(progress.PhotosDescribed)} described");
         if (progress.DocumentsTotal > 0)
-            parts.Add($"{Documents(progress.DocumentsSummarized)} summarized");
+            parts.Add($"{Documents(progress.DocumentsSummarized)} with a short summary");
         if (progress.DocumentsToReadTotal > 0)
             parts.Add($"{Documents(progress.DocumentsRead)} read");
         if (progress.PagesTotal > 0)

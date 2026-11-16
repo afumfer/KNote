@@ -219,7 +219,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity)
+    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false)
     {
         try
         {
@@ -240,8 +240,9 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
                 if (entityForUpdate != null)
                 {
-                    entity.ModificationDateTime = DateTime.Now;
-                    entityForUpdate.SetSimpleDto(entity);                    
+                    if (!keepModificationDate)
+                        entity.ModificationDateTime = DateTime.Now;
+                    entityForUpdate.SetSimpleDto(entity);
                     // Delete deprecated atttibutes
                     entityForUpdate.KAttributes.RemoveAll(_ => _.KAttribute.NoteTypeId != entityForUpdate.NoteTypeId && _.KAttribute.NoteTypeId != null);
 
@@ -1517,8 +1518,10 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
             if (entityForUpdate != null)
             {                    
+                // Moving a note modifies it (KNote Atlas, stage 2, D6).
                 entityForUpdate.FolderId = folderId;
-                resRep = await notes.UpdateAsync(entityForUpdate);                    
+                entityForUpdate.ModificationDateTime = DateTime.Now;
+                resRep = await notes.UpdateAsync(entityForUpdate);
                 result.Entity = resRep.IsValid;
             }
             else
@@ -1568,6 +1571,8 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     entityForUpdate.Tags = entityForUpdate.Tags?.Replace(oldTag, newTag);
 
                 entityForUpdate.Tags = entityForUpdate.Tags?.Trim();
+                // Changing its tags modifies the note (KNote Atlas, stage 2, D6).
+                entityForUpdate.ModificationDateTime = DateTime.Now;
                 resRep = await notes.UpdateAsync(entityForUpdate);
                 result.Entity = resRep.IsValid;
             }

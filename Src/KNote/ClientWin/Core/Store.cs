@@ -71,8 +71,12 @@ public class Store
     private ResourceProcessingJob _resourceProcessing;
     public ResourceProcessingJob ResourceProcessing => _resourceProcessing ??= new ResourceProcessingJob(Events, SemanticIndex);
 
-    // Whether a long run of KNote Atlas is going on (the index or the resources): another one waits.
-    public bool AtlasJobRunning => SemanticIndex.IsRunning || ResourceProcessing.IsRunning;
+    // The summary of a long document (KNote Atlas, stage 2), one at a time and never with another run: see DocumentProcessingJob.
+    private DocumentProcessingJob _documentProcessing;
+    public DocumentProcessingJob DocumentProcessing => _documentProcessing ??= new DocumentProcessingJob(Events, SemanticIndex, () => AtlasJobRunning);
+
+    // Whether a long run of KNote Atlas is going on (the index, the resources or a long document): another one waits.
+    public bool AtlasJobRunning => SemanticIndex.IsRunning || ResourceProcessing.IsRunning || (_documentProcessing?.IsRunning ?? false);
 
     /// <summary>
     /// The model that describes the photos of a repository: its recommended LLM if it is configured here, else the provider

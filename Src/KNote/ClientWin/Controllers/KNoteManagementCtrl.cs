@@ -137,6 +137,7 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         Store.Events.Subscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
         Store.Events.Subscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
         Store.Events.Subscribe<ResourceProcessingProgressChanged>(ResourceProcessing_ProgressChanged);
+        Store.Events.Subscribe<DocumentProcessingProgressChanged>(DocumentProcessing_ProgressChanged);
     }
 
     private async void Store_ChangedActiveFolderWithServiceRef(object sender, ControllerEventArgs<FolderWithServiceRef> e)
@@ -301,8 +302,10 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     private void ResourceProcessing_ProgressChanged(ResourceProcessingProgressChanged e) => ShowAtlasJobProgress();
 
+    private void DocumentProcessing_ProgressChanged(DocumentProcessingProgressChanged e) => ShowAtlasJobProgress();
+
     private void ShowAtlasJobProgress() =>
-        View.ShowSemanticIndexProgress(Store.SemanticIndex.StatusBarText ?? Store.ResourceProcessing.StatusBarText);
+        View.ShowSemanticIndexProgress(Store.SemanticIndex.StatusBarText ?? Store.ResourceProcessing.StatusBarText ?? Store.DocumentProcessing.StatusBarText);
 
     public override void Dispose()
     {
@@ -323,10 +326,12 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         Store.Events.Unsubscribe<EntitySaved<RepositoryRef>>(RepositoryEditorCtrl_SavedEntity);
         Store.Events.Unsubscribe<SemanticIndexProgressChanged>(SemanticIndex_ProgressChanged);
         Store.Events.Unsubscribe<ResourceProcessingProgressChanged>(ResourceProcessing_ProgressChanged);
+        Store.Events.Unsubscribe<DocumentProcessingProgressChanged>(DocumentProcessing_ProgressChanged);
 
         // The app closes: the runs of KNote Atlas stop (what is done is kept).
         Store.SemanticIndex.Cancel();
         Store.ResourceProcessing.Cancel();
+        Store.DocumentProcessing.Cancel();
 
         base.Dispose();
     }
@@ -1114,6 +1119,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             View.ShowInfo(resNoteForSaveTask.ErrorMessage);
             return;
         }
+        // As read, nothing of the note changed: only the task is added, so it isn't «modified» (KNote Atlas, stage 2, D6).
+        resNoteForSaveTask.Entity.SetIsDirty(false);
         resNoteForSaveTask.Entity.Tasks.Add(task);
 
         // Refused (e.g. a Guest in this repository) or failed: the reason is in the result.
