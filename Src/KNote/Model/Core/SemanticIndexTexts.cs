@@ -44,7 +44,7 @@ public static class SemanticIndexTexts
         var text = PendingInSearch(pending);
         if (forFullRun > 0)
             text += $" {(forFullRun == pending ? (pending == 1 ? "It waits" : "They wait") : $"{forFullRun} of them {(forFullRun == 1 ? "waits" : "wait")}")} for the full " +
-                "indexing (documents not read yet, or too long).";
+                "indexing (documents not read yet, too long, or failed several times here).";
         if (!canRunIndex)
             text += " An Admin can bring the index up to date in KNote Atlas › Semantic index.";
         if (notesWithoutFiles > 0)

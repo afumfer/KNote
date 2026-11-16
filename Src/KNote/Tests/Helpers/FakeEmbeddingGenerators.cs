@@ -29,10 +29,21 @@ internal sealed class FakeEmbeddingGenerators : IKntEmbeddingGenerators
 
     public Func<IReadOnlyList<string>, CancellationToken, Task>? BeforeGenerate { get; set; }
 
-    public IKntEmbeddingGenerator Find(string model) =>
-        _models.FirstOrDefault(m => string.Equals(m, model?.Trim(), StringComparison.OrdinalIgnoreCase)) is string found
-            ? new Generator(this, found)
-            : null!;
+    // One generator per model, as AiEmbeddingGenerators (per provider's configuration): the vectors of the queries are kept per
+    // generator (KntQueryVectorCache).
+    private readonly Dictionary<string, Generator> _generators = new(StringComparer.OrdinalIgnoreCase);
+
+    public IKntEmbeddingGenerator Find(string model)
+    {
+        if (_models.FirstOrDefault(m => string.Equals(m, model?.Trim(), StringComparison.OrdinalIgnoreCase)) is not string found)
+            return null!;
+        lock (_generators)
+        {
+            if (!_generators.TryGetValue(found, out var generator))
+                _generators[found] = generator = new Generator(this, found);
+            return generator;
+        }
+    }
 
     public IReadOnlyList<string> Models => _models;
 

@@ -30,10 +30,15 @@ public class SemanticSearchRequestDto
     // (SemanticSearchResultDto.Resources), found only by their own fragments.
     public EnumResourceKind ResourceKind { get; set; }
 
+    // Whether the search brings the index up to date first (D8: some pending notes). False when the same search is only shown
+    // again (ClientWin, back to the Search/Filter tab): with a slow model, that update made every return wait for it.
+    public bool BringIndexUpToDate { get; set; } = true;
+
     // The filter by meaning: the text is its MeaningText.
     public static SemanticSearchRequestDto ForFilter(NotesFilterDto filter) => new() { Text = filter?.MeaningText, Filter = filter };
 
-    public override string ToString() => $"Text: {Text}, Filter: {(Filter != null ? "yes" : "no")}, Resources: {ResourceKind}";
+    public override string ToString() =>
+        $"Text: {Text}, Filter: {(Filter != null ? "yes" : "no")}, Resources: {ResourceKind}, Update index: {BringIndexUpToDate}";
 }
 
 /// <summary>What a search by meaning finds (KNote Atlas, stage 4, D14): the notes, or the photos or the documents.</summary>

@@ -300,7 +300,13 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   - **Indexado** (`Service/Core/KntSemanticIndexer`, independiente del host, con progreso y cancelación entre notas; lo
     hecho se conserva): *crear / actualizar* procesa las notas pendientes, *rehacer* recalcula todos los vectores
     mientras la búsqueda sigue con los anteriores, ambos Admin; *poner al día* (antes de cada búsqueda: 50 notas o unos
-    10 s, nada si hay otra ejecución en marcha) es Guest. Los vectores de una nota se piden en lotes de 32 fragmentos
+    10 s, nada si hay otra ejecución en marcha) es Guest; no se hace si la búsqueda solo se vuelve a mostrar
+    (`SemanticSearchRequestDto.BringIndexUpToDate = false`, ClientWin al volver a la pestaña *Search/Filter*). Una nota que falla
+    se reintenta en la siguiente ejecución: las puestas al día rápidas la dejan tras `MaxFailuresPerProcess` (3) fallos en el
+    proceso (y el aviso de la búsqueda la cuenta en `NotesForFullRun`); *crear / actualizar* y *rehacer* la intentan siempre
+    (`Options.RetryFailedNotes`) y dan su error: antes «Update now» se las saltaba en silencio («Done: 0 notes» con pendientes).
+    Ollama pide los vectores con un `HttpClient` de 10 minutos (`AiEmbeddingGeneratorFactory.OllamaTimeout`): con los 100 s por
+    defecto, un lote de 32 fragmentos sin GPU fallaba y se perdían los ya calculados de la nota. Los vectores de una nota se piden en lotes de 32 fragmentos
     (`EmbeddingBatchSize`: una nota de cientos en una llamada superaba el tiempo máximo del proveedor) y sus filas se
     sustituyen una vez al final; las puestas al día rápidas (antes de una búsqueda y de las parecidas) dejan para la
     indexación completa las notas con más de 64 fragmentos por calcular (`QuickRefreshMaxChunks`). Estado en `AI_INDEX_STATE` (`KntSemanticIndexState`). El
@@ -314,7 +320,8 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
     (`SemanticSearchRules`, `Model/Core`), entre todas o entre las del filtro (`NotesFilterDto.MeaningText`, «Talks
     about…»), cruzadas con las que da el filtro de siempre leído por el servicio. Los vectores se leen de
     `KntSemanticIndexCache` (uno por base de datos y clave del índice en el proceso, con delta por marca de agua y 5
-    minutos de margen); `KntSemanticSearcher` es lo común de la búsqueda y de las parecidas. El resultado
+    minutos de margen); `KntSemanticSearcher` es lo común de la búsqueda y de las parecidas. El vector del texto buscado se
+    guarda por generador (`KntQueryVectorCache`, los últimos 32 textos): repetir la búsqueda no llama al modelo. El resultado
     (`NoteSearchHitDto : NoteMinimalDto`, con parecido y fragmento) lo muestran las listas de siempre; `NoteListSorter`
     ordena en memoria como el repositorio. Sin modelo, sin su generador o sin índice, un error claro: una búsqueda no
     crea el índice.

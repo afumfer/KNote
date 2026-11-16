@@ -218,8 +218,9 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
     // KNote Atlas 4.6b: a search or a filter may take long (the repository grows, the search by meaning brings the index up to date
     // first): instead of the wait cursor, its progress in a window with «Cancel» (shown only if it lasts). Canceled, the list stays as
-    // it was. The folders tree doesn't need it: its notes are found by their folder.
-    private async Task RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef selectedNotesInServiceRef)
+    // it was. The folders tree doesn't need it: its notes are found by their folder. bringIndexUpToDate false: the same search shown
+    // again (back to the tab), without the update of the index that a new search does first (NotesSelectorCtrl.LoadSearchEntities).
+    private async Task RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef selectedNotesInServiceRef, bool bringIndexUpToDate = true)
     {
         SelectMode = EnumSelectMode.Filters;
 
@@ -239,14 +240,15 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         using var cancellation = new CancellationTokenSource();
         var what = isFilter ? "Filtering the notes" : "Searching the notes";
-        var text = $"{what}: {description}" + (byMeaning ? Environment.NewLine + "The semantic index is brought up to date first." : "");
+        var text = $"{what}: {description}" + (byMeaning && bringIndexUpToDate ? Environment.NewLine + "The semantic index is brought up to date first." : "");
         using (View.ShowWorkInProgress(isFilter ? "Filter" : "Search", text, cancellation))
         {
             if (isFilter)
                 await NotesSelectorCtrl.LoadFilteredEntities(selectedNotesInServiceRef.ServiceRef?.Service, selectedNotesInServiceRef.NotesFilter,
-                    cancellationToken: cancellation.Token);
+                    cancellationToken: cancellation.Token, bringIndexUpToDate: bringIndexUpToDate);
             else
-                await NotesSelectorCtrl.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, search, cancellationToken: cancellation.Token);
+                await NotesSelectorCtrl.LoadSearchEntities(selectedNotesInServiceRef?.ServiceRef?.Service, search, cancellationToken: cancellation.Token,
+                    bringIndexUpToDate: bringIndexUpToDate);
         }
 
         if (NotesSelectorCtrl.LastLoadCanceled)
@@ -1388,9 +1390,11 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         await RefreshActiveFolderWithServiceRef(SelectedFolderWithServiceRef);            
     }
 
+    // Back to the Search/Filter tab: the last search or filter again, without bringing the semantic index up to date (with a slow
+    // model every return waited for it); the vector of its text is the one of the first time (KntQueryVectorCache).
     public async Task GoActiveFilter()
     {            
-        await RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef);
+        await RefreshActiveFilterWithServiceRef(SelectedNotesInServiceRef, bringIndexUpToDate: false);
     }
 
     // Reloads the current notes list (folder, search or filter) from the database, so it is sorted again

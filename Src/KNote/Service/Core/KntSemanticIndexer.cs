@@ -29,7 +29,8 @@ namespace KNote.Service.Core;
 /// has their file) is written with the rest, but it stays pending: the next full run reads them. The quick updates
 /// don't write it again while it doesn't change.</item>
 /// <item>Canceled between notes and between batches: what is done is kept (a note half done, not written). A note that fails is counted, its error goes to the progress
-/// and it is tried again in the next run, MaxFailuresPerProcess times per process.</item>
+/// and it is tried again in the next run: in the quick updates, MaxFailuresPerProcess times per process (then they leave it for a
+/// full run); a full run always tries it.</item>
 /// <item>One run at a time per database in a process: a run waits for the one in progress; a refresh (before a search)
 /// does nothing while another one runs.</item>
 /// </list>
@@ -63,6 +64,9 @@ internal static class KntSemanticIndexer
         public TimeSpan? MaxDuration { get; init; }
         // A note with more fragments to calculate is left pending (QuickRefreshMaxChunks in the updates before a search).
         public int? MaxChunksPerNote { get; init; }
+        // The full runs (RunIndexAsync: «Update now», «Rebuild») try again the notes that failed MaxFailuresPerProcess times: only
+        // the quick updates leave them (before, «Update now» skipped them without saying it: «Done: 0 notes» with notes pending).
+        public bool RetryFailedNotes { get; init; }
         public IProgress<SemanticIndexProgressDto> Progress { get; init; }
         public CancellationToken CancellationToken { get; init; }
     }
@@ -195,7 +199,7 @@ internal static class KntSemanticIndexer
 
                 processed.Add(noteId);
                 var failureKey = NoteKey(service, indexKey, noteId);
-                if (Failures.TryGetValue(failureKey, out var failures) && failures >= MaxFailuresPerProcess)
+                if (!options.RetryFailedNotes && Failures.TryGetValue(failureKey, out var failures) && failures >= MaxFailuresPerProcess)
                 {
                     progress.NotesTotal = Math.Max(progress.NotesDone, progress.NotesTotal - 1);
                     continue;
@@ -357,10 +361,15 @@ internal static class KntSemanticIndexer
 
     /// <summary>
     /// Whether a quick update (before a search) left this note for a full run (KNote Atlas 4.6b: the notice of the search says it):
-    /// too many fragments to calculate, or documents not read yet. Known in this process only.
+    /// too many fragments to calculate, documents not read yet, or it failed MaxFailuresPerProcess times (a full run tries it
+    /// again and shows its error). Known in this process only.
     /// </summary>
-    public static bool IsLeftForFullRun(IKntService service, string indexKey, Guid noteId) =>
-        LeftForFullRun.ContainsKey(NoteKey(service, indexKey, noteId));
+    public static bool IsLeftForFullRun(IKntService service, string indexKey, Guid noteId)
+    {
+        var noteKey = NoteKey(service, indexKey, noteId);
+        return LeftForFullRun.ContainsKey(noteKey)
+            || Failures.TryGetValue(noteKey, out var failures) && failures >= MaxFailuresPerProcess;
+    }
 
     private static string NoteKey(IKntService service, string indexKey, Guid noteId) =>
         $"{service.RepositoryRef?.ConnectionString}|{indexKey}|{noteId}";
