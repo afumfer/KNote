@@ -31,4 +31,15 @@ public class SummaryWebApiService : BaseService, ISummaryWebApiService
     public Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
         SendAsync<List<DocumentTranslationDto>>(ct => _httpClient.GetAsync($"api/summaries/documents/{resourceId}/translations", ct),
             "Translations of the document", cancellationToken: cancellationToken);
+
+    public Task<Result<NoisePolicyDto>> GetNoisePolicyAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<NoisePolicyDto>(ct => _httpClient.GetAsync("api/summaries/noise-policy", ct), "Noise policy", cancellationToken: cancellationToken);
+
+    public Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default) =>
+        SendAsync<NoisePolicyDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/noise-policy", policy, ct), "Save the noise policy",
+            emitNotifySucess: true, cancellationToken: cancellationToken);
+
+    public Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default) =>
+        SendAsync<NoiseCountDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/noise-policy/count", policy, ct), "Count the noise",
+            cancellationToken: cancellationToken);
 }

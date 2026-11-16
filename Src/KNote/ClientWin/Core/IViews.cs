@@ -138,6 +138,13 @@ public interface IViewResourceProcessing : IViewEmbeddable
     void RefreshProgress();
 }
 
+// «Noise policy» of the KNote Atlas window (RepositoryNoisePolicyCtrl): RefreshView shows the policy being edited, RefreshCount
+// the recount of the notes it leaves out.
+public interface IViewNoisePolicy : IViewEmbeddable
+{
+    void RefreshCount();
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();

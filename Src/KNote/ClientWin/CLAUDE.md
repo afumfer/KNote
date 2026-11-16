@@ -655,12 +655,17 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
 Etapa 1 (lógica en `Service`, ver «Contexto de la IA» en el `CLAUDE.md` raíz). **Tools › KNote Atlas** (debajo de «AI
 Assistant»): una sola ventana no modal, `AtlasCtrl` (`[KntAuthorize(Guest)]`) y `AtlasForm`, con **todo lo de la IA del
 repositorio** (4.3b): una lista a la izquierda (`EnumAtlasSection`, `ListBox` dibujado a mano: un `TabControl` vertical
-gira el texto) con *Repository models*, *AI personalization*, *Semantic index* y *Process pending resources*. Las tres del
+gira el texto) con *Repository models*, *AI personalization*, *Semantic index*, *Process pending resources* y *Noise policy*. Las tres del
 Admin son las vistas incrustadas de `AtlasCtrl.ModelsCtrl`, `SemanticIndexCtrl` y `ResourcesCtrl` (ver «KNote Atlas:
 búsqueda por significado»); solo se cargan para quien puede usarlas (`IsAvailable`, el rol de su comando) y las demás se
 ven en gris con quién puede (`WhoCanUse`, en el `ToolTip`). Los modelos sin guardar se preguntan antes de cambiar de
 repositorio o cerrar. Empieza en *AI personalization*: las pestañas «Repository profile», «Glossary», «Task instructions» y
-«What the AI receives» (la tarea, un texto de prueba y el mensaje montado; un Guest no lo ve). Empieza en el repositorio activo y la lista de arriba elige otro entre los
+«What the AI receives» (la tarea, un texto de prueba y el mensaje montado; un Guest no lo ve). *Noise policy* (etapa 2, 2.2) es para
+todos: `AtlasCtrl.NoisePolicyCtrl` (`RepositoryNoisePolicyCtrl`, incluido, `IViewNoisePolicy`, `Views/RepositoryNoisePolicyForm`): los
+tipos en un `CheckedListBox`, las carpetas con su ruta, «Add folder...» (`FoldersSelectorCtrl` modal; `ChooseFolder` es `internal` para
+los tests) y «Remove», el recuento de la política sin guardar en cada cambio (el último gana) y con «Count again», y «Save policy», solo si el rol del comando
+lo permite (`CanSave`; si no, la ve con un aviso). Sus cambios sin guardar se preguntan, como los modelos, antes de cambiar de
+repositorio o cerrar, y releer la ventana tras guardar una nota en el editor no los pierde. Tests en `RepositoryNoisePolicyCtrlTests`. Empieza en el repositorio activo y la lista de arriba elige otro entre los
 enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
 otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»
 abre el `NoteEditorCtrl` de siempre y la ventana se refresca con su `SavedEntity` (el editor puede seguir abierto después

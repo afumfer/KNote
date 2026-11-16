@@ -10,7 +10,7 @@ namespace KNote.ClientWin.Views;
 // left (a section the user can't use is grayed out and says who can). The AI personalization (chapters 19–21) is this
 // form's own tabs: the repository's profile, its glossary and the instructions of the tasks show the state of their notes,
 // which are written in the note editor; «What the AI receives» shows the result of the three. The other sections are the
-// embedded views of their controllers (AtlasCtrl.ModelsCtrl, SemanticIndexCtrl, ResourcesCtrl).
+// embedded views of their controllers (AtlasCtrl.ModelsCtrl, SemanticIndexCtrl, ResourcesCtrl, NoisePolicyCtrl).
 public partial class AtlasForm : KntForm, IViewBase
 {
     private readonly AtlasCtrl _ctrl;
@@ -34,6 +34,7 @@ public partial class AtlasForm : KntForm, IViewBase
         panelModels.Controls.Add(_ctrl.ModelsCtrl.View.PanelView());
         panelSemanticIndex.Controls.Add(_ctrl.SemanticIndexCtrl.View.PanelView());
         panelResources.Controls.Add(_ctrl.ResourcesCtrl.View.PanelView());
+        panelNoisePolicy.Controls.Add(_ctrl.NoisePolicyCtrl.View.PanelView());
 
         // The height of the text and a margin, at any scale.
         listSections.ItemHeight = listSections.Font.Height + LogicalToDeviceUnits(10);
@@ -161,6 +162,7 @@ public partial class AtlasForm : KntForm, IViewBase
         EnumAtlasSection.Models => panelModels,
         EnumAtlasSection.SemanticIndex => panelSemanticIndex,
         EnumAtlasSection.Resources => panelResources,
+        EnumAtlasSection.NoisePolicy => panelNoisePolicy,
         _ => panelPersonalization
     };
 
@@ -212,7 +214,7 @@ public partial class AtlasForm : KntForm, IViewBase
 
     protected override void OnUserClosing(FormClosingEventArgs e)
     {
-        // The AI models not saved: save them, discard them or stay (async, so the closing waits for the answer).
+        // The AI models or the noise policy not saved: save them, discard them or stay (async, so the closing waits for the answer).
         if (!_closingResolved && _ctrl.HasPendingChanges)
         {
             e.Cancel = true;
@@ -235,7 +237,7 @@ public partial class AtlasForm : KntForm, IViewBase
         {
             var changed = false;
             await RunAsync(async () => changed = await _ctrl.SelectRepositoryAsync(repository));
-            // The AI models not saved kept the repository.
+            // The AI models or the noise policy not saved kept the repository.
             if (!changed)
                 ShowRepositories();
         }

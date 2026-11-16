@@ -68,6 +68,8 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity);
     Task<Result> DeleteMessageAsync(Guid messageId);
     Task<Result<int>> CountNotesInFolderAsync(Guid folderId);
+    // KNote Atlas 2.2: every note with what the noise policy needs (its folder, its type and its tags), without its texts.
+    Task<Result<List<NoteClassificationDto>>> GetClassificationsAsync();
     Task<Result<int>> CountMessagesByUserAsync(Guid userId);
     Task<Result<int>> CountWindowsByUserAsync(Guid userId);
     Task<Result<int>> CountTasksByUserAsync(Guid userId);

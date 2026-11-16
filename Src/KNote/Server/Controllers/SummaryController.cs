@@ -92,6 +92,21 @@ public class SummaryController : ControllerBase
     public IActionResult CancelDocument() =>
         Ok(new Result<bool>(_jobs.CancelDocument(_repositories.ForUser(User).RepositoryId, User?.Identity?.Name)));
 
+    // KNote Atlas 2.2 (D3): the noise policy of the session's repository. Reading it and its recount, anyone with a session;
+    // keeping it, ProjectManager and Admin, as its command.
+    [HttpGet("noise-policy")]
+    public Task<IActionResult> GetNoisePolicy() =>
+        RunAsync(nameof(GetNoisePolicy), () => _service.Summaries.GetNoisePolicyAsync());
+
+    [HttpPost("noise-policy")]
+    [Authorize(Roles = "ProjectManager, Admin")]
+    public Task<IActionResult> SaveNoisePolicy([FromBody] NoisePolicyDto policy) =>
+        RunAsync(nameof(SaveNoisePolicy), () => _service.Summaries.SaveNoisePolicyAsync(policy ?? new NoisePolicyDto()));
+
+    [HttpPost("noise-policy/count")]
+    public Task<IActionResult> CountNoise([FromBody] NoisePolicyDto policy) =>
+        RunAsync(nameof(CountNoise), () => _service.Summaries.CountNoiseAsync(policy ?? new NoisePolicyDto()));
+
     // The chat provider asked for or, without one, the repository's recommended LLM if this Server has it, else the default one.
     private async Task<(AiProviderRef Provider, Result Error)> ProviderAsync(DocumentProcessRequestDto request)
     {

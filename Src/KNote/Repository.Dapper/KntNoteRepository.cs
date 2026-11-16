@@ -1608,6 +1608,21 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<NoteClassificationDto>>> GetClassificationsAsync()
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var rows = await db.QueryAsync<NoteClassificationDto>("SELECT NoteId, NoteNumber, FolderId, NoteTypeId, Tags FROM Notes;");
+            await CloseIsTempConnection(db);
+            return new Result<List<NoteClassificationDto>>(rows.ToList());
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try

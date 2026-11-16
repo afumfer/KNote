@@ -1273,6 +1273,24 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<NoteClassificationDto>>> GetClassificationsAsync()
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
+            var rows = await notes.DbSet.AsNoTracking()
+                .Select(n => new NoteClassificationDto { NoteId = n.NoteId, NoteNumber = n.NoteNumber, FolderId = n.FolderId, NoteTypeId = n.NoteTypeId, Tags = n.Tags })
+                .ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<List<NoteClassificationDto>>(rows);
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try

@@ -30,4 +30,13 @@ public class KntSummaryService : KntServiceBase, IKntSummaryService
 
     public async Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId) =>
         await ExecuteCommand(new KntSummaryGetDocumentTranslationsAsyncCommand(Service, resourceId));
+
+    public async Task<Result<NoisePolicyDto>> GetNoisePolicyAsync() =>
+        await ExecuteCommand(new KntSummaryGetNoisePolicyAsyncCommand(Service));
+
+    public async Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy) =>
+        await ExecuteCommand(new KntSummarySaveNoisePolicyAsyncCommand(Service, policy));
+
+    public async Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy) =>
+        await ExecuteCommand(new KntSummaryCountNoiseAsyncCommand(Service, policy));
 }

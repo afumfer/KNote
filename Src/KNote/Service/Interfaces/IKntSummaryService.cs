@@ -38,4 +38,13 @@ public interface IKntSummaryService
 
     /// <summary>The translations of a document, the last one first, finished or not («Continue»). Guest.</summary>
     Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId);
+
+    /// <summary>The noise policy of the repository (2.2, D3), without the types and folders that no longer exist. Guest.</summary>
+    Task<Result<NoisePolicyDto>> GetNoisePolicyAsync();
+
+    /// <summary>Keeps the noise policy, without the types and folders that don't exist nor KNote's own ones (always out). ProjectManager.</summary>
+    Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy);
+
+    /// <summary>How many notes this policy (saved or not) leaves out of the summaries, and why. Guest.</summary>
+    Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy);
 }

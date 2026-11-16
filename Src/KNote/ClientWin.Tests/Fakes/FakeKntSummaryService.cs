@@ -27,4 +27,17 @@ internal class FakeKntSummaryService : IKntSummaryService
 
     public Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId) =>
         (GetDocumentTranslationsAsyncImpl ?? throw new NotSupportedException($"{nameof(GetDocumentTranslationsAsync)} not configured for this test"))(resourceId);
+
+    public Func<Task<Result<NoisePolicyDto>>>? GetNoisePolicyAsyncImpl { get; set; }
+    public Func<NoisePolicyDto, Task<Result<NoisePolicyDto>>>? SaveNoisePolicyAsyncImpl { get; set; }
+    public Func<NoisePolicyDto, Task<Result<NoiseCountDto>>>? CountNoiseAsyncImpl { get; set; }
+
+    public Task<Result<NoisePolicyDto>> GetNoisePolicyAsync() =>
+        (GetNoisePolicyAsyncImpl ?? throw new NotSupportedException($"{nameof(GetNoisePolicyAsync)} not configured for this test"))();
+
+    public Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy) =>
+        (SaveNoisePolicyAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveNoisePolicyAsync)} not configured for this test"))(policy);
+
+    public Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy) =>
+        (CountNoiseAsyncImpl ?? throw new NotSupportedException($"{nameof(CountNoiseAsync)} not configured for this test"))(policy);
 }

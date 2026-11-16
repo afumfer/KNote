@@ -239,16 +239,21 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   entrada del menú lateral para cualquier usuario con sesión; 4.3b): todo lo de la IA del repositorio en `RadzenTabs` a la
   izquierda (arriba en pantallas estrechas, `Atlas.razor.css`), una pestaña por parte y cada una para su rol: *Repository
   models* (`AtlasRepositoryModels`, Admin), *AI personalization* (`AtlasPersonalization`, todos), *Semantic index*
-  (`AtlasSemanticIndex`, Admin), *Process pending resources* (`AtlasResources`, Admin) y *Search evaluation*
+  (`AtlasSemanticIndex`, Admin), *Process pending resources* (`AtlasResources`, Admin), *Noise policy* (`AtlasNoisePolicy`, todos) y *Search evaluation*
   (`SearchEvaluation`, ProjectManager). Las que el usuario no puede usar se ven deshabilitadas con un candado y su `title`
   dice quién puede, y **su contenido no se dibuja** (no pide nada al Server). Solo se dibuja la pestaña elegida
   (`RadzenTabs` por defecto), así que cada una lee su estado al abrirse; la elegida va en la dirección (`?tab=models`,
-  `personalization`, `index`, `resources`, `evaluation`) y en `localStorage` (`knt-atlas-tab`); `atlas/evaluation` abre
+  `personalization`, `index`, `resources`, `noise`, `evaluation`) y en `localStorage` (`knt-atlas-tab`); `atlas/evaluation` abre
   la suya. Sin nada, *AI personalization*. Las pestañas de `KntSections` (`AtlasModels`...) dan el texto y el icono.
 - `AtlasRepositoryModels`: los modelos del repositorio, con los avisos de modelo que el Server no tiene o que es de pago
   (`installation-models`). `AtlasSemanticIndex`: estado, «Create index» / «Update now», «Rebuild», «Cancel», el progreso
   con sus errores, que se consulta mientras dura, y los índices de otros modelos con su botón para borrarlos.
   `AtlasResources` (etapa 4): «Process pending resources» (`api/resources`), con los textos de `ResourceProcessingTexts`.
+- **Noise policy** (etapa 2, 2.2; `KntSections.AtlasNoisePolicy`, `?tab=noise`, para todos): `AtlasNoisePolicy` (`IStore.Summaries`,
+  `api/summaries/noise-policy`), con `CanSave` (ProjectManager, Admin; quien no, la ve con un aviso). Los tipos en un
+  `RadzenCheckBoxList` (sin los de KNote, `NoiseRules.KNoteNoteTypeNames`), las carpetas en una lista con su ruta, «Add folder…»
+  (`KntFolderSelector`; una carpeta de KNote se rechaza con una notificación) y su botón de quitar; cada cambio vuelve a contar
+  (`KntLatestRequest`, `NoiseRules.CountLines`) la política sin guardar, y «Count again» lo repite (las notas cambian sin la política). «Save policy» (`KntSingleFlight`) y «Discard changes».
 - **Búsqueda** (`NotesSearch.razor`): selector «Words / Meaning» (`RadzenSelectBar`); el modo va en la URL
   (`mode=meaning`) y en la posición de la lista. En «Words» (4.6a, D18, las mismas que `ClientWin`): «Search in note description»,
   «Search in note tasks» y «Search in resources», **todas desmarcadas por defecto** (decidido por el propietario, aunque en

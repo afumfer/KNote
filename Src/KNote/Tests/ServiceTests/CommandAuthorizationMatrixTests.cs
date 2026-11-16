@@ -63,6 +63,8 @@ public class CommandAuthorizationMatrixTests
             "KntResourceContentGetNoteDocumentsAsyncCommand",
             // KNote Atlas, stage 2: the pace of the models in the summaries (for the estimates).
             "KntSummaryGetStateAsyncCommand", "KntSummaryGetDocumentTranslationsAsyncCommand",
+            // KNote Atlas, stage 2 (2.2): the noise policy and how many notes it leaves out (no content).
+            "KntSummaryGetNoisePolicyAsyncCommand", "KntSummaryCountNoiseAsyncCommand",
             // KNote Atlas: the windows of the context of the AI (profile, glossary, task instructions).
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
             "KntAtlasContextFindGlossaryTermsAsyncCommand",
@@ -121,7 +123,9 @@ public class CommandAuthorizationMatrixTests
             "KntSemanticSearchSaveSearchEvaluationReportAsyncCommand",
             // KNote Atlas: creating the notes of the context of the AI (who saves them, too).
             "KntAtlasContextCreateProfileAsyncCommand", "KntAtlasContextFillProfileFoldersAndTypesAsyncCommand",
-            "KntAtlasContextCreateGlossaryAsyncCommand", "KntAtlasContextCustomizeTaskAsyncCommand");
+            "KntAtlasContextCreateGlossaryAsyncCommand", "KntAtlasContextCustomizeTaskAsyncCommand",
+            // KNote Atlas, stage 2 (2.2, D3): keeping the noise policy (the person responsible).
+            "KntSummarySaveNoisePolicyAsyncCommand");
 
         // Repository administration.
         Add(nameof(EnumRoles.Admin),

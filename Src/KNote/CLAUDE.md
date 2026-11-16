@@ -532,6 +532,19 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   en `AI_SUMMARY_STATE`. **«Tiene páginas»** es `DocumentTextRules.IsPaged(formato, páginas o texto)`: un PDF o un documento con más
   de una página (el lector de TXT y MD parte por `\f`). Tests en `Tests/DocumentTranslationRulesTests`,
   `ServiceTests/DocumentTranslationServiceTests` y los de la traducción en las clases de arriba.
+- **Política de ruido (KNote Atlas, etapa 2, 2.2, CU-13, D2-D4)** (`IKntSummaryService.GetNoisePolicyAsync`, Guest;
+  `SaveNoisePolicyAsync`, ProjectManager; `CountNoiseAsync`, Guest; comandos en `KntSummaryCommands.cs`): los tipos de nota y las
+  carpetas cuyas notas no entran nunca en los resúmenes de notas. Se guarda en `SystemValues` (ámbito `AI`, clave `AI_NOISE_POLICY`,
+  protegida como las demás de ese ámbito) como un JSON con los ids (`NoisePolicyDto`); al leerla y al guardarla se quitan los que ya
+  no existen y los de KNote (`Service/Core/KntNoisePolicy`). **Cada carpeta se excluye sola**, sin sus subcarpetas, y Home es una más
+  (no hay bandeja de entrada). La regla es pura, `Model/Core/NoiseRules.Classify`, en este orden: las notas de KNote (tipos de
+  `KntConst.SystemNoteTypeNames` más `@KNoteSummary` y `@KNoteTranslation`, `NoiseRules.KNoteNoteTypeNames`, y las carpetas de
+  `SystemFolderNames`) → la etiqueta `#NoKnowledge` (siempre fuera) → `#Knowledge` (siempre dentro, gana a la política) → tipo
+  excluido → carpeta excluida. Las etiquetas (`KntConst.NoKnowledgeTag`/`KnowledgeTag`) se buscan enteras, sin mayúsculas, entre
+  espacios, comas o puntos y comas (`NoiseRules.HasTag`). El recuento de una política sin guardar (`NoiseRules.Count`, por motivo)
+  lee todas las notas con una consulta ligera, `IKntNoteRepository.GetClassificationsAsync` (id, número, carpeta, tipo y etiquetas;
+  Dapper y EF, con paridad en `Tests/RepositoryParityTests/NoteClassificationsParityTests`). Guardarla no cambia ninguna nota. Tests en
+  `Tests/NoiseRulesTests`, `ServiceTests/NoisePolicyServiceTests` y `InProcessIntegrationTests/SummaryInProcessTests`.
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

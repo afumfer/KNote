@@ -113,6 +113,13 @@ public static class KntConst
     // The summaries (KNote Atlas, stage 2, SummaryStateDto, JSON): the pace of each model, for the estimates (D18).
     public static string AiSummaryStateKey { get; private set; } = "AI_SUMMARY_STATE";
 
+    // KNote Atlas, stage 2 (2.2, D2, D3): the noise policy (the note types and the folders left out of the summaries, by their
+    // ids) and the two tags of a note that put it out or in. The tags start with '#': '@' is for KNote's note types. They are
+    // the only tags of a note that KNote reads (whole, without case).
+    public static string AiNoisePolicyKey { get; private set; } = "AI_NOISE_POLICY";
+    public static string NoKnowledgeTag { get; private set; } = "#NoKnowledge";
+    public static string KnowledgeTag { get; private set; } = "#Knowledge";
+
     // The description the apps give a resource made from an image pasted from the clipboard. Like the file name, it says
     // nothing of the resource: the semantic index leaves out the resources without a description of their own.
     public static string ClipboardImageResourceDescription { get; private set; } = "Image inserted from clipboard.";

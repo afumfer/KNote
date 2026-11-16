@@ -376,6 +376,71 @@ public class KntSummaryGetDocumentTranslationsAsyncCommand : KntCommandServiceBa
     }
 }
 
+// KNote Atlas, stage 2 (2.2, D3): the noise policy of the repository, without the types and folders that no longer exist.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntSummaryGetNoisePolicyAsyncCommand : KntCommandServiceBase<Result<NoisePolicyDto>>
+{
+    public KntSummaryGetNoisePolicyAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<NoisePolicyDto>> Execute()
+    {
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        return new Result<NoisePolicyDto>(context.Clean(await KntNoisePolicy.ReadAsync(Service)));
+    }
+}
+
+// The noise policy kept: without the types and folders that don't exist, nor KNote's own ones (always out, D4). It gives what was kept.
+[KntAuthorize(EnumRoles.ProjectManager)]
+public class KntSummarySaveNoisePolicyAsyncCommand : KntCommandServiceBase<NoisePolicyDto, Result<NoisePolicyDto>>
+{
+    public KntSummarySaveNoisePolicyAsyncCommand(IKntService service, NoisePolicyDto policy) : base(service, policy)
+    {
+
+    }
+
+    public override async Task<Result<NoisePolicyDto>> Execute()
+    {
+        var result = new Result<NoisePolicyDto>();
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var policy = context.Clean(Param);
+        var written = await KntNoisePolicy.WriteAsync(Service, policy);
+        if (!written.IsValid)
+        {
+            result.AddListErrorMessage(written.ListErrorMessage);
+            return result;
+        }
+        result.Entity = policy;
+        return result;
+    }
+}
+
+// How many notes a noise policy (the one being edited, saved or not) leaves out of the summaries, and why (NoiseRules).
+[KntAuthorize(EnumRoles.Guest)]
+public class KntSummaryCountNoiseAsyncCommand : KntCommandServiceBase<NoisePolicyDto, Result<NoiseCountDto>>
+{
+    public KntSummaryCountNoiseAsyncCommand(IKntService service, NoisePolicyDto policy) : base(service, policy)
+    {
+
+    }
+
+    public override async Task<Result<NoiseCountDto>> Execute()
+    {
+        var result = new Result<NoiseCountDto>();
+        var notes = await Repository.Notes.GetClassificationsAsync();
+        if (!notes.IsValid)
+        {
+            result.AddListErrorMessage(notes.ListErrorMessage);
+            return result;
+        }
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        result.Entity = NoiseRules.Count(notes.Entity, context.Clean(Param), context.KNoteNoteTypeIds, context.KNoteFolderIds);
+        return result;
+    }
+}
+
 // The texts of the commands of the summaries, common to both apps.
 public static class KntSummaryTexts
 {

@@ -431,6 +431,9 @@ predeterminado del Server.
   `AiProvidersCatalog`, `KntRepositories` y el usuario de la petición; aceptada la tarjeta (`POST api/aiassistant/actions`), el host
   encola el mismo trabajo para ese usuario en el repositorio de su sesión, con el modelo de `SummaryController` sin alias (el LLM
   recomendado del repositorio o el predeterminado). Con otro suyo en marcha o en cola, falla con `SummaryTexts.YoursRunning`.
+- **Política de ruido** (2.2): `GET noise-policy` y `POST noise-policy/count` (el recuento de una política sin guardar), para cualquier
+  usuario con sesión (`[Authorize]` de la clase); `POST noise-policy` la guarda, `[Authorize(Roles = "ProjectManager, Admin")]`, y
+  devuelve lo que se guardó (sin los ids que no existen ni los de KNote).
 
 ## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
 

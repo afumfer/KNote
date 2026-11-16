@@ -91,6 +91,31 @@ public class SummaryInProcessTests
         StringAssert.EndsWith(summary.Description, "The manual of the Sinclair QL.");
     }
 
+    // 2.2 (D3): the noise policy of the session's repository: anyone reads it and its recount; only ProjectManager and Admin keep it.
+    [TestMethod]
+    public async Task TheNoisePolicy_IsReadByAnyone_AndKeptByWhoIsResponsible()
+    {
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        using var service = _factory.CreateServiceForRepository(0);
+        var type = await service.NoteTypes.SaveAsync(new NoteTypeDto { Name = $"Noise {Guid.NewGuid():N}"[..20] });
+        Assert.IsTrue(type.IsValid, type.ErrorMessage);
+        var policy = new NoisePolicyDto { ExcludedNoteTypeIds = { type.Entity.NoteTypeId } };
+
+        var refused = await staff.PostAsJsonAsync("api/summaries/noise-policy", policy);
+        var saved = await _admin.PostAsJsonAsync("api/summaries/noise-policy", policy);
+        var read = await staff.GetFromJsonAsync<Result<NoisePolicyDto>>("api/summaries/noise-policy", _json);
+        var count = await staff.PostAsJsonAsync("api/summaries/noise-policy/count", policy);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, refused.StatusCode);
+        Assert.IsTrue(saved.IsSuccessStatusCode, await saved.Content.ReadAsStringAsync());
+        CollectionAssert.Contains(read!.Entity.ExcludedNoteTypeIds, type.Entity.NoteTypeId);
+        var countBody = await count.Content.ReadAsStringAsync();
+        Assert.IsTrue(count.IsSuccessStatusCode, countBody);
+        var counted = JsonSerializer.Deserialize<Result<NoiseCountDto>>(countBody, _json)!.Entity;
+        Assert.IsGreaterThan(0, counted.Notes);
+    }
+
     // 2.1b2b: process_document of the assistant, accepted in its card, queues the same run for the user of the conversation.
     [TestMethod]
     public async Task TheAssistant_StartsTheSummaryOfADocument_WhenItsCardIsAccepted()
