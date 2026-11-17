@@ -1,6 +1,7 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.ClientWin.Utils;
+using KNote.Model;
 using KNote.Model.Core;
 
 namespace KNote.ClientWin.Views;
@@ -26,6 +27,16 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
 
         _ctrl = ctrl;
         labelDescription.Text = NoteRelevanceRules.SelectionHelp;
+        numericWords.Minimum = PeriodSummaryRules.MinWords;
+        numericWords.Maximum = PeriodSummaryRules.MaxWords;
+        numericWords.Value = PeriodSummaryRules.DefaultWords;
+        comboLanguage.Items.AddRange(SummaryTexts.Languages.ToArray<object>());
+        comboModel.Format += (_, e) => e.Value = e.ListItem is AiProviderRef p ? $"{p.Alias} ({p.Model})" : e.Value;
+        // Each field of the summary goes to the ctrl as it changes: a refresh of the view shows what the user wrote.
+        textSubject.TextChanged += (_, _) => { if (!_refreshing) _ctrl.Subject = textSubject.Text; };
+        numericWords.ValueChanged += (_, _) => { if (!_refreshing) _ctrl.Words = (int)numericWords.Value; };
+        comboLanguage.TextChanged += (_, _) => { if (!_refreshing) _ctrl.Language = comboLanguage.Text; };
+        comboModel.SelectedIndexChanged += (_, _) => { if (!_refreshing) _ctrl.Provider = comboModel.SelectedItem as AiProviderRef; };
         buttonFolder.AlignToTextBox(textFolder);
         buttonClearFolder.AlignToTextBox(textFolder);
     }
@@ -64,6 +75,7 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
             buttonCancelClassify.Visible = progressClassify.Visible = _ctrl.IsClassifying;
             progressClassify.Maximum = Math.Max(_ctrl.ClassifyTotal, 1);
             progressClassify.Value = Math.Min(_ctrl.ClassifyDone, progressClassify.Maximum);
+            RefreshSummary();
         }
         finally
         {
@@ -71,9 +83,76 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
         }
     }
 
+    // The summary (2.5b): what the ctrl has, without rewriting what is being written.
+    private void RefreshSummary()
+    {
+        if (!textSubject.Focused)
+            textSubject.Text = _ctrl.Subject;
+        textSubject.PlaceholderText = _ctrl.DefaultSubject;
+        numericWords.Value = Math.Clamp(_ctrl.Words, PeriodSummaryRules.MinWords, PeriodSummaryRules.MaxWords);
+        if (!comboLanguage.Focused)
+            comboLanguage.Text = _ctrl.Language;
+        // The first item, the repository's recommended model (Provider null).
+        if (!comboModel.Items.OfType<AiProviderRef>().SequenceEqual(_ctrl.Providers))
+        {
+            comboModel.Items.Clear();
+            comboModel.Items.Add(RepositoryPeriodSummaryCtrl.RecommendedModel);
+            comboModel.Items.AddRange(_ctrl.Providers.ToArray<object>());
+        }
+        comboModel.SelectedItem = (object)_ctrl.Provider ?? RepositoryPeriodSummaryCtrl.RecommendedModel;
+
+        var running = _ctrl.IsRunning;
+        textSubject.Enabled = numericWords.Enabled = comboLanguage.Enabled = comboModel.Enabled = !running;
+        labelEstimate.Text = _ctrl.EstimateText;
+        progressSummary.Visible = running;
+        var progress = _ctrl.Progress;
+        progressSummary.Maximum = Math.Max(progress?.CallsTotal ?? 1, 1);
+        progressSummary.Value = Math.Min(progress?.CallsDone ?? 0, progressSummary.Maximum);
+        progressSummary.Style = progress?.CallsTotal > 0 ? ProgressBarStyle.Continuous : ProgressBarStyle.Marquee;
+        labelProgress.Text = running ? $"{_ctrl.ProgressText}\r\n{SummaryTexts.PeriodRunning}"
+            : _ctrl.OtherRunning ? SummaryTexts.OtherRunning : _ctrl.ProgressText;
+        buttonCancelSummary.Visible = running;
+        linkOpenNote.Visible = _ctrl.CanOpenNote;
+        buttonEstimate.Enabled = !running && _ctrl.Selection?.Notes.Any(n => n.IsIncluded) == true;
+        buttonGenerate.Enabled = _ctrl.CanGenerate;
+    }
+
+    // The fields of the summary, into the ctrl before it is used.
+    private void SummaryToCtrl()
+    {
+        _ctrl.Subject = textSubject.Text;
+        _ctrl.Words = (int)numericWords.Value;
+        _ctrl.Language = comboLanguage.Text;
+        _ctrl.Provider = comboModel.SelectedItem as AiProviderRef;
+    }
+
     #endregion
 
     #region Form event handlers
+
+    private async void buttonEstimate_Click(object sender, EventArgs e)
+    {
+        SummaryToCtrl();
+        Cursor = Cursors.WaitCursor;
+        try
+        {
+            await _ctrl.EstimateAsync();
+        }
+        finally
+        {
+            Cursor = Cursors.Default;
+        }
+    }
+
+    private async void buttonGenerate_Click(object sender, EventArgs e)
+    {
+        SummaryToCtrl();
+        await _ctrl.GenerateAsync();
+    }
+
+    private void buttonCancelSummary_Click(object sender, EventArgs e) => _ctrl.CancelSummary();
+
+    private async void linkOpenNote_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) => await _ctrl.OpenSummaryNoteAsync();
 
     private async void period_Changed(object sender, EventArgs e)
     {

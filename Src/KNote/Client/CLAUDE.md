@@ -266,7 +266,13 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   `dialogService.Confirm` (notas, llamadas, el modelo de `IStore.Notes.GetPhotoDescriberAsync` y si es de pago), pide los lotes uno a uno
   (`IStore.Summaries.ClassifyDoubtfulAsync`, `api/summaries/selection/classify`, sin notificar sus errores: se dicen una vez al final)
   con su progreso y «Cancel» (cancela la petición en curso; lo respondido queda) y vuelve a pedir la selección. La 2.5 añade asunto,
-  palabras, modelo, idioma, «Estimate» y «Generate».
+  palabras, modelo, idioma, «Estimate» y «Generate». **El resumen** (2.5b): una segunda `KntFormSection` con asunto (vacío: el de
+  `PeriodSummaryRules.DefaultSubject`, como marcador), palabras (`RadzenNumeric` de 100 a 3.000), idioma (`RadzenAutoComplete`, el último del
+  repositorio en `localStorage`, `KNotePeriodSummaryLanguage:{RepositoryId}`) y modelo (el recomendado, alias vacío, u otro de
+  `GetProvidersAsync`); «Estimate» y «Generate» van por `IStore.Summaries.EstimateDocumentAsync`/`SummarizeDocumentAsync` con
+  `Kind = PeriodSummary` (el mismo trabajo de la cola, uno por usuario: si el usuario tiene un documento en marcha, `SummaryTexts.YoursRunning`),
+  el progreso cada 1,5 s (`SummaryTexts.Progress`), «Cancel» y «Open the note» (`KntWindows.OpenEditAsync`); al terminar, la selección se
+  vuelve a pedir (la IA pudo clasificar dudosas).
 - **Búsqueda** (`NotesSearch.razor`): selector «Words / Meaning» (`RadzenSelectBar`); el modo va en la URL
   (`mode=meaning`) y en la posición de la lista. En «Words» (4.6a, D18, las mismas que `ClientWin`): «Search in note description»,
   «Search in note tasks» y «Search in resources», **todas desmarcadas por defecto** (decidido por el propietario, aunque en

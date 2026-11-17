@@ -47,6 +47,23 @@ namespace KNote.ClientWin.Views
             this.buttonReview = new System.Windows.Forms.Button();
             this.labelPending = new System.Windows.Forms.Label();
             this.linkRelevance = new System.Windows.Forms.LinkLabel();
+            this.labelSummary = new System.Windows.Forms.Label();
+            this.labelSubject = new System.Windows.Forms.Label();
+            this.textSubject = new System.Windows.Forms.TextBox();
+            this.labelWords = new System.Windows.Forms.Label();
+            this.numericWords = new System.Windows.Forms.NumericUpDown();
+            this.labelLanguage = new System.Windows.Forms.Label();
+            this.comboLanguage = new System.Windows.Forms.ComboBox();
+            this.labelModel = new System.Windows.Forms.Label();
+            this.comboModel = new System.Windows.Forms.ComboBox();
+            this.labelEstimate = new System.Windows.Forms.Label();
+            this.progressSummary = new System.Windows.Forms.ProgressBar();
+            this.labelProgress = new System.Windows.Forms.Label();
+            this.linkOpenNote = new System.Windows.Forms.LinkLabel();
+            this.buttonCancelSummary = new System.Windows.Forms.Button();
+            this.buttonEstimate = new System.Windows.Forms.Button();
+            this.buttonGenerate = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.numericWords)).BeginInit();
             this.progressClassify = new System.Windows.Forms.ProgressBar();
             this.buttonClassify = new System.Windows.Forms.Button();
             this.buttonCancelClassify = new System.Windows.Forms.Button();
@@ -60,6 +77,22 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.progressClassify);
             this.panelForm.Controls.Add(this.labelPending);
             this.panelForm.Controls.Add(this.linkRelevance);
+            this.panelForm.Controls.Add(this.labelSummary);
+            this.panelForm.Controls.Add(this.labelSubject);
+            this.panelForm.Controls.Add(this.textSubject);
+            this.panelForm.Controls.Add(this.labelWords);
+            this.panelForm.Controls.Add(this.numericWords);
+            this.panelForm.Controls.Add(this.labelLanguage);
+            this.panelForm.Controls.Add(this.comboLanguage);
+            this.panelForm.Controls.Add(this.labelModel);
+            this.panelForm.Controls.Add(this.comboModel);
+            this.panelForm.Controls.Add(this.labelEstimate);
+            this.panelForm.Controls.Add(this.progressSummary);
+            this.panelForm.Controls.Add(this.labelProgress);
+            this.panelForm.Controls.Add(this.linkOpenNote);
+            this.panelForm.Controls.Add(this.buttonCancelSummary);
+            this.panelForm.Controls.Add(this.buttonEstimate);
+            this.panelForm.Controls.Add(this.buttonGenerate);
             this.panelForm.Controls.Add(this.buttonReview);
             this.panelForm.Controls.Add(this.labelCount);
             this.panelForm.Controls.Add(this.textMeaning);
@@ -76,6 +109,7 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.dateFrom);
             this.panelForm.Controls.Add(this.labelFrom);
             this.panelForm.Controls.Add(this.labelDescription);
+            this.panelForm.AutoScroll = true;
             this.panelForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelForm.Location = new System.Drawing.Point(0, 0);
             this.panelForm.Name = "panelForm";
@@ -260,6 +294,165 @@ namespace KNote.ClientWin.Views
             this.linkRelevance.Visible = false;
             this.linkRelevance.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkRelevance_LinkClicked);
             //
+            // labelSummary
+            //
+            this.labelSummary.AutoSize = true;
+            this.labelSummary.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.labelSummary.Location = new System.Drawing.Point(9, 416);
+            this.labelSummary.Name = "labelSummary";
+            this.labelSummary.Size = new System.Drawing.Size(60, 15);
+            this.labelSummary.TabIndex = 30;
+            this.labelSummary.Text = "Summary";
+            //
+            // labelSubject
+            //
+            this.labelSubject.AutoSize = true;
+            this.labelSubject.Location = new System.Drawing.Point(9, 440);
+            this.labelSubject.Name = "labelSubject";
+            this.labelSubject.Size = new System.Drawing.Size(250, 15);
+            this.labelSubject.TabIndex = 31;
+            this.labelSubject.Text = "Subject (empty: the period and the filters)";
+            //
+            // textSubject
+            //
+            this.textSubject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textSubject.Location = new System.Drawing.Point(9, 458);
+            this.textSubject.Name = "textSubject";
+            this.textSubject.Size = new System.Drawing.Size(500, 23);
+            this.textSubject.TabIndex = 12;
+            //
+            // labelWords
+            //
+            this.labelWords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelWords.AutoSize = true;
+            this.labelWords.Location = new System.Drawing.Point(517, 440);
+            this.labelWords.Name = "labelWords";
+            this.labelWords.Size = new System.Drawing.Size(40, 15);
+            this.labelWords.TabIndex = 32;
+            this.labelWords.Text = "Words";
+            //
+            // numericWords
+            //
+            this.numericWords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.numericWords.Increment = new decimal(new int[] { 100, 0, 0, 0 });
+            this.numericWords.Location = new System.Drawing.Point(517, 458);
+            this.numericWords.Name = "numericWords";
+            this.numericWords.Size = new System.Drawing.Size(100, 23);
+            this.numericWords.TabIndex = 13;
+            //
+            // labelLanguage
+            //
+            this.labelLanguage.AutoSize = true;
+            this.labelLanguage.Location = new System.Drawing.Point(9, 490);
+            this.labelLanguage.Name = "labelLanguage";
+            this.labelLanguage.Size = new System.Drawing.Size(200, 15);
+            this.labelLanguage.TabIndex = 33;
+            this.labelLanguage.Text = "Language (empty: of the notes)";
+            //
+            // comboLanguage
+            //
+            this.comboLanguage.FormattingEnabled = true;
+            this.comboLanguage.Location = new System.Drawing.Point(9, 508);
+            this.comboLanguage.Name = "comboLanguage";
+            this.comboLanguage.Size = new System.Drawing.Size(190, 23);
+            this.comboLanguage.TabIndex = 14;
+            //
+            // labelModel
+            //
+            this.labelModel.AutoSize = true;
+            this.labelModel.Location = new System.Drawing.Point(210, 490);
+            this.labelModel.Name = "labelModel";
+            this.labelModel.Size = new System.Drawing.Size(41, 15);
+            this.labelModel.TabIndex = 34;
+            this.labelModel.Text = "Model";
+            //
+            // comboModel
+            //
+            this.comboModel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboModel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboModel.FormattingEnabled = true;
+            this.comboModel.Location = new System.Drawing.Point(210, 508);
+            this.comboModel.Name = "comboModel";
+            this.comboModel.Size = new System.Drawing.Size(407, 23);
+            this.comboModel.TabIndex = 15;
+            //
+            // labelEstimate
+            //
+            this.labelEstimate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelEstimate.Location = new System.Drawing.Point(9, 542);
+            this.labelEstimate.Name = "labelEstimate";
+            this.labelEstimate.Size = new System.Drawing.Size(608, 64);
+            this.labelEstimate.TabIndex = 35;
+            //
+            // progressSummary
+            //
+            this.progressSummary.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressSummary.Location = new System.Drawing.Point(9, 610);
+            this.progressSummary.Name = "progressSummary";
+            this.progressSummary.Size = new System.Drawing.Size(608, 8);
+            this.progressSummary.TabIndex = 36;
+            this.progressSummary.Visible = false;
+            //
+            // labelProgress
+            //
+            this.labelProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelProgress.Location = new System.Drawing.Point(9, 622);
+            this.labelProgress.Name = "labelProgress";
+            this.labelProgress.Size = new System.Drawing.Size(608, 36);
+            this.labelProgress.TabIndex = 37;
+            //
+            // linkOpenNote
+            //
+            this.linkOpenNote.AutoSize = true;
+            this.linkOpenNote.Location = new System.Drawing.Point(9, 670);
+            this.linkOpenNote.Name = "linkOpenNote";
+            this.linkOpenNote.Size = new System.Drawing.Size(85, 15);
+            this.linkOpenNote.TabIndex = 19;
+            this.linkOpenNote.TabStop = true;
+            this.linkOpenNote.Text = "Open the note";
+            this.linkOpenNote.Visible = false;
+            this.linkOpenNote.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkOpenNote_LinkClicked);
+            //
+            // buttonCancelSummary
+            //
+            this.buttonCancelSummary.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancelSummary.Location = new System.Drawing.Point(197, 664);
+            this.buttonCancelSummary.Name = "buttonCancelSummary";
+            this.buttonCancelSummary.Size = new System.Drawing.Size(100, 29);
+            this.buttonCancelSummary.TabIndex = 18;
+            this.buttonCancelSummary.Text = "Cancel";
+            this.buttonCancelSummary.UseVisualStyleBackColor = true;
+            this.buttonCancelSummary.Visible = false;
+            this.buttonCancelSummary.Click += new System.EventHandler(this.buttonCancelSummary_Click);
+            //
+            // buttonEstimate
+            //
+            this.buttonEstimate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonEstimate.Location = new System.Drawing.Point(303, 664);
+            this.buttonEstimate.Name = "buttonEstimate";
+            this.buttonEstimate.Size = new System.Drawing.Size(150, 29);
+            this.buttonEstimate.TabIndex = 16;
+            this.buttonEstimate.Text = "&Estimate";
+            this.buttonEstimate.UseVisualStyleBackColor = true;
+            this.buttonEstimate.Click += new System.EventHandler(this.buttonEstimate_Click);
+            //
+            // buttonGenerate
+            //
+            this.buttonGenerate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonGenerate.Location = new System.Drawing.Point(467, 664);
+            this.buttonGenerate.Name = "buttonGenerate";
+            this.buttonGenerate.Size = new System.Drawing.Size(150, 29);
+            this.buttonGenerate.TabIndex = 17;
+            this.buttonGenerate.Text = "&Generate";
+            this.buttonGenerate.UseVisualStyleBackColor = true;
+            this.buttonGenerate.Click += new System.EventHandler(this.buttonGenerate_Click);
+            //
             // progressClassify
             //
             this.progressClassify.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -303,6 +496,7 @@ namespace KNote.ClientWin.Views
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "RepositoryPeriodSummaryForm";
             this.Text = "Period summary";
+            ((System.ComponentModel.ISupportInitialize)(this.numericWords)).EndInit();
             this.panelForm.ResumeLayout(false);
             this.panelForm.PerformLayout();
             this.ResumeLayout(false);
@@ -330,6 +524,22 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.Button buttonReview;
         private System.Windows.Forms.Label labelPending;
         private System.Windows.Forms.LinkLabel linkRelevance;
+        private System.Windows.Forms.Label labelSummary;
+        private System.Windows.Forms.Label labelSubject;
+        private System.Windows.Forms.TextBox textSubject;
+        private System.Windows.Forms.Label labelWords;
+        private System.Windows.Forms.NumericUpDown numericWords;
+        private System.Windows.Forms.Label labelLanguage;
+        private System.Windows.Forms.ComboBox comboLanguage;
+        private System.Windows.Forms.Label labelModel;
+        private System.Windows.Forms.ComboBox comboModel;
+        private System.Windows.Forms.Label labelEstimate;
+        private System.Windows.Forms.ProgressBar progressSummary;
+        private System.Windows.Forms.Label labelProgress;
+        private System.Windows.Forms.LinkLabel linkOpenNote;
+        private System.Windows.Forms.Button buttonCancelSummary;
+        private System.Windows.Forms.Button buttonEstimate;
+        private System.Windows.Forms.Button buttonGenerate;
         private System.Windows.Forms.ProgressBar progressClassify;
         private System.Windows.Forms.Button buttonClassify;
         private System.Windows.Forms.Button buttonCancelClassify;

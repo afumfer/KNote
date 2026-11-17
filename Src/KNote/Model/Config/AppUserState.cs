@@ -68,6 +68,9 @@ public class SessionState
     // The language of the last translation of each repository (2.1b2): the one proposed the next time.
     public List<RepositoryLanguageState> TranslationLanguages { get; set; } = new();
 
+    // The language of the last period summary of each repository (2.5b, D14): the one proposed the next time.
+    public List<RepositoryLanguageState> PeriodSummaryLanguages { get; set; } = new();
+
     // Set automatically when a connection attempt to the chat hub fails, so the app stops retrying (and
     // freezing) on every startup until the user fixes the chat room settings or signs in again from Options.
     public bool ChatHubAutoConnectDisabled { get; set; }

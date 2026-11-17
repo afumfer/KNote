@@ -38,11 +38,28 @@ public static class SummaryTexts
         "to it. The note of the document doesn't change. If it stops, «Continue» goes on with it.";
     public const string TranslateRunning = "A translation is being written: it goes on if you close this window.";
 
-    public static string TitleOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateTitle : Title;
+    // The summary of a period (2.5b): the section «Period summary» of KNote Atlas.
+    public const string PeriodTitle = "Period summary";
+    public const string PeriodRunning = "A summary is being written: it goes on if you leave this page or close the window.";
+    public const string SubjectHelp = "Empty: the period and the subject of the filters.";
+    public const string PeriodLanguageHelp = "Empty: the language of the notes.";
+    public static string WordsHelp => $"From {PeriodSummaryRules.MinWords} to {PeriodSummaryRules.MaxWords:N0}.";
+
+    public static string TitleOf(EnumDocumentProcessKind kind) => kind switch
+    {
+        EnumDocumentProcessKind.Translate => TranslateTitle,
+        EnumDocumentProcessKind.PeriodSummary => PeriodTitle,
+        _ => Title
+    };
 
     public static string IntroOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateIntro : Intro;
 
-    public static string RunningOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateRunning : Running;
+    public static string RunningOf(EnumDocumentProcessKind kind) => kind switch
+    {
+        EnumDocumentProcessKind.Translate => TranslateRunning,
+        EnumDocumentProcessKind.PeriodSummary => PeriodRunning,
+        _ => Running
+    };
 
     public static string LanguageHelpOf(EnumDocumentProcessKind kind) => kind == EnumDocumentProcessKind.Translate ? TranslateLanguageHelp : LanguageHelp;
 
@@ -80,6 +97,8 @@ public static class SummaryTexts
     /// <summary>What the estimate says, line by line.</summary>
     public static List<string> EstimateLines(DocumentProcessEstimateDto estimate, string providerName)
     {
+        if (estimate.Kind == EnumDocumentProcessKind.PeriodSummary)
+            return PeriodEstimateLines(estimate, providerName);
         var lines = new List<string>
         {
             estimate.Paged
@@ -97,6 +116,22 @@ public static class SummaryTexts
         return lines;
     }
 
+    // A period summary: its notes, the doubtful ones asked first, the calls, the time and, of a paid model, that the notes are sent.
+    private static List<string> PeriodEstimateLines(DocumentProcessEstimateDto estimate, string providerName)
+    {
+        var lines = new List<string>
+        {
+            $"{(estimate.Notes == 1 ? "1 note" : $"{estimate.Notes:N0} notes")}, {estimate.Characters:N0} characters: {Calls(estimate.Calls)} to the model.",
+            estimate.Seconds is double seconds ? $"About {Duration(seconds)} with {estimate.Model}."
+                : $"{estimate.Model}: no time yet, its first period summary will say its pace."
+        };
+        if (estimate.DoubtfulToClassify > 0)
+            lines.Insert(1, $"First, the AI is asked about {(estimate.DoubtfulToClassify == 1 ? "1 doubtful note" : $"{estimate.DoubtfulToClassify} doubtful notes")} (in those calls).");
+        if (estimate.IsPaid)
+            lines.Add($"The notes are sent to {providerName ?? "the provider"}, which charges for it.");
+        return lines;
+    }
+
     public static string MissingPages(IReadOnlyCollection<int> pages) =>
         $"Scanned pages without text are left out ({pages.Count}: {LongDocumentRules.Ranges(pages)}). Transcribe them first to include them too.";
 
@@ -108,10 +143,13 @@ public static class SummaryTexts
         var what = progress.Phase switch
         {
             EnumDocumentProcessPhase.Queued => progress.QueuePosition > 0 ? $"Waiting in the queue ({progress.QueuePosition})" : "Waiting in the queue",
-            EnumDocumentProcessPhase.Preparing => "Preparing the document",
-            EnumDocumentProcessPhase.Reading => $"Reading the document: {progress.CallsDone} of {progress.CallsTotal}",
+            EnumDocumentProcessPhase.Preparing => progress.Kind == EnumDocumentProcessKind.PeriodSummary ? "Preparing the notes" : "Preparing the document",
+            EnumDocumentProcessPhase.Classifying => $"Asking the AI about the doubtful notes: {progress.CallsDone} of {progress.CallsTotal}",
+            EnumDocumentProcessPhase.Reading => progress.Kind == EnumDocumentProcessKind.PeriodSummary
+                ? $"Reading the notes: {progress.CallsDone} of {progress.CallsTotal}"
+                : $"Reading the document: {progress.CallsDone} of {progress.CallsTotal}",
             EnumDocumentProcessPhase.Joining => $"Joining its notes: {progress.CallsDone} of {progress.CallsTotal}",
-            EnumDocumentProcessPhase.Writing => "Writing the extended summary",
+            EnumDocumentProcessPhase.Writing => progress.Kind == EnumDocumentProcessKind.PeriodSummary ? "Writing the summary" : "Writing the extended summary",
             EnumDocumentProcessPhase.Saving => "Saving the note",
             EnumDocumentProcessPhase.Translating => progress.Page is int page
                 ? $"Translating: page {page} of {progress.PagesCount}"
@@ -141,5 +179,10 @@ public static class SummaryTexts
 
     private static string Calls(int calls) => calls == 1 ? "1 call" : $"{calls} calls";
 
-    private static string What(DocumentProcessProgressDto progress) => progress.Kind == EnumDocumentProcessKind.Translate ? "translation" : "extended summary";
+    private static string What(DocumentProcessProgressDto progress) => progress.Kind switch
+    {
+        EnumDocumentProcessKind.Translate => "translation",
+        EnumDocumentProcessKind.PeriodSummary => "summary",
+        _ => "extended summary"
+    };
 }
