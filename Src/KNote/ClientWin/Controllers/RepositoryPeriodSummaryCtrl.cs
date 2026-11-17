@@ -1,8 +1,10 @@
+using KNote.Ai;
 using KNote.ClientWin.Core;
 using KNote.Model;
 using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Extensions.AI;
 
 namespace KNote.ClientWin.Controllers;
 
@@ -11,7 +13,8 @@ namespace KNote.ClientWin.Controllers;
 /// of the selection of a summary (the period, with «From the beginning»; the folder and its subfolders; the keywords; «Talks about…»,
 /// only if the repository can search by meaning here), its counts (Service.Summaries.PrepareSelectionAsync, prepared again at each
 /// change: the last one wins) and «Review selection» (ReviewSelectionCtrl, modal; the selection is prepared again with what it
-/// kept). 2.5 adds the subject, the words, the model, the language, «Estimate» and «Generate». Included in the KNote Atlas window (no
+/// kept). The doubtful notes are asked to the AI on demand (2.4, C1-C6: ClassifyAsync, a batch at a time with AiNoteClassifier and the
+/// repository's recommended model, cancelled between batches; what was asked stays). 2.5 adds the subject, the words, the model, the language, «Estimate» and «Generate». Included in the KNote Atlas window (no
 /// [KntAuthorize]: it decides, by the role of the command, Staff).
 /// </summary>
 public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSummary>
@@ -19,6 +22,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
     #region Private fields
 
     private int _version;
+    private CancellationTokenSource _classifyCancellation;
 
     #endregion
 
@@ -60,7 +64,28 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
     public string CountText => Selection != null ? NoteRelevanceRules.CountText(Selection)
         : LoadFailed ? "The selection could not be prepared." : "Preparing the selection…";
 
-    public bool CanReview => Selection?.Notes.Count > 0;
+    public bool CanReview => Selection?.Notes.Count > 0 && !IsClassifying;
+
+    // «Note relevance», where the corrections and the answers of the AI are kept: the link of the section (empty until it exists).
+    public string RelevanceNoteText => Selection?.RelevanceNote is { } note ? $"Note relevance (#{note.NoteNumber})" : "";
+
+    // 2.4: the doubtful notes that can be asked to the AI, and the run that asks them.
+    public bool CanClassify => !IsClassifying && NoteClassificationRules.PendingCount(Selection) > 0;
+
+    public bool IsClassifying { get; private set; }
+
+    public string PendingText => IsClassifying ? ClassifyProgressText : NoteClassificationRules.PendingText(Selection);
+
+    public string ClassifyProgressText { get; private set; } = "";
+
+    public int ClassifyDone { get; private set; }
+
+    public int ClassifyTotal { get; private set; }
+
+    // The model of the doubtful notes (the repository's recommended LLM) and its client (replaced by the tests).
+    internal Func<IKntService, Task<(AiProviderRef Provider, ResourceDescriberDto Info)>> ChooseModel { get; set; }
+
+    internal Func<AiProviderRef, IChatClient> CreateChatClient { get; set; }
 
     public NoteSelectionRequestDto Request => new()
     {
@@ -164,6 +189,99 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
         if (saved)
             await PrepareAsync();
         return saved;
+    }
+
+    /// <summary>
+    /// «Classify doubtful notes with AI…»: after saying what it does (how many notes and calls, the model and, if it is paid, that
+    /// the beginning of the notes is sent to its provider), asks the batches one by one; the selection is prepared again after.
+    /// </summary>
+    public async Task<bool> ClassifyAsync()
+    {
+        var toClassify = NoteClassificationRules.ToClassify(Selection);
+        if (IsClassifying || toClassify.Count == 0 || Service == null)
+            return false;
+
+        var service = Service;
+        var (provider, info) = await (ChooseModel ?? Store.GetPhotoDescriberAsync)(service);
+        if (provider == null || !info.CanSummarize)
+        {
+            View.ShowInfo(info?.Message ?? "There is no AI model to classify the notes.", ControllerName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return false;
+        }
+        if (View.ShowInfo(NoteClassificationRules.Confirmation(toClassify.Count, info.Model, info.IsPaid), "Classify doubtful notes",
+            MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK)
+            return false;
+
+        var batches = NoteClassificationRules.Batches(toClassify.Select(n => n.NoteId));
+        var chatClient = (CreateChatClient ?? (p => AiChatClientFactory.Create(p)))(provider);
+        var answered = 0;
+        var failed = 0;
+        string firstError = null;
+        IsClassifying = true;
+        ClassifyTotal = batches.Count;
+        ClassifyDone = 0;
+        _classifyCancellation = new CancellationTokenSource();
+        try
+        {
+            foreach (var batch in batches)
+            {
+                if (_classifyCancellation.IsCancellationRequested)
+                    break;
+                ClassifyProgressText = NoteClassificationRules.Progress(ClassifyDone + 1, ClassifyTotal);
+                View.RefreshView();
+                try
+                {
+                    var result = await AiNoteClassifier.ClassifyAsync(service, chatClient, provider, batch, Store.Logger, _classifyCancellation.Token);
+                    if (result.IsValid)
+                        answered += result.Entity.Count;
+                    else
+                    {
+                        failed++;
+                        firstError ??= result.ErrorMessage;
+                        if (result.NotAuthorized)
+                            break;
+                    }
+                }
+                catch (OperationCanceledException) when (_classifyCancellation.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    firstError ??= ex.Message;
+                }
+                ClassifyDone++;
+            }
+        }
+        finally
+        {
+            IsClassifying = false;
+            _classifyCancellation.Dispose();
+            _classifyCancellation = null;
+        }
+
+        View.ShowInfo(NoteClassificationRules.Done(answered, toClassify.Count, failed) + (firstError == null ? "" : $"\n\n{firstError}"),
+            ControllerName, MessageBoxButtons.OK, failed == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+        await PrepareAsync();
+        return failed == 0;
+    }
+
+    public void CancelClassification() => _classifyCancellation?.Cancel();
+
+    // The note «Note relevance» in the note editor of always (a Staff sees it; saving it, the Service refuses).
+    public async Task<bool> OpenRelevanceNoteAsync()
+    {
+        if (Selection?.RelevanceNote is not { } relevance || Service == null)
+            return false;
+        var noteEditorCtrl = new NoteEditorCtrl(Store);
+        if (!await noteEditorCtrl.LoadModelById(Service, relevance.NoteId, false))
+        {
+            noteEditorCtrl.Dispose();
+            return false;
+        }
+        noteEditorCtrl.Run();
+        return true;
     }
 
     // The selection of the fields as they are now; one left behind by a newer one is not shown.

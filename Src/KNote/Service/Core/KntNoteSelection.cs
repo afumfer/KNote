@@ -72,13 +72,13 @@ internal static class KntNoteSelection
 
         var context = await KntNoisePolicy.LoadContextAsync(service);
         var policy = context.Clean(await KntNoisePolicy.ReadAsync(service));
-        var (keptCorrections, keptAnswers) = await KntRelevanceNotes.ReadAsync(service, result);
+        var (keptCorrections, keptAnswers, relevanceNote) = await KntRelevanceNotes.ReadAsync(service, result);
         var corrections = keptCorrections.ToDictionary(c => c.NoteId);
         var answers = keptAnswers.ToDictionary(a => a.NoteId);
         if (!result.IsValid)
             return null;
 
-        var selection = new NoteSelectionResultDto { MeaningUsed = meaningUsed };
+        var selection = new NoteSelectionResultDto { MeaningUsed = meaningUsed, RelevanceNote = relevanceNote };
         var notes = new List<(NoteSelectionSourceDto Source, EnumNoiseReason Noise, string Text)>();
         foreach (var source in sources)
         {

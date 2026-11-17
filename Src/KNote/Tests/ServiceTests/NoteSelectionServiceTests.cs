@@ -189,6 +189,22 @@ public class NoteSelectionServiceTests
         StringAssert.Contains(result.ErrorMessage, "The end of the period is before its start.");
     }
 
+    [TestMethod]
+    public async Task TheSelection_GivesNoteRelevance_OnceItExists()
+    {
+        using var fixture = await SemanticIndexFixture.CreateAsync();
+        await SignInAsync(fixture);
+        var note = await AddNoteAsync(fixture, "Note", Words(60), fixture.HomeId, InPeriod);
+        Assert.IsNull((await SelectAsync(fixture, new NoteSelectionRequestDto { From = From, To = To })).RelevanceNote, "not created by reading");
+
+        Assert.IsTrue((await fixture.Service.Summaries.SaveRelevanceCorrectionsAsync(Change(note, EnumSelectionDecision.Out))).IsValid);
+        var relevance = (await SelectAsync(fixture, new NoteSelectionRequestDto { From = From, To = To })).RelevanceNote;
+
+        Assert.IsNotNull(relevance);
+        Assert.AreEqual(KntConst.RelevanceTopic, relevance.Topic);
+        Assert.AreEqual((await RelevanceNoteAsync(fixture)).NoteId, relevance.NoteId);
+    }
+
     private static RelevanceCorrectionsSaveDto Change(Guid noteId, EnumSelectionDecision? decision) =>
         new() { Changes = { new RelevanceCorrectionChangeDto { NoteId = noteId, Decision = decision } } };
 

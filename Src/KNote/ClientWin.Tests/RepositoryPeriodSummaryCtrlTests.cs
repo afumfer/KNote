@@ -119,6 +119,20 @@ public class RepositoryPeriodSummaryCtrlTests
     }
 
     [TestMethod]
+    public async Task TheLinkToNoteRelevance_IsShown_OnceItExists()
+    {
+        var fixture = Create();
+        await fixture.Ctrl.LoadAsync(fixture.Service);
+        Assert.AreEqual("", fixture.Ctrl.RelevanceNoteText);
+        Assert.IsFalse(await fixture.Ctrl.OpenRelevanceNoteAsync());
+
+        fixture.Selection = new NoteSelectionResultDto { RelevanceNote = new AtlasNoteRefDto { NoteId = Guid.NewGuid(), NoteNumber = 42 } };
+        await fixture.Ctrl.PrepareAsync();
+
+        Assert.AreEqual("Note relevance (#42)", fixture.Ctrl.RelevanceNoteText);
+    }
+
+    [TestMethod]
     public async Task ASelectionThatFails_SaysSo()
     {
         var fixture = Create();

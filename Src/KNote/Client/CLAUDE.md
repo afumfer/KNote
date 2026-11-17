@@ -257,11 +257,16 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
 - **Period summary** (etapa 2, 2.3b, D19; `KntSections.AtlasPeriodSummary`, `?tab=summary`, Staff+): `AtlasPeriodSummary`, por ahora
   solo los campos de la selección (Desde / Hasta con «From the beginning» = `NoteSelectionRequestDto.Beginning`, carpeta con
   `KntFolderPicker`, palabras clave y «Talks about…» solo con `SemanticIndexTexts.CanSearch`), el recuento
-  (`NoteRelevanceRules.CountText`) y «Review selection…». La selección se pide otra vez (`KntLatestRequest`) al cambiar el periodo o la
+  (`NoteRelevanceRules.CountText`), el enlace a «Note relevance» (`NoteSelectionResultDto.RelevanceNote`, en su ventana de lectura,
+  `KntWindows.OpenViewAsync`; solo si existe) y «Review selection…». La selección se pide otra vez (`KntLatestRequest`) al cambiar el periodo o la
   carpeta, y los textos al salir de ellos o con Enter (`Change`). `AtlasReviewSelectionDialog` (`KntDialogs.Large`): una pestaña por
   lista con un `RadzenDataGrid` y una casilla por nota; doble clic abre la nota (`KntWindows.OpenViewAsync`); «Accept»
   (`KntSingleFlight`) guarda las casillas cambiadas (`NoteRelevanceRules.CorrectionFor`) y cierra con `true`, y la pestaña vuelve a
-  pedir la selección. La 2.5 añade asunto, palabras, modelo, idioma, «Estimate» y «Generate».
+  pedir la selección. «Classify doubtful notes with AI…» (2.4b, `NoteClassificationRules`): con las dudosas por sus señales, confirma con
+  `dialogService.Confirm` (notas, llamadas, el modelo de `IStore.Notes.GetPhotoDescriberAsync` y si es de pago), pide los lotes uno a uno
+  (`IStore.Summaries.ClassifyDoubtfulAsync`, `api/summaries/selection/classify`, sin notificar sus errores: se dicen una vez al final)
+  con su progreso y «Cancel» (cancela la petición en curso; lo respondido queda) y vuelve a pedir la selección. La 2.5 añade asunto,
+  palabras, modelo, idioma, «Estimate» y «Generate».
 - **Búsqueda** (`NotesSearch.razor`): selector «Words / Meaning» (`RadzenSelectBar`); el modo va en la URL
   (`mode=meaning`) y en la posición de la lista. En «Words» (4.6a, D18, las mismas que `ClientWin`): «Search in note description»,
   «Search in note tasks» y «Search in resources», **todas desmarcadas por defecto** (decidido por el propietario, aunque en

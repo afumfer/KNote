@@ -47,6 +47,11 @@ public class SummaryWebApiService : BaseService, ISummaryWebApiService
         SendAsync<NoteSelectionResultDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/selection", request, ct), "Prepare the selection",
             cancellationToken: cancellationToken);
 
+    // One batch of doubtful notes asked to the AI; its errors are said by the page, once for the whole run.
+    public Task<Result<List<RelevanceAiAnswerDto>>> ClassifyDoubtfulAsync(NoteClassificationRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<List<RelevanceAiAnswerDto>>(ct => _httpClient.PostAsJsonAsync("api/summaries/selection/classify", request, ct),
+            "Classify doubtful notes", cancellationToken: cancellationToken, notifyErrors: false);
+
     public Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes, CancellationToken cancellationToken = default) =>
         SendAsync<List<RelevanceCorrectionDto>>(ct => _httpClient.PostAsJsonAsync("api/summaries/relevance/corrections", changes, ct),
             "Save the corrections of the selection", emitNotifySucess: true, cancellationToken: cancellationToken);

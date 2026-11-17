@@ -560,7 +560,8 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   **Las correcciones van en la nota del sistema «Note relevance»** (`@KNoteRelevance`, en «KNote Atlas», `Model/Core/RelevanceNote`: dos
   tablas legibles y una marca oculta por fila, `<!-- knt-relevance {...} -->`, de la que se leen; `Service/Core/KntRelevanceNotes`):
   una por repositorio, compartida, la última vale; escrituras una a una por base de datos y releyendo la nota; al escribirla se quitan
-  las filas de notas borradas. Es una nota protegida (`KntAtlasNotes.ProtectedNoteTypeNames`): a mano, solo ProjectManager y Admin;
+  las filas de notas borradas. La selección da su referencia (`NoteSelectionResultDto.RelevanceNote`, el enlace de la sección; nula
+  hasta que existe: leer no la crea). Es una nota protegida (`KntAtlasNotes.ProtectedNoteTypeNames`): a mano, solo ProjectManager y Admin;
   el comando la escribe para un Staff dentro de `KntAuthorizationBypass`, **que también salta esa regla de guardado**
   (`KntAtlasNotes.CanWriteAsync`). Las personas nunca tocan sus notas al corregir. Tests en `Tests/NoteReadingCleanerTests`,
   `NoteRelevanceRulesTests`, `RelevanceNoteTests`, `ServiceTests/NoteSelectionServiceTests` y `InProcessIntegrationTests/SummaryInProcessTests`.
@@ -572,7 +573,8 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   pide las notas a `IKntSummaryService.GetNotesToClassifyAsync` y guarda las respuestas con `SaveRelevanceAiAnswersAsync` (los dos Staff;
   las respuestas van a la tabla «AI classification» de «Note relevance», con la huella y el modelo, dentro de `KntAuthorizationBypass`).
   **La huella** (`NoteRelevanceRules.ContentHash`: el tema y el texto limpio, sin los saltos de línea ni los espacios de los extremos) la
-  calcula igual la selección: una respuesta con otra huella no vale y la nota vuelve a ser dudosa. La respuesta decide solo una dudosa
+  calcula igual la selección: una respuesta con otra huella no vale y la nota vuelve a ser dudosa; la siguiente escritura de «Note
+  relevance» la quita (`KntRelevanceNotes`, como las filas de notas borradas), así la tabla solo tiene respuestas válidas. La respuesta decide solo una dudosa
   por sus señales, por debajo de una corrección y de la política (`NoteRelevanceRules.Decide`, `EnumSelectionSource.Ai`). Tests en
   `Tests/NoteClassificationRulesTests`, `ServiceTests/NoteClassificationServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`
   y el smoke `ServiceTests/AiNoteClassifierSmokeTests` (`RequiresRealAiProvider`, `KNOTE_RESOURCE_SMOKE_MODEL`).

@@ -92,6 +92,8 @@ public class NoteSelectionResultDto
     public List<NoteSelectionDto> Notes { get; set; } = new();
     public int KNoteNotes { get; set; }
     public bool MeaningUsed { get; set; }
+    // «Note relevance», where the corrections and the answers of the AI are kept (null until the first one): the link of the section.
+    public AtlasNoteRefDto RelevanceNote { get; set; }
 
     public int In => Notes.Count(n => n.Decision == EnumSelectionDecision.In);
     public int Doubtful => Notes.Count(n => n.Decision == EnumSelectionDecision.Doubtful);

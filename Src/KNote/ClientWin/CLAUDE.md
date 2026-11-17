@@ -669,11 +669,16 @@ repositorio o cerrar, y releer la ventana tras guardar una nota en el editor no 
 *Period summary* (2.3b, D19, Staff: `IsAvailable` por `KntSummaryPrepareSelectionAsyncCommand`; en gris dice el rol, `AtlasCtrl.RoleText`):
 `AtlasCtrl.PeriodSummaryCtrl` (`RepositoryPeriodSummaryCtrl`, incluido, `IViewPeriodSummary`, `Views/RepositoryPeriodSummaryForm`), por
 ahora solo los campos de la selección (Desde / Hasta con «From the beginning», carpeta con su ruta y `FoldersSelectorCtrl`, palabras
-clave y «Talks about…» solo con `Store.CanSearchByMeaningAsync`), el recuento (la selección se pide otra vez en cada cambio, gana la
+clave y «Talks about…» solo con `Store.CanSearchByMeaningAsync`), el enlace a «Note relevance» (`RelevanceNoteText`,
+`OpenRelevanceNoteAsync`: el editor de siempre; un Staff no puede guardarla), el recuento (la selección se pide otra vez en cada cambio, gana la
 última; los textos al salir o con Enter) y «Review selection...», que abre `ReviewSelectionCtrl` (incluido, modal, `IViewReviewSelection`,
 `Views/ReviewSelectionForm`: una pestaña por lista con un `ListView` con casillas; doble clic abre la nota en el editor; «Accept» guarda
 las casillas cambiadas y, si guardó algo, la sección vuelve a pedir la selección). `ChooseFolder` y `RunReview` son `internal` para los
-tests. Tests en `RepositoryPeriodSummaryCtrlTests` y `AtlasCtrlTests`. Empieza en el repositorio activo y la lista de arriba elige otro entre los
+tests. «Classify doubtful notes with AI...» (2.4b, `RepositoryPeriodSummaryCtrl.ClassifyAsync`): confirma con el modelo de
+`Store.GetPhotoDescriberAsync` (el LLM recomendado del repositorio), pide los lotes uno a uno con `AiNoteClassifier` sobre el `Service`
+del repositorio de la ventana, con su progreso en la sección y «Cancel» (`CancelClassification`, entre lotes y en la llamada en curso),
+dice cómo fue y vuelve a pedir la selección; `ChooseModel` y `CreateChatClient` son `internal` para los tests. Tests en
+`RepositoryPeriodSummaryCtrlTests`, `RepositoryPeriodSummaryCtrlClassifyTests` y `AtlasCtrlTests`. Empieza en el repositorio activo y la lista de arriba elige otro entre los
 enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
 otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»
 abre el `NoteEditorCtrl` de siempre y la ventana se refresca con su `SavedEntity` (el editor puede seguir abierto después

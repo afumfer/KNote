@@ -26,12 +26,13 @@ internal static class KntRelevanceNotes
     // The note is read and written again by each write: one at a time per database (in this process).
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> WriteLocks = new();
 
-    /// <summary>The corrections and the answers of the AI kept; none without the note (nothing is created).</summary>
-    public static async Task<(List<RelevanceCorrectionDto> Corrections, List<RelevanceAiAnswerDto> AiAnswers)> ReadAsync(
+    /// <summary>The corrections and the answers of the AI kept, and the note (null, and none of them, without it: nothing is created).</summary>
+    public static async Task<(List<RelevanceCorrectionDto> Corrections, List<RelevanceAiAnswerDto> AiAnswers, AtlasNoteRefDto Note)> ReadAsync(
         IKntService service, ResultBase result)
     {
         var note = await KntAtlasNotes.FindFirstAsync(service, KntConst.RelevanceTag, result);
-        return RelevanceNote.Parse(note?.Description);
+        var (corrections, answers) = RelevanceNote.Parse(note?.Description);
+        return (corrections, answers, KntAtlasNotes.Ref(note));
     }
 
     /// <summary>The changes of «Review selection», saved by the current user; it gives the corrections as they are kept.</summary>
@@ -86,6 +87,17 @@ internal static class KntRelevanceNotes
                 var ids = existing.Entity.Select(n => n.NoteId).ToHashSet();
                 corrections = corrections.Where(c => ids.Contains(c.NoteId)).ToList();
                 answers = answers.Where(a => ids.Contains(a.NoteId)).ToList();
+            }
+
+            // The answers of the AI of the notes changed since they were asked (another fingerprint) are no longer used: they go
+            // away too, so that the table only has the valid ones.
+            if (answers.Count > 0)
+            {
+                var current = await KntNoteSelection.ToClassifyAsync(service, answers.Select(a => a.NoteId), result);
+                if (!result.IsValid)
+                    return null;
+                var hashes = current.ToDictionary(n => n.NoteId, n => n.ContentHash);
+                answers = answers.Where(a => hashes.TryGetValue(a.NoteId, out var hash) && hash == a.ContentHash).ToList();
             }
 
             note.Description = AtlasTemplates.NoteText(RelevanceNote.Write(corrections, answers));

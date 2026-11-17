@@ -62,6 +62,12 @@ public class NoteClassificationServiceTests
             Changes = { new() { NoteId = decision.NoteId, Decision = EnumSelectionDecision.Out } }
         })).IsValid);
         Assert.AreEqual((EnumSelectionDecision.Out, EnumSelectionSource.Correction), Decision(await SelectAsync(fixture), decision.NoteId));
+
+        // That write took away the answer of the changed note (no longer valid); the other one stays.
+        var relevanceType = (await fixture.Service.NoteTypes.GetAllAsync()).Entity.Single(t => t.Name == KntConst.RelevanceTag);
+        var relevance = (await fixture.Service.Notes.GetFilterMinimalAsync(new NotesFilterDto { NoteTypeId = relevanceType.NoteTypeId })).Entity.Single();
+        var (_, kept) = RelevanceNote.Parse((await fixture.Service.Notes.GetAsync(relevance.NoteId)).Entity.Description);
+        CollectionAssert.AreEqual(new[] { decision.NoteId }, kept.Select(a => a.NoteId).ToList());
     }
 
     [TestMethod]

@@ -18,7 +18,7 @@ namespace KNote.Model.Core;
 public static class RelevanceNote
 {
     public const string CorrectionsHeading = "## Corrections by people";
-    public const string AiHeading = "## AI classification (doubtful notes)";
+    public const string AiHeading = "## AI classification";
 
     private const string CorrectionMarker = "knt-relevance";
     private const string AiMarker = "knt-relevance-ai";
@@ -28,7 +28,8 @@ public static class RelevanceNote
 
     public const string Intro =
         "KNote keeps here the corrections of the selection of the summaries («Review selection» in KNote Atlas › Period summary) and " +
-        "what the AI decided about the doubtful notes. Don't edit it by hand: KNote writes it.";
+        "what the AI decided about the notes that were doubtful when it was asked. An answer of the AI is not used once its note " +
+        "changes (the note is doubtful again), and it goes away the next time KNote writes this note. Don't edit it by hand: KNote writes it.";
 
     private sealed record CorrectionMark(Guid NoteId, EnumSelectionDecision Decision, string User, DateTime Date);
 

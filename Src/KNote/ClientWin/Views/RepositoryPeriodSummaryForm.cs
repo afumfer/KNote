@@ -7,7 +7,8 @@ namespace KNote.ClientWin.Views;
 
 // Section «Period summary» of the KNote Atlas window (RepositoryPeriodSummaryCtrl, 2.3b): the fields of the selection (the period
 // with «From the beginning», the folder, the keywords and «Talks about…»), its counts and «Review selection...». A date or the folder
-// prepares the selection again at once; a text, when it is left or with Enter. Always used embedded (PanelView()) inside AtlasForm.
+// prepares the selection again at once; a text, when it is left or with Enter. Below, the doubtful notes that can be asked to the AI
+// (2.4) with «Classify doubtful notes with AI…», its progress and «Cancel». Always used embedded (PanelView()) inside AtlasForm.
 public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
 {
     #region Private fields
@@ -55,7 +56,14 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
             if (!textMeaning.Focused)
                 textMeaning.Text = _ctrl.MeaningText;
             labelCount.Text = _ctrl.CountText;
+            linkRelevance.Text = _ctrl.RelevanceNoteText;
+            linkRelevance.Visible = linkRelevance.Text.Length > 0;
             buttonReview.Enabled = _ctrl.CanReview;
+            labelPending.Text = _ctrl.PendingText;
+            buttonClassify.Visible = !_ctrl.IsClassifying && _ctrl.CanClassify;
+            buttonCancelClassify.Visible = progressClassify.Visible = _ctrl.IsClassifying;
+            progressClassify.Maximum = Math.Max(_ctrl.ClassifyTotal, 1);
+            progressClassify.Value = Math.Min(_ctrl.ClassifyDone, progressClassify.Maximum);
         }
         finally
         {
@@ -91,6 +99,12 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
     private async void buttonFolder_Click(object sender, EventArgs e) => await _ctrl.ChooseFolderAsync();
 
     private async void buttonClearFolder_Click(object sender, EventArgs e) => await _ctrl.ClearFolderAsync();
+
+    private async void buttonClassify_Click(object sender, EventArgs e) => await _ctrl.ClassifyAsync();
+
+    private async void linkRelevance_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) => await _ctrl.OpenRelevanceNoteAsync();
+
+    private void buttonCancelClassify_Click(object sender, EventArgs e) => _ctrl.CancelClassification();
 
     private async void buttonReview_Click(object sender, EventArgs e)
     {

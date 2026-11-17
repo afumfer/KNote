@@ -103,9 +103,10 @@ public static class NoteClassificationRules
     public static string PendingText(NoteSelectionResultDto selection)
     {
         var pending = PendingCount(selection);
+        var notes = pending == 1 ? "1 doubtful note" : $"{pending:N0} doubtful notes";
         return pending == 0 ? "" : pending <= MaxPerRun
-            ? $"{Notes(pending)} doubtful can be asked to the AI."
-            : $"{Notes(pending)} doubtful can be asked to the AI: the first {MaxPerRun} now, the rest in another run.";
+            ? $"{notes} can be asked to the AI."
+            : $"{notes} can be asked to the AI: the first {MaxPerRun} now, the rest in another run.";
     }
 
     public static string Confirmation(int notes, string model, bool paid)

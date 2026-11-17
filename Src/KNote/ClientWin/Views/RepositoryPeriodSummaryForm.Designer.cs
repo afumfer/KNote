@@ -45,11 +45,21 @@ namespace KNote.ClientWin.Views
             this.textMeaning = new System.Windows.Forms.TextBox();
             this.labelCount = new System.Windows.Forms.Label();
             this.buttonReview = new System.Windows.Forms.Button();
+            this.labelPending = new System.Windows.Forms.Label();
+            this.linkRelevance = new System.Windows.Forms.LinkLabel();
+            this.progressClassify = new System.Windows.Forms.ProgressBar();
+            this.buttonClassify = new System.Windows.Forms.Button();
+            this.buttonCancelClassify = new System.Windows.Forms.Button();
             this.panelForm.SuspendLayout();
             this.SuspendLayout();
             //
             // panelForm
             //
+            this.panelForm.Controls.Add(this.buttonCancelClassify);
+            this.panelForm.Controls.Add(this.buttonClassify);
+            this.panelForm.Controls.Add(this.progressClassify);
+            this.panelForm.Controls.Add(this.labelPending);
+            this.panelForm.Controls.Add(this.linkRelevance);
             this.panelForm.Controls.Add(this.buttonReview);
             this.panelForm.Controls.Add(this.labelCount);
             this.panelForm.Controls.Add(this.textMeaning);
@@ -229,6 +239,61 @@ namespace KNote.ClientWin.Views
             this.buttonReview.UseVisualStyleBackColor = true;
             this.buttonReview.Click += new System.EventHandler(this.buttonReview_Click);
             //
+            // labelPending
+            //
+            this.labelPending.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelPending.Location = new System.Drawing.Point(9, 356);
+            this.labelPending.Name = "labelPending";
+            this.labelPending.Size = new System.Drawing.Size(398, 36);
+            this.labelPending.TabIndex = 27;
+            //
+            // linkRelevance
+            //
+            this.linkRelevance.AutoSize = true;
+            this.linkRelevance.Location = new System.Drawing.Point(9, 318);
+            this.linkRelevance.Name = "linkRelevance";
+            this.linkRelevance.Size = new System.Drawing.Size(120, 15);
+            this.linkRelevance.TabIndex = 11;
+            this.linkRelevance.TabStop = true;
+            this.linkRelevance.Text = "Note relevance";
+            this.linkRelevance.Visible = false;
+            this.linkRelevance.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkRelevance_LinkClicked);
+            //
+            // progressClassify
+            //
+            this.progressClassify.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressClassify.Location = new System.Drawing.Point(9, 394);
+            this.progressClassify.Name = "progressClassify";
+            this.progressClassify.Size = new System.Drawing.Size(398, 8);
+            this.progressClassify.TabIndex = 28;
+            this.progressClassify.Visible = false;
+            //
+            // buttonClassify
+            //
+            this.buttonClassify.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonClassify.Location = new System.Drawing.Point(417, 352);
+            this.buttonClassify.Name = "buttonClassify";
+            this.buttonClassify.Size = new System.Drawing.Size(200, 29);
+            this.buttonClassify.TabIndex = 9;
+            this.buttonClassify.Text = "&Classify doubtful notes with AI...";
+            this.buttonClassify.UseVisualStyleBackColor = true;
+            this.buttonClassify.Visible = false;
+            this.buttonClassify.Click += new System.EventHandler(this.buttonClassify_Click);
+            //
+            // buttonCancelClassify
+            //
+            this.buttonCancelClassify.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancelClassify.Location = new System.Drawing.Point(517, 352);
+            this.buttonCancelClassify.Name = "buttonCancelClassify";
+            this.buttonCancelClassify.Size = new System.Drawing.Size(100, 29);
+            this.buttonCancelClassify.TabIndex = 10;
+            this.buttonCancelClassify.Text = "Ca&ncel";
+            this.buttonCancelClassify.UseVisualStyleBackColor = true;
+            this.buttonCancelClassify.Visible = false;
+            this.buttonCancelClassify.Click += new System.EventHandler(this.buttonCancelClassify_Click);
+            //
             // RepositoryPeriodSummaryForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -263,5 +328,10 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.TextBox textMeaning;
         private System.Windows.Forms.Label labelCount;
         private System.Windows.Forms.Button buttonReview;
+        private System.Windows.Forms.Label labelPending;
+        private System.Windows.Forms.LinkLabel linkRelevance;
+        private System.Windows.Forms.ProgressBar progressClassify;
+        private System.Windows.Forms.Button buttonClassify;
+        private System.Windows.Forms.Button buttonCancelClassify;
     }
 }

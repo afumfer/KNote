@@ -14,7 +14,7 @@ internal class FakePeriodSummaryView : IViewPeriodSummary
     public void RefreshView() => RefreshViewCount++;
     public void OnClosingView() { }
 
-    public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
+    public virtual DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)
     {
         ShownInfo.Add(info);
         return DialogResult.OK;

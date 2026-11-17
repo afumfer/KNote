@@ -3,12 +3,15 @@
 @* KNote Atlas, stage 2 (2.3b, CU-15, D19): the tab «Period summary», for now only the fields of the selection (the period, with «From
    the beginning»; the folder; the keywords; «Talks about…», only if the server can search by meaning), the counts of the selection
    and «Review selection» (AtlasReviewSelectionDialog). The selection is asked for again at each change of the period or the folder,
-   and of the texts when they are left or Enter is pressed (the last one wins). 2.5 adds the subject, the words, the model, the
+   and of the texts when they are left or Enter is pressed (the last one wins). The doubtful notes are asked to the AI on demand (2.4),
+   a batch per request, with the repository's recommended model. 2.5 adds the subject, the words, the model, the
    language, «Estimate» and «Generate». *@
 
 @implements IDisposable
 @inject IStore store
 @inject DialogService dialogService
+@inject NotificationService notificationService
+@inject KntWindows kntWindows
 
 <KntFormSection Icon="@KntSections.AtlasPeriodSummary.Icon" Title="@KntSections.AtlasPeriodSummary.Text" Description="@NoteRelevanceRules.SelectionHelp">
     <RadzenRow Gap="1rem">
@@ -67,11 +70,34 @@
             else
             {
                 <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@NoteRelevanceRules.CountText(selection)</RadzenText>
+                @if (selection.RelevanceNote is { } relevance)
+                {
+                    @* Read-only: KNote writes it. *@
+                    <RadzenButton Text="@($"Note relevance (#{relevance.NoteNumber})")" Icon="fact_check" Variant="Variant.Text"
+                                  Size="ButtonSize.ExtraSmall" class="rz-p-0" Click="@(() => kntWindows.OpenViewAsync(relevance.NoteId))" />
+                }
             }
         </div>
-        <RadzenButton Text="Review selection…" Icon="checklist" Size="ButtonSize.Small" Disabled="@(selection == null || selection.Notes.Count == 0)"
+        <RadzenButton Text="Review selection…" Icon="checklist" Size="ButtonSize.Small" Disabled="@(selection == null || selection.Notes.Count == 0 || classifying.IsBusy)"
                       Click="OnReview" />
     </RadzenStack>
+    @if (classifying.IsBusy)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem" class="rz-mt-2">
+            <div style="flex: 1">
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@classifyText</RadzenText>
+                <RadzenProgressBar Value="@classifyDone" Max="@Math.Max(classifyTotal, 1)" ShowValue="false" Style="height: 6px" />
+            </div>
+            <RadzenButton Text="Cancel" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="OnCancelClassify" />
+        </RadzenStack>
+    }
+    else if (selection != null && NoteClassificationRules.PendingCount(selection) > 0)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem" class="rz-mt-2">
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@NoteClassificationRules.PendingText(selection)</RadzenText>
+            <RadzenButton Text="@NoteClassificationRules.ButtonText" Icon="psychology" Size="ButtonSize.Small" Click="OnClassify" />
+        </RadzenStack>
+    }
 </KntFormSection>
 
 @code {
@@ -85,6 +111,11 @@
     private NoteSelectionResultDto? selection;
     private bool loadFailed;
     private readonly KntLatestRequest selectionRequest = new();
+    private readonly KntSingleFlight classifying = new();
+    private CancellationTokenSource? classifyCancellation;
+    private string classifyText = "";
+    private int classifyDone;
+    private int classifyTotal;
     private readonly CancellationTokenSource disposal = new();
 
     protected override async Task OnInitializedAsync()
@@ -165,6 +196,75 @@
         meaningText = value ?? "";
         await PrepareAsync();
     }
+
+    // 2.4 (D9, C1-C6): the doubtful notes asked to the AI, a batch per request, with its progress and «Cancel» (what was asked stays);
+    // then the selection is prepared again with the answers.
+    private Task OnClassify() => classifying.RunAsync(async () =>
+    {
+        if (selection == null)
+            return;
+        var toClassify = NoteClassificationRules.ToClassify(selection);
+        if (toClassify.Count == 0)
+            return;
+
+        var describer = await store.Notes.GetPhotoDescriberAsync(disposal.Token);
+        if (!describer.IsValid || disposal.IsCancellationRequested)
+            return;
+        if (!describer.Entity.CanSummarize)
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = KntSections.AtlasPeriodSummary.Text, Detail = describer.Entity.Message });
+            return;
+        }
+        var ok = await dialogService.Confirm(NoteClassificationRules.Confirmation(toClassify.Count, describer.Entity.Model, describer.Entity.IsPaid),
+            "Classify doubtful notes", new ConfirmOptions { OkButtonText = "Classify", CancelButtonText = "Cancel" });
+        if (ok != true || disposal.IsCancellationRequested)
+            return;
+
+        var batches = NoteClassificationRules.Batches(toClassify.Select(n => n.NoteId));
+        classifyTotal = batches.Count;
+        classifyDone = 0;
+        var answered = 0;
+        var failed = 0;
+        string? firstError = null;
+        classifyCancellation = CancellationTokenSource.CreateLinkedTokenSource(disposal.Token);
+        try
+        {
+            foreach (var batch in batches)
+            {
+                if (classifyCancellation.IsCancellationRequested)
+                    break;
+                classifyText = NoteClassificationRules.Progress(classifyDone + 1, classifyTotal);
+                StateHasChanged();
+                var result = await store.Summaries.ClassifyDoubtfulAsync(new NoteClassificationRequestDto { NoteIds = batch }, classifyCancellation.Token);
+                if (classifyCancellation.IsCancellationRequested)
+                    break;
+                if (result.IsValid)
+                    answered += result.Entity.Count;
+                else
+                {
+                    failed++;
+                    firstError ??= result.ErrorMessage;
+                }
+                classifyDone++;
+            }
+        }
+        finally
+        {
+            classifyCancellation.Dispose();
+            classifyCancellation = null;
+        }
+        if (disposal.IsCancellationRequested)
+            return;
+
+        notificationService.Notify(new NotificationMessage
+        {
+            Severity = failed == 0 ? NotificationSeverity.Success : NotificationSeverity.Warning, Summary = KntSections.AtlasPeriodSummary.Text,
+            Detail = NoteClassificationRules.Done(answered, toClassify.Count, failed) + (firstError == null ? "" : $" {firstError}"), Duration = 8000
+        });
+        await PrepareAsync();
+    });
+
+    private void OnCancelClassify() => classifyCancellation?.Cancel();
 
     // The dialog keeps the corrections; afterwards the selection is prepared again with them.
     private async Task OnReview()
