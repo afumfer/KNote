@@ -1,0 +1,187 @@
+@using KNote.Model.Core
+
+@* KNote Atlas, stage 2 (2.3b, CU-15, D19): the tab «Period summary», for now only the fields of the selection (the period, with «From
+   the beginning»; the folder; the keywords; «Talks about…», only if the server can search by meaning), the counts of the selection
+   and «Review selection» (AtlasReviewSelectionDialog). The selection is asked for again at each change of the period or the folder,
+   and of the texts when they are left or Enter is pressed (the last one wins). 2.5 adds the subject, the words, the model, the
+   language, «Estimate» and «Generate». *@
+
+@implements IDisposable
+@inject IStore store
+@inject DialogService dialogService
+
+<KntFormSection Icon="@KntSections.AtlasPeriodSummary.Icon" Title="@KntSections.AtlasPeriodSummary.Text" Description="@NoteRelevanceRules.SelectionHelp">
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="4">
+            <KntField Label="From" Component="SelectionFrom">
+                <RadzenDatePicker Name="SelectionFrom" TValue="DateTime" Value="@from" ValueChanged="OnFromChanged" DateFormat="d"
+                                  Disabled="@fromTheBeginning" />
+            </KntField>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mt-1">
+                <RadzenCheckBox Name="SelectionFromBeginning" TValue="bool" Value="@fromTheBeginning" ValueChanged="OnFromTheBeginningChanged" />
+                <RadzenLabel Text="From the beginning" Component="SelectionFromBeginning" />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeSM="4">
+            <KntField Label="To" Component="SelectionTo">
+                <RadzenDatePicker Name="SelectionTo" TValue="DateTime" Value="@to" ValueChanged="OnToChanged" DateFormat="d" />
+            </KntField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="8">
+            <KntField Label="Folder" Component="SelectionFolder" Help="The folder and its subfolders.">
+                <KntFolderPicker FolderName="@(folder?.Name ?? "All folders")" FolderSelected="OnFolderSelected" FolderReset="OnFolderReset"
+                                 ResetTitle="All folders" />
+            </KntField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="@(meaningAvailable ? 4 : 8)">
+            <KntField Label="Keywords" Component="SelectionKeywords" Help="As in the search: ! to leave a word out, phrases in quotes.">
+                <RadzenTextBox Name="SelectionKeywords" Value="@keywords" Change="OnKeywordsChanged" />
+            </KntField>
+        </RadzenColumn>
+        @if (meaningAvailable)
+        {
+            <RadzenColumn Size="12" SizeSM="4">
+                <KntField Label="Talks about…" Component="SelectionMeaning" Help="By meaning, among the notes of the period.">
+                    <RadzenTextBox Name="SelectionMeaning" Value="@meaningText" Change="OnMeaningChanged" />
+                </KntField>
+            </RadzenColumn>
+        }
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem" class="rz-mt-3">
+        <div>
+            @if (selection == null)
+            {
+                @if (loadFailed)
+                {
+                    <span class="knt-load-error-text">The selection could not be prepared.</span>
+                }
+                else
+                {
+                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.ExtraSmall" />
+                }
+            }
+            else
+            {
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@NoteRelevanceRules.CountText(selection)</RadzenText>
+            }
+        </div>
+        <RadzenButton Text="Review selection…" Icon="checklist" Size="ButtonSize.Small" Disabled="@(selection == null || selection.Notes.Count == 0)"
+                      Click="OnReview" />
+    </RadzenStack>
+</KntFormSection>
+
+@code {
+    private DateTime from = DateTime.Today.AddDays(-6);
+    private DateTime to = DateTime.Today;
+    private bool fromTheBeginning;
+    private FolderDto? folder;
+    private string keywords = "";
+    private string meaningText = "";
+    private bool meaningAvailable;
+    private NoteSelectionResultDto? selection;
+    private bool loadFailed;
+    private readonly KntLatestRequest selectionRequest = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var status = await store.SemanticSearch.GetIndexStatusAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        meaningAvailable = status.IsValid && SemanticIndexTexts.CanSearch(status.Entity);
+        await PrepareAsync();
+    }
+
+    private NoteSelectionRequestDto Request() => new()
+    {
+        From = fromTheBeginning ? NoteSelectionRequestDto.Beginning : from,
+        To = to,
+        FolderId = folder?.FolderId,
+        Keywords = string.IsNullOrWhiteSpace(keywords) ? null : keywords.Trim(),
+        MeaningText = meaningAvailable && !string.IsNullOrWhiteSpace(meaningText) ? meaningText.Trim() : null
+    };
+
+    // The selection of the fields as they are now; an older one still running is left behind.
+    private async Task PrepareAsync()
+    {
+        selection = null;
+        loadFailed = false;
+        StateHasChanged();
+        var request = Request();
+        var r = await selectionRequest.RunAsync(ct => store.Summaries.PrepareSelectionAsync(request, ct));
+        if (r.Canceled)
+            return;
+        selection = r.Value.IsValid ? r.Value.Entity : null;
+        loadFailed = !r.Value.IsValid;
+        StateHasChanged();
+    }
+
+    private async Task OnFromChanged(DateTime value)
+    {
+        from = value.Date;
+        await PrepareAsync();
+    }
+
+    private async Task OnToChanged(DateTime value)
+    {
+        to = value.Date;
+        await PrepareAsync();
+    }
+
+    private async Task OnFromTheBeginningChanged(bool value)
+    {
+        fromTheBeginning = value;
+        await PrepareAsync();
+    }
+
+    private async Task OnFolderSelected(FolderDto value)
+    {
+        folder = value;
+        await PrepareAsync();
+    }
+
+    private async Task OnFolderReset()
+    {
+        folder = null;
+        await PrepareAsync();
+    }
+
+    private async Task OnKeywordsChanged(string value)
+    {
+        if ((value ?? "") == keywords)
+            return;
+        keywords = value ?? "";
+        await PrepareAsync();
+    }
+
+    private async Task OnMeaningChanged(string value)
+    {
+        if ((value ?? "") == meaningText)
+            return;
+        meaningText = value ?? "";
+        await PrepareAsync();
+    }
+
+    // The dialog keeps the corrections; afterwards the selection is prepared again with them.
+    private async Task OnReview()
+    {
+        if (selection == null)
+            return;
+        var saved = await dialogService.OpenAsync<AtlasReviewSelectionDialog>("Review selection",
+            new Dictionary<string, object?> { [nameof(AtlasReviewSelectionDialog.Selection)] = selection },
+            KntDialogs.Framed(KntDialogs.Large()));
+        if (saved is true && !disposal.IsCancellationRequested)
+            await PrepareAsync();
+    }
+
+    public void Dispose()
+    {
+        selectionRequest.Dispose();
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

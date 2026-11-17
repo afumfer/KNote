@@ -371,6 +371,19 @@ No todas las notas son conocimiento: actas de reuniones, notas rápidas, borrado
 
 Dos etiquetas deciden por una nota, diga lo que diga la política: **#NoKnowledge** la deja siempre fuera y **#Knowledge** la mantiene dentro aunque su tipo de nota o su carpeta estén fuera (con las dos, gana #NoKnowledge). Las notas propias de KNote (las conversaciones del asistente, el chat room, las notas de KNote Atlas, los resúmenes extendidos y las traducciones) siempre están fuera, y sus tipos y carpetas no se ofrecen. Cualquiera ve la política; solo un **ProjectManager** o un **Admin** la cambia. Guardarla no cambia ninguna nota.
 
+### Resumen de un periodo: la selección de las notas (KNote Atlas)
+
+La sección **Period summary** de **KNote Atlas** (rol Staff o superior) prepara el resumen de lo ocurrido entre dos fechas. Por ahora elige **qué notas** entran; la redacción del resumen llega en una versión posterior.
+
+- **From / To**: el periodo, días enteros (por defecto, la última semana). **From the beginning** toma todas las notas hasta **To**.
+- **Folder** (opcional): solo las notas de una carpeta y sus subcarpetas.
+- **Keywords** (opcional): solo las notas con estas palabras en su tema o su texto, como en la búsqueda (`!` deja fuera una palabra, las frases entre comillas).
+- **Talks about...** (opcional, solo con índice semántico): solo las notas que hablan de ello, por significado.
+
+Entran las notas **modificadas en el periodo** y las que tuvieron **actividad de tareas** en él (una tarea que empezó o terminó), combinadas con los campos de arriba. Debajo, KNote dice cuántas **entran**, cuántas son **dudosas** y cuántas quedan **fuera**; las notas propias de KNote siempre están fuera y no se listan. Cada nota tiene su motivo en palabras, el primero que se cumple: la corrección de una persona; la política de ruido o las etiquetas **#NoKnowledge** / **#Knowledge**; y sus propias señales (tareas con actividad, citas desde otras notas de la selección, relaciones, recursos y su tamaño). Por ejemplo, una nota de 4 palabras creada y abandonada el mismo día, sin tareas, recursos, relaciones ni citas, queda fuera; una corta sin nada de eso es dudosa (una versión posterior preguntará por ellas a la IA; mientras, entran).
+
+**Review selection...** abre las tres listas (**In**, **Doubtful**, **Out**) con el motivo de cada nota y una casilla: marcada, la nota entra en el resumen. Las dudosas empiezan marcadas. Doble clic abre la nota. **Accept** guarda las casillas que cambiaste como **correcciones**, que se recuerdan para los próximos resúmenes: una corrección decide por encima de la política de ruido y de las etiquetas, y volver a dejar una casilla como la decidió KNote quita la corrección. Las correcciones no cambian las notas (ni su fecha de modificación): KNote las guarda en la nota **Note relevance** de la carpeta **KNote Atlas**, con una tabla de quién corrigió qué y cuándo. No la edites a mano: solo pueden un **ProjectManager** o un **Admin**, y la escribe KNote.
+
 ### Chat room
 
 El chat room permite a los usuarios de un servidor Web de KNote hablar en **hilos**: cada hilo es una conversación sobre un tema, y cualquier usuario con rol Staff o superior en ese servidor puede leerlo, unirse y escribir en él. La aplicación Web y la de escritorio comparten el mismo chat room, el del servidor Web: un mensaje escrito en una aparece al momento en la otra.

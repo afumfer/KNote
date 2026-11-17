@@ -13,14 +13,16 @@ public enum EnumAtlasSection
     Personalization,
     SemanticIndex,
     Resources,
-    NoisePolicy
+    NoisePolicy,
+    PeriodSummary
 }
 
 /// <summary>
 /// KNote Atlas (Tools › KNote Atlas): everything of the AI of a repository in one window (KNote Atlas 4.3b), a section for
 /// each part, each one for its role: the repository's AI models (RepositoryAiModelsCtrl), the semantic index
 /// (RepositorySemanticIndexCtrl) and «Process pending resources» (RepositoryResourcesCtrl), for an Admin; the noise policy
-/// (RepositoryNoisePolicyCtrl, stage 2), seen by everyone and kept by a ProjectManager; and the AI personalization (chapters
+/// (RepositoryNoisePolicyCtrl, stage 2), seen by everyone and kept by a ProjectManager; the period summary (RepositoryPeriodSummaryCtrl,
+/// 2.3b, D19), for a Staff; and the AI personalization (chapters
 /// 19–21), for everyone: the repository's profile, its glossary, the instructions of each task
 /// (notes written in the note editor of always, which only ProjectManager and Admin save: a rule of the Service) and what
 /// the AI receives. A section the user can't use is disabled, with who can (WhoCanUse). It starts in the active repository
@@ -43,6 +45,7 @@ public class AtlasCtrl : CtrlViewBase<IViewBase>
         EnumAtlasSection.Personalization => "AI personalization",
         EnumAtlasSection.SemanticIndex => "Semantic index",
         EnumAtlasSection.NoisePolicy => "Noise policy",
+        EnumAtlasSection.PeriodSummary => "Period summary",
         _ => ResourceProcessingTexts.Title
     };
 
@@ -52,8 +55,12 @@ public class AtlasCtrl : CtrlViewBase<IViewBase>
         EnumAtlasSection.Models => "Only an Admin chooses the AI models of the repository.",
         EnumAtlasSection.SemanticIndex => "Only an Admin creates or updates the semantic index.",
         EnumAtlasSection.Resources => "Only an Admin processes the pending resources of the repository.",
+        EnumAtlasSection.PeriodSummary => "Only a Staff user or higher asks for summaries.",
         _ => ""
     };
+
+    // The role a section needs, said next to it when it is grayed out.
+    public static string RoleText(EnumAtlasSection section) => section == EnumAtlasSection.PeriodSummary ? "Staff" : "Admin";
 
     // The section shown; it starts in the one everybody can use.
     public EnumAtlasSection Section { get; set; } = EnumAtlasSection.Personalization;
@@ -64,6 +71,7 @@ public class AtlasCtrl : CtrlViewBase<IViewBase>
         EnumAtlasSection.Models => IsAllowed(typeof(KntSystemValueSaveRepositoryAiModelsAsyncCommand)),
         EnumAtlasSection.SemanticIndex => IsAllowed(typeof(KntSemanticSearchRunIndexAsyncCommand)),
         EnumAtlasSection.Resources => IsAllowed(typeof(KntResourceContentPrepareProcessingAsyncCommand)),
+        EnumAtlasSection.PeriodSummary => IsAllowed(typeof(KntSummaryPrepareSelectionAsyncCommand)),
         _ => true
     };
 
@@ -90,6 +98,9 @@ public class AtlasCtrl : CtrlViewBase<IViewBase>
 
     private RepositoryNoisePolicyCtrl _noisePolicyCtrl;
     public RepositoryNoisePolicyCtrl NoisePolicyCtrl => _noisePolicyCtrl ??= new RepositoryNoisePolicyCtrl(Store);
+
+    private RepositoryPeriodSummaryCtrl _periodSummaryCtrl;
+    public RepositoryPeriodSummaryCtrl PeriodSummaryCtrl => _periodSummaryCtrl ??= new RepositoryPeriodSummaryCtrl(Store);
 
     // AI models or a noise policy not saved (they are asked about before changing the repository or closing).
     public bool HasPendingChanges => _modelsCtrl?.HasPendingChanges() == true || _noisePolicyCtrl?.HasPendingChanges() == true;
@@ -171,6 +182,8 @@ public class AtlasCtrl : CtrlViewBase<IViewBase>
         // A note saved in the editor reads everything again: the policy being edited is kept.
         if (NoisePolicyCtrl.Service != service || !NoisePolicyCtrl.HasPendingChanges())
             await NoisePolicyCtrl.LoadAsync(service);
+        if (IsAvailable(EnumAtlasSection.PeriodSummary))
+            await PeriodSummaryCtrl.LoadAsync(service);
         if (!IsAvailable(Section))
             Section = EnumAtlasSection.Personalization;
 
@@ -244,6 +257,7 @@ public class AtlasCtrl : CtrlViewBase<IViewBase>
         _semanticIndexCtrl?.Dispose();
         _resourcesCtrl?.Dispose();
         _noisePolicyCtrl?.Dispose();
+        _periodSummaryCtrl?.Dispose();
         return base.OnFinalized();
     }
 

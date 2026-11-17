@@ -20,6 +20,11 @@ public static class NoteRelevanceRules
     public const int OutWords = 10;
     public const int DoubtfulWords = 40;
 
+    public const string SelectionHelp = "The notes modified in the period or with task activity in it (a task that started or ended), " +
+        "of the folder and its subfolders, with the keywords and about what «Talks about…» says, if given. Each one goes in, is doubtful " +
+        "or stays out, with its reason; KNote's own notes are always out. «Review selection» shows them and lets you change them: " +
+        "the changes are remembered for the next summaries, without touching the notes.";
+
     public sealed record Signals(int Words, int Tasks, int TasksWithActivity, int Resources, int Relations, int CitedBy, bool LeftTheSameDay)
     {
         public bool Any => Tasks > 0 || Resources > 0 || Relations > 0 || CitedBy > 0;
@@ -135,6 +140,10 @@ public static class NoteRelevanceRules
             text += $" {Count(selection.KNoteNotes, "note")} of KNote's own, always out, are not listed.";
         return text;
     }
+
+    /// <summary>What «Review selection» would keep (both apps).</summary>
+    public static string ChangesText(int included, int total, int changes) =>
+        $"{included:N0} of {total:N0} notes would go into the summary" + (changes == 0 ? "." : $" · {Count(changes, "change")} to keep.");
 
     private static (EnumSelectionDecision, string, EnumSelectionSource) Signal(Signals signals)
     {

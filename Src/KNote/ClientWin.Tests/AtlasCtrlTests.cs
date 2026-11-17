@@ -61,6 +61,13 @@ public class AtlasCtrlTests
                 return Task.FromResult(new Result<NoisePolicyDto>(new NoisePolicyDto()));
             };
             service.SummariesFake.CountNoiseAsyncImpl = _ => Task.FromResult(new Result<NoiseCountDto>(new NoiseCountDto()));
+
+            // The period summary, for a Staff.
+            service.SummariesFake.PrepareSelectionAsyncImpl = (_, _) =>
+            {
+                SelectionReads++;
+                return Task.FromResult(new Result<NoteSelectionResultDto>(new NoteSelectionResultDto()));
+            };
             service.NoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<NoteTypeDto>>(new List<NoteTypeDto>
             {
                 new() { NoteTypeId = MeetingId, Name = "Meeting" }
@@ -82,6 +89,7 @@ public class AtlasCtrlTests
         public int IndexReads { get; private set; }
         public int ResourceReads { get; private set; }
         public int NoiseReads { get; private set; }
+        public int SelectionReads { get; private set; }
         public List<AiComposeRequestDto> ComposeRequests { get; } = new();
     }
 
@@ -104,6 +112,7 @@ public class AtlasCtrlTests
         noiseView = new FakeNoisePolicyView();
         var noise = noiseView;
         factoryViews.Registry.Register<RepositoryNoisePolicyCtrl, IViewNoisePolicy>(_ => noise);
+        factoryViews.Registry.Register<RepositoryPeriodSummaryCtrl, IViewPeriodSummary>(_ => new FakePeriodSummaryView());
         var store = new Store(factoryViews);
         var first = new Repository(store, role);
         var second = new Repository(store, role);
@@ -255,7 +264,9 @@ public class AtlasCtrlTests
         Assert.IsFalse(ctrl.IsAvailable(EnumAtlasSection.Models) || ctrl.IsAvailable(EnumAtlasSection.SemanticIndex)
             || ctrl.IsAvailable(EnumAtlasSection.Resources));
         Assert.AreEqual(EnumAtlasSection.Personalization, ctrl.Section, "a section that can't be used is not shown");
-        Assert.AreEqual(0, first.ModelReads + first.IndexReads + first.ResourceReads);
+        Assert.AreEqual(0, first.ModelReads + first.ResourceReads);
+        // Only the period summary (Staff) reads the status of the index: whether «Talks about…» can be offered.
+        Assert.AreEqual(first.SelectionReads, first.IndexReads);
         StringAssert.Contains(AtlasCtrl.WhoCanUse(EnumAtlasSection.SemanticIndex), "Admin");
     }
 
@@ -269,8 +280,9 @@ public class AtlasCtrlTests
 
         Assert.IsTrue(AtlasCtrl.Sections.All(ctrl.IsAvailable));
         Assert.AreEqual(EnumAtlasSection.Personalization, ctrl.Section, "it starts in the one everybody can use");
-        Assert.AreEqual((1, 1, 1), (first.ModelReads, first.IndexReads, first.ResourceReads));
-        Assert.AreEqual((1, 1, 1), (second.ModelReads, second.IndexReads, second.ResourceReads));
+        // The status of the index: the semantic index and, for «Talks about…», the period summary.
+        Assert.AreEqual((1, 2, 1), (first.ModelReads, first.IndexReads, first.ResourceReads));
+        Assert.AreEqual((1, 2, 1), (second.ModelReads, second.IndexReads, second.ResourceReads));
         Assert.AreSame(second.Ref.Service, ctrl.SemanticIndexCtrl.Service);
         Assert.AreSame(second.Ref.Service, ctrl.ResourcesCtrl.Service);
     }
@@ -316,6 +328,22 @@ public class AtlasCtrlTests
         Assert.AreEqual(1, second.NoiseReads);
         Assert.AreSame(second.Ref.Service, ctrl.NoisePolicyCtrl.Service);
         Assert.IsFalse(ctrl.HasPendingChanges);
+    }
+
+    [TestMethod]
+    [DataRow(EnumRoles.Guest, false)]
+    [DataRow(EnumRoles.Staff, true)]
+    public async Task ThePeriodSummary_IsForAStaff_AndReadsItsRepository(EnumRoles role, bool available)
+    {
+        var (ctrl, _, first, second) = CreateCtrl(role);
+
+        await ctrl.LoadAsync();
+        await ctrl.SelectRepositoryAsync(second.Ref);
+
+        Assert.AreEqual(available, ctrl.IsAvailable(EnumAtlasSection.PeriodSummary));
+        Assert.AreEqual(available ? (1, 1) : (0, 0), (first.SelectionReads, second.SelectionReads));
+        Assert.AreEqual("Staff", AtlasCtrl.RoleText(EnumAtlasSection.PeriodSummary));
+        StringAssert.Contains(AtlasCtrl.WhoCanUse(EnumAtlasSection.PeriodSummary), "Staff");
     }
 
     [TestMethod]

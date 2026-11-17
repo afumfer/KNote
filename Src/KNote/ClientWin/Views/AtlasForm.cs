@@ -10,7 +10,7 @@ namespace KNote.ClientWin.Views;
 // left (a section the user can't use is grayed out and says who can). The AI personalization (chapters 19–21) is this
 // form's own tabs: the repository's profile, its glossary and the instructions of the tasks show the state of their notes,
 // which are written in the note editor; «What the AI receives» shows the result of the three. The other sections are the
-// embedded views of their controllers (AtlasCtrl.ModelsCtrl, SemanticIndexCtrl, ResourcesCtrl, NoisePolicyCtrl).
+// embedded views of their controllers (AtlasCtrl.ModelsCtrl, SemanticIndexCtrl, ResourcesCtrl, NoisePolicyCtrl, PeriodSummaryCtrl).
 public partial class AtlasForm : KntForm, IViewBase
 {
     private readonly AtlasCtrl _ctrl;
@@ -35,6 +35,7 @@ public partial class AtlasForm : KntForm, IViewBase
         panelSemanticIndex.Controls.Add(_ctrl.SemanticIndexCtrl.View.PanelView());
         panelResources.Controls.Add(_ctrl.ResourcesCtrl.View.PanelView());
         panelNoisePolicy.Controls.Add(_ctrl.NoisePolicyCtrl.View.PanelView());
+        panelPeriodSummary.Controls.Add(_ctrl.PeriodSummaryCtrl.View.PanelView());
 
         // The height of the text and a margin, at any scale.
         listSections.ItemHeight = listSections.Font.Height + LogicalToDeviceUnits(10);
@@ -163,6 +164,7 @@ public partial class AtlasForm : KntForm, IViewBase
         EnumAtlasSection.SemanticIndex => panelSemanticIndex,
         EnumAtlasSection.Resources => panelResources,
         EnumAtlasSection.NoisePolicy => panelNoisePolicy,
+        EnumAtlasSection.PeriodSummary => panelPeriodSummary,
         _ => panelPersonalization
     };
 
@@ -195,7 +197,7 @@ public partial class AtlasForm : KntForm, IViewBase
         var selected = (e.State & DrawItemState.Selected) != 0;
         e.DrawBackground();
         var color = !available ? SystemColors.GrayText : selected ? SystemColors.HighlightText : listSections.ForeColor;
-        var text = AtlasCtrl.SectionText(section) + (available ? "" : " (Admin)");
+        var text = AtlasCtrl.SectionText(section) + (available ? "" : $" ({AtlasCtrl.RoleText(section)})");
         var bounds = new Rectangle(e.Bounds.X + LogicalToDeviceUnits(8), e.Bounds.Y, e.Bounds.Width - LogicalToDeviceUnits(8), e.Bounds.Height);
         TextRenderer.DrawText(e.Graphics, text, listSections.Font, bounds, color,
             TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis);

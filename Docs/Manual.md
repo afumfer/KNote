@@ -371,6 +371,19 @@ Not every note is knowledge: meeting minutes, quick notes, drafts... The **noise
 
 Two tags decide for a single note, whatever the policy says: **#NoKnowledge** always leaves it out, and **#Knowledge** keeps it in although its note type or its folder are left out (with both, #NoKnowledge wins). KNote's own notes (the assistant's conversations, the chat room, the notes of KNote Atlas, the extended summaries and the translations) are always out, and their types and folders are not offered. Anyone sees the policy; only a **ProjectManager** or an **Admin** changes it. Saving it doesn't change any note.
 
+### Period summary: the selection of the notes (KNote Atlas)
+
+The section **Period summary** of **KNote Atlas** (Staff role or higher) prepares the summary of what happened between two dates. For now it chooses **which notes** go into it; writing the summary comes in a later version.
+
+- **From / To**: the period, whole days (the last week by default). **From the beginning** takes every note up to **To**.
+- **Folder** (optional): only the notes of a folder and its subfolders.
+- **Keywords** (optional): only the notes with these words in their topic or text, as in the search (`!` leaves a word out, phrases in quotes).
+- **Talks about...** (optional, only with the semantic index): only the notes that talk about it, by meaning.
+
+The notes that enter are the ones **modified in the period** and the ones with **task activity** in it (a task that started or ended), combined with the fields above. Below, KNote says how many go **in**, how many are **doubtful** and how many stay **out**; KNote's own notes are always out and are not listed. Each note has its reason in words, the first that applies: a correction made by a person; the noise policy or the tags **#NoKnowledge** / **#Knowledge**; and its own signals (tasks with activity, citations from other notes of the selection, relations, resources and its size). For example, a note of 4 words created and left the same day, without tasks, resources, relations or citations, stays out; a short one without any of those is doubtful (a later version will ask the AI about them; meanwhile they go in).
+
+**Review selection...** opens the three lists (**In**, **Doubtful**, **Out**) with the reason of each note and a box: checked, the note goes into the summary. A doubtful note starts checked. Double click opens the note. **Accept** keeps the boxes you changed as **corrections**, remembered for the next summaries: a correction decides above the noise policy and the tags, and putting a box back as KNote decided takes the correction away. The corrections don't change the notes (nor their modification date): KNote keeps them in the note **Note relevance** of the folder **KNote Atlas**, with a table of who corrected what and when. Don't edit it by hand: only a **ProjectManager** or an **Admin** can, and KNote writes it.
+
 ### Chat room
 
 The chat room lets the users of a KNote web server talk in **threads**: each thread is a conversation about one topic, and every user with the Staff role or a higher one in that server can read it, join it and write in it. The web app and the desktop app share the same chat room, the one of the web server: a message written in one appears at once in the other.

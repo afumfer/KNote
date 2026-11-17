@@ -1,0 +1,123 @@
+@using KNote.Model.Core
+
+@* KNote Atlas, stage 2 (2.3b, CU-15, D20): «Review selection». The notes of the selection in three lists (In, Doubtful, Out), each
+   one with its reason and a box: checked, it goes into the summary. A doubtful note starts checked (S5). Double click opens the
+   note in its window. «Accept» keeps the boxes changed as corrections in «Note relevance» (NoteRelevanceRules.CorrectionFor: a box
+   back as KNote decides takes the correction away) and closes with true; the notes don't change. *@
+
+@implements IDisposable
+@inject IStore store
+@inject DialogService dialogService
+@inject KntWindows kntWindows
+
+<KntDialogFrame Icon="checklist" Title="Review selection" Subtitle="@SubtitleText" OnClose="OnCancel">
+    <ChildContent>
+        <RadzenTabs @bind-SelectedIndex="selectedTab">
+            <Tabs>
+                @foreach (var decision in Decisions)
+                {
+                    var notes = Selection.Notes.Where(n => n.Decision == decision).ToList();
+                    <RadzenTabsItem Text="@($"{TabText(decision)} ({notes.Count})")">
+                        @if (notes.Count == 0)
+                        {
+                            <div class="knt-empty-state-text">No note.</div>
+                        }
+                        else
+                        {
+                            <RadzenDataGrid TItem="NoteSelectionDto" Data="@notes" Density="Density.Compact" AllowColumnResize="true" AllowSorting="true"
+                                            AllowAlternatingRows="false" class="knt-list" Style="max-height: 55vh" RowDoubleClick="OnRowDoubleClick">
+                                <Columns>
+                                    <RadzenDataGridColumn TItem="NoteSelectionDto" Title="In" Width="56px" Sortable="false" TextAlign="TextAlign.Center">
+                                        <Template Context="note">
+                                            <RadzenCheckBox TValue="bool" Value="@IsChecked(note)" ValueChanged="@(value => SetChecked(note, value))"
+                                                            Disabled="@saving.IsBusy" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn TItem="NoteSelectionDto" Property="@nameof(NoteSelectionDto.NoteNumber)" Title="#" Width="70px" />
+                                    <RadzenDataGridColumn TItem="NoteSelectionDto" Property="@nameof(NoteSelectionDto.Topic)" Title="Topic" MinWidth="180px" />
+                                    <RadzenDataGridColumn TItem="NoteSelectionDto" Property="@nameof(NoteSelectionDto.FolderName)" Title="Folder" Width="140px" />
+                                    <RadzenDataGridColumn TItem="NoteSelectionDto" Property="@nameof(NoteSelectionDto.ModificationDateTime)" Title="Modified"
+                                                          FormatString="{0:d}" Width="110px" />
+                                    <RadzenDataGridColumn TItem="NoteSelectionDto" Property="@nameof(NoteSelectionDto.Reason)" Title="Reason" MinWidth="240px">
+                                        <Template Context="note">
+                                            <span style="white-space: normal">@note.Reason</span>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                </Columns>
+                            </RadzenDataGrid>
+                        }
+                    </RadzenTabsItem>
+                }
+            </Tabs>
+        </RadzenTabs>
+    </ChildContent>
+    <Footer>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0" style="flex: 1">@ChangesText</RadzenText>
+            <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="OnCancel" Disabled="@saving.IsBusy" />
+            <RadzenButton Text="Accept" Icon="check" ButtonStyle="ButtonStyle.Primary" Click="OnAccept" IsBusy="@saving.IsBusy" />
+        </RadzenStack>
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public NoteSelectionResultDto Selection { get; set; } = null!;
+
+    private static readonly EnumSelectionDecision[] Decisions = { EnumSelectionDecision.In, EnumSelectionDecision.Doubtful, EnumSelectionDecision.Out };
+
+    private readonly Dictionary<Guid, bool> checkedNotes = new();
+    private readonly KntSingleFlight saving = new();
+    private int selectedTab;
+    private bool closed;
+
+    private string SubtitleText => NoteRelevanceRules.CountText(Selection);
+
+    private List<RelevanceCorrectionChangeDto> Changes => Selection.Notes
+        .Where(n => IsChecked(n) != n.IsIncluded)
+        .Select(n => new RelevanceCorrectionChangeDto { NoteId = n.NoteId, Decision = NoteRelevanceRules.CorrectionFor(n, IsChecked(n)) })
+        .ToList();
+
+    private string ChangesText => NoteRelevanceRules.ChangesText(Selection.Notes.Count(IsChecked), Selection.Notes.Count, Changes.Count);
+
+    private static string TabText(EnumSelectionDecision decision) => decision switch
+    {
+        EnumSelectionDecision.In => "In",
+        EnumSelectionDecision.Doubtful => "Doubtful",
+        _ => "Out"
+    };
+
+    private bool IsChecked(NoteSelectionDto note) => checkedNotes.TryGetValue(note.NoteId, out var value) ? value : note.IsIncluded;
+
+    private void SetChecked(NoteSelectionDto note, bool value) => checkedNotes[note.NoteId] = value;
+
+    private async Task OnRowDoubleClick(DataGridRowMouseEventArgs<NoteSelectionDto> args) => await kntWindows.OpenViewAsync(args.Data.NoteId);
+
+    private Task OnAccept() => saving.RunAsync(async () =>
+    {
+        var changes = Changes;
+        if (changes.Count == 0)
+        {
+            CloseDialog(false);
+            return;
+        }
+        var result = await store.Summaries.SaveRelevanceCorrectionsAsync(new RelevanceCorrectionsSaveDto { Changes = changes });
+        if (result.IsValid)
+            CloseDialog(true);
+    });
+
+    private void OnCancel()
+    {
+        if (!saving.IsBusy)
+            CloseDialog(null);
+    }
+
+    private void CloseDialog(object? result)
+    {
+        if (closed)
+            return;
+        closed = true;
+        dialogService.Close(result);
+    }
+
+    public void Dispose() => closed = true;
+}

@@ -17,4 +17,7 @@ public interface ISummaryWebApiService
     Task<Result<NoisePolicyDto>> GetNoisePolicyAsync(CancellationToken cancellationToken = default);
     Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default);
     Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default);
+    // KNote Atlas 2.3: the selection of a summary and the corrections of «Review selection».
+    Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default);
+    Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes, CancellationToken cancellationToken = default);
 }

@@ -42,4 +42,12 @@ public class SummaryWebApiService : BaseService, ISummaryWebApiService
     public Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default) =>
         SendAsync<NoiseCountDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/noise-policy/count", policy, ct), "Count the noise",
             cancellationToken: cancellationToken);
+
+    public Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteSelectionResultDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/selection", request, ct), "Prepare the selection",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes, CancellationToken cancellationToken = default) =>
+        SendAsync<List<RelevanceCorrectionDto>>(ct => _httpClient.PostAsJsonAsync("api/summaries/relevance/corrections", changes, ct),
+            "Save the corrections of the selection", emitNotifySucess: true, cancellationToken: cancellationToken);
 }

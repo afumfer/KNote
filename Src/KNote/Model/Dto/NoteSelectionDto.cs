@@ -11,6 +11,9 @@ namespace KNote.Model.Dto;
 /// the notes of the period). All of them combined with «and».</summary>
 public class NoteSelectionRequestDto
 {
+    // «From the beginning»: before any note (SQL Server's datetime starts in 1753).
+    public static readonly DateTime Beginning = new(1900, 1, 1);
+
     public DateTime From { get; set; }
     public DateTime To { get; set; }
     public Guid? FolderId { get; set; }
