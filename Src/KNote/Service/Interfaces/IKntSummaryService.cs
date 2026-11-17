@@ -62,4 +62,10 @@ public interface IKntSummaryService
 
     /// <summary>Keeps the answers of the AI in «Note relevance» (each one replaces the note's one). Staff.</summary>
     Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers);
+
+    /// <summary>A period summary ready to be read (2.5): its selection and what the AI reads of each note that goes in. Staff.</summary>
+    Task<Result<PeriodSummaryPreparedDto>> PreparePeriodAsync(PeriodSummaryRequestDto request, CancellationToken cancellationToken = default);
+
+    /// <summary>Keeps a period summary in a new note @KNoteSummary of «KNote Summary», with the original of the AI attached. Staff.</summary>
+    Task<Result<NoteDto>> SavePeriodSummaryAsync(PeriodSummarySaveDto summary);
 }

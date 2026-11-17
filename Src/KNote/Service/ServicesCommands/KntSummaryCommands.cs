@@ -558,6 +558,128 @@ public class KntSummarySaveRelevanceAiAnswersAsyncCommand : KntCommandServiceBas
     }
 }
 
+// KNote Atlas, stage 2 (2.5, CU-16): a period summary ready to be read (KntNoteSelection.PreparePeriodAsync); nothing is written.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummaryPreparePeriodAsyncCommand : KntCommandServiceBase<PeriodSummaryRequestDto, Result<PeriodSummaryPreparedDto>>
+{
+    private readonly CancellationToken _cancellationToken;
+
+    public KntSummaryPreparePeriodAsyncCommand(IKntService service, PeriodSummaryRequestDto request, CancellationToken cancellationToken)
+        : base(service, request)
+    {
+        _cancellationToken = cancellationToken;
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param?.Selection == null)
+            result.AddErrorMessage("The period of the summary is required.");
+        else if (Param.Selection.To.Date < Param.Selection.From.Date)
+            result.AddErrorMessage(KntNoteSelection.PeriodError);
+        return result;
+    }
+
+    public override async Task<Result<PeriodSummaryPreparedDto>> Execute()
+    {
+        var result = new Result<PeriodSummaryPreparedDto>();
+        result.Entity = await KntNoteSelection.PreparePeriodAsync(Service, Param, _cancellationToken, result);
+        return result;
+    }
+}
+
+// A period summary in a new note (2.5, D5, D17, P5): of the type @KNoteSummary, in the folder «KNote Summary» (created the first time,
+// not a system folder: the summaries are notes as any other), with the summary as the AI wrote it attached and locked, so that the
+// stage 4 doesn't describe it. No note of the period is touched (nor its date). Its relations with each note come in 2.6.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<PeriodSummarySaveDto, Result<NoteDto>>
+{
+    private const string BypassReason = "KNote Atlas: the type and the folder of the summaries (stage 2)";
+
+    public KntSummarySavePeriodSummaryAsyncCommand(IKntService service, PeriodSummarySaveDto summary) : base(service, summary)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param?.Request?.Selection == null)
+            result.AddErrorMessage("The period of the summary is required.");
+        else if (string.IsNullOrWhiteSpace(Param.Summary))
+            result.AddErrorMessage("The AI gave no summary.");
+        else if (string.IsNullOrWhiteSpace(Param.Model))
+            result.AddErrorMessage("The model that wrote the summary is required.");
+        return result;
+    }
+
+    public override async Task<Result<NoteDto>> Execute()
+    {
+        var result = new Result<NoteDto>();
+
+        var summaryTypeId = await KntSystemNotes.EnsureNoteTypeAsync(Service, KntConst.SummaryTag,
+            "Summaries written by KNote Atlas", BypassReason, result);
+        var folder = await KntSystemNotes.EnsureFolderAsync(Service, KntConst.SummaryFolderName, BypassReason, result);
+        if (!result.IsValid)
+            return result;
+
+        var newNote = await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = summaryTypeId });
+        if (!newNote.IsValid)
+        {
+            result.AddListErrorMessage(newNote.ListErrorMessage);
+            return result;
+        }
+
+        string folderPath = null;
+        if (Param.Request.Selection.FolderId is Guid folderId)
+        {
+            var path = await Service.Folders.GetPathAsync(folderId);
+            folderPath = path.IsValid ? path.Entity : null;
+        }
+
+        var now = DateTime.Now;
+        var subject = string.IsNullOrWhiteSpace(Param.Request.Subject) ? PeriodSummaryRules.DefaultSubject(Param.Request.Selection) : Param.Request.Subject.Trim();
+        var summary = newNote.Entity;
+        summary.Topic = subject;
+        summary.Description = PeriodSummaryRules.NoteDescription(Param, folderPath, now);
+        summary.Tags = "";
+        summary.NoteTypeId = summaryTypeId;
+        var folderDto = await Service.Folders.GetAsync(folder.FolderId);
+        if (!folderDto.IsValid)
+        {
+            result.AddListErrorMessage(folderDto.ListErrorMessage);
+            return result;
+        }
+        summary.FolderId = folder.FolderId;
+        summary.FolderDto = folderDto.Entity;
+        summary.Resources.Add(new ResourceDto
+        {
+            Name = $"{Guid.NewGuid()}_{PeriodSummaryRules.OriginalFileName(subject)}",
+            Description = PeriodSummaryRules.OriginalDescription(Param.Model, now),
+            DescriptionByUser = true,
+            FileType = "text/markdown",
+            ContentArrayBytes = Encoding.UTF8.GetBytes(Param.Summary)
+        });
+
+        var saved = await Service.Notes.SaveExtendedAsync(summary);
+        if (!saved.IsValid)
+        {
+            result.AddListErrorMessage(saved.ListErrorMessage);
+            return result;
+        }
+
+        // The pace of the model in a period summary, for the next estimates (D18, P6).
+        var state = await KntSummaryState.ReadAsync(Service) ?? new SummaryStateDto();
+        if (SummaryEstimate.Pace(Param.CharactersRead, Param.Seconds) is double pace)
+            state.PeriodSecondsPer1000Characters[Param.Model] = pace;
+        state.LastRunDateTime = now;
+        await KntSummaryState.WriteAsync(Service, state);
+
+        result.Entity = saved.Entity.GetSimpleDto<NoteDto>();
+        return result;
+    }
+}
+
 // The texts of the commands of the summaries, common to both apps.
 public static class KntSummaryTexts
 {

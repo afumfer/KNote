@@ -59,7 +59,7 @@ public class SummaryController : ControllerBase
             return await AiDocumentProcessor.EstimateAsync(_service, provider, request, _logger, cancellationToken);
         });
 
-    // Queues the summary or the translation of a document for the user (or gives the one the user already has in this repository).
+    // Queues the summary or the translation of a document, or a period summary (2.5, Kind PeriodSummary), for the user (or gives the one the user already has in this repository).
     [HttpPost("documents")]
     [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> SummarizeDocument([FromBody] DocumentProcessRequestDto request) =>
@@ -149,10 +149,14 @@ public class SummaryController : ControllerBase
     // The chat provider asked for or, without one, the repository's recommended LLM if this Server has it, else the default one.
     private async Task<(AiProviderRef Provider, Result Error)> ProviderAsync(DocumentProcessRequestDto request)
     {
-        if (request == null || request.ResourceId == Guid.Empty)
+        // A period summary (2.5) has no document: its period.
+        var missingWhat = request == null ? "The document is required."
+            : request.Kind == EnumDocumentProcessKind.PeriodSummary ? (request.Period?.Selection == null ? "The period of the summary is required." : null)
+            : request.ResourceId == Guid.Empty ? "The document is required." : null;
+        if (missingWhat != null)
         {
             var missing = new Result();
-            missing.AddErrorMessage("The document is required.");
+            missing.AddErrorMessage(missingWhat);
             return (null, missing);
         }
         return await ProviderForAsync(request.ProviderAlias);

@@ -72,6 +72,8 @@ public static class KntConst
     // where it comes from with a trace note of this type (D17, D21).
     public static string SummaryTag { get; private set; } = "@KNoteSummary";
     public static string DerivedFromTraceNoteType { get; private set; } = "@DerivedFrom";
+    // The folder of the period summaries (2.5, D5): not a system folder, they are notes as any other.
+    public static string SummaryFolderName { get; private set; } = "KNote Summary";
     // The translations of a long document (CU-43, D21): as the summaries, notes of the people's own, with the translation attached.
     public static string TranslationTag { get; private set; } = "@KNoteTranslation";
     // «Note relevance» (stage 2, chapter 30, D10): the corrections of the selection of the summaries made by people and the

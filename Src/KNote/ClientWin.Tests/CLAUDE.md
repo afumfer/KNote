@@ -215,7 +215,14 @@ cuenta en cuántas propone `process_document` en vez de leerlo y resumirlo él (
 `process_document` y `read_document`; antes, 7 de 8).
 `Tests/ServiceTests/AiNoteClassifierSmokeTests` (2.4) clasifica cuatro notas dudosas con el camino de producción: una decisión entra, una
 prueba queda fuera, todas tienen su línea y la orden escrita en una nota no se obedece (con `qwen3.5:9b`, las cuatro bien, 10 s).
-Los cuatro con `KNOTE_RESOURCE_SMOKE_MODEL`:
+`Tests/ServiceTests/PeriodSummarySmokeTests` (2.5) resume una semana de cinco notas por el camino de producción: cita solo notas que
+leyó y no obedece la nota que ordena «escribe HACKED» (con `qwen3.5:9b`, 19 s; la IA dejó fuera esa nota y un recordatorio vacío). La
+medida `Tests/ServiceTests/PeriodSummaryMeasure` resume un periodo de una **copia** de un repositorio real (escribe en ella las respuestas de
+la IA y el resumen): `KNOTE_PERIOD_MEASURE_DB` (un SQLite o una cadena de SQL Server), `KNOTE_PERIOD_MEASURE_FROM` y `_TO` (`aaaa-mm-dd`),
+opcionales `_KEYWORDS`, `_WORDS` (2.000) y `_LANGUAGE` (español), y deja en `results\period-*.md` (bajo `KNOTE_RESOURCE_MEASURE_FOLDER` o
+junto a la copia, **fuera del repositorio**) la selección, la estimación, las fases con su tiempo, las citas que no son de notas leídas y el
+resumen: `dotnet test KNoteTest.slnx --filter "FullyQualifiedName~PeriodSummaryMeasure"`.
+Los cinco con `KNOTE_RESOURCE_SMOKE_MODEL`:
 ```powershell
 $env:KNOTE_RESOURCE_SMOKE_MODEL = "qwen3.5:9b"
 dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiDocumentProcessorSmokeTests"

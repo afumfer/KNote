@@ -436,6 +436,9 @@ predeterminado del Server.
   devuelve lo que se guardó (sin los ids que no existen ni los de KNote).
 - **Selección** (2.3): `POST selection` (`NoteSelectionRequestDto` → `NoteSelectionResultDto`, sin IA, cancelada si se cierra la petición) y
   `POST relevance/corrections` (los cambios de «Review selection», guardados en «Note relevance»), Staff+, con `EnforceAuthorization`.
+- **El resumen de un periodo** (2.5): las mismas rutas de los documentos (`documents/estimate`, `documents`, `documents/progress`,
+  `documents/cancel`) con `Kind = PeriodSummary` y `Period` (sin documento); el trabajo es el mismo `DocumentProcess` de la cola, con el
+  asunto como `FileName` del progreso.
 - **Las dudosas con IA** (2.4): `POST selection/classify` (`NoteClassificationRequestDto`: hasta 10 notas y el alias del modelo; sin él, el
   LLM recomendado del repositorio o el predeterminado, como los documentos) hace un lote con `AiNoteClassifier` y devuelve las respuestas
   guardadas; el cliente pide los lotes uno a uno. Staff+, con `EnforceAuthorization`, cancelado con la petición.

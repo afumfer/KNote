@@ -15,7 +15,9 @@ public enum EnumSummaryLength
 public enum EnumDocumentProcessKind
 {
     Summarize,
-    Translate
+    Translate,
+    // The summary of a period or of a subject (2.5): its request in DocumentProcessRequestDto.Period, without a document.
+    PeriodSummary
 }
 
 /// <summary>
@@ -32,8 +34,12 @@ public class DocumentProcessRequestDto
     public string Language { get; set; }
     public EnumSummaryLength Length { get; set; } = EnumSummaryLength.Medium;
     public Guid? ContinueNoteId { get; set; }
+    // A period summary (Kind PeriodSummary, 2.5).
+    public PeriodSummaryRequestDto Period { get; set; }
 
-    public override string ToString() => $"{Kind} resource {ResourceId}, {ProviderAlias}, {Length}, {Language}, continue {ContinueNoteId}";
+    public override string ToString() => Kind == EnumDocumentProcessKind.PeriodSummary
+        ? $"{Kind} {Period}, {ProviderAlias}, {Language}"
+        : $"{Kind} resource {ResourceId}, {ProviderAlias}, {Length}, {Language}, continue {ContinueNoteId}";
 }
 
 /// <summary>
@@ -80,6 +86,9 @@ public class DocumentProcessEstimateDto
     public double? Seconds { get; set; }
     // A translation that goes on: the page it goes on from (a document with pages).
     public int? FromPage { get; set; }
+    // A period summary (2.5): the notes it reads and the doubtful ones the AI will be asked about first (their calls are in Calls).
+    public int Notes { get; set; }
+    public int DoubtfulToClassify { get; set; }
 }
 
 public enum EnumDocumentProcessPhase
@@ -94,7 +103,9 @@ public enum EnumDocumentProcessPhase
     Canceled,
     Failed,
     // A translation (2.1b): its parts, one after another.
-    Translating
+    Translating,
+    // A period summary (2.5): the doubtful notes asked to the AI before reading.
+    Classifying
 }
 
 /// <summary>How a summary or a translation of a document goes (the job of each app, D18).</summary>
@@ -219,5 +230,7 @@ public class SummaryStateDto
 {
     public Dictionary<string, double> SecondsPer1000Characters { get; set; } = new();
     public Dictionary<string, double> TranslationSecondsPer1000Characters { get; set; } = new();
+    // The pace of the period summaries (2.5, P6): reading notes doesn't go at the pace of a document.
+    public Dictionary<string, double> PeriodSecondsPer1000Characters { get; set; } = new();
     public DateTime? LastRunDateTime { get; set; }
 }

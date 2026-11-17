@@ -23,7 +23,7 @@ internal static class KntNoteSelection
     public const string PeriodError = "The end of the period is before its start.";
 
     public static async Task<NoteSelectionResultDto> BuildAsync(IKntService service, NoteSelectionRequestDto request,
-        CancellationToken cancellationToken, ResultBase result)
+        CancellationToken cancellationToken, ResultBase result, Dictionary<Guid, (NoteSelectionSourceDto Source, string Text)> texts = null)
     {
         var from = request.From.Date;
         var to = request.To.Date.AddDays(1);
@@ -103,6 +103,8 @@ internal static class KntNoteSelection
         var folderNames = folders.ToDictionary(f => f.FolderId, f => f.Name);
         foreach (var (source, noise, text) in notes)
         {
+            if (texts != null)
+                texts[source.NoteId] = (source, text);
             var note = new NoteSelectionDto
             {
                 NoteId = source.NoteId, NoteNumber = source.NoteNumber, Topic = source.Topic, FolderId = source.FolderId,
@@ -165,6 +167,56 @@ internal static class KntNoteSelection
         var snapshot = await KntSemanticSearcher.VectorsAsync(service, index, cancellationToken);
         return SemanticSearchRules.Rank(snapshot.Chunks, query, SemanticSearchRules.MinSimilarity, candidates.Contains)
             .Select(m => m.NoteId).ToHashSet();
+    }
+
+    /// <summary>
+    /// A period summary ready to be read (2.5): the selection and, of each note that goes in (In, and the doubtful ones as they are:
+    /// they go in), what the AI reads: its data and the path of its folder, its cleaned text, its tasks with activity in the period and
+    /// the descriptions of its resources (not the whole text of its documents, P2).
+    /// </summary>
+    public static async Task<PeriodSummaryPreparedDto> PreparePeriodAsync(IKntService service, PeriodSummaryRequestDto request,
+        CancellationToken cancellationToken, ResultBase result)
+    {
+        var texts = new Dictionary<Guid, (NoteSelectionSourceDto Source, string Text)>();
+        var selection = await BuildAsync(service, request.Selection, cancellationToken, result, texts);
+        if (selection == null)
+            return null;
+
+        var from = request.Selection.From.Date;
+        var to = request.Selection.To.Date.AddDays(1);
+        var paths = new Dictionary<Guid, string>();
+        var prepared = new PeriodSummaryPreparedDto { Selection = selection };
+        foreach (var note in selection.Notes.Where(n => n.IsIncluded))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var (source, text) = texts[note.NoteId];
+            if (!paths.TryGetValue(source.FolderId, out var path))
+            {
+                var resPath = await service.Folders.GetPathAsync(source.FolderId);
+                paths[source.FolderId] = path = resPath.IsValid ? resPath.Entity : note.FolderName;
+            }
+
+            var period = new PeriodNoteDto
+            {
+                NoteId = note.NoteId, NoteNumber = note.NoteNumber, Topic = note.Topic, FolderPath = path, Tags = source.Tags,
+                ModificationDateTime = source.ModificationDateTime, Text = text, Score = note.Score
+            };
+            if (source.TasksWithActivity > 0)
+            {
+                var tasks = await service.Repository.Notes.GetNoteTasksAsync(note.NoteId);
+                if (tasks.IsValid)
+                    period.Tasks = tasks.Entity.Where(t => PeriodSummaryRules.HasActivity(t, from, to)).Select(PeriodSummaryRules.TaskText).ToList();
+            }
+            if (source.Resources > 0)
+            {
+                var resources = await service.Notes.GetResourcesInfoAsync(note.NoteId);
+                if (resources.IsValid)
+                    period.Resources = resources.Entity.Where(r => !string.IsNullOrWhiteSpace(r.Description))
+                        .Select(r => PeriodSummaryRules.ResourceText(r.NameOut, r.Description)).ToList();
+            }
+            prepared.Notes.Add(period);
+        }
+        return prepared;
     }
 
     /// <summary>The doubtful notes as the AI reads them (2.4): their data and the beginning of their cleaned text, with the same

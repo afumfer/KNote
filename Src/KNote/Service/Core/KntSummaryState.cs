@@ -25,6 +25,7 @@ internal static class KntSummaryState
             {
                 state.SecondsPer1000Characters ??= new();
                 state.TranslationSecondsPer1000Characters ??= new();
+                state.PeriodSecondsPer1000Characters ??= new();
             }
             return state;
         }

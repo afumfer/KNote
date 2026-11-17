@@ -151,6 +151,49 @@ public class SummaryInProcessTests
         Assert.AreEqual(EnumSelectionSource.Correction, corrections.Notes.Single(n => n.NoteId == note.NoteId).Source);
     }
 
+    // 2.5 (CU-16, CU-17): a period summary in the queue of the Server, as the summary of a document: estimated, made and kept in
+    // a new note of «KNote Summary».
+    [TestMethod]
+    public async Task APeriodSummary_IsMadeInTheQueue_AndKeptInANewNote()
+    {
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        using var service = _factory.CreateServiceForRepository(0);
+        var note = (await service.Notes.NewAsync()).Entity;
+        note.Topic = $"Period {Guid.NewGuid():N}";
+        note.Description = string.Join(" ", Enumerable.Range(1, 60).Select(i => $"word{i}"));
+        note.FolderId = (await service.Folders.GetHomeAsync()).Entity.FolderId;
+        Assert.IsTrue((await service.Notes.SaveAsync(note)).IsValid);
+        _chatClients.Script = () => Enumerable.Range(0, 40).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "The week in short.") }).ToList();
+        var request = new DocumentProcessRequestDto
+        {
+            Kind = EnumDocumentProcessKind.PeriodSummary, Language = "English",
+            Period = new PeriodSummaryRequestDto { Subject = "Week in short", Words = 200, Selection = new NoteSelectionRequestDto { From = DateTime.Today, To = DateTime.Today } }
+        };
+
+        var estimate = await staff.PostAsJsonAsync("api/summaries/documents/estimate", request);
+        var started = await staff.PostAsJsonAsync("api/summaries/documents", request);
+
+        var estimateBody = await estimate.Content.ReadAsStringAsync();
+        Assert.IsTrue(estimate.IsSuccessStatusCode, estimateBody);
+        Assert.IsGreaterThan(0, JsonSerializer.Deserialize<Result<DocumentProcessEstimateDto>>(estimateBody, _json)!.Entity.Notes);
+        Assert.IsTrue(started.IsSuccessStatusCode, await started.Content.ReadAsStringAsync());
+        DocumentProcessProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            progress = (await staff.GetFromJsonAsync<Result<DocumentProcessProgressDto>>("api/summaries/documents/progress", _json))!.Entity;
+        }
+        Assert.AreEqual(EnumDocumentProcessPhase.Completed, progress!.Phase, progress.Message);
+        Assert.AreEqual(EnumDocumentProcessKind.PeriodSummary, progress.Kind);
+        Assert.AreEqual("Week in short", progress.FileName);
+
+        var summary = (await service.Notes.GetExtendedAsync(progress.NoteId!.Value)).Entity;
+        Assert.AreEqual(KntConst.SummaryTag, summary.NoteTypeDto.Name);
+        Assert.AreEqual("Week in short", summary.Topic);
+        StringAssert.EndsWith(summary.Description, "The week in short.");
+    }
+
     // 2.4 (D9, C2): a batch of doubtful notes asked to the AI, by a Staff, and its answers used by the selection.
     [TestMethod]
     public async Task TheDoubtfulNotes_AreAskedToTheAi_ByAStaff()

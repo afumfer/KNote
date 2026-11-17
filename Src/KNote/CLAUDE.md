@@ -578,6 +578,20 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   por sus señales, por debajo de una corrección y de la política (`NoteRelevanceRules.Decide`, `EnumSelectionSource.Ai`). Tests en
   `Tests/NoteClassificationRulesTests`, `ServiceTests/NoteClassificationServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`
   y el smoke `ServiceTests/AiNoteClassifierSmokeTests` (`RequiresRealAiProvider`, `KNOTE_RESOURCE_SMOKE_MODEL`).
+- **El resumen de un periodo (KNote Atlas, etapa 2, 2.5, CU-16, CU-17, P1-P7)**: **un tipo más del trabajo de los resúmenes**
+  (`EnumDocumentProcessKind.PeriodSummary`, `DocumentProcessRequestDto.Period`): la misma cola del `Server` (`KntAtlasJobs`,
+  `DocumentProcess`, uno por usuario: un resumen de un documento o de un periodo), el mismo trabajo de `ClientWin`, el mismo progreso
+  y la misma cancelación, y las mismas rutas (`api/summaries/documents/...`). `Ai/AiPeriodSummarizer` (desde `AiDocumentProcessor`):
+  `IKntSummaryService.PreparePeriodAsync` (Staff: la selección y, de cada nota que entra, su ruta, su texto limpio, sus tareas con
+  actividad en el periodo y las descripciones de sus recursos, sin el texto de sus documentos), las dudosas que queden preguntadas antes
+  a la IA (fase `Classifying`, con el tope de 100; sus respuestas se guardan aunque luego se cancele), las notas como piezas `#123`
+  ordenadas por carpeta y fecha (`Model/Core/PeriodSummaryRules`) leídas por `AiSummaryEngine` con **una tarea**, `SummarizePeriod`
+  (como el documento largo: lotes, uniones y redacción), de 100 a 3.000 palabras, y `SavePeriodSummaryAsync` (Staff): una nota
+  `@KNoteSummary` en la carpeta «KNote Summary» (`KntConst.SummaryFolderName`, no del sistema), con una cabecera (periodo, filtros, notas
+  leídas y fuera, modelo, fecha, idioma), el texto y el original adjunto; el ritmo por modelo en `PeriodSecondsPer1000Characters`. Las
+  notas del periodo no cambian. Sin notas que entren, un error claro (`PeriodSummaryRules.NoNotes`). Tests en `Tests/PeriodSummaryRulesTests`,
+  `ServiceTests/PeriodSummaryServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`, el smoke `ServiceTests/PeriodSummarySmokeTests`
+  y la medida `ServiceTests/PeriodSummaryMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

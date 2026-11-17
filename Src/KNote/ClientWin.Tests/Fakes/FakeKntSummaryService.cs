@@ -58,4 +58,13 @@ internal class FakeKntSummaryService : IKntSummaryService
 
     public Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers) =>
         (SaveRelevanceAiAnswersAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRelevanceAiAnswersAsync)} not configured for this test"))(answers);
+
+    public Func<PeriodSummaryRequestDto, CancellationToken, Task<Result<PeriodSummaryPreparedDto>>>? PreparePeriodAsyncImpl { get; set; }
+    public Func<PeriodSummarySaveDto, Task<Result<NoteDto>>>? SavePeriodSummaryAsyncImpl { get; set; }
+
+    public Task<Result<PeriodSummaryPreparedDto>> PreparePeriodAsync(PeriodSummaryRequestDto request, CancellationToken cancellationToken = default) =>
+        (PreparePeriodAsyncImpl ?? throw new NotSupportedException($"{nameof(PreparePeriodAsync)} not configured for this test"))(request, cancellationToken);
+
+    public Task<Result<NoteDto>> SavePeriodSummaryAsync(PeriodSummarySaveDto summary) =>
+        (SavePeriodSummaryAsyncImpl ?? throw new NotSupportedException($"{nameof(SavePeriodSummaryAsync)} not configured for this test"))(summary);
 }

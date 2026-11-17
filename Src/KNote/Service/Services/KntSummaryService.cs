@@ -52,4 +52,10 @@ public class KntSummaryService : KntServiceBase, IKntSummaryService
 
     public async Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers) =>
         await ExecuteCommand(new KntSummarySaveRelevanceAiAnswersAsyncCommand(Service, answers));
+
+    public async Task<Result<PeriodSummaryPreparedDto>> PreparePeriodAsync(PeriodSummaryRequestDto request, CancellationToken cancellationToken = default) =>
+        await ExecuteCommand(new KntSummaryPreparePeriodAsyncCommand(Service, request, cancellationToken));
+
+    public async Task<Result<NoteDto>> SavePeriodSummaryAsync(PeriodSummarySaveDto summary) =>
+        await ExecuteCommand(new KntSummarySavePeriodSummaryAsyncCommand(Service, summary));
 }
