@@ -49,4 +49,13 @@ internal class FakeKntSummaryService : IKntSummaryService
 
     public Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes) =>
         (SaveRelevanceCorrectionsAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRelevanceCorrectionsAsync)} not configured for this test"))(changes);
+
+    public Func<List<Guid>, Task<Result<List<NoteToClassifyDto>>>>? GetNotesToClassifyAsyncImpl { get; set; }
+    public Func<RelevanceAiAnswersSaveDto, Task<Result<List<RelevanceAiAnswerDto>>>>? SaveRelevanceAiAnswersAsyncImpl { get; set; }
+
+    public Task<Result<List<NoteToClassifyDto>>> GetNotesToClassifyAsync(List<Guid> noteIds) =>
+        (GetNotesToClassifyAsyncImpl ?? throw new NotSupportedException($"{nameof(GetNotesToClassifyAsync)} not configured for this test"))(noteIds);
+
+    public Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers) =>
+        (SaveRelevanceAiAnswersAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRelevanceAiAnswersAsync)} not configured for this test"))(answers);
 }

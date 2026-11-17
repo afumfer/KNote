@@ -117,7 +117,8 @@ public class CommandAuthorizationMatrixTests
             "KntSummarySaveDocumentTranslationAsyncCommand");
         // The selection of a summary and the corrections of «Review selection» (2.3, chapter 8: who asks for summaries and corrects).
         Add(nameof(EnumRoles.Staff),
-            "KntSummaryPrepareSelectionAsyncCommand", "KntSummarySaveRelevanceCorrectionsAsyncCommand");
+            "KntSummaryPrepareSelectionAsyncCommand", "KntSummarySaveRelevanceCorrectionsAsyncCommand",
+            "KntSummaryGetNotesToClassifyAsyncCommand", "KntSummarySaveRelevanceAiAnswersAsyncCommand");
 
         Add(nameof(EnumRoles.ProjectManager),
             "KntFoldersSaveAsyncCommand", "KntFoldersDeleteAsyncCommand",

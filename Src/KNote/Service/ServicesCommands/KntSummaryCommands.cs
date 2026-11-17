@@ -506,6 +506,58 @@ public class KntSummarySaveRelevanceCorrectionsAsyncCommand : KntCommandServiceB
     }
 }
 
+// KNote Atlas, stage 2 (2.4, D9): doubtful notes as the AI reads them, with the same fingerprint as the selection.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummaryGetNotesToClassifyAsyncCommand : KntCommandServiceBase<List<Guid>, Result<List<NoteToClassifyDto>>>
+{
+    public KntSummaryGetNotesToClassifyAsyncCommand(IKntService service, List<Guid> noteIds) : base(service, noteIds)
+    {
+
+    }
+
+    public override async Task<Result<List<NoteToClassifyDto>>> Execute()
+    {
+        var result = new Result<List<NoteToClassifyDto>>();
+        result.Entity = await KntNoteSelection.ToClassifyAsync(Service, Param, result);
+        return result;
+    }
+}
+
+// The answers of the AI kept in «Note relevance» (KntRelevanceNotes, D10), for a Staff (inside KntAuthorizationBypass). The answers
+// of notes of KNote's own are not kept.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummarySaveRelevanceAiAnswersAsyncCommand : KntCommandServiceBase<RelevanceAiAnswersSaveDto, Result<List<RelevanceAiAnswerDto>>>
+{
+    public KntSummarySaveRelevanceAiAnswersAsyncCommand(IKntService service, RelevanceAiAnswersSaveDto answers) : base(service, answers)
+    {
+
+    }
+
+    public override async Task<Result<List<RelevanceAiAnswerDto>>> Execute()
+    {
+        var result = new Result<List<RelevanceAiAnswerDto>>();
+        var answers = (Param?.Answers ?? new List<RelevanceAiAnswerDto>()).Where(a => a.NoteId != Guid.Empty)
+            .GroupBy(a => a.NoteId).Select(g => g.Last()).ToList();
+
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var notes = await Repository.Notes.GetClassificationsAsync();
+        if (!notes.IsValid)
+        {
+            result.AddListErrorMessage(notes.ListErrorMessage);
+            return result;
+        }
+        var kNoteNotes = notes.Entity
+            .Where(n => (n.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)) || context.KNoteFolderIds.Contains(n.FolderId))
+            .Select(n => n.NoteId).ToHashSet();
+        answers = answers.Where(a => !kNoteNotes.Contains(a.NoteId)).ToList();
+
+        await KntRelevanceNotes.SaveAiAnswersAsync(Service, answers, result);
+        if (result.IsValid)
+            result.Entity = answers;
+        return result;
+    }
+}
+
 // The texts of the commands of the summaries, common to both apps.
 public static class KntSummaryTexts
 {

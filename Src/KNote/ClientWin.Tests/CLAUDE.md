@@ -213,7 +213,9 @@ con el ritmo, el tiempo estimado del documento entero y las partes marcadas como
 peticiones de resumen extendido y de traducción de un documento largo de una nota (`KNOTE_SMOKE_RUNS` veces cada una, 2 por defecto) y
 cuenta en cuántas propone `process_document` en vez de leerlo y resumirlo él (con `qwen3.5:9b`, 12 de 12 tras afinar las descripciones de
 `process_document` y `read_document`; antes, 7 de 8).
-Los tres con `KNOTE_RESOURCE_SMOKE_MODEL`:
+`Tests/ServiceTests/AiNoteClassifierSmokeTests` (2.4) clasifica cuatro notas dudosas con el camino de producción: una decisión entra, una
+prueba queda fuera, todas tienen su línea y la orden escrita en una nota no se obedece (con `qwen3.5:9b`, las cuatro bien, 10 s).
+Los cuatro con `KNOTE_RESOURCE_SMOKE_MODEL`:
 ```powershell
 $env:KNOTE_RESOURCE_SMOKE_MODEL = "qwen3.5:9b"
 dotnet test KNoteTest.slnx --filter "FullyQualifiedName~AiDocumentProcessorSmokeTests"

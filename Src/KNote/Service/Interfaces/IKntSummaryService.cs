@@ -56,4 +56,10 @@ public interface IKntSummaryService
     /// <summary>Keeps the changes of «Review selection» in «Note relevance» (created the first time), for the current user; it gives
     /// the corrections as they are kept. Staff.</summary>
     Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes);
+
+    /// <summary>Doubtful notes as the AI reads them (2.4): their data, the beginning of their text and their fingerprint. Staff.</summary>
+    Task<Result<List<NoteToClassifyDto>>> GetNotesToClassifyAsync(List<Guid> noteIds);
+
+    /// <summary>Keeps the answers of the AI in «Note relevance» (each one replaces the note's one). Staff.</summary>
+    Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers);
 }

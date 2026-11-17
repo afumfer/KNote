@@ -72,7 +72,9 @@ internal static class KntNoteSelection
 
         var context = await KntNoisePolicy.LoadContextAsync(service);
         var policy = context.Clean(await KntNoisePolicy.ReadAsync(service));
-        var corrections = (await KntRelevanceNotes.ReadAsync(service, result)).Corrections.ToDictionary(c => c.NoteId);
+        var (keptCorrections, keptAnswers) = await KntRelevanceNotes.ReadAsync(service, result);
+        var corrections = keptCorrections.ToDictionary(c => c.NoteId);
+        var answers = keptAnswers.ToDictionary(a => a.NoteId);
         if (!result.IsValid)
             return null;
 
@@ -89,7 +91,7 @@ internal static class KntNoteSelection
                 selection.KNoteNotes++;
                 continue;
             }
-            notes.Add((source, noise, NoteReadingCleaner.Clean(Markdown(service, source))));
+            notes.Add((source, noise, ReadingText(service, source.ContentType, source.Description)));
         }
 
         // The citations #n between the notes of the selection (one per citing note, not itself).
@@ -104,10 +106,14 @@ internal static class KntNoteSelection
             var note = new NoteSelectionDto
             {
                 NoteId = source.NoteId, NoteNumber = source.NoteNumber, Topic = source.Topic, FolderId = source.FolderId,
-                FolderName = folderNames.GetValueOrDefault(source.FolderId), ModificationDateTime = source.ModificationDateTime
+                FolderName = folderNames.GetValueOrDefault(source.FolderId), ModificationDateTime = source.ModificationDateTime,
+                ContentHash = NoteRelevanceRules.ContentHash(source.Topic, text)
             };
             var signals = NoteRelevanceRules.SignalsOf(source, text, citedBy.GetValueOrDefault(source.NoteNumber));
-            NoteRelevanceRules.Decide(note, noise, signals, corrections.GetValueOrDefault(source.NoteId));
+            // An answer of the AI only while the note is as it was (2.4, D9).
+            var answer = answers.GetValueOrDefault(source.NoteId);
+            NoteRelevanceRules.Decide(note, noise, signals, corrections.GetValueOrDefault(source.NoteId),
+                answer?.ContentHash == note.ContentHash ? answer : null);
             selection.Notes.Add(note);
         }
         selection.Notes = NoteRelevanceRules.Order(selection.Notes);
@@ -161,11 +167,42 @@ internal static class KntNoteSelection
             .Select(m => m.NoteId).ToHashSet();
     }
 
-    // The text of a note as it is read: Markdown (an HTML note converted).
-    private static string Markdown(IKntService service, NoteSelectionSourceDto source)
+    /// <summary>The doubtful notes as the AI reads them (2.4): their data and the beginning of their cleaned text, with the same
+    /// fingerprint as the selection. KNote's own notes and the ones that no longer exist are left out.</summary>
+    public static async Task<List<NoteToClassifyDto>> ToClassifyAsync(IKntService service, IEnumerable<Guid> noteIds, ResultBase result)
     {
-        var html = source.ContentType != null
-            && string.Equals(new NoteInfoDto { ContentType = source.ContentType }.GetContentTypeExt().ForDescription, "html", StringComparison.OrdinalIgnoreCase);
-        return html ? service.Notes.UtilHtmlToMarkdown(source.Description ?? "") : source.Description ?? "";
+        var context = await KntNoisePolicy.LoadContextAsync(service);
+        var folders = (await service.Repository.Folders.GetAllAsync()).Entity?.ToDictionary(f => f.FolderId, f => f.Name) ?? new();
+        var types = (await service.Repository.NoteTypes.GetAllAsync()).Entity?.ToDictionary(t => t.NoteTypeId, t => t.Name) ?? new();
+
+        var notes = new List<NoteToClassifyDto>();
+        foreach (var noteId in (noteIds ?? Enumerable.Empty<Guid>()).Distinct())
+        {
+            var res = await service.Repository.Notes.GetAsync(noteId);
+            if (!res.IsValid)
+            {
+                result.AddListErrorMessage(res.ListErrorMessage);
+                return null;
+            }
+            var note = res.Entity;
+            if (note == null || context.KNoteFolderIds.Contains(note.FolderId) || (note.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)))
+                continue;
+            var text = ReadingText(service, note.ContentType, note.Description);
+            notes.Add(new NoteToClassifyDto
+            {
+                NoteId = note.NoteId, NoteNumber = note.NoteNumber, Topic = note.Topic, FolderName = folders.GetValueOrDefault(note.FolderId),
+                NoteTypeName = note.NoteTypeId is Guid typeId ? types.GetValueOrDefault(typeId) : null, Tags = note.Tags,
+                Text = NoteClassificationRules.Cut(text), ContentHash = NoteRelevanceRules.ContentHash(note.Topic, text)
+            });
+        }
+        return notes;
+    }
+
+    // The text of a note as it is read: Markdown (an HTML note converted), cleaned (NoteReadingCleaner).
+    private static string ReadingText(IKntService service, string contentType, string description)
+    {
+        var html = contentType != null
+            && string.Equals(new NoteInfoDto { ContentType = contentType }.GetContentTypeExt().ForDescription, "html", StringComparison.OrdinalIgnoreCase);
+        return NoteReadingCleaner.Clean(html ? service.Notes.UtilHtmlToMarkdown(description ?? "") : description ?? "");
     }
 }

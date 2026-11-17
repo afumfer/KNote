@@ -46,4 +46,10 @@ public class KntSummaryService : KntServiceBase, IKntSummaryService
 
     public async Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes) =>
         await ExecuteCommand(new KntSummarySaveRelevanceCorrectionsAsyncCommand(Service, changes));
+
+    public async Task<Result<List<NoteToClassifyDto>>> GetNotesToClassifyAsync(List<Guid> noteIds) =>
+        await ExecuteCommand(new KntSummaryGetNotesToClassifyAsyncCommand(Service, noteIds));
+
+    public async Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers) =>
+        await ExecuteCommand(new KntSummarySaveRelevanceAiAnswersAsyncCommand(Service, answers));
 }

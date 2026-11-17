@@ -564,6 +564,18 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   el comando la escribe para un Staff dentro de `KntAuthorizationBypass`, **que también salta esa regla de guardado**
   (`KntAtlasNotes.CanWriteAsync`). Las personas nunca tocan sus notas al corregir. Tests en `Tests/NoteReadingCleanerTests`,
   `NoteRelevanceRulesTests`, `RelevanceNoteTests`, `ServiceTests/NoteSelectionServiceTests` y `InProcessIntegrationTests/SummaryInProcessTests`.
+- **Las dudosas con IA (KNote Atlas, etapa 2, 2.4, D9, C1-C6)**: a petición, nunca al preparar la selección. `Model/Core/NoteClassificationRules`
+  elige las dudosas por sus señales (las de más puntuación, 100 como mucho por vez; las demás siguen dudosas, y las dudosas entran), las
+  parte en lotes de 10, arma la petición (cada nota entre `<note>` y `</note>`, con número, tema, carpeta, tipo, etiquetas y el comienzo
+  de su texto limpio, 1.500 caracteres) y lee la respuesta línea a línea (`#123 | In | motivo`; una nota sin línea legible sigue dudosa).
+  `Ai/AiNoteClassifier.ClassifyAsync` hace un lote con la tarea `ClassifyNote` (`AiTaskCatalog`, sin herramientas, `AiResourceTask`):
+  pide las notas a `IKntSummaryService.GetNotesToClassifyAsync` y guarda las respuestas con `SaveRelevanceAiAnswersAsync` (los dos Staff;
+  las respuestas van a la tabla «AI classification» de «Note relevance», con la huella y el modelo, dentro de `KntAuthorizationBypass`).
+  **La huella** (`NoteRelevanceRules.ContentHash`: el tema y el texto limpio, sin los saltos de línea ni los espacios de los extremos) la
+  calcula igual la selección: una respuesta con otra huella no vale y la nota vuelve a ser dudosa. La respuesta decide solo una dudosa
+  por sus señales, por debajo de una corrección y de la política (`NoteRelevanceRules.Decide`, `EnumSelectionSource.Ai`). Tests en
+  `Tests/NoteClassificationRulesTests`, `ServiceTests/NoteClassificationServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`
+  y el smoke `ServiceTests/AiNoteClassifierSmokeTests` (`RequiresRealAiProvider`, `KNOTE_RESOURCE_SMOKE_MODEL`).
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

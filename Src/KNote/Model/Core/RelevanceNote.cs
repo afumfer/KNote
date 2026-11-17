@@ -127,6 +127,16 @@ public static class RelevanceNote
         return result.Values.ToList();
     }
 
+    /// <summary>The answers of the AI after a new batch: each one replaces the note's one.</summary>
+    public static List<RelevanceAiAnswerDto> ApplyAiAnswers(IEnumerable<RelevanceAiAnswerDto> answers, IEnumerable<RelevanceAiAnswerDto> newAnswers)
+    {
+        var result = (answers ?? Enumerable.Empty<RelevanceAiAnswerDto>()).ToDictionary(a => a.NoteId);
+        foreach (var answer in newAnswers ?? Enumerable.Empty<RelevanceAiAnswerDto>())
+            if (answer.Decision is EnumSelectionDecision.In or EnumSelectionDecision.Out)
+                result[answer.NoteId] = answer;
+        return result.Values.ToList();
+    }
+
     // A cell's text in one line, without the separators of the table.
     private static string Escape(string text) =>
         (text ?? "").Replace("\r", " ").Replace("\n", " ").Replace("|", "\\|").Replace("<!--", "<!- -").Trim();

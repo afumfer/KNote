@@ -75,7 +75,8 @@ public static class NoteRelevanceRules
     /// The decision of a note that is not one of KNote's own (noise is not KNoteNote): its correction, if a person made one; else the
     /// noise policy or its tag; else its signals. ComputedDecision / ComputedReason are what KNote decides without the correction.
     /// </summary>
-    public static void Decide(NoteSelectionDto note, EnumNoiseReason noise, Signals signals, RelevanceCorrectionDto correction)
+    public static void Decide(NoteSelectionDto note, EnumNoiseReason noise, Signals signals, RelevanceCorrectionDto correction,
+        RelevanceAiAnswerDto aiAnswer = null)
     {
         ArgumentNullException.ThrowIfNull(note);
         if (noise == EnumNoiseReason.KNoteNote)
@@ -87,7 +88,7 @@ public static class NoteRelevanceRules
             EnumNoiseReason.KnowledgeTag => (EnumSelectionDecision.In, $"In: it has the tag {KntConst.KnowledgeTag}", EnumSelectionSource.Tag),
             EnumNoiseReason.ExcludedNoteType => (EnumSelectionDecision.Out, "Out: its note type is left out by the noise policy", EnumSelectionSource.Policy),
             EnumNoiseReason.ExcludedFolder => (EnumSelectionDecision.Out, "Out: its folder is left out by the noise policy", EnumSelectionSource.Policy),
-            _ => Signal(signals)
+            _ => Signal(signals, aiAnswer)
         };
 
         note.Words = signals.Words;
@@ -145,10 +146,26 @@ public static class NoteRelevanceRules
     public static string ChangesText(int included, int total, int changes) =>
         $"{included:N0} of {total:N0} notes would go into the summary" + (changes == 0 ? "." : $" · {Count(changes, "change")} to keep.");
 
-    private static (EnumSelectionDecision, string, EnumSelectionSource) Signal(Signals signals)
+    // The signals and, for a doubtful note, the answer of the AI (2.4), if it is still valid (the caller checks its fingerprint).
+    private static (EnumSelectionDecision, string, EnumSelectionSource) Signal(Signals signals, RelevanceAiAnswerDto aiAnswer)
     {
         var (decision, reason) = BySignals(signals);
+        if (decision == EnumSelectionDecision.Doubtful && aiAnswer?.Decision is EnumSelectionDecision.In or EnumSelectionDecision.Out)
+            return (aiAnswer.Decision, AiReason(aiAnswer), EnumSelectionSource.Ai);
         return (decision, reason, EnumSelectionSource.Signals);
+    }
+
+    public static string AiReason(RelevanceAiAnswerDto answer) =>
+        $"{answer.Decision}: according to the AI{(string.IsNullOrWhiteSpace(answer.Model) ? "" : $" ({answer.Model})")}" +
+        (string.IsNullOrWhiteSpace(answer.Reason) ? "" : $", {answer.Reason.Trim().TrimEnd('.')}");
+
+    /// <summary>The fingerprint of a note for the answers of the AI: its topic and its cleaned text (line ends and spaces at the
+    /// ends do not count).</summary>
+    public static string ContentHash(string topic, string cleanedText)
+    {
+        var text = $"{(topic ?? "").Trim()}\n{NoteTextCleaner.NormalizeLineEnds(cleanedText ?? "").Trim()}";
+        var hash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text));
+        return Convert.ToHexString(hash, 0, 8).ToLowerInvariant();
     }
 
     private static string Count(int count, string noun) => count == 1 ? $"1 {noun}" : $"{count:N0} {noun}s";

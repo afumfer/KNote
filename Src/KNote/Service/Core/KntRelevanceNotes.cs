@@ -55,6 +55,11 @@ internal static class KntRelevanceNotes
             (RelevanceNote.Apply(corrections, changes, id => notes.TryGetValue(id, out var n) ? n : null, UserName(user), DateTime.Now), answers));
     }
 
+    /// <summary>The answers of the AI for some doubtful notes (2.4), each one replacing the note's one.</summary>
+    public static Task<List<RelevanceCorrectionDto>> SaveAiAnswersAsync(IKntService service, IReadOnlyList<RelevanceAiAnswerDto> answers,
+        ResultBase result) =>
+        WriteAsync(service, result, (corrections, kept) => (corrections, RelevanceNote.ApplyAiAnswers(kept, answers)));
+
     // Writes the note with what change makes of what it has (read again inside the lock).
     private static async Task<List<RelevanceCorrectionDto>> WriteAsync(IKntService service, ResultBase result,
         Func<List<RelevanceCorrectionDto>, List<RelevanceAiAnswerDto>, (List<RelevanceCorrectionDto>, List<RelevanceAiAnswerDto>)> change)

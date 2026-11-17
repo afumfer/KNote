@@ -80,6 +80,8 @@ public class NoteSelectionDto
     public double Score { get; set; }
     public EnumSelectionDecision ComputedDecision { get; set; }
     public string ComputedReason { get; set; }
+    // The fingerprint of its topic and its text (NoteRelevanceRules.ContentHash): an answer of the AI with another one is not valid.
+    public string ContentHash { get; set; }
 
     public bool IsIncluded => Decision != EnumSelectionDecision.Out;
 }
@@ -128,6 +130,36 @@ public class RelevanceCorrectionChangeDto
     public EnumSelectionDecision? Decision { get; set; }
 
     public override string ToString() => $"{NoteId}={Decision?.ToString() ?? "remove"}";
+}
+
+/// <summary>A doubtful note as the AI reads it (2.4): its data and the beginning of its cleaned text, with its fingerprint.</summary>
+public class NoteToClassifyDto
+{
+    public Guid NoteId { get; set; }
+    public int NoteNumber { get; set; }
+    public string Topic { get; set; }
+    public string FolderName { get; set; }
+    public string NoteTypeName { get; set; }
+    public string Tags { get; set; }
+    public string Text { get; set; }
+    public string ContentHash { get; set; }
+}
+
+/// <summary>A batch of doubtful notes to ask the AI about, with the model (empty: the repository's recommended one).</summary>
+public class NoteClassificationRequestDto
+{
+    public List<Guid> NoteIds { get; set; } = new();
+    public string ProviderAlias { get; set; }
+
+    public override string ToString() => $"{NoteIds.Count} notes, model={ProviderAlias}";
+}
+
+/// <summary>The answers of the AI to keep in «Note relevance» (each one replaces the note's one).</summary>
+public class RelevanceAiAnswersSaveDto
+{
+    public List<RelevanceAiAnswerDto> Answers { get; set; } = new();
+
+    public override string ToString() => $"{Answers.Count} answers";
 }
 
 /// <summary>The changes of «Review selection», saved at once.</summary>
