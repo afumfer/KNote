@@ -606,8 +606,10 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
         var result = new Result();
         if (Param?.Request?.Selection == null)
             result.AddErrorMessage("The period of the summary is required.");
-        else if (string.IsNullOrWhiteSpace(Param.Summary))
+        else if (string.IsNullOrWhiteSpace(Param.Executive) && (Param.Sections?.All(s => string.IsNullOrWhiteSpace(s.Text)) ?? true))
             result.AddErrorMessage("The AI gave no summary.");
+        else if (Param.Prepared?.Notes == null || Param.Prepared.Notes.Count == 0)
+            result.AddErrorMessage(PeriodSummaryRules.NoNotes);
         else if (string.IsNullOrWhiteSpace(Param.Model))
             result.AddErrorMessage("The model that wrote the summary is required.");
         return result;
@@ -620,8 +622,28 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
         var summaryTypeId = await KntSystemNotes.EnsureNoteTypeAsync(Service, KntConst.SummaryTag,
             "Summaries written by KNote Atlas", BypassReason, result);
         var folder = await KntSystemNotes.EnsureFolderAsync(Service, KntConst.SummaryFolderName, BypassReason, result);
+        var derivedFromId = await KntSystemNotes.EnsureTraceNoteTypeAsync(Service, KntConst.DerivedFromTraceNoteType,
+            "Where a summary of KNote Atlas comes from", BypassReason, result);
         if (!result.IsValid)
             return result;
+
+        // The notes it comes from that still exist and are not KNote's own: the caller is not trusted (D17).
+        var classifications = await Service.Repository.Notes.GetClassificationsAsync();
+        if (!classifications.IsValid)
+        {
+            result.AddListErrorMessage(classifications.ListErrorMessage);
+            return result;
+        }
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var sources = classifications.Entity
+            .Where(n => !context.KNoteFolderIds.Contains(n.FolderId) && !(n.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)))
+            .Select(n => n.NoteId).ToHashSet();
+
+        // The glossary, for the index by concepts (D15).
+        var glossaryNote = await KntAtlasNotes.FindFirstAsync(Service, KntConst.GlossaryTag, result);
+        if (!result.IsValid)
+            return result;
+        var glossary = glossaryNote == null ? new List<GlossaryTermDto>() : GlossaryTable.Parse(KntAtlasNotes.Text(Service, glossaryNote)).Terms;
 
         var newNote = await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = summaryTypeId });
         if (!newNote.IsValid)
@@ -641,7 +663,7 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
         var subject = string.IsNullOrWhiteSpace(Param.Request.Subject) ? PeriodSummaryRules.DefaultSubject(Param.Request.Selection) : Param.Request.Subject.Trim();
         var summary = newNote.Entity;
         summary.Topic = subject;
-        summary.Description = PeriodSummaryRules.NoteDescription(Param, folderPath, now);
+        summary.Description = PeriodSummaryDocument.Build(Param, folderPath, now, glossary);
         summary.Tags = "";
         summary.NoteTypeId = summaryTypeId;
         var folderDto = await Service.Folders.GetAsync(folder.FolderId);
@@ -658,8 +680,11 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
             Description = PeriodSummaryRules.OriginalDescription(Param.Model, now),
             DescriptionByUser = true,
             FileType = "text/markdown",
-            ContentArrayBytes = Encoding.UTF8.GetBytes(Param.Summary)
+            ContentArrayBytes = Encoding.UTF8.GetBytes(PeriodSummaryDocument.Original(Param))
         });
+        // A relation with each note it comes from, in the order they are cited and with their score (D17).
+        foreach (var source in PeriodSummaryDocument.Sources(Param).Where(s => sources.Contains(s.NoteId)))
+            summary.TraceNotesTo.Add(new TraceNoteDto { ToId = source.NoteId, TraceNoteTypeId = derivedFromId, Order = source.Order, Weight = source.Weight });
 
         var saved = await Service.Notes.SaveExtendedAsync(summary);
         if (!saved.IsValid)

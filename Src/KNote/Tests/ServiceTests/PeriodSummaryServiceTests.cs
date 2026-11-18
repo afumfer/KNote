@@ -71,14 +71,18 @@ public class PeriodSummaryServiceTests
         fixture.Service.Repository.RepositoryRef.ResourcesContainer = "KntResources";
         fixture.Service.Repository.RepositoryRef.ResourcesContainerRootPath = root;
         fixture.Service.Repository.RepositoryRef.ResourcesContainerRootUrl = "http://intranet/KNote";
-        var decision = await AddNoteAsync(fixture, "Server purchase", $"We chose the Dell R750. {Words(50)}", fixture.HomeId);
+        var decision = await AddNoteAsync(fixture, "Server purchase", $"We chose the Dell R750. {Words(150)}", fixture.HomeId);
         var doubtful = await AddNoteAsync(fixture, "Call", "Call the supplier about the delivery date.", fixture.HomeId);
         var decisionNumber = (await fixture.Service.Notes.GetAsync(decision)).Entity.NoteNumber;
         var doubtfulNumber = (await fixture.Service.Notes.GetAsync(doubtful)).Entity.NoteNumber;
         var before = (await fixture.Service.Notes.GetAsync(decision)).Entity.ModificationDateTime;
-        var model = new FakeModel(request => request.Contains("<note number=")
-            ? $"#{doubtfulNumber} | In | about the delivery"
-            : request.Contains("Write the summary") ? $"The server was chosen (#{decisionNumber})." : $"- Chosen #{decisionNumber}");
+        var beforeDoubtful = (await fixture.Service.Notes.GetAsync(doubtful)).Entity.ModificationDateTime;
+        var model = new FakeModel(request =>
+            request.Contains("<note number=") ? $"#{doubtfulNumber} | In | about the delivery"
+            : request.Contains("Write the part of the summary") ? $"The server was chosen (#{decisionNumber}), as #99999 said."
+            : request.Contains("executive summary") ? $"Essential: the delivery (#{doubtfulNumber}) and the server (#{decisionNumber})."
+            : request.Contains("still open") ? "Nothing is open."
+            : $"- Chosen #{decisionNumber}");
         var phases = new List<EnumDocumentProcessPhase>();
 
         var estimate = await AiDocumentProcessor.EstimateAsync(fixture.Service, Provider, Request());
@@ -87,7 +91,8 @@ public class PeriodSummaryServiceTests
 
         Assert.IsTrue(estimate.IsValid, estimate.ErrorMessage);
         Assert.AreEqual((2, 1), (estimate.Entity.Notes, estimate.Entity.DoubtfulToClassify));
-        Assert.AreEqual(3, estimate.Entity.Calls, "a classification, a batch and the final call");
+        Assert.AreEqual(1, estimate.Entity.Sections, "both in Home");
+        Assert.AreEqual(5, estimate.Entity.Calls, "a classification, a batch, the part, the executive summary and what is open");
         Assert.IsTrue(result.IsValid, result.ErrorMessage);
         Assert.AreEqual(EnumDocumentProcessPhase.Completed, result.Entity.Phase);
         CollectionAssert.IsSubsetOf(new[] { EnumDocumentProcessPhase.Classifying, EnumDocumentProcessPhase.Reading, EnumDocumentProcessPhase.Writing }, phases);
@@ -97,9 +102,24 @@ public class PeriodSummaryServiceTests
         Assert.AreEqual(KntConst.SummaryFolderName, (await fixture.Service.Folders.GetAsync(summary.FolderId)).Entity.Name);
         Assert.AreEqual("KNote summary: 09/03/2020 - 15/03/2020", summary.Topic);
         StringAssert.Contains(summary.Description, "2 notes read");
-        StringAssert.EndsWith(summary.Description, $"The server was chosen (#{decisionNumber}).");
+        StringAssert.Contains(summary.Description, "> 5 calls to the model, ");
+        StringAssert.Contains(summary.Description, "1 citation not recognized: #⁠99999");
+        StringAssert.Contains(summary.Description, $"## Executive summary\n\nEssential: the delivery (#{doubtfulNumber}) and the server (#{decisionNumber}).");
+        StringAssert.Contains(summary.Description, $"## What happened\n\n### Home\n\nThe server was chosen (#{decisionNumber}), as #⁠99999 said.");
+        StringAssert.Contains(summary.Description, "## Open and at risk\n\nNothing is open.");
+        StringAssert.Contains(summary.Description, $"| #{decisionNumber} | Server purchase |");
         StringAssert.EndsWith(summary.Resources.Single().NameOut, "(original).md");
+
+        // A relation with each note, in the order they are cited (D17).
+        var relations = summary.TraceNotesTo.OrderBy(r => r.Order).ToList();
+        CollectionAssert.AreEqual(new[] { doubtful, decision }, relations.Select(r => r.ToId).ToList());
+        CollectionAssert.AreEqual(new[] { 1, 2 }, relations.Select(r => r.Order).ToList());
+        Assert.AreEqual(KntConst.DerivedFromTraceNoteType, (await fixture.Service.TraceNoteTypes.GetAsync(relations[0].TraceNoteTypeId!.Value)).Entity.Name);
+        Assert.AreEqual(1.0, relations.Single(r => r.ToId == decision).Weight, "its score: 150 words");
+        var source = (await fixture.Service.Notes.GetExtendedAsync(decision)).Entity;
+        Assert.AreEqual(summary.NoteId, source.TraceNotesFrom.Single().FromId, "seen from the note it comes from");
         Assert.AreEqual(before, (await fixture.Service.Notes.GetAsync(decision)).Entity.ModificationDateTime, "the notes of the period don't change");
+        Assert.AreEqual(beforeDoubtful, (await fixture.Service.Notes.GetAsync(doubtful)).Entity.ModificationDateTime);
         var state = (await fixture.Service.Summaries.GetStateAsync()).Entity;
         Assert.IsTrue(state.PeriodSecondsPer1000Characters.ContainsKey("fake-llm"));
         try { Directory.Delete(root, recursive: true); } catch (IOException) { }

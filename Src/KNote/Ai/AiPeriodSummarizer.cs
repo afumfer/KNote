@@ -43,14 +43,12 @@ public static class AiPeriodSummarizer
         var pieces = PeriodSummaryRules.Pieces(prepared.Entity.Notes);
         var contextTokens = await AiSummaryContext.TokensAsync(provider, cancellationToken);
         var system = await SystemPromptAsync(service, subject, prepared.Entity.Notes, logger);
-        var (batch, final) = AiSummaryEngine.Budgets(contextTokens, system.Length, SummaryBatches.OutputTokens(PeriodSummaryRules.ClampWords(period.Words)));
-        var tooSmall = AiSummaryEngine.ContextTooSmall(contextTokens, batch, final);
-        if (tooSmall != null)
+        var plan = Plan(prepared.Entity.Notes, period.Words, contextTokens, system.Length);
+        if (plan.TooSmall != null)
         {
-            result.AddErrorMessage(tooSmall);
+            result.AddErrorMessage(plan.TooSmall);
             return result;
         }
-        var plan = SummaryEstimate.For(pieces, batch, final);
         var doubtful = NoteClassificationRules.ToClassify(prepared.Entity.Selection).Count;
 
         var state = await service.Summaries.GetStateAsync();
@@ -63,7 +61,8 @@ public static class AiPeriodSummarizer
             Notes = prepared.Entity.Notes.Count,
             DoubtfulToClassify = doubtful,
             Characters = pieces.Sum(p => p.Text.Length),
-            Batches = plan.Batches,
+            Sections = plan.Sections.Count,
+            Batches = plan.SectionPlans.Sum(p => p.Batches),
             Calls = plan.Calls + NoteClassificationRules.Batches(Enumerable.Range(0, doubtful).Select(_ => Guid.NewGuid())).Count,
             ContextTokens = contextTokens,
             Model = provider.Model,
@@ -71,6 +70,32 @@ public static class AiPeriodSummarizer
             Seconds = SummaryEstimate.Seconds(plan.CharactersRead, pace)
         };
         return result;
+    }
+
+    // How a summary is written (2.6, D13): its parts, the calls of each one, the executive summary and what is open (two calls with the
+    // notes of all the parts, as many as fit), and the budgets of the calls in this context.
+    private sealed record WritingPlan(List<PeriodSection> Sections, List<SummaryEstimate.Plan> SectionPlans, int ExecutiveWords, int PendingWords,
+        int BatchCharacters, int SummaryCharacters, string TooSmall)
+    {
+        public int Calls => SectionPlans.Sum(p => p.Calls) + 2;
+
+        // The notes of the parts are read twice more, by the executive summary and by what is open.
+        public int CharactersRead => SectionPlans.Sum(p => p.CharactersRead) + 2 * Math.Min(SummaryCharacters, SectionPlans.Sum(p => p.Batches) * SummaryEstimate.NotesCharacters);
+    }
+
+    private static WritingPlan Plan(IReadOnlyList<PeriodNoteDto> notes, int words, int contextTokens, int systemCharacters)
+    {
+        var sections = PeriodSummarySections.Plan(notes, words);
+        var (executiveWords, pendingWords, _) = PeriodSummarySections.Words(words);
+        var finalWords = sections.Select(s => s.Words).Append(executiveWords).Append(pendingWords).Max();
+        var (batch, final) = AiSummaryEngine.Budgets(contextTokens, systemCharacters, SummaryBatches.OutputTokens(finalWords));
+        var tooSmall = AiSummaryEngine.ContextTooSmall(contextTokens, batch, final);
+        var summary = AiSummaryEngine.Budgets(contextTokens, systemCharacters, SummaryBatches.OutputTokens(Math.Max(executiveWords, pendingWords))).Final;
+        var plans = tooSmall != null ? new List<SummaryEstimate.Plan>() : sections
+            .Select(s => SummaryEstimate.For(PeriodSummaryRules.Pieces(s.Notes), batch,
+                AiSummaryEngine.Budgets(contextTokens, systemCharacters, SummaryBatches.OutputTokens(s.Words)).Final))
+            .ToList();
+        return new WritingPlan(sections, plans, executiveWords, pendingWords, batch, summary, tooSmall);
     }
 
     /// <summary>Makes the summary and keeps it in a new note. Entity: how it ended (Completed with the note, Canceled or Failed with why).</summary>
@@ -130,34 +155,73 @@ public static class AiPeriodSummarizer
                 return Failed(current, PeriodSummaryRules.NoNotes, progress);
 
             var notes = prepared.Entity.Notes;
-            var pieces = PeriodSummaryRules.Pieces(notes);
-            var words = PeriodSummaryRules.ClampWords(period.Words);
+            var subject = current.FileName;
             var contextTokens = await AiSummaryContext.TokensAsync(provider, cancellationToken);
             var chatClient = createChatClient(AiSummaryContext.With(provider, contextTokens));
-            var system = await SystemPromptAsync(service, current.FileName, notes, logger);
+            var system = await SystemPromptAsync(service, subject, notes, logger);
+            var plan = Plan(notes, period.Words, contextTokens, system.Length);
+            if (plan.TooSmall != null)
+                return Failed(current, plan.TooSmall, progress);
 
+            // «What happened», a part at a time (D13): each one, the engine with its notes.
             var selection = period.Selection;
-            var requests = new AiSummaryEngine.Requests(
-                Batch: batch => PeriodSummaryRules.BatchRequest(current.FileName, batch),
-                Join: joined => PeriodSummaryRules.JoinRequest(current.FileName, joined),
-                Final: joined => PeriodSummaryRules.FinalRequest(current.FileName, selection.From, selection.To, notes.Count, joined, words, request.Language),
-                FinalOutputTokens: SummaryBatches.OutputTokens(words));
-            var outcome = await AiSummaryEngine.RunAsync(chatClient, provider, system, contextTokens, pieces, requests,
-                step => Report(step.Phase, classifyCalls + step.CallsDone, classifyCalls + step.CallsTotal), cancellationToken);
+            var done = 0;
+            var read = 0;
+            var sections = new List<PeriodSummarySectionDto>();
+            var partNotes = new List<string>();
+            for (var i = 0; i < plan.Sections.Count; i++)
+            {
+                var section = plan.Sections[i];
+                var before = done;
+                var after = plan.SectionPlans.Skip(i + 1).Sum(p => p.Calls) + 2;
+                var requests = new AiSummaryEngine.Requests(
+                    Batch: batch => PeriodSummaryRules.BatchRequest(subject, batch),
+                    Join: joined => PeriodSummaryRules.JoinRequest(subject, joined),
+                    Final: joined => PeriodSummaryRules.SectionRequest(subject, section.Title, selection.From, selection.To, section.Notes.Count, joined,
+                        section.Words, request.Language),
+                    FinalOutputTokens: SummaryBatches.OutputTokens(section.Words));
+                var outcome = await AiSummaryEngine.RunAsync(chatClient, provider, system, contextTokens, PeriodSummaryRules.Pieces(section.Notes), requests,
+                    step => Report(step.Phase, classifyCalls + before + step.CallsDone, classifyCalls + before + step.CallsTotal + after), cancellationToken);
+                done += outcome.Calls;
+                read += outcome.CharactersRead;
+                partNotes.AddRange(outcome.Notes);
+                sections.Add(new PeriodSummarySectionDto { Title = section.Title, Text = outcome.Text, NoteNumbers = section.Notes.Select(n => n.NoteNumber).ToList() });
+            }
+
+            // The executive summary and what is open, from the notes of all the parts (joined if they don't fit together).
+            var joinedNotes = await AiSummaryEngine.JoinAsync(chatClient, provider, system, partNotes, plan.BatchCharacters, plan.SummaryCharacters,
+                joined => PeriodSummaryRules.JoinRequest(subject, joined),
+                (joins, planned) => Report(EnumDocumentProcessPhase.Joining, classifyCalls + done + joins, classifyCalls + done + planned + 2), cancellationToken);
+            done += joinedNotes.Calls;
+            read += joinedNotes.CharactersRead;
+
+            async Task<string> WriteAsync(string partRequest, int words, int left)
+            {
+                Report(EnumDocumentProcessPhase.Writing, classifyCalls + done, classifyCalls + done + left);
+                var text = await AiSummaryEngine.AskAsync(chatClient, provider, system, partRequest, SummaryBatches.OutputTokens(words), cancellationToken);
+                done++;
+                read += partRequest.Length;
+                return text;
+            }
+            var executive = await WriteAsync(PeriodSummaryRules.ExecutiveRequest(subject, selection.From, selection.To, notes.Count, joinedNotes.Notes,
+                plan.ExecutiveWords, request.Language), plan.ExecutiveWords, 2);
+            var pending = await WriteAsync(PeriodSummaryRules.PendingRequest(subject, selection.From, selection.To, notes.Count, joinedNotes.Notes,
+                plan.PendingWords, request.Language), plan.PendingWords, 1);
 
             cancellationToken.ThrowIfCancellationRequested();
-            var calls = classifyCalls + outcome.Calls;
+            var calls = classifyCalls + done;
             Report(EnumDocumentProcessPhase.Saving, calls, calls);
             var saved = await service.Summaries.SavePeriodSummaryAsync(new PeriodSummarySaveDto
             {
                 Request = period,
                 Model = provider.Model,
                 Language = request.Language,
-                Summary = outcome.Text,
-                NotesRead = notes.Count,
-                NotesLeftOut = prepared.Entity.Selection.Out,
-                KNoteNotes = prepared.Entity.Selection.KNoteNotes,
-                CharactersRead = outcome.CharactersRead,
+                Executive = executive,
+                Sections = sections,
+                Pending = pending,
+                Prepared = prepared.Entity,
+                Calls = calls,
+                CharactersRead = read,
                 Seconds = clock.Elapsed.TotalSeconds
             });
             if (!saved.IsValid)

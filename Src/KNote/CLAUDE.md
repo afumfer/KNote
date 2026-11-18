@@ -586,12 +586,24 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   actividad en el periodo y las descripciones de sus recursos, sin el texto de sus documentos), las dudosas que queden preguntadas antes
   a la IA (fase `Classifying`, con el tope de 100; sus respuestas se guardan aunque luego se cancele), las notas como piezas `#123`
   ordenadas por carpeta y fecha (`Model/Core/PeriodSummaryRules`) leídas por `AiSummaryEngine` con **una tarea**, `SummarizePeriod`
-  (como el documento largo: lotes, uniones y redacción), de 100 a 3.000 palabras, y `SavePeriodSummaryAsync` (Staff): una nota
-  `@KNoteSummary` en la carpeta «KNote Summary» (`KntConst.SummaryFolderName`, no del sistema), con una cabecera (periodo, filtros, notas
-  leídas y fuera, modelo, fecha, idioma), el texto y el original adjunto; el ritmo por modelo en `PeriodSecondsPer1000Characters`. Las
-  notas del periodo no cambian. Sin notas que entren, un error claro (`PeriodSummaryRules.NoNotes`). Tests en `Tests/PeriodSummaryRulesTests`,
-  `ServiceTests/PeriodSummaryServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`, el smoke `ServiceTests/PeriodSummarySmokeTests`
-  y la medida `ServiceTests/PeriodSummaryMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
+  (como el documento largo: lotes, uniones y redacción), de 100 a 10.000 palabras, y `SavePeriodSummaryAsync` (Staff): una nota
+  `@KNoteSummary` en la carpeta «KNote Summary» (`KntConst.SummaryFolderName`, no del sistema); el ritmo por modelo en
+  `PeriodSecondsPer1000Characters`. Las notas del periodo no cambian. Sin notas que entren, un error claro (`PeriodSummaryRules.NoNotes`).
+  **Por apartados, siempre** (2.6, D13; `Model/Core/PeriodSummarySections`): las notas por carpeta hasta el segundo nivel de su ruta, como
+  mucho 8 (los más pequeños, en «Other folders»), con las palabras repartidas por sus notas (el ejecutivo, el 10 %; los pendientes, el 15 %)
+  y uno de más de 2.500 palabras partido por fecha; cada apartado es una ejecución de `AiSummaryEngine.RunAsync` con sus piezas y el
+  resumen ejecutivo y los pendientes, dos llamadas con los apuntes de todos (`AiSummaryEngine.JoinAsync`/`AskAsync`, separados de
+  `RunAsync` sin cambiar lo que hace). **El documento** lo monta `Model/Core/PeriodSummaryDocument` en el orden del capítulo 35, con
+  títulos en inglés: datos (con llamadas, tiempo y citas no reconocidas), ejecutivo (IA), índice por carpetas y por conceptos (etiquetas
+  y términos del glosario, `GlossaryTable.KeysPerTerm`), lo ocurrido (IA), pendientes (IA), estadísticas por carpeta (tareas con actividad:
+  empezadas, terminadas, abiertas al final, tiempos; `PeriodSummaryRules.SetTaskCounts`), incluidas y omitidas con su motivo. El comando
+  lo calcula con `PeriodSummarySaveDto.Prepared` (las partes de la IA van aparte: `Executive`, `Sections`, `Pending`). **Citas**
+  (`Model/Core/SummaryCitationRules`, D16): la de una nota no leída queda sin enlace (un `⁠` entre `#` y el número) y se cuenta.
+  **Relaciones** `@DerivedFrom` hacia cada nota leída que sigue existiendo y no es de KNote (el comando no se fía de quien llama), con
+  `Order` (el de su primera cita, las demás detrás) y `Weight` (su puntuación). El original adjunto, las partes tal como las escribió la
+  IA. Tests en `Tests/PeriodSummaryRulesTests`, `PeriodSummaryDocumentTests`, `ServiceTests/PeriodSummaryServiceTests`,
+  `InProcessIntegrationTests/SummaryInProcessTests`, el smoke `ServiceTests/PeriodSummarySmokeTests` y la medida
+  `ServiceTests/PeriodSummaryMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

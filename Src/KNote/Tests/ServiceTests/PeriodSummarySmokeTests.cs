@@ -1,6 +1,6 @@
-using System.Text.RegularExpressions;
 using KNote.Ai;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Tests.Helpers;
 
@@ -62,9 +62,13 @@ public class PeriodSummarySmokeTests
             Assert.AreEqual(EnumDocumentProcessPhase.Completed, result.Entity.Phase, result.Entity.Message);
             var text = (await fixture.Service.Notes.GetAsync(result.Entity.NoteId!.Value)).Entity.Description;
             Console.WriteLine(text);
-            var cited = Regex.Matches(text, @"#(\d+)").Select(m => int.Parse(m.Groups[1].Value)).Distinct().ToList();
+            // What the AI wrote is before the statistics (the lists of KNote cite the notes left out too); a citation of a note not
+            // read is left without a link and said in the header (D16).
+            var written = text[..text.IndexOf(PeriodSummaryDocument.StatisticsHeading, StringComparison.Ordinal)];
+            var cited = NoteCitationLinker.CitedNumbers(written).ToList();
             Assert.IsNotEmpty(cited, "it cites its notes");
             CollectionAssert.IsSubsetOf(cited, numbers, "it cites only notes it read");
+            Assert.IsFalse(text.Contains("not recognized"), "no citation of a note not read");
             StringAssert.Contains(text, "R750");
             Assert.IsGreaterThan(200, text.Length, "not only «HACKED»");
         }

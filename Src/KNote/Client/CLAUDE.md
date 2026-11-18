@@ -267,7 +267,7 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   (`IStore.Summaries.ClassifyDoubtfulAsync`, `api/summaries/selection/classify`, sin notificar sus errores: se dicen una vez al final)
   con su progreso y «Cancel» (cancela la petición en curso; lo respondido queda) y vuelve a pedir la selección. La 2.5 añade asunto,
   palabras, modelo, idioma, «Estimate» y «Generate». **El resumen** (2.5b): una segunda `KntFormSection` con asunto (vacío: el de
-  `PeriodSummaryRules.DefaultSubject`, como marcador), palabras (`RadzenNumeric` de 100 a 3.000), idioma (`RadzenAutoComplete`, el último del
+  `PeriodSummaryRules.DefaultSubject`, como marcador), palabras (`RadzenNumeric` de `PeriodSummaryRules.MinWords` a `MaxWords`, 100 a 10.000), idioma (`RadzenAutoComplete`, el último del
   repositorio en `localStorage`, `KNotePeriodSummaryLanguage:{RepositoryId}`) y modelo (el recomendado, alias vacío, u otro de
   `GetProvidersAsync`); «Estimate» y «Generate» van por `IStore.Summaries.EstimateDocumentAsync`/`SummarizeDocumentAsync` con
   `Kind = PeriodSummary` (el mismo trabajo de la cola, uno por usuario: si el usuario tiene un documento en marcha, `SummaryTexts.YoursRunning`),

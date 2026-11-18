@@ -191,7 +191,9 @@ public class SummaryInProcessTests
         var summary = (await service.Notes.GetExtendedAsync(progress.NoteId!.Value)).Entity;
         Assert.AreEqual(KntConst.SummaryTag, summary.NoteTypeDto.Name);
         Assert.AreEqual("Week in short", summary.Topic);
-        StringAssert.EndsWith(summary.Description, "The week in short.");
+        StringAssert.Contains(summary.Description, "## Executive summary\n\nThe week in short.");
+        StringAssert.Contains(summary.Description, "## What happened\n\n### Home\n\nThe week in short.");
+        CollectionAssert.Contains(summary.TraceNotesTo.Select(r => r.ToId).ToList(), note.NoteId, "related with the note it comes from (D17)");
     }
 
     // 2.4 (D9, C2): a batch of doubtful notes asked to the AI, by a Staff, and its answers used by the selection.

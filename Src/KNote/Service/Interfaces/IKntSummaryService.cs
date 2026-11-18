@@ -66,6 +66,7 @@ public interface IKntSummaryService
     /// <summary>A period summary ready to be read (2.5): its selection and what the AI reads of each note that goes in. Staff.</summary>
     Task<Result<PeriodSummaryPreparedDto>> PreparePeriodAsync(PeriodSummaryRequestDto request, CancellationToken cancellationToken = default);
 
-    /// <summary>Keeps a period summary in a new note @KNoteSummary of «KNote Summary», with the original of the AI attached. Staff.</summary>
+    /// <summary>Keeps a period summary in a new note @KNoteSummary of «KNote Summary» (2.6: the document of PeriodSummaryDocument, with
+    /// what KNote calculates), related to each note it comes from (@DerivedFrom), with the original of the AI attached. Staff.</summary>
     Task<Result<NoteDto>> SavePeriodSummaryAsync(PeriodSummarySaveDto summary);
 }

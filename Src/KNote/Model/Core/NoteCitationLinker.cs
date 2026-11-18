@@ -38,6 +38,15 @@ public static class NoteCitationLinker
         return numbers;
     }
 
+    /// <summary>A text (Markdown or plain) with each citation #123 replaced by what replace gives for its number and text (KNote
+    /// Atlas, stage 2, 2.6: SummaryCitationRules).</summary>
+    public static string ReplaceCitations(string text, Func<int, string, string> replace)
+    {
+        if (string.IsNullOrEmpty(text) || !text.Contains('#'))
+            return text;
+        return Citation.Replace(text, match => replace(int.Parse(match.Groups[1].Value), match.Value));
+    }
+
     public static string Link(string html, Func<int, string> url)
     {
         if (string.IsNullOrEmpty(html) || !html.Contains('#'))

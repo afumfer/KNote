@@ -17,7 +17,8 @@ namespace KNote.Model.Core;
 public static class PeriodSummaryRules
 {
     public const int MinWords = 100;
-    public const int MaxWords = 3000;
+    // By parts (2.6, D13): each one is a call of its own (PeriodSummarySections).
+    public const int MaxWords = 10000;
     public const int DefaultWords = 2000;
     public const int MaxTaskLength = 300;
     public const int MaxResourceLength = 500;
@@ -46,10 +47,12 @@ public static class PeriodSummaryRules
 
     /// <summary>The pieces of the notes, by the path of their folder and by date.</summary>
     public static List<SummaryPiece> Pieces(IEnumerable<PeriodNoteDto> notes) =>
+        Ordered(notes).SelectMany(n => SummaryPieces.Cut(PieceText(n)).Select(t => new SummaryPiece(Label(n.NoteNumber), t))).ToList();
+
+    /// <summary>The notes in the order they are read: by the path of their folder and by date.</summary>
+    public static IEnumerable<PeriodNoteDto> Ordered(IEnumerable<PeriodNoteDto> notes) =>
         (notes ?? Enumerable.Empty<PeriodNoteDto>())
-            .OrderBy(n => n.FolderPath ?? "", StringComparer.CurrentCultureIgnoreCase).ThenBy(n => n.ModificationDateTime).ThenBy(n => n.NoteNumber)
-            .SelectMany(n => SummaryPieces.Cut(PieceText(n)).Select(t => new SummaryPiece(Label(n.NoteNumber), t)))
-            .ToList();
+            .OrderBy(n => n.FolderPath ?? "", StringComparer.CurrentCultureIgnoreCase).ThenBy(n => n.ModificationDateTime).ThenBy(n => n.NoteNumber);
 
     /// <summary>What the AI reads of a note: its data, its text, its tasks with activity and the descriptions of its resources.</summary>
     public static string PieceText(PeriodNoteDto note)
@@ -87,6 +90,18 @@ public static class PeriodSummaryRules
         return (start >= from && start < to) || (task.EndDate is DateTime end && end >= from && end < to);
     }
 
+    /// <summary>The statistics of the tasks with activity of a note (2.6, D15): started and ended in [from, to), open at its end, and
+    /// the sum of their estimated and spent time (none if no task has it).</summary>
+    public static void SetTaskCounts(PeriodNoteDto note, IEnumerable<NoteTaskDto> tasksWithActivity, DateTime from, DateTime to)
+    {
+        var tasks = (tasksWithActivity ?? Enumerable.Empty<NoteTaskDto>()).ToList();
+        note.TasksStarted = tasks.Count(t => (t.StartDate ?? t.CreationDateTime) is var start && start >= from && start < to);
+        note.TasksEnded = tasks.Count(t => t.EndDate is DateTime end && end >= from && end < to);
+        note.TasksOpen = tasks.Count(t => t.EndDate is not DateTime end || end >= to);
+        note.EstimatedTime = tasks.Any(t => t.EstimatedTime != null) ? tasks.Sum(t => t.EstimatedTime ?? 0) : null;
+        note.SpentTime = tasks.Any(t => t.SpentTime != null) ? tasks.Sum(t => t.SpentTime ?? 0) : null;
+    }
+
     /// <summary>A task of a note with activity in the period: its state, its dates and the beginning of its description.</summary>
     public static string TaskText(NoteTaskDto task)
     {
@@ -117,47 +132,64 @@ public static class PeriodSummaryRules
         $"{SummaryBatches.NotesWords} words, keeping what is essential and the notes they cite, as #123." +
         "\n\n" + string.Join(LongDocumentRules.NotesSeparator, notes);
 
-    /// <summary>The summary, from the notes of all the batches.</summary>
-    public static string FinalRequest(string subject, DateTime from, DateTime to, int notesCount, IReadOnlyList<string> notes, int words, string language)
-    {
-        var text = new StringBuilder();
-        text.Append($"These are notes of the {notesCount} notes of the period {PeriodText(from, to)} for the summary «{subject}». ");
-        text.Append($"Write the summary from them: about {ClampWords(words)} words, in Markdown. Start with a short paragraph with what ");
-        text.Append("is essential; then what happened, with headings by subject if they help, in the order it happened; and end with what ");
-        text.Append("is still open or at risk, if anything. Keep the citations of the notes, as #123.");
-        text.Append("\n\n");
-        text.Append(string.Join(LongDocumentRules.NotesSeparator, notes));
-        text.Append("\n\n");
-        text.Append(string.IsNullOrWhiteSpace(language)
-            ? "Write the summary in the language of the notes."
-            : $"Write the summary in {language.Trim()}.");
-        return text.ToString();
-    }
+    /// <summary>A part of «What happened» (2.6, D13), from the notes of the batches of its notes. KNote writes its title.</summary>
+    public static string SectionRequest(string subject, string title, DateTime from, DateTime to, int notesCount, IReadOnlyList<string> notes,
+        int words, string language) =>
+        Request($"These are notes of the {Notes(notesCount)} of «{title}» of the period {PeriodText(from, to)} for the summary «{subject}». " +
+            $"Write the part of the summary about them: what happened, in the order it happened, about {words} words, in Markdown, without " +
+            "a title (KNote writes it; if headings help, only of level 4, ####). Keep the citations of the notes, as #123.", notes, language);
+
+    /// <summary>The executive summary (2.6, D13), from the notes of all the parts.</summary>
+    public static string ExecutiveRequest(string subject, DateTime from, DateTime to, int notesCount, IReadOnlyList<string> notes, int words,
+        string language) =>
+        Request($"These are notes of the {Notes(notesCount)} of the period {PeriodText(from, to)} for the summary «{subject}». Write its " +
+            $"executive summary: what is essential, in one or two paragraphs of about {words} words, without a title and without lists. " +
+            "Cite the notes of what is most important, as #123.", notes, language);
+
+    /// <summary>What is still open or at risk (2.6, D13), from the notes of all the parts.</summary>
+    public static string PendingRequest(string subject, DateTime from, DateTime to, int notesCount, IReadOnlyList<string> notes, int words,
+        string language) =>
+        Request($"These are notes of the {Notes(notesCount)} of the period {PeriodText(from, to)} for the summary «{subject}». Write what is " +
+            "still open or at risk at its end: tasks not finished, problems without a solution, decisions to take and dates to come, as a " +
+            $"Markdown list of at most {words} words, without a title, each item with the notes it comes from, as #123. If nothing is open, " +
+            "say it in one sentence.", notes, language);
+
+    // A request of a part: what it asks, the notes, and the language last (D14).
+    private static string Request(string ask, IReadOnlyList<string> notes, string language) =>
+        ask + "\n\n" + string.Join(LongDocumentRules.NotesSeparator, notes) + "\n\n" +
+        (string.IsNullOrWhiteSpace(language) ? "Write it in the language of the notes." : $"Write it in {language.Trim()}.");
 
     /// <summary>
-    /// The text of the note with the summary: a header with the period, the filters, the notes read and left out, the model, the date
-    /// and the language; and the summary. (2.6 adds what KNote calculates.)
+    /// A part as KNote puts it in the document: without the title the model may write first, and with its headings at the level 4
+    /// (KNote writes the ones of the levels 2 and 3), outside the code blocks.
     /// </summary>
-    public static string NoteDescription(PeriodSummarySaveDto summary, string folderPath, DateTime date)
+    public static string CleanPart(string text)
     {
-        var selection = summary.Request?.Selection ?? new NoteSelectionRequestDto();
-        var header = new StringBuilder();
-        header.Append($"> Summary of the period **{PeriodText(selection.From, selection.To)}**");
-        if (!string.IsNullOrWhiteSpace(folderPath))
-            header.Append($" · folder **{folderPath}** and its subfolders");
-        if (!string.IsNullOrWhiteSpace(selection.Keywords))
-            header.Append($" · keywords «{selection.Keywords.Trim()}»");
-        if (!string.IsNullOrWhiteSpace(selection.MeaningText))
-            header.Append($" · talks about «{selection.MeaningText.Trim()}»");
-        header.Append($"\n>\n> {Notes(summary.NotesRead)} read");
-        if (summary.NotesLeftOut > 0)
-            header.Append($", {Notes(summary.NotesLeftOut)} left out");
-        if (summary.KNoteNotes > 0)
-            header.Append($" (and {summary.KNoteNotes:N0} of KNote's own)");
-        header.Append($" · {summary.Model} · {date:yyyy-MM-dd}");
-        if (!string.IsNullOrWhiteSpace(summary.Language))
-            header.Append($" · {summary.Language.Trim()}");
-        return $"{header}\n\n{summary.Summary?.Trim()}";
+        var lines = (text ?? "").Replace("\r\n", "\n").Trim().Split('\n').ToList();
+        if (lines.Count > 0 && IsHeading(lines[0], 6))
+        {
+            lines.RemoveAt(0);
+            while (lines.Count > 0 && lines[0].Trim().Length == 0)
+                lines.RemoveAt(0);
+        }
+
+        var inCode = false;
+        for (var i = 0; i < lines.Count; i++)
+        {
+            if (lines[i].TrimStart().StartsWith("```", StringComparison.Ordinal))
+                inCode = !inCode;
+            else if (!inCode && IsHeading(lines[i], 3))
+                lines[i] = "#### " + lines[i].TrimStart().TrimStart('#').TrimStart();
+        }
+        return string.Join("\n", lines).Trim();
+    }
+
+    // A Markdown heading of at most these levels: «## Title».
+    private static bool IsHeading(string line, int maxLevel)
+    {
+        var text = line.TrimStart();
+        var level = text.TakeWhile(c => c == '#').Count();
+        return level >= 1 && level <= maxLevel && text.Length > level && text[level] == ' ';
     }
 
     /// <summary>The name of the resource with the summary as the AI wrote it (D17), without the characters a file name can't have.</summary>
@@ -173,11 +205,11 @@ public static class PeriodSummaryRules
     public static string OriginalDescription(string model, DateTime date) =>
         $"The summary as the AI wrote it ({model}, {date:yyyy-MM-dd}), before anybody changed it.";
 
-    private static string Day(DateTime date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    internal static string Day(DateTime date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
     private static string Short(DateTime date) => date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-    private static string Line(string text) => (text ?? "").Replace("\r", " ").Replace("\n", " ").Trim();
+    internal static string Line(string text) => (text ?? "").Replace("\r", " ").Replace("\n", " ").Trim();
 
     private static string Cut(string text, int max)
     {
@@ -185,5 +217,5 @@ public static class PeriodSummaryRules
         return text.Length <= max ? text : text[..max].TrimEnd() + "…";
     }
 
-    private static string Notes(int count) => count == 1 ? "1 note" : $"{count:N0} notes";
+    internal static string Notes(int count) => count == 1 ? "1 note" : $"{count:N0} notes";
 }

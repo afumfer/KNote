@@ -121,7 +121,8 @@ public static class SummaryTexts
     {
         var lines = new List<string>
         {
-            $"{(estimate.Notes == 1 ? "1 note" : $"{estimate.Notes:N0} notes")}, {estimate.Characters:N0} characters: {Calls(estimate.Calls)} to the model.",
+            $"{(estimate.Notes == 1 ? "1 note" : $"{estimate.Notes:N0} notes")}, {estimate.Characters:N0} characters, " +
+                $"{(estimate.Sections == 1 ? "1 part" : $"{estimate.Sections} parts")} in «What happened»: {Calls(estimate.Calls)} to the model.",
             estimate.Seconds is double seconds ? $"About {Duration(seconds)} with {estimate.Model}."
                 : $"{estimate.Model}: no time yet, its first period summary will say its pace."
         };
@@ -149,7 +150,8 @@ public static class SummaryTexts
                 ? $"Reading the notes: {progress.CallsDone} of {progress.CallsTotal}"
                 : $"Reading the document: {progress.CallsDone} of {progress.CallsTotal}",
             EnumDocumentProcessPhase.Joining => $"Joining its notes: {progress.CallsDone} of {progress.CallsTotal}",
-            EnumDocumentProcessPhase.Writing => progress.Kind == EnumDocumentProcessKind.PeriodSummary ? "Writing the summary" : "Writing the extended summary",
+            EnumDocumentProcessPhase.Writing => progress.Kind == EnumDocumentProcessKind.PeriodSummary
+                ? $"Writing the summary: {progress.CallsDone} of {progress.CallsTotal}" : "Writing the extended summary",
             EnumDocumentProcessPhase.Saving => "Saving the note",
             EnumDocumentProcessPhase.Translating => progress.Page is int page
                 ? $"Translating: page {page} of {progress.PagesCount}"

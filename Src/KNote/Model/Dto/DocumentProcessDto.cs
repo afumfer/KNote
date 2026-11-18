@@ -89,6 +89,8 @@ public class DocumentProcessEstimateDto
     // A period summary (2.5): the notes it reads and the doubtful ones the AI will be asked about first (their calls are in Calls).
     public int Notes { get; set; }
     public int DoubtfulToClassify { get; set; }
+    // The parts of «What happened» (2.6, D13).
+    public int Sections { get; set; }
 }
 
 public enum EnumDocumentProcessPhase

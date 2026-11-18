@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Tests.Helpers;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Tests;
@@ -59,7 +60,7 @@ public class RepositoryPeriodSummaryCtrlSummaryTests
         Assert.AreEqual(EnumDocumentProcessKind.PeriodSummary, request.Kind);
         Assert.IsNull(request.Period.Subject, "empty: the default one");
         StringAssert.StartsWith(ctrl.DefaultSubject, "KNote summary: ");
-        Assert.AreEqual(3000, request.Period.Words);
+        Assert.AreEqual(PeriodSummaryRules.MaxWords, request.Period.Words);
         Assert.AreEqual("Spanish", request.Language, "the last one of the repository");
         Assert.IsNull(ctrl.Provider, "the repository's recommended model");
         Assert.IsNull(request.ProviderAlias);

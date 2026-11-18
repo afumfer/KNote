@@ -24,7 +24,10 @@ public static class NoiseRules
 
     /// <summary>Whether the tags of a note have this one, whole and without case.</summary>
     public static bool HasTag(string tags, string tag) =>
-        (tags ?? "").Split(TagSeparators, StringSplitOptions.RemoveEmptyEntries).Any(t => string.Equals(t, tag, StringComparison.OrdinalIgnoreCase));
+        Tags(tags).Any(t => string.Equals(t, tag, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>The tags of a note, one by one, as they are written.</summary>
+    public static IEnumerable<string> Tags(string tags) => (tags ?? "").Split(TagSeparators, StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>Why a note is in or out. kNoteNoteTypeIds / kNoteFolderIds: the ids of KNote's own types and folders.</summary>
     public static EnumNoiseReason Classify(NoteClassificationDto note, NoisePolicyDto policy, ISet<Guid> kNoteNoteTypeIds, ISet<Guid> kNoteFolderIds)

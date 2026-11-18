@@ -83,11 +83,13 @@ public class PeriodSummaryMeasure
         if (result.Entity?.NoteId is Guid noteId)
         {
             var text = (await service.Notes.GetAsync(noteId)).Entity.Description;
-            var prepared = (await service.Summaries.PreparePeriodAsync(request.Period)).Entity;
-            var read = prepared.Notes.Select(n => n.NoteNumber).ToHashSet();
-            var cited = Regex.Matches(text, @"(?<![\w&#/])#(\d+)").Select(m => int.Parse(m.Groups[1].Value)).Distinct().ToList();
-            report.Append($"- Citations: {cited.Count} notes cited, {cited.Count(read.Contains)} of the notes read, not read: {string.Join(", ", cited.Where(c => !read.Contains(c)))}\n");
-            report.Append($"- Words of the summary: {NoteReadingCleaner.CountWords(text)}\n");
+            // What the AI wrote is before the statistics; the citations of notes not read, without a link (SummaryCitationRules, D16).
+            var written = text[..Math.Max(0, text.IndexOf(PeriodSummaryDocument.StatisticsHeading, StringComparison.Ordinal))];
+            var cited = NoteCitationLinker.CitedNumbers(written);
+            var notRead = Regex.Matches(written, $@"#{SummaryCitationRules.Unlinked}(\d+)").Select(m => m.Groups[1].Value).Distinct().ToList();
+            report.Append($"- Parts of «What happened»: {estimate.Entity?.Sections}\n");
+            report.Append($"- Citations: {cited.Count} notes read cited; not recognized ({notRead.Count}): {string.Join(", ", notRead)}\n");
+            report.Append($"- Words written by the AI: {NoteReadingCleaner.CountWords(written)}\n");
             report.Append("\n## Phases\n\n").Append(string.Join("\n", phases.Distinct().Select(p => $"- {p}"))).Append("\n\n## Summary\n\n").Append(text).Append('\n');
         }
 

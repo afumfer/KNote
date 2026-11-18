@@ -205,7 +205,11 @@ internal static class KntNoteSelection
             {
                 var tasks = await service.Repository.Notes.GetNoteTasksAsync(note.NoteId);
                 if (tasks.IsValid)
-                    period.Tasks = tasks.Entity.Where(t => PeriodSummaryRules.HasActivity(t, from, to)).Select(PeriodSummaryRules.TaskText).ToList();
+                {
+                    var withActivity = tasks.Entity.Where(t => PeriodSummaryRules.HasActivity(t, from, to)).ToList();
+                    period.Tasks = withActivity.Select(PeriodSummaryRules.TaskText).ToList();
+                    PeriodSummaryRules.SetTaskCounts(period, withActivity, from, to);
+                }
             }
             if (source.Resources > 0)
             {
