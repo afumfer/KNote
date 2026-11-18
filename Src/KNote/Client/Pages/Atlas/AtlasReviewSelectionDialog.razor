@@ -90,7 +90,11 @@
 
     private void SetChecked(NoteSelectionDto note, bool value) => checkedNotes[note.NoteId] = value;
 
-    private async Task OnRowDoubleClick(DataGridRowMouseEventArgs<NoteSelectionDto> args) => await kntWindows.OpenViewAsync(args.Data.NoteId);
+    private async Task OnRowDoubleClick(DataGridRowMouseEventArgs<NoteSelectionDto> args)
+    {
+        if (args.Data != null)
+            await kntWindows.OpenViewAsync(args.Data.NoteId);
+    }
 
     private Task OnAccept() => saving.RunAsync(async () =>
     {

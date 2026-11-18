@@ -56,6 +56,28 @@ public class RelevanceNoteTests
         Assert.IsEmpty(RelevanceNote.Parse(null).Corrections);
     }
 
+    // § 7 of 03-Etapa-2: «Note relevance» with thousands of rows (a big repository after a year of summaries) is read and written at once.
+    [TestMethod]
+    public void ThousandsOfRows_AreWrittenAndReadBack_Quickly()
+    {
+        var date = new DateTime(2026, 11, 18);
+        var corrections = Enumerable.Range(1, 2_000).Select(i => new RelevanceCorrectionDto { NoteId = Guid.NewGuid(), NoteNumber = i,
+            Topic = $"Note {i} | with a long topic to look like a real one", Decision = i % 2 == 0 ? EnumSelectionDecision.In : EnumSelectionDecision.Out,
+            UserName = "Ana", Date = date }).ToList();
+        var answers = Enumerable.Range(1, 5_000).Select(i => new RelevanceAiAnswerDto { NoteId = Guid.NewGuid(), NoteNumber = 10_000 + i,
+            Topic = $"Doubtful note {i}", Decision = EnumSelectionDecision.Out, Reason = "A personal reminder without anything to keep",
+            ContentHash = new string('a', 64), Model = "qwen3.5:9b", Date = date }).ToList();
+
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var text = RelevanceNote.Write(corrections, answers);
+        var (readCorrections, readAnswers) = RelevanceNote.Parse(text);
+        clock.Stop();
+
+        Assert.HasCount(2_000, readCorrections);
+        Assert.HasCount(5_000, readAnswers);
+        Assert.IsLessThan(5_000, clock.ElapsedMilliseconds, $"{clock.ElapsedMilliseconds} ms for {text.Length:N0} characters");
+    }
+
     [TestMethod]
     public void TheChanges_ReplaceOrTakeAwayACorrection()
     {
