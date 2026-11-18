@@ -407,7 +407,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
                 if (!res.IsValid)
                     result.AddListErrorMessage(res.ListErrorMessage);
                 else
-                    result.Entity.Messages.Add(res.Entity);
+                    result.Entity.Messages.Add(Saved(res.Entity));
             }
             else
                 result.Entity.Messages.Add(item);
@@ -430,7 +430,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
                 if (!res.IsValid)
                     result.AddListErrorMessage(res.ListErrorMessage);
                 else
-                    result.Entity.Resources.Add(res.Entity);
+                    result.Entity.Resources.Add(Saved(res.Entity));
             }
             else
                 result.Entity.Resources.Add(item);
@@ -453,7 +453,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
                 if (!res.IsValid)
                     result.AddListErrorMessage(res.ListErrorMessage);
                 else
-                    result.Entity.Tasks.Add(res.Entity);
+                    result.Entity.Tasks.Add(Saved(res.Entity));
             }
             else
                 result.Entity.Tasks.Add(item);
@@ -477,7 +477,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
                 if (!res.IsValid)
                     result.AddListErrorMessage(res.ListErrorMessage);
                 else
-                    result.Entity.TraceNotesFrom.Add(res.Entity);
+                    result.Entity.TraceNotesFrom.Add(Saved(res.Entity));
             }
             else
                 result.Entity.TraceNotesFrom.Add(item);
@@ -500,7 +500,7 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
                 if (!res.IsValid)
                     result.AddListErrorMessage(res.ListErrorMessage);
                 else
-                    result.Entity.TraceNotesTo.Add(res.Entity);
+                    result.Entity.TraceNotesTo.Add(Saved(res.Entity));
             }
             else
                 result.Entity.TraceNotesTo.Add(item);
@@ -515,6 +515,15 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
         }
 
         return result;
+    }
+
+    // An item saved is no longer new, whatever the ORM: Dapper gives back the object it saved, and the desktop editor marks its new
+    // items with SetIsNew(true). Kept new, the editor saw the note always changed, deleting the item only took it out of the list
+    // and «Save the note first» never went away for a document already saved.
+    private static T Saved<T>(T item) where T : SmartModelDtoBase
+    {
+        item?.SetIsNew(false);
+        return item;
     }
 }
 
