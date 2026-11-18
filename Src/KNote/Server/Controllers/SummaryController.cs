@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using KNote.Ai;
@@ -28,10 +29,11 @@ public class SummaryController : ControllerBase
     private readonly AiProvidersCatalog _providers;
     private readonly KntRepositories _repositories;
     private readonly KntAtlasJobs _jobs;
+    private readonly IAiChatClientProvider _chatClients;
     private readonly ILogger<SummaryController> _logger;
 
     public SummaryController(IKntService service, IHttpContextAccessor httpContextAccessor, AiProvidersCatalog providers,
-        KntRepositories repositories, KntAtlasJobs jobs, ILogger<SummaryController> logger)
+        KntRepositories repositories, KntAtlasJobs jobs, IAiChatClientProvider chatClients, ILogger<SummaryController> logger)
     {
         _service = service;
         _service.Logger = logger;
@@ -39,6 +41,7 @@ public class SummaryController : ControllerBase
         _providers = providers;
         _repositories = repositories;
         _jobs = jobs;
+        _chatClients = chatClients;
         _logger = logger;
     }
 
@@ -56,7 +59,7 @@ public class SummaryController : ControllerBase
             return await AiDocumentProcessor.EstimateAsync(_service, provider, request, _logger, cancellationToken);
         });
 
-    // Queues the summary or the translation of a document for the user (or gives the one the user already has in this repository).
+    // Queues the summary or the translation of a document, or a period summary (2.5, Kind PeriodSummary), for the user (or gives the one the user already has in this repository).
     [HttpPost("documents")]
     [Authorize(Roles = StaffRoles)]
     public Task<IActionResult> SummarizeDocument([FromBody] DocumentProcessRequestDto request) =>
@@ -92,29 +95,90 @@ public class SummaryController : ControllerBase
     public IActionResult CancelDocument() =>
         Ok(new Result<bool>(_jobs.CancelDocument(_repositories.ForUser(User).RepositoryId, User?.Identity?.Name)));
 
+    // KNote Atlas 2.2 (D3): the noise policy of the session's repository. Reading it and its recount, anyone with a session;
+    // keeping it, ProjectManager and Admin, as its command.
+    [HttpGet("noise-policy")]
+    public Task<IActionResult> GetNoisePolicy() =>
+        RunAsync(nameof(GetNoisePolicy), () => _service.Summaries.GetNoisePolicyAsync());
+
+    [HttpPost("noise-policy")]
+    [Authorize(Roles = "ProjectManager, Admin")]
+    public Task<IActionResult> SaveNoisePolicy([FromBody] NoisePolicyDto policy) =>
+        RunAsync(nameof(SaveNoisePolicy), () => _service.Summaries.SaveNoisePolicyAsync(policy ?? new NoisePolicyDto()));
+
+    [HttpPost("noise-policy/count")]
+    public Task<IActionResult> CountNoise([FromBody] NoisePolicyDto policy) =>
+        RunAsync(nameof(CountNoise), () => _service.Summaries.CountNoiseAsync(policy ?? new NoisePolicyDto()));
+
+    // KNote Atlas 2.3 (CU-15): the selection of the notes of a summary, without the AI, and the changes of «Review selection», kept
+    // in «Note relevance». Staff+, with the roles of the commands (EnforceAuthorization).
+    [HttpPost("selection")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> PrepareSelection([FromBody] NoteSelectionRequestDto request, CancellationToken cancellationToken) =>
+        RunAsync(nameof(PrepareSelection), () =>
+        {
+            _service.EnforceAuthorization = true;
+            return _service.Summaries.PrepareSelectionAsync(request, cancellationToken);
+        });
+
+    // 2.4 (D9, C2): asks the AI about a batch of doubtful notes and keeps its answers in «Note relevance»; the client asks the batches
+    // one by one (cancelled with the request).
+    [HttpPost("selection/classify")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> ClassifyDoubtful([FromBody] NoteClassificationRequestDto request, CancellationToken cancellationToken) =>
+        RunAsync(nameof(ClassifyDoubtful), async () =>
+        {
+            var (provider, error) = await ProviderForAsync(request?.ProviderAlias);
+            if (error != null)
+                return error.As<List<RelevanceAiAnswerDto>>();
+
+            _service.EnforceAuthorization = true;
+            var chatClient = _chatClients.Create(provider, []);
+            return await AiNoteClassifier.ClassifyAsync(_service, chatClient, provider, request?.NoteIds ?? new(), _logger, cancellationToken);
+        });
+
+    [HttpPost("relevance/corrections")]
+    [Authorize(Roles = StaffRoles)]
+    public Task<IActionResult> SaveRelevanceCorrections([FromBody] RelevanceCorrectionsSaveDto changes) =>
+        RunAsync(nameof(SaveRelevanceCorrections), () =>
+        {
+            _service.EnforceAuthorization = true;
+            return _service.Summaries.SaveRelevanceCorrectionsAsync(changes ?? new RelevanceCorrectionsSaveDto());
+        });
+
     // The chat provider asked for or, without one, the repository's recommended LLM if this Server has it, else the default one.
     private async Task<(AiProviderRef Provider, Result Error)> ProviderAsync(DocumentProcessRequestDto request)
     {
-        var error = new Result();
-        if (request == null || request.ResourceId == Guid.Empty)
+        // A period summary (2.5) has no document: its period.
+        var missingWhat = request == null ? "The document is required."
+            : request.Kind == EnumDocumentProcessKind.PeriodSummary ? (request.Period?.Selection == null ? "The period of the summary is required." : null)
+            : request.ResourceId == Guid.Empty ? "The document is required." : null;
+        if (missingWhat != null)
         {
-            error.AddErrorMessage("The document is required.");
-            return (null, error);
+            var missing = new Result();
+            missing.AddErrorMessage(missingWhat);
+            return (null, missing);
         }
+        return await ProviderForAsync(request.ProviderAlias);
+    }
 
+    // The chat provider of the alias or, without one, the repository's recommended LLM if this Server has it, else the default one.
+    private async Task<(AiProviderRef Provider, Result Error)> ProviderForAsync(string providerAlias)
+    {
+        var error = new Result();
         AiProviderRef provider;
-        if (string.IsNullOrWhiteSpace(request.ProviderAlias))
+        if (string.IsNullOrWhiteSpace(providerAlias))
         {
             var models = await _service.SystemValues.GetRepositoryAiModelsAsync();
             provider = AiProviderSelection.ForRepository(_providers.ChatProviders, models.Entity?.LlmModel, _providers.Default);
         }
         else
-            provider = _providers.Find(request.ProviderAlias);
+            provider = _providers.Find(providerAlias);
         if (provider == null)
         {
-            error.AddErrorMessage(string.IsNullOrWhiteSpace(request.ProviderAlias)
-                ? "This Server has no AI model to summarize or translate: configure a chat provider."
-                : $"The AI provider «{request.ProviderAlias}» is not configured in this Server.");
+            error.AddErrorMessage(string.IsNullOrWhiteSpace(providerAlias)
+                ? "This Server has no AI model for KNote Atlas: configure a chat provider."
+                : $"The AI provider «{providerAlias}» is not configured in this Server.");
             return (null, error);
         }
         return (provider, null);

@@ -26,21 +26,23 @@ internal static class KntAtlasNotes
 
     public static readonly IReadOnlyList<string> ProtectedNoteTypeNames = new[]
     {
-        KntConst.ProfileTag, KntConst.GlossaryTag, KntConst.TaskPromptTag, KntConst.TestQueriesTag
+        KntConst.ProfileTag, KntConst.GlossaryTag, KntConst.TaskPromptTag, KntConst.TestQueriesTag, KntConst.RelevanceTag
     };
 
     public const string NotAllowedMessage =
-        "Only a ProjectManager or an Admin can change the notes of KNote Atlas (profile, glossary, task instructions and test queries).";
+        "Only a ProjectManager or an Admin can change the notes of KNote Atlas (profile, glossary, task instructions, test queries and note relevance).";
 
     public static readonly IReadOnlyList<string> TaskPromptModes = new[] { "Add", "Replace" };
 
     #region The rule of who writes them
 
-    /// <summary>False when a note of one of these types (its new one or the one it had) is written by a user below ProjectManager.</summary>
+    /// <summary>False when a note of one of these types (its new one or the one it had) is written by a user below ProjectManager.
+    /// KNote itself writes some of them inside an authorized command (KntAuthorizationBypass: «Note relevance», from «Review
+    /// selection», for a Staff): allowed.</summary>
     public static async Task<bool> CanWriteAsync(IKntService service, params Guid?[] noteTypeIds)
     {
         var ids = noteTypeIds.Where(id => id != null).Select(id => id.Value).Distinct().ToList();
-        if (ids.Count == 0 || string.IsNullOrWhiteSpace(service.UserIdentityName))
+        if (ids.Count == 0 || string.IsNullOrWhiteSpace(service.UserIdentityName) || KntAuthorizationBypass.IsActive)
             return true;
 
         var types = (await service.Repository.NoteTypes.GetAllAsync()).Entity;

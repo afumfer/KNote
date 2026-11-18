@@ -1,0 +1,502 @@
+@using KNote.Model.Core
+
+@* KNote Atlas, stage 2 (2.3b, CU-15, D19): the tab «Period summary», for now only the fields of the selection (the period, with «From
+   the beginning»; the folder; the keywords; «Talks about…», only if the server can search by meaning), the counts of the selection
+   and «Review selection» (AtlasReviewSelectionDialog). The selection is asked for again at each change of the period or the folder,
+   and of the texts when they are left or Enter is pressed (the last one wins). The doubtful notes are asked to the AI on demand (2.4),
+   a batch per request, with the repository's recommended model. Below (2.5b), the summary: its subject, words, language (the last one
+   of the repository, in the browser) and model; «Estimate», «Generate» and its progress, asked to the Server every second and a half
+   (the run is in the Server's queue, one summary per user, and goes on if the page is left; back, it shows it), «Cancel» and «Open the
+   note». *@
+
+@implements IDisposable
+@inject IStore store
+@inject DialogService dialogService
+@inject NotificationService notificationService
+@inject KntWindows kntWindows
+@inject IJSRuntime js
+@inject AuthenticationStateProvider authenticationStateProvider
+
+<KntFormSection Icon="@KntSections.AtlasPeriodSummary.Icon" Title="@KntSections.AtlasPeriodSummary.Text" Description="@NoteRelevanceRules.SelectionHelp">
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="4">
+            <KntField Label="From" Component="SelectionFrom">
+                <RadzenDatePicker Name="SelectionFrom" TValue="DateTime" Value="@from" ValueChanged="OnFromChanged" DateFormat="d"
+                                  Disabled="@fromTheBeginning" />
+            </KntField>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mt-1">
+                <RadzenCheckBox Name="SelectionFromBeginning" TValue="bool" Value="@fromTheBeginning" ValueChanged="OnFromTheBeginningChanged" />
+                <RadzenLabel Text="From the beginning" Component="SelectionFromBeginning" />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeSM="4">
+            <KntField Label="To" Component="SelectionTo">
+                <RadzenDatePicker Name="SelectionTo" TValue="DateTime" Value="@to" ValueChanged="OnToChanged" DateFormat="d" />
+            </KntField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="8">
+            <KntField Label="Folder" Component="SelectionFolder" Help="The folder and its subfolders.">
+                <KntFolderPicker FolderName="@(folder?.Name ?? "All folders")" FolderSelected="OnFolderSelected" FolderReset="OnFolderReset"
+                                 ResetTitle="All folders" />
+            </KntField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="@(meaningAvailable ? 4 : 8)">
+            <KntField Label="Keywords" Component="SelectionKeywords" Help="As in the search: ! to leave a word out, phrases in quotes.">
+                <RadzenTextBox Name="SelectionKeywords" Value="@keywords" Change="OnKeywordsChanged" />
+            </KntField>
+        </RadzenColumn>
+        @if (meaningAvailable)
+        {
+            <RadzenColumn Size="12" SizeSM="4">
+                <KntField Label="Talks about…" Component="SelectionMeaning" Help="By meaning, among the notes of the period.">
+                    <RadzenTextBox Name="SelectionMeaning" Value="@meaningText" Change="OnMeaningChanged" />
+                </KntField>
+            </RadzenColumn>
+        }
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem" class="rz-mt-3">
+        <div>
+            @if (selection == null)
+            {
+                @if (loadFailed)
+                {
+                    <span class="knt-load-error-text">The selection could not be prepared.</span>
+                }
+                else
+                {
+                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.ExtraSmall" />
+                }
+            }
+            else
+            {
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@NoteRelevanceRules.CountText(selection)</RadzenText>
+                @if (selection.RelevanceNote is { } relevance)
+                {
+                    @* Read-only: KNote writes it. *@
+                    <RadzenButton Text="@($"Note relevance (#{relevance.NoteNumber})")" Icon="fact_check" Variant="Variant.Text"
+                                  Size="ButtonSize.ExtraSmall" class="rz-p-0" Click="@(() => kntWindows.OpenViewAsync(relevance.NoteId))" />
+                }
+            }
+        </div>
+        <RadzenButton Text="Review selection…" Icon="checklist" Size="ButtonSize.Small" Disabled="@(selection == null || selection.Notes.Count == 0 || classifying.IsBusy)"
+                      Click="OnReview" />
+    </RadzenStack>
+    @if (classifying.IsBusy)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem" class="rz-mt-2">
+            <div style="flex: 1">
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@classifyText</RadzenText>
+                <RadzenProgressBar Value="@classifyDone" Max="@Math.Max(classifyTotal, 1)" ShowValue="false" Style="height: 6px" />
+            </div>
+            <RadzenButton Text="Cancel" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="OnCancelClassify" />
+        </RadzenStack>
+    }
+    else if (selection != null && NoteClassificationRules.PendingCount(selection) > 0)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem" class="rz-mt-2">
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@NoteClassificationRules.PendingText(selection)</RadzenText>
+            <RadzenButton Text="@NoteClassificationRules.ButtonText" Icon="psychology" Size="ButtonSize.Small" Click="OnClassify" Disabled="@Running" />
+        </RadzenStack>
+    }
+</KntFormSection>
+
+<KntFormSection Icon="summarize" Title="Summary" Description="The AI reads the notes that go in by batches and writes the summary in a new note of the folder «KNote Summary», citing them as #123. The notes don't change.">
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="8">
+            <KntField Label="Subject" Component="SummarySubject" Help="@SummaryTexts.SubjectHelp">
+                <RadzenTextBox Name="SummarySubject" @bind-Value="@subject" Placeholder="@DefaultSubject" Disabled="@Running" />
+            </KntField>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeSM="4">
+            <KntField Label="Words" Component="SummaryWords" Help="@SummaryTexts.WordsHelp">
+                <RadzenNumeric Name="SummaryWords" TValue="int" @bind-Value="@words" Min="@PeriodSummaryRules.MinWords" Max="@PeriodSummaryRules.MaxWords" Step="100" Disabled="@Running" />
+            </KntField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="4">
+            <KntField Label="Language" Component="SummaryLanguage" Help="@SummaryTexts.PeriodLanguageHelp">
+                <RadzenAutoComplete Name="SummaryLanguage" @bind-Value="@language" Data="@SummaryTexts.Languages" Disabled="@Running"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" MinLength="0" OpenOnFocus="true" />
+            </KntField>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeSM="8">
+            <KntField Label="Model" Component="SummaryModel">
+                <RadzenDropDown Name="SummaryModel" TValue="string" @bind-Value="@providerAlias" Data="@models" Disabled="@Running"
+                                TextProperty="Text" ValueProperty="Value" />
+            </KntField>
+        </RadzenColumn>
+    </RadzenRow>
+    @if (estimateError != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">@estimateError</RadzenAlert>
+    }
+    else if (estimate != null)
+    {
+        <RadzenStack Gap="0.25rem">
+            @foreach (var line in SummaryTexts.EstimateLines(estimate, ProviderName))
+            {
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@line</RadzenText>
+            }
+        </RadzenStack>
+    }
+    @if (progress != null)
+    {
+        <RadzenStack Gap="0.25rem" class="rz-mt-2">
+            @if (Running)
+            {
+                <RadzenProgressBar Value="@(SummaryTexts.Share(progress) * 100)" ShowValue="false" Mode="@(progress.CallsTotal > 0 ? ProgressBarMode.Determinate : ProgressBarMode.Indeterminate)" />
+            }
+            <RadzenText TextStyle="TextStyle.Body2" class="@(progress.Phase == EnumDocumentProcessPhase.Failed ? "rz-color-danger rz-my-0" : "rz-my-0")">
+                @SummaryTexts.Progress(progress)
+            </RadzenText>
+            @if (Running)
+            {
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-my-0">@SummaryTexts.PeriodRunning</RadzenText>
+            }
+        </RadzenStack>
+    }
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem" class="rz-mt-2">
+        @if (!Running && SummaryTexts.HasNote(progress) && progress?.NoteId is Guid noteId)
+        {
+            <RadzenButton Text="@SummaryTexts.OpenNote" Icon="open_in_new" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                          Click="() => kntWindows.OpenEditAsync(noteId)" />
+        }
+        @if (Running)
+        {
+            <RadzenButton Text="@SummaryTexts.Cancel" Icon="stop" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                          IsBusy="@canceling.IsBusy" Click="OnCancelSummary" />
+        }
+        <RadzenButton Text="@SummaryTexts.Estimate" Icon="calculate" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                      IsBusy="@estimating.IsBusy" BusyText="Estimating…" Disabled="@(Running || NoNotes)" Click="OnEstimate" />
+        <RadzenButton Text="@SummaryTexts.Generate" Icon="summarize" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                      IsBusy="@starting.IsBusy" Disabled="@(Running || NoNotes || classifying.IsBusy)" Click="OnGenerate" />
+    </RadzenStack>
+</KntFormSection>
+
+@code {
+    private DateTime from = DateTime.Today.AddDays(-6);
+    private DateTime to = DateTime.Today;
+    private bool fromTheBeginning;
+    private FolderDto? folder;
+    private string keywords = "";
+    private string meaningText = "";
+    private bool meaningAvailable;
+    private NoteSelectionResultDto? selection;
+    private bool loadFailed;
+    private readonly KntLatestRequest selectionRequest = new();
+    private readonly KntSingleFlight classifying = new();
+    private CancellationTokenSource? classifyCancellation;
+    private string classifyText = "";
+    private int classifyDone;
+    private int classifyTotal;
+    private readonly CancellationTokenSource disposal = new();
+
+    // 2.5b: the summary.
+    private sealed record Option(string Text, string? Value);
+    private List<Option> models = [new("The repository's recommended model", null)];
+    private List<AiProviderInfoDto> providers = [];
+    private string subject = "";
+    private int words = PeriodSummaryRules.DefaultWords;
+    private string language = "";
+    private string? providerAlias;
+    private string? repositoryId;
+    private DocumentProcessEstimateDto? estimate;
+    private string? estimateError;
+    private DocumentProcessProgressDto? progress;
+    private readonly KntSingleFlight estimating = new();
+    private readonly KntSingleFlight starting = new();
+    private readonly KntSingleFlight canceling = new();
+
+    private string DefaultSubject => PeriodSummaryRules.DefaultSubject(Request());
+
+    // The run of the Server is a period summary (the user may have the summary of a document going on).
+    private bool Running => progress is { IsFinished: false } && progress.Kind == EnumDocumentProcessKind.PeriodSummary;
+
+    private bool NoNotes => selection == null || selection.Notes.All(n => !n.IsIncluded);
+
+    private string? ProviderName => providers.FirstOrDefault(p => p.Alias == providerAlias)?.Provider ?? providers.FirstOrDefault(p => p.IsDefault)?.Provider;
+
+    private string LanguageKey => $"KNotePeriodSummaryLanguage:{repositoryId}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var status = await store.SemanticSearch.GetIndexStatusAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        meaningAvailable = status.IsValid && SemanticIndexTexts.CanSearch(status.Entity);
+        await PrepareAsync();
+        await LoadSummaryAsync();
+    }
+
+    // The models, the language of the repository and a period summary going on (or the last one).
+    private async Task LoadSummaryAsync()
+    {
+        var user = (await authenticationStateProvider.GetAuthenticationStateAsync()).User;
+        repositoryId = user.FindFirst(KntConst.RepositoryClaimType)?.Value;
+        try
+        {
+            language = await js.LocalStorageGetItem(LanguageKey) ?? "";
+        }
+        catch (JSException)
+        {
+            language = "";
+        }
+
+        var listed = await store.AiAssistant.GetProvidersAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (listed.IsValid)
+        {
+            providers = listed.Entity;
+            models = [new("The repository's recommended model", null), .. providers.Select(p => new Option($"{p.Alias} ({p.Model})", p.Alias))];
+        }
+
+        var current = await store.Summaries.GetDocumentProgressAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (current.IsValid && current.Entity?.Kind == EnumDocumentProcessKind.PeriodSummary)
+        {
+            progress = current.Entity;
+            if (Running)
+                _ = FollowAsync();
+        }
+        StateHasChanged();
+    }
+
+    private DocumentProcessRequestDto SummaryRequest() => new()
+    {
+        Kind = EnumDocumentProcessKind.PeriodSummary,
+        ProviderAlias = providerAlias,
+        Language = language?.Trim(),
+        Period = new PeriodSummaryRequestDto
+        {
+            Selection = Request(),
+            Subject = string.IsNullOrWhiteSpace(subject) ? null : subject.Trim(),
+            Words = PeriodSummaryRules.ClampWords(words)
+        }
+    };
+
+    private Task OnEstimate() => estimating.RunAsync(async () =>
+    {
+        estimate = null;
+        estimateError = null;
+        var result = await store.Summaries.EstimateDocumentAsync(SummaryRequest(), disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (result.IsValid)
+            estimate = result.Entity;
+        else
+            estimateError = result.ErrorMessage;
+    });
+
+    private Task OnGenerate() => starting.RunAsync(async () =>
+    {
+        var result = await store.Summaries.SummarizeDocumentAsync(SummaryRequest(), disposal.Token);
+        if (disposal.IsCancellationRequested || !result.IsValid)
+            return;
+        try
+        {
+            await js.LocalStorageSetItem(LanguageKey, language?.Trim() ?? "");
+        }
+        catch (JSException)
+        {
+        }
+        progress = result.Entity?.Kind == EnumDocumentProcessKind.PeriodSummary
+            ? result.Entity
+            : new DocumentProcessProgressDto { Kind = EnumDocumentProcessKind.PeriodSummary, Phase = EnumDocumentProcessPhase.Failed, Message = SummaryTexts.YoursRunning };
+        if (Running)
+            _ = FollowAsync();
+    });
+
+    private Task OnCancelSummary() => canceling.RunAsync(async () =>
+    {
+        await store.Summaries.CancelDocumentAsync(disposal.Token);
+    });
+
+    // The progress of the run, every second and a half, until it ends or the page is left; at the end, the selection again (the
+    // answers of the AI about the doubtful notes).
+    private async Task FollowAsync()
+    {
+        try
+        {
+            while (!disposal.IsCancellationRequested && Running)
+            {
+                await Task.Delay(1500, disposal.Token);
+                var current = await store.Summaries.GetDocumentProgressAsync(disposal.Token);
+                if (disposal.IsCancellationRequested)
+                    return;
+                if (current.IsValid && current.Entity?.Kind == EnumDocumentProcessKind.PeriodSummary)
+                    progress = current.Entity;
+                if (!Running)
+                    await PrepareAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private NoteSelectionRequestDto Request() => new()
+    {
+        From = fromTheBeginning ? NoteSelectionRequestDto.Beginning : from,
+        To = to,
+        FolderId = folder?.FolderId,
+        Keywords = string.IsNullOrWhiteSpace(keywords) ? null : keywords.Trim(),
+        MeaningText = meaningAvailable && !string.IsNullOrWhiteSpace(meaningText) ? meaningText.Trim() : null
+    };
+
+    // The selection of the fields as they are now; an older one still running is left behind.
+    private async Task PrepareAsync()
+    {
+        selection = null;
+        loadFailed = false;
+        StateHasChanged();
+        var request = Request();
+        var r = await selectionRequest.RunAsync(ct => store.Summaries.PrepareSelectionAsync(request, ct));
+        if (r.Canceled)
+            return;
+        selection = r.Value.IsValid ? r.Value.Entity : null;
+        loadFailed = !r.Value.IsValid;
+        StateHasChanged();
+    }
+
+    private async Task OnFromChanged(DateTime value)
+    {
+        from = value.Date;
+        await PrepareAsync();
+    }
+
+    private async Task OnToChanged(DateTime value)
+    {
+        to = value.Date;
+        await PrepareAsync();
+    }
+
+    private async Task OnFromTheBeginningChanged(bool value)
+    {
+        fromTheBeginning = value;
+        await PrepareAsync();
+    }
+
+    private async Task OnFolderSelected(FolderDto value)
+    {
+        folder = value;
+        await PrepareAsync();
+    }
+
+    private async Task OnFolderReset()
+    {
+        folder = null;
+        await PrepareAsync();
+    }
+
+    private async Task OnKeywordsChanged(string value)
+    {
+        if ((value ?? "") == keywords)
+            return;
+        keywords = value ?? "";
+        await PrepareAsync();
+    }
+
+    private async Task OnMeaningChanged(string value)
+    {
+        if ((value ?? "") == meaningText)
+            return;
+        meaningText = value ?? "";
+        await PrepareAsync();
+    }
+
+    // 2.4 (D9, C1-C6): the doubtful notes asked to the AI, a batch per request, with its progress and «Cancel» (what was asked stays);
+    // then the selection is prepared again with the answers.
+    private Task OnClassify() => classifying.RunAsync(async () =>
+    {
+        if (selection == null)
+            return;
+        var toClassify = NoteClassificationRules.ToClassify(selection);
+        if (toClassify.Count == 0)
+            return;
+
+        var describer = await store.Notes.GetPhotoDescriberAsync(disposal.Token);
+        if (!describer.IsValid || disposal.IsCancellationRequested)
+            return;
+        if (!describer.Entity.CanSummarize)
+        {
+            notificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = KntSections.AtlasPeriodSummary.Text, Detail = describer.Entity.Message });
+            return;
+        }
+        var ok = await dialogService.Confirm(NoteClassificationRules.Confirmation(toClassify.Count, describer.Entity.Model, describer.Entity.IsPaid),
+            "Classify doubtful notes", new ConfirmOptions { OkButtonText = "Classify", CancelButtonText = "Cancel" });
+        if (ok != true || disposal.IsCancellationRequested)
+            return;
+
+        var batches = NoteClassificationRules.Batches(toClassify.Select(n => n.NoteId));
+        classifyTotal = batches.Count;
+        classifyDone = 0;
+        var answered = 0;
+        var failed = 0;
+        string? firstError = null;
+        classifyCancellation = CancellationTokenSource.CreateLinkedTokenSource(disposal.Token);
+        try
+        {
+            foreach (var batch in batches)
+            {
+                if (classifyCancellation.IsCancellationRequested)
+                    break;
+                classifyText = NoteClassificationRules.Progress(classifyDone + 1, classifyTotal);
+                StateHasChanged();
+                var result = await store.Summaries.ClassifyDoubtfulAsync(new NoteClassificationRequestDto { NoteIds = batch }, classifyCancellation.Token);
+                if (classifyCancellation.IsCancellationRequested)
+                    break;
+                if (result.IsValid)
+                    answered += result.Entity.Count;
+                else
+                {
+                    failed++;
+                    firstError ??= result.ErrorMessage;
+                }
+                classifyDone++;
+            }
+        }
+        finally
+        {
+            classifyCancellation.Dispose();
+            classifyCancellation = null;
+        }
+        if (disposal.IsCancellationRequested)
+            return;
+
+        notificationService.Notify(new NotificationMessage
+        {
+            Severity = failed == 0 ? NotificationSeverity.Success : NotificationSeverity.Warning, Summary = KntSections.AtlasPeriodSummary.Text,
+            Detail = NoteClassificationRules.Done(answered, toClassify.Count, failed) + (firstError == null ? "" : $" {firstError}"), Duration = 8000
+        });
+        await PrepareAsync();
+    });
+
+    private void OnCancelClassify() => classifyCancellation?.Cancel();
+
+    // The dialog keeps the corrections; afterwards the selection is prepared again with them.
+    private async Task OnReview()
+    {
+        if (selection == null)
+            return;
+        var saved = await dialogService.OpenAsync<AtlasReviewSelectionDialog>("Review selection",
+            new Dictionary<string, object?> { [nameof(AtlasReviewSelectionDialog.Selection)] = selection },
+            KntDialogs.Framed(KntDialogs.Large()));
+        if (saved is true && !disposal.IsCancellationRequested)
+            await PrepareAsync();
+    }
+
+    public void Dispose()
+    {
+        selectionRequest.Dispose();
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

@@ -431,6 +431,17 @@ predeterminado del Server.
   `AiProvidersCatalog`, `KntRepositories` y el usuario de la petición; aceptada la tarjeta (`POST api/aiassistant/actions`), el host
   encola el mismo trabajo para ese usuario en el repositorio de su sesión, con el modelo de `SummaryController` sin alias (el LLM
   recomendado del repositorio o el predeterminado). Con otro suyo en marcha o en cola, falla con `SummaryTexts.YoursRunning`.
+- **Política de ruido** (2.2): `GET noise-policy` y `POST noise-policy/count` (el recuento de una política sin guardar), para cualquier
+  usuario con sesión (`[Authorize]` de la clase); `POST noise-policy` la guarda, `[Authorize(Roles = "ProjectManager, Admin")]`, y
+  devuelve lo que se guardó (sin los ids que no existen ni los de KNote).
+- **Selección** (2.3): `POST selection` (`NoteSelectionRequestDto` → `NoteSelectionResultDto`, sin IA, cancelada si se cierra la petición) y
+  `POST relevance/corrections` (los cambios de «Review selection», guardados en «Note relevance»), Staff+, con `EnforceAuthorization`.
+- **El resumen de un periodo** (2.5): las mismas rutas de los documentos (`documents/estimate`, `documents`, `documents/progress`,
+  `documents/cancel`) con `Kind = PeriodSummary` y `Period` (sin documento); el trabajo es el mismo `DocumentProcess` de la cola, con el
+  asunto como `FileName` del progreso.
+- **Las dudosas con IA** (2.4): `POST selection/classify` (`NoteClassificationRequestDto`: hasta 10 notas y el alias del modelo; sin él, el
+  LLM recomendado del repositorio o el predeterminado, como los documentos) hace un lote con `AiNoteClassifier` y devuelve las respuestas
+  guardadas; el cliente pide los lotes uno a uno. Staff+, con `EnforceAuthorization`, cancelado con la petición.
 
 ## Chat room (`Hubs/ChatHub`, `ChatRoomController`)
 

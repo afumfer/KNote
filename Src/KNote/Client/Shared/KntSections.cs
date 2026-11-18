@@ -34,6 +34,8 @@ public static class KntSections
     public static readonly KntSection AtlasPersonalization = new("AI personalization", "atlas?tab=personalization", "tune");
     public static readonly KntSection AtlasSemanticIndex = new("Semantic index", "atlas?tab=index", "manage_search");
     public static readonly KntSection AtlasResources = new("Process pending resources", "atlas?tab=resources", "photo_library");
+    public static readonly KntSection AtlasNoisePolicy = new("Noise policy", "atlas?tab=noise", "filter_alt_off");
+    public static readonly KntSection AtlasPeriodSummary = new("Period summary", "atlas?tab=summary", "date_range");
     // The laboratory of the search by meaning (ProjectManager), only in the Web.
     public static readonly KntSection SearchEvaluation = new("Search evaluation", "atlas?tab=evaluation", "query_stats");
     // Only in KNote Local (the server's capabilities).

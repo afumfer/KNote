@@ -27,4 +27,44 @@ internal class FakeKntSummaryService : IKntSummaryService
 
     public Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId) =>
         (GetDocumentTranslationsAsyncImpl ?? throw new NotSupportedException($"{nameof(GetDocumentTranslationsAsync)} not configured for this test"))(resourceId);
+
+    public Func<Task<Result<NoisePolicyDto>>>? GetNoisePolicyAsyncImpl { get; set; }
+    public Func<NoisePolicyDto, Task<Result<NoisePolicyDto>>>? SaveNoisePolicyAsyncImpl { get; set; }
+    public Func<NoisePolicyDto, Task<Result<NoiseCountDto>>>? CountNoiseAsyncImpl { get; set; }
+
+    public Task<Result<NoisePolicyDto>> GetNoisePolicyAsync() =>
+        (GetNoisePolicyAsyncImpl ?? throw new NotSupportedException($"{nameof(GetNoisePolicyAsync)} not configured for this test"))();
+
+    public Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy) =>
+        (SaveNoisePolicyAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveNoisePolicyAsync)} not configured for this test"))(policy);
+
+    public Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy) =>
+        (CountNoiseAsyncImpl ?? throw new NotSupportedException($"{nameof(CountNoiseAsync)} not configured for this test"))(policy);
+
+    public Func<NoteSelectionRequestDto, CancellationToken, Task<Result<NoteSelectionResultDto>>>? PrepareSelectionAsyncImpl { get; set; }
+    public Func<RelevanceCorrectionsSaveDto, Task<Result<List<RelevanceCorrectionDto>>>>? SaveRelevanceCorrectionsAsyncImpl { get; set; }
+
+    public Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default) =>
+        (PrepareSelectionAsyncImpl ?? throw new NotSupportedException($"{nameof(PrepareSelectionAsync)} not configured for this test"))(request, cancellationToken);
+
+    public Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes) =>
+        (SaveRelevanceCorrectionsAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRelevanceCorrectionsAsync)} not configured for this test"))(changes);
+
+    public Func<List<Guid>, Task<Result<List<NoteToClassifyDto>>>>? GetNotesToClassifyAsyncImpl { get; set; }
+    public Func<RelevanceAiAnswersSaveDto, Task<Result<List<RelevanceAiAnswerDto>>>>? SaveRelevanceAiAnswersAsyncImpl { get; set; }
+
+    public Task<Result<List<NoteToClassifyDto>>> GetNotesToClassifyAsync(List<Guid> noteIds) =>
+        (GetNotesToClassifyAsyncImpl ?? throw new NotSupportedException($"{nameof(GetNotesToClassifyAsync)} not configured for this test"))(noteIds);
+
+    public Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers) =>
+        (SaveRelevanceAiAnswersAsyncImpl ?? throw new NotSupportedException($"{nameof(SaveRelevanceAiAnswersAsync)} not configured for this test"))(answers);
+
+    public Func<PeriodSummaryRequestDto, CancellationToken, Task<Result<PeriodSummaryPreparedDto>>>? PreparePeriodAsyncImpl { get; set; }
+    public Func<PeriodSummarySaveDto, Task<Result<NoteDto>>>? SavePeriodSummaryAsyncImpl { get; set; }
+
+    public Task<Result<PeriodSummaryPreparedDto>> PreparePeriodAsync(PeriodSummaryRequestDto request, CancellationToken cancellationToken = default) =>
+        (PreparePeriodAsyncImpl ?? throw new NotSupportedException($"{nameof(PreparePeriodAsync)} not configured for this test"))(request, cancellationToken);
+
+    public Task<Result<NoteDto>> SavePeriodSummaryAsync(PeriodSummarySaveDto summary) =>
+        (SavePeriodSummaryAsyncImpl ?? throw new NotSupportedException($"{nameof(SavePeriodSummaryAsync)} not configured for this test"))(summary);
 }

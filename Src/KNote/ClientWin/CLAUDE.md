@@ -655,12 +655,35 @@ un repositorio de `ClientWin`: los hilos viven en la base de datos del servidor.
 Etapa 1 (lógica en `Service`, ver «Contexto de la IA» en el `CLAUDE.md` raíz). **Tools › KNote Atlas** (debajo de «AI
 Assistant»): una sola ventana no modal, `AtlasCtrl` (`[KntAuthorize(Guest)]`) y `AtlasForm`, con **todo lo de la IA del
 repositorio** (4.3b): una lista a la izquierda (`EnumAtlasSection`, `ListBox` dibujado a mano: un `TabControl` vertical
-gira el texto) con *Repository models*, *AI personalization*, *Semantic index* y *Process pending resources*. Las tres del
+gira el texto) con *Repository models*, *AI personalization*, *Semantic index*, *Process pending resources* y *Noise policy*. Las tres del
 Admin son las vistas incrustadas de `AtlasCtrl.ModelsCtrl`, `SemanticIndexCtrl` y `ResourcesCtrl` (ver «KNote Atlas:
 búsqueda por significado»); solo se cargan para quien puede usarlas (`IsAvailable`, el rol de su comando) y las demás se
 ven en gris con quién puede (`WhoCanUse`, en el `ToolTip`). Los modelos sin guardar se preguntan antes de cambiar de
 repositorio o cerrar. Empieza en *AI personalization*: las pestañas «Repository profile», «Glossary», «Task instructions» y
-«What the AI receives» (la tarea, un texto de prueba y el mensaje montado; un Guest no lo ve). Empieza en el repositorio activo y la lista de arriba elige otro entre los
+«What the AI receives» (la tarea, un texto de prueba y el mensaje montado; un Guest no lo ve). *Noise policy* (etapa 2, 2.2) es para
+todos: `AtlasCtrl.NoisePolicyCtrl` (`RepositoryNoisePolicyCtrl`, incluido, `IViewNoisePolicy`, `Views/RepositoryNoisePolicyForm`): los
+tipos en un `CheckedListBox`, las carpetas con su ruta, «Add folder...» (`FoldersSelectorCtrl` modal; `ChooseFolder` es `internal` para
+los tests) y «Remove», el recuento de la política sin guardar en cada cambio (el último gana) y con «Count again», y «Save policy», solo si el rol del comando
+lo permite (`CanSave`; si no, la ve con un aviso). Sus cambios sin guardar se preguntan, como los modelos, antes de cambiar de
+repositorio o cerrar, y releer la ventana tras guardar una nota en el editor no los pierde. Tests en `RepositoryNoisePolicyCtrlTests`.
+*Period summary* (2.3b, D19, Staff: `IsAvailable` por `KntSummaryPrepareSelectionAsyncCommand`; en gris dice el rol, `AtlasCtrl.RoleText`):
+`AtlasCtrl.PeriodSummaryCtrl` (`RepositoryPeriodSummaryCtrl`, incluido, `IViewPeriodSummary`, `Views/RepositoryPeriodSummaryForm`), por
+ahora solo los campos de la selección (Desde / Hasta con «From the beginning», carpeta con su ruta y `FoldersSelectorCtrl`, palabras
+clave y «Talks about…» solo con `Store.CanSearchByMeaningAsync`), el enlace a «Note relevance» (`RelevanceNoteText`,
+`OpenRelevanceNoteAsync`: el editor de siempre; un Staff no puede guardarla), el recuento (la selección se pide otra vez en cada cambio, gana la
+última; los textos al salir o con Enter) y «Review selection...», que abre `ReviewSelectionCtrl` (incluido, modal, `IViewReviewSelection`,
+`Views/ReviewSelectionForm`: una pestaña por lista con un `ListView` con casillas; doble clic abre la nota en el editor; «Accept» guarda
+las casillas cambiadas y, si guardó algo, la sección vuelve a pedir la selección). `ChooseFolder` y `RunReview` son `internal` para los
+tests. «Classify doubtful notes with AI...» (2.4b, `RepositoryPeriodSummaryCtrl.ClassifyAsync`): confirma con el modelo de
+`Store.GetPhotoDescriberAsync` (el LLM recomendado del repositorio), pide los lotes uno a uno con `AiNoteClassifier` sobre el `Service`
+del repositorio de la ventana, con su progreso en la sección y «Cancel» (`CancelClassification`, entre lotes y en la llamada en curso),
+dice cómo fue y vuelve a pedir la selección; `ChooseModel` y `CreateChatClient` son `internal` para los tests. **El resumen** (2.5b):
+asunto, palabras, idioma (el último del repositorio, `AppUserState.Session.PeriodSummaryLanguages`) y modelo (`Provider` nulo = «The
+repository's recommended model», que se resuelve al estimar o generar con `Store.GetPhotoDescriberAsync`: cargar la sección no lee nada
+más); «Estimate» (`AiDocumentProcessor.EstimateAsync`), «Generate» (`Store.DocumentProcessing.Start` con `Kind = PeriodSummary`, nunca a la
+vez que otro trabajo de KNote Atlas), su progreso (`DocumentProcessingProgressChanged`), «Cancel» y «Open the note»; cada campo pasa al
+`Ctrl` al cambiar (un refresco de la vista no lo pisa) y el panel tiene scroll. `SaveSettings` es `internal` para los tests. Tests en
+`RepositoryPeriodSummaryCtrlTests`, `RepositoryPeriodSummaryCtrlClassifyTests`, `RepositoryPeriodSummaryCtrlSummaryTests` y `AtlasCtrlTests`. Empieza en el repositorio activo y la lista de arriba elige otro entre los
 enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
 otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»
 abre el `NoteEditorCtrl` de siempre y la ventana se refresca con su `SavedEntity` (el editor puede seguir abierto después

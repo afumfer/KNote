@@ -24,7 +24,12 @@ public static class AiSummaryEngine
     /// <summary>How it goes: the phase and the calls done of the ones planned (the joins are known as they come).</summary>
     public sealed record Step(EnumDocumentProcessPhase Phase, int CallsDone, int CallsTotal);
 
-    public sealed record Outcome(string Text, int CharactersRead, int Calls);
+    /// <summary>The final text; the characters read and the calls; and the notes it was written from (a period summary writes more
+    /// parts from them, 2.6).</summary>
+    public sealed record Outcome(string Text, int CharactersRead, int Calls, IReadOnlyList<string> Notes);
+
+    /// <summary>Notes joined until they fit together in a final call: the notes, the characters read and the calls of the joins.</summary>
+    public sealed record Joined(List<string> Notes, int CharactersRead, int Calls);
 
     /// <summary>The characters of the pieces of a batch and of the final call, with this system prompt and context.</summary>
     public static (int Batch, int Final) Budgets(int contextTokens, int systemPromptCharacters, int finalOutputTokens) =>
@@ -64,15 +69,44 @@ public static class AiSummaryEngine
         if (notes.Count == 0)
             throw new InvalidOperationException($"The model {provider.Model} gave no notes of the document.");
 
-        // Summaries of summaries, while the notes don't fit together in the final call.
-        while (notes.Count > 1 && !SummaryBatches.Fit(notes, finalCharacters))
+        var before = callsDone;
+        var joined = await JoinAsync(chatClient, provider, systemPrompt, notes, batchCharacters, finalCharacters, requests.Join,
+            (done, planned) =>
+            {
+                callsTotal = Math.Max(callsTotal, before + planned + 1);
+                progress?.Invoke(new Step(EnumDocumentProcessPhase.Joining, before + done, callsTotal));
+            }, cancellationToken);
+        read += joined.CharactersRead;
+        callsDone += joined.Calls;
+
+        progress?.Invoke(new Step(EnumDocumentProcessPhase.Writing, callsDone, callsDone + 1));
+        var finalRequest = requests.Final(joined.Notes);
+        var text = await AskAsync(chatClient, provider, systemPrompt, finalRequest, requests.FinalOutputTokens, cancellationToken);
+        read += finalRequest.Length;
+        callsDone++;
+        if (text.Length == 0)
+            throw new InvalidOperationException($"The model {provider.Model} gave no summary.");
+
+        return new Outcome(text, read, callsDone, joined.Notes);
+    }
+
+    /// <summary>
+    /// Summaries of summaries: the notes joined in batches while they don't fit together in a final call of finalCharacters.
+    /// progress: before each join, the joins done and the ones planned so far (done included).
+    /// </summary>
+    public static async Task<Joined> JoinAsync(IChatClient chatClient, AiProviderRef provider, string systemPrompt, IReadOnlyList<string> notes,
+        int batchCharacters, int finalCharacters, Func<IReadOnlyList<string>, string> join, Action<int, int> progress, CancellationToken cancellationToken)
+    {
+        var current = notes.ToList();
+        var read = 0;
+        var calls = 0;
+        while (current.Count > 1 && !SummaryBatches.Fit(current, finalCharacters))
         {
-            var groups = SummaryBatches.Group(notes, n => n.Length + LongDocumentRules.NotesSeparator.Length, batchCharacters);
-            if (groups.Count >= notes.Count)
+            var groups = SummaryBatches.Group(current, n => n.Length + LongDocumentRules.NotesSeparator.Length, batchCharacters);
+            if (groups.Count >= current.Count)
                 break;
 
-            var joins = groups.Count(g => g.Count > 1);
-            callsTotal = Math.Max(callsTotal, callsDone + joins + 1);
+            var planned = calls + groups.Count(g => g.Count > 1);
             var joined = new List<string>();
             foreach (var group in groups)
             {
@@ -81,28 +115,20 @@ public static class AiSummaryEngine
                     joined.Add(group[0]);
                     continue;
                 }
-                progress?.Invoke(new Step(EnumDocumentProcessPhase.Joining, callsDone, callsTotal));
-                var request = requests.Join(group);
+                progress?.Invoke(calls, planned);
+                var request = join(group);
                 var answer = await AskAsync(chatClient, provider, systemPrompt, request, SummaryBatches.NotesOutputTokens, cancellationToken);
                 read += request.Length;
-                callsDone++;
+                calls++;
                 joined.Add(answer.Length > 0 ? answer : string.Join(LongDocumentRules.NotesSeparator, group));
             }
-            notes = joined;
+            current = joined;
         }
-
-        progress?.Invoke(new Step(EnumDocumentProcessPhase.Writing, callsDone, callsDone + 1));
-        var finalRequest = requests.Final(notes);
-        var text = await AskAsync(chatClient, provider, systemPrompt, finalRequest, requests.FinalOutputTokens, cancellationToken);
-        read += finalRequest.Length;
-        callsDone++;
-        if (text.Length == 0)
-            throw new InvalidOperationException($"The model {provider.Model} gave no summary.");
-
-        return new Outcome(text, read, callsDone);
+        return new Joined(current, read, calls);
     }
 
-    private static async Task<string> AskAsync(IChatClient chatClient, AiProviderRef provider, string systemPrompt, string request,
+    /// <summary>One call of the summary: a request with the system prompt, without tools; its answer, trimmed.</summary>
+    public static async Task<string> AskAsync(IChatClient chatClient, AiProviderRef provider, string systemPrompt, string request,
         int maxOutputTokens, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

@@ -12,7 +12,7 @@ namespace KNote.Ai;
 
 /// <summary>
 /// Summarizes or translates a long document of a note (KNote Atlas, stage 2, CU-43, D21), the same in the Server and in ClientWin.
-/// The summary: the document in pieces (its pages, or parts cut by paragraphs), read by AiSummaryEngine with the task
+/// A period summary (2.5) is one more kind: AiPeriodSummarizer. The summary: the document in pieces (its pages, or parts cut by paragraphs), read by AiSummaryEngine with the task
 /// SummarizeLongDocument, and kept in a new note (IKntSummaryService.SaveDocumentSummaryAsync); canceled or failed, nothing is kept.
 /// The translation (2.1b): part by part (DocumentTranslationRules) with the task TranslateDocument and the glossary terms of each part,
 /// kept as it goes in the document of a new note (IKntSummaryService.SaveDocumentTranslationAsync); canceled or failed, what was
@@ -25,9 +25,12 @@ public static class AiDocumentProcessor
     public static Task<Result<DocumentProcessProgressDto>> ProcessAsync(IKntService service, Func<AiProviderRef, IChatClient> createChatClient,
         AiProviderRef provider, DocumentProcessRequestDto request, IProgress<DocumentProcessProgressDto> progress = null, ILogger logger = null,
         CancellationToken cancellationToken = default) =>
-        request.Kind == EnumDocumentProcessKind.Translate
-            ? TranslateAsync(service, createChatClient, provider, request, progress, logger, cancellationToken)
-            : SummarizeAsync(service, createChatClient, provider, request, progress, logger, cancellationToken);
+        request.Kind switch
+        {
+            EnumDocumentProcessKind.Translate => TranslateAsync(service, createChatClient, provider, request, progress, logger, cancellationToken),
+            EnumDocumentProcessKind.PeriodSummary => AiPeriodSummarizer.SummarizeAsync(service, createChatClient, provider, request, progress, logger, cancellationToken),
+            _ => SummarizeAsync(service, createChatClient, provider, request, progress, logger, cancellationToken)
+        };
 
     /// <summary>What the summary or the translation of the document would take: pages, calls and, with the pace of the model, its time (D18).</summary>
     public static async Task<Result<DocumentProcessEstimateDto>> EstimateAsync(IKntService service, AiProviderRef provider,
@@ -35,6 +38,8 @@ public static class AiDocumentProcessor
     {
         if (request.Kind == EnumDocumentProcessKind.Translate)
             return await EstimateTranslationAsync(service, provider, request, logger, cancellationToken);
+        if (request.Kind == EnumDocumentProcessKind.PeriodSummary)
+            return await AiPeriodSummarizer.EstimateAsync(service, provider, request, logger, cancellationToken);
 
         var result = new Result<DocumentProcessEstimateDto>();
 

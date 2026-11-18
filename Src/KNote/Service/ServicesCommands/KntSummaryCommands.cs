@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Core;
@@ -372,6 +373,334 @@ public class KntSummaryGetDocumentTranslationsAsyncCommand : KntCommandServiceBa
         }
 
         result.Entity = translations.OrderByDescending(t => t.NoteNumber).ToList();
+        return result;
+    }
+}
+
+// KNote Atlas, stage 2 (2.2, D3): the noise policy of the repository, without the types and folders that no longer exist.
+[KntAuthorize(EnumRoles.Guest)]
+public class KntSummaryGetNoisePolicyAsyncCommand : KntCommandServiceBase<Result<NoisePolicyDto>>
+{
+    public KntSummaryGetNoisePolicyAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<NoisePolicyDto>> Execute()
+    {
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        return new Result<NoisePolicyDto>(context.Clean(await KntNoisePolicy.ReadAsync(Service)));
+    }
+}
+
+// The noise policy kept: without the types and folders that don't exist, nor KNote's own ones (always out, D4). It gives what was kept.
+[KntAuthorize(EnumRoles.ProjectManager)]
+public class KntSummarySaveNoisePolicyAsyncCommand : KntCommandServiceBase<NoisePolicyDto, Result<NoisePolicyDto>>
+{
+    public KntSummarySaveNoisePolicyAsyncCommand(IKntService service, NoisePolicyDto policy) : base(service, policy)
+    {
+
+    }
+
+    public override async Task<Result<NoisePolicyDto>> Execute()
+    {
+        var result = new Result<NoisePolicyDto>();
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var policy = context.Clean(Param);
+        var written = await KntNoisePolicy.WriteAsync(Service, policy);
+        if (!written.IsValid)
+        {
+            result.AddListErrorMessage(written.ListErrorMessage);
+            return result;
+        }
+        result.Entity = policy;
+        return result;
+    }
+}
+
+// How many notes a noise policy (the one being edited, saved or not) leaves out of the summaries, and why (NoiseRules).
+[KntAuthorize(EnumRoles.Guest)]
+public class KntSummaryCountNoiseAsyncCommand : KntCommandServiceBase<NoisePolicyDto, Result<NoiseCountDto>>
+{
+    public KntSummaryCountNoiseAsyncCommand(IKntService service, NoisePolicyDto policy) : base(service, policy)
+    {
+
+    }
+
+    public override async Task<Result<NoiseCountDto>> Execute()
+    {
+        var result = new Result<NoiseCountDto>();
+        var notes = await Repository.Notes.GetClassificationsAsync();
+        if (!notes.IsValid)
+        {
+            result.AddListErrorMessage(notes.ListErrorMessage);
+            return result;
+        }
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        result.Entity = NoiseRules.Count(notes.Entity, context.Clean(Param), context.KNoteNoteTypeIds, context.KNoteFolderIds);
+        return result;
+    }
+}
+
+// KNote Atlas, stage 2 (2.3, CU-15): the selection of the notes of a summary, without the AI (KntNoteSelection); nothing is written.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummaryPrepareSelectionAsyncCommand : KntCommandServiceBase<NoteSelectionRequestDto, Result<NoteSelectionResultDto>>
+{
+    private readonly CancellationToken _cancellationToken;
+
+    public KntSummaryPrepareSelectionAsyncCommand(IKntService service, NoteSelectionRequestDto request, CancellationToken cancellationToken)
+        : base(service, request)
+    {
+        _cancellationToken = cancellationToken;
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null)
+            result.AddErrorMessage("The period of the selection is required.");
+        else if (Param.To.Date < Param.From.Date)
+            result.AddErrorMessage(KntNoteSelection.PeriodError);
+        return result;
+    }
+
+    public override async Task<Result<NoteSelectionResultDto>> Execute()
+    {
+        var result = new Result<NoteSelectionResultDto>();
+        result.Entity = await KntNoteSelection.BuildAsync(Service, Param, _cancellationToken, result);
+        return result;
+    }
+}
+
+// The changes of «Review selection» kept in «Note relevance» (KntRelevanceNotes, D10, S3, S4): a Staff writes that protected
+// system note through this command (inside KntAuthorizationBypass); a change of a note of KNote's own is not kept.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummarySaveRelevanceCorrectionsAsyncCommand : KntCommandServiceBase<RelevanceCorrectionsSaveDto, Result<List<RelevanceCorrectionDto>>>
+{
+    public KntSummarySaveRelevanceCorrectionsAsyncCommand(IKntService service, RelevanceCorrectionsSaveDto changes) : base(service, changes)
+    {
+
+    }
+
+    public override async Task<Result<List<RelevanceCorrectionDto>>> Execute()
+    {
+        var result = new Result<List<RelevanceCorrectionDto>>();
+        var changes = (Param?.Changes ?? new List<RelevanceCorrectionChangeDto>())
+            .GroupBy(c => c.NoteId).Select(g => g.Last()).ToList();
+
+        // KNote's own notes are always out: they are not corrected.
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var notes = await Repository.Notes.GetClassificationsAsync();
+        if (!notes.IsValid)
+        {
+            result.AddListErrorMessage(notes.ListErrorMessage);
+            return result;
+        }
+        var kNoteNotes = notes.Entity
+            .Where(n => (n.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)) || context.KNoteFolderIds.Contains(n.FolderId))
+            .Select(n => n.NoteId).ToHashSet();
+        changes = changes.Where(c => !kNoteNotes.Contains(c.NoteId)).ToList();
+
+        result.Entity = await KntRelevanceNotes.SaveCorrectionsAsync(Service, changes, result);
+        return result;
+    }
+}
+
+// KNote Atlas, stage 2 (2.4, D9): doubtful notes as the AI reads them, with the same fingerprint as the selection.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummaryGetNotesToClassifyAsyncCommand : KntCommandServiceBase<List<Guid>, Result<List<NoteToClassifyDto>>>
+{
+    public KntSummaryGetNotesToClassifyAsyncCommand(IKntService service, List<Guid> noteIds) : base(service, noteIds)
+    {
+
+    }
+
+    public override async Task<Result<List<NoteToClassifyDto>>> Execute()
+    {
+        var result = new Result<List<NoteToClassifyDto>>();
+        result.Entity = await KntNoteSelection.ToClassifyAsync(Service, Param, result);
+        return result;
+    }
+}
+
+// The answers of the AI kept in «Note relevance» (KntRelevanceNotes, D10), for a Staff (inside KntAuthorizationBypass). The answers
+// of notes of KNote's own are not kept.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummarySaveRelevanceAiAnswersAsyncCommand : KntCommandServiceBase<RelevanceAiAnswersSaveDto, Result<List<RelevanceAiAnswerDto>>>
+{
+    public KntSummarySaveRelevanceAiAnswersAsyncCommand(IKntService service, RelevanceAiAnswersSaveDto answers) : base(service, answers)
+    {
+
+    }
+
+    public override async Task<Result<List<RelevanceAiAnswerDto>>> Execute()
+    {
+        var result = new Result<List<RelevanceAiAnswerDto>>();
+        var answers = (Param?.Answers ?? new List<RelevanceAiAnswerDto>()).Where(a => a.NoteId != Guid.Empty)
+            .GroupBy(a => a.NoteId).Select(g => g.Last()).ToList();
+
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var notes = await Repository.Notes.GetClassificationsAsync();
+        if (!notes.IsValid)
+        {
+            result.AddListErrorMessage(notes.ListErrorMessage);
+            return result;
+        }
+        var kNoteNotes = notes.Entity
+            .Where(n => (n.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)) || context.KNoteFolderIds.Contains(n.FolderId))
+            .Select(n => n.NoteId).ToHashSet();
+        answers = answers.Where(a => !kNoteNotes.Contains(a.NoteId)).ToList();
+
+        await KntRelevanceNotes.SaveAiAnswersAsync(Service, answers, result);
+        if (result.IsValid)
+            result.Entity = answers;
+        return result;
+    }
+}
+
+// KNote Atlas, stage 2 (2.5, CU-16): a period summary ready to be read (KntNoteSelection.PreparePeriodAsync); nothing is written.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummaryPreparePeriodAsyncCommand : KntCommandServiceBase<PeriodSummaryRequestDto, Result<PeriodSummaryPreparedDto>>
+{
+    private readonly CancellationToken _cancellationToken;
+
+    public KntSummaryPreparePeriodAsyncCommand(IKntService service, PeriodSummaryRequestDto request, CancellationToken cancellationToken)
+        : base(service, request)
+    {
+        _cancellationToken = cancellationToken;
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param?.Selection == null)
+            result.AddErrorMessage("The period of the summary is required.");
+        else if (Param.Selection.To.Date < Param.Selection.From.Date)
+            result.AddErrorMessage(KntNoteSelection.PeriodError);
+        return result;
+    }
+
+    public override async Task<Result<PeriodSummaryPreparedDto>> Execute()
+    {
+        var result = new Result<PeriodSummaryPreparedDto>();
+        result.Entity = await KntNoteSelection.PreparePeriodAsync(Service, Param, _cancellationToken, result);
+        return result;
+    }
+}
+
+// A period summary in a new note (2.5, D5, D17, P5): of the type @KNoteSummary, in the folder «KNote Summary» (created the first time,
+// not a system folder: the summaries are notes as any other), with the summary as the AI wrote it attached and locked, so that the
+// stage 4 doesn't describe it. No note of the period is touched (nor its date). Its relations with each note come in 2.6.
+[KntAuthorize(EnumRoles.Staff)]
+public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<PeriodSummarySaveDto, Result<NoteDto>>
+{
+    private const string BypassReason = "KNote Atlas: the type and the folder of the summaries (stage 2)";
+
+    public KntSummarySavePeriodSummaryAsyncCommand(IKntService service, PeriodSummarySaveDto summary) : base(service, summary)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param?.Request?.Selection == null)
+            result.AddErrorMessage("The period of the summary is required.");
+        else if (string.IsNullOrWhiteSpace(Param.Executive) && (Param.Sections?.All(s => string.IsNullOrWhiteSpace(s.Text)) ?? true))
+            result.AddErrorMessage("The AI gave no summary.");
+        else if (Param.Prepared?.Notes == null || Param.Prepared.Notes.Count == 0)
+            result.AddErrorMessage(PeriodSummaryRules.NoNotes);
+        else if (string.IsNullOrWhiteSpace(Param.Model))
+            result.AddErrorMessage("The model that wrote the summary is required.");
+        return result;
+    }
+
+    public override async Task<Result<NoteDto>> Execute()
+    {
+        var result = new Result<NoteDto>();
+
+        var summaryTypeId = await KntSystemNotes.EnsureNoteTypeAsync(Service, KntConst.SummaryTag,
+            "Summaries written by KNote Atlas", BypassReason, result);
+        var folder = await KntSystemNotes.EnsureFolderAsync(Service, KntConst.SummaryFolderName, BypassReason, result);
+        var derivedFromId = await KntSystemNotes.EnsureTraceNoteTypeAsync(Service, KntConst.DerivedFromTraceNoteType,
+            "Where a summary of KNote Atlas comes from", BypassReason, result);
+        if (!result.IsValid)
+            return result;
+
+        // The notes it comes from that still exist and are not KNote's own: the caller is not trusted (D17).
+        var classifications = await Service.Repository.Notes.GetClassificationsAsync();
+        if (!classifications.IsValid)
+        {
+            result.AddListErrorMessage(classifications.ListErrorMessage);
+            return result;
+        }
+        var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var sources = classifications.Entity
+            .Where(n => !context.KNoteFolderIds.Contains(n.FolderId) && !(n.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)))
+            .Select(n => n.NoteId).ToHashSet();
+
+        // The glossary, for the index by concepts (D15).
+        var glossaryNote = await KntAtlasNotes.FindFirstAsync(Service, KntConst.GlossaryTag, result);
+        if (!result.IsValid)
+            return result;
+        var glossary = glossaryNote == null ? new List<GlossaryTermDto>() : GlossaryTable.Parse(KntAtlasNotes.Text(Service, glossaryNote)).Terms;
+
+        var newNote = await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = summaryTypeId });
+        if (!newNote.IsValid)
+        {
+            result.AddListErrorMessage(newNote.ListErrorMessage);
+            return result;
+        }
+
+        string folderPath = null;
+        if (Param.Request.Selection.FolderId is Guid folderId)
+        {
+            var path = await Service.Folders.GetPathAsync(folderId);
+            folderPath = path.IsValid ? path.Entity : null;
+        }
+
+        var now = DateTime.Now;
+        var subject = string.IsNullOrWhiteSpace(Param.Request.Subject) ? PeriodSummaryRules.DefaultSubject(Param.Request.Selection) : Param.Request.Subject.Trim();
+        var summary = newNote.Entity;
+        summary.Topic = subject;
+        summary.Description = PeriodSummaryDocument.Build(Param, folderPath, now, glossary);
+        summary.Tags = "";
+        summary.NoteTypeId = summaryTypeId;
+        var folderDto = await Service.Folders.GetAsync(folder.FolderId);
+        if (!folderDto.IsValid)
+        {
+            result.AddListErrorMessage(folderDto.ListErrorMessage);
+            return result;
+        }
+        summary.FolderId = folder.FolderId;
+        summary.FolderDto = folderDto.Entity;
+        summary.Resources.Add(new ResourceDto
+        {
+            Name = $"{Guid.NewGuid()}_{PeriodSummaryRules.OriginalFileName(subject)}",
+            Description = PeriodSummaryRules.OriginalDescription(Param.Model, now),
+            DescriptionByUser = true,
+            FileType = "text/markdown",
+            ContentArrayBytes = Encoding.UTF8.GetBytes(PeriodSummaryDocument.Original(Param))
+        });
+        // A relation with each note it comes from, in the order they are cited and with their score (D17).
+        foreach (var source in PeriodSummaryDocument.Sources(Param).Where(s => sources.Contains(s.NoteId)))
+            summary.TraceNotesTo.Add(new TraceNoteDto { ToId = source.NoteId, TraceNoteTypeId = derivedFromId, Order = source.Order, Weight = source.Weight });
+
+        var saved = await Service.Notes.SaveExtendedAsync(summary);
+        if (!saved.IsValid)
+        {
+            result.AddListErrorMessage(saved.ListErrorMessage);
+            return result;
+        }
+
+        // The pace of the model in a period summary, for the next estimates (D18, P6).
+        var state = await KntSummaryState.ReadAsync(Service) ?? new SummaryStateDto();
+        if (SummaryEstimate.Pace(Param.CharactersRead, Param.Seconds) is double pace)
+            state.PeriodSecondsPer1000Characters[Param.Model] = pace;
+        state.LastRunDateTime = now;
+        await KntSummaryState.WriteAsync(Service, state);
+
+        result.Entity = saved.Entity.GetSimpleDto<NoteDto>();
         return result;
     }
 }

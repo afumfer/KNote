@@ -80,23 +80,30 @@ public class EmailAlarmsService : BackgroundService
         bool? wasEnabled = null;
 
         using var timer = new PeriodicTimer(interval);
-        do
+        try
         {
-            var enabled = _config.Value.Email.Enabled;
-            if (enabled != wasEnabled)
+            do
             {
-                if (enabled)
-                    _logger.LogInformation("The Email alarms service sends the alarms of every repository every {seconds} seconds, without a user (authorization is not enforced).",
-                        interval.TotalSeconds);
-                else
-                    _logger.LogInformation("The Email alarms service is off (Alarms:Email:Enabled).");
-                wasEnabled = enabled;
-            }
+                var enabled = _config.Value.Email.Enabled;
+                if (enabled != wasEnabled)
+                {
+                    if (enabled)
+                        _logger.LogInformation("The Email alarms service sends the alarms of every repository every {seconds} seconds, without a user (authorization is not enforced).",
+                            interval.TotalSeconds);
+                    else
+                        _logger.LogInformation("The Email alarms service is off (Alarms:Email:Enabled).");
+                    wasEnabled = enabled;
+                }
 
-            if (enabled)
-                await SendDueAlarmsAsync(stoppingToken);
+                if (enabled)
+                    await SendDueAlarmsAsync(stoppingToken);
+            }
+            while (await timer.WaitForNextTickAsync(stoppingToken));
         }
-        while (await timer.WaitForNextTickAsync(stoppingToken));
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // The Server is stopping: the service ends here, without the exception the debugger stops on.
+        }
     }
 
     /// <summary>One round: the due Email alarms of every repository. The number of emails sent.</summary>

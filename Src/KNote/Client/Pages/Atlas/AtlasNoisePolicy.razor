@@ -1,0 +1,242 @@
+@using KNote.Model.Core
+
+@* KNote Atlas, stage 2 (2.2, CU-13, D3): the noise policy of the session's repository, the note types and the folders whose notes
+   never go into a summary. Everyone sees it; a ProjectManager or an Admin changes it (CanSave; the server checks it too). Each
+   folder is left out on its own, not with its subfolders. How many notes it leaves out, and why, is counted again at each change
+   (the policy as it is edited, not saved yet), and on demand with «Count again» (the notes change without the policy). KNote's own types and folders are always out: they are not offered. *@
+
+@implements IDisposable
+@inject IStore store
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+<KntFormSection Icon="@KntSections.AtlasNoisePolicy.Icon" Title="@KntSections.AtlasNoisePolicy.Text" Description="@NoiseRules.Help">
+    @if (policy == null)
+    {
+        @if (loadFailed)
+        {
+            <div class="knt-load-error">
+                <span class="knt-load-error-text">The noise policy could not be read.</span>
+                <RadzenButton Text="Retry" Icon="refresh" Size="ButtonSize.Small" Click="Load" />
+            </div>
+        }
+        else
+        {
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+        }
+    }
+    else
+    {
+        @if (!CanSave)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Info" Shade="Shade.Lighter" Variant="Variant.Flat" AllowClose="false" Size="AlertSize.Small">
+                Only a ProjectManager or an Admin changes the noise policy.
+            </RadzenAlert>
+        }
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <KntField Label="Note types left out" Component="ExcludedNoteTypes">
+                    @if (noteTypes.Count == 0)
+                    {
+                        <div class="knt-empty-state-text">The repository has no note types of its own.</div>
+                    }
+                    else
+                    {
+                        <RadzenCheckBoxList Name="ExcludedNoteTypes" TValue="Guid" Value="@policy.ExcludedNoteTypeIds" ValueChanged="@OnTypesChanged"
+                                            Data="@noteTypes" TextProperty="Name" ValueProperty="NoteTypeId" Disabled="@(!CanSave)"
+                                            Orientation="Orientation.Vertical" />
+                    }
+                </KntField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <div class="knt-list-header">
+                    <span>Folders left out (@policy.ExcludedFolderIds.Count)</span>
+                    @if (CanSave)
+                    {
+                        <RadzenButton Text="Add folder…" Icon="create_new_folder" Variant="Variant.Text" Size="ButtonSize.Small" Click="AddFolder" />
+                    }
+                </div>
+                @if (policy.ExcludedFolderIds.Count == 0)
+                {
+                    <div class="knt-empty-state-text">No folder is left out. Each folder is left out on its own: its subfolders are not.</div>
+                }
+                else
+                {
+                    @foreach (var folderId in policy.ExcludedFolderIds)
+                    {
+                        var id = folderId;
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="folder" />
+                            <span style="flex: 1">@FolderText(id)</span>
+                            @if (CanSave)
+                            {
+                                <RadzenButton Icon="close" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.ExtraSmall"
+                                              Click="@(() => RemoveFolder(id))" MouseEnter="@(args => tooltipService.Open(args, "Remove from the list"))" />
+                            }
+                        </RadzenStack>
+                    }
+                }
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Gap="0.5rem" class="rz-mt-3">
+            <div style="flex: 1">
+                @if (count == null)
+                {
+                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.ExtraSmall" />
+                }
+                else
+                {
+                    @foreach (var line in NoiseRules.CountLines(count))
+                    {
+                        <RadzenText TextStyle="TextStyle.Body2" class="rz-my-0">@line</RadzenText>
+                    }
+                }
+            </div>
+            @* The notes change without the policy (a tag #NoKnowledge written meanwhile): counted again on demand. *@
+            <RadzenButton Text="Count again" Icon="refresh" Variant="Variant.Text" Size="ButtonSize.Small" Disabled="@(count == null)"
+                          Click="RecountAsync" MouseEnter="@(args => tooltipService.Open(args, "Count the notes again, with the changes made to them meanwhile"))" />
+        </RadzenStack>
+        @if (CanSave)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                @if (IsChanged)
+                {
+                    <RadzenButton Text="Discard changes" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Disabled="@saving.IsBusy" Click="Discard" />
+                }
+                <RadzenButton Text="Save policy" Icon="save" Size="ButtonSize.Small" Click="OnSave" IsBusy="@saving.IsBusy" Disabled="@(!IsChanged)" />
+            </RadzenStack>
+        }
+    }
+</KntFormSection>
+
+@code {
+    // Who can keep it (ProjectManager, Admin): the others see it.
+    [Parameter] public bool CanSave { get; set; }
+
+    [Inject] private TooltipService tooltipService { get; set; } = null!;
+
+    private NoisePolicyDto? policy;
+    private NoisePolicyDto saved = new();
+    private NoiseCountDto? count;
+    private List<NoteTypeDto> noteTypes = new();
+    private readonly Dictionary<Guid, string> folderPaths = new();
+    private bool loadFailed;
+    private readonly KntSingleFlight saving = new();
+    private readonly KntLatestRequest countRequest = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    private bool IsChanged => policy != null
+        && (!policy.ExcludedNoteTypeIds.ToHashSet().SetEquals(saved.ExcludedNoteTypeIds) || !policy.ExcludedFolderIds.ToHashSet().SetEquals(saved.ExcludedFolderIds));
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        loadFailed = false;
+        var resPolicy = await store.Summaries.GetNoisePolicyAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        var resTypes = await store.NoteTypes.GetAllAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+
+        loadFailed = !resPolicy.IsValid || !resTypes.IsValid;
+        if (loadFailed)
+            return;
+
+        noteTypes = (resTypes.Entity ?? new()).Where(t => !NoiseRules.KNoteNoteTypeNames.Contains(t.Name)).OrderBy(t => t.Name).ToList();
+        await ShowAsync(resPolicy.Entity);
+    }
+
+    private async Task ShowAsync(NoisePolicyDto entity)
+    {
+        saved = entity;
+        policy = new NoisePolicyDto { ExcludedNoteTypeIds = entity.ExcludedNoteTypeIds.ToList(), ExcludedFolderIds = entity.ExcludedFolderIds.ToList() };
+        foreach (var folderId in policy.ExcludedFolderIds)
+            await LoadPathAsync(folderId);
+        await RecountAsync();
+    }
+
+    private async Task LoadPathAsync(Guid folderId)
+    {
+        if (folderPaths.ContainsKey(folderId))
+            return;
+        var path = await store.Folders.GetPathAsync(folderId, disposal.Token);
+        if (path.IsValid && !string.IsNullOrEmpty(path.Entity))
+            folderPaths[folderId] = path.Entity;
+    }
+
+    private string FolderText(Guid folderId) => folderPaths.TryGetValue(folderId, out var path) ? path : folderId.ToString();
+
+    private async Task OnTypesChanged(IEnumerable<Guid> values)
+    {
+        if (policy == null)
+            return;
+        policy.ExcludedNoteTypeIds = values?.ToList() ?? new();
+        await RecountAsync();
+    }
+
+    private async Task AddFolder()
+    {
+        if (policy == null)
+            return;
+        var res = await dialogService.OpenAsync<KntFolderSelector>("Folder selector", new Dictionary<string, object?>(), KntDialogs.Framed(KntDialogs.Medium()));
+        if (res is not FolderDto folder || disposal.IsCancellationRequested)
+            return;
+        if (KntConst.SystemFolderNames.Contains(folder.Name))
+        {
+            notificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Info, Summary = KntSections.AtlasNoisePolicy.Text, Detail = "KNote's own folders are always left out."
+            });
+            return;
+        }
+        if (policy.ExcludedFolderIds.Contains(folder.FolderId))
+            return;
+        policy.ExcludedFolderIds.Add(folder.FolderId);
+        await LoadPathAsync(folder.FolderId);
+        await RecountAsync();
+    }
+
+    private async Task RemoveFolder(Guid folderId)
+    {
+        if (policy == null)
+            return;
+        policy.ExcludedFolderIds.Remove(folderId);
+        await RecountAsync();
+    }
+
+    private async Task Discard() => await ShowAsync(saved);
+
+    // The policy as it is now, saved or not.
+    private async Task RecountAsync()
+    {
+        if (policy == null)
+            return;
+        var request = new NoisePolicyDto { ExcludedNoteTypeIds = policy.ExcludedNoteTypeIds.ToList(), ExcludedFolderIds = policy.ExcludedFolderIds.ToList() };
+        count = null;
+        StateHasChanged();
+        var r = await countRequest.RunAsync(ct => store.Summaries.CountNoiseAsync(request, ct));
+        if (r.Canceled)
+            return;
+        count = r.Value.IsValid ? r.Value.Entity : new NoiseCountDto();
+        StateHasChanged();
+    }
+
+    private Task OnSave() => saving.RunAsync(async () =>
+    {
+        if (policy == null || !CanSave)
+            return;
+        var result = await store.Summaries.SaveNoisePolicyAsync(policy);
+        if (result.IsValid && !disposal.IsCancellationRequested)
+            await ShowAsync(result.Entity);
+    });
+
+    public void Dispose()
+    {
+        countRequest.Dispose();
+        disposal.Cancel();
+        disposal.Dispose();
+    }
+}

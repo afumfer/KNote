@@ -13,4 +13,12 @@ public interface ISummaryWebApiService
     Task<Result<bool>> CancelDocumentAsync(CancellationToken cancellationToken = default);
     // The translations of a document, the last one first (2.1b2: «Continue» goes on with one not finished).
     Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId, CancellationToken cancellationToken = default);
+    // The noise policy of the repository (2.2): read it, keep it (ProjectManager and Admin) and count what it leaves out.
+    Task<Result<NoisePolicyDto>> GetNoisePolicyAsync(CancellationToken cancellationToken = default);
+    Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default);
+    Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default);
+    // KNote Atlas 2.3: the selection of a summary and the corrections of «Review selection».
+    Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default);
+    Task<Result<List<RelevanceAiAnswerDto>>> ClassifyDoubtfulAsync(NoteClassificationRequestDto request, CancellationToken cancellationToken = default);
+    Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes, CancellationToken cancellationToken = default);
 }

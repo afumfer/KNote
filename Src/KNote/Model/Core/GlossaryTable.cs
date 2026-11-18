@@ -88,6 +88,23 @@ public static class GlossaryTable
             .ToList();
     }
 
+    /// <summary>
+    /// The terms that appear in each text (by their term or a variant), with the keys of the texts they appear in, in their order
+    /// (KNote Atlas, stage 2, 2.6: the index by concepts of a summary, with the notes as keys). Only the terms that appear.
+    /// </summary>
+    public static List<(GlossaryTermDto Term, List<T> Keys)> KeysPerTerm<T>(IEnumerable<GlossaryTermDto> terms, IEnumerable<(T Key, string Text)> texts)
+    {
+        var normalized = (texts ?? Enumerable.Empty<(T, string)>()).Select(t => (t.Key, Text: Normalize(t.Text))).Where(t => t.Text.Length > 0).ToList();
+        return (terms ?? Enumerable.Empty<GlossaryTermDto>())
+            .Select(term =>
+            {
+                var forms = new[] { term.Term }.Concat(term.AlsoWrittenAs ?? new List<string>()).Select(Normalize).Where(f => f.Length > 0).ToList();
+                return (Term: term, Keys: normalized.Where(t => forms.Any(f => FirstWholeWord(t.Text, f) >= 0)).Select(t => t.Key).ToList());
+            })
+            .Where(t => t.Keys.Count > 0)
+            .ToList();
+    }
+
     // Lower case and without accents (á → a, ñ → n).
     public static string Normalize(string value)
     {

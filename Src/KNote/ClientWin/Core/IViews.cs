@@ -138,6 +138,25 @@ public interface IViewResourceProcessing : IViewEmbeddable
     void RefreshProgress();
 }
 
+// «Noise policy» of the KNote Atlas window (RepositoryNoisePolicyCtrl): RefreshView shows the policy being edited, RefreshCount
+// the recount of the notes it leaves out.
+public interface IViewNoisePolicy : IViewEmbeddable
+{
+    void RefreshCount();
+}
+
+// «Period summary» of the KNote Atlas window (RepositoryPeriodSummaryCtrl, 2.3b): RefreshView shows the fields of the selection and
+// its counts.
+public interface IViewPeriodSummary : IViewEmbeddable
+{
+}
+
+// «Review selection» (ReviewSelectionCtrl, 2.3b): a modal window with the three lists of the selection; it closes with Executed when
+// the changes are kept.
+public interface IViewReviewSelection : IViewBase
+{
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();

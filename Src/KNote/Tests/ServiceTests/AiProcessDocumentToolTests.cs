@@ -23,7 +23,7 @@ public class AiProcessDocumentToolTests
     {
         public bool CanProcess { get; set; } = true;
         public AiProviderRef Provider { get; set; } = Model;
-        public string StartError { get; set; }
+        public string? StartError { get; set; }
         public List<(AiProviderRef Provider, DocumentProcessRequestDto Request)> Started { get; } = new();
 
         public Task<AiNoteDestination> GetNewNoteDestinationAsync() => Task.FromResult<AiNoteDestination>(null!);

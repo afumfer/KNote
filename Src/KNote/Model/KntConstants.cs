@@ -72,15 +72,22 @@ public static class KntConst
     // where it comes from with a trace note of this type (D17, D21).
     public static string SummaryTag { get; private set; } = "@KNoteSummary";
     public static string DerivedFromTraceNoteType { get; private set; } = "@DerivedFrom";
+    // The folder of the period summaries (2.5, D5): not a system folder, they are notes as any other.
+    public static string SummaryFolderName { get; private set; } = "KNote Summary";
     // The translations of a long document (CU-43, D21): as the summaries, notes of the people's own, with the translation attached.
     public static string TranslationTag { get; private set; } = "@KNoteTranslation";
+    // «Note relevance» (stage 2, chapter 30, D10): the corrections of the selection of the summaries made by people and the
+    // classification of the doubtful notes by the AI, in the folder «KNote Atlas». Written by KNote, never by hand.
+    public static string RelevanceTag { get; private set; } = "@KNoteRelevance";
+    public static string RelevanceTopic { get; private set; } = "Note relevance";
 
     // The note types of KNote's own notes: out of the tasks panel, of the semantic index, of the tools of the AI and of the
     // citations (they only link users to those notes, keep private conversations, or are KNote Atlas' test queries and
-    // reports, which would find themselves, or the context it gives the AI: profile, glossary and task instructions).
+    // reports, which would find themselves, or the context it gives the AI: profile, glossary and task instructions, or the
+    // relevance of the notes for the summaries).
     public static IReadOnlyList<string> SystemNoteTypeNames { get; } = new[]
     {
-        ChatSessionsTag, ChatRoomTag, TestQueriesTag, SearchEvaluationTag, ProfileTag, GlossaryTag, TaskPromptTag
+        ChatSessionsTag, ChatRoomTag, TestQueriesTag, SearchEvaluationTag, ProfileTag, GlossaryTag, TaskPromptTag, RelevanceTag
     };
 
     // The folders of those notes.
@@ -112,6 +119,13 @@ public static class KntConst
     public static string AiResourcesStateKey { get; private set; } = "AI_RESOURCES_STATE";
     // The summaries (KNote Atlas, stage 2, SummaryStateDto, JSON): the pace of each model, for the estimates (D18).
     public static string AiSummaryStateKey { get; private set; } = "AI_SUMMARY_STATE";
+
+    // KNote Atlas, stage 2 (2.2, D2, D3): the noise policy (the note types and the folders left out of the summaries, by their
+    // ids) and the two tags of a note that put it out or in. The tags start with '#': '@' is for KNote's note types. They are
+    // the only tags of a note that KNote reads (whole, without case).
+    public static string AiNoisePolicyKey { get; private set; } = "AI_NOISE_POLICY";
+    public static string NoKnowledgeTag { get; private set; } = "#NoKnowledge";
+    public static string KnowledgeTag { get; private set; } = "#Knowledge";
 
     // The description the apps give a resource made from an image pasted from the clipboard. Like the file name, it says
     // nothing of the resource: the semantic index leaves out the resources without a description of their own.

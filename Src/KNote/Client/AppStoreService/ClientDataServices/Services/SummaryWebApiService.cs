@@ -31,4 +31,28 @@ public class SummaryWebApiService : BaseService, ISummaryWebApiService
     public Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId, CancellationToken cancellationToken = default) =>
         SendAsync<List<DocumentTranslationDto>>(ct => _httpClient.GetAsync($"api/summaries/documents/{resourceId}/translations", ct),
             "Translations of the document", cancellationToken: cancellationToken);
+
+    public Task<Result<NoisePolicyDto>> GetNoisePolicyAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<NoisePolicyDto>(ct => _httpClient.GetAsync("api/summaries/noise-policy", ct), "Noise policy", cancellationToken: cancellationToken);
+
+    public Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default) =>
+        SendAsync<NoisePolicyDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/noise-policy", policy, ct), "Save the noise policy",
+            emitNotifySucess: true, cancellationToken: cancellationToken);
+
+    public Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy, CancellationToken cancellationToken = default) =>
+        SendAsync<NoiseCountDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/noise-policy/count", policy, ct), "Count the noise",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<NoteSelectionResultDto>(ct => _httpClient.PostAsJsonAsync("api/summaries/selection", request, ct), "Prepare the selection",
+            cancellationToken: cancellationToken);
+
+    // One batch of doubtful notes asked to the AI; its errors are said by the page, once for the whole run.
+    public Task<Result<List<RelevanceAiAnswerDto>>> ClassifyDoubtfulAsync(NoteClassificationRequestDto request, CancellationToken cancellationToken = default) =>
+        SendAsync<List<RelevanceAiAnswerDto>>(ct => _httpClient.PostAsJsonAsync("api/summaries/selection/classify", request, ct),
+            "Classify doubtful notes", cancellationToken: cancellationToken, notifyErrors: false);
+
+    public Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes, CancellationToken cancellationToken = default) =>
+        SendAsync<List<RelevanceCorrectionDto>>(ct => _httpClient.PostAsJsonAsync("api/summaries/relevance/corrections", changes, ct),
+            "Save the corrections of the selection", emitNotifySucess: true, cancellationToken: cancellationToken);
 }

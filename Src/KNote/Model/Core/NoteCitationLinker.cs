@@ -25,6 +25,28 @@ public static class NoteCitationLinker
         "a", "code", "pre", "kbd", "samp", "script", "style", "textarea", "button"
     };
 
+    /// <summary>The numbers of the notes a text (Markdown or plain) cites with #123, each once (KNote Atlas, stage 2: the citations
+    /// from other notes of the selection of a summary).</summary>
+    public static HashSet<int> CitedNumbers(string text)
+    {
+        var numbers = new HashSet<int>();
+        if (string.IsNullOrEmpty(text) || !text.Contains('#'))
+            return numbers;
+        foreach (Match match in Citation.Matches(text))
+            if (int.TryParse(match.Groups[1].Value, out var number))
+                numbers.Add(number);
+        return numbers;
+    }
+
+    /// <summary>A text (Markdown or plain) with each citation #123 replaced by what replace gives for its number and text (KNote
+    /// Atlas, stage 2, 2.6: SummaryCitationRules).</summary>
+    public static string ReplaceCitations(string text, Func<int, string, string> replace)
+    {
+        if (string.IsNullOrEmpty(text) || !text.Contains('#'))
+            return text;
+        return Citation.Replace(text, match => replace(int.Parse(match.Groups[1].Value), match.Value));
+    }
+
     public static string Link(string html, Func<int, string> url)
     {
         if (string.IsNullOrEmpty(html) || !html.Contains('#'))

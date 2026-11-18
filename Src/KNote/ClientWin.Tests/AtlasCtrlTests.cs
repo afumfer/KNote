@@ -54,6 +54,25 @@ public class AtlasCtrlTests
                 return Task.FromResult(new Result<ResourceProcessingStatusDto>(new ResourceProcessingStatusDto()));
             };
 
+            // The noise policy, for everyone.
+            service.SummariesFake.GetNoisePolicyAsyncImpl = () =>
+            {
+                NoiseReads++;
+                return Task.FromResult(new Result<NoisePolicyDto>(new NoisePolicyDto()));
+            };
+            service.SummariesFake.CountNoiseAsyncImpl = _ => Task.FromResult(new Result<NoiseCountDto>(new NoiseCountDto()));
+
+            // The period summary, for a Staff.
+            service.SummariesFake.PrepareSelectionAsyncImpl = (_, _) =>
+            {
+                SelectionReads++;
+                return Task.FromResult(new Result<NoteSelectionResultDto>(new NoteSelectionResultDto()));
+            };
+            service.NoteTypesFake.GetAllAsyncImpl = () => Task.FromResult(new Result<List<NoteTypeDto>>(new List<NoteTypeDto>
+            {
+                new() { NoteTypeId = MeetingId, Name = "Meeting" }
+            }));
+
             Ref = TestServiceRefFactory.CreateWithFakeService(service);
             store.AddServiceRef(Ref);
             store.Security.SetRepositoryRole(service, role);
@@ -69,11 +88,16 @@ public class AtlasCtrlTests
         public int ModelReads { get; private set; }
         public int IndexReads { get; private set; }
         public int ResourceReads { get; private set; }
+        public int NoiseReads { get; private set; }
+        public int SelectionReads { get; private set; }
         public List<AiComposeRequestDto> ComposeRequests { get; } = new();
     }
 
-    // The view of the AI models of the last window created.
+    private static readonly Guid MeetingId = Guid.NewGuid();
+
+    // The views of the AI models and of the noise policy of the last window created.
     private FakeEditorView<RepositoryAiModelsDto> modelsView = null!;
+    private FakeNoisePolicyView noiseView = null!;
 
     private (AtlasCtrl Ctrl, FakeBaseView View, Repository First, Repository Second) CreateCtrl(EnumRoles role = EnumRoles.Admin)
     {
@@ -85,6 +109,10 @@ public class AtlasCtrlTests
         factoryViews.Registry.Register<RepositoryAiModelsCtrl, IViewEditorEmbeddable<RepositoryAiModelsDto>>(_ => models);
         factoryViews.Registry.Register<RepositorySemanticIndexCtrl, IViewSemanticIndex>(_ => new FakeSemanticIndexView());
         factoryViews.Registry.Register<RepositoryResourcesCtrl, IViewResourceProcessing>(_ => new FakeResourceProcessingView());
+        noiseView = new FakeNoisePolicyView();
+        var noise = noiseView;
+        factoryViews.Registry.Register<RepositoryNoisePolicyCtrl, IViewNoisePolicy>(_ => noise);
+        factoryViews.Registry.Register<RepositoryPeriodSummaryCtrl, IViewPeriodSummary>(_ => new FakePeriodSummaryView());
         var store = new Store(factoryViews);
         var first = new Repository(store, role);
         var second = new Repository(store, role);
@@ -236,7 +264,9 @@ public class AtlasCtrlTests
         Assert.IsFalse(ctrl.IsAvailable(EnumAtlasSection.Models) || ctrl.IsAvailable(EnumAtlasSection.SemanticIndex)
             || ctrl.IsAvailable(EnumAtlasSection.Resources));
         Assert.AreEqual(EnumAtlasSection.Personalization, ctrl.Section, "a section that can't be used is not shown");
-        Assert.AreEqual(0, first.ModelReads + first.IndexReads + first.ResourceReads);
+        Assert.AreEqual(0, first.ModelReads + first.ResourceReads);
+        // Only the period summary (Staff) reads the status of the index: whether «Talks about…» can be offered.
+        Assert.AreEqual(first.SelectionReads, first.IndexReads);
         StringAssert.Contains(AtlasCtrl.WhoCanUse(EnumAtlasSection.SemanticIndex), "Admin");
     }
 
@@ -250,8 +280,9 @@ public class AtlasCtrlTests
 
         Assert.IsTrue(AtlasCtrl.Sections.All(ctrl.IsAvailable));
         Assert.AreEqual(EnumAtlasSection.Personalization, ctrl.Section, "it starts in the one everybody can use");
-        Assert.AreEqual((1, 1, 1), (first.ModelReads, first.IndexReads, first.ResourceReads));
-        Assert.AreEqual((1, 1, 1), (second.ModelReads, second.IndexReads, second.ResourceReads));
+        // The status of the index: the semantic index and, for «Talks about…», the period summary.
+        Assert.AreEqual((1, 2, 1), (first.ModelReads, first.IndexReads, first.ResourceReads));
+        Assert.AreEqual((1, 2, 1), (second.ModelReads, second.IndexReads, second.ResourceReads));
         Assert.AreSame(second.Ref.Service, ctrl.SemanticIndexCtrl.Service);
         Assert.AreSame(second.Ref.Service, ctrl.ResourcesCtrl.Service);
     }
@@ -272,6 +303,47 @@ public class AtlasCtrlTests
         StringAssert.Contains(modelsView.ShownInfo.Single(), "not saved");
         Assert.AreEqual(changes, changed);
         Assert.AreEqual(changes ? second.Ref : first.Ref, ctrl.ServiceRef);
+    }
+
+    [TestMethod]
+    public async Task TheNoisePolicy_IsForEveryone_AndItsChangesAreAskedAbout_BeforeChoosingAnotherRepository()
+    {
+        var (ctrl, _, first, second) = CreateCtrl(EnumRoles.ProjectManager);
+        await ctrl.LoadAsync();
+        Assert.IsTrue(ctrl.IsAvailable(EnumAtlasSection.NoisePolicy));
+        Assert.AreEqual(1, first.NoiseReads);
+        await ctrl.NoisePolicyCtrl.SetNoteTypeExcludedAsync(MeetingId, true);
+        Assert.IsTrue(ctrl.HasPendingChanges);
+
+        // A note saved in the editor reads everything again: the policy being edited stays.
+        await ctrl.LoadAsync();
+        Assert.AreEqual(1, first.NoiseReads);
+        Assert.IsTrue(ctrl.NoisePolicyCtrl.IsExcluded(MeetingId));
+
+        noiseView.ShowInfoImpl = (_, buttons) => buttons == MessageBoxButtons.YesNoCancel ? DialogResult.Cancel : DialogResult.OK;
+        Assert.IsFalse(await ctrl.SelectRepositoryAsync(second.Ref));
+        noiseView.ShowInfoImpl = (_, buttons) => buttons == MessageBoxButtons.YesNoCancel ? DialogResult.No : DialogResult.OK;
+        Assert.IsTrue(await ctrl.SelectRepositoryAsync(second.Ref));
+
+        Assert.AreEqual(1, second.NoiseReads);
+        Assert.AreSame(second.Ref.Service, ctrl.NoisePolicyCtrl.Service);
+        Assert.IsFalse(ctrl.HasPendingChanges);
+    }
+
+    [TestMethod]
+    [DataRow(EnumRoles.Guest, false)]
+    [DataRow(EnumRoles.Staff, true)]
+    public async Task ThePeriodSummary_IsForAStaff_AndReadsItsRepository(EnumRoles role, bool available)
+    {
+        var (ctrl, _, first, second) = CreateCtrl(role);
+
+        await ctrl.LoadAsync();
+        await ctrl.SelectRepositoryAsync(second.Ref);
+
+        Assert.AreEqual(available, ctrl.IsAvailable(EnumAtlasSection.PeriodSummary));
+        Assert.AreEqual(available ? (1, 1) : (0, 0), (first.SelectionReads, second.SelectionReads));
+        Assert.AreEqual("Staff", AtlasCtrl.RoleText(EnumAtlasSection.PeriodSummary));
+        StringAssert.Contains(AtlasCtrl.WhoCanUse(EnumAtlasSection.PeriodSummary), "Staff");
     }
 
     [TestMethod]

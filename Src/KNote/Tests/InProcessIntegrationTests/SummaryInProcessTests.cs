@@ -91,6 +91,144 @@ public class SummaryInProcessTests
         StringAssert.EndsWith(summary.Description, "The manual of the Sinclair QL.");
     }
 
+    // 2.2 (D3): the noise policy of the session's repository: anyone reads it and its recount; only ProjectManager and Admin keep it.
+    [TestMethod]
+    public async Task TheNoisePolicy_IsReadByAnyone_AndKeptByWhoIsResponsible()
+    {
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        using var service = _factory.CreateServiceForRepository(0);
+        var type = await service.NoteTypes.SaveAsync(new NoteTypeDto { Name = $"Noise {Guid.NewGuid():N}"[..20] });
+        Assert.IsTrue(type.IsValid, type.ErrorMessage);
+        var policy = new NoisePolicyDto { ExcludedNoteTypeIds = { type.Entity.NoteTypeId } };
+
+        var refused = await staff.PostAsJsonAsync("api/summaries/noise-policy", policy);
+        var saved = await _admin.PostAsJsonAsync("api/summaries/noise-policy", policy);
+        var read = await staff.GetFromJsonAsync<Result<NoisePolicyDto>>("api/summaries/noise-policy", _json);
+        var count = await staff.PostAsJsonAsync("api/summaries/noise-policy/count", policy);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, refused.StatusCode);
+        Assert.IsTrue(saved.IsSuccessStatusCode, await saved.Content.ReadAsStringAsync());
+        CollectionAssert.Contains(read!.Entity.ExcludedNoteTypeIds, type.Entity.NoteTypeId);
+        var countBody = await count.Content.ReadAsStringAsync();
+        Assert.IsTrue(count.IsSuccessStatusCode, countBody);
+        var counted = JsonSerializer.Deserialize<Result<NoiseCountDto>>(countBody, _json)!.Entity;
+        Assert.IsGreaterThan(0, counted.Notes);
+    }
+
+    // 2.3 (CU-15): the selection of a summary and the corrections of «Review selection», for a Staff; not for a Guest.
+    [TestMethod]
+    public async Task TheSelection_AndItsCorrections_AreForAStaff()
+    {
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        var (guest, _) = await NewClientAsync(nameof(EnumRoles.Guest));
+        using var __ = guest;
+        using var service = _factory.CreateServiceForRepository(0);
+        var note = (await service.Notes.NewAsync()).Entity;
+        note.Topic = $"Selection {Guid.NewGuid():N}";
+        note.Description = string.Join(" ", Enumerable.Range(1, 60).Select(i => $"word{i}"));
+        note.FolderId = (await service.Folders.GetHomeAsync()).Entity.FolderId;
+        var saved = await service.Notes.SaveAsync(note);
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+        note = saved.Entity;
+        var request = new NoteSelectionRequestDto { From = DateTime.Today, To = DateTime.Today };
+
+        var refused = await guest.PostAsJsonAsync("api/summaries/selection", request);
+        var answer = await staff.PostAsJsonAsync("api/summaries/selection", request);
+        var corrected = await staff.PostAsJsonAsync("api/summaries/relevance/corrections", new RelevanceCorrectionsSaveDto
+        {
+            Changes = { new RelevanceCorrectionChangeDto { NoteId = note.NoteId, Decision = EnumSelectionDecision.Out } }
+        });
+        var again = await staff.PostAsJsonAsync("api/summaries/selection", request);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, refused.StatusCode);
+        var body = await answer.Content.ReadAsStringAsync();
+        Assert.IsTrue(answer.IsSuccessStatusCode, body);
+        Assert.AreEqual(EnumSelectionDecision.In, JsonSerializer.Deserialize<Result<NoteSelectionResultDto>>(body, _json)!.Entity.Notes.Single(n => n.NoteId == note.NoteId).Decision);
+        Assert.IsTrue(corrected.IsSuccessStatusCode, await corrected.Content.ReadAsStringAsync());
+        var corrections = JsonSerializer.Deserialize<Result<NoteSelectionResultDto>>(await again.Content.ReadAsStringAsync(), _json)!.Entity;
+        Assert.AreEqual(EnumSelectionSource.Correction, corrections.Notes.Single(n => n.NoteId == note.NoteId).Source);
+    }
+
+    // 2.5 (CU-16, CU-17): a period summary in the queue of the Server, as the summary of a document: estimated, made and kept in
+    // a new note of «KNote Summary».
+    [TestMethod]
+    public async Task APeriodSummary_IsMadeInTheQueue_AndKeptInANewNote()
+    {
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        using var service = _factory.CreateServiceForRepository(0);
+        var note = (await service.Notes.NewAsync()).Entity;
+        note.Topic = $"Period {Guid.NewGuid():N}";
+        note.Description = string.Join(" ", Enumerable.Range(1, 60).Select(i => $"word{i}"));
+        note.FolderId = (await service.Folders.GetHomeAsync()).Entity.FolderId;
+        Assert.IsTrue((await service.Notes.SaveAsync(note)).IsValid);
+        _chatClients.Script = () => Enumerable.Range(0, 40).Select(_ => new List<ChatResponseUpdate> { new(ChatRole.Assistant, "The week in short.") }).ToList();
+        var request = new DocumentProcessRequestDto
+        {
+            Kind = EnumDocumentProcessKind.PeriodSummary, Language = "English",
+            Period = new PeriodSummaryRequestDto { Subject = "Week in short", Words = 200, Selection = new NoteSelectionRequestDto { From = DateTime.Today, To = DateTime.Today } }
+        };
+
+        var estimate = await staff.PostAsJsonAsync("api/summaries/documents/estimate", request);
+        var started = await staff.PostAsJsonAsync("api/summaries/documents", request);
+
+        var estimateBody = await estimate.Content.ReadAsStringAsync();
+        Assert.IsTrue(estimate.IsSuccessStatusCode, estimateBody);
+        Assert.IsGreaterThan(0, JsonSerializer.Deserialize<Result<DocumentProcessEstimateDto>>(estimateBody, _json)!.Entity.Notes);
+        Assert.IsTrue(started.IsSuccessStatusCode, await started.Content.ReadAsStringAsync());
+        DocumentProcessProgressDto? progress = null;
+        for (var i = 0; i < 200 && progress?.IsFinished != true; i++)
+        {
+            await Task.Delay(50);
+            progress = (await staff.GetFromJsonAsync<Result<DocumentProcessProgressDto>>("api/summaries/documents/progress", _json))!.Entity;
+        }
+        Assert.AreEqual(EnumDocumentProcessPhase.Completed, progress!.Phase, progress.Message);
+        Assert.AreEqual(EnumDocumentProcessKind.PeriodSummary, progress.Kind);
+        Assert.AreEqual("Week in short", progress.FileName);
+
+        var summary = (await service.Notes.GetExtendedAsync(progress.NoteId!.Value)).Entity;
+        Assert.AreEqual(KntConst.SummaryTag, summary.NoteTypeDto.Name);
+        Assert.AreEqual("Week in short", summary.Topic);
+        StringAssert.Contains(summary.Description, "## Executive summary\n\nThe week in short.");
+        StringAssert.Contains(summary.Description, "## What happened\n\n### Home\n\nThe week in short.");
+        CollectionAssert.Contains(summary.TraceNotesTo.Select(r => r.ToId).ToList(), note.NoteId, "related with the note it comes from (D17)");
+    }
+
+    // 2.4 (D9, C2): a batch of doubtful notes asked to the AI, by a Staff, and its answers used by the selection.
+    [TestMethod]
+    public async Task TheDoubtfulNotes_AreAskedToTheAi_ByAStaff()
+    {
+        var (staff, _) = await NewClientAsync(nameof(EnumRoles.Staff));
+        using var _ = staff;
+        var (guest, _) = await NewClientAsync(nameof(EnumRoles.Guest));
+        using var __ = guest;
+        using var service = _factory.CreateServiceForRepository(0);
+        var note = (await service.Notes.NewAsync()).Entity;
+        note.Topic = $"Doubtful {Guid.NewGuid():N}";
+        note.Description = string.Join(" ", Enumerable.Range(1, 15).Select(i => $"word{i}"));
+        note.FolderId = (await service.Folders.GetHomeAsync()).Entity.FolderId;
+        var saved = await service.Notes.SaveAsync(note);
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+        note = saved.Entity;
+        _chatClients.Script = () => [[new(ChatRole.Assistant, $"#{note.NoteNumber} | Out | a list of words")]];
+        var request = new NoteClassificationRequestDto { NoteIds = { note.NoteId } };
+
+        var refused = await guest.PostAsJsonAsync("api/summaries/selection/classify", request);
+        var answer = await staff.PostAsJsonAsync("api/summaries/selection/classify", request);
+        var selection = await staff.PostAsJsonAsync("api/summaries/selection", new NoteSelectionRequestDto { From = DateTime.Today, To = DateTime.Today });
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, refused.StatusCode);
+        var body = await answer.Content.ReadAsStringAsync();
+        Assert.IsTrue(answer.IsSuccessStatusCode, body);
+        Assert.AreEqual(EnumSelectionDecision.Out, JsonSerializer.Deserialize<Result<List<RelevanceAiAnswerDto>>>(body, _json)!.Entity.Single().Decision);
+        var decided = JsonSerializer.Deserialize<Result<NoteSelectionResultDto>>(await selection.Content.ReadAsStringAsync(), _json)!.Entity
+            .Notes.Single(n => n.NoteId == note.NoteId);
+        Assert.AreEqual((EnumSelectionDecision.Out, EnumSelectionSource.Ai), (decided.Decision, decided.Source));
+        StringAssert.Contains(decided.Reason, "fake-model");
+    }
+
     // 2.1b2b: process_document of the assistant, accepted in its card, queues the same run for the user of the conversation.
     [TestMethod]
     public async Task TheAssistant_StartsTheSummaryOfADocument_WhenItsCardIsAccepted()

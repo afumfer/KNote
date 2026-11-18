@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -30,4 +31,31 @@ public class KntSummaryService : KntServiceBase, IKntSummaryService
 
     public async Task<Result<List<DocumentTranslationDto>>> GetDocumentTranslationsAsync(Guid resourceId) =>
         await ExecuteCommand(new KntSummaryGetDocumentTranslationsAsyncCommand(Service, resourceId));
+
+    public async Task<Result<NoisePolicyDto>> GetNoisePolicyAsync() =>
+        await ExecuteCommand(new KntSummaryGetNoisePolicyAsyncCommand(Service));
+
+    public async Task<Result<NoisePolicyDto>> SaveNoisePolicyAsync(NoisePolicyDto policy) =>
+        await ExecuteCommand(new KntSummarySaveNoisePolicyAsyncCommand(Service, policy));
+
+    public async Task<Result<NoiseCountDto>> CountNoiseAsync(NoisePolicyDto policy) =>
+        await ExecuteCommand(new KntSummaryCountNoiseAsyncCommand(Service, policy));
+
+    public async Task<Result<NoteSelectionResultDto>> PrepareSelectionAsync(NoteSelectionRequestDto request, CancellationToken cancellationToken = default) =>
+        await ExecuteCommand(new KntSummaryPrepareSelectionAsyncCommand(Service, request, cancellationToken));
+
+    public async Task<Result<List<RelevanceCorrectionDto>>> SaveRelevanceCorrectionsAsync(RelevanceCorrectionsSaveDto changes) =>
+        await ExecuteCommand(new KntSummarySaveRelevanceCorrectionsAsyncCommand(Service, changes));
+
+    public async Task<Result<List<NoteToClassifyDto>>> GetNotesToClassifyAsync(List<Guid> noteIds) =>
+        await ExecuteCommand(new KntSummaryGetNotesToClassifyAsyncCommand(Service, noteIds));
+
+    public async Task<Result<List<RelevanceAiAnswerDto>>> SaveRelevanceAiAnswersAsync(RelevanceAiAnswersSaveDto answers) =>
+        await ExecuteCommand(new KntSummarySaveRelevanceAiAnswersAsyncCommand(Service, answers));
+
+    public async Task<Result<PeriodSummaryPreparedDto>> PreparePeriodAsync(PeriodSummaryRequestDto request, CancellationToken cancellationToken = default) =>
+        await ExecuteCommand(new KntSummaryPreparePeriodAsyncCommand(Service, request, cancellationToken));
+
+    public async Task<Result<NoteDto>> SavePeriodSummaryAsync(PeriodSummarySaveDto summary) =>
+        await ExecuteCommand(new KntSummarySavePeriodSummaryAsyncCommand(Service, summary));
 }

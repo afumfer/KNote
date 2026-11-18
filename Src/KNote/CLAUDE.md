@@ -532,6 +532,78 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   en `AI_SUMMARY_STATE`. **«Tiene páginas»** es `DocumentTextRules.IsPaged(formato, páginas o texto)`: un PDF o un documento con más
   de una página (el lector de TXT y MD parte por `\f`). Tests en `Tests/DocumentTranslationRulesTests`,
   `ServiceTests/DocumentTranslationServiceTests` y los de la traducción en las clases de arriba.
+- **Política de ruido (KNote Atlas, etapa 2, 2.2, CU-13, D2-D4)** (`IKntSummaryService.GetNoisePolicyAsync`, Guest;
+  `SaveNoisePolicyAsync`, ProjectManager; `CountNoiseAsync`, Guest; comandos en `KntSummaryCommands.cs`): los tipos de nota y las
+  carpetas cuyas notas no entran nunca en los resúmenes de notas. Se guarda en `SystemValues` (ámbito `AI`, clave `AI_NOISE_POLICY`,
+  protegida como las demás de ese ámbito) como un JSON con los ids (`NoisePolicyDto`); al leerla y al guardarla se quitan los que ya
+  no existen y los de KNote (`Service/Core/KntNoisePolicy`). **Cada carpeta se excluye sola**, sin sus subcarpetas, y Home es una más
+  (no hay bandeja de entrada). La regla es pura, `Model/Core/NoiseRules.Classify`, en este orden: las notas de KNote (tipos de
+  `KntConst.SystemNoteTypeNames` más `@KNoteSummary` y `@KNoteTranslation`, `NoiseRules.KNoteNoteTypeNames`, y las carpetas de
+  `SystemFolderNames`) → la etiqueta `#NoKnowledge` (siempre fuera) → `#Knowledge` (siempre dentro, gana a la política) → tipo
+  excluido → carpeta excluida. Las etiquetas (`KntConst.NoKnowledgeTag`/`KnowledgeTag`) se buscan enteras, sin mayúsculas, entre
+  espacios, comas o puntos y comas (`NoiseRules.HasTag`). El recuento de una política sin guardar (`NoiseRules.Count`, por motivo)
+  lee todas las notas con una consulta ligera, `IKntNoteRepository.GetClassificationsAsync` (id, número, carpeta, tipo y etiquetas;
+  Dapper y EF, con paridad en `Tests/RepositoryParityTests/NoteClassificationsParityTests`). Guardarla no cambia ninguna nota. Tests en
+  `Tests/NoiseRulesTests`, `ServiceTests/NoisePolicyServiceTests` y `InProcessIntegrationTests/SummaryInProcessTests`.
+- **Selección de un resumen (KNote Atlas, etapa 2, 2.3, CU-15, D6-D10, S1-S7)** (`IKntSummaryService.PrepareSelectionAsync` y
+  `SaveRelevanceCorrectionsAsync`, Staff; `Service/Core/KntNoteSelection`), sin IA y sin escribir nada: las notas **modificadas en el
+  periodo** (días enteros) **o con una tarea que empezó** (`StartDate` o, sin ella, su creación) **o terminó en él**
+  (`IKntNoteRepository.GetSelectionSourcesAsync`, con su texto y cuántas tareas, con actividad, recursos y relaciones en los dos sentidos;
+  Dapper y EF con paridad en `Tests/RepositoryParityTests/NoteSelectionSourcesParityTests`) y, con «y», de una carpeta y sus
+  subcarpetas, con palabras clave (la búsqueda por palabras en el tema y el texto) y «Talks about…» (por significado entre las del
+  periodo, desde 0,45, sin el tope de 100). Cada nota la decide `Model/Core/NoteRelevanceRules` (In / Doubtful / Out, con su motivo
+  en palabras y una puntuación que ordena las listas), la primera que decide: las notas de KNote (solo se cuentan, `KNoteNotes`) →
+  la corrección de una persona → la política de ruido y las etiquetas (`NoiseRules`) → las señales (tareas con actividad, citas `#n`
+  desde otras notas de la selección, relaciones, recursos y el tamaño del texto limpio con `Model/NoteReadingCleaner`: menos de 10
+  palabras y creada y dejada el mismo día, fuera; menos de 40, dudosa). `ComputedDecision` es lo que decide KNote sin la corrección:
+  `NoteRelevanceRules.CorrectionFor` da lo que guarda «Review selection» al cambiar una casilla (o quitar la corrección).
+  **Las correcciones van en la nota del sistema «Note relevance»** (`@KNoteRelevance`, en «KNote Atlas», `Model/Core/RelevanceNote`: dos
+  tablas legibles y una marca oculta por fila, `<!-- knt-relevance {...} -->`, de la que se leen; `Service/Core/KntRelevanceNotes`):
+  una por repositorio, compartida, la última vale; escrituras una a una por base de datos y releyendo la nota; al escribirla se quitan
+  las filas de notas borradas. La selección da su referencia (`NoteSelectionResultDto.RelevanceNote`, el enlace de la sección; nula
+  hasta que existe: leer no la crea). Es una nota protegida (`KntAtlasNotes.ProtectedNoteTypeNames`): a mano, solo ProjectManager y Admin;
+  el comando la escribe para un Staff dentro de `KntAuthorizationBypass`, **que también salta esa regla de guardado**
+  (`KntAtlasNotes.CanWriteAsync`). Las personas nunca tocan sus notas al corregir. Tests en `Tests/NoteReadingCleanerTests`,
+  `NoteRelevanceRulesTests`, `RelevanceNoteTests`, `ServiceTests/NoteSelectionServiceTests` y `InProcessIntegrationTests/SummaryInProcessTests`.
+- **Las dudosas con IA (KNote Atlas, etapa 2, 2.4, D9, C1-C6)**: a petición, nunca al preparar la selección. `Model/Core/NoteClassificationRules`
+  elige las dudosas por sus señales (las de más puntuación, 100 como mucho por vez; las demás siguen dudosas, y las dudosas entran), las
+  parte en lotes de 10, arma la petición (cada nota entre `<note>` y `</note>`, con número, tema, carpeta, tipo, etiquetas y el comienzo
+  de su texto limpio, 1.500 caracteres) y lee la respuesta línea a línea (`#123 | In | motivo`; una nota sin línea legible sigue dudosa).
+  `Ai/AiNoteClassifier.ClassifyAsync` hace un lote con la tarea `ClassifyNote` (`AiTaskCatalog`, sin herramientas, `AiResourceTask`):
+  pide las notas a `IKntSummaryService.GetNotesToClassifyAsync` y guarda las respuestas con `SaveRelevanceAiAnswersAsync` (los dos Staff;
+  las respuestas van a la tabla «AI classification» de «Note relevance», con la huella y el modelo, dentro de `KntAuthorizationBypass`).
+  **La huella** (`NoteRelevanceRules.ContentHash`: el tema y el texto limpio, sin los saltos de línea ni los espacios de los extremos) la
+  calcula igual la selección: una respuesta con otra huella no vale y la nota vuelve a ser dudosa; la siguiente escritura de «Note
+  relevance» la quita (`KntRelevanceNotes`, como las filas de notas borradas), así la tabla solo tiene respuestas válidas. La respuesta decide solo una dudosa
+  por sus señales, por debajo de una corrección y de la política (`NoteRelevanceRules.Decide`, `EnumSelectionSource.Ai`). Tests en
+  `Tests/NoteClassificationRulesTests`, `ServiceTests/NoteClassificationServiceTests`, `InProcessIntegrationTests/SummaryInProcessTests`
+  y el smoke `ServiceTests/AiNoteClassifierSmokeTests` (`RequiresRealAiProvider`, `KNOTE_RESOURCE_SMOKE_MODEL`).
+- **El resumen de un periodo (KNote Atlas, etapa 2, 2.5, CU-16, CU-17, P1-P7)**: **un tipo más del trabajo de los resúmenes**
+  (`EnumDocumentProcessKind.PeriodSummary`, `DocumentProcessRequestDto.Period`): la misma cola del `Server` (`KntAtlasJobs`,
+  `DocumentProcess`, uno por usuario: un resumen de un documento o de un periodo), el mismo trabajo de `ClientWin`, el mismo progreso
+  y la misma cancelación, y las mismas rutas (`api/summaries/documents/...`). `Ai/AiPeriodSummarizer` (desde `AiDocumentProcessor`):
+  `IKntSummaryService.PreparePeriodAsync` (Staff: la selección y, de cada nota que entra, su ruta, su texto limpio, sus tareas con
+  actividad en el periodo y las descripciones de sus recursos, sin el texto de sus documentos), las dudosas que queden preguntadas antes
+  a la IA (fase `Classifying`, con el tope de 100; sus respuestas se guardan aunque luego se cancele), las notas como piezas `#123`
+  ordenadas por carpeta y fecha (`Model/Core/PeriodSummaryRules`) leídas por `AiSummaryEngine` con **una tarea**, `SummarizePeriod`
+  (como el documento largo: lotes, uniones y redacción), de 100 a 10.000 palabras, y `SavePeriodSummaryAsync` (Staff): una nota
+  `@KNoteSummary` en la carpeta «KNote Summary» (`KntConst.SummaryFolderName`, no del sistema); el ritmo por modelo en
+  `PeriodSecondsPer1000Characters`. Las notas del periodo no cambian. Sin notas que entren, un error claro (`PeriodSummaryRules.NoNotes`).
+  **Por apartados, siempre** (2.6, D13; `Model/Core/PeriodSummarySections`): las notas por carpeta hasta el segundo nivel de su ruta, como
+  mucho 8 (los más pequeños, en «Other folders»), con las palabras repartidas por sus notas (el ejecutivo, el 10 %; los pendientes, el 15 %)
+  y uno de más de 2.500 palabras partido por fecha; cada apartado es una ejecución de `AiSummaryEngine.RunAsync` con sus piezas y el
+  resumen ejecutivo y los pendientes, dos llamadas con los apuntes de todos (`AiSummaryEngine.JoinAsync`/`AskAsync`, separados de
+  `RunAsync` sin cambiar lo que hace). **El documento** lo monta `Model/Core/PeriodSummaryDocument` en el orden del capítulo 35, con
+  títulos en inglés: datos (con llamadas, tiempo y citas no reconocidas), ejecutivo (IA), índice por carpetas y por conceptos (etiquetas
+  y términos del glosario, `GlossaryTable.KeysPerTerm`), lo ocurrido (IA), pendientes (IA), estadísticas por carpeta (tareas con actividad:
+  empezadas, terminadas, abiertas al final, tiempos; `PeriodSummaryRules.SetTaskCounts`), incluidas y omitidas con su motivo. El comando
+  lo calcula con `PeriodSummarySaveDto.Prepared` (las partes de la IA van aparte: `Executive`, `Sections`, `Pending`). **Citas**
+  (`Model/Core/SummaryCitationRules`, D16): la de una nota no leída queda sin enlace (un `⁠` entre `#` y el número) y se cuenta.
+  **Relaciones** `@DerivedFrom` hacia cada nota leída que sigue existiendo y no es de KNote (el comando no se fía de quien llama), con
+  `Order` (el de su primera cita, las demás detrás) y `Weight` (su puntuación). El original adjunto, las partes tal como las escribió la
+  IA. Tests en `Tests/PeriodSummaryRulesTests`, `PeriodSummaryDocumentTests`, `ServiceTests/PeriodSummaryServiceTests`,
+  `InProcessIntegrationTests/SummaryInProcessTests`, el smoke `ServiceTests/PeriodSummarySmokeTests` y la medida
+  `ServiceTests/PeriodSummaryMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota
   existe): solo en texto (no en etiquetas, enlaces ni código; no `#urgente`, `C#123`, `#0` ni entidades `&#123;`). Abrir una
   nota por número pasa siempre por `IKntNoteService.GetCitedNoteAsync` (`api/notes/cited/{n}`), que no da las notas del

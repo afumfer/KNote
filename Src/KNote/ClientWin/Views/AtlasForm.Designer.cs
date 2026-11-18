@@ -37,6 +37,8 @@ namespace KNote.ClientWin.Views
             panelModels = new Panel();
             panelSemanticIndex = new Panel();
             panelResources = new Panel();
+            panelNoisePolicy = new Panel();
+            panelPeriodSummary = new Panel();
             tabContext = new TabControl();
             tabProfile = new TabPage();
             labelProfileHelp = new Label();
@@ -122,6 +124,8 @@ namespace KNote.ClientWin.Views
             panelSections.Controls.Add(panelModels);
             panelSections.Controls.Add(panelSemanticIndex);
             panelSections.Controls.Add(panelResources);
+            panelSections.Controls.Add(panelNoisePolicy);
+            panelSections.Controls.Add(panelPeriodSummary);
             panelSections.Location = new Point(230, 44);
             panelSections.Name = "panelSections";
             panelSections.Size = new Size(658, 508);
@@ -163,6 +167,24 @@ namespace KNote.ClientWin.Views
             panelResources.Size = new Size(658, 508);
             panelResources.TabIndex = 3;
             panelResources.Visible = false;
+            // 
+            // panelNoisePolicy
+            // 
+            panelNoisePolicy.Dock = DockStyle.Fill;
+            panelNoisePolicy.Location = new Point(0, 0);
+            panelNoisePolicy.Name = "panelNoisePolicy";
+            panelNoisePolicy.Size = new Size(658, 508);
+            panelNoisePolicy.TabIndex = 4;
+            panelNoisePolicy.Visible = false;
+            //
+            // panelPeriodSummary
+            //
+            panelPeriodSummary.Dock = DockStyle.Fill;
+            panelPeriodSummary.Location = new Point(0, 0);
+            panelPeriodSummary.Name = "panelPeriodSummary";
+            panelPeriodSummary.Size = new Size(658, 508);
+            panelPeriodSummary.TabIndex = 5;
+            panelPeriodSummary.Visible = false;
             //
             // tabContext
             //
@@ -523,6 +545,8 @@ namespace KNote.ClientWin.Views
         private Panel panelModels;
         private Panel panelSemanticIndex;
         private Panel panelResources;
+        private Panel panelNoisePolicy;
+        private Panel panelPeriodSummary;
         private TabControl tabContext;
         private TabPage tabProfile;
         private Label labelProfileHelp;

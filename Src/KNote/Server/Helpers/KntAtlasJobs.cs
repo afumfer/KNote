@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using KNote.Ai;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Server.Ai;
 using KNote.Service.Core;
@@ -155,6 +156,10 @@ public class KntAtlasJobs : BackgroundService
                 RequestedBy = userName,
                 Kind = request.Kind,
                 ResourceId = request.ResourceId,
+                FileName = request.Kind == EnumDocumentProcessKind.PeriodSummary
+                    ? (string.IsNullOrWhiteSpace(request.Period?.Subject) && request.Period?.Selection != null
+                        ? PeriodSummaryRules.DefaultSubject(request.Period.Selection) : request.Period?.Subject)
+                    : null,
                 Model = provider?.Model,
                 Phase = EnumDocumentProcessPhase.Queued
             }
