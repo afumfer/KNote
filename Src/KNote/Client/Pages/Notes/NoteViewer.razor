@@ -4,7 +4,7 @@
 @inject DialogService dialogService
 @inject TooltipService tooltipService
 
-@* A note to read: topic, description, tags and dates. Used by the note's window (NoteView) and the preview
+@* A note to read: topic, description and, below, its number, tags and dates in one line. Used by the note's window (NoteView) and the preview
    beside the notes lists (NotePreviewPane). With a semantic index, «Similar notes» shows the notes most similar to it
    when pressed (KNote Atlas: not before, so changing of note is not slower). *@
 
@@ -23,11 +23,16 @@
             @* The preview gives the HTML read with the note; otherwise ViewMarkdown asks Server for it. *@
             <ViewMarkdown MarkdownContent="@(DescriptionHtml == null ? Note.Description : null)" SafeHtml="@DescriptionHtml" />
         </div>
-        <i>
-            <p>Tags: @(Note.Tags)</p>
-            <p>Creation date: @(Note.CreationDateTime)</p>
-            <p>Modification date: @(Note.ModificationDateTime)</p>
-        </i>
+        @* The data of the note in one line (two if it does not fit, close together). *@
+        <div class="knt-note-footer">
+            <span class="knt-note-footer-number">#@Note.NoteNumber</span>
+            @if (!string.IsNullOrWhiteSpace(Note.Tags))
+            {
+                <span>Tags: @Note.Tags</span>
+            }
+            <span>Created: @Note.CreationDateTime.ToString("g")</span>
+            <span>Modified: @Note.ModificationDateTime.ToString("g")</span>
+        </div>
     </RadzenStack>
 </RadzenCard>
 

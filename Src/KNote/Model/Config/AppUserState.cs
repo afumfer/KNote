@@ -68,8 +68,11 @@ public class SessionState
     // The language of the last translation of each repository (2.1b2): the one proposed the next time.
     public List<RepositoryLanguageState> TranslationLanguages { get; set; } = new();
 
-    // The language of the last period summary of each repository (2.5b, D14): the one proposed the next time.
+    // The language of the last period summary of each repository (2.5b, D14). Only read, while a repository has no PeriodSummaries yet.
     public List<RepositoryLanguageState> PeriodSummaryLanguages { get; set; } = new();
+
+    // The fields of «Period summary» of each repository and user, as they were left (RepositoryPeriodSummaryCtrl).
+    public List<RepositoryPeriodSummaryState> PeriodSummaries { get; set; } = new();
 
     // Set automatically when a connection attempt to the chat hub fails, so the app stops retrying (and
     // freezing) on every startup until the user fixes the chat room settings or signs in again from Options.
@@ -186,4 +189,15 @@ public class RepositoryLanguageState
     public Guid RepositoryId { get; set; }
 
     public string Language { get; set; }
+}
+
+[Serializable]
+public class RepositoryPeriodSummaryState
+{
+    public Guid RepositoryId { get; set; }
+
+    // The user of the session (Store.AppUserName): the same Windows profile can sign in as other users.
+    public string UserName { get; set; }
+
+    public KNote.Model.Dto.PeriodSummaryParametersDto Parameters { get; set; } = new();
 }

@@ -4,8 +4,8 @@
    the beginning»; the folder; the keywords; «Talks about…», only if the server can search by meaning), the counts of the selection
    and «Review selection» (AtlasReviewSelectionDialog). The selection is asked for again at each change of the period or the folder,
    and of the texts when they are left or Enter is pressed (the last one wins). The doubtful notes are asked to the AI on demand (2.4),
-   a batch per request, with the repository's recommended model. Below (2.5b), the summary: its subject, words, language (the last one
-   of the repository, in the browser) and model; «Estimate», «Generate» and its progress, asked to the Server every second and a half
+   a batch per request, with the repository's recommended model. Below (2.5b), the summary: its subject, words, language, model and
+   the attributes of «By concept». Every field is kept in the browser for the user and the repository as it changes, and comes back; «Estimate», «Generate» and its progress, asked to the Server every second and a half
    (the run is in the Server's queue, one summary per user, and goes on if the page is left; back, it shows it), «Cancel» and «Open the
    note». *@
 
@@ -108,26 +108,35 @@
     <RadzenRow Gap="1rem">
         <RadzenColumn Size="12" SizeSM="8">
             <KntField Label="Subject" Component="SummarySubject" Help="@SummaryTexts.SubjectHelp">
-                <RadzenTextBox Name="SummarySubject" @bind-Value="@subject" Placeholder="@DefaultSubject" Disabled="@Running" />
+                <RadzenTextBox Name="SummarySubject" @bind-Value="@subject" @bind-Value:after="SaveParametersAsync" Placeholder="@DefaultSubject" Disabled="@Running" />
             </KntField>
         </RadzenColumn>
         <RadzenColumn Size="12" SizeSM="4">
             <KntField Label="Words" Component="SummaryWords" Help="@SummaryTexts.WordsHelp">
-                <RadzenNumeric Name="SummaryWords" TValue="int" @bind-Value="@words" Min="@PeriodSummaryRules.MinWords" Max="@PeriodSummaryRules.MaxWords" Step="100" Disabled="@Running" />
+                <RadzenNumeric Name="SummaryWords" TValue="int" @bind-Value="@words" @bind-Value:after="SaveParametersAsync" Min="@PeriodSummaryRules.MinWords" Max="@PeriodSummaryRules.MaxWords" Step="100" Disabled="@Running" />
             </KntField>
         </RadzenColumn>
     </RadzenRow>
     <RadzenRow Gap="1rem">
         <RadzenColumn Size="12" SizeSM="4">
             <KntField Label="Language" Component="SummaryLanguage" Help="@SummaryTexts.PeriodLanguageHelp">
-                <RadzenAutoComplete Name="SummaryLanguage" @bind-Value="@language" Data="@SummaryTexts.Languages" Disabled="@Running"
+                <RadzenAutoComplete Name="SummaryLanguage" @bind-Value="@language" @bind-Value:after="SaveParametersAsync" Data="@SummaryTexts.Languages" Disabled="@Running"
                                     FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" MinLength="0" OpenOnFocus="true" />
             </KntField>
         </RadzenColumn>
         <RadzenColumn Size="12" SizeSM="8">
             <KntField Label="Model" Component="SummaryModel">
-                <RadzenDropDown Name="SummaryModel" TValue="string" @bind-Value="@providerAlias" Data="@models" Disabled="@Running"
+                <RadzenDropDown Name="SummaryModel" TValue="string" @bind-Value="@providerAlias" @bind-Value:after="SaveParametersAsync" Data="@models" Disabled="@Running"
                                 TextProperty="Text" ValueProperty="Value" />
+            </KntField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12">
+            <KntField Label="@SummaryTexts.ConceptAttributesLabel" Component="SummaryConceptAttributes" Help="@SummaryTexts.ConceptAttributesHelp">
+                <RadzenDropDown Name="SummaryConceptAttributes" TValue="IEnumerable<Guid>" @bind-Value="@conceptAttributes" @bind-Value:after="SaveParametersAsync" Data="@conceptChoices" TextProperty="Label" ValueProperty="KAttributeId"
+                                Multiple="true" Chips="true" AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                Placeholder="@PeriodConceptRules.NoneChosen" Disabled="@Running" />
             </KntField>
         </RadzenColumn>
     </RadzenRow>
@@ -204,6 +213,8 @@
     private int words = PeriodSummaryRules.DefaultWords;
     private string language = "";
     private string? providerAlias;
+    private List<PeriodConceptRules.Choice> conceptChoices = [];
+    private IEnumerable<Guid> conceptAttributes = [];
     private string? repositoryId;
     private DocumentProcessEstimateDto? estimate;
     private string? estimateError;
@@ -221,30 +232,94 @@
 
     private string? ProviderName => providers.FirstOrDefault(p => p.Alias == providerAlias)?.Provider ?? providers.FirstOrDefault(p => p.IsDefault)?.Provider;
 
-    private string LanguageKey => $"KNotePeriodSummaryLanguage:{repositoryId}";
+    // The fields as the user left them, by repository and user (in the browser); before, only the language was kept, by repository.
+    private string? userName;
+    private bool parametersLoaded;
+    private PeriodSummaryParametersDto? saved;
+
+    private string ParametersKey => $"KNotePeriodSummary:{repositoryId}:{userName}";
+
+    private string LegacyLanguageKey => $"KNotePeriodSummaryLanguage:{repositoryId}";
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await authenticationStateProvider.GetAuthenticationStateAsync()).User;
+        repositoryId = user.FindFirst(KntConst.RepositoryClaimType)?.Value;
+        userName = user.Identity?.Name;
+        await LoadParametersAsync();
         var status = await store.SemanticSearch.GetIndexStatusAsync(disposal.Token);
         if (disposal.IsCancellationRequested)
             return;
         meaningAvailable = status.IsValid && SemanticIndexTexts.CanSearch(status.Entity);
         await PrepareAsync();
         await LoadSummaryAsync();
+        parametersLoaded = true;
     }
 
-    // The models, the language of the repository and a period summary going on (or the last one).
-    private async Task LoadSummaryAsync()
+    // The fields of the selection and of the summary as they were left (the folder, if it still exists); the model and the attributes,
+    // when their lists are read (LoadSummaryAsync).
+    private async Task LoadParametersAsync()
     {
-        var user = (await authenticationStateProvider.GetAuthenticationStateAsync()).User;
-        repositoryId = user.FindFirst(KntConst.RepositoryClaimType)?.Value;
         try
         {
-            language = await js.LocalStorageGetItem(LanguageKey) ?? "";
+            var json = await js.LocalStorageGetItem(ParametersKey);
+            saved = string.IsNullOrWhiteSpace(json) ? null : System.Text.Json.JsonSerializer.Deserialize<PeriodSummaryParametersDto>(json);
+            if (saved == null)
+                language = await js.LocalStorageGetItem(LegacyLanguageKey) ?? "";
+        }
+        catch (Exception ex) when (ex is JSException or System.Text.Json.JsonException)
+        {
+            saved = null;
+        }
+        if (saved == null)
+            return;
+
+        from = (saved.From ?? DateTime.Today.AddDays(-6)).Date;
+        to = (saved.To ?? DateTime.Today).Date;
+        fromTheBeginning = saved.FromTheBeginning;
+        keywords = saved.Keywords ?? "";
+        meaningText = saved.MeaningText ?? "";
+        subject = saved.Subject ?? "";
+        words = PeriodSummaryRules.ClampWords(saved.Words);
+        language = saved.Language ?? "";
+        if (saved.FolderId is Guid folderId)
+        {
+            var read = await store.Folders.GetAsync(folderId, disposal.Token);
+            folder = read.IsValid ? read.Entity : null;
+        }
+    }
+
+    // The fields as they are now, kept for the next time (each change).
+    private async Task SaveParametersAsync()
+    {
+        if (!parametersLoaded || repositoryId == null)
+            return;
+        var parameters = new PeriodSummaryParametersDto
+        {
+            From = from, To = to, FromTheBeginning = fromTheBeginning, FolderId = folder?.FolderId, Keywords = keywords, MeaningText = meaningText,
+            Subject = subject, Words = words, Language = language, ProviderAlias = providerAlias,
+            ConceptAttributeIds = PeriodConceptRules.Chosen(conceptAttributes, conceptChoices)
+        };
+        try
+        {
+            await js.LocalStorageSetItem(ParametersKey, System.Text.Json.JsonSerializer.Serialize(parameters));
         }
         catch (JSException)
         {
-            language = "";
+        }
+    }
+
+    // The models, the attributes, the ones of them chosen the last time and a period summary going on (or the last one).
+    private async Task LoadSummaryAsync()
+    {
+        // The attributes that can group the notes; of the last ones chosen, the ones that still can.
+        var attributes = await store.KAttributes.GetAllAsync(disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (attributes.IsValid)
+        {
+            conceptChoices = PeriodConceptRules.Choices(attributes.Entity);
+            conceptAttributes = PeriodConceptRules.Chosen(saved?.ConceptAttributeIds, conceptChoices);
         }
 
         var listed = await store.AiAssistant.GetProvidersAsync(disposal.Token);
@@ -254,6 +329,7 @@
         {
             providers = listed.Entity;
             models = [new("The repository's recommended model", null), .. providers.Select(p => new Option($"{p.Alias} ({p.Model})", p.Alias))];
+            providerAlias = providers.Any(p => p.Alias == saved?.ProviderAlias) ? saved!.ProviderAlias : null;
         }
 
         var current = await store.Summaries.GetDocumentProgressAsync(disposal.Token);
@@ -277,7 +353,8 @@
         {
             Selection = Request(),
             Subject = string.IsNullOrWhiteSpace(subject) ? null : subject.Trim(),
-            Words = PeriodSummaryRules.ClampWords(words)
+            Words = PeriodSummaryRules.ClampWords(words),
+            ConceptAttributeIds = PeriodConceptRules.Chosen(conceptAttributes, conceptChoices)
         }
     };
 
@@ -299,13 +376,6 @@
         var result = await store.Summaries.SummarizeDocumentAsync(SummaryRequest(), disposal.Token);
         if (disposal.IsCancellationRequested || !result.IsValid)
             return;
-        try
-        {
-            await js.LocalStorageSetItem(LanguageKey, language?.Trim() ?? "");
-        }
-        catch (JSException)
-        {
-        }
         progress = result.Entity?.Kind == EnumDocumentProcessKind.PeriodSummary
             ? result.Entity
             : new DocumentProcessProgressDto { Kind = EnumDocumentProcessKind.PeriodSummary, Phase = EnumDocumentProcessPhase.Failed, Message = SummaryTexts.YoursRunning };
@@ -369,30 +439,35 @@
     private async Task OnFromChanged(DateTime value)
     {
         from = value.Date;
+        await SaveParametersAsync();
         await PrepareAsync();
     }
 
     private async Task OnToChanged(DateTime value)
     {
         to = value.Date;
+        await SaveParametersAsync();
         await PrepareAsync();
     }
 
     private async Task OnFromTheBeginningChanged(bool value)
     {
         fromTheBeginning = value;
+        await SaveParametersAsync();
         await PrepareAsync();
     }
 
     private async Task OnFolderSelected(FolderDto value)
     {
         folder = value;
+        await SaveParametersAsync();
         await PrepareAsync();
     }
 
     private async Task OnFolderReset()
     {
         folder = null;
+        await SaveParametersAsync();
         await PrepareAsync();
     }
 
@@ -401,6 +476,7 @@
         if ((value ?? "") == keywords)
             return;
         keywords = value ?? "";
+        await SaveParametersAsync();
         await PrepareAsync();
     }
 
@@ -409,6 +485,7 @@
         if ((value ?? "") == meaningText)
             return;
         meaningText = value ?? "";
+        await SaveParametersAsync();
         await PrepareAsync();
     }
 

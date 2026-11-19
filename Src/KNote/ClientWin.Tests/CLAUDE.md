@@ -56,7 +56,10 @@ comando nuevo las hace fallar hasta que se decide su rol en ellas.
   `StoreConfigPersistenceTests`.
 - Los tests que escriben ficheros de configuración usan siempre un directorio temporal propio; **nunca** el
   `%LocalAppData%\KNote` real (por eso los tests de `KntServerCOMCtrl`/`KNoteAIAssistantCtrl` no llaman a
-  `SaveConfig()`).
+  `SaveConfig()`, y los `Ctrl` con `SaveSettings` lo sustituyen). Además, `TestAssemblySetup` (`[AssemblyInitialize]`) pone
+  `KNOTE_USER_DATA_PATH` en una carpeta temporal de la ejecución antes de cualquier test, y `AppUserDataPath.Directory` la usa: un
+  `Store.SaveConfig()` que se escape escribe ahí. Sin esto, el 2026-11-08 y el 2026-11-19 una ejecución de la suite sobrescribió la
+  configuración real del propietario (con su `.bak`). `TheUserDataFolder_IsNotTheRealOne` lo comprueba.
 - `Fakes/FakeSecretProtector` sustituye a DPAPI en `AppConfigStorageTests`/`AppUserSettingsSecretsTests`; los
   tests de `DpapiSecretProtector` y de `StoreConfigPersistenceTests` usan DPAPI real (solo Windows).
 
@@ -222,7 +225,8 @@ reconocidas (con `qwen3.5:9b`, por apartados: 5 llamadas, 18 s, ninguna cita no 
 medida `Tests/ServiceTests/PeriodSummaryMeasure` (la de la etapa 2, D23; paso a paso en `C:\Dev\KNote-Atlas\Guia-evaluaciones.md`, parte 3)
 resume uno o varios periodos de una **copia** de un repositorio real (escribe en ella las respuestas de la IA y los resúmenes):
 `KNOTE_PERIOD_MEASURE_DB` (un SQLite o una cadena de SQL Server), `KNOTE_PERIOD_MEASURE_PERIODS` (`aaaa-mm-dd..aaaa-mm-dd`, separados por
-`|`) o `_FROM` y `_TO` (uno), opcionales `_KEYWORDS`, `_WORDS` (2.000), `_LANGUAGE` (español) y `_SEED` (2, las muestras). Deja en
+`|`) o `_FROM` y `_TO` (uno), opcionales `_KEYWORDS`, `_WORDS` (2.000), `_LANGUAGE` (español), `_ATTRIBUTES` (los atributos de «By concept»,
+separados por `|`: «Tipo de nota · Atributo» como en el selector, o solo el nombre) y `_SEED` (2, las muestras). Deja en
 `results\` (bajo `KNOTE_RESOURCE_MEASURE_FOLDER` o junto a la copia, **fuera del repositorio**) un `period-*.md` por periodo (selección,
 estimación, fases con su tiempo, citas no reconocidas, relaciones y el resumen), `stage2-measure-*.md` (la tabla de todos y el tamaño de
 «Note relevance») y las tres hojas para valorar en el navegador (`Tests/Helpers/MeasureSheet`, como las de `Stage4Measure`):

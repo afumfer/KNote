@@ -5,6 +5,7 @@ using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.ClientWin.Controllers;
 
@@ -15,7 +16,8 @@ namespace KNote.ClientWin.Controllers;
 /// change: the last one wins) and «Review selection» (ReviewSelectionCtrl, modal; the selection is prepared again with what it
 /// kept). The doubtful notes are asked to the AI on demand (2.4, C1-C6: ClassifyAsync, a batch at a time with AiNoteClassifier and the
 /// repository's recommended model, cancelled between batches; what was asked stays). Below (2.5b), the summary: subject, words, language
-/// (the last one of the repository, AppUserState.Session.PeriodSummaryLanguages) and model; «Estimate» (AiDocumentProcessor), «Generate»
+/// (the last one of the repository, AppUserState.Session.PeriodSummaryLanguages), model and the attributes of «By concept» (the last ones
+/// of the repository, AppUserState.Session.PeriodSummaryConceptAttributes); «Estimate» (AiDocumentProcessor), «Generate»
 /// (the run of the Store, Store.DocumentProcessing, as the extended summary of a document: never with another run of KNote Atlas, and it
 /// goes on if the window is closed), its progress, «Cancel» and «Open the note». Included in the KNote Atlas window (no
 /// [KntAuthorize]: it decides, by the role of the command, Staff).
@@ -114,16 +116,28 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
     // 2.5b: the summary.
     public List<AiProviderRef> Providers { get; private set; } = new();
 
+    // The fields of the summary, kept for the user and the repository as they change (Remember).
+    private AiProviderRef _provider;
+    private string _subject = "";
+    private int _words = PeriodSummaryRules.DefaultWords;
+    private string _language = "";
+    private List<Guid> _conceptAttributeIds = new();
+
     // The model chosen; null: the repository's recommended one (resolved when it is used, as in the web).
-    public AiProviderRef Provider { get; set; }
+    public AiProviderRef Provider { get => _provider; set { _provider = value; Remember(); } }
 
     public const string RecommendedModel = "The repository's recommended model";
 
-    public string Subject { get; set; } = "";
+    public string Subject { get => _subject; set { _subject = value ?? ""; Remember(); } }
 
-    public int Words { get; set; } = PeriodSummaryRules.DefaultWords;
+    public int Words { get => _words; set { _words = value; Remember(); } }
 
-    public string Language { get; set; } = "";
+    public string Language { get => _language; set { _language = value ?? ""; Remember(); } }
+
+    // The attributes of the index «By concept» that can be chosen (PeriodConceptRules.Choices) and the ones chosen.
+    public List<PeriodConceptRules.Choice> ConceptChoices { get; private set; } = new();
+
+    public List<Guid> ConceptAttributeIds { get => _conceptAttributeIds; set { _conceptAttributeIds = value ?? new(); Remember(); } }
 
     public string DefaultSubject => PeriodSummaryRules.DefaultSubject(Request);
 
@@ -148,7 +162,8 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
 
     public bool CanOpenNote => !IsRunning && SummaryTexts.HasNote(Progress);
 
-    // The language of the repository, proposed next time (D14). Store.SaveConfig is the app's: the tests replace it.
+    // Writes the fields kept (Store.State) to disk: at «Estimate», «Generate» and when the section is closed (the app also writes them
+    // when it is closed). Store.SaveConfig is the app's: the tests replace it.
     internal Action SaveSettings { get; set; }
 
     #endregion
@@ -164,23 +179,20 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
 
     #region Public methods
 
-    // The repository of the window: the folder chosen in another one does not go on.
+    // The repository of the window, with the fields as the user left them in it.
     public async Task LoadAsync(IKntService service)
     {
-        if (service != Service)
-        {
-            Folder = null;
-            FolderText = AllFolders;
-        }
         var changed = service != Service;
+        if (changed && Service != null)
+            SaveSettings?.Invoke();
         Service = service;
         if (changed)
         {
             Providers = Store.Settings.Ai.Providers.Where(p => p.IsChat).ToList();
-            Provider = null;
-            Language = Store.State.Session.PeriodSummaryLanguages.FirstOrDefault(l => l.RepositoryId == RepositoryId)?.Language ?? "";
             Estimate = null;
             EstimateError = null;
+            ConceptChoices = await ConceptChoicesAsync(service);
+            await ApplyParametersAsync(service);
         }
         MeaningAvailable = await Store.CanSearchByMeaningAsync(service);
         await PrepareAsync();
@@ -206,7 +218,8 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
         {
             Selection = Request,
             Subject = string.IsNullOrWhiteSpace(Subject) ? null : Subject.Trim(),
-            Words = PeriodSummaryRules.ClampWords(Words)
+            Words = PeriodSummaryRules.ClampWords(Words),
+            ConceptAttributeIds = PeriodConceptRules.Chosen(ConceptAttributeIds, ConceptChoices)
         }
     };
 
@@ -215,6 +228,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
     {
         Estimate = null;
         EstimateError = null;
+        SaveSettings?.Invoke();
         _usedProvider = Providers.Count == 0 ? null : await ProviderToUseAsync();
         if (_usedProvider == null)
             EstimateError = "There is no AI provider of chat configured (Tools › Manage AI providers).";
@@ -257,7 +271,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
             View.ShowInfo(SummaryTexts.OtherRunning);
             return false;
         }
-        RememberLanguage();
+        SaveSettings?.Invoke();
         View.RefreshView();
         return true;
     }
@@ -285,6 +299,8 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
         Store.Events.Unsubscribe<DocumentProcessingProgressChanged>(OnProgressChanged);
         Store.Events.Unsubscribe<SemanticIndexProgressChanged>(OnOtherJobChanged);
         Store.Events.Unsubscribe<ResourceProcessingProgressChanged>(OnOtherJobChanged);
+        if (Service != null)
+            SaveSettings?.Invoke();
         base.Dispose();
     }
 
@@ -295,6 +311,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
         From = from.Date;
         To = to.Date;
         FromTheBeginning = fromTheBeginning;
+        Remember();
         await PrepareAsync();
     }
 
@@ -303,6 +320,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
         if ((keywords ?? "") == Keywords)
             return;
         Keywords = keywords ?? "";
+        Remember();
         await PrepareAsync();
     }
 
@@ -311,6 +329,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
         if ((meaningText ?? "") == MeaningText)
             return;
         MeaningText = meaningText ?? "";
+        Remember();
         await PrepareAsync();
     }
 
@@ -324,6 +343,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
         Folder = folder;
         var path = await Service.Folders.GetPathAsync(folder.FolderId);
         FolderText = path.IsValid && !string.IsNullOrEmpty(path.Entity) ? path.Entity : folder.Name;
+        Remember();
         await PrepareAsync();
         return true;
     }
@@ -334,6 +354,7 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
             return;
         Folder = null;
         FolderText = AllFolders;
+        Remember();
         await PrepareAsync();
     }
 
@@ -483,12 +504,86 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
 
     private Guid RepositoryId => Service?.RepositoryRef?.RepositoryId ?? Guid.Empty;
 
-    private void RememberLanguage()
+    // The attributes that can group the notes; if they cannot be read, none (the summary goes on without «By concept»).
+    private async Task<List<PeriodConceptRules.Choice>> ConceptChoicesAsync(IKntService service)
     {
-        var languages = Store.State.Session.PeriodSummaryLanguages;
-        languages.RemoveAll(l => l.RepositoryId == RepositoryId);
-        languages.Add(new RepositoryLanguageState { RepositoryId = RepositoryId, Language = Language?.Trim() ?? "" });
-        SaveSettings?.Invoke();
+        try
+        {
+            var attributes = await service.KAttributes.GetAllAsync();
+            return attributes.IsValid ? PeriodConceptRules.Choices(attributes.Entity) : new();
+        }
+        catch (Exception ex)
+        {
+            Store.Logger?.LogWarning(ex, "KNote Atlas: the attributes of the repository could not be read.");
+            return new();
+        }
+    }
+
+    // While the fields of a repository are being applied, nothing is kept (they would be kept half applied).
+    private bool _applying;
+
+    private RepositoryPeriodSummaryState SavedState() => Store.State.Session.PeriodSummaries
+        .FirstOrDefault(s => s.RepositoryId == RepositoryId && string.Equals(s.UserName ?? "", Store.AppUserName ?? "", StringComparison.OrdinalIgnoreCase));
+
+    // The fields as they are now, kept in Store.State for the user and the repository (written to disk by SaveSettings).
+    private void Remember()
+    {
+        if (_applying || Service == null)
+            return;
+        var state = SavedState();
+        if (state == null)
+            Store.State.Session.PeriodSummaries.Add(state = new RepositoryPeriodSummaryState { RepositoryId = RepositoryId, UserName = Store.AppUserName });
+        state.Parameters = new PeriodSummaryParametersDto
+        {
+            From = From, To = To, FromTheBeginning = FromTheBeginning, FolderId = Folder?.FolderId, Keywords = Keywords, MeaningText = MeaningText,
+            Subject = Subject, Words = Words, Language = Language, ProviderAlias = Provider?.Alias,
+            ConceptAttributeIds = PeriodConceptRules.Chosen(ConceptAttributeIds, ConceptChoices)
+        };
+    }
+
+    // The fields as the user left them in this repository (the last 7 days and the rest empty the first time; the language of the
+    // version before, if it was kept). A folder or a model that no longer exists is left out.
+    private async Task ApplyParametersAsync(IKntService service)
+    {
+        var parameters = SavedState()?.Parameters;
+        _applying = true;
+        try
+        {
+            From = (parameters?.From ?? DateTime.Today.AddDays(-6)).Date;
+            To = (parameters?.To ?? DateTime.Today).Date;
+            FromTheBeginning = parameters?.FromTheBeginning ?? false;
+            Keywords = parameters?.Keywords ?? "";
+            MeaningText = parameters?.MeaningText ?? "";
+            Subject = parameters?.Subject ?? "";
+            Words = PeriodSummaryRules.ClampWords(parameters?.Words ?? PeriodSummaryRules.DefaultWords);
+            Language = parameters?.Language
+                ?? Store.State.Session.PeriodSummaryLanguages.FirstOrDefault(l => l.RepositoryId == RepositoryId)?.Language ?? "";
+            Provider = string.IsNullOrEmpty(parameters?.ProviderAlias) ? null : Providers.FirstOrDefault(p => p.Alias == parameters.ProviderAlias);
+            ConceptAttributeIds = PeriodConceptRules.Chosen(parameters?.ConceptAttributeIds, ConceptChoices);
+            Folder = null;
+            FolderText = AllFolders;
+            if (parameters?.FolderId is Guid folderId)
+            {
+                try
+                {
+                    var folder = await service.Folders.GetAsync(folderId);
+                    if (folder.IsValid && folder.Entity != null)
+                    {
+                        Folder = folder.Entity;
+                        var path = await service.Folders.GetPathAsync(folderId);
+                        FolderText = path.IsValid && !string.IsNullOrEmpty(path.Entity) ? path.Entity : folder.Entity.Name;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Store.Logger?.LogWarning(ex, "KNote Atlas: the folder of the period summary could not be read.");
+                }
+            }
+        }
+        finally
+        {
+            _applying = false;
+        }
     }
 
     // The progress of the summary; when it ends, the selection again (the answers of the AI about the doubtful notes).

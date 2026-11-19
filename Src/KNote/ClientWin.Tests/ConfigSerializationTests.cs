@@ -185,6 +185,29 @@ public class ConfigSerializationTests
     }
 
     [TestMethod]
+    public void XmlSerializer_RoundTrip_PreservesTheFieldsOfThePeriodSummary()
+    {
+        var state = new AppUserState();
+        var attribute = Guid.NewGuid();
+        state.Session.PeriodSummaries.Add(new RepositoryPeriodSummaryState
+        {
+            RepositoryId = Guid.NewGuid(), UserName = "ana",
+            Parameters = new KNote.Model.Dto.PeriodSummaryParametersDto
+            {
+                From = new DateTime(2026, 10, 1), To = null, FromTheBeginning = true, FolderId = Guid.NewGuid(), Keywords = "R750", Subject = "Servers",
+                Words = 3000, Language = "Spanish", ProviderAlias = "Local", ConceptAttributeIds = { attribute }
+            }
+        });
+
+        var kept = RoundTrip(state).Session.PeriodSummaries.Single();
+
+        Assert.AreEqual("ana", kept.UserName);
+        Assert.AreEqual((new DateTime(2026, 10, 1), (DateTime?)null, true, "R750", 3000, "Local"),
+            (kept.Parameters.From!.Value, kept.Parameters.To, kept.Parameters.FromTheBeginning, kept.Parameters.Keywords, kept.Parameters.Words, kept.Parameters.ProviderAlias));
+        CollectionAssert.AreEqual(new[] { attribute }, kept.Parameters.ConceptAttributeIds);
+    }
+
+    [TestMethod]
     public void XmlSerializer_StateWithoutAiAssistantWindow_KeepsTheDesignerLayout()
     {
         // A state file saved before the AI assistant remembered its window.

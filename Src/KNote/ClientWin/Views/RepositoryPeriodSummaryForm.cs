@@ -15,6 +15,7 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
     #region Private fields
 
     private readonly RepositoryPeriodSummaryCtrl _ctrl;
+    private readonly ToolTip toolTipConcepts = new();
     private bool _refreshing;
 
     #endregion
@@ -37,8 +38,17 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
         numericWords.ValueChanged += (_, _) => { if (!_refreshing) _ctrl.Words = (int)numericWords.Value; };
         comboLanguage.TextChanged += (_, _) => { if (!_refreshing) _ctrl.Language = comboLanguage.Text; };
         comboModel.SelectedIndexChanged += (_, _) => { if (!_refreshing) _ctrl.Provider = comboModel.SelectedItem as AiProviderRef; };
+        labelConcepts.Text = SummaryTexts.ConceptAttributesLabel;
+        toolTipConcepts.SetToolTip(checkedConcepts, SummaryTexts.ConceptAttributesHelp);
+        toolTipConcepts.SetToolTip(labelConcepts, SummaryTexts.ConceptAttributesHelp);
+        // ItemCheck comes before the item changes: the ctrl gets the list after it.
+        checkedConcepts.ItemCheck += (_, _) => { if (!_refreshing) checkedConcepts.BeginInvoke(ConceptsToCtrl); };
         buttonFolder.AlignToTextBox(textFolder);
         buttonClearFolder.AlignToTextBox(textFolder);
+        // The texts wrap with the width: the parts are placed again.
+        panelForm.AutoScrollMargin = new Size(0, LogicalToDeviceUnits(12));
+        panelForm.Resize += (_, _) => { if (_summaryOffsets != null) LayoutSections(); };
+        panelForm.VisibleChanged += (_, _) => { if (_summaryOffsets != null && panelForm.Visible) LayoutSections(); };
     }
 
     #endregion
@@ -76,10 +86,98 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
             progressClassify.Maximum = Math.Max(_ctrl.ClassifyTotal, 1);
             progressClassify.Value = Math.Min(_ctrl.ClassifyDone, progressClassify.Maximum);
             RefreshSummary();
+            LayoutSections();
         }
         finally
         {
             _refreshing = false;
+        }
+    }
+
+    // Where the controls of the summary are, from «Summary», as the Designer has them: the block moves as a whole.
+    private Dictionary<Control, int> _summaryOffsets;
+
+    // The parts below the fields of the selection, one under the other with what they show: a part without text or hidden takes no
+    // room (the Designer keeps room for the doubtful notes, the estimate and the progress, which are seldom shown).
+    private void LayoutSections()
+    {
+        var gap = LogicalToDeviceUnits(8);
+        var sectionGap = LogicalToDeviceUnits(18);
+        var scroll = panelForm.AutoScrollPosition.Y;
+        var left = labelCount.Left;
+        var right = labelDescription.Right;
+        _summaryOffsets ??= new Control[] { labelSubject, textSubject, labelWords, numericWords, labelLanguage, comboLanguage, labelModel,
+            comboModel, labelConcepts, checkedConcepts }.ToDictionary(c => c, c => c.Top - labelSummary.Top);
+
+        panelForm.SuspendLayout();
+        try
+        {
+            // The counts, with «Review selection...» at their right and the link to «Note relevance» below them.
+            var y = textKeywords.Bottom - scroll + LogicalToDeviceUnits(14);
+            buttonReview.Top = y + scroll;
+            y = Place(labelCount, y, left, buttonReview.Left - gap - left);
+            // From the state, not from Visible: it reads false while the section is not on screen.
+            if (linkRelevance.Text.Length > 0)
+            {
+                linkRelevance.Top = y + LogicalToDeviceUnits(2) + scroll;
+                y = linkRelevance.Bottom - scroll;
+            }
+            y = Math.Max(y, buttonReview.Bottom - scroll);
+
+            // The doubtful notes that can be asked to the AI, only when there are.
+            var classifyButton = _ctrl.IsClassifying ? buttonCancelClassify : _ctrl.CanClassify ? buttonClassify : null;
+            var pending = labelPending.Text.Length > 0;
+            labelPending.Visible = pending;
+            if (pending || classifyButton != null)
+            {
+                y += gap;
+                if (classifyButton != null)
+                    classifyButton.Top = y + scroll;
+                y = pending ? Place(labelPending, y, left, (classifyButton?.Left ?? right + gap) - gap - left) : y;
+                if (_ctrl.IsClassifying)
+                {
+                    progressClassify.SetBounds(left, y + LogicalToDeviceUnits(4) + scroll, (classifyButton?.Left ?? right + gap) - gap - left, progressClassify.Height);
+                    y = progressClassify.Bottom - scroll;
+                }
+                if (classifyButton != null)
+                    y = Math.Max(y, classifyButton.Bottom - scroll);
+            }
+
+            // «Summary» and its fields, as a block.
+            y += sectionGap;
+            labelSummary.Top = y + scroll;
+            foreach (var (control, offset) in _summaryOffsets)
+                control.Top = labelSummary.Top + offset;
+            y = checkedConcepts.Bottom - scroll + gap;
+
+            // The estimate, the progress and its text, only with something to show; then the buttons.
+            labelEstimate.Visible = labelEstimate.Text.Length > 0;
+            if (labelEstimate.Visible)
+                y = Place(labelEstimate, y, left, right - left) + gap;
+            if (_ctrl.IsRunning)
+            {
+                progressSummary.Top = y + scroll;
+                y = progressSummary.Bottom - scroll + LogicalToDeviceUnits(4);
+            }
+            labelProgress.Visible = labelProgress.Text.Length > 0;
+            if (labelProgress.Visible)
+                y = Place(labelProgress, y, left, right - left) + gap;
+            foreach (var button in new Control[] { buttonCancelSummary, buttonEstimate, buttonGenerate })
+                button.Top = y + scroll;
+            linkOpenNote.Top = y + (buttonGenerate.Height - linkOpenNote.Height) / 2 + scroll;
+        }
+        finally
+        {
+            panelForm.ResumeLayout();
+        }
+
+        // A label as high as its text in that width; returns where it ends (without the scroll).
+        int Place(Label label, int top, int x, int width)
+        {
+            var height = TextRenderer.MeasureText(label.Text.Length == 0 ? " " : label.Text, label.Font, new Size(Math.Max(width, 1), int.MaxValue),
+                TextFormatFlags.WordBreak).Height;
+            label.SetBounds(x, top + scroll, width, height);
+            return top + height;
         }
     }
 
@@ -100,9 +198,23 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
             comboModel.Items.AddRange(_ctrl.Providers.ToArray<object>());
         }
         comboModel.SelectedItem = (object)_ctrl.Provider ?? RepositoryPeriodSummaryCtrl.RecommendedModel;
+        if (!checkedConcepts.Items.OfType<PeriodConceptRules.Choice>().SequenceEqual(_ctrl.ConceptChoices))
+        {
+            checkedConcepts.Items.Clear();
+            checkedConcepts.Items.AddRange(_ctrl.ConceptChoices.ToArray<object>());
+            // Columns as wide as the longest «Note type · Attribute» (with its check box), never wider than the list.
+            var widest = _ctrl.ConceptChoices.Select(c => TextRenderer.MeasureText(c.Label, checkedConcepts.Font).Width).DefaultIfEmpty(0).Max();
+            checkedConcepts.ColumnWidth = Math.Clamp(widest + LogicalToDeviceUnits(30), LogicalToDeviceUnits(150),
+                Math.Max(checkedConcepts.ClientSize.Width - LogicalToDeviceUnits(4), LogicalToDeviceUnits(150)));
+        }
+        for (var i = 0; i < checkedConcepts.Items.Count; i++)
+            checkedConcepts.SetItemChecked(i, _ctrl.ConceptAttributeIds.Contains(((PeriodConceptRules.Choice)checkedConcepts.Items[i]).KAttributeId));
+        labelConcepts.Text = _ctrl.ConceptChoices.Count == 0
+            ? $"{SummaryTexts.ConceptAttributesLabel}: the repository has no attributes that group the notes"
+            : SummaryTexts.ConceptAttributesLabel;
 
         var running = _ctrl.IsRunning;
-        textSubject.Enabled = numericWords.Enabled = comboLanguage.Enabled = comboModel.Enabled = !running;
+        textSubject.Enabled = numericWords.Enabled = comboLanguage.Enabled = comboModel.Enabled = checkedConcepts.Enabled = !running;
         labelEstimate.Text = _ctrl.EstimateText;
         progressSummary.Visible = running;
         var progress = _ctrl.Progress;
@@ -124,7 +236,10 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
         _ctrl.Words = (int)numericWords.Value;
         _ctrl.Language = comboLanguage.Text;
         _ctrl.Provider = comboModel.SelectedItem as AiProviderRef;
+        ConceptsToCtrl();
     }
+
+    private void ConceptsToCtrl() => _ctrl.ConceptAttributeIds = checkedConcepts.CheckedItems.OfType<PeriodConceptRules.Choice>().Select(c => c.KAttributeId).ToList();
 
     #endregion
 

@@ -7,8 +7,8 @@ namespace KNote.Tests;
 /// <summary>
 /// The document of a period summary (KNote Atlas, stage 2, 2.6, D13, D15-D17, R1-R6): the parts of «What happened» (by folder up to its
 /// second level, at most 8, the words shared by their notes, a long part cut by date) and the words of each part; the citations of notes
-/// not read, without a link and counted; the relations with the notes in the order they are cited; the index by concepts (tags and
-/// glossary terms); the statistics; and the document in the order of the chapter 35, with what the AI wrote and what KNote calculates.
+/// not read, without a link and counted; the relations with the notes in the order they are cited; the index by concepts (the
+/// combinations of the attributes chosen, PeriodConceptRulesTests); the statistics; and the document in the order of the chapter 35, with what the AI wrote and what KNote calculates.
 /// </summary>
 [TestClass]
 public class PeriodSummaryDocumentTests
@@ -76,27 +76,6 @@ public class PeriodSummaryDocumentTests
     }
 
     [TestMethod]
-    public void TheIndexByConcepts_HasTheTagsAndTheGlossaryTerms_WithTheirNotes()
-    {
-        var notes = new[]
-        {
-            Note(1, "Home", 10, tags: "work, #Knowledge", text: "The QL was repaired."),
-            Note(2, "Home", 11, tags: "Work hardware", text: "The Sinclair QL needs a new keyboard."),
-            Note(3, "Home", 12, text: "Nothing.")
-        };
-        var glossary = new[]
-        {
-            new GlossaryTermDto { Row = 1, Term = "QL", AlsoWrittenAs = new List<string> { "Sinclair QL" } },
-            new GlossaryTermDto { Row = 2, Term = "KNote" }
-        };
-
-        var concepts = PeriodSummaryDocument.Concepts(notes, glossary);
-
-        Assert.AreEqual("QL (glossary) 1,2 | work (tag) 1,2 | hardware (tag) 2",
-            string.Join(" | ", concepts.Select(c => $"{c.Name} ({c.Kind}) {string.Join(",", c.NoteNumbers)}")));
-    }
-
-    [TestMethod]
     public void TheSources_AreInTheOrderTheyAreCited_ThenTheOthers_WithTheirScore()
     {
         var summary = Summary(Note(1, @"Home\A", 10, score: 0.5), Note(2, @"Home\A", 11, score: 2), Note(3, @"Home\B", 12));
@@ -116,8 +95,12 @@ public class PeriodSummaryDocumentTests
         work.TasksStarted = 1;
         work.TasksOpen = 1;
         work.EstimatedTime = 2.5;
+        work.Tasks = new List<string> { "Buy the server" };
+        work.Attributes = new Dictionary<string, string> { ["Status"] = "In progress", ["Billable"] = "Yes" };
         var garden = Note(15, @"Home\Garden", 11, text: "Pruned | the roses.");
+        garden.Attributes = new Dictionary<string, string> { ["Billable"] = "Yes" };
         var summary = Summary(garden, work);
+        summary.Prepared.ConceptAttributes = new List<string> { "Status", "Billable" };
         summary.Prepared.Selection = new NoteSelectionResultDto
         {
             KNoteNotes = 4,
@@ -138,7 +121,7 @@ public class PeriodSummaryDocumentTests
         summary.Calls = 7;
         summary.Seconds = 200;
 
-        var text = PeriodSummaryDocument.Build(summary, null, new DateTime(2026, 11, 17), Array.Empty<GlossaryTermDto>());
+        var text = PeriodSummaryDocument.Build(summary, null, new DateTime(2026, 11, 17));
 
         var headings = text.Split('\n').Where(l => l.StartsWith("## ") || l.StartsWith("### ")).ToList();
         CollectionAssert.AreEqual(new[] { "## Executive summary", "## Index", "## What happened", "### Home\\Garden", "### Home\\Work",
@@ -148,7 +131,16 @@ public class PeriodSummaryDocumentTests
         StringAssert.Contains(text, "The R750 (#12, #⁠99).\n#### Purchase\nDone.");
         StringAssert.Contains(text, "## Open and at risk\n\n" + PeriodSummaryDocument.NothingWritten);
         StringAssert.Contains(text, "- Home\\Work: 1 note");
-        StringAssert.Contains(text, "- **server** (tag), 1 note: #12");
+        StringAssert.Contains(text, " · concepts by **Status**, **Billable**\n>\n> 2 notes read");
+        StringAssert.Contains(text, "**By concept**\n\n| Status | Notes | Tasks | Started / ended / open | Notes cited |\n|---|---:|---:|---|---|\n" +
+            "| In progress | 1 | 1 | 1 / 0 / 1 | #12 |\n\n1 note without a value of Status.\n\n" +
+            "| Billable | Notes | Tasks | Started / ended / open | Notes cited |\n|---|---:|---:|---|---|\n" +
+            "| Yes | 2 | 1 | 1 / 0 / 1 | #12, #15 |\n\n## What happened", "a table per attribute");
+        Assert.DoesNotContain("server", text.Split("## What happened")[0].Split("**By concept**")[1], "the tags are not concepts");
+        StringAssert.Contains(PeriodSummaryRules.PieceText(work), "Modified: 2026-11-10 · Tags: server\nAttributes: Status = In progress · Billable = Yes\n", "the AI reads them");
+
+        summary.Prepared.ConceptAttributes = new List<string>();
+        StringAssert.Contains(PeriodSummaryDocument.Build(summary, null, new DateTime(2026, 11, 17)), "**By concept**\n\n" + PeriodConceptRules.NoneChosen + "\n\n");
         StringAssert.Contains(text, "| Home\\Work | 1 | 1 | 0 | 1 | 2.5 |  |");
         StringAssert.Contains(text, "| **Total** | 2 | 1 | 0 | 1 | 2.5 |  |");
         StringAssert.Contains(text, "| #15 | Note 15 | Home\\Garden | 2026-11-11 | In: long |\n| #12 | Note 12 | Home\\Work | 2026-11-10 | In: 2 tasks |");

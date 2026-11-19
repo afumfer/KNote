@@ -51,7 +51,8 @@ public class RepositoryPeriodSummaryCtrlTests
         store.AddServiceRef(TestServiceRefFactory.CreateWithFakeService(service));
         store.Security.SetRepositoryRole(service, EnumRoles.Staff);
 
-        var fixture = new Fixture { Ctrl = new RepositoryPeriodSummaryCtrl(store), View = view, ReviewView = reviewView, Service = service, Store = store };
+        // SaveSettings: not the real Store.SaveConfig, which writes the user's config files.
+        var fixture = new Fixture { Ctrl = new RepositoryPeriodSummaryCtrl(store) { SaveSettings = () => { } }, View = view, ReviewView = reviewView, Service = service, Store = store };
         service.SemanticSearchFake.GetIndexStatusAsyncImpl = () => Task.FromResult(new Result<SemanticIndexStatusDto>(new SemanticIndexStatusDto
         {
             Status = withIndex ? EnumSemanticIndexStatus.Ready : EnumSemanticIndexStatus.None, IndexedNotes = withIndex ? 10 : 0,

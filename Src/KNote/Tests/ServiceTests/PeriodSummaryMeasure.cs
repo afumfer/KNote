@@ -20,7 +20,8 @@ namespace KNote.Tests.ServiceTests;
 /// (or next to the copy), out of the repository: they have what the notes say.
 /// Variables: KNOTE_PERIOD_MEASURE_DB (a SQLite file or a SQL Server connection string); KNOTE_PERIOD_MEASURE_PERIODS
 /// ("yyyy-MM-dd..yyyy-MM-dd", separated by |) or KNOTE_PERIOD_MEASURE_FROM and _TO (one period); optional _KEYWORDS, _WORDS (2000),
-/// _LANGUAGE (Spanish) and _SEED (2, the samples of B and C); KNOTE_RESOURCE_SMOKE_MODEL (an Ollama model; host OLLAMA_HOST or
+/// _LANGUAGE (Spanish), _ATTRIBUTES (the attributes of «By concept», separated by |: «Note type · Name» as the selector shows
+/// them, or only the name) and _SEED (2, the samples of B and C); KNOTE_RESOURCE_SMOKE_MODEL (an Ollama model; host OLLAMA_HOST or
 /// localhost). Without them, Inconclusive. Filter by name: never the category.
 /// </summary>
 [TestClass]
@@ -102,6 +103,18 @@ public class PeriodSummaryMeasure
         return periods;
     }
 
+    // The attributes of «By concept» of KNOTE_PERIOD_MEASURE_ATTRIBUTES: each one as the selector shows it («Note type · Name», «- · Name»)
+    // or only by its name (every attribute of that name).
+    private static async Task<List<Guid>> ConceptAttributeIdsAsync(KntService service)
+    {
+        var asked = Env("KNOTE_PERIOD_MEASURE_ATTRIBUTES").Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (asked.Length == 0)
+            return new List<Guid>();
+        var choices = PeriodConceptRules.Choices((await service.KAttributes.GetAllAsync()).Entity);
+        return choices.Where(c => asked.Any(a => string.Equals(a, c.Label, StringComparison.CurrentCultureIgnoreCase)
+            || string.Equals(a, c.Name, StringComparison.CurrentCultureIgnoreCase))).Select(c => c.KAttributeId).ToList();
+    }
+
     // One summary, as the apps make it, and its report (period-*.md). Null if it was not completed.
     private static async Task<Run?> SummarizeAsync(KntService service, AiProviderRef provider, DateTime from, DateTime to, string results, StringBuilder overview)
     {
@@ -111,7 +124,8 @@ public class PeriodSummaryMeasure
             Period = new PeriodSummaryRequestDto
             {
                 Words = int.TryParse(Env("KNOTE_PERIOD_MEASURE_WORDS"), out var words) ? words : PeriodSummaryRules.DefaultWords,
-                Selection = new NoteSelectionRequestDto { From = from, To = to, Keywords = Env("KNOTE_PERIOD_MEASURE_KEYWORDS", null!) }
+                Selection = new NoteSelectionRequestDto { From = from, To = to, Keywords = Env("KNOTE_PERIOD_MEASURE_KEYWORDS", null!) },
+                ConceptAttributeIds = await ConceptAttributeIdsAsync(service)
             }
         };
 

@@ -43,6 +43,8 @@ public static class SummaryTexts
     public const string PeriodRunning = "A summary is being written: it goes on if you leave this page or close the window.";
     public const string SubjectHelp = "Empty: the period and the subject of the filters.";
     public const string PeriodLanguageHelp = "Empty: the language of the notes.";
+    public const string ConceptAttributesLabel = "Concept attributes";
+    public const string ConceptAttributesHelp = "The index «By concept» groups the notes by the values of these attributes, and the AI reads them.";
     public static string WordsHelp => $"From {PeriodSummaryRules.MinWords} to {PeriodSummaryRules.MaxWords:N0}.";
 
     public static string TitleOf(EnumDocumentProcessKind kind) => kind switch

@@ -594,14 +594,26 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   y uno de más de 2.500 palabras partido por fecha; cada apartado es una ejecución de `AiSummaryEngine.RunAsync` con sus piezas y el
   resumen ejecutivo y los pendientes, dos llamadas con los apuntes de todos (`AiSummaryEngine.JoinAsync`/`AskAsync`, separados de
   `RunAsync` sin cambiar lo que hace). **El documento** lo monta `Model/Core/PeriodSummaryDocument` en el orden del capítulo 35, con
-  títulos en inglés: datos (con llamadas, tiempo y citas no reconocidas), ejecutivo (IA), índice por carpetas y por conceptos (etiquetas
-  y términos del glosario, `GlossaryTable.KeysPerTerm`), lo ocurrido (IA), pendientes (IA), estadísticas por carpeta (tareas con actividad:
-  empezadas, terminadas, abiertas al final, tiempos; `PeriodSummaryRules.SetTaskCounts`), incluidas y omitidas con su motivo. El comando
+  títulos en inglés: datos (con llamadas, tiempo, citas no reconocidas y los atributos de «By concept»), ejecutivo (IA), índice por
+  carpetas y por conceptos, lo ocurrido (IA), pendientes (IA), estadísticas por carpeta (tareas con actividad:
+  empezadas, terminadas, abiertas al final, tiempos; `PeriodSummaryRules.SetTaskCounts`), incluidas y omitidas con su motivo. **«By concept»**
+  (`Model/Core/PeriodConceptRules`): los atributos que elige el usuario (`PeriodSummaryRequestDto.ConceptAttributeIds`; el selector los muestra
+  como «Tipo de nota · Atributo», `PeriodConceptRules.Choice.Label`, con `-` si no son de un tipo; la columna es el nombre, `Columns`: dos
+  elegidos del mismo nombre en tipos distintos son una columna; solo los que agrupan, `IsGrouper`: texto, valor tabulado, etiquetas, sí/no y entero,
+  nunca fechas, decimales ni textos largos; los deshabilitados no), **una tabla por atributo** (`Tables`) con una fila por valor, sus notas,
+  sus tareas con actividad (empezadas / terminadas / abiertas) y sus citas, de más a menos notas, 30 como mucho (el resto, «other values»),
+  y debajo las notas sin valor de ese atributo. En cada tabla, cada nota está en una fila (un `TagsValue` cuenta como el conjunto ordenado
+  de sus valores), así que sus filas suman las notas con valor. Sin atributos, «No attributes chosen.». Los valores los lee `PreparePeriodAsync` de una vez
+  (`IKntNoteRepository.GetAttributeValuesAsync`, Dapper y EF con paridad en `Tests/RepositoryParityTests/NoteAttributeValuesParityTests`) en
+  `PeriodNoteDto.Attributes`, y la IA también los lee (una línea `Attributes:` en `PeriodSummaryRules.PieceText`; la tarea le dice que no
+  cuente notas ni tareas). El glosario no está en el índice: la IA lo recibe en el mensaje de sistema, como siempre. **Todos los campos de
+  «Period summary»** (la selección y el resumen) se guardan en cada cambio por usuario y repositorio (`PeriodSummaryParametersDto`: ClientWin
+  en `AppUserState.Session.PeriodSummaries`, la Web en el navegador) y vuelven al abrir la sección. El comando
   lo calcula con `PeriodSummarySaveDto.Prepared` (las partes de la IA van aparte: `Executive`, `Sections`, `Pending`). **Citas**
   (`Model/Core/SummaryCitationRules`, D16): la de una nota no leída queda sin enlace (un `⁠` entre `#` y el número) y se cuenta.
   **Relaciones** `@DerivedFrom` hacia cada nota leída que sigue existiendo y no es de KNote (el comando no se fía de quien llama), con
   `Order` (el de su primera cita, las demás detrás) y `Weight` (su puntuación). El original adjunto, las partes tal como las escribió la
-  IA. Tests en `Tests/PeriodSummaryRulesTests`, `PeriodSummaryDocumentTests`, `ServiceTests/PeriodSummaryServiceTests`,
+  IA. Tests en `Tests/PeriodSummaryRulesTests`, `PeriodSummaryDocumentTests`, `PeriodConceptRulesTests`, `ServiceTests/PeriodSummaryServiceTests`,
   `InProcessIntegrationTests/SummaryInProcessTests`, el smoke `ServiceTests/PeriodSummarySmokeTests` y la medida
   `ServiceTests/PeriodSummaryMeasure` (ver `ClientWin.Tests/CLAUDE.md`).
 - **Citas `#123` como enlaces** (`Model/Core/NoteCitationLinker`, sobre el HTML ya saneado, sin consultar si la nota

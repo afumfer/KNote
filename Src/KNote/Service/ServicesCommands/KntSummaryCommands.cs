@@ -639,12 +639,6 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
             .Where(n => !context.KNoteFolderIds.Contains(n.FolderId) && !(n.NoteTypeId is Guid t && context.KNoteNoteTypeIds.Contains(t)))
             .Select(n => n.NoteId).ToHashSet();
 
-        // The glossary, for the index by concepts (D15).
-        var glossaryNote = await KntAtlasNotes.FindFirstAsync(Service, KntConst.GlossaryTag, result);
-        if (!result.IsValid)
-            return result;
-        var glossary = glossaryNote == null ? new List<GlossaryTermDto>() : GlossaryTable.Parse(KntAtlasNotes.Text(Service, glossaryNote)).Terms;
-
         var newNote = await Service.Notes.NewExtendedAsync(new NoteInfoDto { NoteTypeId = summaryTypeId });
         if (!newNote.IsValid)
         {
@@ -663,7 +657,7 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
         var subject = string.IsNullOrWhiteSpace(Param.Request.Subject) ? PeriodSummaryRules.DefaultSubject(Param.Request.Selection) : Param.Request.Subject.Trim();
         var summary = newNote.Entity;
         summary.Topic = subject;
-        summary.Description = PeriodSummaryDocument.Build(Param, folderPath, now, glossary);
+        summary.Description = PeriodSummaryDocument.Build(Param, folderPath, now);
         summary.Tags = "";
         summary.NoteTypeId = summaryTypeId;
         var folderDto = await Service.Folders.GetAsync(folder.FolderId);

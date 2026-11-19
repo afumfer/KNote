@@ -54,7 +54,8 @@ public static class PeriodSummaryRules
         (notes ?? Enumerable.Empty<PeriodNoteDto>())
             .OrderBy(n => n.FolderPath ?? "", StringComparer.CurrentCultureIgnoreCase).ThenBy(n => n.ModificationDateTime).ThenBy(n => n.NoteNumber);
 
-    /// <summary>What the AI reads of a note: its data, its text, its tasks with activity and the descriptions of its resources.</summary>
+    /// <summary>What the AI reads of a note: its data (with the values of the attributes of «By concept»), its text, its tasks with
+    /// activity and the descriptions of its resources.</summary>
     public static string PieceText(PeriodNoteDto note)
     {
         var text = new StringBuilder();
@@ -66,6 +67,8 @@ public static class PeriodSummaryRules
         if (!string.IsNullOrWhiteSpace(note.Tags))
             data.Add($"Tags: {Line(note.Tags)}");
         text.Append(string.Join(" · ", data)).Append('\n');
+        if (note.Attributes?.Count > 0)
+            text.Append("Attributes: ").Append(string.Join(" · ", note.Attributes.Select(a => $"{Line(a.Key)} = {Line(a.Value)}"))).Append('\n');
         if (!string.IsNullOrWhiteSpace(note.Text))
             text.Append('\n').Append(note.Text.Trim()).Append('\n');
         if (note.Tasks?.Count > 0)

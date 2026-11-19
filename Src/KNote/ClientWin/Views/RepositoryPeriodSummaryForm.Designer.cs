@@ -56,6 +56,8 @@ namespace KNote.ClientWin.Views
             this.comboLanguage = new System.Windows.Forms.ComboBox();
             this.labelModel = new System.Windows.Forms.Label();
             this.comboModel = new System.Windows.Forms.ComboBox();
+            this.labelConcepts = new System.Windows.Forms.Label();
+            this.checkedConcepts = new System.Windows.Forms.CheckedListBox();
             this.labelEstimate = new System.Windows.Forms.Label();
             this.progressSummary = new System.Windows.Forms.ProgressBar();
             this.labelProgress = new System.Windows.Forms.Label();
@@ -86,6 +88,8 @@ namespace KNote.ClientWin.Views
             this.panelForm.Controls.Add(this.comboLanguage);
             this.panelForm.Controls.Add(this.labelModel);
             this.panelForm.Controls.Add(this.comboModel);
+            this.panelForm.Controls.Add(this.labelConcepts);
+            this.panelForm.Controls.Add(this.checkedConcepts);
             this.panelForm.Controls.Add(this.labelEstimate);
             this.panelForm.Controls.Add(this.progressSummary);
             this.panelForm.Controls.Add(this.labelProgress);
@@ -379,11 +383,35 @@ namespace KNote.ClientWin.Views
             this.comboModel.Size = new System.Drawing.Size(407, 23);
             this.comboModel.TabIndex = 15;
             //
+            // labelConcepts
+            //
+            this.labelConcepts.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelConcepts.Location = new System.Drawing.Point(9, 542);
+            this.labelConcepts.Name = "labelConcepts";
+            this.labelConcepts.Size = new System.Drawing.Size(608, 15);
+            this.labelConcepts.TabIndex = 38;
+            this.labelConcepts.Text = "Concept attributes";
+            //
+            // checkedConcepts
+            //
+            this.checkedConcepts.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkedConcepts.CheckOnClick = true;
+            this.checkedConcepts.FormattingEnabled = true;
+            this.checkedConcepts.IntegralHeight = false;
+            this.checkedConcepts.Location = new System.Drawing.Point(9, 560);
+            this.checkedConcepts.MultiColumn = true;
+            this.checkedConcepts.ColumnWidth = 200;
+            this.checkedConcepts.Name = "checkedConcepts";
+            this.checkedConcepts.Size = new System.Drawing.Size(608, 94);
+            this.checkedConcepts.TabIndex = 16;
+            //
             // labelEstimate
             //
             this.labelEstimate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelEstimate.Location = new System.Drawing.Point(9, 542);
+            this.labelEstimate.Location = new System.Drawing.Point(9, 662);
             this.labelEstimate.Name = "labelEstimate";
             this.labelEstimate.Size = new System.Drawing.Size(608, 64);
             this.labelEstimate.TabIndex = 35;
@@ -392,7 +420,7 @@ namespace KNote.ClientWin.Views
             //
             this.progressSummary.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressSummary.Location = new System.Drawing.Point(9, 610);
+            this.progressSummary.Location = new System.Drawing.Point(9, 730);
             this.progressSummary.Name = "progressSummary";
             this.progressSummary.Size = new System.Drawing.Size(608, 8);
             this.progressSummary.TabIndex = 36;
@@ -402,7 +430,7 @@ namespace KNote.ClientWin.Views
             //
             this.labelProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelProgress.Location = new System.Drawing.Point(9, 622);
+            this.labelProgress.Location = new System.Drawing.Point(9, 742);
             this.labelProgress.Name = "labelProgress";
             this.labelProgress.Size = new System.Drawing.Size(608, 36);
             this.labelProgress.TabIndex = 37;
@@ -410,10 +438,10 @@ namespace KNote.ClientWin.Views
             // linkOpenNote
             //
             this.linkOpenNote.AutoSize = true;
-            this.linkOpenNote.Location = new System.Drawing.Point(9, 670);
+            this.linkOpenNote.Location = new System.Drawing.Point(9, 790);
             this.linkOpenNote.Name = "linkOpenNote";
             this.linkOpenNote.Size = new System.Drawing.Size(85, 15);
-            this.linkOpenNote.TabIndex = 19;
+            this.linkOpenNote.TabIndex = 20;
             this.linkOpenNote.TabStop = true;
             this.linkOpenNote.Text = "Open the note";
             this.linkOpenNote.Visible = false;
@@ -422,10 +450,10 @@ namespace KNote.ClientWin.Views
             // buttonCancelSummary
             //
             this.buttonCancelSummary.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancelSummary.Location = new System.Drawing.Point(197, 664);
+            this.buttonCancelSummary.Location = new System.Drawing.Point(197, 784);
             this.buttonCancelSummary.Name = "buttonCancelSummary";
             this.buttonCancelSummary.Size = new System.Drawing.Size(100, 29);
-            this.buttonCancelSummary.TabIndex = 18;
+            this.buttonCancelSummary.TabIndex = 19;
             this.buttonCancelSummary.Text = "Cancel";
             this.buttonCancelSummary.UseVisualStyleBackColor = true;
             this.buttonCancelSummary.Visible = false;
@@ -434,10 +462,10 @@ namespace KNote.ClientWin.Views
             // buttonEstimate
             //
             this.buttonEstimate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonEstimate.Location = new System.Drawing.Point(303, 664);
+            this.buttonEstimate.Location = new System.Drawing.Point(303, 784);
             this.buttonEstimate.Name = "buttonEstimate";
             this.buttonEstimate.Size = new System.Drawing.Size(150, 29);
-            this.buttonEstimate.TabIndex = 16;
+            this.buttonEstimate.TabIndex = 17;
             this.buttonEstimate.Text = "&Estimate";
             this.buttonEstimate.UseVisualStyleBackColor = true;
             this.buttonEstimate.Click += new System.EventHandler(this.buttonEstimate_Click);
@@ -445,10 +473,10 @@ namespace KNote.ClientWin.Views
             // buttonGenerate
             //
             this.buttonGenerate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonGenerate.Location = new System.Drawing.Point(467, 664);
+            this.buttonGenerate.Location = new System.Drawing.Point(467, 784);
             this.buttonGenerate.Name = "buttonGenerate";
             this.buttonGenerate.Size = new System.Drawing.Size(150, 29);
-            this.buttonGenerate.TabIndex = 17;
+            this.buttonGenerate.TabIndex = 18;
             this.buttonGenerate.Text = "&Generate";
             this.buttonGenerate.UseVisualStyleBackColor = true;
             this.buttonGenerate.Click += new System.EventHandler(this.buttonGenerate_Click);
@@ -533,6 +561,8 @@ namespace KNote.ClientWin.Views
         private System.Windows.Forms.ComboBox comboLanguage;
         private System.Windows.Forms.Label labelModel;
         private System.Windows.Forms.ComboBox comboModel;
+        private System.Windows.Forms.Label labelConcepts;
+        private System.Windows.Forms.CheckedListBox checkedConcepts;
         private System.Windows.Forms.Label labelEstimate;
         private System.Windows.Forms.ProgressBar progressSummary;
         private System.Windows.Forms.Label labelProgress;
