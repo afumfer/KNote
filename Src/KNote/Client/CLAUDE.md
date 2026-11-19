@@ -268,8 +268,13 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   con su progreso y «Cancel» (cancela la petición en curso; lo respondido queda) y vuelve a pedir la selección. La 2.5 añade asunto,
   palabras, modelo, idioma, «Estimate» y «Generate». **El resumen** (2.5b): una segunda `KntFormSection` con asunto (vacío: el de
   `PeriodSummaryRules.DefaultSubject`, como marcador), palabras (`RadzenNumeric` de `PeriodSummaryRules.MinWords` a `MaxWords`, 100 a 10.000), idioma (`RadzenAutoComplete`, el último del
-  repositorio en `localStorage`, `KNotePeriodSummaryLanguage:{RepositoryId}`) y modelo (el recomendado, alias vacío, u otro de
-  `GetProvidersAsync`); «Estimate» y «Generate» van por `IStore.Summaries.EstimateDocumentAsync`/`SummarizeDocumentAsync` con
+  repositorio en `localStorage`, `KNotePeriodSummaryLanguage:{RepositoryId}`), modelo (el recomendado, alias vacío, u otro de
+  `GetProvidersAsync`) y «Concept attributes» (`RadzenDropDown` múltiple con chips y buscador sobre `PeriodConceptRules.Choices` de
+  `IStore.KAttributes.GetAllAsync`, con el texto «Tipo de nota · Atributo» y el id como valor). **Todos los campos** (los de la selección y los del
+  resumen) se guardan en cada cambio (`SaveParametersAsync`: los manejadores de la selección y `@bind-Value:after` en los del resumen) en
+  `localStorage`, `KNotePeriodSummary:{RepositoryId}:{usuario}`, como un `PeriodSummaryParametersDto`, y se leen antes de pedir la primera
+  selección (la carpeta, si sigue existiendo; el modelo y los atributos, si siguen en sus listas); sin ellos, el idioma de la clave anterior
+  `KNotePeriodSummaryLanguage:{RepositoryId}`; «Estimate» y «Generate» van por `IStore.Summaries.EstimateDocumentAsync`/`SummarizeDocumentAsync` con
   `Kind = PeriodSummary` (el mismo trabajo de la cola, uno por usuario: si el usuario tiene un documento en marcha, `SummaryTexts.YoursRunning`),
   el progreso cada 1,5 s (`SummaryTexts.Progress`), «Cancel» y «Open the note» (`KntWindows.OpenEditAsync`); al terminar, la selección se
   vuelve a pedir (la IA pudo clasificar dudosas).
@@ -669,7 +674,9 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   y Blazor rompe el enrutador de toda la app). El enlace es parte de un HTML, así que el clic lo oye `js/kntWindows.js`
   (`listenNoteLinks`, en la fase de captura, antes que Blazor), que abre la ventana en el mismo clic para que el navegador
   no la bloquee; el aviso «Note #n not found» sale en esa ventana.
-- **Ventanas de la app** (`AppStoreService/KntWindows`). **De nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`), editarla
+- **Ventanas de la app** (`AppStoreService/KntWindows`). **De nota**: ver una nota (`notes/view/{id}`, `NoteView` → `NoteViewer`; su cabecera
+  tiene «Edit note», a la izquierda de cerrar, que comprueba Staff al pulsar con `KntAccess` y abre `OpenEditAsync` en el mismo clic; `NoteViewer`
+  acaba con un pie compacto, `.knt-note-footer` de `NoteViewer.razor.css`: número, etiquetas y fechas en una línea, o dos juntas), editarla
   (`notes/edit/{id}`, `NoteEdit`) y crearla (`notes/new?folderId=...`, la misma `NoteEdit`) se hace en una
   ventana propia sin los menús (`@layout KntWindowLayout`), que abre `AppStoreService/KntWindows`
   (`OpenViewAsync`/`OpenEditAsync`/`OpenNewAsync`, `wwwroot/js/kntWindows.js`): una por nota y uso, que se trae al

@@ -1,22 +1,27 @@
 ﻿@page "/notes/view/{NoteId:guid}"
 @page "/notes/number/{NoteNumber:int}"
 @layout KntWindowLayout
+@using KNote.Client.Auth
 
 @implements IDisposable
 
 @inject IStore store
 @inject KntWindows kntWindows
 @inject TooltipService tooltipService
+@inject KntAccess access
 
 @attribute [Authorize(Roles = "Guest, Staff, ProjectManager, Admin")]
 
 @* The window where a note is read (KntWindows.OpenViewAsync), apart from the main window, also by its number (a citation,
-   #123, opened with a click: see KntWindows). It shows the note again when it is saved in another window. *@
+   #123, opened with a click: see KntWindows). It shows the note again when it is saved in another window. «Edit note» opens
+   its edit window, for who can edit (Staff+, checked when pressed, as everywhere: KntAccess). *@
 
 <PageTitle>@(note?.Topic ?? KntConst.AppName)</PageTitle>
 
 <ToolingHeader Title="Note view" Icon="article">
     <Buttons>
+        <RadzenButton Icon="edit" Click="OnEdit" ButtonStyle="ButtonStyle.Primary" Disabled="@(note == null)"
+                      MouseEnter="@(args => tooltipService.Open(args, "Edit note", new TooltipOptions { Position = TooltipPosition.Left }))" />
         <RadzenButton Icon="close" Click="kntWindows.CloseAsync" ButtonStyle="ButtonStyle.Secondary"
                       MouseEnter="@(args => tooltipService.Open(args, "Close", new TooltipOptions { Position = TooltipPosition.Left }))" />
     </Buttons>
@@ -40,8 +45,18 @@ else
     [Parameter] public Guid NoteId { get; set; }
     [Parameter] public int? NoteNumber { get; set; }
 
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
     private NoteDto? note;
     private bool notFound;
+
+    // The role is checked with the page's authentication state, already read: the window opens in the same click (if not, the
+    // browser blocks it).
+    private async Task OnEdit()
+    {
+        if (note != null && await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Editing notes"))
+            await kntWindows.OpenEditAsync(note.NoteId);
+    }
 
     protected override async Task OnInitializedAsync()
     {

@@ -73,6 +73,8 @@ public interface IKntNoteRepository : IDisposable
     // KNote Atlas 2.3 (D6): the notes modified in [from, to) or with a task that started (StartDate or, without it, its creation) or
     // ended (EndDate) in it, with their texts and how many tasks (and with activity in it), resources and relations (both ways).
     Task<Result<List<NoteSelectionSourceDto>>> GetSelectionSourcesAsync(DateTime from, DateTime to);
+    // The index «By concept» of a period summary: the values (not empty) of these attributes in every note.
+    Task<Result<List<NoteAttributeValueDto>>> GetAttributeValuesAsync(IReadOnlyCollection<Guid> kattributeIds);
     Task<Result<int>> CountMessagesByUserAsync(Guid userId);
     Task<Result<int>> CountWindowsByUserAsync(Guid userId);
     Task<Result<int>> CountTasksByUserAsync(Guid userId);

@@ -45,7 +45,8 @@ public class RepositoryPeriodSummaryCtrlClassifyTests
         store.AddServiceRef(TestServiceRefFactory.CreateWithFakeService(service));
         store.Security.SetRepositoryRole(service, EnumRoles.Staff);
 
-        var fixture = new Fixture { Ctrl = new RepositoryPeriodSummaryCtrl(store), View = view, Service = service };
+        // SaveSettings: not the real Store.SaveConfig, which writes the user's config files.
+        var fixture = new Fixture { Ctrl = new RepositoryPeriodSummaryCtrl(store) { SaveSettings = () => { } }, View = view, Service = service };
         view.Answer = (info, buttons) =>
         {
             fixture.Questions.Add(info);

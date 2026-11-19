@@ -1326,6 +1326,27 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<NoteAttributeValueDto>>> GetAttributeValuesAsync(IReadOnlyCollection<Guid> kattributeIds)
+    {
+        try
+        {
+            if (kattributeIds == null || kattributeIds.Count == 0)
+                return new Result<List<NoteAttributeValueDto>>(new List<NoteAttributeValueDto>());
+            var ids = kattributeIds.ToList();
+            var ctx = GetOpenConnection();
+            var rows = await ctx.NoteKAttributes.AsNoTracking()
+                .Where(a => ids.Contains(a.KAttributeId) && a.Value != null && a.Value != "")
+                .Select(a => new NoteAttributeValueDto { NoteId = a.NoteId, KAttributeId = a.KAttributeId, Value = a.Value })
+                .ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<List<NoteAttributeValueDto>>(rows);
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try

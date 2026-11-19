@@ -1651,6 +1651,24 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<NoteAttributeValueDto>>> GetAttributeValuesAsync(IReadOnlyCollection<Guid> kattributeIds)
+    {
+        try
+        {
+            if (kattributeIds == null || kattributeIds.Count == 0)
+                return new Result<List<NoteAttributeValueDto>>(new List<NoteAttributeValueDto>());
+            var db = GetOpenConnection();
+            var rows = await db.QueryAsync<NoteAttributeValueDto>(@"SELECT NoteId, KAttributeId, Value FROM NoteKAttributes
+                WHERE KAttributeId IN @kattributeIds AND Value IS NOT NULL AND Value <> '';", new { kattributeIds });
+            await CloseIsTempConnection(db);
+            return new Result<List<NoteAttributeValueDto>>(rows.ToList());
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<int>> CountNotesInFolderAsync(Guid folderId)
     {
         try

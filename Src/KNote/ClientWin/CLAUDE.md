@@ -678,11 +678,19 @@ tests. «Classify doubtful notes with AI...» (2.4b, `RepositoryPeriodSummaryCtr
 `Store.GetPhotoDescriberAsync` (el LLM recomendado del repositorio), pide los lotes uno a uno con `AiNoteClassifier` sobre el `Service`
 del repositorio de la ventana, con su progreso en la sección y «Cancel» (`CancelClassification`, entre lotes y en la llamada en curso),
 dice cómo fue y vuelve a pedir la selección; `ChooseModel` y `CreateChatClient` son `internal` para los tests. **El resumen** (2.5b):
-asunto, palabras, idioma (el último del repositorio, `AppUserState.Session.PeriodSummaryLanguages`) y modelo (`Provider` nulo = «The
-repository's recommended model», que se resuelve al estimar o generar con `Store.GetPhotoDescriberAsync`: cargar la sección no lee nada
-más); «Estimate» (`AiDocumentProcessor.EstimateAsync`), «Generate» (`Store.DocumentProcessing.Start` con `Kind = PeriodSummary`, nunca a la
+asunto, palabras, idioma, modelo (`Provider` nulo = «The
+repository's recommended model», que se resuelve al estimar o generar con `Store.GetPhotoDescriberAsync`) y «Concept attributes» (un
+`CheckedListBox` con `ConceptChoices`, `PeriodConceptRules.Choices` de los atributos del repositorio leídos al cargar la sección, que se ven
+como «Tipo de nota · Atributo»; si no se pueden leer, ninguno; los elegidos, `ConceptAttributeIds`). **Todos los campos** (selección y
+resumen) se guardan en cada cambio (`Remember`, en memoria) en `AppUserState.Session.PeriodSummaries` por repositorio y usuario
+(`Store.AppUserName`), se escriben a disco con `SaveSettings` al estimar, generar, cambiar de repositorio o cerrar la sección (y la app al
+salir) y vuelven al cargar el repositorio (`ApplyParametersAsync`: la carpeta y el modelo, si siguen existiendo; sin ellos, el idioma de la
+versión anterior, `PeriodSummaryLanguages`, que ya solo se lee); «Estimate» (`AiDocumentProcessor.EstimateAsync`), «Generate» (`Store.DocumentProcessing.Start` con `Kind = PeriodSummary`, nunca a la
 vez que otro trabajo de KNote Atlas), su progreso (`DocumentProcessingProgressChanged`), «Cancel» y «Open the note»; cada campo pasa al
-`Ctrl` al cambiar (un refresco de la vista no lo pisa) y el panel tiene scroll. `SaveSettings` es `internal` para los tests. Tests en
+`Ctrl` al cambiar (un refresco de la vista no lo pisa) y el panel tiene scroll. Lo que hay debajo de los campos de la selección se coloca
+en código (`RepositoryPeriodSummaryForm.LayoutSections`, en cada refresco y al cambiar de tamaño): cada parte mide lo que su texto y las
+vacías u ocultas (las dudosas, la estimación, el progreso) no dejan hueco; qué se ve lo decide el estado del `Ctrl`, no `Visible`, que es
+`false` mientras la sección no está en pantalla. Las columnas de «Concept attributes» miden lo que el texto más largo. `SaveSettings` es `internal` para los tests. Tests en
 `RepositoryPeriodSummaryCtrlTests`, `RepositoryPeriodSummaryCtrlClassifyTests`, `RepositoryPeriodSummaryCtrlSummaryTests` y `AtlasCtrlTests`. Empieza en el repositorio activo y la lista de arriba elige otro entre los
 enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
 otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»

@@ -30,14 +30,11 @@ public static class PeriodSummaryDocument
     /// are read) and its weight (its score of relevance).</summary>
     public sealed record Source(Guid NoteId, int NoteNumber, int Order, double Weight);
 
-    /// <summary>A tag or a glossary term of the notes included, with the notes it appears in.</summary>
-    public sealed record Concept(string Name, string Kind, List<int> NoteNumbers);
-
     /// <summary>The statistics of a folder (or of all of them: Folder null).</summary>
     public sealed record FolderStatistics(string Folder, int Notes, int TasksStarted, int TasksEnded, int TasksOpen, double? EstimatedTime, double? SpentTime);
 
     /// <summary>The text of the note of the summary.</summary>
-    public static string Build(PeriodSummarySaveDto summary, string folderPath, DateTime date, IEnumerable<GlossaryTermDto> glossary)
+    public static string Build(PeriodSummarySaveDto summary, string folderPath, DateTime date)
     {
         var prepared = summary.Prepared ?? new PeriodSummaryPreparedDto();
         var notes = PeriodSummaryRules.Ordered(prepared.Notes).ToList();
@@ -60,7 +57,8 @@ public static class PeriodSummaryDocument
         var text = new StringBuilder();
         text.Append(Header(summary, folderPath, date, notRecognized)).Append("\n\n");
         text.Append(ExecutiveHeading).Append("\n\n").Append(executive).Append("\n\n");
-        text.Append(IndexHeading).Append("\n\n").Append(Index(sections.Select(s => s.Section).ToList(), Concepts(notes, glossary))).Append("\n\n");
+        text.Append(IndexHeading).Append("\n\n").Append(Index(sections.Select(s => s.Section).ToList(),
+            PeriodConceptRules.Tables(notes, prepared.ConceptAttributes))).Append("\n\n");
         text.Append(HappenedHeading).Append("\n\n");
         foreach (var (section, sectionText) in sections)
             text.Append($"### {section.Title}\n\n{sectionText}\n\n");
@@ -95,23 +93,6 @@ public static class PeriodSummaryDocument
             .ToList();
     }
 
-    /// <summary>The index by concepts: the tags (but #Knowledge and #NoKnowledge, which are KNote's) and the glossary terms that appear in
-    /// the notes, with the notes they appear in, from the most frequent.</summary>
-    public static List<Concept> Concepts(IReadOnlyList<PeriodNoteDto> notes, IEnumerable<GlossaryTermDto> glossary)
-    {
-        var tags = notes
-            .SelectMany(n => NoiseRules.Tags(n.Tags).Select(t => (Tag: t, n.NoteNumber)))
-            .Where(t => !string.Equals(t.Tag, KntConst.KnowledgeTag, StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(t.Tag, KntConst.NoKnowledgeTag, StringComparison.OrdinalIgnoreCase))
-            .GroupBy(t => t.Tag, StringComparer.CurrentCultureIgnoreCase)
-            .Select(g => new Concept(g.First().Tag, "tag", g.Select(t => t.NoteNumber).Distinct().OrderBy(n => n).ToList()));
-        var terms = GlossaryTable.KeysPerTerm(glossary, notes.Select(n => (n.NoteNumber, $"{n.Topic}\n{n.Text}")))
-            .Select(t => new Concept(t.Term.Term, "glossary", t.Keys.Distinct().OrderBy(n => n).ToList()));
-        return tags.Concat(terms)
-            .OrderByDescending(c => c.NoteNumbers.Count).ThenBy(c => c.Name, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
-    }
-
     /// <summary>The statistics by folder, in the order they are read, and the total last (Folder null).</summary>
     public static List<FolderStatistics> Statistics(IReadOnlyList<PeriodNoteDto> notes)
     {
@@ -137,6 +118,8 @@ public static class PeriodSummaryDocument
             header.Append($" · keywords «{selection.Keywords.Trim()}»");
         if (!string.IsNullOrWhiteSpace(selection.MeaningText))
             header.Append($" · talks about «{selection.MeaningText.Trim()}»");
+        if (prepared.ConceptAttributes?.Count > 0)
+            header.Append($" · concepts by {string.Join(", ", prepared.ConceptAttributes.Select(a => $"**{PeriodSummaryRules.Line(a)}**"))}");
         var leftOut = prepared.Selection?.Out ?? 0;
         var kNote = prepared.Selection?.KNoteNotes ?? 0;
         header.Append($"\n>\n> {PeriodSummaryRules.Notes(prepared.Notes?.Count ?? 0)} read");
@@ -153,20 +136,35 @@ public static class PeriodSummaryDocument
         return header.ToString();
     }
 
-    private static string Index(IReadOnlyList<PeriodSummarySectionDto> sections, IReadOnlyList<Concept> concepts)
+    private static string Index(IReadOnlyList<PeriodSummarySectionDto> sections, IReadOnlyList<PeriodConceptRules.ConceptTable> concepts)
     {
         var text = new StringBuilder("**By folder**\n\n");
         foreach (var section in sections)
             text.Append($"- {section.Title}: {PeriodSummaryRules.Notes(section.NoteNumbers?.Count ?? 0)}\n");
         text.Append("\n**By concept**\n\n");
-        if (concepts.Count == 0)
-            text.Append("No tags or glossary terms in the notes.\n");
-        foreach (var concept in concepts)
-        {
-            var cited = string.Join(", ", concept.NoteNumbers.Take(MaxCitationsPerConcept).Select(PeriodSummaryRules.Label));
-            var more = concept.NoteNumbers.Count > MaxCitationsPerConcept ? "…" : "";
-            text.Append($"- **{PeriodSummaryRules.Line(concept.Name)}** ({concept.Kind}), {PeriodSummaryRules.Notes(concept.NoteNumbers.Count)}: {cited}{more}\n");
-        }
+        text.Append(concepts.Count == 0 ? PeriodConceptRules.NoneChosen : string.Join("\n\n", concepts.Select(ConceptTable)));
+        return text.ToString().TrimEnd();
+    }
+
+    // The table of an attribute chosen: a row per value, with its notes and their tasks with activity in the period.
+    private static string ConceptTable(PeriodConceptRules.ConceptTable table)
+    {
+        var name = PeriodSummaryRules.Line(table.Attribute);
+        if (table.Rows.Count == 0)
+            return $"No note has a value of {name}.";
+
+        static string Cited(List<int> notes) => string.Join(", ", notes.Take(MaxCitationsPerConcept).Select(PeriodSummaryRules.Label)) +
+            (notes.Count > MaxCitationsPerConcept ? "…" : "");
+        static string Row(string value, PeriodConceptRules.Concept row) =>
+            $"| {value} | {row.NoteNumbers.Count:N0} | {row.Tasks:N0} | {row.TasksStarted:N0} / {row.TasksEnded:N0} / {row.TasksOpen:N0} | {Cited(row.NoteNumbers)} |\n";
+
+        var text = new StringBuilder($"| {Cell(table.Attribute)} | Notes | Tasks | Started / ended / open | Notes cited |\n|---|---:|---:|---|---|\n");
+        foreach (var row in table.Rows)
+            text.Append(Row(Cell(row.Value), row));
+        if (table.Others is { } others)
+            text.Append(Row(table.OtherValues == 1 ? "_1 other value_" : $"_{table.OtherValues:N0} other values_", others));
+        if (table.NotesWithoutValue > 0)
+            text.Append($"\n{PeriodSummaryRules.Notes(table.NotesWithoutValue)} without a value of {name}.");
         return text.ToString().TrimEnd();
     }
 

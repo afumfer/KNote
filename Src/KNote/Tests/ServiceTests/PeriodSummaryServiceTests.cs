@@ -32,6 +32,39 @@ public class PeriodSummaryServiceTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
+    public async Task TheAttributesChosen_AreReadOfEachNote_OnlyTheOnesThatExistAndGroup(string orm)
+    {
+        using var fixture = await SemanticIndexFixture.CreateAsync(orm);
+        async Task<Guid> AttributeAsync(string name, EnumKAttributeDataType type, int order)
+        {
+            var saved = await fixture.Service.Repository.KAttributes.AddAsync(new KAttributeDto { KAttributeId = Guid.NewGuid(), Name = name, KAttributeDataType = type, Order = order });
+            Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+            return saved.Entity.KAttributeId;
+        }
+        var status = await AttributeAsync("Status", EnumKAttributeDataType.TabulatedValue, 1);
+        var billable = await AttributeAsync("Billable", EnumKAttributeDataType.Bool, 2);
+        var due = await AttributeAsync("Due date", EnumKAttributeDataType.DateTime, 3);
+        var noteId = Guid.NewGuid();
+        Assert.IsTrue((await fixture.Service.Repository.Notes.AddAsync(new NoteDto
+        {
+            NoteId = noteId, Topic = "Server purchase", Description = $"We chose the Dell R750. {Words(50)}", FolderId = fixture.HomeId,
+            CreationDateTime = InPeriod.AddDays(-1), ModificationDateTime = InPeriod,
+            KAttributesDto = new[] { (status, "In progress"), (billable, "True"), (due, "2020-03-20") }
+                .Select(a => new NoteKAttributeDto { NoteKAttributeId = Guid.NewGuid(), NoteId = noteId, KAttributeId = a.Item1, Value = a.Item2 }).ToList()
+        })).IsValid);
+        var period = Request().Period;
+        period.ConceptAttributeIds = new List<Guid> { billable, status, due, Guid.NewGuid() };
+
+        var prepared = await fixture.Service.Summaries.PreparePeriodAsync(period);
+
+        Assert.IsTrue(prepared.IsValid, prepared.ErrorMessage);
+        CollectionAssert.AreEqual(new[] { "Status", "Billable" }, prepared.Entity.ConceptAttributes, "in their order, without a date or one that is gone");
+        Assert.AreEqual("Status=In progress, Billable=Yes", string.Join(", ", prepared.Entity.Notes.Single().Attributes.Select(a => $"{a.Key}={a.Value}")));
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
     public async Task ThePeriod_IsPrepared_WithWhatIsReadOfEachNoteThatGoesIn(string orm)
     {
         using var fixture = await SemanticIndexFixture.CreateAsync(orm);

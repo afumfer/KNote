@@ -171,8 +171,8 @@ internal static class KntNoteSelection
 
     /// <summary>
     /// A period summary ready to be read (2.5): the selection and, of each note that goes in (In, and the doubtful ones as they are:
-    /// they go in), what the AI reads: its data and the path of its folder, its cleaned text, its tasks with activity in the period and
-    /// the descriptions of its resources (not the whole text of its documents, P2).
+    /// they go in), what the AI reads: its data and the path of its folder, the values of the attributes of «By concept», its cleaned
+    /// text, its tasks with activity in the period and the descriptions of its resources (not the whole text of its documents, P2).
     /// </summary>
     public static async Task<PeriodSummaryPreparedDto> PreparePeriodAsync(IKntService service, PeriodSummaryRequestDto request,
         CancellationToken cancellationToken, ResultBase result)
@@ -186,6 +186,30 @@ internal static class KntNoteSelection
         var to = request.Selection.To.Date.AddDays(1);
         var paths = new Dictionary<Guid, string>();
         var prepared = new PeriodSummaryPreparedDto { Selection = selection };
+
+        // The attributes of «By concept» (the ones asked for that still exist and group) and their values, read at once.
+        var attributeValues = new Dictionary<Guid, Dictionary<string, string>>();
+        if (request.ConceptAttributeIds?.Count > 0)
+        {
+            var attributes = await service.Repository.KAttributes.GetAllAsync();
+            if (!attributes.IsValid)
+            {
+                result.AddListErrorMessage(attributes.ListErrorMessage);
+                return null;
+            }
+            var ids = PeriodConceptRules.Chosen(request.ConceptAttributeIds, PeriodConceptRules.Choices(attributes.Entity));
+            prepared.ConceptAttributes = PeriodConceptRules.Columns(attributes.Entity, ids);
+            if (ids.Count > 0)
+            {
+                var values = await service.Repository.Notes.GetAttributeValuesAsync(ids);
+                if (!values.IsValid)
+                {
+                    result.AddListErrorMessage(values.ListErrorMessage);
+                    return null;
+                }
+                attributeValues = PeriodConceptRules.ValuesByNote(values.Entity, attributes.Entity, ids);
+            }
+        }
         foreach (var note in selection.Notes.Where(n => n.IsIncluded))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -199,7 +223,8 @@ internal static class KntNoteSelection
             var period = new PeriodNoteDto
             {
                 NoteId = note.NoteId, NoteNumber = note.NoteNumber, Topic = note.Topic, FolderPath = path, Tags = source.Tags,
-                ModificationDateTime = source.ModificationDateTime, Text = text, Score = note.Score
+                ModificationDateTime = source.ModificationDateTime, Text = text, Score = note.Score,
+                Attributes = attributeValues.GetValueOrDefault(note.NoteId) ?? new()
             };
             if (source.TasksWithActivity > 0)
             {

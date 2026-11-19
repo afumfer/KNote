@@ -118,6 +118,8 @@ public class AtlasCtrlTests
         var second = new Repository(store, role);
 
         var ctrl = new AtlasCtrl(store);
+        // Not the real Store.SaveConfig, which writes the user's config files.
+        ctrl.PeriodSummaryCtrl.SaveSettings = () => { };
         ctrl.Run();
         return (ctrl, view, first, second);
     }
