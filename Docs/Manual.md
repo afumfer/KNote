@@ -149,7 +149,7 @@ If the code has changes that haven't been saved, **New**, **Open** and closing t
 
 ### AI assistant (desktop app)
 
-The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. The list next to **New session** chooses the AI model that answers. On the right, the **Sessions** panel lists your previous conversations (see *AI assistant sessions* below).
+The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. While the answer arrives, **Send** becomes **Stop**: it stops the answer, which is not part of the conversation nor saved, and the question stays in the box to send it again. The list next to **New session** chooses the AI model that answers. On the right, the **Sessions** panel lists your previous conversations (see *AI assistant sessions* below).
 
 The assistant can also work with your notes: ask it to look for notes about something, to tell you what a note says, or to note down a task, and it uses the notes of its repository. A task it creates is saved in that repository (in your default folder if it is there, otherwise in its Home folder) and opened in the note editor, where you can change it, keep it or delete it. The assistant's own sessions and the chat room threads are left out when it searches your notes.
 
@@ -428,7 +428,7 @@ The web app connects to the chat room when you sign in and leaves it when you si
 
 Home is the first page of the web app, and it can be seen without signing in. Its header shows the repository's name, the same one as in the desktop app; on the other pages the top bar shows it after *KNote* (on a phone there is only room for *KNote*). Without signing in, it is the server's default repository; once you are signed in, the repository you chose (see *Signing in and repositories (web app)*).
 
-Home shows the notes of the repository's **Home** folder, by priority and topic, 25 at most. When Home has folders inside, a panel at the right of the notes lists them after **Home**: choose one to see its notes, with the same order. Home remembers your choice while the app is open. On a phone the panel is a row above the notes.
+Home shows the notes of the repository's **Home** folder, by priority and topic, 25 at most. A long description is shown up to its first 15 lines, fading out: **Show more** shows it whole and **Show less** shortens it again (and takes you back to its note if you had scrolled past it). When Home has folders inside, a panel at the right of the notes lists them after **Home**: choose one to see its notes, with the same order. Home remembers your choice while the app is open. On a phone the panel is a row above the notes.
 
 Only the folders directly inside Home are listed there, and anybody can open them and their notes without signing in, like Home itself: keep there only what can be public.
 

@@ -91,6 +91,9 @@ public static class AppTheme
                 // only its drop-down list goes dark. The Flat one paints itself with its own dark colors.
                 case ComboBox combo when combo.DropDownStyle == ComboBoxStyle.DropDownList && combo.FlatStyle == FlatStyle.Standard:
                     combo.FlatStyle = FlatStyle.Flat;
+                    // WinForms paints the flat border and arrow over the native combo, and a resize only repaints the
+                    // new part: dragging a splitter left the old arrow and border in the middle of a docked combo.
+                    combo.SizeChanged += (_, _) => combo.Invalidate();
                     break;
             }
 

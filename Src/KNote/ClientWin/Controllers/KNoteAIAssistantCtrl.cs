@@ -59,6 +59,8 @@ public class KNoteAIAssistantCtrl : CtrlBase
     // starts), so a view can repaint it while it streams in.
     // What has arrived of the reasoning of the running turn.
     private readonly StringBuilder _streamingReasoning = new StringBuilder();
+    // The answer being written, to stop it (StopAnswer); null when there is none.
+    private CancellationTokenSource _answerCancellation;
     public string StreamingReasoning => _streamingReasoning.ToString();
 
     private readonly StringBuilder _streamingResult = new StringBuilder();
@@ -538,7 +540,32 @@ public class KNoteAIAssistantCtrl : CtrlBase
         ActivityChanged?.Invoke(this, new ControllerEventArgs<string>(activity));
     }
 
+    // Stops the answer being written, as the Web's Stop button: the turn ends with an OperationCanceledException and nothing
+    // is added to the conversation, so the question (and its files) can be sent again.
+    public void StopAnswer() => _answerCancellation?.Cancel();
+
+    public bool AnswerRunning => _answerCancellation != null;
+
     private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText)
+    {
+        using var cancellation = new CancellationTokenSource();
+        _answerCancellation = cancellation;
+        try
+        {
+            return await RunTurnAsync(prompt, onText, cancellation.Token);
+        }
+        catch (Exception ex) when (cancellation.IsCancellationRequested && ex is not OperationCanceledException)
+        {
+            // A provider's SDK may wrap the cancellation in its own exception: stopped is stopped.
+            throw new OperationCanceledException("The answer was stopped.", ex, cancellation.Token);
+        }
+        finally
+        {
+            _answerCancellation = null;
+        }
+    }
+
+    private async Task<AiChatTurnDto> RunTurnAsync(string prompt, Action<string> onText, CancellationToken cancellationToken)
     {
         _streamingReasoning.Clear();
         RejectPendingActions();
@@ -561,9 +588,11 @@ public class KNoteAIAssistantCtrl : CtrlBase
         if (webSearch)
             tools = (tools ?? []).Concat(AiWebSearch.ToolsFor(_currentProviderRef)).ToList();
         var systemPrompt = AiWebSearch.SystemPrompt(LastSystemPrompt.Text, _currentProviderRef, webSearch);
+        cancellationToken.ThrowIfCancellationRequested();
         try
         {
-            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, systemPrompt, history, prompt, tools, attachments, _tools?.TurnImages))
+            await foreach (var e in AiChatTurnStreamer.StreamAsync(_chatClient, systemPrompt, history, prompt, tools, attachments, _tools?.TurnImages,
+                cancellationToken))
             {
                 if (e.Type == AiChatStreamEventTypes.Delta)
                 {

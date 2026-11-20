@@ -14,8 +14,11 @@
     </RadzenStack>
 
     <div class="rz-p-2">
-        @* HomeNotes gives the descriptions as HTML already made safe (Home is shown without signing in). *@
-        <ViewMarkdown SafeHtml="@Note.Description" />
+        @* HomeNotes gives the descriptions as HTML already made safe (Home is shown without signing in). A long one is shown
+           up to its first lines, with "Show more": with many notes, Home doesn't become an endless page. *@
+        <KntCollapsible Lines="15">
+            <ViewMarkdown SafeHtml="@Note.Description" />
+        </KntCollapsible>
     </div>
 
 </RadzenCard>

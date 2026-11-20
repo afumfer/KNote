@@ -1,0 +1,97 @@
+@inject IJSRuntime js
+@inject IStore store
+
+@implements IAsyncDisposable
+
+@* Content shown up to Lines lines (about: it is measured by its line height, js/kntCollapsible.js), faded at the bottom, with
+   "Show more" / "Show less" only when it is longer. Without its script (the server not reachable, already notified) the content
+   is shown whole. *@
+
+<div class="@Classes" @ref="box">
+    <div class="knt-collapsible-body" id="@bodyId" @ref="body">
+        <div class="knt-collapsible-content" @ref="content">
+            @ChildContent
+        </div>
+    </div>
+    @if (overflows)
+    {
+        <RadzenButton Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="knt-collapsible-toggle"
+                      Icon="@(expanded ? "expand_less" : "expand_more")" Text="@(expanded ? "Show less" : "Show more")"
+                      Click="ToggleAsync" aria-expanded="@(expanded ? "true" : "false")" aria-controls="@bodyId" />
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    // How many lines are shown before "Show more".
+    [Parameter] public int Lines { get; set; } = 15;
+
+    private readonly string bodyId = $"knt-collapsible-{Guid.NewGuid():N}";
+    private ElementReference box;
+    private ElementReference body;
+    private ElementReference content;
+    private IJSObjectReference? module;
+    private IJSObjectReference? helper;
+    private DotNetObjectReference<KntCollapsible>? dotNetRef;
+    private bool measured;
+    private bool overflows;
+    private bool expanded;
+
+    // Cut only once measured: until then (or without the script) the content is shown whole.
+    private string Classes => "knt-collapsible"
+        + (measured ? " knt-collapsible-measured" : "")
+        + (overflows ? " knt-collapsible-overflows" : "")
+        + (expanded ? " knt-collapsible-expanded" : "");
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        module = await js.ImportModuleAsync("./js/kntCollapsible.js", store.AppState);
+        if (module == null)
+            return;
+        dotNetRef = DotNetObjectReference.Create(this);
+        helper = await module.InvokeAsync<IJSObjectReference>("initialize", body, content, Lines, dotNetRef);
+    }
+
+    [JSInvokable]
+    public void SetOverflows(bool longer)
+    {
+        measured = true;
+        overflows = longer;
+        StateHasChanged();
+    }
+
+    private async Task ToggleAsync()
+    {
+        expanded = !expanded;
+        if (!expanded && helper != null)
+        {
+            // Drawn shorter first, then back to its top if it was scrolled away.
+            StateHasChanged();
+            await Task.Yield();
+            await helper.InvokeVoidAsync("showTop", box);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (helper != null)
+            {
+                await helper.InvokeVoidAsync("dispose");
+                await helper.DisposeAsync();
+            }
+            if (module != null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is being closed: nothing to stop.
+        }
+        dotNetRef?.Dispose();
+    }
+}

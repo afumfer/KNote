@@ -1104,26 +1104,18 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
 
         var service = SelectedServiceRef.Service;
 
-        var task = new NoteTaskDto
-        {
-            NoteId = SelectedNoteInfo.NoteId,
-            UserId = (Guid)userId,
-            Description = SelectedNoteInfo.Topic,
-            Tags = "Resolved task",
-            Priority = 1,
-            Resolved = true,
-            EndDate = DateTime.Now
-        };
-
         var resNoteForSaveTask = await service.Notes.GetExtendedAsync(SelectedNoteInfo.NoteId);
         if (!resNoteForSaveTask.IsValid)
         {
             View.ShowInfo(resNoteForSaveTask.ErrorMessage);
             return;
         }
+        var note = resNoteForSaveTask.Entity;
+        var task = QuickResolvedTask.Create(note.NoteId, (Guid)userId, note.Topic, note.CreationDateTime, DateTime.Now);
+
         // As read, nothing of the note changed: only the task is added, so it isn't «modified» (KNote Atlas, stage 2, D6).
-        resNoteForSaveTask.Entity.SetIsDirty(false);
-        resNoteForSaveTask.Entity.Tasks.Add(task);
+        note.SetIsDirty(false);
+        note.Tasks.Add(task);
 
         // Refused (e.g. a Guest in this repository) or failed: the reason is in the result.
         var res = await service.Notes.SaveExtendedAsync(resNoteForSaveTask.Entity);

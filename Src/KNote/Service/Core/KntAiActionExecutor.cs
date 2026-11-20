@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 
 namespace KNote.Service.Core;
@@ -66,9 +67,9 @@ public static class KntAiActionExecutor
             : (res.Entity, null);
     }
 
-    /// <summary>A text of the assistant, in Markdown, as the note keeps it: in an HTML note, in HTML.</summary>
-    public static string NoteText(IKntService service, NoteDto note, string markdown) =>
-        note.GetContentTypeExt().ForDescription == "html" ? service.Notes.UtilMarkdownToHtml(markdown ?? "") : markdown ?? "";
+    /// <summary>A text of the assistant, in Markdown, as the note keeps it: in an HTML note, in HTML; with CR LF.</summary>
+    public static string NoteText(IKntService service, NoteDto note, string markdown) => TextLineEndings.ToCrLf(
+        note.GetContentTypeExt().ForDescription == "html" ? service.Notes.UtilMarkdownToHtml(markdown ?? "") : markdown ?? "");
 
     /// <summary>Why a folder cannot be created there, or null: in the folders of the system, or with the name of a sister.</summary>
     public static async Task<string> GetNewFolderErrorAsync(IKntService service, Guid parentId, string name)
@@ -107,7 +108,7 @@ public static class KntAiActionExecutor
 
         var note = newNote.Entity;
         note.Topic = action.Topic;
-        note.Description = action.Content ?? "";
+        note.Description = TextLineEndings.ToCrLf(action.Content);
         note.Tags = AiActionRules.ChangeTags("", action.AddTags, null);
         note.FolderId = folder.Entity.FolderId;
         note.FolderDto = folder.Entity;
@@ -222,7 +223,7 @@ public static class KntAiActionExecutor
         {
             NoteId = note.NoteId,
             UserId = user.Entity.UserId,
-            Description = action.Content,
+            Description = action.Content == null ? null : TextLineEndings.ToCrLf(action.Content),
             Tags = "",
             Priority = tasks.Entity.Count + 1,
             CreationDateTime = now,
@@ -252,7 +253,7 @@ public static class KntAiActionExecutor
         message.Entity.NotificationType = notification;
         message.Entity.AlarmType = action.AlarmType ?? EnumAlarmType.Standard;
         message.Entity.AlarmDateTime = action.Date;
-        message.Entity.Comment = action.Content;
+        message.Entity.Comment = action.Content == null ? null : TextLineEndings.ToCrLf(action.Content);
 
         var saved = await service.Notes.SaveMessageAsync(message.Entity);
         if (!saved.IsValid)

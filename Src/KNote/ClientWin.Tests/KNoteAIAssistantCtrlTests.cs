@@ -566,4 +566,98 @@ public class KNoteAIAssistantCtrlTests
         yield return new ChatResponseUpdate(ChatRole.Assistant, "partial");
         throw new InvalidOperationException("simulated provider failure mid-stream");
     }
+
+    // Writes "partial" and then waits until it is stopped (or the test gives up).
+    private static async IAsyncEnumerable<ChatResponseUpdate> StreamUntilStopped(
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        yield return new ChatResponseUpdate(ChatRole.Assistant, "partial");
+        await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+        yield return new ChatResponseUpdate(ChatRole.Assistant, " never");
+    }
+
+    private static async IAsyncEnumerable<ChatResponseUpdate> Answer(string text)
+    {
+        await Task.Yield();
+        yield return new ChatResponseUpdate(ChatRole.Assistant, text);
+    }
+
+    private static async Task<Exception?> StopWhenTheTextArrives(KNoteAIAssistantCtrl ctrl, Func<Task> send)
+    {
+        ctrl.StreamToken += (_, e) => { if (e.Entity == "partial") ctrl.StopAnswer(); };
+        try
+        {
+            await send();
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+
+    [TestMethod]
+    public async Task StopAnswer_EndsTheTurn_WithNothingAdded_AndTheQuestionCanBeSentAgain()
+    {
+        var calls = 0;
+        var ctrl = CreateCtrl(new FakeChatClient
+        {
+            GetStreamingResponseImpl = (_, _, token) => ++calls == 1 ? StreamUntilStopped(token) : Answer("Hi there")
+        });
+
+        var error = await StopWhenTheTextArrives(ctrl, () => ctrl.StreamCompletionAsync("Hello"));
+
+        Assert.IsInstanceOfType<OperationCanceledException>(error);
+        Assert.AreEqual(0, ctrl.ChatTurns.Count);
+        Assert.AreEqual("", ctrl.ChatTextMessages.ToString(), "the transcript keeps no orphaned question");
+        Assert.IsFalse(ctrl.AnswerRunning);
+
+        await ctrl.StreamCompletionAsync("Hello");
+
+        Assert.AreEqual("Hi there", ctrl.ChatTurns.Single().Answer);
+    }
+
+    [TestMethod]
+    public async Task StopAnswer_AlsoStopsACompletion()
+    {
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, token) => StreamUntilStopped(token) });
+        // A completion is streamed and put together: stopped while it waits, after its first text.
+        var waiting = ctrl.GetCompletionAsync("Hello");
+        await Task.Delay(50);
+        Assert.IsTrue(ctrl.AnswerRunning);
+        ctrl.StopAnswer();
+
+        Exception? error = null;
+        try { await waiting; } catch (Exception ex) { error = ex; }
+
+        Assert.IsInstanceOfType<OperationCanceledException>(error);
+        Assert.AreEqual(0, ctrl.ChatTurns.Count);
+        Assert.IsFalse(ctrl.AnswerRunning);
+    }
+
+    [TestMethod]
+    public async Task StopAnswer_WhenTheSdkWrapsTheCancellation_IsStillAStop()
+    {
+        static async IAsyncEnumerable<ChatResponseUpdate> Wrapped([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken token = default)
+        {
+            yield return new ChatResponseUpdate(ChatRole.Assistant, "partial");
+            try { await Task.Delay(TimeSpan.FromSeconds(30), token); }
+            catch (OperationCanceledException ex) { throw new HttpRequestException("The request was aborted.", ex); }
+        }
+        var ctrl = CreateCtrl(new FakeChatClient { GetStreamingResponseImpl = (_, _, token) => Wrapped(token) });
+
+        var error = await StopWhenTheTextArrives(ctrl, () => ctrl.StreamCompletionAsync("Hello"));
+
+        Assert.IsInstanceOfType<OperationCanceledException>(error);
+    }
+
+    [TestMethod]
+    public void StopAnswer_WithoutAnAnswer_DoesNothing()
+    {
+        var ctrl = CreateCtrl(new FakeChatClient());
+
+        ctrl.StopAnswer();
+
+        Assert.IsFalse(ctrl.AnswerRunning);
+    }
 }

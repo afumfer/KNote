@@ -45,9 +45,10 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
         checkedConcepts.ItemCheck += (_, _) => { if (!_refreshing) checkedConcepts.BeginInvoke(ConceptsToCtrl); };
         buttonFolder.AlignToTextBox(textFolder);
         buttonClearFolder.AlignToTextBox(textFolder);
-        // The texts wrap with the width: the parts are placed again.
+        // The texts wrap with the width: the parts are placed again. ClientSizeChanged, not Resize: the scroll bar appearing or going
+        // changes the width there is without changing the size of the panel.
         panelForm.AutoScrollMargin = new Size(0, LogicalToDeviceUnits(12));
-        panelForm.Resize += (_, _) => { if (_summaryOffsets != null) LayoutSections(); };
+        panelForm.ClientSizeChanged += (_, _) => { if (_summaryOffsets != null) LayoutSections(); };
         panelForm.VisibleChanged += (_, _) => { if (_summaryOffsets != null && panelForm.Visible) LayoutSections(); };
     }
 
@@ -97,9 +98,34 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
     // Where the controls of the summary are, from «Summary», as the Designer has them: the block moves as a whole.
     private Dictionary<Control, int> _summaryOffsets;
 
+    private bool _layingOut;
+
     // The parts below the fields of the selection, one under the other with what they show: a part without text or hidden takes no
     // room (the Designer keeps room for the doubtful notes, the estimate and the progress, which are seldom shown).
     private void LayoutSections()
+    {
+        // Placing the parts can show or hide the scroll bar, which changes the width there is and comes back here
+        // (ClientSizeChanged): they are placed again, here, with the new width.
+        if (_layingOut)
+            return;
+        _layingOut = true;
+        try
+        {
+            for (var pass = 0; pass < 3; pass++)
+            {
+                var width = panelForm.ClientSize.Width;
+                LayoutSectionsOnce();
+                if (panelForm.ClientSize.Width == width)
+                    break;
+            }
+        }
+        finally
+        {
+            _layingOut = false;
+        }
+    }
+
+    private void LayoutSectionsOnce()
     {
         var gap = LogicalToDeviceUnits(8);
         var sectionGap = LogicalToDeviceUnits(18);
@@ -162,8 +188,11 @@ public partial class RepositoryPeriodSummaryForm : KntForm, IViewPeriodSummary
             labelProgress.Visible = labelProgress.Text.Length > 0;
             if (labelProgress.Visible)
                 y = Place(labelProgress, y, left, right - left) + gap;
+            // The buttons, not anchored: at the right of the width there is, with the margin of the left, as a row (their gaps are the
+            // Designer's). With an anchor, «Generate» was left partly under the scroll bar when it appeared.
+            var shift = panelForm.ClientSize.Width - left - buttonGenerate.Right;
             foreach (var button in new Control[] { buttonCancelSummary, buttonEstimate, buttonGenerate })
-                button.Top = y + scroll;
+                button.Location = new Point(button.Left + shift, y + scroll);
             linkOpenNote.Top = y + (buttonGenerate.Height - linkOpenNote.Height) / 2 + scroll;
         }
         finally

@@ -80,6 +80,7 @@ public class DocumentTranslationServiceTests
         Assert.IsEmpty(translation.Resources, "nothing attached");
         Assert.AreEqual("#### p. 1\n\nEl QL arranca.\n\n#### p. 2\n\nTiene dos microdrives.", DocumentTranslationRules.Body(translation.Description));
         StringAssert.StartsWith(translation.Description, "> Translation of the document **manual.pdf**");
+        Assert.DoesNotContain("\n", translation.Description.Replace("\r\n", ""), "the lines end with CR LF");
 
         Assert.AreEqual(NoteDate, (await service.Notes.GetAsync(noteId)).Entity.ModificationDateTime, "the note of the document is not modified");
         Assert.HasCount(2, model.Requests, "a call per page");
@@ -140,7 +141,8 @@ public class DocumentTranslationServiceTests
         var done = (await service.Notes.GetAsync(left.NoteId)).Entity.Description;
         Assert.AreEqual(6, Headings(done));
         StringAssert.Contains(done, "Página 2 (corregida).", "what somebody changed is kept");
-        StringAssert.Contains(done, "#### p. 6\n\nPágina 6.");
+        StringAssert.Contains(done, "#### p. 6\r\n\r\nPágina 6.");
+        Assert.DoesNotContain("\n", done.Replace("\r\n", ""), "the lines end with CR LF, also after Continue");
         StringAssert.Contains(done, "Translated: all the 6 pages.");
         Assert.HasCount(2, (await service.Notes.GetByFolderAsync(folderId)).Entity, "the document's note and its translation");
         Assert.IsTrue((await service.Summaries.GetDocumentTranslationsAsync(resourceId)).Entity.Single().Finished);

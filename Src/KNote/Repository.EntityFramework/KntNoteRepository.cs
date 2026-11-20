@@ -302,6 +302,22 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<Guid?>> GetResourceIdByNameAsync(Guid noteId, string name)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var resourceId = await ctx.Resources.AsNoTracking().Where(r => r.NoteId == noteId && r.Name == name)
+                .Select(r => (Guid?)r.ResourceId).FirstOrDefaultAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<Guid?> { Entity = resourceId };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds)
     {
         try

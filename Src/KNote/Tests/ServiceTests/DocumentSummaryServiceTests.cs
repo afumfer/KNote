@@ -73,6 +73,8 @@ public class DocumentSummaryServiceTests
         var source = (await service.Notes.GetAsync(noteId)).Entity;
         StringAssert.Contains(summary.Description, $"of the note #{source.NoteNumber}");
         StringAssert.EndsWith(summary.Description, "The QL manual explains how it boots (p. 1).");
+        StringAssert.Contains(summary.Description, "\r\n\r\nThe QL manual");
+        Assert.DoesNotContain("\n", summary.Description.Replace("\r\n", ""), "the lines end with CR LF");
 
         var relation = summary.TraceNotesTo.Single();
         Assert.AreEqual(noteId, relation.ToId);

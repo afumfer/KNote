@@ -272,7 +272,7 @@ window.chrome.webview.postMessage(retValue);";
 
         var formReadVar = new ReadVarForm(listVars);
         formReadVar.Text = "Tags for selected notes";
-        formReadVar.Size = formReadVar.LogicalToDeviceUnits(new Size(500, 150));
+        formReadVar.Width = formReadVar.LogicalToDeviceUnits(500);   // its height is the one of its rows
         var result = formReadVar.ShowDialog();
 
         if (result == DialogResult.Cancel)

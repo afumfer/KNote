@@ -64,7 +64,7 @@
             buttonAcept.Name = "buttonAcept";
             buttonAcept.Size = new Size(81, 29);
             buttonAcept.TabIndex = 0;
-            buttonAcept.Text = "&Acept";
+            buttonAcept.Text = "&Accept";
             buttonAcept.UseVisualStyleBackColor = true;
             buttonAcept.Click += buttonAccept_Click;
             // 

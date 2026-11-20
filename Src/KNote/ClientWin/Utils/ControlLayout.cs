@@ -29,4 +29,16 @@ public static class ControlLayout
         textBox.LocationChanged += (s, e) => Align();
         textBox.SizeChanged += (s, e) => Align();
     }
+
+    /// <summary>
+    /// Moves a label left by the padding GDI draws before its text, so its text (not its edge) starts at <paramref name="left"/>
+    /// (in the label's parent coordinates): over a box, a list or a combo, the text lines up with its border.
+    /// </summary>
+    public static void AlignTextTo(this Label label, int left)
+    {
+        const TextFormatFlags flags = TextFormatFlags.Left | TextFormatFlags.SingleLine;
+        var padded = TextRenderer.MeasureText(label.Text, label.Font, Size.Empty, flags).Width;
+        var unpadded = TextRenderer.MeasureText(label.Text, label.Font, Size.Empty, flags | TextFormatFlags.NoPadding).Width;
+        label.Left = left - (padded - unpadded) / 2;
+    }
 }

@@ -507,6 +507,22 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<Guid?>> GetResourceIdByNameAsync(Guid noteId, string name)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var resource = await db.QueryFirstOrDefaultAsync<ResourceDto>(
+                "SELECT ResourceId FROM Resources WHERE NoteId = @noteId AND [Name] = @name", new { noteId, name });
+            await CloseIsTempConnection(db);
+            return new Result<Guid?> { Entity = resource?.ResourceId };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds)
     {
         try

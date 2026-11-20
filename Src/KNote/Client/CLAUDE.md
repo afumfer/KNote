@@ -734,7 +734,11 @@ más `wwwroot/css/app.css` (base `box-sizing`, tipografía, error de Blazor),
   navegación, así que el título sigue la página sin suscribirse a `LocationChanged`). A la derecha de las notas,
   `Pages/HomeFolders` (presentación) lista Home y sus carpetas hijas directas (`Folders.GetHomeChildrenAsync`) y
   al elegir una Home pide sus notas (`Notes.GetHomeNotesAsync(folderId)`, el mismo criterio que Home: prioridad y
-  tema, 25 como mucho). La elegida se recuerda en `AppState.HomeFolderId` mientras la app está abierta; sin
+  tema, 25 como mucho). La descripción de cada tarjeta (`Notes/NoteItem`) va en `Shared/KntCollapsible` (`Lines`, 15):
+  cortada a ese número de líneas desde su primera línea de texto, difuminada con una máscara (vale para cualquier tema) y con
+  «Show more»/«Show less» solo si es más larga; `js/kntCollapsible.js` la mide con `ResizeObserver` (imágenes que cargan,
+  diagramas, otro ancho) y, al plegarla, vuelve a la tarjeta si quedó fuera de la vista (lo que se desplaza es `.rz-body`, no la
+  ventana). La elegida se recuerda en `AppState.HomeFolderId` mientras la app está abierta; sin
   carpetas no hay panel, y en un móvil es una fila encima de las notas (`grid-template-areas` de
   `Index.razor.css`, así el orden del código coincide con el visual en escritorio).
 - **Chat room** (`Pages/ChatRoom`, ruta `chat`, Staff+): `ChatRoom` es el caso de uso y `ChatRoomThreadsList`/

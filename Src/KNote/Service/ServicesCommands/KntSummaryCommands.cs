@@ -156,7 +156,7 @@ public class KntSummarySaveDocumentSummaryAsyncCommand : KntCommandServiceBase<D
         };
         var summary = newNote.Entity;
         summary.Topic = LongDocumentRules.NoteTopic(resource.NameOut);
-        summary.Description = LongDocumentRules.NoteDescription(document, Param, now);
+        summary.Description = TextLineEndings.ToCrLf(LongDocumentRules.NoteDescription(document, Param, now));
         summary.Tags = "";
         summary.NoteTypeId = summaryTypeId;
         summary.FolderId = note.FolderId;
@@ -167,7 +167,7 @@ public class KntSummarySaveDocumentSummaryAsyncCommand : KntCommandServiceBase<D
             Description = LongDocumentRules.OriginalDescription(Param.Model, now),
             DescriptionByUser = true,
             FileType = "text/markdown",
-            ContentArrayBytes = Encoding.UTF8.GetBytes(Param.Summary)
+            ContentArrayBytes = Encoding.UTF8.GetBytes(TextLineEndings.ToCrLf(Param.Summary))
         });
         summary.TraceNotesTo.Add(new TraceNoteDto { ToId = note.NoteId, TraceNoteTypeId = derivedFromId, Weight = 1.0 });
 
@@ -329,8 +329,8 @@ public class KntSummarySaveDocumentTranslationAsyncCommand : KntCommandServiceBa
         return saved.Entity;
     }
 
-    private string Description(DocumentTranslationDto state, ResourceDto resource, NoteDto note, string body) =>
-        DocumentTranslationRules.NoteDescription(state, resource.NameOut, note.NoteNumber, Param.MissingPages, DateTime.Now, body);
+    private string Description(DocumentTranslationDto state, ResourceDto resource, NoteDto note, string body) => TextLineEndings.ToCrLf(
+        DocumentTranslationRules.NoteDescription(state, resource.NameOut, note.NoteNumber, Param.MissingPages, DateTime.Now, body));
 }
 
 // KNote Atlas, stage 2 (2.1b): the translations of a document (the notes @KNoteTranslation related to its note whose hidden comment
@@ -657,7 +657,7 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
         var subject = string.IsNullOrWhiteSpace(Param.Request.Subject) ? PeriodSummaryRules.DefaultSubject(Param.Request.Selection) : Param.Request.Subject.Trim();
         var summary = newNote.Entity;
         summary.Topic = subject;
-        summary.Description = PeriodSummaryDocument.Build(Param, folderPath, now);
+        summary.Description = TextLineEndings.ToCrLf(PeriodSummaryDocument.Build(Param, folderPath, now));
         summary.Tags = "";
         summary.NoteTypeId = summaryTypeId;
         var folderDto = await Service.Folders.GetAsync(folder.FolderId);
@@ -674,7 +674,7 @@ public class KntSummarySavePeriodSummaryAsyncCommand : KntCommandServiceBase<Per
             Description = PeriodSummaryRules.OriginalDescription(Param.Model, now),
             DescriptionByUser = true,
             FileType = "text/markdown",
-            ContentArrayBytes = Encoding.UTF8.GetBytes(PeriodSummaryDocument.Original(Param))
+            ContentArrayBytes = Encoding.UTF8.GetBytes(TextLineEndings.ToCrLf(PeriodSummaryDocument.Original(Param)))
         });
         // A relation with each note it comes from, in the order they are cited and with their score (D17).
         foreach (var source in PeriodSummaryDocument.Sources(Param).Where(s => sources.Contains(s.NoteId)))

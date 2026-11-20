@@ -352,7 +352,12 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
             return noteAttributeEditor.Model;
         }
         else
+        {
+            // RunModal catches what fails while the editor is prepared: without this, a double click did nothing.
+            if (res.Entity == EControllerResult.Error)
+                View.ShowInfo(res.ErrorMessage);
             return null;
+        }
     }
 
     public async Task<bool> RequestChangeNoteType(Guid? oldSelectedId)

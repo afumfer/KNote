@@ -70,7 +70,7 @@ public class AiActionToolsTests
         using var setup = await SetupAsync(orm);
         var folder = (await setup.Service.Folders.SaveAsync(new FolderDto { Name = "Sinclair", ParentId = setup.Fixture.HomeId })).Entity;
 
-        var result = await setup.CallAsync(AiActionRules.CreateNote, ("topic", "Gold Card"), ("content", "An accelerator."),
+        var result = await setup.CallAsync(AiActionRules.CreateNote, ("topic", "Gold Card"), ("content", "An accelerator.\n\n- 2 MB"),
             ("folder", "Sinclair"), ("tags", new[] { "ql", "hardware" }));
 
         var action = setup.Tools.TurnActions.Single();
@@ -78,7 +78,7 @@ public class AiActionToolsTests
         StringAssert.Contains(result, $"Done: created the note #{action.NoteNumber}");
         var note = await setup.ReadAsync(action.NoteId!.Value);
         Assert.AreEqual("Gold Card", note.Topic);
-        Assert.AreEqual("An accelerator.", note.Description);
+        Assert.AreEqual("An accelerator.\r\n\r\n- 2 MB", note.Description, "with CR LF");
         Assert.AreEqual(folder.FolderId, note.FolderId);
         Assert.AreEqual("ql hardware", note.Tags);
         CollectionAssert.Contains(setup.Host.Created, note.NoteId);
@@ -106,7 +106,7 @@ public class AiActionToolsTests
         using var setup = await SetupAsync(orm);
         var note = await setup.Fixture.AddNoteAsync("QL", "First text.");
 
-        var result = await setup.CallAsync(AiActionRules.AppendToNote, ("noteNumber", note.NoteNumber), ("content", "Second text."));
+        var result = await setup.CallAsync(AiActionRules.AppendToNote, ("noteNumber", note.NoteNumber), ("content", "Second text.\nThird line."));
 
         StringAssert.Contains(result, "NOT done");
         var action = setup.Tools.TurnActions.Single();
@@ -118,7 +118,7 @@ public class AiActionToolsTests
         await setup.Tools.ExecuteActionsAsync(new[] { action });
 
         Assert.AreEqual(EnumAiActionStatus.Done, action.Status, action.Result);
-        Assert.AreEqual("First text.\r\n\r\nSecond text.", (await setup.ReadAsync(note.NoteId)).Description);
+        Assert.AreEqual("First text.\r\n\r\nSecond text.\r\nThird line.", (await setup.ReadAsync(note.NoteId)).Description, "with CR LF");
         CollectionAssert.Contains(setup.Host.Changed, note.NoteId);
     }
 

@@ -31,6 +31,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
     private const int DesignerClientWidth = 1100;
     private const int WidthWithoutSessions = 858;
     private const int SessionsPanelWidth = 254;
+    // Space between "Sessions in the repository:" and its combo, in logical pixels (the Designer's was 8).
+    private const int LabelToComboGap = 4;
+    // The Designer's width of the model's list (scaled): the widest it gets.
+    private readonly int _providersWidth;
     // The sessions list is being filled or its selection set from code: not the user choosing a session.
     private bool _syncingSessions;
     // An answer is being written (StatusProcessing).
@@ -113,6 +117,21 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         panelResultHeader.Resize += (s, e) => AlignResultHeader();
         panelPromptHeader.Resize += (s, e) => AlignPromptHeader();
 
+        // The texts of the labels start where the control under them does (the result, the prompt, the repositories).
+        labelResult.AlignTextTo(kntEditViewResult.Left - panelResultHeader.Left);
+        labelPrompt.AlignTextTo(textPrompt.Left - panelPromptHeader.Left);
+        labelSessions.AlignTextTo(comboRepositories.Left);
+        // The repositories' combo (docked at the bottom of the header) right under its label, and the list of sessions with it.
+        panelSessionsHeader.Height = labelSessions.Bottom + LogicalToDeviceUnits(LabelToComboGap) + comboRepositories.Height
+            + panelSessionsHeader.Padding.Bottom;
+
+        // The model's list gives up width before the buttons reach the "Prompt:" label (AlignPromptHeader); its list keeps
+        // the Designer's width.
+        _providersWidth = comboProviders.Width;
+        comboProviders.DropDownWidth = _providersWidth;
+        // The Designer's value is not scaled with the window.
+        splitSessions.Panel2MinSize = LogicalToDeviceUnits(splitSessions.Panel2MinSize);
+
         // InitializeComponent has already docked both headers to their panel's width (the Designer's one less
         // the panel's Padding), so their Resize has fired before these handlers existed: without aligning them
         // now, the rightmost buttons keep the Designer's position and are cut until the window is resized.
@@ -125,17 +144,34 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     // The buttons next to the model, without the ones that do not show, so they leave no gap (their Visible says nothing here,
     // as it is false until the window shows). ShowWebSearch aligns it again: Internet depends on the provider.
+    // When the header is narrow, the model's list narrows (down to its minimum) instead of the buttons covering the label,
+    // and the chat's panel cannot be made narrower than the header needs with it at its minimum: the Designer's 560
+    // pixels, not scaled and set before the Internet button existed, let the buttons cover "Prompt:".
     private void AlignPromptHeader()
     {
+        const int margin = 6, spacing = 6;
         var controls = new List<Control> { buttonSend, buttonNewSession };
         if (_ctrl.CanAttach)
             controls.Add(buttonAttach);
         if (_ctrl.SupportsWebSearch)
             controls.Add(_buttonWebSearch);
         controls.Add(panelSeparator);
+
+        var minProvidersWidth = _providersWidth * 2 / 3;
+        var required = labelPrompt.Right + controls.Sum(c => c.Width) + spacing * (controls.Count + 1) + minProvidersWidth + margin;
+        comboProviders.Width = Math.Clamp(panelPromptHeader.Width - required + minProvidersWidth, minProvidersWidth, _providersWidth);
         controls.Add(comboProviders);
 
-        AlignControlsRight(panelPromptHeader, 6, 6, controls.ToArray());
+        AlignControlsRight(panelPromptHeader, margin, spacing, controls.ToArray());
+        SetChatMinimumWidth(required + splitSessions.Panel1.Width - panelPromptHeader.Width);
+    }
+
+    // Within what the window allows now: a larger minimum would make SplitContainer throw.
+    private void SetChatMinimumWidth(int width)
+    {
+        width = Math.Min(width, splitSessions.Width - splitSessions.SplitterWidth - splitSessions.Panel2MinSize);
+        if (width > 0 && width != splitSessions.Panel1MinSize)
+            splitSessions.Panel1MinSize = width;
     }
 
     private static IEnumerable<ToolStripMenuItem> MenuItems(ToolStripItemCollection items)
@@ -243,6 +279,15 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
     private async void buttonSend_Click(object sender, EventArgs e)
     {
+        // While an answer is being written the button is Stop (StatusProcessing), as in the Web. The menu's Send (Ctrl+Enter) is
+        // off then, so a shortcut never stops an answer.
+        if (_processing)
+        {
+            if (sender == buttonSend)
+                _ctrl.StopAnswer();
+            return;
+        }
+
         try
         {
             StatusProcessing(true);
@@ -256,6 +301,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
 
             await SendAsync(textPrompt.Text, automatic: false);
             ShowAttachments();
+        }
+        catch (OperationCanceledException)
+        {
+            // Stopped: the question and its files are still in the box, to send it again.
         }
         catch (Exception ex)
         {
@@ -380,6 +429,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             StatusProcessing(true);
             await AnswerActionsAsync(answer.Accepted, answer.DontAsk);
+        }
+        catch (OperationCanceledException)
+        {
+            // The answer after the card, stopped: what was accepted is already done.
         }
         catch (Exception ex)
         {
@@ -923,7 +976,11 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             comboProviders.Enabled = false;
             comboRepositories.Enabled = false;
             menuOptions.Enabled = false;
-            buttonSend.Enabled = false;
+            // Send becomes Stop; its menu item (and Ctrl+Enter) is off.
+            buttonSend.Text = "&Stop";
+            buttonSend.SetKntIcon(KntIcon.Stop);
+            buttonSend.Enabled = true;
+            menuSend.Enabled = false;
             buttonAttach.Enabled = false;
             _buttonWebSearch.Enabled = false;
             buttonNewSession.Enabled = false;
@@ -940,7 +997,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
             comboProviders.Enabled = _ctrl.AiProviderRefs.Count > 0;
             comboRepositories.Enabled = comboRepositories.Items.Count > 1;
             menuOptions.Enabled = true;
+            buttonSend.Text = "&Send";
+            buttonSend.SetKntIcon(KntIcon.Send);
             buttonSend.Enabled = _ctrl.CurrentProviderRef != null;
+            menuSend.Enabled = buttonSend.Enabled;
             buttonAttach.Enabled = _ctrl.CurrentProviderRef != null;
             _buttonWebSearch.Enabled = true;
             buttonNewSession.Enabled = true;
@@ -963,10 +1023,10 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             await _ctrl.GetCompletionAsync(prompt, automatic);
         }
-        catch
+        catch (Exception ex)
         {
             if (chatView)
-                _chatView.FailTurn();
+                _chatView.FailTurn(stopped: ex is OperationCanceledException);
             throw;
         }
 
@@ -1004,10 +1064,13 @@ public partial class KNoteAIAssistantForm : KntForm, IViewBase
         {
             await _ctrl.StreamCompletionAsync(prompt, automatic);
         }
-        catch
+        catch (Exception ex)
         {
             if (chatView)
-                _chatView.FailTurn();
+                _chatView.FailTurn(stopped: ex is OperationCanceledException);
+            else if (ex is OperationCanceledException)
+                // Without the text that had arrived: it is not part of the conversation.
+                kntEditViewResult.ShowMarkdownContent(ChatTranscript());
             throw;
         }
         finally

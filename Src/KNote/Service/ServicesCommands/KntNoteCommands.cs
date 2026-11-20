@@ -727,6 +727,15 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
     {
         Result<ResourceDto> result;
 
+        // Before its file is written: with the name of another resource of the note it would replace that one's file, and the
+        // database would then refuse it with its own error (the unique index of NoteId + Name).
+        if (await DuplicateNameErrorAsync() is string duplicateName)
+        {
+            result = new Result<ResourceDto>();
+            result.AddErrorMessage(duplicateName);
+            return result;
+        }
+
         var hasNewContent = Param.ContentArrayBytes != null;
         var fileManaged = Service.Notes.UtilManageResourceContent(Param, readContent: readContentBack);
 
@@ -807,6 +816,16 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
             await KntSemanticIndexer.MarkStaleAsync(Service, result.Entity.NoteId);
 
         return result;
+    }
+
+    // Another resource of the note with this name (a new resource has none of its own, so any one is another).
+    private async Task<string> DuplicateNameErrorAsync()
+    {
+        if (Param.NoteId == Guid.Empty || string.IsNullOrEmpty(Param.Name))
+            return null;
+
+        var found = await Repository.Notes.GetResourceIdByNameAsync(Param.NoteId, Param.Name);
+        return found.Entity is Guid other && other != Param.ResourceId ? ResourceFileRules.DuplicateNameError(Param.NameOut) : null;
     }
 
     // KNote Atlas, stage 4 (D12): what a person writes the AI never overwrites, and the lock is what the editor says.

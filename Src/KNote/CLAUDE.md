@@ -244,6 +244,12 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   `Tests/ServiceTests/NoteModificationDateServiceTests` y `ClientWin.Tests/NoteEditorsModificationDateTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
+- **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde
+  pasan todos los guardados de recursos, lo comprueba antes de escribir el fichero (`IKntNoteRepository.GetResourceIdByNameAsync`,
+  Dapper y EF con paridad en `Tests/RepositoryParityTests/ResourceNameParityTests`) y devuelve un `Result` no válido con el texto
+  de `ResourceFileRules.DuplicateNameError` (el nombre como lo ve el usuario, `NameOut`): sin eso, el fichero del otro recurso se
+  sobrescribía y el usuario recibía el error de la BD. El índice sigue como última defensa. Tests en
+  `Tests/ServiceTests/NoteResourceFilesServiceTests`.
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben
   los usuarios, así que su HTML (tras Markdig) se sanea antes de mostrarse, con las mismas reglas en las dos
   apps: `IKntNoteService.UtilMarkdownToHtml`/`UtilSanitizeHtml` en `ClientWin` y `POST api/notes/html` en la Web.
@@ -680,6 +686,11 @@ no en `Model`.
   `AppUserState`) y E/S + cifrado en `ClientWin/Core`. Antes de tocarlo lee "Configuración persistida" en
   `ClientWin/CLAUDE.md`: el formato antiguo sigue soportado por migración y su lector (`AppConfigV1`) no debe
   cambiarse.
+- **Saltos de línea del texto de la IA**: lo que KNote guarda escrito por la IA (resumen extendido, traducción, resumen de un
+  periodo y sus `.md` originales, `create_note`/`append_to_note`/`replace_note_text`/`create_task`, tareas y alarmas del asistente)
+  va con CR LF, como las notas escritas en los editores de Windows: `Model/Core/TextLineEndings.ToCrLf`, en el punto de guardado del
+  `Service`. No usa `ReplaceLineEndings`, que también cambiaría el `\f` que separa las páginas de un documento. Un caso de uso
+  nuevo que guarde texto de la IA tiene que pasarlo por ahí.
 - Cadenas localizadas: `Docs/Manual.md` (inglés) y `Docs/Manual_es.md` (español) son el manual de usuario —
   actualiza ambos si cambia el comportamiento de cara al usuario, siguiendo la convención bilingüe ya
   existente en este repo.

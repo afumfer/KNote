@@ -230,6 +230,12 @@ public static class AiChatHtml
     public static string FailedAnswer(string providerAlias, string answerSoFar)
         => Assistant("failed", providerAlias, MarkdownToHtml(answerSoFar), "The request failed: this answer is not part of the conversation.");
 
+    // An answer stopped by the user (Stop): the same, with its reason.
+    public static string StoppedAnswer(string providerAlias, string answerSoFar)
+        => Assistant("failed", providerAlias, MarkdownToHtml(answerSoFar), StoppedText);
+
+    public const string StoppedText = "Stopped: this answer is not part of the conversation.";
+
     public static string MarkdownToHtml(string markdown)
         => string.IsNullOrEmpty(markdown) ? "" : NoteCitationLinker.LinkForDesktop(Markdown.ToHtml(markdown, Pipeline));
 

@@ -133,6 +133,73 @@ public class NoteResourceFilesServiceTests
     }
 
     [TestMethod]
+    public async Task SaveResourceAsync_WithTheNameOfAnotherResourceOfTheNote_SaysSoAndKeepsTheOtherFile()
+    {
+        var noteId = await AddNoteAsync();
+        var first = await service.Notes.SaveResourceAsync(NewResource(noteId, "image.png"));
+        Assert.IsTrue(first.IsValid, first.ErrorMessage);
+        var second = NewResource(noteId, "image.png");
+        second.ContentArrayBytes = [1, 2, 3];
+
+        var saved = await service.Notes.SaveResourceAsync(second);
+
+        Assert.IsFalse(saved.IsValid);
+        Assert.AreEqual("This note already has a resource with the file \"image.png\". Choose another file, or rename it before adding it.",
+            saved.ErrorMessage);
+        Assert.HasCount(1, (await service.Notes.GetResourcesAsync(noteId)).Entity);
+        CollectionAssert.AreEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, File.ReadAllBytes(service.Notes.UtilGetResourceFilePath(first.Entity)),
+            "the file of the other resource is not replaced");
+    }
+
+    [TestMethod]
+    public async Task SaveResourceAsync_ANewResourceWithANameInUse_AsTheNoteEditorSavesIt_SaysTheFileName()
+    {
+        // The desktop note editor gives a new resource its id before saving it (forceNew).
+        var noteId = await AddNoteAsync();
+        var name = $"{Guid.NewGuid()}_report.pdf";
+        Assert.IsTrue((await service.Notes.SaveResourceAsync(NewResource(noteId, name))).IsValid);
+        var again = NewResource(noteId, name);
+        again.ResourceId = Guid.NewGuid();
+
+        var saved = await service.Notes.SaveResourceAsync(again, forceNew: true);
+
+        Assert.IsFalse(saved.IsValid);
+        StringAssert.Contains(saved.ErrorMessage, "\"report.pdf\"", "as the user sees it, without the guid");
+    }
+
+    [TestMethod]
+    public async Task SaveResourceAsync_ItsOwnName_OrTheNameOfAResourceOfAnotherNote_IsSaved()
+    {
+        var noteId = await AddNoteAsync();
+        var otherNoteId = await AddNoteAsync();
+        var saved = await service.Notes.SaveResourceAsync(NewResource(noteId, "image.png"));
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+
+        saved.Entity.Description = "Changed";
+        var again = await service.Notes.SaveResourceAsync(saved.Entity);
+        var inOtherNote = await service.Notes.SaveResourceAsync(NewResource(otherNoteId, "image.png"));
+
+        Assert.IsTrue(again.IsValid, again.ErrorMessage);
+        Assert.IsTrue(inOtherNote.IsValid, inOtherNote.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task SaveResourceAsync_RenamedToTheNameOfAnotherResourceOfTheNote_IsRefused()
+    {
+        var noteId = await AddNoteAsync();
+        Assert.IsTrue((await service.Notes.SaveResourceAsync(NewResource(noteId, "a.png"))).IsValid);
+        var b = await service.Notes.SaveResourceAsync(NewResource(noteId, "b.png"));
+        Assert.IsTrue(b.IsValid, b.ErrorMessage);
+
+        b.Entity.Name = "a.png";
+        var saved = await service.Notes.SaveResourceAsync(b.Entity);
+
+        Assert.IsFalse(saved.IsValid);
+        StringAssert.Contains(saved.ErrorMessage, "\"a.png\"");
+        Assert.AreEqual("b.png", (await service.Notes.GetResourceAsync(b.Entity.ResourceId)).Entity.Name);
+    }
+
+    [TestMethod]
     public async Task DeleteResourceAsync_DeletesItsFile()
     {
         var noteId = await AddNoteAsync();
