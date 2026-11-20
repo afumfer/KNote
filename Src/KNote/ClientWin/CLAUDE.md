@@ -395,7 +395,9 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   usar.
 - **Modo embebido**: si el nuevo caso de uso necesita mostrarse tanto en ventana flotante como embebido en
   un panel, hereda de `CtrlViewEmbeddableBase`/`CtrlNoteEditorEmbeddableBase` e implementa
-  `IViewEmbeddable` en el `Form` (`PanelView()`, `ConfigureEmbededMode()`, `ConfigureWindowMode()`).
+  `IViewEmbeddable` en el `Form` (`PanelView()`, `ConfigureEmbededMode()`, `ConfigureWindowMode()`). Un `Form` que solo
+  se usa embebido nunca crea su ventana: su `BeginInvoke`/`Invoke` lanza `InvalidOperationException`. Usa el del control
+  que recibe el evento (`checkedListTypes.BeginInvoke(...)` en `RepositoryNoisePolicyForm`) o comprueba `IsHandleCreated`.
 - **Escalado (DPI)**: la app es `SystemAware` (`ApplicationHighDpiMode` en el csproj): se maqueta una vez a
   la escala del sistema y Windows reescala la ventana si se mueve a un monitor con otra escala. Se probó
   `PerMonitorV2` y descuadra las vistas embebidas (`TopLevel = false`) al pasar a un monitor de menor escala;
