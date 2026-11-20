@@ -106,10 +106,11 @@ public partial class RepositoryNoisePolicyForm : KntForm, IViewNoisePolicy
             return;
         }
 
-        // After the check box changes (the recount draws the list again).
+        // After the check box changes (the recount draws the list again). The list's BeginInvoke, not the form's: the form is
+        // only used embedded (PanelView), so it never creates its own window handle and its BeginInvoke throws.
         var noteTypeId = ((NoteTypeDto)checkedListTypes.Items[e.Index]).NoteTypeId;
         var excluded = e.NewValue == CheckState.Checked;
-        BeginInvoke(async () => await _ctrl.SetNoteTypeExcludedAsync(noteTypeId, excluded));
+        checkedListTypes.BeginInvoke(async () => await _ctrl.SetNoteTypeExcludedAsync(noteTypeId, excluded));
     }
 
     private async void buttonAddFolder_Click(object sender, EventArgs e)
