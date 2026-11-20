@@ -449,7 +449,7 @@ namespace KNote.ClientWin.Views
             //
             // buttonCancelSummary
             //
-            this.buttonCancelSummary.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancelSummary.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonCancelSummary.Location = new System.Drawing.Point(197, 784);
             this.buttonCancelSummary.Name = "buttonCancelSummary";
             this.buttonCancelSummary.Size = new System.Drawing.Size(100, 29);
@@ -461,7 +461,7 @@ namespace KNote.ClientWin.Views
             //
             // buttonEstimate
             //
-            this.buttonEstimate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonEstimate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonEstimate.Location = new System.Drawing.Point(303, 784);
             this.buttonEstimate.Name = "buttonEstimate";
             this.buttonEstimate.Size = new System.Drawing.Size(150, 29);
@@ -472,7 +472,7 @@ namespace KNote.ClientWin.Views
             //
             // buttonGenerate
             //
-            this.buttonGenerate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonGenerate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonGenerate.Location = new System.Drawing.Point(467, 784);
             this.buttonGenerate.Name = "buttonGenerate";
             this.buttonGenerate.Size = new System.Drawing.Size(150, 29);

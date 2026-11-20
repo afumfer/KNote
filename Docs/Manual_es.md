@@ -149,7 +149,7 @@ Si el código tiene cambios sin guardar, **New**, **Open** y cerrar la ventana p
 
 ### Asistente de IA (aplicación de escritorio)
 
-La ventana del asistente de IA muestra la conversación completa en su zona superior. Escribe una pregunta debajo y pulsa **Send**. La lista que hay junto a **New session** elige el modelo de IA que responde. A la derecha, el panel **Sessions** muestra tus conversaciones anteriores (ver *Sesiones del asistente de IA* más abajo).
+La ventana del asistente de IA muestra la conversación completa en su zona superior. Escribe una pregunta debajo y pulsa **Send**. Mientras llega la respuesta, **Send** pasa a ser **Stop**: detiene la respuesta, que no forma parte de la conversación ni se guarda, y la pregunta sigue en el cuadro para enviarla de nuevo. La lista que hay junto a **New session** elige el modelo de IA que responde. A la derecha, el panel **Sessions** muestra tus conversaciones anteriores (ver *Sesiones del asistente de IA* más abajo).
 
 El asistente también puede trabajar con tus notas: pídele que busque notas sobre algo, que te diga qué contiene una nota o que apunte una tarea, y usará las notas de su repositorio. Una tarea que crea se guarda en ese repositorio (en tu carpeta por defecto si es de él y, si no, en su carpeta Home) y se abre en el editor de notas, donde puedes cambiarla, dejarla o borrarla. Las propias sesiones del asistente y los hilos del chat room quedan fuera cuando busca en tus notas.
 

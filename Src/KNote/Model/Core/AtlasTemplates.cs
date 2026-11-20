@@ -11,7 +11,7 @@ public static class AtlasTemplates
     public const string NoteTypesSection = "Note types";
 
     /// <summary>The Markdown of a note KNote creates from a template: with CR+LF, as the notes written in the editors of Windows.</summary>
-    public static string NoteText(string markdown) => (markdown ?? "").ReplaceLineEndings("\r\n");
+    public static string NoteText(string markdown) => Core.TextLineEndings.ToCrLf(markdown);
 
     public const string Profile =
         "<!-- The profile of the repository (KNote Atlas): the AI receives it in all its tasks. Write it in plain words, " +

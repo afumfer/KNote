@@ -405,6 +405,15 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   (`ForceDesignerDPIUnaware`), así que todos los formularios tienen `AutoScaleDimensions = 7x15`. Cualquier
   tamaño en píxeles que se asigne **en código** después de `InitializeComponent()` (anchos de columna,
   posiciones, tamaños de ventana) ya no lo escala WinForms: pásalo por `LogicalToDeviceUnits(...)`.
+  Pero un control que tiene que caber en otro no se dimensiona así: el formulario se escala por su fuente, que no
+  es exactamente la escala de `LogicalToDeviceUnits` (a 200 %, unos 1,86 frente a 2), así que un ancho lógico fijo
+  se sale del contenedor (le pasaba al valor de `NoteAttributeEditorForm`, que tapaba la flecha del combo): mídelo
+  sobre el contenedor ya escalado (su `ClientSize` y el margen de un control del Designer).
+  Igual con lo que se crea en código (las filas de `ReadVarForm`): se coloca midiendo, cuando la ventana ya tiene su escala.
+  Una etiqueta sobre una caja, una lista o un combo se alinea con `ControlLayout.AlignTextTo` (su texto, no su borde,
+  empieza donde el control: GDI deja un margen antes del texto) y, en una fila de botones alineada a la derecha junto a
+  una etiqueta, el panel no puede ser más estrecho que la fila (`Panel1MinSize` del `SplitContainer`, en código: el del
+  Designer no se escala; ver `KNoteAIAssistantForm.AlignPromptHeader`).
   Al restaurar la posición guardada de una ventana, pásala por `Utils/WindowPlacement.EnsureVisible(...)`:
   si el usuario cambió de monitor o de escala, puede caer fuera de todas las pantallas actuales (incluso en
   el hueco entre dos monitores). Un botón pegado a la derecha de la caja de texto sobre la que actúa (`...`,
@@ -439,7 +448,9 @@ configurar → `RunModal()`/`Run()` → leer resultado por evento o por `.Model`
   (`KNoteWebViewStyle.css` con `prefers-color-scheme`, que `KntEditView` fija según el modo de la app).
   Dos valores por defecto del diseñador se pintan en oscuro como marcos blancos gruesos: el borde `Fixed3D`
   (TextBox, ListBox, ListView, TreeView...) y `TabPage.UseVisualStyleBackColor = true`; y un combo
-  `DropDownList` con `FlatStyle.Standard` deja claros el texto seleccionado y la flecha (pasa a `Flat`).
+  `DropDownList` con `FlatStyle.Standard` deja claros el texto seleccionado y la flecha (pasa a `Flat`); WinForms
+  pinta el borde y la flecha del combo plano encima del nativo y al cambiar de ancho solo repinta lo nuevo, así que
+  `AdjustControls` lo invalida en `SizeChanged`: si no, un combo anclado o acoplado dejaba la flecha vieja a media caja.
   `KntForm.OnLoad` los corrige en todos sus controles (`AppTheme.AdjustControlsForDarkMode`); los que se añaden después del
   `Load` (p. ej. los paneles embebidos vía `PanelView()` en `KNoteManagementForm.LinkComponents`, cuyas
   vistas nunca se cargan) necesitan llamarlo otra vez tras añadirlos. Al pasar un TextBox de una línea a
@@ -692,7 +703,10 @@ vez que otro trabajo de KNote Atlas), su progreso (`DocumentProcessingProgressCh
 `Ctrl` al cambiar (un refresco de la vista no lo pisa) y el panel tiene scroll. Lo que hay debajo de los campos de la selección se coloca
 en código (`RepositoryPeriodSummaryForm.LayoutSections`, en cada refresco y al cambiar de tamaño): cada parte mide lo que su texto y las
 vacías u ocultas (las dudosas, la estimación, el progreso) no dejan hueco; qué se ve lo decide el estado del `Ctrl`, no `Visible`, que es
-`false` mientras la sección no está en pantalla. Las columnas de «Concept attributes» miden lo que el texto más largo. `SaveSettings` es `internal` para los tests. Tests en
+`false` mientras la sección no está en pantalla. La fila «Cancel» / «Estimate» / «Generate» no va anclada: se pone a la derecha del ancho
+útil del panel (`ClientSize`, con el margen de la izquierda) y se recoloca con `ClientSizeChanged` (la barra de scroll cambia el ancho sin
+cambiar el tamaño del panel, así que `Resize` no salta); si al colocarla cambia el ancho, `LayoutSections` repite con el nuevo. Anclada a
+la derecha, «Generate» quedaba en parte bajo la barra al aparecer esta. Las columnas de «Concept attributes» miden lo que el texto más largo. `SaveSettings` es `internal` para los tests. Tests en
 `RepositoryPeriodSummaryCtrlTests`, `RepositoryPeriodSummaryCtrlClassifyTests`, `RepositoryPeriodSummaryCtrlSummaryTests` y `AtlasCtrlTests`. Empieza en el repositorio activo y la lista de arriba elige otro entre los
 enlazados: el asistente tiene el suyo. `LoadAsync` lee las cuatro partes y descarta la respuesta si entretanto se eligió
 otro repositorio. Los botones se activan según el rol del comando (`Store.Security.IsAuthorized`); «Open in the editor»
@@ -869,7 +883,10 @@ en un editor (`Store.IsNoteBeingEdited`: al guardar pisaría el cambio) y `OnNot
   (`AiChatTurnStreamer`, el mismo del asistente Web): se envían el prompt de sistema y los turnos anteriores
   (`ChatTurns`), y el turno solo se añade a la conversación (`ChatTurns`, `ChatMessages` para los scripts,
   totales) cuando la respuesta termina, así que un fallo del proveedor no deja mensajes huérfanos. El uso de
-  tokens es el que da el proveedor (en streaming también); si no lo da, se estima.
+  tokens es el que da el proveedor (en streaming también); si no lo da, se estima. **Parar una respuesta**
+  (`StopAnswer`, el botón Send pasa a Stop mientras se responde, como en la Web): cancela el turno, que termina con una
+  `OperationCanceledException` (también si el SDK del proveedor la envuelve en otra) y no añade nada; la vista lo marca
+  como parado (`AiChatHtml.StoppedAnswer`) y la pregunta y sus archivos siguen en la caja. Ctrl+Enter nunca para.
 - **Repositorio del asistente** (`KNoteAIAssistantCtrl.ServiceRef`): donde buscan las tools, donde `create_task` guarda
   (`KNoteAiToolsHost(store, repositorio)`: la carpeta por defecto si es de ese repositorio; si no, su Home) y donde
   están las sesiones. Se elige en el combo "Sessions in the repository" del panel de sesiones

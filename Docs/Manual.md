@@ -149,7 +149,7 @@ If the code has changes that haven't been saved, **New**, **Open** and closing t
 
 ### AI assistant (desktop app)
 
-The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. The list next to **New session** chooses the AI model that answers. On the right, the **Sessions** panel lists your previous conversations (see *AI assistant sessions* below).
+The AI assistant window shows the whole conversation in its upper area. Write a question below and click **Send**. While the answer arrives, **Send** becomes **Stop**: it stops the answer, which is not part of the conversation nor saved, and the question stays in the box to send it again. The list next to **New session** chooses the AI model that answers. On the right, the **Sessions** panel lists your previous conversations (see *AI assistant sessions* below).
 
 The assistant can also work with your notes: ask it to look for notes about something, to tell you what a note says, or to note down a task, and it uses the notes of its repository. A task it creates is saved in that repository (in your default folder if it is there, otherwise in its Home folder) and opened in the note editor, where you can change it, keep it or delete it. The assistant's own sessions and the chat room threads are left out when it searches your notes.
 

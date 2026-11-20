@@ -576,6 +576,7 @@
             // menuAtlas
             //
             menuAtlas.Name = "menuAtlas";
+            menuAtlas.ShortcutKeys = Keys.F8;
             menuAtlas.Size = new Size(185, 22);
             menuAtlas.Text = "KNote Atlas ...";
             menuAtlas.Click += menu_Click;

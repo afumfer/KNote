@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using Microsoft.Extensions.AI;
@@ -230,7 +231,7 @@ public partial class KNoteAiTools
 
         var note = newNoteResponse.Entity;
         note.Topic = topic;
-        note.Description = description ?? "";
+        note.Description = TextLineEndings.ToCrLf(description);
         note.Tags = "";
         note.FolderId = destination.Folder.FolderId;
         note.FolderDto = destination.Folder.GetSimpleDto<FolderDto>();

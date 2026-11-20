@@ -191,8 +191,8 @@ public class SummaryInProcessTests
         var summary = (await service.Notes.GetExtendedAsync(progress.NoteId!.Value)).Entity;
         Assert.AreEqual(KntConst.SummaryTag, summary.NoteTypeDto.Name);
         Assert.AreEqual("Week in short", summary.Topic);
-        StringAssert.Contains(summary.Description, "## Executive summary\n\nThe week in short.");
-        StringAssert.Contains(summary.Description, "## What happened\n\n### Home\n\nThe week in short.");
+        StringAssert.Contains(summary.Description, "## Executive summary\r\n\r\nThe week in short.");
+        StringAssert.Contains(summary.Description, "## What happened\r\n\r\n### Home\r\n\r\nThe week in short.");
         CollectionAssert.Contains(summary.TraceNotesTo.Select(r => r.ToId).ToList(), note.NoteId, "related with the note it comes from (D17)");
     }
 

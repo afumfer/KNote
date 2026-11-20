@@ -2231,7 +2231,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var formReadVar = new ReadVarForm(listVars);
 
         formReadVar.Text = "Search for text in the note description";
-        formReadVar.Size = formReadVar.LogicalToDeviceUnits(new Size(500, 150));
+        formReadVar.Width = formReadVar.LogicalToDeviceUnits(500);   // its height is the one of its rows
 
         var result = formReadVar.ShowDialog();
 

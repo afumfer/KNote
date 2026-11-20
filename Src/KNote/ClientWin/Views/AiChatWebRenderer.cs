@@ -133,11 +133,15 @@ internal sealed class AiChatWebRenderer : IDisposable
 
     // The turn stays on screen, marked as failed, until the next one reloads the page without it: the ctrl
     // has already removed it from the conversation.
-    public void FailTurn()
+    // stopped: by the user (Stop), not by an error.
+    public void FailTurn(bool stopped = false)
     {
         _repaintTimer.Stop();
         _turnRunning = false;
-        Run(AiChatHtml.ScriptCall("replaceLast", AiChatHtml.FailedAnswer(_providerAlias, _answerSoFar?.Invoke())));
+        var answerSoFar = _answerSoFar?.Invoke();
+        Run(AiChatHtml.ScriptCall("replaceLast", stopped
+            ? AiChatHtml.StoppedAnswer(_providerAlias, answerSoFar)
+            : AiChatHtml.FailedAnswer(_providerAlias, answerSoFar)));
         _answerSoFar = null;
         _pageInSync = false;
     }

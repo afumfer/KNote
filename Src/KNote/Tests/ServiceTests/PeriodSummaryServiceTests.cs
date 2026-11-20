@@ -137,11 +137,15 @@ public class PeriodSummaryServiceTests
         StringAssert.Contains(summary.Description, "2 notes read");
         StringAssert.Contains(summary.Description, "> 5 calls to the model, ");
         StringAssert.Contains(summary.Description, "1 citation not recognized: #⁠99999");
-        StringAssert.Contains(summary.Description, $"## Executive summary\n\nEssential: the delivery (#{doubtfulNumber}) and the server (#{decisionNumber}).");
-        StringAssert.Contains(summary.Description, $"## What happened\n\n### Home\n\nThe server was chosen (#{decisionNumber}), as #⁠99999 said.");
-        StringAssert.Contains(summary.Description, "## Open and at risk\n\nNothing is open.");
+        StringAssert.Contains(summary.Description, $"## Executive summary\r\n\r\nEssential: the delivery (#{doubtfulNumber}) and the server (#{decisionNumber}).");
+        StringAssert.Contains(summary.Description, $"## What happened\r\n\r\n### Home\r\n\r\nThe server was chosen (#{decisionNumber}), as #⁠99999 said.");
+        StringAssert.Contains(summary.Description, "## Open and at risk\r\n\r\nNothing is open.");
         StringAssert.Contains(summary.Description, $"| #{decisionNumber} | Server purchase |");
+        Assert.DoesNotContain("\n", summary.Description.Replace("\r\n", ""), "the lines end with CR LF");
         StringAssert.EndsWith(summary.Resources.Single().NameOut, "(original).md");
+        var original = System.Text.Encoding.UTF8.GetString((await fixture.Service.Notes.GetResourceAsync(summary.Resources.Single().ResourceId)).Entity.ContentArrayBytes);
+        StringAssert.Contains(original, "\r\n\r\n");
+        Assert.DoesNotContain("\n", original.Replace("\r\n", ""), "the original too");
 
         // A relation with each note, in the order they are cited (D17).
         var relations = summary.TraceNotesTo.OrderBy(r => r.Order).ToList();

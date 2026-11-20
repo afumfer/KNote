@@ -104,6 +104,16 @@ public class AiChatHtmlTests
     }
 
     [TestMethod]
+    public void StoppedAnswer_KeepsWhatArrived_MarkedAsStopped()
+    {
+        var html = AiChatHtml.StoppedAnswer("Claude", "partial");
+
+        StringAssert.Contains(html, "msg assistant failed");
+        StringAssert.Contains(html, "partial");
+        StringAssert.Contains(html, "Stopped: this answer is not part of the conversation.");
+    }
+
+    [TestMethod]
     public void UsageSummary_ReportedTokens_ShowsInOutAndTotal()
     {
         Assert.AreEqual("3 in · 2 out · 5 tokens · 1.2 s", Turn("q", "a").UsageSummary());

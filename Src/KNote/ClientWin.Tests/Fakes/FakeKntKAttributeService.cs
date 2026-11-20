@@ -15,6 +15,7 @@ internal class FakeKntKAttributeService : IKntKAttributeService
     public Func<Guid, Task<Result<KAttributeDto>>>? GetAsyncImpl { get; set; }
     public Func<KAttributeDto, Task<Result<KAttributeDto>>>? SaveAsyncImpl { get; set; }
     public Func<Guid, Task<Result<KAttributeInfoDto>>>? DeleteAsyncImpl { get; set; }
+    public Func<Guid, Task<Result<List<KAttributeTabulatedValueDto>>>>? GetKAttributeTabulatedValuesAsyncImpl { get; set; }
 
     public Task<Result<List<KAttributeInfoDto>>> GetAllAsync() =>
         (GetAllAsyncImpl ?? throw new NotSupportedException($"{nameof(GetAllAsync)} not configured for this test"))();
@@ -30,5 +31,6 @@ internal class FakeKntKAttributeService : IKntKAttributeService
     public Task<Result<KAttributeInfoDto>> DeleteAsync(Guid id) =>
         (DeleteAsyncImpl ?? throw new NotSupportedException($"{nameof(DeleteAsync)} not configured for this test"))(id);
 
-    public Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id) => throw new NotSupportedException();
+    public Task<Result<List<KAttributeTabulatedValueDto>>> GetKAttributeTabulatedValuesAsync(Guid id) =>
+        (GetKAttributeTabulatedValuesAsyncImpl ?? throw new NotSupportedException($"{nameof(GetKAttributeTabulatedValuesAsync)} not configured for this test"))(id);
 }

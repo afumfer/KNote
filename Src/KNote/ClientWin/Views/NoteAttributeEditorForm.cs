@@ -88,55 +88,43 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
 
     private void ModelToControlText(bool widthShort = false)
     {
-        textValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
         textValue.Multiline = false;
-        if(widthShort)
-            textValue.Size = LogicalToDeviceUnits(new Size(200, 23));
-        else
-            textValue.Size = LogicalToDeviceUnits(new Size(478, 23));
         textValue.Text = _ctrl.Model.Value?.ToString();
         textValue.Visible = true;
-        // The short box (a date) has its button on its right: it must not grow under it.
-        textValue.Anchor = widthShort
-            ? AnchorStyles.Top | AnchorStyles.Left
-            : AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        SetValueControl(textValue, widthShort ? ValueLayout.Short : ValueLayout.Wide);
     }
 
     private void ModelToControlTextArea()
     {
-        textValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
         textValue.Multiline = true;
-        textValue.Size = LogicalToDeviceUnits(new Size(478, 140));
         textValue.Text = _ctrl.Model.Value;
         textValue.Visible = true;
-        textValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
+        SetValueControl(textValue, ValueLayout.Tall);
     }
 
     private void ModelToControlCheck()
     {
         labelAttribute.Text = "Check option:";
-        checkValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
-        checkValue.Checked = bool.Parse(_ctrl.Model.Value);
+        // An attribute that was never given a value has none (or one written elsewhere): unchecked, never an error,
+        // which left the editor without opening.
+        checkValue.Checked = bool.TryParse(_ctrl.Model.Value, out var value) && value;
         checkValue.Text = _ctrl.Model.Name;
         checkValue.Visible = true;
-        checkValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
+        SetValueControl(checkValue, ValueLayout.Wide);
     }
 
     private void ModelToControlDateTime()
     {
         ModelToControlText(true);
-        buttonSelDate.Left = textValue.Right + LogicalToDeviceUnits(ControlLayout.SideButtonGap);
-        buttonSelDate.Width = LogicalToDeviceUnits(ControlLayout.SideButtonWidth);
-        buttonSelDate.AlignToTextBox(textValue);
         buttonSelDate.Visible = true;
+        LayoutValue();
+        buttonSelDate.AlignToTextBox(textValue);
     }
 
     private async void ModelToControlCombo()
     {
+        comboValue.Visible = true;
+        SetValueControl(comboValue, ValueLayout.Wide);
         var res = await _ctrl.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_ctrl.Model.KAttributeId);
         if (res.IsValid)
         {
@@ -145,38 +133,118 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
                 comboValue.Items.Add(atr.Value);
         }
         comboValue.SelectedItem = _ctrl.Model.Value;
-        comboValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
-        comboValue.Size = LogicalToDeviceUnits(new Size(478, 23));
-        comboValue.Visible = true;
-        comboValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
     }
 
     private async void ModelToControlListView()
     {
         PersonalizeListView(listViewValue);
         listViewValue.Columns.Add("Name", LogicalToDeviceUnits(450), HorizontalAlignment.Left);
+        listViewValue.Visible = true;
+        SetValueControl(listViewValue, ValueLayout.Tall);
         var res = await _ctrl.Service.KAttributes.GetKAttributeTabulatedValuesAsync(_ctrl.Model.KAttributeId);
         if (res.IsValid)
-        {                
+        {
+            // The value is the checked ones separated by commas (see ControlsToModel): compared whole, so "Bet"
+            // is not checked by "Beta".
+            var values = (_ctrl.Model.Value ?? "").Split(',').Select(v => v.Trim()).ToHashSet();
             foreach (var atr in res.Entity)
-            {
-                var itemList = new ListViewItem(atr.Value);
-                if(_ctrl.Model.Value.IndexOf(atr.Value) >= 0 )
-                    itemList.Checked = true;
-                else
-                    itemList.Checked = false;
-                listViewValue.Items.Add(itemList);
-            }
-                
-        }            
-        listViewValue.Location = new Point(LogicalToDeviceUnits(10), LogicalToDeviceUnits(32));
-        listViewValue.Size = LogicalToDeviceUnits(new Size(478, 140));
-        listViewValue.Visible = true;
-        listViewValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));            
+                listViewValue.Items.Add(new ListViewItem(atr.Value) { Checked = values.Contains(atr.Value) });
+        }
+        FitListColumn();
+    }
+
+    private enum ValueLayout { Wide, Short, Tall }
+
+    private Control _valueControl;
+    private ValueLayout _valueLayout;
+
+    private void SetValueControl(Control control, ValueLayout layout)
+    {
+        _valueControl = control;
+        _valueLayout = layout;
+        LayoutValue();
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        // Placed again once the form has its final scale; before base.OnLoad, which centers the dialog with its size.
+        LayoutValue();
+        FitHeightToValue();
+        base.OnLoad(e);
+    }
+
+    // The value goes under its label with the Designer's margin on both sides, measured on the panel as the form was
+    // scaled: by its font, which is not exactly the DPI factor of LogicalToDeviceUnits (about 1.86 against 2 at
+    // 200 %), so fixed logical widths made the box pass the right edge and hid the combo's arrow.
+    private void LayoutValue()
+    {
+        if (_valueControl == null)
+            return;
+
+        // textValue is never moved from its Designer left (it goes back to it when it is the value).
+        var left = textValue.Left;
+        labelAttribute.AlignTextTo(left);
+        labelDescription.AlignTextTo(left);
+        var top = labelAttribute.Bottom + LogicalToDeviceUnits(LabelToValueGap);
+        var width = panelForm.ClientSize.Width - 2 * left;
+        var control = _valueControl;
+
+        switch (_valueLayout)
+        {
+            case ValueLayout.Short:
+                control.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                control.Bounds = new Rectangle(left, top, Math.Min(width, LogicalToDeviceUnits(200)), control.Height);
+                break;
+            case ValueLayout.Tall:
+                control.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+                var bottom = labelDescription.Top - labelDescription.Height;
+                control.Bounds = new Rectangle(left, top, width, Math.Max(bottom - top, control.MinimumSize.Height));
+                break;
+            default:
+                if (control is CheckBox check)
+                {
+                    // Not auto-sized: a long name is cut at the margin instead of passing it.
+                    check.AutoSize = false;
+                    check.Height = check.PreferredSize.Height;
+                }
+                control.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+                control.Bounds = new Rectangle(left, top, width, control.Height);
+                break;
+        }
+
+        if (buttonSelDate.Visible)
+        {
+            buttonSelDate.Width = LogicalToDeviceUnits(ControlLayout.SideButtonWidth);
+            buttonSelDate.Left = textValue.Right + LogicalToDeviceUnits(ControlLayout.SideButtonGap);
+        }
+
+        FitListColumn();
+    }
+
+    // Space between the label and its value, in logical pixels.
+    private const int LabelToValueGap = 6;
+
+    // The Designer's size is the one of a multi-line value (a text area or the list of tags): a value of one line
+    // leaves the description under it, as far from it as in the text area, and the dialog that much shorter.
+    private void FitHeightToValue()
+    {
+        if (_valueControl == null || _valueLayout == ValueLayout.Tall)
+            return;
+
+        var descriptionTop = _valueControl.Bottom + labelDescription.Height;
+        var extra = labelDescription.Top - descriptionTop;
+        if (extra <= 0)
+            return;
+
+        Height -= extra;
+        MinimumSize = new Size(0, Height);
+    }
+
+    // The only column fills the list (without the scroll bar, when it has one), with no horizontal scroll.
+    private void FitListColumn()
+    {
+        if (listViewValue.Visible && listViewValue.Columns.Count > 0)
+            listViewValue.Columns[0].Width = listViewValue.ClientSize.Width;
     }
 
     private void PersonalizeListView(ListView listView)
@@ -201,7 +269,7 @@ public partial class NoteAttributeEditorForm : KntEditorForm, IViewEditor<NoteKA
                 _ctrl.Model.Value = checkValue.Checked.ToString();
                 break;
             case EnumKAttributeDataType.TabulatedValue:
-                _ctrl.Model.Value = comboValue.SelectedItem.ToString();
+                _ctrl.Model.Value = comboValue.SelectedItem?.ToString() ?? "";
                 break;
             case EnumKAttributeDataType.TagsValue:
                 var newValue = "";

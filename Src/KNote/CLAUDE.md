@@ -680,6 +680,11 @@ no en `Model`.
   `AppUserState`) y E/S + cifrado en `ClientWin/Core`. Antes de tocarlo lee "Configuración persistida" en
   `ClientWin/CLAUDE.md`: el formato antiguo sigue soportado por migración y su lector (`AppConfigV1`) no debe
   cambiarse.
+- **Saltos de línea del texto de la IA**: lo que KNote guarda escrito por la IA (resumen extendido, traducción, resumen de un
+  periodo y sus `.md` originales, `create_note`/`append_to_note`/`replace_note_text`/`create_task`, tareas y alarmas del asistente)
+  va con CR LF, como las notas escritas en los editores de Windows: `Model/Core/TextLineEndings.ToCrLf`, en el punto de guardado del
+  `Service`. No usa `ReplaceLineEndings`, que también cambiaría el `\f` que separa las páginas de un documento. Un caso de uso
+  nuevo que guarde texto de la IA tiene que pasarlo por ahí.
 - Cadenas localizadas: `Docs/Manual.md` (inglés) y `Docs/Manual_es.md` (español) son el manual de usuario —
   actualiza ambos si cambia el comportamiento de cara al usuario, siguiendo la convención bilingüe ya
   existente en este repo.
