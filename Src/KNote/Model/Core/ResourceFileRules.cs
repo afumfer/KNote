@@ -14,4 +14,9 @@ public static class ResourceFileRules
         length <= 0 ? $"{fileName} is empty."
         : length > KntConst.MaxLenNoteResourceFile ? $"{fileName} is too big: {MaxSizeText} at most."
         : null;
+
+    /// <summary>Why a resource can't be saved with the name of another resource of its note (fileName as the user sees it,
+    /// ResourceInfoDto.NameOut).</summary>
+    public static string DuplicateNameError(string fileName) =>
+        $"This note already has a resource with the file \"{fileName}\". Choose another file, or rename it before adding it.";
 }

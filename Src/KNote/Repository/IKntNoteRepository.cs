@@ -28,6 +28,9 @@ public interface IKntNoteRepository : IDisposable
     // KNote Atlas, stage 4 (D14): these resources without their file (ContentArrayBytes null), for the lists of the search.
     Task<Result<List<ResourceDto>>> GetResourcesWithoutContentAsync(List<Guid> resourceIds);
     Task<Result<ResourceDto>> GetResourceAsync(Guid noteResourceId);
+    // The resource of the note with this name, if there is one: the unique index of NoteId + Name, checked by the Service before
+    // saving a resource, so that the user gets a message of the Service instead of the database's error.
+    Task<Result<Guid?>> GetResourceIdByNameAsync(Guid noteId, string name);
     Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity);
     Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity);
     // KNote Atlas, stage 4 (D12): writes the description of the AI and its model only if the resource is not locked and still

@@ -244,6 +244,12 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   `Tests/ServiceTests/NoteModificationDateServiceTests` y `ClientWin.Tests/NoteEditorsModificationDateTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
+- **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde
+  pasan todos los guardados de recursos, lo comprueba antes de escribir el fichero (`IKntNoteRepository.GetResourceIdByNameAsync`,
+  Dapper y EF con paridad en `Tests/RepositoryParityTests/ResourceNameParityTests`) y devuelve un `Result` no válido con el texto
+  de `ResourceFileRules.DuplicateNameError` (el nombre como lo ve el usuario, `NameOut`): sin eso, el fichero del otro recurso se
+  sobrescribía y el usuario recibía el error de la BD. El índice sigue como última defensa. Tests en
+  `Tests/ServiceTests/NoteResourceFilesServiceTests`.
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben
   los usuarios, así que su HTML (tras Markdig) se sanea antes de mostrarse, con las mismas reglas en las dos
   apps: `IKntNoteService.UtilMarkdownToHtml`/`UtilSanitizeHtml` en `ClientWin` y `POST api/notes/html` en la Web.
