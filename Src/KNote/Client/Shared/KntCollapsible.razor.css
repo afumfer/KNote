@@ -1,0 +1,18 @@
+/* The content cut at its lines (--knt-collapsible-max, set by js/kntCollapsible.js) and faded at the bottom while it is shown
+   less. The fade is a mask, not a color: it works on any background and theme. */
+
+.knt-collapsible-measured.knt-collapsible-overflows:not(.knt-collapsible-expanded) .knt-collapsible-body {
+    max-height: var(--knt-collapsible-max);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 3em), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3em), transparent);
+}
+
+/* The content's own margins stay inside it, so that its height is the one measured. */
+.knt-collapsible-content {
+    display: flow-root;
+}
+
+.knt-collapsible ::deep .knt-collapsible-toggle {
+    margin-top: 0.25rem;
+}

@@ -428,7 +428,7 @@ La aplicación Web se conecta al chat room al iniciar sesión y lo deja al cerra
 
 Home es la primera página de la aplicación Web, y se puede ver sin iniciar sesión. Su cabecera muestra el nombre del repositorio, el mismo que en la aplicación de escritorio; en las demás páginas la barra superior lo muestra después de *KNote* (en un móvil solo cabe *KNote*). Sin iniciar sesión es el repositorio predeterminado del servidor; con la sesión iniciada, el repositorio que elegiste (ver *Iniciar sesión y repositorios (aplicación Web)*).
 
-Home muestra las notas de la carpeta **Home** del repositorio, por prioridad y tema, 25 como mucho. Cuando Home tiene carpetas dentro, un panel a la derecha de las notas las muestra después de **Home**: elige una para ver sus notas, con el mismo orden. Home recuerda tu elección mientras la aplicación está abierta. En un móvil el panel es una fila encima de las notas.
+Home muestra las notas de la carpeta **Home** del repositorio, por prioridad y tema, 25 como mucho. Una descripción larga se muestra hasta sus 15 primeras líneas, difuminada al final: **Show more** la muestra entera y **Show less** la vuelve a acortar (y te lleva de vuelta a su nota si habías pasado de ella). Cuando Home tiene carpetas dentro, un panel a la derecha de las notas las muestra después de **Home**: elige una para ver sus notas, con el mismo orden. Home recuerda tu elección mientras la aplicación está abierta. En un móvil el panel es una fila encima de las notas.
 
 Ahí solo aparecen las carpetas que están directamente dentro de Home, y cualquiera puede abrirlas, con sus notas, sin iniciar sesión, como la propia Home: deja ahí solo lo que pueda ser público.
 
