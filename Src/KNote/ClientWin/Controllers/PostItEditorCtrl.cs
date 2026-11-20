@@ -484,16 +484,7 @@ public class PostItEditorCtrl : CtrlNoteEditorBase<IViewPostItEditor<NoteDto>, N
 
     private async Task<bool> SaveFastModelTask()
     {
-        var task = new NoteTaskDto
-        {
-            NoteId = Model.NoteId,
-            UserId = await PostItGetUserId(),
-            Description = Model.Topic,
-            Tags = "Resolved task",
-            Priority = 1,
-            Resolved = true,
-            EndDate = DateTime.Now
-        };
+        var task = QuickResolvedTask.Create(Model.NoteId, await PostItGetUserId(), Model.Topic, Model.CreationDateTime, DateTime.Now);
 
         var resSaveTask = await Service.Notes.SaveNoteTaskAsync(task, true);
 
