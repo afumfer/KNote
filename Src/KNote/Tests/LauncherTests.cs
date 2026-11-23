@@ -153,4 +153,18 @@ public class LauncherTests
         Assert.AreEqual(Path.Combine(serverBuild, ServerStarter.ServerDll), ServerStarter.FindServer(null, launcherBuild + Path.DirectorySeparatorChar));
         Assert.IsNull(ServerStarter.FindServer(Path.Combine(_path, "none.dll"), installed), "--server that doesn't exist.");
     }
+
+    [TestMethod]
+    public void ServerProcess_OnlyDotnetOrKNote_StartedBeforeThePidFile()
+    {
+        var written = new DateTime(2026, 11, 20, 9, 52, 56);
+
+        Assert.IsTrue(ServerStarter.IsServerProcess("dotnet", () => written.AddSeconds(-2), written));
+        Assert.IsTrue(ServerStarter.IsServerProcess("KNote.Server", () => written.AddSeconds(-2), written));
+        Assert.IsFalse(ServerStarter.IsServerProcess("svchost", () => written.AddSeconds(-2), written), "Another program.");
+        Assert.IsFalse(ServerStarter.IsServerProcess("dotnet", () => written.AddDays(3), written),
+            "The PID of a server that ended without stopping (the computer restarted), reused by another dotnet.");
+        Assert.IsFalse(ServerStarter.IsServerProcess("dotnet", () => throw new System.ComponentModel.Win32Exception(5, "Access denied"), written),
+            "A process that can't be opened (of the system or of another user) isn't the user's server.");
+    }
 }
