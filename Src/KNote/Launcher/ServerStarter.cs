@@ -97,6 +97,25 @@ public static class ServerStarter
         }
     }
 
+    /// <summary>
+    /// Whether the process with the PID of the PID file can be the server that wrote it: dotnet or KNote, started before
+    /// the file was written (the server writes it once running; a few seconds of margin for the clocks). A process that
+    /// can't be opened (startTime throws: a process of the system or of another user) isn't: the server runs as the user.
+    /// </summary>
+    public static bool IsServerProcess(string processName, Func<DateTime> startTime, DateTime pidWrittenAt)
+    {
+        if (!processName.StartsWith("dotnet", StringComparison.OrdinalIgnoreCase) && !processName.Contains("KNote", StringComparison.OrdinalIgnoreCase))
+            return false;
+        try
+        {
+            return startTime() <= pidWrittenAt.AddSeconds(5);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
+        {
+            return false;
+        }
+    }
+
     public static Process Start(string dotnet, string serverDll, string dataPath)
     {
         var start = new ProcessStartInfo(dotnet)

@@ -33,7 +33,7 @@ macOS, `notify-send` en Linux) y todo se apunta en `Logs/launcher.log` de la car
 |---|---|
 | `--no-browser` | Arranca el servidor sin abrir el navegador (arranque al iniciar sesión) |
 | `--app-window` | Ventana de aplicación en lugar del navegador predeterminado |
-| `--stop` | Para el servidor: `POST /KNote/local/stop` con el token de control y, si no para en 15 s, termina el proceso del PID (solo si es `dotnet` o KNote: un PID se puede reutilizar). Lo usan los instaladores y las actualizaciones |
+| `--stop` | Para el servidor: `POST /KNote/local/stop` con el token de control y, si no para en 15 s, termina el proceso del PID (solo si es `dotnet` o KNote y empezó antes de escribirse el fichero del PID, `ServerStarter.IsServerProcess`: un servidor que no paró, porque se reinició el equipo, deja el fichero, y su PID puede ser ya de otro programa, también de uno del sistema que no se puede abrir). Lo usan los instaladores y las actualizaciones |
 | `--port N` | El puerto desde ahora (1024-65535), en una instalación ya creada; la primera vez el servidor elige uno libre solo |
 | `--data PATH` | Otra carpeta de datos (pruebas, desarrollo) |
 | `--server PATH` | Otro `KNote.Server.dll` |

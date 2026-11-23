@@ -167,7 +167,10 @@ namespace KNote.Launcher
             return HealthState.NotRunning;
         }
 
-        // The server of the PID file, if it is still running (a PID can be reused by another program: only dotnet or KNote).
+        // The server of the PID file, if it is still running. A PID can be reused: a server that ended without stopping
+        // (the computer was restarted) leaves its PID file, and its number may now be another program's, also a process
+        // of the system that can't be opened (HasExited and StartTime throw "Access denied"). That one isn't ours: only
+        // dotnet or KNote, started before the PID file was written (ServerStarter.IsServerProcess).
         private Process? ServerProcess()
         {
             if (_instance.ReadPid() is not int pid)
@@ -175,12 +178,12 @@ namespace KNote.Launcher
             try
             {
                 var process = Process.GetProcessById(pid);
-                var name = process.ProcessName;
-                return !process.HasExited && (name.StartsWith("dotnet", StringComparison.OrdinalIgnoreCase) || name.Contains("KNote", StringComparison.OrdinalIgnoreCase))
+                var pidWrittenAt = File.GetLastWriteTime(_instance.PidFile);
+                return ServerStarter.IsServerProcess(process.ProcessName, () => process.StartTime, pidWrittenAt) && !process.HasExited
                     ? process
                     : null;
             }
-            catch (ArgumentException)
+            catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception)
             {
                 return null;
             }
