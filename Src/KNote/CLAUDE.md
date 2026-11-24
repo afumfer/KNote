@@ -250,6 +250,13 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   de `ResourceFileRules.DuplicateNameError` (el nombre como lo ve el usuario, `NameOut`): sin eso, el fichero del otro recurso se
   sobrescribía y el usuario recibía el error de la BD. El índice sigue como última defensa. Tests en
   `Tests/ServiceTests/NoteResourceFilesServiceTests`.
+- **Contenido de los recursos de una nota**: `GetResourcesAsync` (y con él `GetExtendedAsync`) da los recursos **sin el contenido de
+  sus ficheros** (`UtilManageResourceContent(r, readContent: false)`); los guardados en la BD (`ContentInDB`) lo traen con su fila, como
+  siempre. Antes leía cada fichero entero al cargar una nota, de forma síncrona: con la carpeta de recursos en una red lenta, `ClientWin`
+  no respondía al arrancar (1,6 MB en 38 s, la primera nota de la última carpeta). Quien necesita el contenido lo lee: un recurso suelto
+  (`GetResourceAsync`, también lo que usa la IA), el editor de recursos y «Save as» (el fichero), los informes (la ruta del fichero) y la
+  fusión por el *message broker* (`KntNotesSaveExtendedAsyncCommand` lo lee antes de publicar). Guardar un recurso sin contenido conserva su
+  fichero. Un uso nuevo del contenido de los recursos de una nota tiene que leerlo él. Tests en `Tests/ServiceTests/NoteResourceFilesServiceTests`.
 - **HTML de las notas** (`Service/Core/KntHtmlSanitizer`, paquete HtmlSanitizer): las descripciones las escriben
   los usuarios, así que su HTML (tras Markdig) se sanea antes de mostrarse, con las mismas reglas en las dos
   apps: `IKntNoteService.UtilMarkdownToHtml`/`UtilSanitizeHtml` en `ClientWin` y `POST api/notes/html` en la Web.

@@ -81,6 +81,50 @@ public class NoteResourceFilesServiceTests
         Assert.AreEqual($"{RootUrl}/{saved.Entity.Container}/image.png", resources.Entity[0].FullUrl);
     }
 
+    // Reading every file whole with the note kept the desktop app from answering while a document came from a slow network
+    // folder (at startup, the first note of the last folder). The ones in the database come with the row, as always.
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task TheResourcesOfANote_ComeWithoutTheContentOfTheirFiles(bool contentInDB)
+    {
+        var noteId = await AddNoteAsync();
+        var newResource = NewResource(noteId, "image.png");
+        newResource.Container = $"{Container}/2026";   // without it, the repository's default (ContentInDB too) is taken
+        newResource.ContentInDB = contentInDB;
+        var saved = await service.Notes.SaveResourceAsync(newResource);
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+
+        var resource = (await service.Notes.GetExtendedAsync(noteId)).Entity.Resources.Single();
+
+        Assert.AreEqual($"{RootUrl}/{saved.Entity.Container}/image.png", resource.FullUrl);
+        if (contentInDB)
+            CollectionAssert.AreEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, resource.ContentArrayBytes);
+        else
+            Assert.IsNull(resource.ContentArrayBytes, "the file is not read");
+        CollectionAssert.AreEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, (await service.Notes.GetResourceAsync(saved.Entity.ResourceId)).Entity.ContentArrayBytes,
+            "a single resource still comes with its content");
+    }
+
+    [TestMethod]
+    public async Task AResourceReadWithItsNote_ChangedAndSavedWithIt_KeepsItsFile()
+    {
+        var noteId = await AddNoteAsync();
+        var saved = await service.Notes.SaveResourceAsync(NewResource(noteId, "image.png"));
+        Assert.IsTrue(saved.IsValid, saved.ErrorMessage);
+        var note = (await service.Notes.GetExtendedAsync(noteId)).Entity;
+        note.SetIsDirty(false);
+
+        note.Resources.Single().Description = "A new description";
+        var result = await service.Notes.SaveExtendedAsync(note);
+
+        Assert.IsTrue(result.IsValid, result.ErrorMessage);
+        var stored = (await service.Notes.GetResourceAsync(saved.Entity.ResourceId)).Entity;
+        Assert.AreEqual("A new description", stored.Description);
+        CollectionAssert.AreEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, stored.ContentArrayBytes);
+        CollectionAssert.AreEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, File.ReadAllBytes(service.Notes.UtilGetResourceFilePath(stored)));
+    }
+
     [TestMethod]
     [DataRow(false)]
     [DataRow(true)]
