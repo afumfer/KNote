@@ -511,6 +511,9 @@ public class KntNotesSaveExtendedAsyncCommand : KntCommandSaveServiceBase<NoteEx
 
         if (Param.Tags?.Contains(KntConst.TagForMerging) == true)
         {
+            // The other installation saves the resources from their content: the note's resources are read without it.
+            foreach (var resource in Param.Resources.Where(r => !r.ContentInDB && r.ContentArrayBytes == null))
+                Service.Notes.UtilManageResourceContent(resource);
             Service.PublishNoteInMessageBroker(Param);
         }
 
@@ -637,13 +640,18 @@ public class KntNotesGetResourcesAsyncCommand : KntCommandServiceBase<Guid, Resu
 
     }
 
+    // Without the content of the files (the ones kept in the database come with it, as always): it read every file whole each
+    // time a note was loaded, synchronously, so the desktop app didn't answer while a document came from a slow network folder
+    // (1,6 MB in 38 s, at startup). Who needs the content reads it: a single resource (GetResourceAsync), its editor, «Save as»
+    // (the file), the reports (the file), and the merge through the message broker (KntNotesSaveExtendedAsyncCommand). Saving a
+    // resource without content keeps its file.
     public override async Task<Result<List<ResourceDto>>> Execute()
     {
         var res = await Repository.Notes.GetResourcesAsync(Param);
         if (res.IsValid)
             foreach (var r in res.Entity)
             {
-                Service.Notes.UtilManageResourceContent(r);
+                Service.Notes.UtilManageResourceContent(r, readContent: false);
                 // What it was read with (D12): saving it again without changing it keeps what is saved by then.
                 r.LoadedDescription = r.Description ?? "";
             }

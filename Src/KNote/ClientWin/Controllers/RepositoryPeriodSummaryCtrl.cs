@@ -287,8 +287,10 @@ public class RepositoryPeriodSummaryCtrl : CtrlViewEmbeddableBase<IViewPeriodSum
     {
         if (Progress?.NoteId is not Guid noteId)
             return;
+        // Without refreshing the view on load, as the rest of the app: Run() already does it, and two
+        // refreshes at once showed every relation of the note twice.
         var editor = new NoteEditorCtrl(Store);
-        if (await editor.LoadModelById(Service, noteId))
+        if (await editor.LoadModelById(Service, noteId, false))
             editor.Run();
         else
             editor.Dispose();

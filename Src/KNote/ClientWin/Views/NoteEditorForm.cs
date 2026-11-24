@@ -48,6 +48,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     private List<NoteSearchHitDto> _similarNotes = new();
     private int _similarNotesVersion;
 
+    // The relations are read (awaited) before they are shown; with two refreshes at once, both cleared the lists before
+    // either filled them and every relation was shown twice. The last refresh wins (ModelToControlsTraceNotes).
+    private int _traceNotesVersion;
+
     #endregion
 
     #region Constructor
@@ -264,6 +268,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         listViewAlarms.Clear();
         listViewTraceNoteFrom.Clear();
         listViewTraceNoteTo.Clear();
+        _traceNotesVersion++;
         _similarNotesVersion++;
         _similarNotes = new();
         listViewSimilarNotes.Items.Clear();
@@ -1455,6 +1460,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private async Task ModelToControlsTraceNotes()
     {
+        var version = ++_traceNotesVersion;
+
         listViewTraceNoteFrom.Clear();
         listViewTraceNoteTo.Clear();
 
@@ -1465,12 +1472,21 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         if (_ctrl.Service == null)
             return;
 
-        var traceNoteTypeNames = await TraceNoteRows.GetTypeNamesAsync(_ctrl.Service);
+        // Everything read first, then shown at once, only by the last refresh (_traceNotesVersion).
+        var service = _ctrl.Service;
+        var traceNoteTypeNames = await TraceNoteRows.GetTypeNamesAsync(service);
+        var rowsFrom = await TraceNoteRows.ResolveAllAsync(service, _ctrl.Model.TraceNotesFrom.ToList(), fromSide: true, traceNoteTypeNames);
+        var rowsTo = await TraceNoteRows.ResolveAllAsync(service, _ctrl.Model.TraceNotesTo.ToList(), fromSide: false, traceNoteTypeNames);
+        if (IsDisposed || version != _traceNotesVersion)
+            return;
 
-        foreach (var row in await TraceNoteRows.ResolveAllAsync(_ctrl.Service, _ctrl.Model.TraceNotesFrom, fromSide: true, traceNoteTypeNames))
+        listViewTraceNoteFrom.Clear();
+        listViewTraceNoteTo.Clear();
+
+        foreach (var row in rowsFrom)
             listViewTraceNoteFrom.Items.Add(TraceNoteRowToListViewItem(row));
 
-        foreach (var row in await TraceNoteRows.ResolveAllAsync(_ctrl.Service, _ctrl.Model.TraceNotesTo, fromSide: false, traceNoteTypeNames))
+        foreach (var row in rowsTo)
             listViewTraceNoteTo.Items.Add(TraceNoteRowToListViewItem(row));
 
         listViewTraceNoteFrom.Columns.Add("Number", LogicalToDeviceUnits(60), HorizontalAlignment.Left);

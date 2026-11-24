@@ -871,8 +871,9 @@ en un editor (`Store.IsNoteBeingEdited`: al guardar pisaría el cambio) y `OnNot
     (`new KNoteAiToolsHost(store)`), la carpeta por defecto;
   - una vez guardada (siempre **solo por la capa Service**, `NewExtendedAsync` + `SaveExtendedAsync`), la abre
     con el mismo camino "editar nota existente" que el resto de la app: `NoteEditorCtrl.LoadModelById(service,
-    noteId)` + `.Run()`, sin tocar su `View` ni precargar `Model`. Queda en manos del usuario modificarla,
-    dejarla o borrarla.
+    noteId, false)` + `.Run()`, sin tocar su `View` ni precargar `Model`. Queda en manos del usuario modificarla,
+    dejarla o borrarla. **Con `false`**: `Run()` ya refresca la vista, y dos refrescos a la vez (`ModelToControls` es
+    `async void`) mostraban cada relación de la nota dos veces (le pasaba a «Open the note» del resumen extendido).
   - Como la tool se ejecuta dentro de la pipeline async del SDK de IA, que puede perder el
     `SynchronizationContext` de UI, `KNoteAiToolsHost` lo captura en su constructor (siempre en el hilo de UI:
     se construye en `ApplyProvider`, al que solo se llega desde manejadores de UI) y usa

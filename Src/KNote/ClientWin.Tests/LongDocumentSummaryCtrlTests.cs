@@ -115,6 +115,29 @@ public class LongDocumentSummaryCtrlTests
         Assert.AreEqual(9, ctrl.Progress.NoteNumber, "its document's run, after it ended");
     }
 
+    // Loaded with a refresh of the view and then run (another one), the editor read and showed the relations twice at once and
+    // the one of the summary to the document's note was listed twice.
+    [TestMethod]
+    public async Task OpenTheNote_RefreshesTheEditorOnce()
+    {
+        var (ctrl, _, service, store, document) = Create();
+        var editorView = new FakeNoteEditorView();
+        store.FactoryViews.Registry.Register<NoteEditorCtrl, IViewNoteEditorEmbeddable<NoteExtendedDto>>(_ => editorView);
+        await ctrl.LoadAsync(TestServiceRefFactory.CreateWithFakeService(service), document);
+        service.SemanticSearchFake.GetIndexStatusAsyncImpl = () => Task.FromResult(new Result<SemanticIndexStatusDto>(new SemanticIndexStatusDto { Status = EnumSemanticIndexStatus.None }));
+        var summaryId = Guid.NewGuid();
+        store.DocumentProcessing.Runner = (_, _, _, _, _) => Task.FromResult(new Result<DocumentProcessProgressDto>(
+            new DocumentProcessProgressDto { Phase = EnumDocumentProcessPhase.Completed, NoteId = summaryId, NoteNumber = 9 }));
+        ctrl.Language = "Spanish";
+        Assert.IsTrue(await ctrl.GenerateAsync());
+        await store.DocumentProcessing.Completion;
+        service.NotesFake.GetExtendedAsyncImpl = id => Task.FromResult(new Result<NoteExtendedDto>(new NoteExtendedDto { NoteId = id, FolderDto = new FolderDto() }));
+
+        await ctrl.OpenNoteAsync();
+
+        Assert.AreEqual(1, editorView.RefreshViewCallCount);
+    }
+
     [TestMethod]
     public async Task Generate_IsRefused_WhileAnotherRunOfKNoteAtlasGoesOn()
     {
