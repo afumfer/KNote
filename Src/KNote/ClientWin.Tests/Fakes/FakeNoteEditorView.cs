@@ -12,7 +12,8 @@ internal class FakeNoteEditorView : IViewNoteEditorEmbeddable<NoteExtendedDto>
 
     public void ShowView() { }
     public Result<EControllerResult> ShowModalView() => new(EControllerResult.Executed);
-    public void RefreshView() { }
+    public int RefreshViewCallCount { get; private set; }
+    public void RefreshView() => RefreshViewCallCount++;
     public void OnClosingView() { }
 
     public DialogResult ShowInfo(string info, string caption = "KNote", MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.Information)

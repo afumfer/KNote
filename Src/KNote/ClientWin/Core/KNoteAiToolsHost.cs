@@ -140,11 +140,13 @@ public class KNoteAiToolsHost : IKNoteAiToolsHost
 
     private async Task ShowNoteForEditingAsync(IKntService service, Guid noteId)
     {
-        // The same LoadModelById(service, id) + Run() the rest of the app uses to open an existing
+        // The same LoadModelById(service, id, false) + Run() the rest of the app uses to open an existing
         // note for editing (e.g. double-clicking a note in the tree) - NoteEditorCtrl/its view are
         // used exactly as designed, unmodified, with no direct access to view members from here.
+        // Without refreshing the view on load: Run() already does it, and two refreshes at once
+        // showed every relation of the note twice.
         var noteEditor = new NoteEditorCtrl(_store);
-        var loaded = await noteEditor.LoadModelById(service, noteId);
+        var loaded = await noteEditor.LoadModelById(service, noteId, false);
         if (loaded)
             noteEditor.Run();
     }
