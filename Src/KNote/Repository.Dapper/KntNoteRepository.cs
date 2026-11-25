@@ -228,7 +228,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
     }
 
-    public async Task<Result<NoteDto>> AddAsync(NoteDto entity)
+    public async Task<Result<NoteDto>> AddAsync(NoteDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -244,18 +244,23 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                using TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                // The note, its attributes and its row of the history go in one transaction of the connection: an
+                // ambient TransactionScope does nothing in Sqlite (its connections don't enlist).
                 var db = GetOpenConnection();
+                DbTransaction transaction = null;
+                var writingHistory = false;
 
                 try
                 {
+                    transaction = await BeginTransactionAsync(db);
+
                     // As in EF: the dates it receives are kept (an import keeps the original ones).
                     if (entity.CreationDateTime == DateTime.MinValue)
                         entity.CreationDateTime = DateTime.Now;
                     if (entity.ModificationDateTime == DateTime.MinValue)
                         entity.ModificationDateTime = DateTime.Now;
                     if (autoNumber)
-                        entity.NoteNumber = GetNextNoteNumber(db);
+                        entity.NoteNumber = GetNextNoteNumber(db, transaction);
 
                     var sql = @"INSERT INTO [Notes]
                                     (NoteId, NoteNumber, Topic, CreationDateTime, ModificationDateTime,
@@ -281,7 +286,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                             entity.Priority,
                             entity.FolderId,
                             entity.NoteTypeId
-                        });
+                        }, transaction);
 
                     if (r == 0)
                     {
@@ -309,7 +314,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                                     atr.NoteId,
                                     atr.KAttributeId,
                                     atr.Value
-                                });
+                                }, transaction);
 
                             if (rA == 0)
                             {
@@ -318,23 +323,29 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                         }
                     }
 
-                    result.Entity = entity;
+                    history?.TitleNewNote(entity.NoteNumber, entity.Topic);
+                    writingHistory = true;
+                    await KntHistoryWriter.WriteAsync(db, transaction, history);
 
-                    scope.Complete();
+                    await transaction.CommitAsync();
+
+                    result.Entity = entity;
 
                     return result;
                 }
-                catch (Exception ex) when (autoNumber && ex.IsUniqueConstraintViolation())
+                catch (Exception ex) when (autoNumber && !writingHistory && ex.IsUniqueConstraintViolation())
                 {
-                    // Lost the race for this NoteNumber; the TransactionScope above rolls back on
-                    // dispose (Complete() was never called). Record the conflict and retry with a
-                    // fresh number, up to maxAttempts - caught here even on the last attempt so the
-                    // loop always falls through to the descriptive exception below instead of
-                    // letting the raw provider exception escape uncaught.
+                    // Lost the race for this NoteNumber (not a row of the history that can't be written); the transaction rolls back on dispose (it was
+                    // never committed). Record the conflict and retry with a fresh number, up to
+                    // maxAttempts - caught here even on the last attempt so the loop always falls
+                    // through to the descriptive exception below instead of letting the raw provider
+                    // exception escape uncaught.
                     lastConflict = ex;
                 }
                 finally
                 {
+                    if (transaction != null)
+                        await transaction.DisposeAsync();
                     await CloseIsTempConnection(db);
                 }
             }
@@ -347,15 +358,18 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false)
+    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false, KLogWriteDto history = null)
     {
         try
         {
             var result = new Result<NoteDto>();
 
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            // The note, its attributes and its row of the history, in one transaction (see AddAsync).
+            var db = GetOpenConnection();
+            DbTransaction transaction = null;
+            try
             {
-                var db = GetOpenConnection();
+                transaction = await BeginTransactionAsync(db);
 
                 if (!keepModificationDate)
                     entity.ModificationDateTime = DateTime.Now;
@@ -391,7 +405,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                         entity.Priority,
                         entity.FolderId,
                         entity.NoteTypeId
-                    });
+                    }, transaction);
 
                 if (r == 0)
                 {
@@ -407,20 +421,20 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                 {
                     sql = @"DELETE FROM NoteKAttributes WHERE NoteId = @NoteId AND 
                                 KAttributeId NOT IN (SELECT KAttributeId FROM KAttributes WHERE NoteTypeId IS NULL)";
-                    rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId });
+                    rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId }, transaction);
                 }
                 else
                 {
                     sql = @"DELETE FROM NoteKAttributes WHERE NoteId = @NoteId AND 
                                 KAttributeId NOT IN (SELECT KAttributeId FROM KAttributes WHERE NoteTypeId IS NULL OR NoteTypeId = @NoteTypeId)";
-                    rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId });
+                    rDel = await db.ExecuteAsync(sql.ToString(), new { NoteId = entity.NoteId, NoteTypeId = entity.NoteTypeId }, transaction);
                 }
 
                 // Add new attributes or update 
                 var sqlFindNoteKAttribute = "SELECT * FROM NoteKAttributes WHERE NoteKAttributeId = @NoteKAttributeId;";
                 foreach (var atr in entity.KAttributesDto)
                 {
-                    var entityNoteKAttribute = await db.QueryFirstOrDefaultAsync<NoteKAttributeDto>(sqlFindNoteKAttribute.ToString(), new { NoteKAttributeId = atr.NoteKAttributeId });
+                    var entityNoteKAttribute = await db.QueryFirstOrDefaultAsync<NoteKAttributeDto>(sqlFindNoteKAttribute.ToString(), new { NoteKAttributeId = atr.NoteKAttributeId }, transaction);
                     if (entityNoteKAttribute == null)
                     {
                         if (!string.IsNullOrEmpty(atr.Value))
@@ -457,7 +471,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                                 atr.NoteId,
                                 atr.KAttributeId,
                                 atr.Value
-                            });
+                            }, transaction);
 
                         if (rA == 0)
                         {
@@ -468,13 +482,18 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
                 // TODO: Delete old attributes
 
+                await KntHistoryWriter.WriteAsync(db, transaction, history);
+                await transaction.CommitAsync();
+
                 result.Entity = entity;
-
-                scope.Complete();
-
+            }
+            finally
+            {
+                if (transaction != null)
+                    await transaction.DisposeAsync();
                 await CloseIsTempConnection(db);
             }
-            
+
             return result;
         }
         catch (Exception ex)
@@ -483,22 +502,37 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result> DeleteAsync(Guid id, KLogWriteDto history = null)
     {
         try
         {
             var result = new Result();
             var db = GetOpenConnection();
+            DbTransaction transaction = null;
 
-            var sql = @"DELETE FROM Notes WHERE NoteId = @Id";
+            // The note and its row of the history (with its last version: the trash), in one transaction.
+            try
+            {
+                transaction = await BeginTransactionAsync(db);
 
-            var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
+                var sql = @"DELETE FROM Notes WHERE NoteId = @Id";
+                var r = await db.ExecuteAsync(sql.ToString(), new { Id = id }, transaction);
 
-            if (r == 0)
-                result.AddErrorMessage("Entity not deleted");
-                
-            await CloseIsTempConnection(db);
-            
+                if (r == 0)
+                    result.AddErrorMessage("Entity not deleted");
+                else
+                {
+                    await KntHistoryWriter.WriteAsync(db, transaction, history);
+                    await transaction.CommitAsync();
+                }
+            }
+            finally
+            {
+                if (transaction != null)
+                    await transaction.DisposeAsync();
+                await CloseIsTempConnection(db);
+            }
+
             return result;
         }
         catch (Exception ex)
@@ -1928,35 +1962,51 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
+    public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId, KLogWriteDto history = null)
     {
         try
         {
             var result = new Result<bool>();
 
             var db = GetOpenConnection();
+            DbTransaction transaction = null;
 
-            // Moving a note modifies it (KNote Atlas, stage 2, D6).
-            var sql = @"UPDATE Notes SET
-                    FolderId = @FolderId,
-                    ModificationDateTime = @ModificationDateTime
-                WHERE NoteId = @NoteId";
+            // The note and its row of the history, in one transaction.
+            try
+            {
+                transaction = await BeginTransactionAsync(db);
 
-            var r = await db.ExecuteAsync(sql.ToString(),
-                new
+                // Moving a note modifies it (KNote Atlas, stage 2, D6).
+                var sql = @"UPDATE Notes SET
+                        FolderId = @FolderId,
+                        ModificationDateTime = @ModificationDateTime
+                    WHERE NoteId = @NoteId";
+
+                var r = await db.ExecuteAsync(sql.ToString(),
+                    new
+                    {
+                        NoteId = noteId,
+                        FolderId = folderId,
+                        ModificationDateTime = DateTime.Now
+                    }, transaction);
+
+                if (r == 0)
+                    result.AddErrorMessage("Entity not updated");
+                else
                 {
-                    NoteId = noteId,
-                    FolderId = folderId,
-                    ModificationDateTime = DateTime.Now
-                });
+                    await KntHistoryWriter.WriteAsync(db, transaction, history);
+                    await transaction.CommitAsync();
+                }
 
-            if (r == 0)
-                result.AddErrorMessage("Entity not updated");
+                result.Entity = true;
+            }
+            finally
+            {
+                if (transaction != null)
+                    await transaction.DisposeAsync();
+                await CloseIsTempConnection(db);
+            }
 
-            result.Entity = true;
-
-            await CloseIsTempConnection(db);
-            
             return result;
         }
         catch (Exception ex)
@@ -1965,7 +2015,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag)
+    public async Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag, KLogWriteDto history = null)
     {
         try
         {
@@ -1973,29 +2023,37 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
             var sql = "";
 
             var db = GetOpenConnection();
+            DbTransaction transaction = null;
 
-            sql = @"Select Tags FROM Notes WHERE NoteId = @NoteId";                
-            var actualTag = await db.ExecuteScalarAsync<string>(sql.ToString(), new { NoteId = noteId }) ?? "";         
-                
-            if (string.IsNullOrEmpty(oldTag))
+            // The note and its row of the history, in one transaction.
+            try
             {
-                if (!(actualTag.IndexOf(newTag) >= 0))
-                    actualTag += " " + newTag;
+                transaction = await BeginTransactionAsync(db);
+
+                sql = @"Select Tags FROM Notes WHERE NoteId = @NoteId";
+                var actualTag = await db.ExecuteScalarAsync<string>(sql.ToString(), new { NoteId = noteId }, transaction);
+                actualTag = NoteChangeRules.ChangeTag(actualTag, oldTag, newTag);
+
+                // Changing its tags modifies the note (KNote Atlas, stage 2, D6).
+                sql = @"UPDATE Notes SET Tags = @NewTag, ModificationDateTime = @ModificationDateTime WHERE NoteId = @NoteId";
+                var r = await db.ExecuteAsync(sql.ToString(), new { NoteId = noteId, NewTag = actualTag, ModificationDateTime = DateTime.Now }, transaction);
+                if (r == 0)
+                    result.AddErrorMessage("Entity not updated");
+                else
+                {
+                    await KntHistoryWriter.WriteAsync(db, transaction, history);
+                    await transaction.CommitAsync();
+                }
+
+                result.Entity = true;
             }
-            else                    
-                actualTag = (actualTag.Replace(oldTag, newTag));
-            actualTag = actualTag.Trim();
+            finally
+            {
+                if (transaction != null)
+                    await transaction.DisposeAsync();
+                await CloseIsTempConnection(db);
+            }
 
-            // Changing its tags modifies the note (KNote Atlas, stage 2, D6).
-            sql = @"UPDATE Notes SET Tags = @NewTag, ModificationDateTime = @ModificationDateTime WHERE NoteId = @NoteId";
-            var r = await db.ExecuteAsync(sql.ToString(), new { NoteId = noteId, NewTag = actualTag, ModificationDateTime = DateTime.Now });
-            if (r == 0)
-                result.AddErrorMessage("Entity not updated");
-
-            result.Entity = true;
-
-            await CloseIsTempConnection(db);
-            
             return result;
         }
         catch (Exception ex)
@@ -2008,11 +2066,11 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
     #region Private methods
 
-    private int GetNextNoteNumber(DbConnection db)
+    private int GetNextNoteNumber(DbConnection db, DbTransaction transaction = null)
     {
         // TODO: Look here for a more efficient implementation
-        var sql = "SELECT MAX(NoteNumber) FROM Notes";        
-        var result = db.ExecuteScalar<int>(sql);
+        var sql = "SELECT MAX(NoteNumber) FROM Notes";
+        var result = db.ExecuteScalar<int>(sql, transaction: transaction);
             
         return result + 1;
     }

@@ -296,7 +296,10 @@ internal static class KntSystemValueProtectedKeys
         && ((string.Equals(value.Scope, KntConst.SystemScope, StringComparison.OrdinalIgnoreCase)
             && (string.Equals(value.Key, KntConst.DbVersionKey, StringComparison.OrdinalIgnoreCase)
                 || string.Equals(value.Key, KntConst.RepositoryIdKey, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(value.Key, KntConst.RepositoryNameKey, StringComparison.OrdinalIgnoreCase)))
+                || string.Equals(value.Key, KntConst.RepositoryNameKey, StringComparison.OrdinalIgnoreCase)
+                // The history: its retention has its own command (H.4) and the day it started is KntSchemaUpdater's.
+                || string.Equals(value.Key, KntConst.HistoryRetentionKey, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(value.Key, KntConst.HistoryStartKey, StringComparison.OrdinalIgnoreCase)))
             || string.Equals(value.Scope, KntConst.AiScope, StringComparison.OrdinalIgnoreCase));
 
     public static string ErrorMessage(SystemValueDto value) =>

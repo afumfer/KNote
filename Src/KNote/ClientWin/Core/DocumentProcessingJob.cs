@@ -108,6 +108,8 @@ public class DocumentProcessingJob
         CancellationTokenSource cancellation)
     {
         DocumentProcessProgressDto final;
+        // What it writes is KNote's work for the user, for the history (H11): the service is the app's, shared with the editors.
+        using var origin = KntHistoryOrigin.Begin(EnumHistoryOrigin.KNote);
         try
         {
             var result = await Runner(service, provider, request, new Reporter(this), cancellation.Token);

@@ -236,7 +236,10 @@ public partial class KNoteAiTools
         note.FolderId = destination.Folder.FolderId;
         note.FolderDto = destination.Folder.GetSimpleDto<FolderDto>();
 
-        var saveResponse = await service.Notes.SaveExtendedAsync(note);
+        Result<NoteExtendedDto> saveResponse;
+        // The assistant's, for the history (H11).
+        using (KntHistoryOrigin.Begin(EnumHistoryOrigin.Assistant))
+            saveResponse = await service.Notes.SaveExtendedAsync(note);
         if (!saveResponse.IsValid)
             return $"Error saving note: {saveResponse.ErrorMessage}";
 

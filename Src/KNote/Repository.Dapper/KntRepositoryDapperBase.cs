@@ -70,6 +70,17 @@ public abstract class KntRepositoryDapperBase : KntRepositoryBase, IDisposable
             throw new Exception("Data provider not suported (KntEx)");
     }
 
+    /// <summary>
+    /// A transaction of the connection (opened if it isn't: SqlClient's are not). Every command of it must be given it, also in
+    /// Sqlite. An ambient TransactionScope is no substitute: Sqlite's connections don't enlist in it.
+    /// </summary>
+    protected static async Task<DbTransaction> BeginTransactionAsync(DbConnection db)
+    {
+        if (db.State != System.Data.ConnectionState.Open)
+            await db.OpenAsync();
+        return await db.BeginTransactionAsync();
+    }
+
     public virtual async Task<bool> CloseIsTempConnection(DbConnection db)
     {
         try

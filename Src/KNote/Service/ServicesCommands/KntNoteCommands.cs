@@ -330,10 +330,14 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
             return res;
         }
 
+        // The history (03-Historial.md): the row of the change goes with it, in its transaction; nothing if only its status changed.
+        KLogWriteDto history;
+
         if (Param.NoteId == Guid.Empty)
         {
             Param.NoteId = Guid.NewGuid();
-            res = await Repository.Notes.AddAsync(Param);
+            history = await KntHistory.PrepareSaveAsync(Service, null, Param);
+            res = await Repository.Notes.AddAsync(Param, history);
             return res;
         }
         else
@@ -345,7 +349,8 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
 
             if (stored == null)
             {
-                res = await Repository.Notes.AddAsync(Param);
+                history = await KntHistory.PrepareSaveAsync(Service, null, Param);
+                res = await Repository.Notes.AddAsync(Param, history);
             }
             else
             {
@@ -357,9 +362,13 @@ public class KntNotesSaveAsyncCommand : KntCommandSaveServiceBase<NoteDto, Resul
                 else
                     Param.ModificationDateTime = stored.ModificationDateTime;
 
-                res = await Repository.Notes.UpdateAsync(Param, keepModificationDate: changedField == null);
+                history = changedField == null ? null : await KntHistory.PrepareSaveAsync(Service, stored, Param);
+                res = await Repository.Notes.UpdateAsync(Param, keepModificationDate: changedField == null, history);
                 if (res.IsValid)
+                {
+                    await KntHistory.AfterChangeAsync(Service, Param.NoteId, history);
                     await KntSemanticIndexer.MarkStaleAsync(Service, Param.NoteId);
+                }
             }
 
             return res;
@@ -551,9 +560,14 @@ public class KntNotesDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<Not
 
         if (resGetEntity.IsValid)
         {
-            var resDelEntity = await Repository.Notes.DeleteAsync(Param);
+            // The history keeps its last version (the trash), in the transaction of the delete.
+            var history = await KntHistory.PrepareDeleteAsync(Service, resGetEntity.Entity);
+            var resDelEntity = await Repository.Notes.DeleteAsync(Param, history);
             if (resDelEntity.IsValid)
+            {
                 result.Entity = resGetEntity.Entity;
+                await KntHistory.AfterDeleteAsync(Service, history);
+            }
             else
                 result.AddListErrorMessage(resDelEntity.ListErrorMessage);
         }
@@ -1806,9 +1820,18 @@ public class KntNotesPatchFolderAsyncCommand : KntCommandServiceBase<Result<bool
             denied.AddErrorMessage(KntAtlasNotes.NotAllowedMessage);
             return denied;
         }
-        var result = await Repository.Notes.PatchFolderAsync(noteId, folderId);
+        var stored = (await Repository.Notes.GetAsync(noteId)).Entity;
+        var after = NoteVersionDto.From(stored);
+        if (after != null)
+            after.FolderId = folderId;
+        var history = await KntHistory.PreparePatchAsync(Service, stored, after);
+
+        var result = await Repository.Notes.PatchFolderAsync(noteId, folderId, history);
         if (result.IsValid)
+        {
+            await KntHistory.AfterChangeAsync(Service, noteId, history);
             await KntSemanticIndexer.MarkStaleAsync(Service, noteId);
+        }
         return result;
     }
 }
@@ -1835,9 +1858,18 @@ public class KntNotesPatchChangeTagsAsyncCommand : KntCommandServiceBase<Result<
             denied.AddErrorMessage(KntAtlasNotes.NotAllowedMessage);
             return denied;
         }
-        var result = await Repository.Notes.PatchChangeTagsAsync(noteId, oldTag, newTag);
+        var stored = (await Repository.Notes.GetAsync(noteId)).Entity;
+        var after = NoteVersionDto.From(stored);
+        if (after != null)
+            after.Tags = NoteChangeRules.ChangeTag(stored.Tags, oldTag, newTag);
+        var history = await KntHistory.PreparePatchAsync(Service, stored, after);
+
+        var result = await Repository.Notes.PatchChangeTagsAsync(noteId, oldTag, newTag, history);
         if (result.IsValid)
+        {
+            await KntHistory.AfterChangeAsync(Service, noteId, history);
             await KntSemanticIndexer.MarkStaleAsync(Service, noteId);
+        }
         return result;
     }
 }

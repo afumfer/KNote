@@ -31,6 +31,7 @@ internal class FakeKntService : IKntService
     public Guid IdServiceRef { get; } = Guid.NewGuid();
     public RepositoryRef RepositoryRef { get; set; } = new RepositoryRef { Name = "Fake repository" };
     public string UserIdentityName { get; set; }
+    public EnumHistoryOrigin HistoryOrigin { get; set; }
     public bool EnforceAuthorization { get; set; }
 
     // What GetCurrentUserAsync returns (null: the user isn't registered in this repository); the role

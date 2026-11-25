@@ -88,7 +88,8 @@ public class KntScriptConsoleCtrl : CtrlViewBase<IViewBase>
     {
         _kntSEngine.InOutDevice.Clear();
         _kntSEngine.ClearAllVars();
-        _kntSEngine.Run(code);        
+        using (KNote.Service.Core.KntHistoryOrigin.Begin(EnumHistoryOrigin.Script)) // its changes are the script's (history, H11)
+            _kntSEngine.Run(code);
     }
 
     // Interactive: streams output live and accepts input (SendInput) while the process runs,

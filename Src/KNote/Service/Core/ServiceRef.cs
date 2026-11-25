@@ -59,6 +59,8 @@ public class ServiceRef
                 _service = new KntService(Repository, ActivateMessageBroker);
                 _service.UserIdentityName = UserIdentityName;
                 _service.EnforceAuthorization = EnforceAuthorization;
+                // The changes made in the desktop app, for the history (H11).
+                _service.HistoryOrigin = EnumHistoryOrigin.Desktop;
             }
             return _service;
         }
@@ -85,6 +87,8 @@ public class ServiceRef
         EnforceAuthorization = enforceAuthorization;
         Service.Logger = logger;
         LoadRepositoryInfo();
+        // The trash of the history, when the repository is opened (H9). It never fails: an error goes to the log.
+        Task.Run(() => KntHistory.PurgeDeletedNotesAsync(Service)).GetAwaiter().GetResult();
     }
 
     #endregion

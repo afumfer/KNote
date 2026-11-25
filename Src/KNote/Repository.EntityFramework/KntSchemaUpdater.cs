@@ -25,7 +25,7 @@ namespace KNote.Repository.EntityFramework;
 /// </summary>
 public static class KntSchemaUpdater
 {
-    public const int CurrentSchemaRevision = 10;
+    public const int CurrentSchemaRevision = 11;
 
     private static readonly List<(int Revision, Action<KntDbContext, RepositoryRef> Apply)> Steps = new()
     {
@@ -37,7 +37,8 @@ public static class KntSchemaUpdater
         (7, AddNoteChunks),
         (8, AddNoteChunksPendingIndex),
         (9, AddResourceDescriptionColumns),
-        (10, UpdateSchemaV10)
+        (10, UpdateSchemaV10),
+        (11, AddHistoryColumns)
     };
 
     // KntRepositoryFactory.Create runs EnsureUpToDate on every repository construction, which for
@@ -80,6 +81,10 @@ public static class KntSchemaUpdater
 
         // Also for a new database: the columns of the documents' text are not in the EF model (see revision 10).
         AddDocumentTextColumns(ctx, repositoryRef);
+
+        // Also for a new database: the versions of the history are not in the EF model, and the history starts now (revision 11).
+        AddHistoryContentColumn(ctx, repositoryRef);
+        AddHistoryStart(ctx);
 
         if (repositoryRef.Provider == "Microsoft.Data.Sqlite")
             UseWriteAheadLog(ctx);
@@ -551,6 +556,86 @@ IF COL_LENGTH('Resources', 'ExtractedState') IS NULL
 IF COL_LENGTH('NoteChunks', 'Page') IS NULL
     ALTER TABLE [NoteChunks] ADD [Page] int NULL;
 ";
+
+    // Revision 11 - the history of the notes: KLogs, which existed and nothing wrote, gets who, from where, the last change of
+    // the session, what changed and what the entity was called (Entities/KLog.cs), the indexes of the history of an entity and
+    // of a period (ModelBuilderExtensions), PreviousContent (the version, NOT in the EF model, as revision 10's text: it runs for
+    // every database) and the date the history starts (H13).
+    private static void AddHistoryColumns(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        if (repositoryRef.Provider == "Microsoft.Data.SqlClient")
+            ctx.Database.ExecuteSqlRaw(AddHistoryColumnsSqlServer);
+        else
+        {
+            AddColumnIfMissingSqlite(ctx, "KLogs", "LastDateTime", "TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'");
+            AddColumnIfMissingSqlite(ctx, "KLogs", "UserName", "TEXT NULL");
+            AddColumnIfMissingSqlite(ctx, "KLogs", "Origin", "TEXT NULL");
+            AddColumnIfMissingSqlite(ctx, "KLogs", "Fields", "INTEGER NOT NULL DEFAULT 0");
+            AddColumnIfMissingSqlite(ctx, "KLogs", "ChangeDetails", "TEXT NULL");
+            AddColumnIfMissingSqlite(ctx, "KLogs", "EntityTitle", "TEXT NULL");
+            AddColumnIfMissingSqlite(ctx, "KLogs", "PreviousContentSize", "INTEGER NULL");
+            ctx.Database.ExecuteSqlRaw(AddHistoryIndexesSqlite);
+        }
+
+        AddHistoryContentColumn(ctx, repositoryRef);
+        AddHistoryStart(ctx);
+    }
+
+    private const string AddHistoryColumnsSqlServer = @"
+IF COL_LENGTH('KLogs', 'LastDateTime') IS NULL
+    ALTER TABLE [KLogs] ADD [LastDateTime] datetime2 NOT NULL CONSTRAINT [DF_KLogs_LastDateTime] DEFAULT '0001-01-01T00:00:00.0000000';
+
+IF COL_LENGTH('KLogs', 'UserName') IS NULL
+    ALTER TABLE [KLogs] ADD [UserName] nvarchar(256) NULL;
+
+IF COL_LENGTH('KLogs', 'Origin') IS NULL
+    ALTER TABLE [KLogs] ADD [Origin] nvarchar(32) NULL;
+
+IF COL_LENGTH('KLogs', 'Fields') IS NULL
+    ALTER TABLE [KLogs] ADD [Fields] int NOT NULL CONSTRAINT [DF_KLogs_Fields] DEFAULT 0;
+
+IF COL_LENGTH('KLogs', 'ChangeDetails') IS NULL
+    ALTER TABLE [KLogs] ADD [ChangeDetails] nvarchar(max) NULL;
+
+IF COL_LENGTH('KLogs', 'EntityTitle') IS NULL
+    ALTER TABLE [KLogs] ADD [EntityTitle] nvarchar(512) NULL;
+
+IF COL_LENGTH('KLogs', 'PreviousContentSize') IS NULL
+    ALTER TABLE [KLogs] ADD [PreviousContentSize] int NULL;
+";
+
+    // Separate batches: SQL Server compiles a batch before running it, and the new columns don't exist yet in the one above.
+    private const string AddHistoryIndexesSqlServer = @"
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_KLogs_EntityName_EntityId_LastDateTime' AND object_id = OBJECT_ID('KLogs'))
+    CREATE INDEX [IX_KLogs_EntityName_EntityId_LastDateTime] ON [KLogs] ([EntityName], [EntityId], [LastDateTime]);
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_KLogs_LastDateTime' AND object_id = OBJECT_ID('KLogs'))
+    CREATE INDEX [IX_KLogs_LastDateTime] ON [KLogs] ([LastDateTime]);
+";
+
+    private const string AddHistoryIndexesSqlite = @"
+CREATE INDEX IF NOT EXISTS ""IX_KLogs_EntityName_EntityId_LastDateTime"" ON ""KLogs"" (""EntityName"", ""EntityId"", ""LastDateTime"");
+CREATE INDEX IF NOT EXISTS ""IX_KLogs_LastDateTime"" ON ""KLogs"" (""LastDateTime"");
+";
+
+    private static void AddHistoryContentColumn(KntDbContext ctx, RepositoryRef repositoryRef)
+    {
+        if (repositoryRef.Provider == "Microsoft.Data.SqlClient")
+        {
+            ctx.Database.ExecuteSqlRaw(@"
+IF COL_LENGTH('KLogs', 'PreviousContent') IS NULL
+    ALTER TABLE [KLogs] ADD [PreviousContent] nvarchar(max) NULL;
+");
+            ctx.Database.ExecuteSqlRaw(AddHistoryIndexesSqlServer);
+            return;
+        }
+
+        AddColumnIfMissingSqlite(ctx, "KLogs", "PreviousContent", "TEXT NULL");
+    }
+
+    // The day the history starts (H13): what changed before is not in it. Only added if missing.
+    private static void AddHistoryStart(KntDbContext ctx) =>
+        AddSystemValueIfMissing(ctx, KntConst.HistoryStartKey, DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture));
 
     private static void AddColumnIfMissingSqlite(KntDbContext ctx, string table, string column, string definition)
     {

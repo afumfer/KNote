@@ -98,6 +98,13 @@ public static class ModelBuilderExtensions
         // are wide (the vector is kept in them). Without it, ~1 s with 600 notes in SQL Server; with it, a few ms.
         modelBuilder.Entity<NoteChunk>()
             .HasIndex(_ => new { _.Model, _.NoteId, _.Stale, _.IndexedDateTime }).IsUnique(false);
+
+        // The history (KntSchemaUpdater revision 11): the rows of an entity, and the changes of a period. No foreign key: the
+        // rows stay when their entity is deleted. The names are the ones the revision gives them in a database from before.
+        modelBuilder.Entity<KLog>()
+            .HasIndex(_ => new { _.EntityName, _.EntityId, _.LastDateTime }).IsUnique(false);
+        modelBuilder.Entity<KLog>()
+            .HasIndex(_ => _.LastDateTime).IsUnique(false);
     }
 
     public static void Seed(this ModelBuilder modelBuilder)

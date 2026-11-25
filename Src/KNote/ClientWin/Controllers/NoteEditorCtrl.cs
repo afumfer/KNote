@@ -1174,7 +1174,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
         try
         {
-            kntScript.Run(assistantScript);
+            using (KNote.Service.Core.KntHistoryOrigin.Begin(EnumHistoryOrigin.Script)) // its changes are the script's (history, H11)
+                kntScript.Run(assistantScript);
         }
         catch (Exception ex)
         {

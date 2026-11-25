@@ -324,6 +324,8 @@ public class KntAtlasJobs : BackgroundService
         service.EmbeddingGenerators = generators;
         service.DocumentReader = _documentReader;
         service.Logger = _logger;
+        // What it writes is KNote's work for the user, for the history (H11).
+        service.HistoryOrigin = EnumHistoryOrigin.KNote;
         return await service.SemanticSearch.RunIndexAsync(new SemanticIndexRunRequest
         {
             Rebuild = job.Rebuild,
@@ -344,6 +346,8 @@ public class KntAtlasJobs : BackgroundService
         service.EmbeddingGenerators = generators;
         service.DocumentReader = _documentReader;
         service.Logger = _logger;
+        // What it writes is KNote's work for the user, for the history (H11).
+        service.HistoryOrigin = EnumHistoryOrigin.KNote;
         // The roles of the commands apply, as in a request of the assistant.
         service.EnforceAuthorization = true;
 
@@ -366,6 +370,8 @@ public class KntAtlasJobs : BackgroundService
         service.EmbeddingGenerators = generators;
         service.DocumentReader = _documentReader;
         service.Logger = _logger;
+        // What it writes is KNote's work for the user, for the history (H11).
+        service.HistoryOrigin = EnumHistoryOrigin.KNote;
         // The roles of the commands apply, as in a request of the assistant.
         service.EnforceAuthorization = true;
 

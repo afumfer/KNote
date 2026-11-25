@@ -18,11 +18,13 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<List<NoteInfoDto>>> GetSearchAsync(NotesSearchDto notesSearch);
     Task<Result<List<NoteMinimalDto>>> GetSearchMinimalAsync(NotesSearchDto notesSearch);
     Task<Result<NoteDto>> NewAsync(NoteInfoDto entity = null);        
-    Task<Result<NoteDto>> AddAsync(NoteDto entity);
+    // history: the row of the history of the change (KLogWriteDto), written in the same transaction as the note and its
+    // attributes: if it can't be written, nothing is (H10). Null: nothing is noted. The same in the Patch methods below.
+    Task<Result<NoteDto>> AddAsync(NoteDto entity, KLogWriteDto history = null);
     // keepModificationDate: only what belongs to the note but isn't its own data changed (its status, from its tasks and alarms):
     // it isn't «modified» (KNote Atlas, stage 2, D6).
-    Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false);
-    Task<Result> DeleteAsync(Guid id);
+    Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false, KLogWriteDto history = null);
+    Task<Result> DeleteAsync(Guid id, KLogWriteDto history = null);
     Task<List<NoteKAttributeDto>> CompleteNoteAttributesAsync(List<NoteKAttributeDto> attributesNotes, Guid noteId, Guid? noteTypeId = null);
     Task<Result<List<ResourceDto>>> GetResourcesAsync(Guid noteId);
     // KNote Atlas, stage 4 (D14): these resources without their file (ContentArrayBytes null), for the lists of the search.
@@ -96,6 +98,7 @@ public interface IKntNoteRepository : IDisposable
     // types; deactivated ones only if it asks for them): those whose AlarmDateTime is in the range and every activated
     // periodic one, with their note's number, topic and creation date. The Service expands their occurrences.
     Task<Result<List<AlarmCalendarItemDto>>> GetCalendarAlarmsAsync(AlarmsCalendarFilterDto filter);
-    Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId);
-    Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag);       
+    Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId, KLogWriteDto history = null);
+    // The tags change as NoteChangeRules.ChangeTag says.
+    Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag, KLogWriteDto history = null);
 }

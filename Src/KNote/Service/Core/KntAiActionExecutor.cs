@@ -21,6 +21,8 @@ public static class KntAiActionExecutor
 
     public static async Task ExecuteAsync(IKntService service, AiActionDto action)
     {
+        // What it changes is the assistant's, with the user's permission (the history, H11).
+        using var origin = KntHistoryOrigin.Begin(EnumHistoryOrigin.Assistant);
         try
         {
             var error = action.Kind switch

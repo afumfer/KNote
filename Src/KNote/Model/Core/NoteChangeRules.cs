@@ -50,6 +50,24 @@ public static class NoteChangeRules
         return null;
     }
 
+    /// <summary>
+    /// The tags of a note after changing oldTag into newTag (IKntNoteRepository.PatchChangeTagsAsync): without oldTag, newTag is
+    /// added if the tags don't have it yet; with it, every oldTag becomes newTag. Shared by both repositories and the history.
+    /// </summary>
+    public static string ChangeTag(string tags, string oldTag, string newTag)
+    {
+        var changed = tags ?? "";
+        newTag ??= "";
+        if (string.IsNullOrEmpty(oldTag))
+        {
+            if (changed.IndexOf(newTag, StringComparison.Ordinal) < 0)
+                changed += " " + newTag;
+        }
+        else
+            changed = changed.Replace(oldTag, newTag);
+        return changed.Trim();
+    }
+
     /// <summary>Two texts of a note as the same text (see the class).</summary>
     public static bool SameText(string a, string b)
     {

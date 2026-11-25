@@ -242,6 +242,26 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   editores cargan la nota con `SetEmptyTextsForEditing` antes de `SetIsDirty(false)`; el editor de `ClientWin` no
   devuelve el estado al modelo. Tests en `Tests/NoteChangeRulesTests`, `Tests/RepositoryParityTests/NoteDatesParityTests`,
   `Tests/ServiceTests/NoteModificationDateServiceTests` y `ClientWin.Tests/NoteEditorsModificationDateTests`.
+- **Historial de las notas** (especificación en `C:\Dev\KNote-Atlas\03-Historial.md`; entrega H.1: las notas, sin UI). Una sola
+  tabla, `KLogs` (revisión 11 del esquema): una fila por cambio o por **sesión** (el mismo usuario, nota y origen en 10 minutos
+  actualizan la última fila: el autoguardado deja una, `HistoryRules.CanGroup`), con quién (`UserName`), desde dónde (`Origin`,
+  `EnumHistoryOrigin`), qué partes (`Fields`), el detalle (`ChangeDetails`, `NoteChangeDetailsDto`) y la línea legible
+  (`RegistryMessage`, en inglés, `Model/Core/NoteChangeDescriber`, el texto comparado por líneas con `LineDiff`). Si el cambio tocó los
+  datos propios de la nota (los mismos que deciden su fecha de modificación), la fila guarda **cómo estaba antes** (`PreviousContent`,
+  `NoteVersionDto` en JSON: la versión), **fuera del modelo de EF** como `ExtractedText`: solo la leen `IKntHistoryRepository.GetPreviousContentAsync`
+  y el escritor de cada ORM. **Un único punto**: `Service/Core/KntHistory`, que llaman los cinco comandos que escriben una nota (guardar,
+  borrar, `PatchFolder`, `PatchChangeTags`); compara con lo guardado y da al repositorio un `KLogWriteDto`, que este escribe **en la misma
+  transacción** que la nota y sus atributos (H10): si no se puede anotar, no se guarda nada. Esas transacciones son **explícitas de la
+  conexión** (`BeginTransaction`): en Sqlite un `TransactionScope` no protege nada (sus conexiones no se enlistan; comprobado). Las fechas
+  del historial van al milisegundo (`HistoryRules.Timestamp`; Dapper las envía como `datetime2`). El origen lo pone el host
+  (`IKntService.HistoryOrigin`: `ServiceRef` Desktop, el `Server` Web, sus trabajos KNote) y lo cambia un ámbito (`KntHistoryOrigin.Begin`:
+  el ejecutor de acciones y `create_task` del asistente, KntScript, el broker, los trabajos de `ClientWin`). Borrar guarda la última
+  versión (la papelera, `DeletedNotesDays`); después del cambio, sin hacerlo fallar, la retención de esa nota (`HistoryRules.CopiesToEmpty`)
+  y la papelera (`KntHistory.PurgeDeletedNotesAsync`, también al abrir el repositorio: `ServiceRef` y `KntRepositories.OpenAsync`).
+  Retención: `SYSTEM/HISTORY_RETENTION` (`HistoryRetentionDto`, valores por defecto si no existe); `SYSTEM/HISTORY_START`, el día que
+  empezó. Nada de las notas que escribe KNote (`KntConst.HistoryExcludedNoteTypeNames`). Tests en `Tests/LineDiffTests`,
+  `NoteChangeDescriberTests`, `HistoryRulesTests`, `RepositoryParityTests/HistoryParityTests`, `SchemaUpdateTests/SchemaUpdaterRevision11Tests`
+  y `ServiceTests/NoteHistoryServiceTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

@@ -159,6 +159,20 @@ public class KntRepository : IKntRepository
         }
     }
 
+    private IKntHistoryRepository _history;
+    public IKntHistoryRepository History
+    {
+        get
+        {
+            if (_history == null)
+                if (_db != null)
+                    _history = new KntHistoryRepository(_db, _repositoryRef);
+                else
+                    _history = new KntHistoryRepository(_repositoryRef);
+            return _history;
+        }
+    }
+
     public RepositoryRef RepositoryRef
     {
         get { return _repositoryRef; }
@@ -221,6 +235,8 @@ public class KntRepository : IKntRepository
             _traceNoteTypes.Dispose();
         if (_semanticIndex != null)
             _semanticIndex.Dispose();
+        if (_history != null)
+            _history.Dispose();
 
         //if (_kEvents != null)
         //    _kEvents.Dispose();
@@ -240,6 +256,7 @@ public class KntRepository : IKntRepository
         _traceNotes = null;
         _traceNoteTypes = null;
         _semanticIndex = null;
+        _history = null;
 
         if (_db != null)
             _db.Dispose();

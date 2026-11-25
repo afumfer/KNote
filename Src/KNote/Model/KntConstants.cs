@@ -95,6 +95,13 @@ public static class KntConst
 
     public static bool IsSystemNoteType(string noteTypeName) => noteTypeName != null && SystemNoteTypeNames.Contains(noteTypeName);
 
+    // The notes KNote writes by itself, out of the history: the assistant's conversations, the chat room, «Note relevance»
+    // and the evaluation reports. The system notes people write (profile, glossary, task instructions, test queries) are in it.
+    public static IReadOnlyList<string> HistoryExcludedNoteTypeNames { get; } = new[]
+    {
+        ChatSessionsTag, ChatRoomTag, RelevanceTag, SearchEvaluationTag
+    };
+
     // The most occurrences of alarms the alarms calendar of the web receives at once (AlarmsCalendarDto.Truncated).
     public const int MaxAlarmsCalendarOccurrences = 3000;
 
@@ -104,6 +111,11 @@ public static class KntConst
     public static string DbVersionKey { get; private set; } = "DB_VERSION";
     public static string RepositoryNameKey { get; private set; } = "DB_REPOSITORYNAME";
     public static string RepositoryIdKey { get; private set; } = "DB_REPOSITORYID";
+
+    // The history of the notes (scope SYSTEM, protected as the identity): its retention (HistoryRetentionDto, JSON) and the
+    // date it started (H13, written by KntSchemaUpdater the first time: what happened before is not in it).
+    public static string HistoryRetentionKey { get; private set; } = "HISTORY_RETENTION";
+    public static string HistoryStartKey { get; private set; } = "HISTORY_START";
 
     // SystemValues rows (scope AI) with the AI models the repository declares (KNote Atlas, RepositoryAiModelsDto): every
     // installation working with it must use the same embedding model. Where each model runs is installation settings.
