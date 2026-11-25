@@ -39,6 +39,28 @@ public static class HistoryRules
     public static string NoteTitle(int noteNumber, string topic) =>
         Truncate($"#{noteNumber} {topic}".Trim(), KLogDto.MaxEntityTitleLength);
 
+    /// <summary>
+    /// The EntityId of a setting of the history (SystemValue): always the same for the same scope and key (without case), so that
+    /// its changes are one history, also those of a setting kept in several rows (the AI models). FNV-1a, no cryptography (the web
+    /// app reads Model too, where MD5 doesn't exist).
+    /// </summary>
+    public static Guid SettingId(string scope, string key)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes($"{scope}/{key}".ToUpperInvariant());
+        ulong first = 14695981039346656037UL, second = 1099511628211UL ^ 0x9E3779B97F4A7C15UL;
+        foreach (var b in bytes)
+        {
+            first = (first ^ b) * 1099511628211UL;
+            second = (second ^ b) * 1099511628211UL + 0x632BE59BD9B4E019UL;
+        }
+        var guid = new byte[16];
+        BitConverter.GetBytes(first).CopyTo(guid, 0);
+        BitConverter.GetBytes(second).CopyTo(guid, 8);
+        return new Guid(guid);
+    }
+
+    public static string Title(string name) => Truncate(name?.Trim(), KLogDto.MaxEntityTitleLength);
+
     /// <summary>The size of a version in bytes (UTF-8), as kept in PreviousContentSize.</summary>
     public static int ContentSize(string json) => json == null ? 0 : Encoding.UTF8.GetByteCount(json);
 

@@ -273,6 +273,16 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   Borrar una nota con sus partes (`KntHistory.DeletingNote`, en `KntNotesDeleteExtendedAsyncCommand`) no las anota sueltas: la fila
   `Deleted` dice cuántas tenía y cada nota relacionada anota que perdió la relación (H14). Un comando nuevo que cambie una parte tiene que
   pasar su fila. Tests en `Tests/NotePartChangeDescriberTests` y `ServiceTests/NotePartsHistoryServiceTests`.
+  **La estructura del repositorio** (H.2b): carpetas, tipos de nota, atributos y sus valores de lista, tipos de relación, usuarios y
+  ajustes (`EntityName` = la entidad; los ajustes, `SystemValue` con un id fijo por ajuste, `HistoryRules.SettingId`), una fila por sesión,
+  sin versiones: `Model/Core/StructureChangeDescriber` y `StructureChangeDetailsDto`. Los atributos se anotan en su transacción (Dapper y
+  EF, ya sin `TransactionScope`, que en Sqlite no guardaba juntos el atributo y sus valores); el resto **justo después**
+  (`KntHistory.NoteStructureAsync`, `IKntHistoryRepository.WriteAsync`): si no se puede anotar, el cambio se queda y el error va al log
+  (H10). Nunca una contraseña ni un hash (`StructureChangeDescriber.Password` solo dice cómo cambió); el correo de un usuario y el valor de
+  un ajuste genérico, sin sus valores (H15). El registro y «Olvidé mi contraseña», sin usuario en el servicio, se anotan con el del propio
+  usuario. Lo que crea `KntSystemNotes` lleva el origen `KNote` (H16). No se anotan el orden de las notas de una carpeta (H17) ni los
+  estados que KNote escribe solo. Un comando nuevo que cambie la estructura tiene que anotarlo. Tests en `Tests/StructureChangeDescriberTests`
+  y `ServiceTests/StructureHistoryServiceTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

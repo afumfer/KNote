@@ -195,10 +195,13 @@ public static class NoteChangeDescriber
     }
 
     /// <summary>The line of the history: the changes in order, as many as fit in maxLength.</summary>
-    public static string Render(NoteChangeDetailsDto details, int maxLength = MaxMessageLength)
+    public static string Render(NoteChangeDetailsDto details, int maxLength = MaxMessageLength) =>
+        Join(Parts(details ?? new NoteChangeDetailsDto()), maxLength);
+
+    /// <summary>The parts of a line of the history, in order, as many as fit in maxLength, and «… and N more changes».</summary>
+    public static string Join(IReadOnlyList<string> parts, int maxLength = MaxMessageLength)
     {
-        var parts = Parts(details ?? new NoteChangeDetailsDto());
-        if (parts.Count == 0)
+        if (parts == null || parts.Count == 0)
             return "No changes";
 
         var line = new StringBuilder();

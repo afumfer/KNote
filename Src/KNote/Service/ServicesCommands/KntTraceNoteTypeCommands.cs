@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
@@ -45,15 +46,24 @@ public class KntTraceNoteTypeSaveAsyncCommand : KntCommandSaveServiceBase<TraceN
 
     public override async Task<Result<TraceNoteTypeDto>> Execute()
     {
+        TraceNoteTypeDto before = null;
+        Result<TraceNoteTypeDto> result;
         if (Param.TraceNoteTypeId == Guid.Empty)
         {
             Param.TraceNoteTypeId = Guid.NewGuid();
-            return await Repository.TraceNoteTypes.AddAsync(Param);
+            result = await Repository.TraceNoteTypes.AddAsync(Param);
         }
         else
         {
-            return await Repository.TraceNoteTypes.UpdateAsync(Param);
+            var resOld = await Repository.TraceNoteTypes.GetAsync(Param.TraceNoteTypeId);
+            before = resOld.IsValid ? resOld.Entity : null;
+            result = await Repository.TraceNoteTypes.UpdateAsync(Param);
         }
+
+        if (result.IsValid)
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.TraceNoteType, Param.TraceNoteTypeId, Param.Name,
+                StructureChangeDescriber.TraceNoteType(before, Param));
+        return result;
     }
 }
 
@@ -85,7 +95,11 @@ public class KntTraceNoteTypeDeleteAsyncCommand : KntCommandServiceBase<Guid, Re
         // pre-check, just the most common one per entity.
         var resDelEntity = await Repository.TraceNoteTypes.DeleteAsync(Param);
         if (resDelEntity.IsValid)
+        {
             result.Entity = resGetEntity.Entity;
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.TraceNoteType, Param, resGetEntity.Entity.Name,
+                StructureChangeDescriber.TraceNoteType(resGetEntity.Entity, null));
+        }
         else
             result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 

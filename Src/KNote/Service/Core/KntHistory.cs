@@ -212,6 +212,120 @@ public static class KntHistory
         };
     }
 
+    #endregion
+
+    #region The structure of the repository (H.2b)
+
+    /// <summary>The titles of the settings of the history (EntityTitle of their SystemValue rows).</summary>
+    public const string RepositoryNameTitle = "Repository name";
+    public const string AiModelsTitle = "AI models";
+    public const string NoisePolicyTitle = "Noise policy";
+
+    /// <summary>
+    /// The row of a change of an entity of the structure (HistoryEntities), or null if nothing changed: a new one, or into the
+    /// row of its session (H5); a deletion is always a row of its own. userName: who, when the service has no user (registering,
+    /// «Forgot password»). Never fails the change: KntAttributes writes it in its transaction, the rest just after (WriteAsync).
+    /// </summary>
+    internal static async Task<KLogWriteDto> PrepareStructureAsync(IKntService service, string entityName, Guid entityId, string title,
+        StructureChangeDetailsDto change, string userName = null)
+    {
+        if (change == null || change.IsEmpty || entityId == Guid.Empty || _notNoted.Value)
+            return null;
+
+        var who = HistoryRules.Truncate(string.IsNullOrWhiteSpace(service.UserIdentityName) ? userName : service.UserIdentityName,
+            KLogDto.MaxUserNameLength);
+        var origin = KntHistoryOrigin.Current(service);
+        var now = HistoryRules.Timestamp(DateTime.Now);
+        var action = change.Created == true ? EnumHistoryAction.Created
+            : change.Deleted == true ? EnumHistoryAction.Deleted : EnumHistoryAction.Updated;
+        var standalone = new KLogDto
+        {
+            KLogId = Guid.NewGuid(),
+            EntityName = entityName,
+            EntityId = entityId,
+            RegistryDateTime = now,
+            LastDateTime = now,
+            ActionType = action.ToString(),
+            UserName = who,
+            Origin = origin.ToString(),
+            Fields = EnumHistoryFields.None,
+            ChangeDetails = change.ToJson(),
+            RegistryMessage = StructureChangeDescriber.Render(entityName, change),
+            EntityTitle = HistoryRules.Title(title)
+        };
+        if (action == EnumHistoryAction.Deleted)
+            return new KLogWriteDto { Row = standalone };
+
+        var last = (await service.Repository.History.GetLastAsync(entityName, entityId)).Entity;
+        if (!HistoryRules.CanGroup(last, who, origin, now))
+            return new KLogWriteDto { Row = standalone };
+
+        var merged = StructureChangeDescriber.Merge(StructureChangeDetailsDto.FromJson(last.ChangeDetails), change);
+        return new KLogWriteDto
+        {
+            Row = new KLogDto
+            {
+                KLogId = last.KLogId,
+                EntityName = last.EntityName,
+                EntityId = last.EntityId,
+                RegistryDateTime = last.RegistryDateTime,
+                ActionType = last.ActionType,
+                UserName = last.UserName,
+                Origin = last.Origin,
+                LastDateTime = now,
+                Fields = EnumHistoryFields.None,
+                ChangeDetails = merged.ToJson(),
+                RegistryMessage = StructureChangeDescriber.Render(entityName, merged),
+                EntityTitle = HistoryRules.Title(title) ?? last.EntityTitle
+            },
+            MergeIntoKLogId = last.KLogId,
+            ExpectedLastDateTime = last.LastDateTime,
+            Standalone = standalone
+        };
+    }
+
+    /// <summary>
+    /// Notes a change of the structure just after it was made (H10: those changes have no transaction of their own). Never
+    /// fails it: an error goes to the log.
+    /// </summary>
+    internal static async Task NoteStructureAsync(IKntService service, string entityName, Guid entityId, string title,
+        StructureChangeDetailsDto change, string userName = null)
+    {
+        try
+        {
+            var write = await PrepareStructureAsync(service, entityName, entityId, title, change, userName);
+            if (write != null)
+                await service.Repository.History.WriteAsync(write);
+        }
+        catch (Exception ex)
+        {
+            service.Logger?.LogError(ex, "The change of {entityName} {title} could not be noted in the history.", entityName, title);
+        }
+    }
+
+    /// <summary>The path of a folder (Home\Projects\KNote), or null.</summary>
+    internal static async Task<string> FolderPathAsync(IKntService service, Guid? folderId)
+    {
+        if (folderId is not Guid id || id == Guid.Empty)
+            return null;
+        var names = new HistoryNames();
+        await AddFolderAsync(service, names, id);
+        return names.Folders.TryGetValue(id, out var path) ? path : null;
+    }
+
+    /// <summary>The names of the note types of the repository, for the history of the structure.</summary>
+    internal static async Task<HistoryNames> NoteTypeNamesForHistoryAsync(IKntService service)
+    {
+        var names = new HistoryNames();
+        foreach (var type in await NoteTypeNamesAsync(service))
+            names.NoteTypes[type.Key] = type.Value;
+        return names;
+    }
+
+    #endregion
+
+    #region Helpers
+
     // The names of the users of a task or an alarm, read from the repository (the history needs no role of its own).
     private static async Task AddUsersAsync(IKntService service, HistoryNames names, params Guid?[] userIds)
     {

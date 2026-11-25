@@ -130,6 +130,31 @@ public class KntHistoryRepository : KntRepositoryEFBase, IKntHistoryRepository
         }
     }
 
+    public async Task<Result> WriteAsync(KLogWriteDto write)
+    {
+        try
+        {
+            if (write?.Row == null)
+                return new Result();
+            var ctx = GetOpenConnection();
+            try
+            {
+                await using var transaction = await ctx.Database.BeginTransactionAsync();
+                await KntHistoryWriter.WriteAsync(ctx, write);
+                await transaction.CommitAsync();
+            }
+            finally
+            {
+                await CloseIsTempConnection(ctx);
+            }
+            return new Result();
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     internal static KLogDto ToDto(KLog row) => new()
     {
         KLogId = row.KLogId,

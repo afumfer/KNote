@@ -31,4 +31,10 @@ public interface IKntHistoryRepository : IDisposable
 
     /// <summary>Empties every version of an entity.</summary>
     Task<Result> ClearEntityContentAsync(string entityName, Guid entityId);
+
+    /// <summary>
+    /// Writes a row of the history on its own, just after the change it notes: the structure of the repository, whose changes
+    /// don't run in a transaction of their own (H10). The merge into the row of its session and its row are one transaction.
+    /// </summary>
+    Task<Result> WriteAsync(KLogWriteDto write);
 }

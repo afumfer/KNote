@@ -108,35 +108,47 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
         }
     }
 
-    public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity)
+    // The attribute, its tabulated values and its row of the history, in one transaction of the connection: an ambient
+    // TransactionScope does nothing in Sqlite (its connections don't enlist), so they weren't saved together there.
+    public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity, KLogWriteDto history = null)
     {
         try
         {
             var result = new Result<KAttributeDto>();
-
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var db = GetOpenConnection();
+            DbTransaction transaction = null;
+            try
             {
-                var db = GetOpenConnection();
+                transaction = await BeginTransactionAsync(db);
 
                 var sql = @"INSERT INTO KAttributes  (KAttributeId, [Name], Description, KAttributeDataType, RequiredValue, [Order], Script, Disabled, NoteTypeId)
                             VALUES (@KAttributeId, @Name, @Description, @KAttributeDataType, @RequiredValue, @Order, @Script, @Disabled, @NoteTypeId)";
 
                 var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
+                    new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId },
+                    transaction);
                 if (r == 0)
                     result.AddErrorMessage("Entity not inserted");
-                
-                var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
+
+                var resTabValues = await SaveTabulateValueAsync(db, transaction, entity.KAttributeId, entity.KAttributeValues);
                 if (!resTabValues.IsValid)
                     result.AddListErrorMessage(resTabValues.ListErrorMessage);
-                
+
                 result.Entity = entity;
 
-                scope.Complete();
-
+                if (result.IsValid)
+                {
+                    await KntHistoryWriter.WriteAsync(db, transaction, history);
+                    await transaction.CommitAsync();
+                }
+            }
+            finally
+            {
+                if (transaction != null)
+                    await transaction.DisposeAsync();
                 await CloseIsTempConnection(db);
             }
-    
+
             return result;
         }
         catch (Exception ex)
@@ -145,23 +157,24 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
         }
     }
 
-    public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity)
+    public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity, KLogWriteDto history = null)
     {
         try
-        {                
+        {
             var result = new Result<KAttributeDto>();
-
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var db = GetOpenConnection();
+            DbTransaction transaction = null;
+            try
             {
-                var db = GetOpenConnection();
-                
+                transaction = await BeginTransactionAsync(db);
+
                 // Check notetype in notes.
                 if (entity.NoteTypeId != null)
                 {
                     var sqlType = @"SELECT NoteTypeId FROM KAttributes WHERE KAttributeId = @KAttributeId";
-                    var noteTypeOld = await db.QueryFirstOrDefaultAsync<Guid?>(sqlType, new { KAttributeId = entity.KAttributeId });
+                    var noteTypeOld = await db.QueryFirstOrDefaultAsync<Guid?>(sqlType, new { KAttributeId = entity.KAttributeId }, transaction);
 
-                    if (noteTypeOld != entity.NoteTypeId && await CountNoteUsagesAsync(db, entity.KAttributeId) > 0)
+                    if (noteTypeOld != entity.NoteTypeId && await CountNoteUsagesAsync(db, entity.KAttributeId, transaction) > 0)
                     {
                         result.AddErrorMessage("You can not change the note type for this attribute. This attribute is already being used by several notes. ");
                         result.Entity = entity;
@@ -169,30 +182,39 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
                     }
                 }
 
-                var sql = @"UPDATE KAttributes SET                     
-                        [Name] = @Name, 
-                        Description = @Description, 
-                        KAttributeDataType = @KAttributeDataType, 
-                        RequiredValue = @RequiredValue, 
-                        [Order] = @Order, 
-                        Script = @Script, 
-                        Disabled = @Disabled, 
+                var sql = @"UPDATE KAttributes SET
+                        [Name] = @Name,
+                        Description = @Description,
+                        KAttributeDataType = @KAttributeDataType,
+                        RequiredValue = @RequiredValue,
+                        [Order] = @Order,
+                        Script = @Script,
+                        Disabled = @Disabled,
                         NoteTypeId = @NoteTypeId
                     WHERE KAttributeId = @KAttributeId";
 
                 var r = await db.ExecuteAsync(sql.ToString(),
-                    new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId });
+                    new { entity.KAttributeId, entity.Name, entity.Description, entity.KAttributeDataType, entity.RequiredValue, entity.Order, entity.Script, entity.Disabled, entity.NoteTypeId },
+                    transaction);
                 if (r == 0)
                     result.AddErrorMessage("Entity not updated");
 
-                var resTabValues = await SaveTabulateValueAsync(db, entity.KAttributeId, entity.KAttributeValues);
+                var resTabValues = await SaveTabulateValueAsync(db, transaction, entity.KAttributeId, entity.KAttributeValues);
                 if (!resTabValues.IsValid)
                     result.AddListErrorMessage(resTabValues.ListErrorMessage);
 
                 result.Entity = entity;
 
-                scope.Complete();
-
+                if (result.IsValid)
+                {
+                    await KntHistoryWriter.WriteAsync(db, transaction, history);
+                    await transaction.CommitAsync();
+                }
+            }
+            finally
+            {
+                if (transaction != null)
+                    await transaction.DisposeAsync();
                 await CloseIsTempConnection(db);
             }
 
@@ -204,7 +226,7 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
         }
     }
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result> DeleteAsync(Guid id, KLogWriteDto history = null)
     {
         try
         {
@@ -213,7 +235,7 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
             var db = GetOpenConnection();
 
             var sql = @"DELETE FROM KAttributes WHERE KAttributeId = @Id";
-            var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
+            var r = await ExecuteNotedAsync(db, sql.ToString(), new { Id = id }, history);
             if (r == 0)
                 result.AddErrorMessage("Entity not deleted");
 
@@ -337,14 +359,15 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
     /// UpdateAsync and by KntKAttributesDeleteAsyncCommand's "can't delete while in use" business
     /// rule - takes an already-open connection so it can run inside UpdateAsync's TransactionScope.
     /// </summary>
-    private async Task<int> CountNoteUsagesAsync(DbConnection db, Guid kattributeId)
+    private async Task<int> CountNoteUsagesAsync(DbConnection db, Guid kattributeId, DbTransaction transaction = null)
     {
         var sql = "SELECT count(*) FROM NoteKAttributes WHERE KAttributeId = @KAttributeId";
-        return await db.ExecuteScalarAsync<int>(sql, new { KAttributeId = kattributeId });
+        return await db.ExecuteScalarAsync<int>(sql, new { KAttributeId = kattributeId }, transaction);
     }
 
-    private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(DbConnection db, Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)
-    {            
+    // The values given are the attribute's: the others are deleted, also all of them when none is given (a value list emptied).
+    private async Task<Result<List<KAttributeTabulatedValueDto>>> SaveTabulateValueAsync(DbConnection db, DbTransaction transaction, Guid kattributeId, List<KAttributeTabulatedValueDto> tabulatedValues)
+    {
         try
         {                
             var result = new Result<List<KAttributeTabulatedValueDto>>();
@@ -360,7 +383,7 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
                                     WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId ;";
             int r = 0;
 
-            foreach (var tv in tabulatedValues)
+            foreach (var tv in tabulatedValues ?? new List<KAttributeTabulatedValueDto>())
             {
                 if (tv != null)
                 {
@@ -374,12 +397,12 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
                     else
                     {
                         var sqlCount = "SELECT COUNT(*) FROM KAttributeTabulatedValues WHERE KAttributeTabulatedValueId = @KAttributeTabulatedValueId";
-                        var countTabValue = await db.ExecuteScalarAsync<long>(sqlCount, new { KAttributeTabulatedValueId = tv.KAttributeTabulatedValueId });
+                        var countTabValue = await db.ExecuteScalarAsync<long>(sqlCount, new { KAttributeTabulatedValueId = tv.KAttributeTabulatedValueId }, transaction);
                         sql = (countTabValue > 0) ? sqlUpdate : sqlInsert;
                     }
 
                     r = await db.ExecuteAsync(sql.ToString(),
-                        new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order });
+                        new { tv.KAttributeTabulatedValueId, tv.KAttributeId, tv.Value, tv.Description, tv.Order }, transaction);
 
                     if (r == 0)
                         result.AddErrorMessage($"Entity tabulated value - {tv.KAttributeTabulatedValueId} - not updated.");
@@ -388,12 +411,13 @@ public class KntKAttributeRepository : KntRepositoryDapperBase, IKntKAttributeRe
                 }
             }
 
+            // Without values, all of them go (before, emptying the list left them in the database).
             if (idsTabValues.Count > 0)
-            {
-                sql = "DELETE FROM [KAttributeTabulatedValues] WHERE KAttributeId = @KAttributeId AND KAttributeTabulatedValueId NOT IN @IdsTabValues";
-                r = await db.ExecuteAsync(sql.ToString(),
-                            new { KAttributeId = kattributeId, IdsTabValues = idsTabValues });
-            }
+                await db.ExecuteAsync("DELETE FROM [KAttributeTabulatedValues] WHERE KAttributeId = @KAttributeId AND KAttributeTabulatedValueId NOT IN @IdsTabValues",
+                    new { KAttributeId = kattributeId, IdsTabValues = idsTabValues }, transaction);
+            else
+                await db.ExecuteAsync("DELETE FROM [KAttributeTabulatedValues] WHERE KAttributeId = @KAttributeId",
+                    new { KAttributeId = kattributeId }, transaction);
 
             result.Entity = tabulatedValues;                
          

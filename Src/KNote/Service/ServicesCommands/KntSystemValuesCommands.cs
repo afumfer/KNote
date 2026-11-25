@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
@@ -65,6 +66,7 @@ public class KntSystemValueSaveAsyncCommand : KntCommandSaveServiceBase<SystemVa
             return result;
         }
 
+        SystemValueDto stored = null;
         if (Param.SystemValueId != Guid.Empty)
         {
             // Not by turning a protected row into another one either.
@@ -74,17 +76,22 @@ public class KntSystemValueSaveAsyncCommand : KntCommandSaveServiceBase<SystemVa
                 result.AddErrorMessage(KntSystemValueProtectedKeys.ErrorMessage(resStored.Entity));
                 return result;
             }
+            stored = resStored.IsValid ? resStored.Entity : null;
         }
 
         if (Param.SystemValueId == Guid.Empty)
         {
             Param.SystemValueId = Guid.NewGuid();
-            return await Repository.SystemValues.AddAsync(Param);
+            result = await Repository.SystemValues.AddAsync(Param);
         }
         else
-        {            
-            return await Repository.SystemValues.UpdateAsync(Param);
-        }
+            result = await Repository.SystemValues.UpdateAsync(Param);
+
+        // A generic value may be a secret: noted without its values (H15).
+        if (result.IsValid)
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.SystemValue, Param.SystemValueId, $"{Param.Scope}/{Param.Key}",
+                StructureChangeDescriber.Setting(stored == null ? null : stored.Value ?? "", Param.Value ?? "", showValues: false));
+        return result;
     }
 }
 
@@ -110,7 +117,11 @@ public class KntSystemValueDeleteAsyncCommand : KntCommandServiceBase<Guid, Resu
         {
             var resDelEntity = await Repository.SystemValues.DeleteAsync(Param);
             if (resDelEntity.IsValid)
+            {
                 result.Entity = resGetEntity.Entity;
+                await KntHistory.NoteStructureAsync(Service, HistoryEntities.SystemValue, Param,
+                    $"{resGetEntity.Entity.Scope}/{resGetEntity.Entity.Key}", StructureChangeDescriber.Setting(resGetEntity.Entity.Value ?? "", null, false));
+            }
             else
                 result.AddListErrorMessage(resDelEntity.ListErrorMessage);
         }
@@ -192,6 +203,10 @@ public class KntSystemValueSaveRepositoryNameAsyncCommand : KntCommandServiceBas
             return result;
         }
 
+        await KntHistory.NoteStructureAsync(Service, HistoryEntities.SystemValue,
+            HistoryRules.SettingId(KntConst.SystemScope, KntConst.RepositoryNameKey), KntHistory.RepositoryNameTitle,
+            StructureChangeDescriber.Setting(resStored.IsValid ? resStored.Entity?.Value ?? "" : "", Param, showValues: true));
+
         return await new KntSystemValueGetRepositoryInfoAsyncCommand(Service).Execute();
     }
 }
@@ -246,6 +261,7 @@ public class KntSystemValueSaveRepositoryAiModelsAsyncCommand : KntCommandSaveSe
 
     public override async Task<Result<RepositoryAiModelsDto>> Execute()
     {
+        var before = (await new KntSystemValueGetRepositoryAiModelsAsyncCommand(Service).Execute()).Entity;
         var values = new (string Key, string Value)[]
         {
             (KntConst.AiEmbedModelKey, RepositoryAiModelsDto.Normalize(Param.EmbeddingModel)),
@@ -265,7 +281,10 @@ public class KntSystemValueSaveRepositoryAiModelsAsyncCommand : KntCommandSaveSe
             }
         }
 
-        return await new KntSystemValueGetRepositoryAiModelsAsyncCommand(Service).Execute();
+        var saved = await new KntSystemValueGetRepositoryAiModelsAsyncCommand(Service).Execute();
+        await KntHistory.NoteStructureAsync(Service, HistoryEntities.SystemValue, HistoryRules.SettingId(KntConst.AiScope, "MODELS"),
+            KntHistory.AiModelsTitle, StructureChangeDescriber.AiModels(before, saved.Entity));
+        return saved;
     }
 
     // An empty value has no row.

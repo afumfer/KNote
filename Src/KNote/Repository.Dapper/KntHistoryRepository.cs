@@ -127,6 +127,31 @@ public class KntHistoryRepository : KntRepositoryDapperBase, IKntHistoryReposito
             throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
         }
     }
+
+    public async Task<Result> WriteAsync(KLogWriteDto write)
+    {
+        try
+        {
+            if (write?.Row == null)
+                return new Result();
+            var db = GetOpenConnection();
+            try
+            {
+                await using var transaction = await BeginTransactionAsync(db);
+                await KntHistoryWriter.WriteAsync(db, transaction, write);
+                await transaction.CommitAsync();
+            }
+            finally
+            {
+                await CloseIsTempConnection(db);
+            }
+            return new Result();
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
 }
 
 /// <summary>

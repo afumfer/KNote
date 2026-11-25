@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Repository;
 using KNote.Service.Core;
 
@@ -72,6 +73,7 @@ public class KntUsersSaveAsyncCommand : KntCommandSaveServiceBase<UserDto, Resul
             return result;
         }
 
+        UserDto before = null;
         if (Param.UserId == Guid.Empty)
         {
             Param.UserId = Guid.NewGuid();
@@ -79,8 +81,13 @@ public class KntUsersSaveAsyncCommand : KntCommandSaveServiceBase<UserDto, Resul
         }
         else
         {
+            before = KntNotesSaveNoteTaskAsyncCommand.Found(await Repository.Users.GetAsync(Param.UserId));
             result = await Repository.Users.UpdateAsync(Param);
         }
+
+        if (result.IsValid)
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.User, Param.UserId, Param.UserName,
+                StructureChangeDescriber.User(before, Param));
 
         // The saved user may be the current one (its roles, or whether it is disabled).
         Service.ResetCurrentUser();
@@ -134,7 +141,11 @@ public class KntUsersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<Use
 
         var resDelEntity = await Repository.Users.DeleteAsync(Param);
         if (resDelEntity.IsValid)
+        {
             result.Entity = resGetEntity.Entity;
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.User, Param, resGetEntity.Entity.UserName,
+                StructureChangeDescriber.User(resGetEntity.Entity, null));
+        }
         else
             result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 
@@ -224,6 +235,10 @@ public class KntUsersCreateAsyncCommand : KntCommandSaveServiceBase<UserRegister
             resService.Entity = resRep.Entity?.GetSimpleDto<UserDto>();
             if (!resRep.IsValid)
                 resService.AddListErrorMessage(resRep.ListErrorMessage);
+            else
+                // Who registers has no user yet: the row is of the new one. Never its password (UserDto has none).
+                await KntHistory.NoteStructureAsync(Service, HistoryEntities.User, newEntity.UserId, newEntity.UserName,
+                    StructureChangeDescriber.User(null, newEntity.GetSimpleDto<UserDto>()), userName: newEntity.UserName);
 
             // The new user may be the current one, until now not registered (no role).
             Service.ResetCurrentUser();
@@ -309,7 +324,11 @@ public class KntUsersSetPasswordAsyncCommand : KntCommandServiceBase<KntSetPassw
 
         var resRep = await Repository.Users.UpdatePasswordAsync(Param.UserId, passwordHash, passwordSalt);
         if (resRep.IsValid)
+        {
             result.Entity = resGetEntity.Entity;
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.User, Param.UserId, resGetEntity.Entity.UserName,
+                StructureChangeDescriber.Password(HistoryPasswordChanges.Set));
+        }
         else
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
@@ -491,7 +510,11 @@ public class KntUsersResetPasswordAsyncCommand : KntCommandServiceBase<KntPasswo
 
         var resRep = await Repository.Users.UpdatePasswordAsync(user.UserId, passwordHash, passwordSalt);
         if (resRep.IsValid)
+        {
             result.Entity = user.GetSimpleDto<UserDto>();
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.User, user.UserId, user.UserName,
+                StructureChangeDescriber.Password(HistoryPasswordChanges.Reset), userName: user.UserName);
+        }
         else
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
@@ -626,7 +649,11 @@ public class KntUsersSaveProfileAsyncCommand : KntCommandSaveServiceBase<UserPro
 
         var resRep = await Repository.Users.UpdateAsync(userDto);
         if (resRep.IsValid)
+        {
             result.Entity = KntCurrentUserAccount.ToProfile(resRep.Entity);
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.User, user.UserId, user.UserName,
+                StructureChangeDescriber.User(user.GetSimpleDto<UserDto>(), userDto));
+        }
         else
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
@@ -689,7 +716,11 @@ public class KntUsersChangePasswordAsyncCommand : KntCommandServiceBase<UserChan
 
         var resRep = await Repository.Users.UpdatePasswordAsync(user.UserId, passwordHash, passwordSalt);
         if (resRep.IsValid)
+        {
             result.Entity = user.GetSimpleDto<UserDto>();
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.User, user.UserId, user.UserName,
+                StructureChangeDescriber.Password(HistoryPasswordChanges.Changed));
+        }
         else
             result.AddListErrorMessage(resRep.ListErrorMessage);
 
