@@ -1,0 +1,143 @@
+@using KNote.Model.Core
+@inject IStore webApiService
+@inject DialogService dialogService
+
+@implements IDisposable
+
+@* The «History» tab of the note editor (H.3): who changed what and when, the newest first, 100 at a time (H20); «See this
+   version» opens the note as it was after the selected change (H18). Read when the tab is shown (only the chosen tab is drawn)
+   and with «Refresh». *@
+
+@if (NoteIsNew)
+{
+    <div class="knt-empty-state">Save the note to start its history.</div>
+}
+else
+{
+    <div class="knt-list-header">
+        <span>@(page == null ? "Loading the history ..." : page.Total == 1 ? "1 change" : $"{page.Total} changes")</span>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+            <RadzenButton Text="See this version" Icon="history" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                          Disabled="@(selected.Count == 0)" Click="() => SeeVersionAsync(selected.FirstOrDefault())" />
+            <RadzenButton Icon="refresh" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="ReloadAsync" />
+        </RadzenStack>
+    </div>
+
+    @if (loadFailed)
+    {
+        <div class="knt-load-error">
+            <span class="knt-load-error-text">The history could not be loaded.</span>
+            <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="ReloadAsync" />
+        </div>
+    }
+    else if (page != null && rows.Count == 0)
+    {
+        <div class="knt-empty-state">No changes noted yet: the history starts the day it was installed.</div>
+    }
+    else if (page != null)
+    {
+        <RadzenDataGrid TItem="KLogDto" Data="@rows" Density="Density.Compact" AllowColumnResize="true" class="knt-list"
+                        AllowAlternatingRows="false" SelectionMode="DataGridSelectionMode.Single" @bind-Value="@selected"
+                        RowDoubleClick="args => SeeVersionAsync(args.Data)">
+            <Columns>
+                <RadzenDataGridColumn TItem="KLogDto" Title="When" Width="190px">
+                    <Template Context="row">@HistoryRules.WhenText(row)</Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KLogDto" Property="UserName" Title="Who" Width="120px" />
+                <RadzenDataGridColumn TItem="KLogDto" Property="Origin" Title="From" Width="100px" />
+                <RadzenDataGridColumn TItem="KLogDto" Property="RegistryMessage" Title="Change">
+                    <Template Context="row"><span class="knt-history-change">@row.RegistryMessage</span></Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+
+        @if (page.HasMore)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" class="rz-mt-2">
+                <RadzenButton Text="Show more" Icon="expand_more" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base"
+                              IsBusy="@loadingMore" Click="ShowMoreAsync" />
+            </RadzenStack>
+        }
+    }
+}
+
+@code {
+    [Parameter][EditorRequired] public Guid NoteId { get; set; }
+    [Parameter] public bool NoteIsNew { get; set; }
+    // The note's "#123 · Topic", for the window of a version.
+    [Parameter] public string? NoteTitle { get; set; }
+
+    private NoteHistoryPageDto? page;
+    private readonly List<KLogDto> rows = new();
+    private IList<KLogDto> selected = new List<KLogDto>();
+    private bool loadFailed;
+    private bool loadingMore;
+    private Guid? loadedNoteId;
+
+    // The first page: another one asked for meanwhile (Refresh, another note) leaves this one out of date.
+    private readonly KntLatestRequest request = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (NoteIsNew || NoteId == loadedNoteId)
+            return;
+        loadedNoteId = NoteId;
+        await ReloadAsync();
+    }
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        request.Dispose();
+    }
+
+    private async Task ReloadAsync()
+    {
+        var noteId = NoteId;
+        loadFailed = false;
+        var result = await request.RunAsync(ct => webApiService.History.GetNoteHistoryAsync(noteId, 0, ct));
+        if (result.Canceled)
+            return;
+        if (!result.Value.IsValid)
+        {
+            loadFailed = true;
+            return;
+        }
+        page = result.Value.Entity;
+        rows.Clear();
+        rows.AddRange(page.Rows);
+        selected = new List<KLogDto>();
+    }
+
+    private async Task ShowMoreAsync()
+    {
+        if (page == null || loadingMore)
+            return;
+        loadingMore = true;
+        try
+        {
+            var result = await webApiService.History.GetNoteHistoryAsync(NoteId, rows.Count, disposal.Token);
+            if (result.IsValid && result.Entity.NoteId == NoteId)
+            {
+                page = result.Entity;
+                rows.AddRange(page.Rows.Where(r => rows.All(k => k.KLogId != r.KLogId)));
+                page.Skip = 0;
+                page.Rows = rows;
+            }
+        }
+        finally
+        {
+            loadingMore = false;
+        }
+    }
+
+    private async Task SeeVersionAsync(KLogDto? row)
+    {
+        if (row == null)
+            return;
+        await dialogService.OpenAsync<NoteVersionDialog>("Version",
+            new Dictionary<string, object?> { { "NoteId", NoteId }, { "Row", row }, { "NoteTitle", NoteTitle } },
+            KntDialogs.Framed(KntDialogs.Large()));
+    }
+}

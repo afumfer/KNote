@@ -653,6 +653,32 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         return result;
     }
 
+    /// <summary>
+    /// The history of the note (H.3), a page of its rows, the newest first (H20: 100 at a time, from skip). Null for a new note
+    /// (it has none yet).
+    /// </summary>
+    public async Task<Result<NoteHistoryPageDto>> GetHistoryAsync(int skip = 0)
+    {
+        if (Service == null || Model == null || Model.IsNew())
+            return null;
+        return await Service.History.GetNoteHistoryAsync(Model.NoteId, skip);
+    }
+
+    /// <summary>«See this version» (H18): the note as it was after that change, in a window of its own (NoteVersionCtrl).</summary>
+    public async Task ShowVersionAsync(KLogDto row)
+    {
+        if (row == null || Service == null || Model == null)
+            return;
+        var versionCtrl = new NoteVersionCtrl(Store, Service, Model.NoteId, row, $"#{Model.NoteNumber} · {Model.Topic}");
+        if (await versionCtrl.LoadAsync())
+            versionCtrl.Run();
+        else
+        {
+            View.ShowInfo(versionCtrl.Error);
+            versionCtrl.Finalize();
+        }
+    }
+
     // A relation from this note to a similar one, in the editor of relations with that note already chosen (saved with
     // the note, as the others).
     public Task<TraceNoteDto> RelateSimilarNoteAsync(NoteSearchHitDto note) =>

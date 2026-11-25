@@ -1,0 +1,53 @@
+/* A version of a note (H.3): what changed, the topic, where it was and its attributes, and its description. Only theme
+   variables, so it follows the light/dark theme. */
+
+.knt-version-change {
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+    overflow-wrap: anywhere;
+}
+
+.knt-version-topic {
+    margin: 0;
+    font-family: var(--knt-heading-font-family);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--rz-text-title-color);
+    overflow-wrap: anywhere;
+}
+
+.knt-version-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+    .knt-version-meta > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .knt-version-meta ::deep .rzi {
+        font-size: 1rem;
+    }
+
+.knt-version-attributes {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+}
+
+.knt-version-attribute-name {
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-version-description {
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+}

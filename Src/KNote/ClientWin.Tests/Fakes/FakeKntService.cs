@@ -26,6 +26,7 @@ internal class FakeKntService : IKntService
     public FakeKntSummaryService SummariesFake { get; } = new();
     public FakeKntAtlasContextService AtlasContextFake { get; } = new();
     public FakeKntSystemValuesService SystemValuesFake { get; } = new();
+    public FakeKntHistoryService HistoryFake { get; } = new();
 
     public ILogger Logger { get; set; }
     public Guid IdServiceRef { get; } = Guid.NewGuid();
@@ -59,6 +60,7 @@ internal class FakeKntService : IKntService
     public IKntAtlasContextService AtlasContext => AtlasContextFake;
     public IKntResourceContentService ResourceContent => ResourceContentFake;
     public IKntSummaryService Summaries => SummariesFake;
+    public IKntHistoryService History => HistoryFake;
     public IKntMessageBroker MessageBroker => throw new NotSupportedException();
 
     public Task<bool> TestDbConnection() => throw new NotSupportedException();

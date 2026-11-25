@@ -129,6 +129,58 @@ public class HistoryRulesTests
         Assert.AreEqual("c", NoteChangeRules.ChangeTag("a c", "a", null));
     }
 
+    [TestMethod]
+    public void TheVersionAfterAChange_IsTheCopyOfTheNextRowWithOne_OrTheNoteNow()
+    {
+        var created = Row(1, "Created", copy: false, EnumHistoryFields.None);
+        var edited = Row(2, "Updated", copy: true, EnumHistoryFields.Description);
+        var taskOnly = Row(3, "Updated", copy: false, EnumHistoryFields.Tasks);
+        var renamed = Row(4, "Updated", copy: true, EnumHistoryFields.Topic);
+        var rows = new[] { renamed, created, taskOnly, edited };
+
+        Assert.AreEqual(edited, HistoryRules.VersionAfter(rows, created.KLogId).CopyRow, "how the note was before the next change");
+        var afterEdit = HistoryRules.VersionAfter(rows, edited.KLogId);
+        Assert.AreEqual(renamed, afterEdit.CopyRow, "a row of its tasks only has no copy and doesn't count");
+        Assert.IsTrue(afterEdit.Exact);
+        var last = HistoryRules.VersionAfter(rows, renamed.KLogId);
+        Assert.IsTrue(last.CurrentNote);
+        Assert.IsTrue(last.Exact);
+        Assert.IsNull(HistoryRules.VersionAfter(rows, Guid.NewGuid()));
+    }
+
+    [TestMethod]
+    public void WithoutACopyInBetween_TheVersionIncludesLaterChanges()
+    {
+        var first = Row(1, "Updated", copy: true, EnumHistoryFields.Topic);
+        var emptied = Row(2, "Updated", copy: false, EnumHistoryFields.Description); // its copy emptied by the retention
+        var next = Row(3, "Updated", copy: true, EnumHistoryFields.Topic);
+
+        var version = HistoryRules.VersionAfter(new[] { first, emptied, next }, first.KLogId);
+
+        Assert.AreEqual(next, version.CopyRow);
+        Assert.IsFalse(version.Exact);
+        Assert.AreEqual(emptied.LastDateTime, version.IncludesUntil);
+        StringAssert.StartsWith(HistoryRules.VersionNotice(version.IncludesUntil), "Includes later changes, up to ");
+        Assert.IsNull(HistoryRules.VersionNotice(null));
+    }
+
+    [TestMethod]
+    public void WhenText_IsAMomentOrASession()
+    {
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+        var moment = new KLogDto { RegistryDateTime = new DateTime(2026, 11, 25, 10, 5, 0), LastDateTime = new DateTime(2026, 11, 25, 10, 5, 30) };
+        var session = new KLogDto { RegistryDateTime = new DateTime(2026, 11, 25, 10, 5, 0), LastDateTime = new DateTime(2026, 11, 25, 10, 31, 0) };
+
+        Assert.AreEqual("25/11/2026 10:05", HistoryRules.WhenText(moment, culture));
+        Assert.AreEqual("25/11/2026 10:05–10:31", HistoryRules.WhenText(session, culture));
+    }
+
+    private static KLogDto Row(int minute, string action, bool copy, EnumHistoryFields fields) => new()
+    {
+        KLogId = Guid.NewGuid(), ActionType = action, Fields = fields, PreviousContentSize = copy ? 10 : null,
+        RegistryDateTime = Now.AddMinutes(minute), LastDateTime = Now.AddMinutes(minute).AddSeconds(20)
+    };
+
     private static KLogDto Copy(DateTime when) => new()
     {
         KLogId = Guid.NewGuid(), RegistryDateTime = when, LastDateTime = when, PreviousContentSize = 100

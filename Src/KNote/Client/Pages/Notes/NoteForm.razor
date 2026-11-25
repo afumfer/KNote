@@ -243,6 +243,16 @@
                 </ChildContent>
             </RadzenTabsItem>
 
+            @* The history of the note (H.3): read when the tab is shown (only the chosen tab is drawn). *@
+            <RadzenTabsItem Icon="history">
+                <Template Context="tab">
+                    <span class="knt-tab-text">History</span>
+                </Template>
+                <ChildContent>
+                    <NoteHistory NoteId="Note.NoteId" NoteIsNew="Note.IsNew()" NoteTitle="@($"#{Note.NoteNumber} · {Note.Topic}")" />
+                </ChildContent>
+            </RadzenTabsItem>
+
         </Tabs>
     </RadzenTabs>
 

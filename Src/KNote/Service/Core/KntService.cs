@@ -169,6 +169,17 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntHistoryService _history;
+    public IKntHistoryService History
+    {
+        get
+        {
+            if (_history == null)
+                _history = new KntHistoryService(this);
+            return _history;
+        }
+    }
+
     private IKntAtlasContextService _atlasContext;
     public IKntAtlasContextService AtlasContext
     {

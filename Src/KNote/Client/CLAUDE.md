@@ -608,6 +608,11 @@ Patrones ya establecidos que hay que seguir:
   su ventana de edición (`KntWindows.OpenEditAsync`, sin esperas delante). Los tipos se mantienen en la pestaña
   "Trace note types" de `Admin` (`Pages/TraceNoteTypes`, como `Types`; `IStore.TraceNoteTypes`); su icono,
   `KntSections.TraceNoteTypes`, es también el de la pestaña del editor.
+- **Historia de la nota** (`NoteHistory`, la última pestaña de `NoteForm`; `NoteVersionDialog`; `IStore.History`, `api/history`): la
+  lista de los cambios, la más nueva primero, 100 cada vez con «Show more» (`HistoryRules.WhenText`, quién, desde dónde y la línea), leída
+  al mostrar la pestaña (`KntLatestRequest`) y con el botón de recargar. «See this version» (o doble clic) abre la versión en un diálogo
+  `Large`: la nota tal como quedó tras ese cambio, de solo lectura, con el aviso si incluye cambios posteriores, y la descripción con
+  `ViewMarkdown`. Una nota nueva dice que se guarde antes.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - **Calendario de alarmas** (`Notes/NotesAlarmsCalendar` + `AlarmDetailPane`, menú "Alarms calendar", Guest+, solo

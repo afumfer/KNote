@@ -283,6 +283,14 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   usuario. Lo que crea `KntSystemNotes` lleva el origen `KNote` (H16). No se anotan el orden de las notas de una carpeta (H17) ni los
   estados que KNote escribe solo. Un comando nuevo que cambie la estructura tiene que anotarlo. Tests en `Tests/StructureChangeDescriberTests`
   y `ServiceTests/StructureHistoryServiceTests`.
+  **Lo que se ve** (H.3): `IKntService.History` (`KntHistoryCommands.cs`, Guest): `GetNoteHistoryAsync` (una página de las filas de una
+  nota, la más nueva primero, 100 como mucho, `NoteHistoryPageDto`) y `GetNoteVersionAsync` («See this version», `NoteVersionViewDto`):
+  **la nota tal como quedó tras ese cambio** (H18, `HistoryRules.VersionAfter`): la copia de la primera fila posterior que la tenga o, sin
+  ninguna, la nota actual; si entre medias hay un cambio de sus datos propios sin copia, `Exact = false` y un aviso (`VersionNotice`).
+  Con los nombres resueltos (ruta de la carpeta, tipo, atributos), sin el script (H21). `HistoryRules.WhenText` es el «cuándo» de las dos
+  apps. `Server`: `HistoryController` (`api/history`); la pestaña «History» del editor en la Web (`Client/Pages/Notes/NoteHistory`,
+  `NoteVersionDialog`) y en `ClientWin` (`NoteEditorForm`, `NoteVersionCtrl`/`NoteVersionForm`). Tests en `Tests/HistoryRulesTests`,
+  `ServiceTests/NoteHistoryViewServiceTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/NoteVersionCtrlTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

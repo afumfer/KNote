@@ -1,0 +1,108 @@
+@using KNote.Model.Core
+@inject IStore webApiService
+@inject DialogService dialogService
+
+@implements IDisposable
+
+@* A version of a note (H.3, «See this version»): the note as it was after a change of its history (H18), read only, with its
+   names resolved by Server and without its script (H21). If copies in between were not kept, it says so. *@
+
+<KntDialogFrame Icon="history" Title="@Title" Subtitle="@Subtitle" OnClose="() => dialogService.Close(null)">
+    <ChildContent>
+        @if (loadFailed)
+        {
+            <div class="knt-load-error">
+                <span class="knt-load-error-text">The version could not be loaded.</span>
+                <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="LoadAsync" />
+            </div>
+        }
+        else if (version == null)
+        {
+            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" ShowValue="false" Size="ProgressBarCircularSize.Small" />
+        }
+        else
+        {
+            <RadzenStack Gap="1rem">
+                @if (!string.IsNullOrEmpty(version.Notice))
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                        @version.Notice
+                    </RadzenAlert>
+                }
+
+                <div class="knt-version-change">@version.Change</div>
+
+                <h2 class="knt-version-topic">@(string.IsNullOrWhiteSpace(version.Topic) ? "Untitled note" : version.Topic)</h2>
+
+                <div class="knt-version-meta">
+                    <span><RadzenIcon Icon="folder" />@version.FolderPath</span>
+                    @if (!string.IsNullOrEmpty(version.NoteTypeName))
+                    {
+                        <span><RadzenIcon Icon="@KntSections.NoteTypes.Icon" />@version.NoteTypeName</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(version.Tags))
+                    {
+                        <span><RadzenIcon Icon="sell" />@version.Tags</span>
+                    }
+                    <span><RadzenIcon Icon="low_priority" />Priority @version.Priority</span>
+                </div>
+
+                @if (version.Attributes.Count > 0)
+                {
+                    <div class="knt-version-attributes">
+                        @foreach (var item in version.Attributes)
+                        {
+                            <div><span class="knt-version-attribute-name">@item.Name:</span> @item.Value</div>
+                        }
+                    </div>
+                }
+
+                <div class="knt-version-description">
+                    @if (string.IsNullOrWhiteSpace(version.Description))
+                    {
+                        <span class="knt-empty-state">No description.</span>
+                    }
+                    else
+                    {
+                        <ViewMarkdown MarkdownContent="@version.Description" />
+                    }
+                </div>
+            </RadzenStack>
+        }
+    </ChildContent>
+    <Footer>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => dialogService.Close(null)" />
+        </RadzenStack>
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public Guid NoteId { get; set; }
+    [Parameter][EditorRequired] public KLogDto Row { get; set; } = null!;
+    // The note's "#123 · Topic".
+    [Parameter] public string? NoteTitle { get; set; }
+
+    private NoteVersionViewDto? version;
+    private bool loadFailed;
+    private readonly CancellationTokenSource disposal = new();
+
+    private string Title => string.IsNullOrEmpty(NoteTitle) ? "Version of the note" : $"Version of {NoteTitle}";
+    private string Subtitle => $"As it was after the change of {HistoryRules.WhenText(Row)}" + (string.IsNullOrEmpty(Row.UserName) ? "" : $" by {Row.UserName}");
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    public void Dispose() => disposal.Cancel();
+
+    private async Task LoadAsync()
+    {
+        loadFailed = false;
+        var result = await webApiService.History.GetNoteVersionAsync(NoteId, Row.KLogId, disposal.Token);
+        if (disposal.IsCancellationRequested)
+            return;
+        if (result.IsValid)
+            version = result.Entity;
+        else
+            loadFailed = true;
+    }
+}

@@ -471,6 +471,13 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
   (la URL, de la petición de la conexión). Con `MountResourceContainerOnStartup` la URL de los recursos puede ser
   relativa (`/Ruta`): la Web la resuelve sola y ClientWin con un `<base href>` del servidor.
 
+## Historial de las notas (`HistoryController`, `api/history`)
+
+La pestaña «History» del editor de la Web (H.3, ver «Historial de las notas» en el `CLAUDE.md` raíz), para cualquier usuario con sesión
+(los comandos son Guest): `GET notes/{noteId}?skip=` (una página de sus filas, `NoteHistoryPageDto`) y `GET notes/{noteId}/versions/{klogId}`
+(la nota tal como quedó tras ese cambio, `NoteVersionViewDto`; su descripción pasa por `UtilUpdateResourceInDescriptionForRead`, como al
+leer una nota). Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
+
 ## Calendario de alarmas y panel de tareas (`NotesController`)
 
 Dos lecturas para la Web, de cualquier usuario con sesión (Guest+, como las tareas y alarmas de una nota):

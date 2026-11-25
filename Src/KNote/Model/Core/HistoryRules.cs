@@ -61,6 +61,58 @@ public static class HistoryRules
 
     public static string Title(string name) => Truncate(name?.Trim(), KLogDto.MaxEntityTitleLength);
 
+    /// <summary>Where the note as it was after a change of its history comes from (VersionAfter).</summary>
+    public sealed record VersionSource(KLogDto CopyRow, bool CurrentNote, bool Exact, DateTime? IncludesUntil);
+
+    /// <summary>
+    /// The note as it was after a change (H18, «See this version»): the copy of the first later row that has one (it is how the
+    /// note was before that row) or, without any, the note as it is now. A deleted note: the copy of its row Deleted (how it was
+    /// when deleted). Exact unless some row in between changed its own data and has no copy (the retention emptied it, or it was
+    /// too big): then it includes later changes, up to the last of those. The rows of its parts never have a copy and don't count.
+    /// </summary>
+    public static VersionSource VersionAfter(IEnumerable<KLogDto> rows, Guid klogId)
+    {
+        var ordered = (rows ?? Enumerable.Empty<KLogDto>()).OrderBy(r => r.RegistryDateTime).ThenBy(r => r.LastDateTime).ToList();
+        var index = ordered.FindIndex(r => r.KLogId == klogId);
+        if (index < 0)
+            return null;
+
+        var row = ordered[index];
+        if (row.ActionType == nameof(EnumHistoryAction.Deleted))
+            return new VersionSource(row.HasPreviousContent ? row : null, !row.HasPreviousContent, row.HasPreviousContent, null);
+
+        DateTime? includesUntil = null;
+        foreach (var later in ordered.Skip(index + 1))
+        {
+            if (later.HasPreviousContent)
+                return new VersionSource(later, false, includesUntil == null, includesUntil);
+            if ((later.Fields & EnumHistoryFields.NoteData) != 0)
+                includesUntil = later.LastDateTime;
+        }
+        return new VersionSource(null, true, includesUntil == null, includesUntil);
+    }
+
+    /// <summary>
+    /// When a row happened, as the «History» tab writes it in the culture of the app: one moment, or a session from its first
+    /// change to its last (25/11/2026 10:05–10:31; across days, both dates).
+    /// </summary>
+    public static string WhenText(KLogDto row, IFormatProvider culture = null)
+    {
+        if (row == null)
+            return "";
+        culture ??= System.Globalization.CultureInfo.CurrentCulture;
+        string Full(DateTime d) => d.ToString("g", culture);
+        if (row.LastDateTime.Date != row.RegistryDateTime.Date)
+            return $"{Full(row.RegistryDateTime)} – {Full(row.LastDateTime)}";
+        if (row.LastDateTime - row.RegistryDateTime < TimeSpan.FromMinutes(1))
+            return Full(row.LastDateTime);
+        return $"{Full(row.RegistryDateTime)}–{row.LastDateTime.ToString("t", culture)}";
+    }
+
+    /// <summary>What the window of a version says when it is not exact (H18).</summary>
+    public static string VersionNotice(DateTime? includesUntil) => includesUntil is not DateTime until ? null
+        : $"Includes later changes, up to {until.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)}: the copies in between were not kept.";
+
     /// <summary>The size of a version in bytes (UTF-8), as kept in PreviousContentSize.</summary>
     public static int ContentSize(string json) => json == null ? 0 : Encoding.UTF8.GetByteCount(json);
 

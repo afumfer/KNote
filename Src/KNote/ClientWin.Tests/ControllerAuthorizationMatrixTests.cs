@@ -51,6 +51,8 @@ public class ControllerAuthorizationMatrixTests
         ["RepositoryNoisePolicyCtrl"] = Included,
         ["RepositoryPeriodSummaryCtrl"] = Included,
         ["ReviewSelectionCtrl"] = Included,
+        // A version of a note (the history, H.3), from the note editor: the command checks the role (Guest).
+        ["NoteVersionCtrl"] = Included,
         // KNote Atlas: the window of the context of the AI (any user; its buttons ask the role of each command).
         ["AtlasCtrl"] = Requirement(EnumRoles.Guest, AuthorizationScope.Repository),
         // KNote Atlas, stage 2: summarizing a long document of a note in a new note (who edits the notes).

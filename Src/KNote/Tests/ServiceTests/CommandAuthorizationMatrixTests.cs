@@ -69,6 +69,8 @@ public class CommandAuthorizationMatrixTests
             "KntAtlasContextGetProfileInfoAsyncCommand", "KntAtlasContextGetGlossaryInfoAsyncCommand",
             "KntAtlasContextFindGlossaryTermsAsyncCommand",
             "KntAtlasContextGetTaskPromptsAsyncCommand",
+            // The history of a note and its versions (H.3): reading it, as reading the note.
+            "KntHistoryGetNoteHistoryAsyncCommand", "KntHistoryGetNoteVersionAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).

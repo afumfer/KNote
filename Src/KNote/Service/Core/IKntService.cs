@@ -79,6 +79,7 @@ public interface IKntService : IDisposable
     IKntAtlasContextService AtlasContext { get; }
     IKntResourceContentService ResourceContent { get; }
     IKntSummaryService Summaries { get; }
+    IKntHistoryService History { get; }
     IKntMessageBroker MessageBroker { get; }
 
     string GetSystemVariable(string scope, string variable);
