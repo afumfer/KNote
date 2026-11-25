@@ -780,11 +780,16 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   árbol (`FoldersSelectorForm.RefreshView`, `async void`) acababa después del de `OnInitialized` y, al restaurar «el valor anterior»,
   dejaba el cursor de espera para siempre.
 - **Historia de la nota** (H.3): la última pestaña de `NoteEditorForm`, «History», creada en código (`CreateHistoryTab`, con el icono
-  `KntIcon.Undo`): los cambios, el más nuevo primero, 100 cada vez con «Show more» (`NoteEditorCtrl.GetHistoryAsync`), leída al mostrar la
+  `KntIcon.History`, el suyo: no el de «Undo»): los cambios, el más nuevo primero, 100 cada vez con «Show more» (`NoteEditorCtrl.GetHistoryAsync`), leída al mostrar la
   pestaña y tras guardar con ella abierta (gana la última petición). «See this version» (doble clic, Enter) abre `NoteVersionCtrl`
   (incluido, sin `[KntAuthorize]`) con `NoteVersionForm`, también creada en código: la versión de solo lectura, con el aviso si incluye
   cambios posteriores y la descripción en un `KntEditView` con las reglas de la nota (saneada, sin scripts salvo los de sus diagramas),
-  que arranca en `OnShown`. Tests en `NoteVersionCtrlTests`.
+  que arranca en `OnShown`. Tests en `NoteVersionCtrlTests`. «Compare» (H22) abre `NoteCompareCtrl` (incluido) con `NoteCompareForm`, en
+  código: la casilla «Compare with the current note» y la comparación del `Service` como HTML (`NoteCompareCtrl.Html`: **todo texto escapado**,
+  sin scripts) en un `KntEditView`. «Restore» (H23; también en `NoteVersionForm`, si el editor se lo da) solo en la ventana propia del editor
+  (`NoteEditorCtrl.CanRestoreVersions`: `EditMode` y no consulta) y en las filas de `NoteHistoryPageDto.Restorable`:
+  `NoteEditorCtrl.RestoreVersionAsync` pregunta, guarda antes los cambios con `SaveModel` (si no puede, no restaura), restaura, vuelve a
+  cargar la nota (`LoadModelById` + `OnSavedEntity`, que avisa a las listas) y muestra los avisos. Tests en `NoteCompareCtrlTests`.
 - **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las
   relaciones (creada en código, envuelve el `SplitContainer` del Designer), plegada si no hay índice utilizable o la nota
   es nueva; se calcula al abrir la pestaña y al cambiar de nota o de relaciones con ella abierta.

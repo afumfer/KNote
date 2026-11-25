@@ -59,6 +59,7 @@ public class FactoryViewsWinForms : IFactoryViews
         Registry.Register<RepositoryPeriodSummaryCtrl, IViewPeriodSummary>(c => new RepositoryPeriodSummaryForm(c));
         Registry.Register<ReviewSelectionCtrl, IViewReviewSelection>(c => new ReviewSelectionForm(c));
         Registry.Register<NoteVersionCtrl, IViewNoteVersion>(c => new NoteVersionForm(c));
+        Registry.Register<NoteCompareCtrl, IViewNoteCompare>(c => new NoteCompareForm(c));
         Registry.Register<AiProvidersManageCtrl, IViewManageList<AiProviderRef>>(c => new AiProvidersManageForm(c));
         Registry.Register<KntChatCtrl, IViewChatRoom>(c => new KntChatForm(c));
         Registry.Register<KntServerCOMCtrl, IViewServerCOM>(c => new KntServerCOMForm(c));

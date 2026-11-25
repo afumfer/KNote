@@ -66,6 +66,25 @@ public class NoteVersionForm : KntForm, IViewNoteVersion
         close.Click += (s, e) => Close();
         buttons.Controls.Add(close);
         CancelButton = close;
+        if (_ctrl.CanRestore)
+        {
+            var restore = new Button { Text = "Restore", AutoSize = true, UseVisualStyleBackColor = true };
+            restore.Click += async (s, e) =>
+            {
+                restore.Enabled = false;
+                try
+                {
+                    if (await _ctrl.RestoreAsync())
+                        Close();
+                }
+                finally
+                {
+                    if (!IsDisposed)
+                        restore.Enabled = true;
+                }
+            };
+            buttons.Controls.Add(restore);
+        }
 
         Controls.Add(_description);
         Controls.Add(buttons);

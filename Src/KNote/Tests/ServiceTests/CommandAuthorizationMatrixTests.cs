@@ -71,6 +71,7 @@ public class CommandAuthorizationMatrixTests
             "KntAtlasContextGetTaskPromptsAsyncCommand",
             // The history of a note and its versions (H.3): reading it, as reading the note.
             "KntHistoryGetNoteHistoryAsyncCommand", "KntHistoryGetNoteVersionAsyncCommand",
+            "KntHistoryGetNoteComparisonAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).
@@ -87,7 +88,9 @@ public class CommandAuthorizationMatrixTests
             "KntNotesNewMessageAsyncCommand", "KntNotesSaveMessageAsyncCommand", "KntNotesDeleteMessageAsyncCommand", "KntNotesSaveTraceNoteAsyncCommand",
             "KntNotesDeleteTraceNoteAsyncCommand", "KntNotesSaveWindowAsyncCommand", "KntNotesGetAlarmNotesIdAsyncCommand",
             "KntNotesConsumeDueAlarmsAsyncCommand", "KntNotesGetAlarmNoticesAsyncCommand",
-            "KntNotesPatchFolderAsyncCommand", "KntNotesPatchChangeTagsAsyncCommand");
+            "KntNotesPatchFolderAsyncCommand", "KntNotesPatchChangeTagsAsyncCommand",
+            // Restoring a version of a note (H23): it saves the note.
+            "KntHistoryRestoreNoteVersionAsyncCommand");
 
         // The AI assistant's sessions: notes and tasks of the user's own (Staff, like the assistant), also to
         // read them, since the assistant itself requires Staff.

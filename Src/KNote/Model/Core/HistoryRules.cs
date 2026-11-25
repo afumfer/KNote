@@ -93,6 +93,53 @@ public static class HistoryRules
     }
 
     /// <summary>
+    /// Whether «Compare» can show what a change did (H22): the first one (created) or one that changed the note's own data. Not one
+    /// of its parts only, nor its deletion (there is no note after it).
+    /// </summary>
+    public static bool CanCompare(KLogDto row) =>
+        row != null && row.ActionType != nameof(EnumHistoryAction.Deleted)
+        && (row.ActionType == nameof(EnumHistoryAction.Created) || (row.Fields & EnumHistoryFields.NoteData) != 0);
+
+    /// <summary>Where the note before a change comes from (H22): its own copy, or an empty note for the first one.</summary>
+    public sealed record BeforeSource(KLogDto CopyRow, bool EmptyNote);
+
+    /// <summary>The note before a change: the copy its row keeps, an empty note if it created it, or null if the copy is gone.</summary>
+    public static BeforeSource VersionBefore(KLogDto row)
+    {
+        if (row == null)
+            return null;
+        if (row.ActionType == nameof(EnumHistoryAction.Created))
+            return new BeforeSource(null, true);
+        return row.HasPreviousContent ? new BeforeSource(row, false) : null;
+    }
+
+    /// <summary>
+    /// The rows whose version can be restored (H23): those of a note that exists (its last row isn't Deleted) with a later row that
+    /// keeps a copy (the version after them, H18); not the last change (that is the note now) nor a deletion (a deleted note is
+    /// recovered from «Deleted notes», H24).
+    /// </summary>
+    public static HashSet<Guid> Restorable(IEnumerable<KLogDto> rowsOfANote)
+    {
+        var ordered = (rowsOfANote ?? Enumerable.Empty<KLogDto>()).OrderBy(r => r.RegistryDateTime).ThenBy(r => r.LastDateTime).ToList();
+        var restorable = new HashSet<Guid>();
+        if (ordered.Count == 0 || ordered[^1].ActionType == nameof(EnumHistoryAction.Deleted))
+            return restorable;
+
+        bool laterCopy = false;
+        for (int i = ordered.Count - 1; i >= 0; i--)
+        {
+            var row = ordered[i];
+            if (laterCopy && row.ActionType != nameof(EnumHistoryAction.Deleted))
+                restorable.Add(row.KLogId);
+            laterCopy |= row.HasPreviousContent;
+        }
+        return restorable;
+    }
+
+    /// <summary>The moment of a version in the lines of the history (English, as RegistryMessage).</summary>
+    public static string MomentText(DateTime moment) => moment.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>
     /// When a row happened, as the «History» tab writes it in the culture of the app: one moment, or a session from its first
     /// change to its last (25/11/2026 10:05–10:31; across days, both dates).
     /// </summary>
@@ -111,7 +158,7 @@ public static class HistoryRules
 
     /// <summary>What the window of a version says when it is not exact (H18).</summary>
     public static string VersionNotice(DateTime? includesUntil) => includesUntil is not DateTime until ? null
-        : $"Includes later changes, up to {until.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)}: the copies in between were not kept.";
+        : $"Includes later changes, up to {MomentText(until)}: the copies in between were not kept.";
 
     /// <summary>The size of a version in bytes (UTF-8), as kept in PreviousContentSize.</summary>
     public static int ContentSize(string json) => json == null ? 0 : Encoding.UTF8.GetByteCount(json);

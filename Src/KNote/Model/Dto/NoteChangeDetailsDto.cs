@@ -19,6 +19,8 @@ public class NoteChangeDetailsDto
 
     public HistoryCreatedDto Created { get; set; }
     public HistoryDeletedDto Deleted { get; set; }
+    /// <summary>A version restored (H23): the row ActionType Restored, with what it changed in the other members.</summary>
+    public HistoryRestoredDto Restored { get; set; }
 
     public HistoryValueChangeDto Topic { get; set; }
     public HistoryTextChangeDto Text { get; set; }
@@ -87,6 +89,13 @@ public class HistoryCreatedDto
 {
     public string Folder { get; set; }
     public List<string> Sections { get; set; }
+}
+
+public class HistoryRestoredDto
+{
+    /// <summary>The row whose version was restored, and when that change happened (the last one of its session).</summary>
+    public Guid? KLogId { get; set; }
+    public DateTime? VersionOf { get; set; }
 }
 
 public class HistoryDeletedDto

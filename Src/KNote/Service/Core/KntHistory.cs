@@ -25,6 +25,7 @@ public static class KntHistory
 
     private static readonly AsyncLocal<bool> _notNoted = new();
     private static readonly AsyncLocal<DeletingNoteScope> _deletingNote = new();
+    private static readonly AsyncLocal<HistoryRestoredDto> _restoring = new();
 
     #region Scopes
 
@@ -48,6 +49,17 @@ public static class KntHistory
         var previous = _deletingNote.Value;
         _deletingNote.Value = new DeletingNoteScope(noteId);
         return new Restore(() => _deletingNote.Value = previous);
+    }
+
+    /// <summary>
+    /// While a version is restored (KntHistoryRestoreNoteVersionAsyncCommand, H23): saving the note leaves a row Restored of its own
+    /// (never merged into a session), with its copy of how the note was before, so restoring can be undone.
+    /// </summary>
+    internal static IDisposable Restoring(HistoryRestoredDto restored)
+    {
+        var previous = _restoring.Value;
+        _restoring.Value = restored;
+        return new Restore(() => _restoring.Value = previous);
     }
 
     private sealed class DeletingNoteScope
@@ -454,6 +466,12 @@ public static class KntHistory
         var action = before == null ? EnumHistoryAction.Created : EnumHistoryAction.Updated;
         if (action == EnumHistoryAction.Updated && details.Fields == EnumHistoryFields.None)
             return null;
+        var restoring = before == null ? null : _restoring.Value;
+        if (restoring != null)
+        {
+            details.Restored = restoring;
+            action = EnumHistoryAction.Restored;
+        }
 
         var retention = await RetentionAsync(service);
         string beforeJson = null;
@@ -467,6 +485,9 @@ public static class KntHistory
         var now = HistoryRules.Timestamp(DateTime.Now);
         var standalone = NewRow(service, noteId, action, now, details, title);
         var write = new KLogWriteDto { Row = standalone, PreviousContent = beforeJson, TitleFromNewNote = before == null };
+        // A restore is a row of its own, with its copy (H23).
+        if (restoring != null)
+            return write;
 
         var last = (await service.Repository.History.GetLastAsync(HistoryEntities.Note, noteId)).Entity;
         if (!HistoryRules.CanGroup(last, service.UserIdentityName, KntHistoryOrigin.Current(service), now))

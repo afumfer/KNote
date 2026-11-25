@@ -175,6 +175,67 @@ public class HistoryRulesTests
         Assert.AreEqual("25/11/2026 10:05–10:31", HistoryRules.WhenText(session, culture));
     }
 
+    [TestMethod]
+    public void Compare_IsForTheChangesOfTheNotesOwnData()
+    {
+        Assert.IsTrue(HistoryRules.CanCompare(Row(1, "Created", copy: false, EnumHistoryFields.None)));
+        Assert.IsTrue(HistoryRules.CanCompare(Row(2, "Updated", copy: true, EnumHistoryFields.Description)));
+        Assert.IsTrue(HistoryRules.CanCompare(Row(3, "Restored", copy: true, EnumHistoryFields.Topic)));
+        Assert.IsFalse(HistoryRules.CanCompare(Row(4, "Updated", copy: false, EnumHistoryFields.Tasks)), "only its parts");
+        Assert.IsFalse(HistoryRules.CanCompare(Row(5, "Deleted", copy: true, EnumHistoryFields.None)));
+        Assert.IsFalse(HistoryRules.CanCompare(null));
+    }
+
+    [TestMethod]
+    public void TheNoteBeforeAChange_IsItsCopy_OrAnEmptyNote()
+    {
+        var created = Row(1, "Created", copy: false, EnumHistoryFields.None);
+        var edited = Row(2, "Updated", copy: true, EnumHistoryFields.Description);
+        var emptied = Row(3, "Updated", copy: false, EnumHistoryFields.Description);
+
+        Assert.IsTrue(HistoryRules.VersionBefore(created).EmptyNote);
+        Assert.AreEqual(edited, HistoryRules.VersionBefore(edited).CopyRow);
+        Assert.IsNull(HistoryRules.VersionBefore(emptied), "its copy is gone");
+    }
+
+    [TestMethod]
+    public void TheRowsWithALaterCopy_CanBeRestored()
+    {
+        var created = Row(1, "Created", copy: false, EnumHistoryFields.None);
+        var edited = Row(2, "Updated", copy: true, EnumHistoryFields.Description);
+        var taskOnly = Row(3, "Updated", copy: false, EnumHistoryFields.Tasks);
+        var renamed = Row(4, "Updated", copy: true, EnumHistoryFields.Topic);
+        var last = Row(5, "Updated", copy: false, EnumHistoryFields.Tasks);
+
+        var restorable = HistoryRules.Restorable(new[] { last, renamed, created, taskOnly, edited });
+
+        CollectionAssert.AreEquivalent(new[] { created.KLogId, edited.KLogId, taskOnly.KLogId }, restorable.ToArray(),
+            "the last copy is how the note was before «renamed»: after it, the note now");
+    }
+
+    [TestMethod]
+    public void ADeletedNote_HasNothingToRestore()
+    {
+        var edited = Row(1, "Updated", copy: true, EnumHistoryFields.Description);
+        var renamed = Row(2, "Updated", copy: true, EnumHistoryFields.Topic);
+        var deleted = Row(3, "Deleted", copy: true, EnumHistoryFields.None);
+
+        Assert.AreEqual(0, HistoryRules.Restorable(new[] { edited, renamed, deleted }).Count, "it is recovered from «Deleted notes» (H24)");
+    }
+
+    [TestMethod]
+    public void ARestore_SaysWhichVersion()
+    {
+        var details = new NoteChangeDetailsDto
+        {
+            Restored = new HistoryRestoredDto { VersionOf = new DateTime(2026, 11, 25, 10, 31, 0) },
+            Topic = new HistoryValueChangeDto { Before = "B", After = "A" }
+        };
+
+        Assert.AreEqual("Restored the version of 2026-11-25 10:31 · Topic: «B» → «A»", NoteChangeDescriber.Render(details));
+        Assert.AreEqual(EnumHistoryFields.Topic, details.Fields);
+    }
+
     private static KLogDto Row(int minute, string action, bool copy, EnumHistoryFields fields) => new()
     {
         KLogId = Guid.NewGuid(), ActionType = action, Fields = fields, PreviousContentSize = copy ? 10 : null,

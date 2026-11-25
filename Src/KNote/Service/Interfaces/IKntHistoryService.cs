@@ -16,4 +16,10 @@ public interface IKntHistoryService
 
     /// <summary>The note as it was after a change of its history (H18), with its names resolved. Guest.</summary>
     Task<Result<NoteVersionViewDto>> GetNoteVersionAsync(Guid noteId, Guid klogId);
+
+    /// <summary>«Compare» (H22): what a change did, or that version against the note now (withCurrentNote). Guest.</summary>
+    Task<Result<NoteComparisonDto>> GetNoteComparisonAsync(Guid noteId, Guid klogId, bool withCurrentNote = false);
+
+    /// <summary>«Restore» (H23): the note as it was after that change, in a row Restored of its own. Staff.</summary>
+    Task<Result<NoteRestoreResultDto>> RestoreNoteVersionAsync(Guid noteId, Guid klogId);
 }

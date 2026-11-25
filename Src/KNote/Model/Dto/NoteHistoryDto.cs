@@ -13,8 +13,89 @@ public class NoteHistoryPageDto
     /// <summary>How many rows the note has.</summary>
     public int Total { get; set; }
     public int Skip { get; set; }
+    /// <summary>The rows of this page whose version can be restored (H23, HistoryRules.Restorable).</summary>
+    public List<Guid> Restorable { get; set; } = new();
 
     public bool HasMore => Skip + Rows.Count < Total;
+
+    public bool CanRestore(Guid klogId) => Restorable?.Contains(klogId) == true;
+}
+
+/// <summary>What restoring a version did (H23): Changed false if the note was already so; Notices, what couldn't be restored.</summary>
+public class NoteRestoreResultDto
+{
+    public Guid NoteId { get; set; }
+    public bool Changed { get; set; }
+    public List<string> Notices { get; set; } = new();
+}
+
+/// <summary>
+/// Two versions of a note side by side («Compare», H12, H22): what the change did (the note before and after that row) or that
+/// version against the note now (WithCurrentNote). Its fields that differ, with their names resolved, and its text by lines, with
+/// the equal lines far from a change folded and the words that changed in each line replaced (NoteComparer).
+/// </summary>
+public class NoteComparisonDto
+{
+    public Guid NoteId { get; set; }
+    public Guid KLogId { get; set; }
+    public int NoteNumber { get; set; }
+    public bool WithCurrentNote { get; set; }
+    /// <summary>The note before that change is still kept (or it is the first one): «what the change did» can be compared.</summary>
+    public bool CanCompareChange { get; set; } = true;
+    public string BeforeLabel { get; set; }
+    public string AfterLabel { get; set; }
+    public string Notice { get; set; }
+
+    public List<NoteComparisonFieldDto> Fields { get; set; } = new();
+    public NoteTextComparisonDto Text { get; set; } = new();
+
+    public bool Same => Fields.Count == 0 && Text.Same;
+}
+
+public class NoteComparisonFieldDto
+{
+    public string Name { get; set; }
+    public string Before { get; set; }
+    public string After { get; set; }
+}
+
+public enum EnumComparisonLine
+{
+    Equal,
+    Removed,
+    Added,
+    /// <summary>Equal lines folded: Skipped of them.</summary>
+    Folded
+}
+
+public class NoteTextComparisonDto
+{
+    public bool Same { get; set; } = true;
+    /// <summary>Too many changes to compare them line by line: all of it removed and added.</summary>
+    public bool Replaced { get; set; }
+    public int Added { get; set; }
+    public int Removed { get; set; }
+    /// <summary>Not every line is here (NoteComparer.MaxLinesShown).</summary>
+    public bool Truncated { get; set; }
+    public List<NoteComparisonLineDto> Lines { get; set; } = new();
+}
+
+public class NoteComparisonLineDto
+{
+    public EnumComparisonLine Kind { get; set; }
+    /// <summary>Its number in the text before and after (1 the first; 0 if it isn't there).</summary>
+    public int BeforeNumber { get; set; }
+    public int AfterNumber { get; set; }
+    public string Text { get; set; }
+    /// <summary>The words that changed, when its pair (the line it replaces or that replaces it) is like it; null: the whole line.</summary>
+    public List<NoteComparisonSegmentDto> Segments { get; set; }
+    public int Skipped { get; set; }
+}
+
+public class NoteComparisonSegmentDto
+{
+    public string Text { get; set; }
+    public bool Changed { get; set; }
 }
 
 /// <summary>

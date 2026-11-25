@@ -476,7 +476,9 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
 La pestaña «History» del editor de la Web (H.3, ver «Historial de las notas» en el `CLAUDE.md` raíz), para cualquier usuario con sesión
 (los comandos son Guest): `GET notes/{noteId}?skip=` (una página de sus filas, `NoteHistoryPageDto`) y `GET notes/{noteId}/versions/{klogId}`
 (la nota tal como quedó tras ese cambio, `NoteVersionViewDto`; su descripción pasa por `UtilUpdateResourceInDescriptionForRead`, como al
-leer una nota). Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
+leer una nota). Desde la H.4a: `GET notes/{noteId}/compare/{klogId}?withCurrentNote=` (Guest, `NoteComparisonDto`; el texto como se guarda,
+sin `UtilUpdateResourceInDescriptionForRead`: no se dibuja) y `POST notes/{noteId}/versions/{klogId}/restore` (`Admin, Staff, ProjectManager`,
+`NoteRestoreResultDto`; la Web vuelve a leer la nota). Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
 
 ## Calendario de alarmas y panel de tareas (`NotesController`)
 

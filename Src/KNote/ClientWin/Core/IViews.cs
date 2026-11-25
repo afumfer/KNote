@@ -162,6 +162,10 @@ public interface IViewNoteVersion : IViewBase
 {
 }
 
+public interface IViewNoteCompare : IViewBase
+{
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();

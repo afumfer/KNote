@@ -18,4 +18,13 @@ internal class FakeKntHistoryService : IKntHistoryService
 
     public Task<Result<NoteVersionViewDto>> GetNoteVersionAsync(Guid noteId, Guid klogId) =>
         (GetNoteVersionAsyncImpl ?? throw new NotSupportedException($"{nameof(GetNoteVersionAsync)} not configured for this test"))(noteId, klogId);
+
+    public Func<Guid, Guid, bool, Task<Result<NoteComparisonDto>>>? GetNoteComparisonAsyncImpl { get; set; }
+    public Func<Guid, Guid, Task<Result<NoteRestoreResultDto>>>? RestoreNoteVersionAsyncImpl { get; set; }
+
+    public Task<Result<NoteComparisonDto>> GetNoteComparisonAsync(Guid noteId, Guid klogId, bool withCurrentNote = false) =>
+        (GetNoteComparisonAsyncImpl ?? throw new NotSupportedException($"{nameof(GetNoteComparisonAsync)} not configured for this test"))(noteId, klogId, withCurrentNote);
+
+    public Task<Result<NoteRestoreResultDto>> RestoreNoteVersionAsync(Guid noteId, Guid klogId) =>
+        (RestoreNoteVersionAsyncImpl ?? throw new NotSupportedException($"{nameof(RestoreNoteVersionAsync)} not configured for this test"))(noteId, klogId);
 }

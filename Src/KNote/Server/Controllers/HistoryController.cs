@@ -69,4 +69,41 @@ public class HistoryController : ControllerBase
             return BadRequest(resApi);
         }
     }
+
+    // GET api/history/notes/{noteId}/compare/{klogId}?withCurrentNote=false  (H22: the text as it is kept, not drawn)
+    [HttpGet("notes/{noteId}/compare/{klogId}")]
+    public async Task<IActionResult> GetNoteComparison(Guid noteId, Guid klogId, bool withCurrentNote = false)
+    {
+        try
+        {
+            var resApi = await _service.History.GetNoteComparisonAsync(noteId, klogId, withCurrentNote);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetNoteComparison {noteId} {klogId} at {dateTime}.", noteId, klogId, DateTime.Now);
+            var resApi = new Result<NoteComparisonDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // POST api/history/notes/{noteId}/versions/{klogId}/restore  (H23: who edits the notes)
+    [HttpPost("notes/{noteId}/versions/{klogId}/restore")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> RestoreNoteVersion(Guid noteId, Guid klogId)
+    {
+        try
+        {
+            var resApi = await _service.History.RestoreNoteVersionAsync(noteId, klogId);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "RestoreNoteVersion {noteId} {klogId} at {dateTime}.", noteId, klogId, DateTime.Now);
+            var resApi = new Result<NoteRestoreResultDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
 }

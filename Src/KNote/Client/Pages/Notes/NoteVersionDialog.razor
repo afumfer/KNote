@@ -72,6 +72,12 @@
     </ChildContent>
     <Footer>
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            @if (CanRestore)
+            {
+                @* The History tab asks and restores (H23): true is «restore this one». *@
+                <RadzenButton Text="Restore" Icon="restore" ButtonStyle="ButtonStyle.Primary" Disabled="@(version == null)"
+                              Click="() => dialogService.Close(true)" />
+            }
             <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => dialogService.Close(null)" />
         </RadzenStack>
     </Footer>
@@ -82,6 +88,8 @@
     [Parameter][EditorRequired] public KLogDto Row { get; set; } = null!;
     // The note's "#123 · Topic".
     [Parameter] public string? NoteTitle { get; set; }
+    // This version can be restored (and the window was opened from the editor).
+    [Parameter] public bool CanRestore { get; set; }
 
     private NoteVersionViewDto? version;
     private bool loadFailed;

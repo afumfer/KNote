@@ -158,6 +158,7 @@ public static class NoteChangeDescriber
         {
             Created = earlier.Created ?? later.Created,
             Deleted = later.Deleted ?? earlier.Deleted,
+            Restored = earlier.Restored ?? later.Restored,
             Topic = MergeValue(earlier.Topic, later.Topic),
             Folder = MergeValue(earlier.Folder, later.Folder),
             NoteType = MergeValue(earlier.NoteType, later.NoteType),
@@ -236,6 +237,10 @@ public static class NoteChangeDescriber
     {
         var parts = new List<string>();
 
+        if (d.Restored != null)
+            parts.Add(d.Restored.VersionOf is DateTime versionOf
+                ? $"Restored the version of {HistoryRules.MomentText(versionOf)}"
+                : "Restored a version");
         if (d.Created != null)
         {
             parts.Add(d.Created.Folder != null ? $"New note in {d.Created.Folder}" : "New note");

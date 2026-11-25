@@ -612,7 +612,13 @@ Patrones ya establecidos que hay que seguir:
   lista de los cambios, la más nueva primero, 100 cada vez con «Show more» (`HistoryRules.WhenText`, quién, desde dónde y la línea), leída
   al mostrar la pestaña (`KntLatestRequest`) y con el botón de recargar. «See this version» (o doble clic) abre la versión en un diálogo
   `Large`: la nota tal como quedó tras ese cambio, de solo lectura, con el aviso si incluye cambios posteriores, y la descripción con
-  `ViewMarkdown`. Una nota nueva dice que se guarde antes.
+  `ViewMarkdown`. Una nota nueva dice que se guarde antes. «Compare» (H22, `NoteCompareDialog`, `Large`) dibuja la comparación que da el
+  `Server` (campos y texto fuente por líneas, con las palabras cambiadas en `<mark>`), con la casilla «Compare with the current note»
+  (desactivada si la copia de antes ya no está: el `Server` ya comparó con la nota actual). «Restore» (H23, también en el diálogo de la
+  versión, que se cierra con `true`) pregunta y llama a `NoteForm.RestoreVersion` → `NoteEdit.RestoreVersionAsync`: guarda antes los
+  cambios (si no puede, no restaura), restaura (`api/history/.../restore`), vuelve a leer la nota y avisa a las otras ventanas; los avisos
+  (`Notices`) salen en un `Alert`. Solo en las filas de `NoteHistoryPageDto.Restorable`. `NoteForm` vuelve a leer la ruta de la carpeta si
+  la nota leída otra vez cambió de carpeta.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - **Calendario de alarmas** (`Notes/NotesAlarmsCalendar` + `AlarmDetailPane`, menú "Alarms calendar", Guest+, solo

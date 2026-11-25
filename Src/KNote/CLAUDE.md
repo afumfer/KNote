@@ -291,6 +291,17 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   apps. `Server`: `HistoryController` (`api/history`); la pestaña «History» del editor en la Web (`Client/Pages/Notes/NoteHistory`,
   `NoteVersionDialog`) y en `ClientWin` (`NoteEditorForm`, `NoteVersionCtrl`/`NoteVersionForm`). Tests en `Tests/HistoryRulesTests`,
   `ServiceTests/NoteHistoryViewServiceTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/NoteVersionCtrlTests`.
+  **Comparar y restaurar** (H.4a): `GetNoteComparisonAsync` (Guest, H22): lo que hizo un cambio (la copia de su fila o, la de creación,
+  una nota vacía, frente a la versión de después) o esa versión frente a la nota actual, lo único posible si la copia ya no está (lo dice);
+  `HistoryRules.CanCompare` (no en las filas que solo tocaron sus partes ni en el borrado). La comparación la calcula `Model/Core/NoteComparer`
+  (campos con sus nombres, sin el script; el texto por líneas con `LineDiff`, 3 líneas de contexto, lo demás plegado, 3.000 líneas como mucho)
+  con el resaltado por palabras de `WordDiff` (cada línea quitada con la añadida que la sustituye, si se parecen; si no, la línea entera): las
+  apps solo la dibujan. `RestoreNoteVersionAsync` (Staff, H23): la nota tal como quedó tras ese cambio, **por el guardado de siempre**
+  (`KntNotesSaveAsyncCommand`, dentro de `KntHistory.Restoring`): una fila `Restored` aparte (nunca se agrupa, `NoteChangeDetailsDto.Restored`)
+  con su copia, así que deshacer es restaurar la fila anterior. Se puede restaurar una fila con una copia posterior en una nota que existe
+  (`HistoryRules.Restorable`, `NoteHistoryPageDto.Restorable`); una carpeta, un tipo o un atributo que ya no existen dejan lo actual y el
+  resultado lo dice (`NoteRestoreResultDto.Notices`). Los editores guardan antes sus cambios. Tests en `Tests/NoteComparerTests`,
+  `HistoryRulesTests`, `ServiceTests/NoteHistoryRestoreServiceTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/NoteCompareCtrlTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

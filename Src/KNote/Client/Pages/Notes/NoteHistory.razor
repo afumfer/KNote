@@ -1,12 +1,14 @@
 @using KNote.Model.Core
 @inject IStore webApiService
 @inject DialogService dialogService
+@inject TooltipService tooltipService
 
 @implements IDisposable
 
 @* The «History» tab of the note editor (H.3): who changed what and when, the newest first, 100 at a time (H20); «See this
-   version» opens the note as it was after the selected change (H18). Read when the tab is shown (only the chosen tab is drawn)
-   and with «Refresh». *@
+   version» opens the note as it was after the selected change (H18), «Compare» what it did (H22) and «Restore» brings that
+   version back (H23, by the editor: RestoreVersion saves its changes first). Read when the tab is shown (only the chosen tab is
+   drawn), with «Refresh» and after a restore. *@
 
 @if (NoteIsNew)
 {
@@ -19,7 +21,17 @@ else
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
             <RadzenButton Text="See this version" Icon="history" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                           Disabled="@(selected.Count == 0)" Click="() => SeeVersionAsync(selected.FirstOrDefault())" />
-            <RadzenButton Icon="refresh" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="ReloadAsync" />
+            <RadzenButton Text="Compare" Icon="difference" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                          Disabled="@(!HistoryRules.CanCompare(selected.FirstOrDefault()))" Click="() => CompareAsync(selected.FirstOrDefault())"
+                          MouseEnter="@(args => tooltipService.Open(args, "What the selected change did, or that version against the note now"))" />
+            @if (RestoreVersion != null)
+            {
+                <RadzenButton Text="Restore" Icon="restore" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" IsBusy="@restoring"
+                              Disabled="@(!CanRestore(selected.FirstOrDefault()))" Click="() => RestoreAsync(selected.FirstOrDefault())"
+                              MouseEnter="@(args => tooltipService.Open(args, "The note as it was after the selected change"))" />
+            }
+            <RadzenButton Text="Refresh" Icon="refresh" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="ReloadAsync"
+                          MouseEnter="@(args => tooltipService.Open(args, "Read the history of the note again"))" />
         </RadzenStack>
     </div>
 
@@ -66,8 +78,16 @@ else
     [Parameter] public bool NoteIsNew { get; set; }
     // The note's "#123 · Topic", for the window of a version.
     [Parameter] public string? NoteTitle { get; set; }
+    // Restores the version after a row (the editor: it saves its changes first, then restores and reads the note again); true
+    // if it was restored. None: no «Restore».
+    [Parameter] public Func<KLogDto, Task<bool>>? RestoreVersion { get; set; }
+    // The editor has unsaved changes: the confirmation says they are saved first.
+    [Parameter] public bool NoteIsDirty { get; set; }
 
     private NoteHistoryPageDto? page;
+    private bool restoring;
+    // The rows whose version can be restored, of every page read.
+    private readonly HashSet<Guid> restorable = new();
     private readonly List<KLogDto> rows = new();
     private IList<KLogDto> selected = new List<KLogDto>();
     private bool loadFailed;
@@ -107,6 +127,8 @@ else
         page = result.Value.Entity;
         rows.Clear();
         rows.AddRange(page.Rows);
+        restorable.Clear();
+        restorable.UnionWith(page.Restorable);
         selected = new List<KLogDto>();
     }
 
@@ -122,6 +144,7 @@ else
             {
                 page = result.Entity;
                 rows.AddRange(page.Rows.Where(r => rows.All(k => k.KLogId != r.KLogId)));
+                restorable.UnionWith(page.Restorable);
                 page.Skip = 0;
                 page.Rows = rows;
             }
@@ -132,12 +155,52 @@ else
         }
     }
 
+    private bool CanRestore(KLogDto? row) => row != null && RestoreVersion != null && restorable.Contains(row.KLogId);
+
     private async Task SeeVersionAsync(KLogDto? row)
     {
         if (row == null)
             return;
-        await dialogService.OpenAsync<NoteVersionDialog>("Version",
+        var answer = await dialogService.OpenAsync<NoteVersionDialog>("Version",
+            new Dictionary<string, object?> { { "NoteId", NoteId }, { "Row", row }, { "NoteTitle", NoteTitle }, { "CanRestore", CanRestore(row) } },
+            KntDialogs.Framed(KntDialogs.Large()));
+        if (answer is true)
+            await RestoreAsync(row);
+    }
+
+    private async Task CompareAsync(KLogDto? row)
+    {
+        if (!HistoryRules.CanCompare(row))
+            return;
+        await dialogService.OpenAsync<NoteCompareDialog>("Compare",
             new Dictionary<string, object?> { { "NoteId", NoteId }, { "Row", row }, { "NoteTitle", NoteTitle } },
             KntDialogs.Framed(KntDialogs.Large()));
+    }
+
+    // H23: after confirming; the editor saves its changes first and reads the note again.
+    private async Task RestoreAsync(KLogDto? row)
+    {
+        if (row == null || restoring || !CanRestore(row))
+            return;
+
+        var who = string.IsNullOrEmpty(row.UserName) ? "" : $" by {row.UserName}";
+        var message = $"Restore the note as it was after the change of {HistoryRules.WhenText(row)}{who}?"
+            + (NoteIsDirty ? " Your unsaved changes are saved first." : "")
+            + " The note as it is now stays in its history: restoring can be undone.";
+        var confirmed = await dialogService.Confirm(message, "Restore this version",
+            new ConfirmOptions { OkButtonText = "Restore", CancelButtonText = "Cancel" });
+        if (confirmed != true)
+            return;
+
+        restoring = true;
+        try
+        {
+            if (await RestoreVersion!(row))
+                await ReloadAsync();
+        }
+        finally
+        {
+            restoring = false;
+        }
     }
 }

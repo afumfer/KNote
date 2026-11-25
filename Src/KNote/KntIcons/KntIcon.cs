@@ -13,6 +13,8 @@ public enum KntIcon
     Save,
     Undo,
     Redo,
+    /// <summary>The history of a note (its changes and versions).</summary>
+    History,
     Print,
     Settings,
     Search,

@@ -15,14 +15,18 @@ public class NoteVersionCtrl : CtrlViewBase<IViewNoteVersion>
 {
     #region Constructor
 
-    public NoteVersionCtrl(Store store, IKntService service, Guid noteId, KLogDto row, string noteTitle) : base(store)
+    // restore: «Restore» of this version (H23, the note editor, which asks first); null, no «Restore».
+    public NoteVersionCtrl(Store store, IKntService service, Guid noteId, KLogDto row, string noteTitle, Func<Task<bool>> restore = null) : base(store)
     {
         ControllerName = "Note version";
         Service = service;
         NoteId = noteId;
         Row = row;
         NoteTitle = noteTitle;
+        _restore = restore;
     }
+
+    private readonly Func<Task<bool>> _restore;
 
     #endregion
 
@@ -66,6 +70,11 @@ public class NoteVersionCtrl : CtrlViewBase<IViewNoteVersion>
     }
 
     public string Error { get; private set; }
+
+    public bool CanRestore => _restore != null;
+
+    /// <summary>«Restore» (H23): true if the note was restored (the window then closes).</summary>
+    public async Task<bool> RestoreAsync() => _restore != null && await _restore();
 
     /// <summary>
     /// The HTML of its description, as the note editor shows a note's (made safe by the Service, with its resources through the

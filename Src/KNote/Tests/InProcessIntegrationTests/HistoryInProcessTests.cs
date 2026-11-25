@@ -57,6 +57,41 @@ public class HistoryInProcessTests
         Assert.IsFalse((await other.Content.ReadFromJsonAsync<Result<NoteVersionViewDto>>())!.IsValid);
     }
 
+    [TestMethod]
+    public async Task CompareAndRestore()
+    {
+        var note = await PostAsync(new NoteDto
+        {
+            NoteId = Guid.Empty, Topic = "__TEST_HISTORY_RESTORE__", Description = "First text", FolderId = _folder.FolderId, FolderDto = _folder,
+            CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now
+        });
+        note.Description = "Second text";
+        note = await PutAsync(note);
+
+        var page = (await _httpClient.GetFromJsonAsync<Result<NoteHistoryPageDto>>($"api/history/notes/{note.NoteId}"))!.Entity!;
+        // The same user and origin within ten minutes: one row, the creation and the edit.
+        var created = page.Rows.Single();
+
+        var comparison = (await _httpClient.GetFromJsonAsync<Result<NoteComparisonDto>>(
+            $"api/history/notes/{note.NoteId}/compare/{created.KLogId}?withCurrentNote=false"))!;
+        Assert.IsTrue(comparison.IsValid, comparison.ErrorMessage);
+        Assert.AreEqual(EnumComparisonLine.Added, comparison.Entity!.Text.Lines.Single().Kind);
+        Assert.AreEqual("Second text", comparison.Entity.Text.Lines.Single().Text);
+
+        // Nothing to restore: the only row is the note now.
+        var restore = await _httpClient.PostAsync($"api/history/notes/{note.NoteId}/versions/{created.KLogId}/restore", null);
+        Assert.IsFalse(restore.IsSuccessStatusCode);
+        StringAssert.Contains((await restore.Content.ReadFromJsonAsync<Result<NoteRestoreResultDto>>())!.ErrorMessage, "nothing to restore");
+    }
+
+    private static async Task<NoteDto> PutAsync(NoteDto note)
+    {
+        var httpRes = await _httpClient.PutAsJsonAsync("api/notes", note);
+        if (!httpRes.IsSuccessStatusCode)
+            Assert.Fail($"Status: {httpRes.StatusCode}, Body: {await httpRes.Content.ReadAsStringAsync()}");
+        return (await httpRes.Content.ReadFromJsonAsync<Result<NoteDto>>())!.Entity!;
+    }
+
     private static async Task<NoteDto> PostAsync(NoteDto note)
     {
         var httpRes = await _httpClient.PostAsJsonAsync("api/notes", note);

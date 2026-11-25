@@ -20,4 +20,10 @@ public class KntHistoryService : KntServiceBase, IKntHistoryService
 
     public async Task<Result<NoteVersionViewDto>> GetNoteVersionAsync(Guid noteId, Guid klogId) =>
         await ExecuteCommand(new KntHistoryGetNoteVersionAsyncCommand(Service, noteId, klogId));
+
+    public async Task<Result<NoteComparisonDto>> GetNoteComparisonAsync(Guid noteId, Guid klogId, bool withCurrentNote = false) =>
+        await ExecuteCommand(new KntHistoryGetNoteComparisonAsyncCommand(Service, noteId, klogId, withCurrentNote));
+
+    public async Task<Result<NoteRestoreResultDto>> RestoreNoteVersionAsync(Guid noteId, Guid klogId) =>
+        await ExecuteCommand(new KntHistoryRestoreNoteVersionAsyncCommand(Service, noteId, klogId));
 }
