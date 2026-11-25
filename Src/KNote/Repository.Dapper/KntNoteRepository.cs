@@ -634,8 +634,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
-    {            
+    public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity, KLogWriteDto history = null)
+    {
         try
         {
             var result = new Result<ResourceDto>();
@@ -653,10 +653,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                         VALUES (@ResourceId, @Name, @Container, @Description, @DescriptionByUser, @DescriptionModel, @Order,
                             @FileType, @ContentInDB, @ContentArrayBytes, @NoteId)";
 
-            var r = await db.ExecuteAsync(sql.ToString(),
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
                 new { entity.ResourceId, entity.Name, entity.Container,
                     entity.Description, entity.DescriptionByUser, entity.DescriptionModel, entity.Order, entity.FileType,
-                    entity.ContentInDB, entity.ContentArrayBytes, entity.NoteId });
+                    entity.ContentInDB, entity.ContentArrayBytes, entity.NoteId }, history);
                 
             if (r == 0)
                 result.AddErrorMessage("Entity not inserted");
@@ -673,8 +673,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
-    {                        
+    public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity, KLogWriteDto history = null)
+    {
         try
         {
             var result = new Result<ResourceDto>();
@@ -698,7 +698,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                         ContentArrayBytes = @ContentArrayBytes, 
                         NoteId = @NoteId
                 WHERE ResourceId = @ResourceId";
-            var r = await db.ExecuteAsync(sql.ToString(),
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
                 new {
                     entity.ResourceId,
                     entity.Name,
@@ -711,7 +711,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     entity.ContentInDB,
                     entity.ContentArrayBytes,
                     entity.NoteId
-                });
+                }, history);
             if (r == 0)
                 result.AddErrorMessage("Entity not updated");
 
@@ -887,7 +887,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result> DeleteResourceAsync(Guid id)
+    public async Task<Result> DeleteResourceAsync(Guid id, KLogWriteDto history = null)
     {
         try
         {
@@ -897,7 +897,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             var sql = @"DELETE FROM Resources WHERE ResourceId = @Id";
 
-            var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
+            var r = await ExecuteNotedAsync(db, sql.ToString(), new { Id = id }, history);
 
             if (r == 0)
                 result.AddErrorMessage("Entity not deleted");
@@ -1178,8 +1178,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
     }
 
-    public async Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity)
-    {            
+    public async Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity, KLogWriteDto history = null)
+    {
         try
         {
             var result = new Result<NoteTaskDto>();
@@ -1198,7 +1198,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                             @DifficultyLevel, @ExpectedStartDate, @ExpectedEndDate, @StartDate, @EndDate
                             )";
 
-            var r = await db.ExecuteAsync(sql.ToString(),
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
                 new {
                     entity.NoteTaskId,
                     entity.NoteId,
@@ -1216,7 +1216,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     entity.ExpectedEndDate,
                     entity.StartDate,
                     entity.EndDate
-                });
+                }, history);
 
             if (r == 0)
                 result.AddErrorMessage("Entity not inserted");
@@ -1233,8 +1233,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity)
-    {            
+    public async Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity, KLogWriteDto history = null)
+    {
         try
         {
             var result = new Result<NoteTaskDto>();
@@ -1261,7 +1261,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     EndDate = @EndDate
                 WHERE NoteTaskId = @NoteTaskId";
 
-            var r = await db.ExecuteAsync(sql.ToString(),
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
                 new {
                     entity.NoteTaskId,
                     entity.NoteId,
@@ -1279,7 +1279,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     entity.ExpectedEndDate,
                     entity.StartDate,
                     entity.EndDate
-                });
+                }, history);
 
             if (r == 0)
                 result.AddErrorMessage("Entity not updated");
@@ -1296,8 +1296,8 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result> DeleteNoteTaskAsync(Guid id)
-    {            
+    public async Task<Result> DeleteNoteTaskAsync(Guid id, KLogWriteDto history = null)
+    {
         try
         {
             var result = new Result();
@@ -1306,7 +1306,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             var sql = @"DELETE FROM NoteTasks WHERE NoteTaskId = @Id";
 
-            var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
+            var r = await ExecuteNotedAsync(db, sql.ToString(), new { Id = id }, history);
 
             if (r == 0)             
                 result.AddErrorMessage("Entity not deleted");
@@ -1386,7 +1386,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
+    public async Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -1401,7 +1401,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                             @NotificationType, @AlarmType, @Comment, 
                             @AlarmActivated, @AlarmDateTime, @AlarmMinutes)";
 
-            var r = await db.ExecuteAsync(sql.ToString(),
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
                 new
                 {
                     entity.KMessageId,
@@ -1409,12 +1409,12 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     entity.NoteId,
                     entity.ActionType,
                     entity.NotificationType,
-                    entity.AlarmType,                        
+                    entity.AlarmType,
                     entity.Comment,
                     entity.AlarmActivated,
                     entity.AlarmDateTime,
                     entity.AlarmMinutes
-                });
+                }, history);
 
             if (r == 0)
                 result.AddErrorMessage("Entity not inserted");
@@ -1431,7 +1431,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async  Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
+    public async  Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -1451,10 +1451,10 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
                     AlarmMinutes = @AlarmMinutes
                 WHERE KMessageId = @KMessageId";
 
-            var r = await db.ExecuteAsync(sql.ToString(),
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
                 new { entity.KMessageId, entity.UserId, entity.NoteId, entity.ActionType, entity.NotificationType,
                     entity.AlarmType, entity.Comment,  entity.AlarmActivated, entity.AlarmDateTime, entity.AlarmMinutes
-                });
+                }, history);
 
             if (r == 0)
                 result.AddErrorMessage("Entity not updated");
@@ -1471,7 +1471,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result> DeleteMessageAsync(Guid messageId)
+    public async Task<Result> DeleteMessageAsync(Guid messageId, KLogWriteDto history = null)
     {
         try
         {
@@ -1481,7 +1481,7 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
 
             var sql = @"DELETE FROM KMessages WHERE KMessageId = @Id";
 
-            var r = await db.ExecuteAsync(sql.ToString(), new { Id = messageId });
+            var r = await ExecuteNotedAsync(db, sql.ToString(), new { Id = messageId }, history);
 
             if (r == 0)
                 result.AddErrorMessage("Entity not deleted");

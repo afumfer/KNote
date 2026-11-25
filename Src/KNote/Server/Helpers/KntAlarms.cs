@@ -186,7 +186,8 @@ public class EmailAlarmsService : BackgroundService
             // The SMTP server failed: the alarm as it was when due, to be sent the next time.
             _logger.LogWarning(ex, "The Email alarm {message} could not be sent: it will be sent again.", message.KMessageId);
             message.SetIsDirty(true);
-            await service.Notes.SaveMessageAsync(message);
+            using (KntHistory.NotNoted()) // KNote's own upkeep, not a change of a person's (history)
+                await service.Notes.SaveMessageAsync(message);
             return false;
         }
     }
@@ -200,6 +201,7 @@ public class EmailAlarmsService : BackgroundService
             return;
         current.Comment = KntAlarmEmail.FailedComment(current, reason);
         current.SetIsDirty(true);
-        await service.Notes.SaveMessageAsync(current);
+        using (KntHistory.NotNoted()) // KNote's own upkeep, not a change of a person's (history)
+            await service.Notes.SaveMessageAsync(current);
     }
 }

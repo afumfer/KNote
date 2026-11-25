@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -36,6 +37,12 @@ public class NoteChangeDetailsDto
     /// <summary>True if the script changed (its text is only in the version).</summary>
     public bool? Script { get; set; }
 
+    // The parts of the note (H3): not its own data, so never in its versions (H6). NotePartChangeDescriber.
+    public List<HistoryPartChangeDto> Tasks { get; set; }
+    public List<HistoryPartChangeDto> Resources { get; set; }
+    public List<HistoryPartChangeDto> Alarms { get; set; }
+    public List<HistoryPartChangeDto> Relations { get; set; }
+
     [JsonIgnore]
     public EnumHistoryFields Fields
     {
@@ -51,6 +58,10 @@ public class NoteChangeDetailsDto
             if (Priority != null) fields |= EnumHistoryFields.Priority;
             if (DescriptionFormat != null || ScriptFormat != null || DescriptionBlocked != null) fields |= EnumHistoryFields.ContentType;
             if (Script == true) fields |= EnumHistoryFields.Script;
+            if (Tasks?.Count > 0) fields |= EnumHistoryFields.Tasks;
+            if (Resources?.Count > 0) fields |= EnumHistoryFields.Resources;
+            if (Alarms?.Count > 0) fields |= EnumHistoryFields.Alarms;
+            if (Relations?.Count > 0) fields |= EnumHistoryFields.Relations;
             return fields;
         }
     }
@@ -81,6 +92,42 @@ public class HistoryCreatedDto
 public class HistoryDeletedDto
 {
     public string Folder { get; set; }
+
+    // The parts deleted with the note, not noted one by one (H14).
+    public int? Tasks { get; set; }
+    public int? Resources { get; set; }
+    public int? Alarms { get; set; }
+    public int? Relations { get; set; }
+}
+
+/// <summary>What happened to a part of a note (HistoryPartActions).</summary>
+public static class HistoryPartActions
+{
+    public const string Added = "Added";
+    public const string Changed = "Changed";
+    public const string Removed = "Removed";
+}
+
+/// <summary>
+/// A part of a note added, changed or removed: a task, a resource, an alarm or a relation. Name is how people know it (the
+/// first line of a task, the file of a resource, the date of an alarm, #12 Topic of the other note); Changes, the fields
+/// changed (HistoryPartFields), with the value before and after when it is small.
+/// </summary>
+public class HistoryPartChangeDto
+{
+    public Guid Id { get; set; }
+    public string Action { get; set; }
+    public string Name { get; set; }
+    public List<HistoryFieldChangeDto> Changes { get; set; }
+    /// <summary>A relation removed because the other note was deleted (H14).</summary>
+    public bool? OtherNoteDeleted { get; set; }
+}
+
+public class HistoryFieldChangeDto
+{
+    public string Field { get; set; }
+    public string Before { get; set; }
+    public string After { get; set; }
 }
 
 public class HistoryValueChangeDto

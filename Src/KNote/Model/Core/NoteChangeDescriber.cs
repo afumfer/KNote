@@ -22,6 +22,18 @@ public class HistoryNames
 
     public string Attribute(Guid kattributeId) =>
         Attributes.TryGetValue(kattributeId, out var name) && !string.IsNullOrEmpty(name) ? name : "(unknown attribute)";
+
+    /// <summary>The name of each user (the tasks and alarms of a note have one).</summary>
+    public Dictionary<Guid, string> Users { get; } = new();
+    public Dictionary<Guid, string> TraceNoteTypes { get; } = new();
+
+    public string User(Guid? userId) =>
+        userId is not Guid id || id == Guid.Empty ? NoteChangeDescriber.NoValue
+        : Users.TryGetValue(id, out var name) && !string.IsNullOrEmpty(name) ? name : "(unknown user)";
+
+    public string TraceNoteType(Guid? traceNoteTypeId) =>
+        traceNoteTypeId is not Guid id ? null
+        : TraceNoteTypes.TryGetValue(id, out var name) && !string.IsNullOrEmpty(name) ? name : "(unknown type)";
 }
 
 /// <summary>
@@ -157,7 +169,11 @@ public static class NoteChangeDescriber
                 ? null : earlier.DescriptionBlocked ?? later.DescriptionBlocked,
             Script = earlier.Script == true || later.Script == true ? true : null,
             Tags = MergeTags(earlier.Tags, later.Tags),
-            Text = MergeText(earlier.Text, later.Text)
+            Text = MergeText(earlier.Text, later.Text),
+            Tasks = NotePartChangeDescriber.MergeList(earlier.Tasks, later.Tasks),
+            Resources = NotePartChangeDescriber.MergeList(earlier.Resources, later.Resources),
+            Alarms = NotePartChangeDescriber.MergeList(earlier.Alarms, later.Alarms),
+            Relations = NotePartChangeDescriber.MergeList(earlier.Relations, later.Relations)
         };
 
         var attributes = new List<HistoryAttributeChangeDto>();
@@ -224,7 +240,11 @@ public static class NoteChangeDescriber
                 parts.Add("Sections: " + Quoted(d.Created.Sections, 5));
         }
         if (d.Deleted != null)
+        {
             parts.Add(d.Deleted.Folder != null ? $"Note deleted from {d.Deleted.Folder}" : "Note deleted");
+            if (NotePartChangeDescriber.DeletedParts(d.Deleted) is string had)
+                parts.Add(had);
+        }
 
         if (d.Topic != null)
             parts.Add($"Topic: «{d.Topic.Before}» → «{d.Topic.After}»");
@@ -252,6 +272,7 @@ public static class NoteChangeDescriber
         if (d.Script == true)
             parts.Add("Script changed");
 
+        parts.AddRange(NotePartChangeDescriber.Parts(d));
         return parts;
     }
 

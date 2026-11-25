@@ -33,8 +33,10 @@ public interface IKntNoteRepository : IDisposable
     // The resource of the note with this name, if there is one: the unique index of NoteId + Name, checked by the Service before
     // saving a resource, so that the user gets a message of the Service instead of the database's error.
     Task<Result<Guid?>> GetResourceIdByNameAsync(Guid noteId, string name);
-    Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity);
-    Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity);
+    // The parts of a note (resources, tasks, alarms) with the row of the history of their note (history: KntHistory), in the
+    // same transaction (H10): if it can't be noted, the part doesn't change. Without it, as always.
+    Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity, KLogWriteDto history = null);
+    Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity, KLogWriteDto history = null);
     // KNote Atlas, stage 4 (D12): writes the description of the AI and its model only if the resource is not locked and still
     // has the description and the file it was read with. Entity: whether it was written. The note is not touched.
     Task<Result<bool>> SaveResourceAiDescriptionAsync(Guid resourceId, string description, string model, string expectedDescription, string expectedName);
@@ -55,7 +57,7 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<bool>> SaveResourceTextAsync(Guid resourceId, string text, EnumExtractedState state, string expectedName);
     // Its file was replaced: what was read of it is forgotten.
     Task<Result> ClearResourceTextAsync(Guid resourceId);
-    Task<Result> DeleteResourceAsync(Guid resourceId);
+    Task<Result> DeleteResourceAsync(Guid resourceId, KLogWriteDto history = null);
     Task<Result<List<NoteTaskDto>>> GetNoteTasksAsync(Guid noteId);
     // The tasks panel (TaskPanelRules in SQL; never the tasks of the query's ExcludeNoteTypeIds): how many tasks each
     // column has in the window (and how many the filters have without it), a page of a column in its order (Pending and
@@ -64,14 +66,14 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<List<TaskPanelItemDto>>> GetTasksPanelPageAsync(TasksPanelQueryDto query, EnumTaskPanelColumn column, int skip, int take);
     Task<Result<TasksPanelNearestDto>> GetTasksPanelNearestAsync(TasksPanelQueryDto query);
     Task<Result<NoteTaskDto>> GetNoteTaskAsync(Guid noteTaskId);
-    Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity);
-    Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity);        
-    Task<Result> DeleteNoteTaskAsync(Guid noteTaskId);
+    Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity, KLogWriteDto history = null);
+    Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity, KLogWriteDto history = null);
+    Task<Result> DeleteNoteTaskAsync(Guid noteTaskId, KLogWriteDto history = null);
     Task<Result<List<KMessageDto>>> GetMessagesAsync(Guid noteId);
     Task<Result<KMessageDto>> GetMessageAsync(Guid messageId);
-    Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity);
-    Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity);
-    Task<Result> DeleteMessageAsync(Guid messageId);
+    Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity, KLogWriteDto history = null);
+    Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity, KLogWriteDto history = null);
+    Task<Result> DeleteMessageAsync(Guid messageId, KLogWriteDto history = null);
     Task<Result<int>> CountNotesInFolderAsync(Guid folderId);
     // KNote Atlas 2.2: every note with what the noise policy needs (its folder, its type and its tags), without its texts.
     Task<Result<List<NoteClassificationDto>>> GetClassificationsAsync();

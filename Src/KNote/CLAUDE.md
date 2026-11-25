@@ -262,6 +262,17 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   empezó. Nada de las notas que escribe KNote (`KntConst.HistoryExcludedNoteTypeNames`). Tests en `Tests/LineDiffTests`,
   `NoteChangeDescriberTests`, `HistoryRulesTests`, `RepositoryParityTests/HistoryParityTests`, `SchemaUpdateTests/SchemaUpdaterRevision11Tests`
   y `ServiceTests/NoteHistoryServiceTests`.
+  **Las partes de una nota** (H.2a: tareas, recursos, alarmas, relaciones) son filas **de su nota** (H3), en la de su sesión, sin versión
+  (no son datos propios): `Model/Core/NotePartChangeDescriber` (qué cambió, con la descripción anterior de una tarea hasta 4 KB; cómo se
+  suman en una sesión, `MergeList`; añadido y quitado en la misma sesión no queda) y `NoteChangeDetailsDto.Tasks/Resources/Alarms/Relations`.
+  Los comandos de cada parte (guardar y borrar) comparan con lo guardado y pasan la fila al repositorio, que la escribe en la transacción de
+  la parte (`ExecuteNotedAsync` en Dapper, `NotedAsync` en EF); una relación, una fila en cada nota. Un recurso «sustituido» es uno que llega
+  con un contenido distinto del guardado (los editores lo reenvían en cada guardado). **No se anotan**: lo que escribe la IA en los recursos
+  (otros métodos del repositorio), el orden de un recurso, las relaciones `@DerivedFrom`, las ventanas, el estado de la nota, y lo que hace
+  KNote solo dentro de `KntHistory.NotNoted()` (el correo de una alarma que no se pudo enviar, en `KntAlarms` y `KNoteManagementCtrl`).
+  Borrar una nota con sus partes (`KntHistory.DeletingNote`, en `KntNotesDeleteExtendedAsyncCommand`) no las anota sueltas: la fila
+  `Deleted` dice cuántas tenía y cada nota relacionada anota que perdió la relación (H14). Un comando nuevo que cambie una parte tiene que
+  pasar su fila. Tests en `Tests/NotePartChangeDescriberTests` y `ServiceTests/NotePartsHistoryServiceTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

@@ -97,7 +97,7 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
         return result;
     }
 
-    public async Task<Result<TraceNoteDto>> AddAsync(TraceNoteDto entity)
+    public async Task<Result<TraceNoteDto>> AddAsync(TraceNoteDto entity, IReadOnlyList<KLogWriteDto> history = null)
     {
         var result = new Result<TraceNoteDto>();
 
@@ -109,7 +109,7 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
             var newEntity = new TraceNote();
             newEntity.SetSimpleDto(entity);
 
-            var resGenRep = await traceNotes.AddAsync(newEntity);
+            var resGenRep = await NotedAsync(ctx, history, () => traceNotes.AddAsync(newEntity));
 
             result.Entity = resGenRep.Entity?.GetSimpleDto<TraceNoteDto>();
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
@@ -124,7 +124,7 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
         return result;
     }
 
-    public async Task<Result<TraceNoteDto>> UpdateAsync(TraceNoteDto entity)
+    public async Task<Result<TraceNoteDto>> UpdateAsync(TraceNoteDto entity, IReadOnlyList<KLogWriteDto> history = null)
     {
         var result = new Result<TraceNoteDto>();
         var resGenRep = new Result<TraceNote>();
@@ -141,7 +141,7 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
             {
                 entityForUpdate = resGenRepGet.Entity;
                 entityForUpdate.SetSimpleDto(entity);
-                resGenRep = await traceNotes.UpdateAsync(entityForUpdate);
+                resGenRep = await NotedAsync(ctx, history, () => traceNotes.UpdateAsync(entityForUpdate));
             }
             else
             {
@@ -162,7 +162,7 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
         return result;
     }
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result> DeleteAsync(Guid id, IReadOnlyList<KLogWriteDto> history = null)
     {
         var result = new Result();
 
@@ -171,7 +171,7 @@ public class KntTraceNoteRepository : KntRepositoryEFBase, IKntTraceNoteReposito
             var ctx = GetOpenConnection();
             var traceNotes = new GenericRepositoryEF<KntDbContext, TraceNote>(ctx);
 
-            var resGenRep = await traceNotes.DeleteAsync(id);
+            var resGenRep = await NotedAsync(ctx, history, () => traceNotes.DeleteAsync(id));
             if (!resGenRep.IsValid)
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 

@@ -829,7 +829,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             // open the note's alarm list - no retry.
             message.Comment = KntAlarmEmail.FailedComment(message, ex.Message);
             message.SetIsDirty(true);
-            await service.Notes.SaveMessageAsync(message, false);
+            using (KNote.Service.Core.KntHistory.NotNoted()) // KNote's own upkeep, not a change of a person's (history)
+                await service.Notes.SaveMessageAsync(message, false);
         }
     }
 

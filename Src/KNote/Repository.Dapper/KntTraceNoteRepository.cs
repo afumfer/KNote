@@ -89,7 +89,7 @@ public class KntTraceNoteRepository : KntRepositoryDapperBase, IKntTraceNoteRepo
         }
     }
 
-    public async Task<Result<TraceNoteDto>> AddAsync(TraceNoteDto entity)
+    public async Task<Result<TraceNoteDto>> AddAsync(TraceNoteDto entity, IReadOnlyList<KLogWriteDto> history = null)
     {
         try
         {
@@ -99,8 +99,8 @@ public class KntTraceNoteRepository : KntRepositoryDapperBase, IKntTraceNoteRepo
 
             var sql = @"INSERT INTO TraceNotes (TraceNoteId, FromId, ToId, [Order], Weight, TraceNoteTypeId)
                         VALUES (@TraceNoteId, @FromId, @ToId, @Order, @Weight, @TraceNoteTypeId)";
-            var r = await db.ExecuteAsync(sql.ToString(),
-                new { entity.TraceNoteId, entity.FromId, entity.ToId, entity.Order, entity.Weight, entity.TraceNoteTypeId });
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
+                new { entity.TraceNoteId, entity.FromId, entity.ToId, entity.Order, entity.Weight, entity.TraceNoteTypeId }, history);
             if (r == 0)
                 result.AddErrorMessage("Entity not inserted");
             result.Entity = entity;
@@ -115,7 +115,7 @@ public class KntTraceNoteRepository : KntRepositoryDapperBase, IKntTraceNoteRepo
         }
     }
 
-    public async Task<Result<TraceNoteDto>> UpdateAsync(TraceNoteDto entity)
+    public async Task<Result<TraceNoteDto>> UpdateAsync(TraceNoteDto entity, IReadOnlyList<KLogWriteDto> history = null)
     {
         try
         {
@@ -130,8 +130,8 @@ public class KntTraceNoteRepository : KntRepositoryDapperBase, IKntTraceNoteRepo
                     Weight = @Weight,
                     TraceNoteTypeId = @TraceNoteTypeId
                 WHERE TraceNoteId = @TraceNoteId";
-            var r = await db.ExecuteAsync(sql.ToString(),
-                new { entity.TraceNoteId, entity.FromId, entity.ToId, entity.Order, entity.Weight, entity.TraceNoteTypeId });
+            var r = await ExecuteNotedAsync(db, sql.ToString(),
+                new { entity.TraceNoteId, entity.FromId, entity.ToId, entity.Order, entity.Weight, entity.TraceNoteTypeId }, history);
             if (r == 0)
                 result.AddErrorMessage("Entity not updated");
             result.Entity = entity;
@@ -146,7 +146,7 @@ public class KntTraceNoteRepository : KntRepositoryDapperBase, IKntTraceNoteRepo
         }
     }
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result> DeleteAsync(Guid id, IReadOnlyList<KLogWriteDto> history = null)
     {
         try
         {
@@ -155,7 +155,7 @@ public class KntTraceNoteRepository : KntRepositoryDapperBase, IKntTraceNoteRepo
             var db = GetOpenConnection();
 
             var sql = @"DELETE FROM TraceNotes WHERE TraceNoteId = @Id";
-            var r = await db.ExecuteAsync(sql.ToString(), new { Id = id });
+            var r = await ExecuteNotedAsync(db, sql.ToString(), new { Id = id }, history);
             if (r == 0)
                 result.AddErrorMessage("Entity not deleted");
 

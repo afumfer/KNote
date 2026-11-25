@@ -600,6 +600,9 @@ public class KntNotesDeleteExtendedAsyncCommand : KntCommandServiceBase<Guid, Re
 
         var neForDelete = (await Service.Notes.GetExtendedAsync(Param)).Entity;
 
+        // Its parts are not noted one by one: its row Deleted says how many it had, and its related notes note it (H14).
+        using var deleting = KntHistory.DeletingNote(Param);
+
         foreach (var item in neForDelete.Messages)
         {
             var res = await Service.Notes.DeleteMessageAsync(item.KMessageId);
@@ -759,6 +762,7 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
         }
 
         var hasNewContent = Param.ContentArrayBytes != null;
+        var newContent = Param.ContentArrayBytes;
         var fileManaged = Service.Notes.UtilManageResourceContent(Param, readContent: readContentBack);
 
         // Without its file (and its content not in the database) the resource would be saved empty.
@@ -775,12 +779,15 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
             Param.ContentArrayBytes = null;
 
         var checkExist = Param.ResourceId == Guid.Empty ? null : await Service.Notes.GetResourceAsync(Param.ResourceId);
-        ApplyDescriptionRules(checkExist?.IsValid == true ? checkExist.Entity : null);
+        var stored = checkExist?.IsValid == true ? checkExist.Entity : null;
+        ApplyDescriptionRules(stored);
+        // Its file replaced, for its history: a content other than the stored one (the editors send it again with each save).
+        var fileReplaced = newContent != null && (stored?.ContentArrayBytes == null || !newContent.AsSpan().SequenceEqual(stored.ContentArrayBytes));
 
         if (Param.ResourceId == Guid.Empty)
         {
             Param.ResourceId = Guid.NewGuid();
-            result = await Repository.Notes.AddResourceAsync(Param);
+            result = await Repository.Notes.AddResourceAsync(Param, await KntHistory.PrepareResourceAsync(Service, null, Param, fileReplaced));
         }
         else
         {
@@ -804,18 +811,11 @@ public class KntNotesSaveResourceAsyncCommand : KntCommandSaveServiceBase<Resour
                 }
             }
 
-            if (!forceNew)
-            {
-                result = await Repository.Notes.UpdateResourceAsync(Param);
-            }
+            var history = await KntHistory.PrepareResourceAsync(Service, stored, Param, fileReplaced);
+            if (!forceNew || checkExist.IsValid)
+                result = await Repository.Notes.UpdateResourceAsync(Param, history);
             else
-            {
-
-                if (checkExist.IsValid)
-                    result = await Repository.Notes.UpdateResourceAsync(Param);
-                else
-                    result = await Repository.Notes.AddResourceAsync(Param);
-            }
+                result = await Repository.Notes.AddResourceAsync(Param, history);
         }
 
         if (!result.Entity.ContentInDB)
@@ -1082,7 +1082,8 @@ public class KntNotesDeleteResourceAsyncCommand : KntCommandServiceBase<Guid, Re
         var resGetEntity = await Repository.Notes.GetResourceAsync(Param);
         if (resGetEntity.IsValid)
         {
-            var resDelEntity = await Repository.Notes.DeleteResourceAsync(Param);
+            var history = await KntHistory.PrepareResourceAsync(Service, resGetEntity.Entity, null, newFile: false);
+            var resDelEntity = await Repository.Notes.DeleteResourceAsync(Param, history);
             if (resDelEntity.IsValid)
             {
                 result.Entity = resGetEntity.Entity;
@@ -1257,26 +1258,26 @@ public class KntNotesSaveNoteTaskAsyncCommand : KntCommandSaveServiceBase<NoteTa
     public override async Task<Result<NoteTaskDto>> Execute()
     {
         Result<NoteTaskDto> result;
+        // As it is stored, for its history (and to know whether it exists).
+        var stored = Param.NoteTaskId == Guid.Empty ? null : Found(await Repository.Notes.GetNoteTaskAsync(Param.NoteTaskId));
+
         if (Param.NoteTaskId == Guid.Empty)
         {
             Param.NoteTaskId = Guid.NewGuid();
-            result = await Repository.Notes.AddNoteTaskAsync(Param);
+            result = await Repository.Notes.AddNoteTaskAsync(Param, await KntHistory.PrepareTaskAsync(Service, null, Param));
         }
-        else if (!forceNew)
-            result = await Repository.Notes.UpdateNoteTaskAsync(Param);
+        else if (!forceNew || stored != null)
+            result = await Repository.Notes.UpdateNoteTaskAsync(Param, await KntHistory.PrepareTaskAsync(Service, stored, Param));
         else
-        {
-            var checkExist = await Service.Notes.GetNoteTaskAsync(Param.NoteTaskId);
-            if (checkExist.IsValid)
-                result = await Repository.Notes.UpdateNoteTaskAsync(Param);
-            else
-                result = await Repository.Notes.AddNoteTaskAsync(Param);
-        }
+            result = await Repository.Notes.AddNoteTaskAsync(Param, await KntHistory.PrepareTaskAsync(Service, null, Param));
 
         if (result.IsValid)
             await KntSemanticIndexer.MarkStaleAsync(Service, Param.NoteId);
         return result;
     }
+
+    // What a repository read found: null if it isn't there (EF gives an empty object then, with the error).
+    internal static T Found<T>(Result<T> read) where T : class => read.IsValid ? read.Entity : null;
 }
 
 [KntAuthorize(EnumRoles.Staff)]
@@ -1294,7 +1295,8 @@ public class KntNotesDeleteNoteTaskAsyncCommand : KntCommandServiceBase<Guid, Re
         var resGetEntity = await Repository.Notes.GetNoteTaskAsync(Param);
         if (resGetEntity.IsValid)
         {
-            var resDelEntity = await Repository.Notes.DeleteNoteTaskAsync(Param);
+            var history = await KntHistory.PrepareTaskAsync(Service, resGetEntity.Entity, null);
+            var resDelEntity = await Repository.Notes.DeleteNoteTaskAsync(Param, history);
             if (resDelEntity.IsValid)
             {
                 result.Entity = resGetEntity.Entity;
@@ -1388,27 +1390,18 @@ public class KntNotesSaveMessageAsyncCommand : KntCommandSaveServiceBase<KMessag
     public override async Task<Result<KMessageDto>> Execute()
     {
         Result<KMessageDto> resSavedEntity;
+        // As it is stored, for its history (and to know whether it exists).
+        var stored = Param.KMessageId == Guid.Empty ? null : KntNotesSaveNoteTaskAsyncCommand.Found(await Repository.Notes.GetMessageAsync(Param.KMessageId));
 
         if (Param.KMessageId == Guid.Empty)
         {
             Param.KMessageId = Guid.NewGuid();
-            resSavedEntity = await Repository.Notes.AddMessageAsync(Param);
+            resSavedEntity = await Repository.Notes.AddMessageAsync(Param, await KntHistory.PrepareAlarmAsync(Service, null, Param));
         }
+        else if (!forceNew || stored != null)
+            resSavedEntity = await Repository.Notes.UpdateMessageAsync(Param, await KntHistory.PrepareAlarmAsync(Service, stored, Param));
         else
-        {
-            if (!forceNew)
-            {
-                resSavedEntity = await Repository.Notes.UpdateMessageAsync(Param);
-            }
-            else
-            {
-                var checkExist = await Service.Notes.GetMessageAsync(Param.KMessageId);
-                if (checkExist.IsValid)
-                    resSavedEntity = await Repository.Notes.UpdateMessageAsync(Param);
-                else
-                    resSavedEntity = await Repository.Notes.AddMessageAsync(Param);
-            }
-        }
+            resSavedEntity = await Repository.Notes.AddMessageAsync(Param, await KntHistory.PrepareAlarmAsync(Service, null, Param));
 
         resSavedEntity.Entity.UserFullName = Param.UserFullName;
         return resSavedEntity;
@@ -1431,7 +1424,8 @@ public class KntNotesDeleteMessageAsyncCommand : KntCommandServiceBase<Guid, Res
 
         if (resGetEntity.IsValid)
         {
-            var resDelEntity = await Repository.Notes.DeleteMessageAsync(Param);
+            var history = await KntHistory.PrepareAlarmAsync(Service, resGetEntity.Entity, null);
+            var resDelEntity = await Repository.Notes.DeleteMessageAsync(Param, history);
             if (resDelEntity.IsValid)
                 result.Entity = resGetEntity.Entity;
             else
@@ -1494,26 +1488,17 @@ public class KntNotesSaveTraceNoteAsyncCommand : KntCommandSaveServiceBase<Trace
         if (!resDuplicate.IsValid)
             return resDuplicate;
 
+        // As it is stored, for the history of its two notes (and to know whether it exists).
+        var stored = Param.TraceNoteId == Guid.Empty ? null : KntNotesSaveNoteTaskAsyncCommand.Found(await Repository.TraceNotes.GetAsync(Param.TraceNoteId));
+
         if (Param.TraceNoteId == Guid.Empty)
         {
             Param.TraceNoteId = Guid.NewGuid();
-            return await Repository.TraceNotes.AddAsync(Param);
+            return await Repository.TraceNotes.AddAsync(Param, await KntHistory.PrepareRelationAsync(Service, null, Param));
         }
-        else
-        {
-            if (!forceNew)
-            {
-                return await Repository.TraceNotes.UpdateAsync(Param);
-            }
-            else
-            {
-                var checkExist = await Repository.TraceNotes.GetAsync(Param.TraceNoteId);
-                if (checkExist.IsValid)
-                    return await Repository.TraceNotes.UpdateAsync(Param);
-                else
-                    return await Repository.TraceNotes.AddAsync(Param);
-            }
-        }
+        if (!forceNew || stored != null)
+            return await Repository.TraceNotes.UpdateAsync(Param, await KntHistory.PrepareRelationAsync(Service, stored, Param));
+        return await Repository.TraceNotes.AddAsync(Param, await KntHistory.PrepareRelationAsync(Service, null, Param));
     }
 
     private async Task<Result<TraceNoteDto>> CheckNotDuplicatedAsync()
@@ -1549,7 +1534,8 @@ public class KntNotesDeleteTraceNoteAsyncCommand : KntCommandServiceBase<Guid, R
         var resGetEntity = await Repository.TraceNotes.GetAsync(Param);
         if (resGetEntity.IsValid)
         {
-            var resDelEntity = await Repository.TraceNotes.DeleteAsync(Param);
+            var history = await KntHistory.PrepareRelationAsync(Service, resGetEntity.Entity, null);
+            var resDelEntity = await Repository.TraceNotes.DeleteAsync(Param, history);
             if (resDelEntity.IsValid)
                 result.Entity = resGetEntity.Entity;
             else
