@@ -53,7 +53,8 @@ public static class KntHistory
 
     /// <summary>
     /// While a version is restored (KntHistoryRestoreNoteVersionAsyncCommand, H23): saving the note leaves a row Restored of its own
-    /// (never merged into a session), with its copy of how the note was before, so restoring can be undone.
+    /// (never merged into a session), with its copy of how the note was before, so restoring can be undone. With Recovered, a deleted
+    /// note created again (KntHistoryRecoverNoteAsyncCommand, H24): its row Restored, without a copy (there was no note).
     /// </summary>
     internal static IDisposable Restoring(HistoryRestoredDto restored)
     {
@@ -232,6 +233,7 @@ public static class KntHistory
     public const string RepositoryNameTitle = "Repository name";
     public const string AiModelsTitle = "AI models";
     public const string NoisePolicyTitle = "Noise policy";
+    public const string HistoryRetentionTitle = "History retention";
 
     /// <summary>
     /// The row of a change of an entity of the structure (HistoryEntities), or null if nothing changed: a new one, or into the
@@ -466,10 +468,16 @@ public static class KntHistory
         var action = before == null ? EnumHistoryAction.Created : EnumHistoryAction.Updated;
         if (action == EnumHistoryAction.Updated && details.Fields == EnumHistoryFields.None)
             return null;
-        var restoring = before == null ? null : _restoring.Value;
+        // A version restored onto the note, or a deleted note recovered (created again, Recovered): a row Restored (H23, H24).
+        var restoring = _restoring.Value;
+        if (restoring != null && (before == null) != (restoring.Recovered == true))
+            restoring = null;
         if (restoring != null)
         {
-            details.Restored = restoring;
+            if (before == null)
+                details = new NoteChangeDetailsDto { Restored = restoring };
+            else
+                details.Restored = restoring;
             action = EnumHistoryAction.Restored;
         }
 

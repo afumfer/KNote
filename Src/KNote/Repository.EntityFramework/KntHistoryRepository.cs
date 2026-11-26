@@ -114,6 +114,26 @@ public class KntHistoryRepository : KntRepositoryEFBase, IKntHistoryRepository
         }
     }
 
+    public async Task<Result<List<KLogDto>>> GetDeletedAsync(string entityName)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var deleted = nameof(EnumHistoryAction.Deleted);
+            var rows = await ctx.KLogs.AsNoTracking()
+                .Where(d => d.EntityName == entityName && d.ActionType == deleted && d.PreviousContentSize != null
+                    && !ctx.KLogs.Any(l => l.EntityName == entityName && l.EntityId == d.EntityId && l.RegistryDateTime > d.RegistryDateTime))
+                .OrderByDescending(d => d.LastDateTime)
+                .ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<List<KLogDto>> { Entity = rows.Select(ToDto).ToList() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result> ClearEntityContentAsync(string entityName, Guid entityId)
     {
         try

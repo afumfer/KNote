@@ -302,6 +302,17 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   (`HistoryRules.Restorable`, `NoteHistoryPageDto.Restorable`); una carpeta, un tipo o un atributo que ya no existen dejan lo actual y el
   resultado lo dice (`NoteRestoreResultDto.Notices`). Los editores guardan antes sus cambios. Tests en `Tests/NoteComparerTests`,
   `HistoryRulesTests`, `ServiceTests/NoteHistoryRestoreServiceTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/NoteCompareCtrlTests`.
+  **Notas borradas y retención** (H.4b): «Recover deleted notes» (H24): `GetDeletedNotesAsync` (Staff; `IKntHistoryRepository.GetDeletedAsync`,
+  paridad en `HistoryParityTests`: la fila `Deleted` de las notas cuya última fila es su borrado y aún tiene copia) y `RecoverNoteAsync` (Staff),
+  que la vuelve a crear **por el guardado de siempre** dentro de `KntHistory.Restoring` con `Recovered`: el mismo id (su historial sigue), su
+  número si está libre (`HistoryRules.NoteNumberOf` del título; si no, otro y lo dice), su carpeta o Home, su tipo y los atributos que existan,
+  creada cuando dice su fila `Created` (H26) y una fila `Restored` («Recovered from the deleted notes», sin copia); sus partes no vuelven (H8, lo
+  dice). `RemoveDeletedNoteAsync` (Admin, H27) vacía sus copias como la purga. La retención (H25): `GetRetentionAsync` (Guest, con
+  `HISTORY_START`) y `SaveRetentionAsync` (Admin, validada, anotada como ajuste con sus valores, `StructureChangeDescriber.HistoryRetention`);
+  antes de guardar, las apps avisan con `HistoryRules.RetentionReductions` y `RetentionApplies`. Web: menú «Utils» de las páginas de notas
+  (`NotesUtilsMenu`, `DeletedNotesDialog`) y la pestaña «History» del panel Admin (`HistoryRetentionSettings`); `ClientWin`: *Edit* › «Recover
+  deleted notes ...» (`DeletedNotesCtrl`/`DeletedNotesForm`) y la pestaña «History» del editor del repositorio. Tests en
+  `ServiceTests/NoteHistoryRecoverServiceTests`, `HistoryRulesTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/DeletedNotesCtrlTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

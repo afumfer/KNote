@@ -22,12 +22,14 @@
             {
                 @* The photos or the documents found (4.6b): their notes, but no printing (the reports are of notes). *@
                 <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(selectedHit == null)" Click="@(() => OnOpenNote(selectedHit!))"></RadzenMenuItem>
+                <NotesUtilsMenu Changed="OnNotesRecovered" />
                 <NotesViewOptionsMenu Grid="null" Changed="StateHasChanged" />
             }
             else
             {
                 <RadzenMenuItem Text="Edit note ..." Icon="edit" Disabled="@(!(notesGrid?.HasCurrent ?? false))" Click="@(() => notesGrid!.EditCurrentAsync())"></RadzenMenuItem>
                 <RadzenMenuItem Text="Delete note ..." Icon="delete" Disabled="@(!(notesGrid?.HasCurrent ?? false) || deleting.IsBusy)" Click="@(() => notesGrid!.DeleteCurrentAsync())"></RadzenMenuItem>
+                <NotesUtilsMenu Changed="OnNotesRecovered" />
                 <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
                 <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" ListName="@($"Search: {SearchedText()}")" />
             }
@@ -369,6 +371,13 @@
             NewMeaningPages();
             return notesGrid?.RefreshAsync() ?? Task.CompletedTask;
         });
+    }
+
+    // A deleted note recovered (Utils, H24): it may be one of the notes found.
+    private Task OnNotesRecovered()
+    {
+        NewMeaningPages();
+        return notesGrid?.ReloadAsync() ?? Task.CompletedTask;
     }
 
     // One delete at a time: a click or the Delete key repeated asks and deletes once.

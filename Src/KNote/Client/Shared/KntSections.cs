@@ -38,6 +38,8 @@ public static class KntSections
     public static readonly KntSection AtlasPeriodSummary = new("Period summary", "atlas?tab=summary", "date_range");
     // The laboratory of the search by meaning (ProjectManager), only in the Web.
     public static readonly KntSection SearchEvaluation = new("Search evaluation", "atlas?tab=evaluation", "query_stats");
+    // The retention of the history of the notes (H25), a tab of the admin panel.
+    public static readonly KntSection HistoryRetention = new("History", "admin", "history");
     // Only in KNote Local (the server's capabilities).
     public static readonly KntSection ThisComputer = new("This computer", "local", "computer");
 }

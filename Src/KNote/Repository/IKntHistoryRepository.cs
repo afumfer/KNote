@@ -29,6 +29,12 @@ public interface IKntHistoryRepository : IDisposable
     /// </summary>
     Task<Result<List<Guid>>> GetDeletedWithContentAsync(string entityName, DateTime deletedBefore);
 
+    /// <summary>
+    /// The row Deleted of each entity whose latest row is its deletion and still keeps its last version (it can be recovered: the
+    /// deleted notes, H24), the newest first, without the versions.
+    /// </summary>
+    Task<Result<List<KLogDto>>> GetDeletedAsync(string entityName);
+
     /// <summary>Empties every version of an entity.</summary>
     Task<Result> ClearEntityContentAsync(string entityName, Guid entityId);
 

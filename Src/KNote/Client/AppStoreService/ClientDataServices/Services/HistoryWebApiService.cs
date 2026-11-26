@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using KNote.Client.AppStoreService.ClientDataServices.Base;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -23,6 +24,24 @@ public class HistoryWebApiService : BaseService, IHistoryWebApiService
         SendAsync<NoteComparisonDto>(ct => _httpClient.GetAsync(
                 $"api/history/notes/{noteId}/compare/{klogId}?withCurrentNote={(withCurrentNote ? "true" : "false")}", ct),
             "Compare the versions of the note", cancellationToken: cancellationToken);
+
+    public Task<Result<List<DeletedNoteDto>>> GetDeletedNotesAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<List<DeletedNoteDto>>(ct => _httpClient.GetAsync("api/history/deleted", ct), "Get the deleted notes",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<NoteRecoverResultDto>> RecoverNoteAsync(Guid noteId) =>
+        SendAsync<NoteRecoverResultDto>(ct => _httpClient.PostAsync($"api/history/deleted/{noteId}/recover", null, ct), "Recover the deleted note");
+
+    // The server answers a Result without an entity.
+    public async Task<Result> RemoveDeletedNoteAsync(Guid noteId) =>
+        await SendAsync<bool>(ct => _httpClient.DeleteAsync($"api/history/deleted/{noteId}", ct), "Remove the deleted note permanently");
+
+    public Task<Result<HistoryRetentionInfoDto>> GetRetentionAsync(CancellationToken cancellationToken = default) =>
+        SendAsync<HistoryRetentionInfoDto>(ct => _httpClient.GetAsync("api/history/retention", ct), "Get the retention of the history",
+            cancellationToken: cancellationToken);
+
+    public Task<Result<HistoryRetentionDto>> SaveRetentionAsync(HistoryRetentionDto retention) =>
+        SendAsync<HistoryRetentionDto>(ct => _httpClient.PutAsJsonAsync("api/history/retention", retention, ct), "Save the retention of the history", true);
 
     // Not canceled with the window: a restore that started finishes.
     public Task<Result<NoteRestoreResultDto>> RestoreNoteVersionAsync(Guid noteId, Guid klogId) =>

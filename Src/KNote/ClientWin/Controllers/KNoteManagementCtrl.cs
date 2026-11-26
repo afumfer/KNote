@@ -1405,6 +1405,34 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
         await ForceRefreshListNotes();
     }
 
+    /// <summary>
+    /// «Recover deleted notes» (the history, H24): the deleted notes of the repository selected in the tree, in a modal window; if
+    /// some note was recovered, the notes list is read again (it may be in it).
+    /// </summary>
+    public async Task RecoverDeletedNotes()
+    {
+        var serviceRef = SelectedServiceRef ?? Store.GetActiveOrDefaultServiceRef();
+        if (serviceRef == null)
+        {
+            View.ShowInfo("There is no repository selected.");
+            return;
+        }
+
+        // Refused (it tells why) before anything is read.
+        var deletedNotesCtrl = new DeletedNotesCtrl(Store, serviceRef.Service);
+        if (!deletedNotesCtrl.CheckAccess())
+            return;
+        if (!await deletedNotesCtrl.LoadAsync())
+        {
+            View.ShowInfo(deletedNotesCtrl.Error);
+            deletedNotesCtrl.Finalize();
+            return;
+        }
+        deletedNotesCtrl.RunModal();
+        if (deletedNotesCtrl.AnyRecovered)
+            await ForceRefreshListNotes();
+    }
+
     public async Task MoveSelectedNotes()
     {                
         var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal().ToList();

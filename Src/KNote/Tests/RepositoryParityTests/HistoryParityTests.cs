@@ -164,7 +164,13 @@ public class HistoryParityTests
 
         CollectionAssert.AreEqual(new[] { deletedLongAgo.NoteId },
             (await reader.History.GetDeletedWithContentAsync(HistoryEntities.Note, Start.AddDays(-30))).Entity);
+        // «Recover deleted notes» (H24): the rows Deleted that keep their version, the newest first.
+        CollectionAssert.AreEqual(new[] { deletedToday.NoteId, deletedLongAgo.NoteId },
+            (await reader.History.GetDeletedAsync(HistoryEntities.Note)).Entity.Select(r => r.EntityId).ToArray());
+        Assert.IsTrue((await reader.History.GetDeletedAsync(HistoryEntities.Note)).Entity.All(r => r.ActionType == "Deleted" && r.HasPreviousContent));
         Assert.IsTrue((await reader.History.ClearEntityContentAsync(HistoryEntities.Note, deletedLongAgo.NoteId)).IsValid);
+        CollectionAssert.AreEqual(new[] { deletedToday.NoteId },
+            (await writer.History.GetDeletedAsync(HistoryEntities.Note)).Entity.Select(r => r.EntityId).ToArray(), "without its version it is gone");
         Assert.IsTrue((await reader.History.ClearPreviousContentAsync(new List<Guid> { keptRows[0].KLogId })).IsValid);
 
         var longAgoRows = (await writer.History.GetEntityHistoryAsync(HistoryEntities.Note, deletedLongAgo.NoteId)).Entity;

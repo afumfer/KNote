@@ -84,6 +84,46 @@ public class HistoryInProcessTests
         StringAssert.Contains((await restore.Content.ReadFromJsonAsync<Result<NoteRestoreResultDto>>())!.ErrorMessage, "nothing to restore");
     }
 
+    [TestMethod]
+    public async Task ADeletedNote_IsRecovered()
+    {
+        var note = await PostAsync(new NoteDto
+        {
+            NoteId = Guid.Empty, Topic = "__TEST_HISTORY_RECOVER__", Description = "To recover", FolderId = _folder.FolderId, FolderDto = _folder,
+            CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now
+        });
+        Assert.IsTrue((await _httpClient.DeleteAsync($"api/notes/{note.NoteId}")).IsSuccessStatusCode);
+
+        var deleted = (await _httpClient.GetFromJsonAsync<Result<List<DeletedNoteDto>>>("api/history/deleted"))!.Entity!;
+        var mine = deleted.Single(d => d.NoteId == note.NoteId);
+        Assert.AreEqual("__TEST_HISTORY_RECOVER__", mine.Topic);
+
+        var recover = await _httpClient.PostAsync($"api/history/deleted/{note.NoteId}/recover", null);
+        Assert.IsTrue(recover.IsSuccessStatusCode, await recover.Content.ReadAsStringAsync());
+        var result = (await recover.Content.ReadFromJsonAsync<Result<NoteRecoverResultDto>>())!.Entity!;
+        Assert.AreEqual(note.NoteNumber, result.NoteNumber);
+        var recovered = await _httpClient.GetFromJsonAsync<Result<NoteDto>>($"api/notes/{note.NoteId}");
+        Assert.AreEqual("To recover", recovered!.Entity!.Description);
+
+        Assert.IsTrue((await _httpClient.DeleteAsync($"api/notes/{note.NoteId}")).IsSuccessStatusCode);
+        Assert.IsTrue((await _httpClient.DeleteAsync($"api/history/deleted/{note.NoteId}")).IsSuccessStatusCode, "remove permanently (Admin)");
+        deleted = (await _httpClient.GetFromJsonAsync<Result<List<DeletedNoteDto>>>("api/history/deleted"))!.Entity!;
+        Assert.IsFalse(deleted.Any(d => d.NoteId == note.NoteId));
+    }
+
+    [TestMethod]
+    public async Task TheRetention_IsReadAndValidated()
+    {
+        var info = (await _httpClient.GetFromJsonAsync<Result<HistoryRetentionInfoDto>>("api/history/retention"))!.Entity!;
+        Assert.IsNotNull(info.Retention);
+
+        var wrong = await _httpClient.PutAsJsonAsync("api/history/retention", new HistoryRetentionDto { KeepAllMonths = 6, DailyUntilMonths = 2 });
+        Assert.IsFalse(wrong.IsSuccessStatusCode);
+
+        var saved = await _httpClient.PutAsJsonAsync("api/history/retention", info.Retention);
+        Assert.IsTrue(saved.IsSuccessStatusCode, await saved.Content.ReadAsStringAsync());
+    }
+
     private static async Task<NoteDto> PutAsync(NoteDto note)
     {
         var httpRes = await _httpClient.PutAsJsonAsync("api/notes", note);

@@ -478,7 +478,9 @@ La pestaña «History» del editor de la Web (H.3, ver «Historial de las notas�
 (la nota tal como quedó tras ese cambio, `NoteVersionViewDto`; su descripción pasa por `UtilUpdateResourceInDescriptionForRead`, como al
 leer una nota). Desde la H.4a: `GET notes/{noteId}/compare/{klogId}?withCurrentNote=` (Guest, `NoteComparisonDto`; el texto como se guarda,
 sin `UtilUpdateResourceInDescriptionForRead`: no se dibuja) y `POST notes/{noteId}/versions/{klogId}/restore` (`Admin, Staff, ProjectManager`,
-`NoteRestoreResultDto`; la Web vuelve a leer la nota). Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
+`NoteRestoreResultDto`; la Web vuelve a leer la nota). Desde la H.4b: `GET deleted` y `POST deleted/{noteId}/recover` («Recover deleted notes»,
+`Admin, Staff, ProjectManager`), `DELETE deleted/{noteId}` («Remove permanently», `Admin`), `GET retention` (con sesión) y `PUT retention`
+(`Admin`). Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
 
 ## Calendario de alarmas y panel de tareas (`NotesController`)
 

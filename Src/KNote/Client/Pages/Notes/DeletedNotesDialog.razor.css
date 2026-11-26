@@ -1,0 +1,6 @@
+/* «Recover deleted notes»: what did not come back of a recovered note, under its line. */
+
+.knt-deleted-notice {
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+}

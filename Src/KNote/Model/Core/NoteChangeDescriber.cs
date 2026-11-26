@@ -237,7 +237,11 @@ public static class NoteChangeDescriber
     {
         var parts = new List<string>();
 
-        if (d.Restored != null)
+        if (d.Restored?.Recovered == true)
+            parts.Add(d.Restored.VersionOf is DateTime deletedAt
+                ? $"Recovered from the deleted notes (deleted {HistoryRules.MomentText(deletedAt)})"
+                : "Recovered from the deleted notes");
+        else if (d.Restored != null)
             parts.Add(d.Restored.VersionOf is DateTime versionOf
                 ? $"Restored the version of {HistoryRules.MomentText(versionOf)}"
                 : "Restored a version");

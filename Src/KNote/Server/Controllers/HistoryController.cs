@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -83,6 +84,100 @@ public class HistoryController : ControllerBase
         {
             _logger.LogError(ex, "GetNoteComparison {noteId} {klogId} at {dateTime}.", noteId, klogId, DateTime.Now);
             var resApi = new Result<NoteComparisonDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // GET api/history/deleted  (H24: «Recover deleted notes», who deletes notes)
+    [HttpGet("deleted")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> GetDeletedNotes()
+    {
+        try
+        {
+            var resApi = await _service.History.GetDeletedNotesAsync();
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetDeletedNotes at {dateTime}.", DateTime.Now);
+            var resApi = new Result<List<DeletedNoteDto>>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // POST api/history/deleted/{noteId}/recover  (H24)
+    [HttpPost("deleted/{noteId}/recover")]
+    [Authorize(Roles = "Admin, Staff, ProjectManager")]
+    public async Task<IActionResult> RecoverNote(Guid noteId)
+    {
+        try
+        {
+            var resApi = await _service.History.RecoverNoteAsync(noteId);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "RecoverNote {noteId} at {dateTime}.", noteId, DateTime.Now);
+            var resApi = new Result<NoteRecoverResultDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // DELETE api/history/deleted/{noteId}  (H27: «Remove permanently», Admin)
+    [HttpDelete("deleted/{noteId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RemoveDeletedNote(Guid noteId)
+    {
+        try
+        {
+            var resApi = await _service.History.RemoveDeletedNoteAsync(noteId);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "RemoveDeletedNote {noteId} at {dateTime}.", noteId, DateTime.Now);
+            var resApi = new Result();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // GET api/history/retention  (H25)
+    [HttpGet("retention")]
+    public async Task<IActionResult> GetRetention()
+    {
+        try
+        {
+            var resApi = await _service.History.GetRetentionAsync();
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetRetention at {dateTime}.", DateTime.Now);
+            var resApi = new Result<HistoryRetentionInfoDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // PUT api/history/retention  (H25, Admin)
+    [HttpPut("retention")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> SaveRetention(HistoryRetentionDto retention)
+    {
+        try
+        {
+            var resApi = await _service.History.SaveRetentionAsync(retention);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SaveRetention at {dateTime}.", DateTime.Now);
+            var resApi = new Result<HistoryRetentionDto>();
             resApi.AddErrorMessage(ex.ToApiErrorMessage());
             return BadRequest(resApi);
         }

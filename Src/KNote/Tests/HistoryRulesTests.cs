@@ -236,6 +236,42 @@ public class HistoryRulesTests
         Assert.AreEqual(EnumHistoryFields.Topic, details.Fields);
     }
 
+    [TestMethod]
+    public void AShorterRetention_IsToldBeforeSaving()
+    {
+        var before = new HistoryRetentionDto();
+        var shorter = new HistoryRetentionDto { KeepAllMonths = 1, DailyUntilMonths = 12, MaxCopiesPerNote = 100, DeletedNotesDays = 7 };
+
+        var lines = HistoryRules.RetentionReductions(before, shorter);
+
+        CollectionAssert.AreEqual(new[]
+        {
+            "All the versions: 3 → 1 months. Older ones keep one a day.",
+            "Versions per note: 500 → 100. The oldest ones above it are emptied.",
+            "Days in the deleted notes: 30 → 7. Notes deleted before can no longer be recovered."
+        }, lines);
+        Assert.AreEqual(0, HistoryRules.RetentionReductions(before, new HistoryRetentionDto { KeepAllMonths = 6, DailyUntilMonths = 24 }).Count,
+            "keeping more says nothing");
+    }
+
+    [TestMethod]
+    public void TheNumberAndTopic_OfATitle()
+    {
+        Assert.AreEqual(340, HistoryRules.NoteNumberOf("#340 Amstrad CPC 464"));
+        Assert.AreEqual("Amstrad CPC 464", HistoryRules.NoteTopicOf("#340 Amstrad CPC 464"));
+        Assert.AreEqual(0, HistoryRules.NoteNumberOf("Equipment"));
+        Assert.AreEqual("Equipment", HistoryRules.NoteTopicOf("Equipment"));
+        Assert.AreEqual(0, HistoryRules.NoteNumberOf(null));
+    }
+
+    [TestMethod]
+    public void ARecovery_SaysWhenTheNoteWasDeleted()
+    {
+        var details = new NoteChangeDetailsDto { Restored = new HistoryRestoredDto { Recovered = true, VersionOf = new DateTime(2026, 11, 20, 9, 0, 0) } };
+
+        Assert.AreEqual("Recovered from the deleted notes (deleted 2026-11-20 09:00)", NoteChangeDescriber.Render(details));
+    }
+
     private static KLogDto Row(int minute, string action, bool copy, EnumHistoryFields fields) => new()
     {
         KLogId = Guid.NewGuid(), ActionType = action, Fields = fields, PreviousContentSize = copy ? 10 : null,

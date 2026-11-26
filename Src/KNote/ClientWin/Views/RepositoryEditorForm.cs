@@ -1,6 +1,7 @@
 ﻿using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Core;
 using KNote.Model;
+using KNote.Model.Dto;
 using KNote.ClientWin.Utils;
 
 namespace KNote.ClientWin.Views;
@@ -31,6 +32,84 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         tabPageTraceNoteTypes.Controls.Add(_ctrl.TraceNoteTypesManageCtrl.View.PanelView());
         tabPageAttributes.Controls.Add(_ctrl.KAttributesManageCtrl.View.PanelView());
         tabPageUsers.Controls.Add(_ctrl.UsersManageCtrl.View.PanelView());
+
+        CreateHistoryTab();
+    }
+
+    #endregion
+
+    #region History tab (H25)
+
+    // The retention of the history of the notes: built here and not in the Designer, the last tab. Saved with «Accept».
+    private TabPage tabPageHistory;
+    private Label labelHistorySince;
+    private NumericUpDown numericKeepAllMonths;
+    private NumericUpDown numericDailyUntilMonths;
+    private NumericUpDown numericMaxCopiesPerNote;
+    private NumericUpDown numericMaxContentSizeMB;
+    private NumericUpDown numericDeletedNotesDays;
+
+    private void CreateHistoryTab()
+    {
+        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, AutoSize = true, Padding = new Padding(10) };
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+        labelHistorySince = new Label { AutoSize = true, ForeColor = SystemColors.GrayText, Margin = new Padding(3, 3, 3, 10), MaximumSize = new Size(600, 0) };
+        layout.Controls.Add(labelHistorySince, 0, 0);
+        layout.SetColumnSpan(labelHistorySince, 2);
+
+        NumericUpDown AddValue(string label, int max, int min, string help)
+        {
+            var row = layout.RowCount++;
+            layout.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(3, 7, 12, 3) }, 0, row);
+            var numeric = new NumericUpDown { Minimum = min, Maximum = max, Width = 90, Anchor = AnchorStyles.Left };
+            var cell = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0), WrapContents = false };
+            cell.Controls.Add(numeric);
+            if (help != null)
+                cell.Controls.Add(new Label { Text = help, AutoSize = true, ForeColor = SystemColors.GrayText, Margin = new Padding(8, 7, 3, 3) });
+            layout.Controls.Add(cell, 1, row);
+            return numeric;
+        }
+
+        layout.RowCount = 1;
+        numericKeepAllMonths = AddValue("Months with all the versions:", HistoryRetentionDto.MaxMonths, 0, null);
+        numericDailyUntilMonths = AddValue("Months with one version a day:", HistoryRetentionDto.MaxMonths, 0, "Then, one a month.");
+        numericMaxCopiesPerNote = AddValue("Versions per note:", HistoryRetentionDto.MaxCopiesLimit, 1, "The oldest ones go first.");
+        numericMaxContentSizeMB = AddValue("Largest note copied (MB):", HistoryRetentionDto.MaxContentSizeLimitMB, 0, "A bigger note is noted without its copy.");
+        numericDeletedNotesDays = AddValue("Days in the deleted notes:", HistoryRetentionDto.MaxDeletedNotesDays, 0, "Then it can no longer be recovered.");
+
+        tabPageHistory = new TabPage("History") { Padding = tabPageAttributes.Padding, UseVisualStyleBackColor = true };
+        tabPageHistory.Controls.Add(layout);
+        tabControlMain.TabPages.Add(tabPageHistory);
+    }
+
+    private void RetentionToControls()
+    {
+        var retention = _ctrl.Retention;
+        tabPageHistory.Enabled = _ctrl.AdministrationAvailable && retention != null;
+        toolTipAdminTabs.SetToolTip(tabPageHistory, _ctrl.AdministrationAvailable ? "" : "Available once the repository is linked.");
+        labelHistorySince.Text = (_ctrl.HistorySince is DateTime since ? $"KNote keeps the history of the notes since {since:d}. " : "")
+            + "How long the versions of the notes are kept. Reducing a period empties versions: it is said before saving.";
+        if (retention == null)
+            return;
+        numericKeepAllMonths.Value = retention.KeepAllMonths;
+        numericDailyUntilMonths.Value = retention.DailyUntilMonths;
+        numericMaxCopiesPerNote.Value = Math.Max(1, retention.MaxCopiesPerNote);
+        numericMaxContentSizeMB.Value = retention.MaxContentSizeMB;
+        numericDeletedNotesDays.Value = retention.DeletedNotesDays;
+    }
+
+    private void ControlsToRetention()
+    {
+        var retention = _ctrl.Retention;
+        if (retention == null)
+            return;
+        retention.KeepAllMonths = (int)numericKeepAllMonths.Value;
+        retention.DailyUntilMonths = (int)numericDailyUntilMonths.Value;
+        retention.MaxCopiesPerNote = (int)numericMaxCopiesPerNote.Value;
+        retention.MaxContentSizeMB = (int)numericMaxContentSizeMB.Value;
+        retention.DeletedNotesDays = (int)numericDeletedNotesDays.Value;
     }
 
     #endregion 
@@ -223,9 +302,10 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
                 radioMSSqlServer.Checked = true;                
             }            
         }
-        else 
+        else
             radioSqLite.Checked = true;
 
+        RetentionToControls();
     }
 
     protected override void ControlsToModel()
@@ -236,6 +316,7 @@ public partial class RepositoryEditorForm : KntEditorForm, IViewEditor<Repositor
         _ctrl.Model.ResourceContentInDB = checkResourceContentInDB.Checked;
         _ctrl.Model.ResourcesContainerRootPath = textResourcesContainerRoot.Text;
         _ctrl.Model.ResourcesContainerRootUrl = textResourcesContainerUrl.Text;
+        ControlsToRetention();
         if (radioSqLite.Checked)
         {
             _ctrl.Model.Provider = "Microsoft.Data.Sqlite";

@@ -28,6 +28,12 @@ public static class HistoryStructureFields
     public const string EmbeddingDimensions = "EmbeddingDimensions";
     public const string QueryInstruction = "QueryInstruction";
     public const string LlmModel = "LlmModel";
+    // The retention of the history (H25).
+    public const string KeepAllMonths = "KeepAllMonths";
+    public const string DailyUntilMonths = "DailyUntilMonths";
+    public const string MaxContentSizeMB = "MaxContentSizeMB";
+    public const string MaxCopiesPerNote = "MaxCopiesPerNote";
+    public const string DeletedNotesDays = "DeletedNotesDays";
 
     // Lists
     public const string Values = "Values";
@@ -197,6 +203,20 @@ public static class StructureChangeDescriber
         AddText(fields, HistoryStructureFields.EmbeddingDimensions, before.EmbeddingDimensions?.ToString(), after.EmbeddingDimensions?.ToString());
         AddPrivate(fields, HistoryStructureFields.QueryInstruction, before.QueryInstruction, after.QueryInstruction);
         AddText(fields, HistoryStructureFields.LlmModel, before.LlmModel, after.LlmModel);
+        return Changed(fields);
+    }
+
+    /// <summary>The retention of the history (H25), with its values: they are not private.</summary>
+    public static StructureChangeDetailsDto HistoryRetention(HistoryRetentionDto before, HistoryRetentionDto after)
+    {
+        before ??= new HistoryRetentionDto();
+        after ??= new HistoryRetentionDto();
+        var fields = new List<HistoryFieldChangeDto>();
+        AddText(fields, HistoryStructureFields.KeepAllMonths, before.KeepAllMonths.ToString(), after.KeepAllMonths.ToString());
+        AddText(fields, HistoryStructureFields.DailyUntilMonths, before.DailyUntilMonths.ToString(), after.DailyUntilMonths.ToString());
+        AddText(fields, HistoryStructureFields.MaxContentSizeMB, before.MaxContentSizeMB.ToString(), after.MaxContentSizeMB.ToString());
+        AddText(fields, HistoryStructureFields.MaxCopiesPerNote, before.MaxCopiesPerNote.ToString(), after.MaxCopiesPerNote.ToString());
+        AddText(fields, HistoryStructureFields.DeletedNotesDays, before.DeletedNotesDays.ToString(), after.DeletedNotesDays.ToString());
         return Changed(fields);
     }
 
@@ -370,6 +390,11 @@ public static class StructureChangeDescriber
             HistoryStructureFields.EmbeddingDimensions => Change("Embedding dimensions"),
             HistoryStructureFields.QueryInstruction => "Query instruction changed",
             HistoryStructureFields.LlmModel => Change("Recommended LLM"),
+            HistoryStructureFields.KeepAllMonths => Change("Months with all the versions"),
+            HistoryStructureFields.DailyUntilMonths => Change("Months with one version a day"),
+            HistoryStructureFields.MaxContentSizeMB => Change("Largest note copied (MB)"),
+            HistoryStructureFields.MaxCopiesPerNote => Change("Versions per note"),
+            HistoryStructureFields.DeletedNotesDays => Change("Days in the deleted notes"),
             _ => Change(field.Field)
         };
     }

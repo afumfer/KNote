@@ -618,7 +618,15 @@ Patrones ya establecidos que hay que seguir:
   versión, que se cierra con `true`) pregunta y llama a `NoteForm.RestoreVersion` → `NoteEdit.RestoreVersionAsync`: guarda antes los
   cambios (si no puede, no restaura), restaura (`api/history/.../restore`), vuelve a leer la nota y avisa a las otras ventanas; los avisos
   (`Notices`) salen en un `Alert`. Solo en las filas de `NoteHistoryPageDto.Restorable`. `NoteForm` vuelve a leer la ruta de la carpeta si
-  la nota leída otra vez cambió de carpeta.
+  la nota leída otra vez cambió de carpeta. `NoteEdit.RestoreVersionAsync` llama a `StateHasChanged`: lo invoca la pestaña con un delegado,
+  no un `EventCallback`, y sin eso la nota restaurada no se veía hasta el siguiente evento de la página.
+- **Menú «Utils»** (`Notes/NotesUtilsMenu`, en «Quick search», «Tree panel» y «Notes filter», detrás de «Delete note», como el menú *Edit* de
+  `ClientWin`; nunca en el menú lateral): las opciones menores sobre las notas, con el rol comprobado al elegirlas (`KntAccess`). Por ahora
+  «Recover deleted notes ...» (H24, Staff): `DeletedNotesDialog` (`Large`) con las notas borradas que aún se pueden recuperar, «See this version»
+  (`NoteVersionDialog` con su fila `Deleted`), «Recover» (dice lo que no volvió y ofrece abrirla en su ventana) y, para Admin, «Remove
+  permanently» (H27); se cierra con `true` si recuperó alguna y la página vuelve a leer su lista (`Changed`).
+- **Retención del historial** (H25): la pestaña «History» del panel Admin (`Notes/HistoryRetentionSettings`, `KntSections.HistoryRetention`),
+  con los límites de `HistoryRetentionDto` antes de guardar y, si se acorta algo, el aviso de `HistoryRules.RetentionReductions`.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia
   página, `notificationService.Notify(new NotificationMessage { Severity = ..., ... })`.
 - **Calendario de alarmas** (`Notes/NotesAlarmsCalendar` + `AlarmDetailPane`, menú "Alarms calendar", Guest+, solo

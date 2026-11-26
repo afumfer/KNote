@@ -21,6 +21,38 @@ public class NoteHistoryPageDto
     public bool CanRestore(Guid klogId) => Restorable?.Contains(klogId) == true;
 }
 
+/// <summary>
+/// A note in «Recover deleted notes» (H24): what its row Deleted says (its number and topic as they were, the folder it was deleted
+/// from, when and by whom), without its version. Row is that row, for «See this version».
+/// </summary>
+public class DeletedNoteDto
+{
+    public Guid NoteId { get; set; }
+    public int NoteNumber { get; set; }
+    public string Topic { get; set; }
+    public string FolderPath { get; set; }
+    public DateTime DeletedAt { get; set; }
+    public string DeletedBy { get; set; }
+    public string Origin { get; set; }
+    public KLogDto Row { get; set; }
+}
+
+/// <summary>What recovering a deleted note did (H24): its number (another one if its own was taken) and what didn't come back.</summary>
+public class NoteRecoverResultDto
+{
+    public Guid NoteId { get; set; }
+    public int NoteNumber { get; set; }
+    public string Topic { get; set; }
+    public List<string> Notices { get; set; } = new();
+}
+
+/// <summary>The retention of the history (H25) and the day the history started (SYSTEM/HISTORY_START), for its editor.</summary>
+public class HistoryRetentionInfoDto
+{
+    public HistoryRetentionDto Retention { get; set; } = new();
+    public DateTime? Since { get; set; }
+}
+
 /// <summary>What restoring a version did (H23): Changed false if the note was already so; Notices, what couldn't be restored.</summary>
 public class NoteRestoreResultDto
 {

@@ -1,0 +1,29 @@
+@* Menu item «Utils» of the notes pages (tree, search, filter): the minor tools on the notes, as ClientWin's Edit menu (H24). For
+   now «Recover deleted notes ...» (Staff, checked when chosen, KntAccess, as Print/Export); the other options of ClientWin's Edit
+   menu on the selected notes will come here. Changed: something changed the notes (a note recovered), the page reads its list
+   again. *@
+
+@using KNote.Client.Auth
+
+@inject DialogService dialogService
+@inject KntAccess access
+
+<RadzenMenuItem Text="Utils" Icon="handyman" class="knt-menu-separator">
+    <RadzenMenuItem Text="Recover deleted notes ..." Icon="restore_from_trash" Click="RecoverDeletedNotesAsync" />
+</RadzenMenuItem>
+
+@code {
+    [Parameter] public EventCallback Changed { get; set; }
+
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    private async Task RecoverDeletedNotesAsync()
+    {
+        if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Recovering deleted notes"))
+            return;
+        var recovered = await dialogService.OpenAsync<DeletedNotesDialog>("Recover deleted notes", new Dictionary<string, object?>(),
+            KntDialogs.Framed(KntDialogs.Large()));
+        if (recovered is true)
+            await Changed.InvokeAsync();
+    }
+}

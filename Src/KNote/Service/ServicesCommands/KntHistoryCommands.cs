@@ -6,6 +6,7 @@ using KNote.Model;
 using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
+using Microsoft.Extensions.Logging;
 
 namespace KNote.Service.ServicesCommands;
 
@@ -114,8 +115,7 @@ public class KntHistoryGetNoteVersionAsyncCommand : KntCommandServiceBase<(Guid 
     }
 
     // The number of a note from the title of its row (#340 Topic), for one that no longer exists.
-    internal static int NumberOf(string title) =>
-        title?.StartsWith('#') == true && int.TryParse(new string(title.Skip(1).TakeWhile(char.IsDigit).ToArray()), out var number) ? number : 0;
+    internal static int NumberOf(string title) => HistoryRules.NoteNumberOf(title);
 }
 
 /// <summary>
@@ -315,6 +315,261 @@ public class KntHistoryRestoreNoteVersionAsyncCommand : KntCommandServiceBase<(G
 
         restore.Changed = true;
         result.Entity = restore;
+        return result;
+    }
+}
+
+/// <summary>
+/// «Recover deleted notes» (H24): the notes whose last row is their deletion and still keep their last version (the trash, which
+/// the purge empties after DeletedNotesDays), the newest first; not the ones that can no longer be recovered.
+/// </summary>
+[KntAuthorize(EnumRoles.Staff)]
+public class KntHistoryGetDeletedNotesAsyncCommand : KntCommandServiceBase<Result<List<DeletedNoteDto>>>
+{
+    public KntHistoryGetDeletedNotesAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<List<DeletedNoteDto>>> Execute()
+    {
+        var result = new Result<List<DeletedNoteDto>>();
+        var rows = await Repository.History.GetDeletedAsync(HistoryEntities.Note);
+        if (!rows.IsValid)
+        {
+            result.AddListErrorMessage(rows.ListErrorMessage);
+            return result;
+        }
+        result.Entity = (rows.Entity ?? new()).Select(row => new DeletedNoteDto
+        {
+            NoteId = row.EntityId,
+            NoteNumber = HistoryRules.NoteNumberOf(row.EntityTitle),
+            Topic = HistoryRules.NoteTopicOf(row.EntityTitle),
+            FolderPath = NoteChangeDetailsDto.FromJson(row.ChangeDetails).Deleted?.Folder,
+            DeletedAt = row.LastDateTime,
+            DeletedBy = row.UserName,
+            Origin = row.Origin,
+            Row = row
+        }).ToList();
+        return result;
+    }
+}
+
+/// <summary>
+/// Recovers a deleted note (H24, H26): created again by the save of always (KntNotesSaveAsyncCommand: its rules, the index, the
+/// history) with its own data as it was deleted (H8), in a row Restored («Recovered from the deleted notes»). The same id, so its
+/// history goes on; its number if it is free (another one if not); its folder or, if it no longer exists, Home; its type and the
+/// attributes that still exist; created when its row Created says, modified now. Its tasks, resources, alarms and relations don't
+/// come back: the result says so.
+/// </summary>
+[KntAuthorize(EnumRoles.Staff)]
+public class KntHistoryRecoverNoteAsyncCommand : KntCommandServiceBase<Guid, Result<NoteRecoverResultDto>>
+{
+    public const string NotDeleted = "This note is not among the deleted notes that can be recovered.";
+    public const string PartsNotRecovered = "Its tasks, resources, alarms and relations are not recovered.";
+
+    public KntHistoryRecoverNoteAsyncCommand(IKntService service, Guid noteId) : base(service, noteId)
+    {
+
+    }
+
+    public override async Task<Result<NoteRecoverResultDto>> Execute()
+    {
+        var result = new Result<NoteRecoverResultDto>();
+        var rows = (await Repository.History.GetEntityHistoryAsync(HistoryEntities.Note, Param)).Entity ?? new();
+        var deleted = rows.OrderBy(r => r.RegistryDateTime).ThenBy(r => r.LastDateTime).LastOrDefault();
+        if (deleted == null || deleted.ActionType != nameof(EnumHistoryAction.Deleted) || !deleted.HasPreviousContent
+            || (await Repository.Notes.GetAsync(Param)).Entity != null)
+        {
+            result.AddErrorMessage(NotDeleted);
+            return result;
+        }
+        var version = NoteVersionDto.FromJson((await Repository.History.GetPreviousContentAsync(deleted.KLogId)).Entity);
+        if (version == null)
+        {
+            result.AddErrorMessage(KntHistoryGetNoteVersionAsyncCommand.CopyNotKept);
+            return result;
+        }
+
+        var notices = new List<string>();
+        var number = HistoryRules.NoteNumberOf(deleted.EntityTitle);
+        if (number > 0 && (await Repository.Notes.GetAsync(number)).Entity != null)
+            number = 0;
+
+        var folder = (await Repository.Folders.GetAsync(version.FolderId)).Entity;
+        if (folder == null || folder.FolderId != version.FolderId)
+        {
+            folder = (await Repository.Folders.GetAsync(KntConst.DefaultFolderNumber)).Entity;
+            if (folder == null)
+            {
+                result.AddErrorMessage("The folder of the note no longer exists, nor the Home folder.");
+                return result;
+            }
+            notices.Add($"Its folder no longer exists: it is in {await KntHistory.FolderPathAsync(Service, folder.FolderId) ?? folder.Name}.");
+        }
+
+        NoteTypeDto type = null;
+        if (version.NoteTypeId is Guid typeId)
+        {
+            var found = await Repository.NoteTypes.GetAsync(typeId);
+            type = found.IsValid && found.Entity?.NoteTypeId == typeId ? found.Entity : null;
+            if (type == null)
+                notices.Add("Its type no longer exists: it has no type.");
+        }
+
+        var now = DateTime.Now;
+        var note = new NoteDto
+        {
+            NoteId = Param,
+            NoteNumber = number,
+            Topic = version.Topic,
+            Description = version.Description,
+            ContentType = version.ContentType,
+            Tags = version.Tags,
+            Priority = version.Priority,
+            Script = version.Script,
+            InternalTags = "",
+            FolderId = folder.FolderId,
+            FolderDto = folder,
+            NoteTypeId = type?.NoteTypeId,
+            NoteTypeDto = type,
+            CreationDateTime = rows.FirstOrDefault(r => r.ActionType == nameof(EnumHistoryAction.Created))?.RegistryDateTime ?? now,
+            ModificationDateTime = now
+        };
+        note.KAttributesDto = await Service.Notes.UtilCompleteNoteAttributesAsync(new List<NoteKAttributeDto>(), note.NoteId, note.NoteTypeId) ?? new();
+        foreach (var attribute in note.KAttributesDto)
+        {
+            attribute.NoteId = note.NoteId;
+            attribute.Value = version.AttributeValue(attribute.KAttributeId) ?? "";
+        }
+        var lost = version.Attributes.Count(v => note.KAttributesDto.All(a => a.KAttributeId != v.Id));
+        if (lost > 0)
+            notices.Add(lost == 1
+                ? "1 attribute of it no longer exists or isn't of its type: it was not recovered."
+                : $"{lost} attributes of it no longer exist or aren't of its type: they were not recovered.");
+
+        Result<NoteDto> saved;
+        using (KntHistory.Restoring(new HistoryRestoredDto { Recovered = true, KLogId = deleted.KLogId, VersionOf = deleted.LastDateTime }))
+            saved = await Service.Notes.SaveAsync(note);
+        if (!saved.IsValid)
+        {
+            result.AddListErrorMessage(saved.ListErrorMessage);
+            return result;
+        }
+
+        var wanted = HistoryRules.NoteNumberOf(deleted.EntityTitle);
+        if (wanted > 0 && saved.Entity.NoteNumber != wanted)
+            notices.Insert(0, $"Its number #{wanted} is now another note's: it is #{saved.Entity.NoteNumber}.");
+        notices.Add(PartsNotRecovered);
+        result.Entity = new NoteRecoverResultDto
+        {
+            NoteId = saved.Entity.NoteId,
+            NoteNumber = saved.Entity.NoteNumber,
+            Topic = saved.Entity.Topic,
+            Notices = notices
+        };
+        return result;
+    }
+}
+
+/// <summary>
+/// «Remove permanently» (H27, Admin): empties every version of a deleted note, as the purge does after DeletedNotesDays; its rows
+/// stay and it can no longer be recovered.
+/// </summary>
+[KntAuthorize(EnumRoles.Admin)]
+public class KntHistoryRemoveDeletedNoteAsyncCommand : KntCommandServiceBase<Guid, Result>
+{
+    public KntHistoryRemoveDeletedNoteAsyncCommand(IKntService service, Guid noteId) : base(service, noteId)
+    {
+
+    }
+
+    public override async Task<Result> Execute()
+    {
+        var result = new Result();
+        var last = (await Repository.History.GetLastAsync(HistoryEntities.Note, Param)).Entity;
+        if (last == null || last.ActionType != nameof(EnumHistoryAction.Deleted) || (await Repository.Notes.GetAsync(Param)).Entity != null)
+        {
+            result.AddErrorMessage(KntHistoryRecoverNoteAsyncCommand.NotDeleted);
+            return result;
+        }
+        var cleared = await Repository.History.ClearEntityContentAsync(HistoryEntities.Note, Param);
+        if (!cleared.IsValid)
+            return cleared;
+        Service.Logger?.LogInformation("History: the versions of the deleted note {title} were removed by {user}.", last.EntityTitle, Service.UserIdentityName);
+        return result;
+    }
+}
+
+/// <summary>The retention of the history (H25) and the day the history started: any user (the editor is the Admin's).</summary>
+[KntAuthorize(EnumRoles.Guest)]
+public class KntHistoryGetRetentionAsyncCommand : KntCommandServiceBase<Result<HistoryRetentionInfoDto>>
+{
+    public KntHistoryGetRetentionAsyncCommand(IKntService service) : base(service)
+    {
+
+    }
+
+    public override async Task<Result<HistoryRetentionInfoDto>> Execute()
+    {
+        var start = (await Repository.SystemValues.GetAsync(KntConst.SystemScope, KntConst.HistoryStartKey)).Entity?.Value;
+        return new Result<HistoryRetentionInfoDto>(new HistoryRetentionInfoDto
+        {
+            Retention = await KntHistory.RetentionAsync(Service),
+            Since = DateTime.TryParse(start, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var since)
+                ? since : null
+        });
+    }
+}
+
+/// <summary>
+/// Keeps the retention of the history (H25, Admin), within the limits of HistoryRetentionDto. It applies in the next purge (H9) and
+/// goes into the history of the settings, with its values.
+/// </summary>
+[KntAuthorize(EnumRoles.Admin)]
+public class KntHistorySaveRetentionAsyncCommand : KntCommandServiceBase<HistoryRetentionDto, Result<HistoryRetentionDto>>
+{
+    public KntHistorySaveRetentionAsyncCommand(IKntService service, HistoryRetentionDto retention) : base(service, retention)
+    {
+
+    }
+
+    public override Result ValidateParam()
+    {
+        var result = new Result();
+        if (Param == null)
+            result.AddErrorMessage("The retention of the history is required.");
+        else if (Param.GetErrorMessage() is string error && !string.IsNullOrEmpty(error))
+            result.AddErrorMessage(error);
+        return result;
+    }
+
+    public override async Task<Result<HistoryRetentionDto>> Execute()
+    {
+        var result = new Result<HistoryRetentionDto>();
+        var retention = Param.Normalized();
+        var before = await KntHistory.RetentionAsync(Service);
+        var stored = await Repository.SystemValues.GetAsync(KntConst.SystemScope, KntConst.HistoryRetentionKey);
+
+        var saved = stored.IsValid && stored.Entity != null
+            ? await Repository.SystemValues.UpdateAsync(new SystemValueDto
+            {
+                SystemValueId = stored.Entity.SystemValueId, Scope = KntConst.SystemScope, Key = KntConst.HistoryRetentionKey, Value = retention.ToJson()
+            })
+            : await Repository.SystemValues.AddAsync(new SystemValueDto
+            {
+                SystemValueId = Guid.NewGuid(), Scope = KntConst.SystemScope, Key = KntConst.HistoryRetentionKey, Value = retention.ToJson()
+            });
+        if (!saved.IsValid)
+        {
+            result.AddListErrorMessage(saved.ListErrorMessage);
+            return result;
+        }
+
+        await KntHistory.NoteStructureAsync(Service, HistoryEntities.SystemValue,
+            HistoryRules.SettingId(KntConst.SystemScope, KntConst.HistoryRetentionKey), KntHistory.HistoryRetentionTitle,
+            StructureChangeDescriber.HistoryRetention(before, retention));
+        result.Entity = retention;
         return result;
     }
 }

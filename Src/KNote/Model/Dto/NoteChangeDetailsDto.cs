@@ -96,6 +96,8 @@ public class HistoryRestoredDto
     /// <summary>The row whose version was restored, and when that change happened (the last one of its session).</summary>
     public Guid? KLogId { get; set; }
     public DateTime? VersionOf { get; set; }
+    /// <summary>A deleted note recovered (H24): KLogId and VersionOf are its row Deleted.</summary>
+    public bool? Recovered { get; set; }
 }
 
 public class HistoryDeletedDto

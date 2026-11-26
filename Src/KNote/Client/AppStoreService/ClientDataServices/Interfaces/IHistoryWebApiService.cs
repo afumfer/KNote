@@ -10,4 +10,9 @@ public interface IHistoryWebApiService
     Task<Result<NoteVersionViewDto>> GetNoteVersionAsync(Guid noteId, Guid klogId, CancellationToken cancellationToken = default);
     Task<Result<NoteComparisonDto>> GetNoteComparisonAsync(Guid noteId, Guid klogId, bool withCurrentNote, CancellationToken cancellationToken = default);
     Task<Result<NoteRestoreResultDto>> RestoreNoteVersionAsync(Guid noteId, Guid klogId);
+    Task<Result<List<DeletedNoteDto>>> GetDeletedNotesAsync(CancellationToken cancellationToken = default);
+    Task<Result<NoteRecoverResultDto>> RecoverNoteAsync(Guid noteId);
+    Task<Result> RemoveDeletedNoteAsync(Guid noteId);
+    Task<Result<HistoryRetentionInfoDto>> GetRetentionAsync(CancellationToken cancellationToken = default);
+    Task<Result<HistoryRetentionDto>> SaveRetentionAsync(HistoryRetentionDto retention);
 }

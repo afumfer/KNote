@@ -790,6 +790,16 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   (`NoteEditorCtrl.CanRestoreVersions`: `EditMode` y no consulta) y en las filas de `NoteHistoryPageDto.Restorable`:
   `NoteEditorCtrl.RestoreVersionAsync` pregunta, guarda antes los cambios con `SaveModel` (si no puede, no restaura), restaura, vuelve a
   cargar la nota (`LoadModelById` + `OnSavedEntity`, que avisa a las listas) y muestra los avisos. Tests en `NoteCompareCtrlTests`.
+  `ModelToControls` olvida la carpeta elegida a mano en el editor (`_changedFolder`): era de la nota mostrada antes y, tras restaurar
+  una versión de otra carpeta, guardar volvía a dejar la nota en la elegida.
+- **Notas borradas** (H24, H27): *Edit* › «Recover deleted notes ...» (debajo de «Delete note», creado en código en `KNoteManagementForm`;
+  el nombre no se lee como «Delete note») abre `DeletedNotesCtrl` (`[KntAuthorize(Staff)]` en el repositorio seleccionado, modal) con
+  `DeletedNotesForm`, en código: la lista, «See this version» (`NoteVersionCtrl` con la fila `Deleted`), «Recover» (dice lo que no volvió y
+  ofrece abrir la nota) y, para un Admin del repositorio, «Remove permanently». Al cerrar, si recuperó alguna, la ventana principal vuelve a
+  leer su lista. Tests en `DeletedNotesCtrlTests`.
+- **Retención del historial** (H25): la pestaña «History» de *Edit repository properties* (`RepositoryEditorForm.CreateHistoryTab`, en
+  código; solo en modo `Management`, que pide Admin). `RepositoryEditorCtrl` la lee con las demás pestañas de administración y la guarda con
+  «Accept», tras sus validaciones y, si se acorta algo, el aviso de `HistoryRules.RetentionReductions` (Sí/No).
 - **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las
   relaciones (creada en código, envuelve el `SplitContainer` del Designer), plegada si no hay índice utilizable o la nota
   es nueva; se calcula al abrir la pestaña y al cambiar de nota o de relaciones con ella abierta.

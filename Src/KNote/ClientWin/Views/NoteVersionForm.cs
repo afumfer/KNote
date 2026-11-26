@@ -62,13 +62,14 @@ public class NoteVersionForm : KntForm, IViewNoteVersion
         };
 
         var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, FlowDirection = FlowDirection.RightToLeft, AutoSize = true, Padding = new Padding(6) };
-        var close = new Button { Text = "Close", AutoSize = true, UseVisualStyleBackColor = true, DialogResult = DialogResult.Cancel };
+        var close = FooterButtons.Create("Close");
+        close.DialogResult = DialogResult.Cancel;
         close.Click += (s, e) => Close();
         buttons.Controls.Add(close);
         CancelButton = close;
         if (_ctrl.CanRestore)
         {
-            var restore = new Button { Text = "Restore", AutoSize = true, UseVisualStyleBackColor = true };
+            var restore = FooterButtons.Create("Restore");
             restore.Click += async (s, e) =>
             {
                 restore.Enabled = false;
@@ -125,6 +126,7 @@ public class NoteVersionForm : KntForm, IViewNoteVersion
     protected override void OnLoad(EventArgs e)
     {
         base.OnLoad(e);
+        FooterButtons.FitTexts(this);
         RefreshView();
     }
 

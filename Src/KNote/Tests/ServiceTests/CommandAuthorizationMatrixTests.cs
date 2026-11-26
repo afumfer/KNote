@@ -72,6 +72,8 @@ public class CommandAuthorizationMatrixTests
             // The history of a note and its versions (H.3): reading it, as reading the note.
             "KntHistoryGetNoteHistoryAsyncCommand", "KntHistoryGetNoteVersionAsyncCommand",
             "KntHistoryGetNoteComparisonAsyncCommand",
+            // The retention of the history (H25): reading it.
+            "KntHistoryGetRetentionAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).
@@ -89,8 +91,9 @@ public class CommandAuthorizationMatrixTests
             "KntNotesDeleteTraceNoteAsyncCommand", "KntNotesSaveWindowAsyncCommand", "KntNotesGetAlarmNotesIdAsyncCommand",
             "KntNotesConsumeDueAlarmsAsyncCommand", "KntNotesGetAlarmNoticesAsyncCommand",
             "KntNotesPatchFolderAsyncCommand", "KntNotesPatchChangeTagsAsyncCommand",
-            // Restoring a version of a note (H23): it saves the note.
-            "KntHistoryRestoreNoteVersionAsyncCommand");
+            // Restoring a version of a note (H23): it saves the note; recovering a deleted one (H24), who deletes notes.
+            "KntHistoryRestoreNoteVersionAsyncCommand",
+            "KntHistoryGetDeletedNotesAsyncCommand", "KntHistoryRecoverNoteAsyncCommand");
 
         // The AI assistant's sessions: notes and tasks of the user's own (Staff, like the assistant), also to
         // read them, since the assistant itself requires Staff.
@@ -153,6 +156,10 @@ public class CommandAuthorizationMatrixTests
         // The alarms of every user (the Server's alarms services, which run without a user).
         Add(nameof(EnumRoles.Admin),
             "KntNotesConsumeAllUsersDueAlarmsAsyncCommand");
+
+        // The history (H25, H27): its retention and removing a deleted note for good.
+        Add(nameof(EnumRoles.Admin),
+            "KntHistorySaveRetentionAsyncCommand", "KntHistoryRemoveDeletedNoteAsyncCommand");
 
         return matrix;
     }

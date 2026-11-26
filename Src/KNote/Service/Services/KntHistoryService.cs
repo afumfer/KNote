@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model;
 using KNote.Model.Dto;
@@ -26,4 +27,19 @@ public class KntHistoryService : KntServiceBase, IKntHistoryService
 
     public async Task<Result<NoteRestoreResultDto>> RestoreNoteVersionAsync(Guid noteId, Guid klogId) =>
         await ExecuteCommand(new KntHistoryRestoreNoteVersionAsyncCommand(Service, noteId, klogId));
+
+    public async Task<Result<List<DeletedNoteDto>>> GetDeletedNotesAsync() =>
+        await ExecuteCommand(new KntHistoryGetDeletedNotesAsyncCommand(Service));
+
+    public async Task<Result<NoteRecoverResultDto>> RecoverNoteAsync(Guid noteId) =>
+        await ExecuteCommand(new KntHistoryRecoverNoteAsyncCommand(Service, noteId));
+
+    public async Task<Result> RemoveDeletedNoteAsync(Guid noteId) =>
+        await ExecuteCommand(new KntHistoryRemoveDeletedNoteAsyncCommand(Service, noteId));
+
+    public async Task<Result<HistoryRetentionInfoDto>> GetRetentionAsync() =>
+        await ExecuteCommand(new KntHistoryGetRetentionAsyncCommand(Service));
+
+    public async Task<Result<HistoryRetentionDto>> SaveRetentionAsync(HistoryRetentionDto retention) =>
+        await ExecuteCommand(new KntHistorySaveRetentionAsyncCommand(Service, retention));
 }

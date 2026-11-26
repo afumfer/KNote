@@ -166,6 +166,10 @@ public interface IViewNoteCompare : IViewBase
 {
 }
 
+public interface IViewDeletedNotes : IViewBase
+{
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();

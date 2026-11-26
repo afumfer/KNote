@@ -61,6 +61,54 @@ public static class HistoryRules
 
     public static string Title(string name) => Truncate(name?.Trim(), KLogDto.MaxEntityTitleLength);
 
+    /// <summary>The number of a note from the title of its row (#340 Topic): for one that no longer exists. 0 if it has none.</summary>
+    public static int NoteNumberOf(string title)
+    {
+        if (string.IsNullOrEmpty(title) || title[0] != '#')
+            return 0;
+        int end = 1;
+        while (end < title.Length && char.IsDigit(title[end]))
+            end++;
+        return int.TryParse(title[1..end], out var number) ? number : 0;
+    }
+
+    /// <summary>The topic of a note from the title of its row (#340 Topic).</summary>
+    public static string NoteTopicOf(string title)
+    {
+        if (string.IsNullOrEmpty(title) || NoteNumberOf(title) == 0)
+            return title ?? "";
+        int end = 1;
+        while (end < title.Length && char.IsDigit(title[end]))
+            end++;
+        return title[end..].Trim();
+    }
+
+    /// <summary>When the retention empties versions (H9): said under the warning of a shorter retention.</summary>
+    public const string RetentionApplies = "The versions are emptied in each note the next time it is saved, and those of the deleted notes "
+        + "when another note is deleted or the repository is opened. An emptied version can't be brought back.";
+
+    /// <summary>
+    /// What a new retention shortens (H25), said before it is saved: one line for each value lower than before. Nothing if it keeps
+    /// as much as before or more.
+    /// </summary>
+    public static List<string> RetentionReductions(HistoryRetentionDto before, HistoryRetentionDto after)
+    {
+        before = (before ?? new HistoryRetentionDto()).Normalized();
+        after = (after ?? new HistoryRetentionDto()).Normalized();
+        var lines = new List<string>();
+        if (after.KeepAllMonths < before.KeepAllMonths)
+            lines.Add($"All the versions: {before.KeepAllMonths} → {after.KeepAllMonths} months. Older ones keep one a day.");
+        if (after.DailyUntilMonths < before.DailyUntilMonths)
+            lines.Add($"One version a day: {before.DailyUntilMonths} → {after.DailyUntilMonths} months. Older ones keep one a month.");
+        if (after.MaxCopiesPerNote < before.MaxCopiesPerNote)
+            lines.Add($"Versions per note: {before.MaxCopiesPerNote} → {after.MaxCopiesPerNote}. The oldest ones above it are emptied.");
+        if (after.DeletedNotesDays < before.DeletedNotesDays)
+            lines.Add($"Days in the deleted notes: {before.DeletedNotesDays} → {after.DeletedNotesDays}. Notes deleted before can no longer be recovered.");
+        if (after.MaxContentSizeMB < before.MaxContentSizeMB)
+            lines.Add($"Largest note copied: {before.MaxContentSizeMB} → {after.MaxContentSizeMB} MB. Bigger notes will be noted without their copy.");
+        return lines;
+    }
+
     /// <summary>Where the note as it was after a change of its history comes from (VersionAfter).</summary>
     public sealed record VersionSource(KLogDto CopyRow, bool CurrentNote, bool Exact, DateTime? IncludesUntil);
 
