@@ -22,6 +22,50 @@ public class NoteHistoryPageDto
 }
 
 /// <summary>
+/// What «Repository changes» asks for (H28): the rows whose last change is in the period (whole days, From to To), of an entity
+/// (HistoryEntities; null, all the ones the user can see, H29), an action (EnumHistoryAction), a user and an origin (null, any), from
+/// Skip, Take at most (NoteHistoryPageDto.PageSize when 0).
+/// </summary>
+public class RepositoryChangesQueryDto
+{
+    public const int DefaultDays = 7;
+
+    public DateTime From { get; set; } = DateTime.Today.AddDays(-(DefaultDays - 1));
+    public DateTime To { get; set; } = DateTime.Today;
+    public string EntityName { get; set; }
+    public string ActionType { get; set; }
+    public string UserName { get; set; }
+    public string Origin { get; set; }
+    public int Skip { get; set; }
+    public int Take { get; set; }
+}
+
+/// <summary>
+/// A page of «Repository changes» (H28), the newest first, without the copies. StructureIncluded: the user sees the changes of the
+/// structure (ProjectManager and up, H29); ExistingNotes, the notes of the page that exist («Open note»). A deleted note is
+/// recovered from «Recover deleted notes» (H28), not from here.
+/// </summary>
+public class RepositoryChangesPageDto
+{
+    public List<KLogDto> Rows { get; set; } = new();
+    public int Total { get; set; }
+    public int Skip { get; set; }
+    public bool StructureIncluded { get; set; }
+    public List<Guid> ExistingNotes { get; set; } = new();
+
+    public bool HasMore => Skip + Rows.Count < Total;
+
+    public bool NoteExists(KLogDto row) => row?.EntityName == HistoryEntities.Note && ExistingNotes?.Contains(row.EntityId) == true;
+}
+
+/// <summary>A page of the rows of the history (the repository's query): the rows and how many there are in all.</summary>
+public class KLogPageDto
+{
+    public List<KLogDto> Rows { get; set; } = new();
+    public int Total { get; set; }
+}
+
+/// <summary>
 /// A note in «Recover deleted notes» (H24): what its row Deleted says (its number and topic as they were, the folder it was deleted
 /// from, when and by whom), without its version. Row is that row, for «See this version».
 /// </summary>

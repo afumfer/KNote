@@ -480,7 +480,9 @@ leer una nota). Desde la H.4a: `GET notes/{noteId}/compare/{klogId}?withCurrentN
 sin `UtilUpdateResourceInDescriptionForRead`: no se dibuja) y `POST notes/{noteId}/versions/{klogId}/restore` (`Admin, Staff, ProjectManager`,
 `NoteRestoreResultDto`; la Web vuelve a leer la nota). Desde la H.4b: `GET deleted` y `POST deleted/{noteId}/recover` («Recover deleted notes»,
 `Admin, Staff, ProjectManager`), `DELETE deleted/{noteId}` («Remove permanently», `Admin`), `GET retention` (con sesión) y `PUT retention`
-(`Admin`). Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
+(`Admin`). Desde la H.5a: `POST changes` y `POST changes/users` («Repository changes», con sesión; la consulta en el cuerpo,
+`RepositoryChangesQueryDto`): **la estructura la deja fuera el propio comando** para quien no es ProjectManager o superior, porque el
+`Server` no aplica los roles de los comandos. Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
 
 ## Calendario de alarmas y panel de tareas (`NotesController`)
 

@@ -88,7 +88,9 @@ else
     private bool restoring;
     // The rows whose version can be restored, of every page read.
     private readonly HashSet<Guid> restorable = new();
-    private readonly List<KLogDto> rows = new();
+    // Always a new list when it changes: RadzenDataGrid only reads its Data again when it is another instance (the same list,
+    // cleared and filled, kept showing the rows it had: Refresh and Show more did nothing on screen).
+    private List<KLogDto> rows = new();
     private IList<KLogDto> selected = new List<KLogDto>();
     private bool loadFailed;
     private bool loadingMore;
@@ -125,8 +127,7 @@ else
             return;
         }
         page = result.Value.Entity;
-        rows.Clear();
-        rows.AddRange(page.Rows);
+        rows = page.Rows.ToList();
         restorable.Clear();
         restorable.UnionWith(page.Restorable);
         selected = new List<KLogDto>();
@@ -143,7 +144,7 @@ else
             if (result.IsValid && result.Entity.NoteId == NoteId)
             {
                 page = result.Entity;
-                rows.AddRange(page.Rows.Where(r => rows.All(k => k.KLogId != r.KLogId)));
+                rows = rows.Concat(page.Rows.Where(r => rows.All(k => k.KLogId != r.KLogId))).ToList();
                 restorable.UnionWith(page.Restorable);
                 page.Skip = 0;
                 page.Rows = rows;

@@ -74,6 +74,8 @@ public class CommandAuthorizationMatrixTests
             "KntHistoryGetNoteComparisonAsyncCommand",
             // The retention of the history (H25): reading it.
             "KntHistoryGetRetentionAsyncCommand",
+            // «Repository changes» (H28): the notes for any user; the structure, checked inside (H29).
+            "KntHistoryGetRepositoryChangesAsyncCommand", "KntHistoryGetRepositoryChangesUsersAsyncCommand",
             "KntTraceNoteTypeGetAllAsyncCommand", "KntTraceNoteTypeGetAsyncCommand",
             "KntUsersGetAllAsyncCommand", "KntUsersGetAsyncCommand", "KntUsersGetByUserNameAsyncCommand",
             // The user's own account (every user has one).

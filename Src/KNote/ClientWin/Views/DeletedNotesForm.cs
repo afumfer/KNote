@@ -111,6 +111,14 @@ public class DeletedNotesForm : KntForm, IViewDeletedNotes
         base.OnLoad(e);
         FooterButtons.FitTexts(this);
         RefreshView();
+        // Opened from a deletion of «Repository changes»: that note, if it is still here.
+        if (_ctrl.SelectedNoteId is Guid noteId && _list.Items[noteId.ToString()] is ListViewItem item)
+        {
+            item.Selected = true;
+            item.Focused = true;
+            item.EnsureVisible();
+            ActiveControl = _list;
+        }
     }
 
     protected override void OnUserClosing(FormClosingEventArgs e) => _ctrl.Finalize();

@@ -89,6 +89,8 @@ public interface IKntNoteRepository : IDisposable
     Task<Result<WindowDto>> AddWindowAsync(WindowDto entity);
     Task<Result<WindowDto>> UpdateWindowAsync(WindowDto entity);
     Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId);
+    /// <summary>Which of these notes exist (the history: «Repository changes», H28).</summary>
+    Task<Result<List<Guid>>> GetExistingNoteIdsAsync(IReadOnlyCollection<Guid> noteIds);
     Task<Result<List<Guid>>> GetAlarmNotesIdAsync(Guid userId, EnumNotificationType? notificationType = null);
     // The due alarms of a type (activated, AlarmDateTime <= now, of a note) of a user or, with userId null, of every
     // user, consumed: each one rescheduled or deactivated (ApplyAlarmControl) with a conditional update (still activated

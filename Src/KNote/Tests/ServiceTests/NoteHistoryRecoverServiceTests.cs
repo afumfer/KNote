@@ -133,7 +133,15 @@ public class NoteHistoryRecoverServiceTests
         var result = await service.History.RecoverNoteAsync(note.NoteId);
         Assert.IsFalse(result.IsValid);
         StringAssert.Contains(result.ErrorMessage, KntHistoryRecoverNoteAsyncCommand.NotDeleted);
-        Assert.AreEqual(2, (await service.History.GetNoteHistoryAsync(note.NoteId)).Entity.Total, "its rows stay");
+        var rows = (await service.History.GetNoteHistoryAsync(note.NoteId)).Entity.Rows;
+        CollectionAssert.AreEqual(new[] { "Removed", "Deleted", "Created" }, rows.Select(r => r.ActionType).ToArray(),
+            "its rows stay, and one more says who removed it");
+        Assert.AreEqual("Removed permanently from the deleted notes", rows[0].RegistryMessage);
+        Assert.AreEqual("armando", rows[0].UserName);
+        Assert.IsTrue(rows.All(r => !r.HasPreviousContent));
+        var version = await service.History.GetNoteVersionAsync(note.NoteId, rows[1].KLogId);
+        StringAssert.Contains(version.ErrorMessage, KNote.Model.Core.HistoryRules.VersionCopyNotKept, "«See this version» says why");
+        Assert.IsFalse((await service.History.RemoveDeletedNoteAsync(note.NoteId)).IsValid, "once");
     }
 
     [TestMethod]

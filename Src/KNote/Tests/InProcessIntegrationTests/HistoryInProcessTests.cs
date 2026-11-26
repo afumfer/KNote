@@ -124,6 +124,26 @@ public class HistoryInProcessTests
         Assert.IsTrue(saved.IsSuccessStatusCode, await saved.Content.ReadAsStringAsync());
     }
 
+    [TestMethod]
+    public async Task TheChangesOfTheRepository()
+    {
+        var note = await PostAsync(new NoteDto
+        {
+            NoteId = Guid.Empty, Topic = "__TEST_HISTORY_CHANGES__", Description = "A change", FolderId = _folder.FolderId, FolderDto = _folder,
+            CreationDateTime = DateTime.Now, ModificationDateTime = DateTime.Now
+        });
+
+        var response = await _httpClient.PostAsJsonAsync("api/history/changes", new RepositoryChangesQueryDto { EntityName = HistoryEntities.Note });
+        Assert.IsTrue(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
+        var page = (await response.Content.ReadFromJsonAsync<Result<RepositoryChangesPageDto>>())!.Entity!;
+        var row = page.Rows.First(r => r.EntityId == note.NoteId);
+        Assert.AreEqual("Created", row.ActionType);
+        Assert.IsTrue(page.NoteExists(row));
+
+        var users = await _httpClient.PostAsJsonAsync("api/history/changes/users", new RepositoryChangesQueryDto());
+        Assert.IsTrue((await users.Content.ReadFromJsonAsync<Result<List<string>>>())!.Entity!.Contains(row.UserName));
+    }
+
     private static async Task<NoteDto> PutAsync(NoteDto note)
     {
         var httpRes = await _httpClient.PutAsJsonAsync("api/notes", note);

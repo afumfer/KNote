@@ -11,9 +11,13 @@
     <ChildContent>
         @if (loadFailed)
         {
+            @* The reason the Server gives; if it is for good (the copy is no longer kept...), no «Retry». *@
             <div class="knt-load-error">
-                <span class="knt-load-error-text">The version could not be loaded.</span>
-                <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="LoadAsync" />
+                <span class="knt-load-error-text">@(string.IsNullOrEmpty(error) ? "The version could not be loaded." : error)</span>
+                @if (!HistoryRules.IsPermanentVersionError(error))
+                {
+                    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="LoadAsync" />
+                }
             </div>
         }
         else if (version == null)
@@ -93,6 +97,7 @@
 
     private NoteVersionViewDto? version;
     private bool loadFailed;
+    private string? error;
     private readonly CancellationTokenSource disposal = new();
 
     private string Title => string.IsNullOrEmpty(NoteTitle) ? "Version of the note" : $"Version of {NoteTitle}";
@@ -105,12 +110,16 @@
     private async Task LoadAsync()
     {
         loadFailed = false;
+        error = null;
         var result = await webApiService.History.GetNoteVersionAsync(NoteId, Row.KLogId, disposal.Token);
         if (disposal.IsCancellationRequested)
             return;
         if (result.IsValid)
             version = result.Entity;
         else
+        {
             loadFailed = true;
+            error = result.ErrorMessage;
+        }
     }
 }

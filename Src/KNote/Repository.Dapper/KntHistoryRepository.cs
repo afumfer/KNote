@@ -131,6 +131,77 @@ public class KntHistoryRepository : KntRepositoryDapperBase, IKntHistoryReposito
         }
     }
 
+    public async Task<Result<KLogPageDto>> GetChangesAsync(DateTime from, DateTime toExclusive, IReadOnlyCollection<string> entityNames,
+        string actionType, string userName, string origin, int skip, int take)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var (where, parameters) = ChangesWhere(from, toExclusive, entityNames, actionType, userName, origin);
+            var total = await db.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM KLogs WHERE {where}", parameters);
+
+            var sql = $"SELECT {LightColumns} FROM KLogs WHERE {where} ORDER BY LastDateTime DESC, RegistryDateTime DESC, KLogId";
+            sql += db.GetType().Name == "SqliteConnection" ? " LIMIT @take OFFSET @skip" : " OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
+            parameters.Add("skip", Math.Max(skip, 0));
+            parameters.Add("take", Math.Max(take, 1));
+            var rows = await db.QueryAsync<KLogDto>(sql, parameters);
+            await CloseIsTempConnection(db);
+            return new Result<KLogPageDto> { Entity = new KLogPageDto { Rows = rows.ToList(), Total = total } };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<string>>> GetChangeUserNamesAsync(DateTime from, DateTime toExclusive, IReadOnlyCollection<string> entityNames)
+    {
+        try
+        {
+            var db = GetOpenConnection();
+            var (where, parameters) = ChangesWhere(from, toExclusive, entityNames, null, null, null);
+            var names = await db.QueryAsync<string>(
+                $"SELECT DISTINCT UserName FROM KLogs WHERE {where} AND UserName IS NOT NULL AND UserName <> '' ORDER BY UserName", parameters);
+            await CloseIsTempConnection(db);
+            return new Result<List<string>> { Entity = names.ToList() };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    // The conditions of «Repository changes»: the period by LastDateTime (its index) and the optional filters.
+    private static (string Where, DynamicParameters Parameters) ChangesWhere(DateTime from, DateTime toExclusive,
+        IReadOnlyCollection<string> entityNames, string actionType, string userName, string origin)
+    {
+        var parameters = new DynamicParameters();
+        var where = "LastDateTime >= @from AND LastDateTime < @toExclusive";
+        parameters.Add("from", from, System.Data.DbType.DateTime2);
+        parameters.Add("toExclusive", toExclusive, System.Data.DbType.DateTime2);
+        if (entityNames?.Count > 0)
+        {
+            where += " AND EntityName IN @entityNames";
+            parameters.Add("entityNames", entityNames.ToList());
+        }
+        if (!string.IsNullOrEmpty(actionType))
+        {
+            where += " AND ActionType = @actionType";
+            parameters.Add("actionType", actionType);
+        }
+        if (!string.IsNullOrEmpty(userName))
+        {
+            where += " AND UserName = @userName";
+            parameters.Add("userName", userName);
+        }
+        if (!string.IsNullOrEmpty(origin))
+        {
+            where += " AND Origin = @origin";
+            parameters.Add("origin", origin);
+        }
+        return (where, parameters);
+    }
+
     public async Task<Result> ClearEntityContentAsync(string entityName, Guid entityId)
     {
         try

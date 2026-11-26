@@ -146,6 +146,42 @@ public class HistoryController : ControllerBase
         }
     }
 
+    // POST api/history/changes  (H28, «Repository changes»: the structure only for ProjectManager and up, checked by the command)
+    [HttpPost("changes")]
+    public async Task<IActionResult> GetRepositoryChanges(RepositoryChangesQueryDto query)
+    {
+        try
+        {
+            var resApi = await _service.History.GetRepositoryChangesAsync(query);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetRepositoryChanges at {dateTime}.", DateTime.Now);
+            var resApi = new Result<RepositoryChangesPageDto>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
+    // POST api/history/changes/users  (H28: the users of the period, for its filter)
+    [HttpPost("changes/users")]
+    public async Task<IActionResult> GetRepositoryChangesUsers(RepositoryChangesQueryDto query)
+    {
+        try
+        {
+            var resApi = await _service.History.GetRepositoryChangesUsersAsync(query);
+            return resApi.IsValid ? Ok(resApi) : BadRequest(resApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetRepositoryChangesUsers at {dateTime}.", DateTime.Now);
+            var resApi = new Result<List<string>>();
+            resApi.AddErrorMessage(ex.ToApiErrorMessage());
+            return BadRequest(resApi);
+        }
+    }
+
     // GET api/history/retention  (H25)
     [HttpGet("retention")]
     public async Task<IActionResult> GetRetention()

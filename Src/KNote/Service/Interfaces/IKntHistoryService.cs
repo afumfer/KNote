@@ -33,6 +33,12 @@ public interface IKntHistoryService
     /// <summary>«Remove permanently» (H27): empties the versions of a deleted note; it can no longer be recovered. Admin.</summary>
     Task<Result> RemoveDeletedNoteAsync(Guid noteId);
 
+    /// <summary>«Repository changes» (H28): a page of the changes of a period; the structure, for ProjectManager and up (H29). Guest.</summary>
+    Task<Result<RepositoryChangesPageDto>> GetRepositoryChangesAsync(RepositoryChangesQueryDto query);
+
+    /// <summary>The users in «Repository changes» in a period, for its filter. Guest.</summary>
+    Task<Result<List<string>>> GetRepositoryChangesUsersAsync(RepositoryChangesQueryDto query);
+
     /// <summary>The retention of the history and the day it started (H25). Guest.</summary>
     Task<Result<HistoryRetentionInfoDto>> GetRetentionAsync();
 

@@ -35,6 +35,16 @@ public interface IKntHistoryRepository : IDisposable
     /// </summary>
     Task<Result<List<KLogDto>>> GetDeletedAsync(string entityName);
 
+    /// <summary>
+    /// «Repository changes» (H28): a page of the rows whose last change (LastDateTime) is in [from, toExclusive), the newest first,
+    /// without the versions, of these entities (null or empty: all), an action, a user and an origin (null: any); and how many.
+    /// </summary>
+    Task<Result<KLogPageDto>> GetChangesAsync(DateTime from, DateTime toExclusive, IReadOnlyCollection<string> entityNames,
+        string actionType, string userName, string origin, int skip, int take);
+
+    /// <summary>The users of the rows of a period (of these entities; null or empty: all), in alphabetical order.</summary>
+    Task<Result<List<string>>> GetChangeUserNamesAsync(DateTime from, DateTime toExclusive, IReadOnlyCollection<string> entityNames);
+
     /// <summary>Empties every version of an entity.</summary>
     Task<Result> ClearEntityContentAsync(string entityName, Guid entityId);
 

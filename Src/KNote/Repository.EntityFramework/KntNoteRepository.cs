@@ -1469,6 +1469,29 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<Guid>>> GetExistingNoteIdsAsync(IReadOnlyCollection<Guid> noteIds)
+    {
+        try
+        {
+            var existing = new List<Guid>();
+            if (noteIds == null || noteIds.Count == 0)
+                return new Result<List<Guid>> { Entity = existing };
+
+            var ctx = GetOpenConnection();
+            foreach (var chunk in noteIds.Distinct().Chunk(500))
+            {
+                var ids = chunk.ToList();
+                existing.AddRange(await ctx.Notes.AsNoTracking().Where(n => ids.Contains(n.NoteId)).Select(n => n.NoteId).ToListAsync());
+            }
+            await CloseIsTempConnection(ctx);
+            return new Result<List<Guid>> { Entity = existing };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId)
     {
         try

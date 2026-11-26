@@ -10,6 +10,7 @@
 
 <RadzenMenuItem Text="Utils" Icon="handyman" class="knt-menu-separator">
     <RadzenMenuItem Text="Recover deleted notes ..." Icon="restore_from_trash" Click="RecoverDeletedNotesAsync" />
+    <RadzenMenuItem Text="Repository changes ..." Icon="manage_history" Click="RepositoryChangesAsync" />
 </RadzenMenuItem>
 
 @code {
@@ -22,6 +23,15 @@
         if (!await access.CheckAsync(AuthenticationState, EnumRoles.Staff, "Recovering deleted notes"))
             return;
         var recovered = await dialogService.OpenAsync<DeletedNotesDialog>("Recover deleted notes", new Dictionary<string, object?>(),
+            KntDialogs.Framed(KntDialogs.Large()));
+        if (recovered is true)
+            await Changed.InvokeAsync();
+    }
+
+    // «Repository changes» (H28): the notes for any user, the structure for ProjectManager and up (Server leaves it out).
+    private async Task RepositoryChangesAsync()
+    {
+        var recovered = await dialogService.OpenAsync<RepositoryChangesDialog>("Repository changes", new Dictionary<string, object?>(),
             KntDialogs.Framed(KntDialogs.Large()));
         if (recovered is true)
             await Changed.InvokeAsync();

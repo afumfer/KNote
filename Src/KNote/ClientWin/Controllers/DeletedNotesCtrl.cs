@@ -32,6 +32,9 @@ public class DeletedNotesCtrl : CtrlViewBase<IViewDeletedNotes>
 
     public List<DeletedNoteDto> Notes { get; private set; } = new();
 
+    /// <summary>The note to select when the window opens (from a deletion of «Repository changes»), if it is in the list.</summary>
+    public Guid? SelectedNoteId { get; set; }
+
     /// <summary>The last note recovered and what didn't come back of it.</summary>
     public NoteRecoverResultDto Recovered { get; private set; }
 

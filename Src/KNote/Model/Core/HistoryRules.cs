@@ -83,6 +83,41 @@ public static class HistoryRules
         return title[end..].Trim();
     }
 
+    /// <summary>
+    /// The column «What» of «Repository changes» (H28): a note by its title (#340 Topic), the structure with its kind before
+    /// («Folder: Home\Projects»), as it was called when it changed.
+    /// </summary>
+    public static string WhatText(KLogDto row) =>
+        row == null ? "" : row.EntityName == HistoryEntities.Note ? row.EntityTitle ?? ""
+        : $"{StructureChangeDescriber.Kind(row.EntityName)}: {row.EntityTitle}";
+
+    /// <summary>
+    /// The header of the list of «Repository changes»: how many, in which period and, if the period starts before it, since when
+    /// there is history (H13): a period before it shows nothing more.
+    /// </summary>
+    public static string ChangesSummary(int total, DateTime from, DateTime to, DateTime? since, IFormatProvider culture = null)
+    {
+        culture ??= System.Globalization.CultureInfo.CurrentCulture;
+        var count = total == 0 ? "No changes" : total == 1 ? "1 change" : $"{total} changes";
+        var text = $"{count} from {from.ToString("d", culture)} to {to.ToString("d", culture)}";
+        return since is DateTime start && from.Date < start.Date
+            ? $"{text} (the history starts on {start.ToString("d", culture)})"
+            : text;
+    }
+
+    /// <summary>The kinds of «What» in «Repository changes» (H28): the notes for everybody, the rest for ProjectManager and up (H29).</summary>
+    public static IReadOnlyList<(string EntityName, string Text)> ChangeKinds(bool structure)
+    {
+        var kinds = new List<(string, string)> { (HistoryEntities.Note, "Notes") };
+        if (structure)
+            kinds.AddRange(new[]
+            {
+                (HistoryEntities.Folder, "Folders"), (HistoryEntities.NoteType, "Note types"), (HistoryEntities.KAttribute, "Attributes"),
+                (HistoryEntities.TraceNoteType, "Relation types"), (HistoryEntities.User, "Users"), (HistoryEntities.SystemValue, "Settings")
+            });
+        return kinds;
+    }
+
     /// <summary>When the retention empties versions (H9): said under the warning of a shorter retention.</summary>
     public const string RetentionApplies = "The versions are emptied in each note the next time it is saved, and those of the deleted notes "
         + "when another note is deleted or the repository is opened. An emptied version can't be brought back.";
@@ -107,6 +142,25 @@ public static class HistoryRules
         if (after.MaxContentSizeMB < before.MaxContentSizeMB)
             lines.Add($"Largest note copied: {before.MaxContentSizeMB} → {after.MaxContentSizeMB} MB. Bigger notes will be noted without their copy.");
         return lines;
+    }
+
+    /// <summary>Why a version can't be shown, said by the Service and read by the apps (a reason for good: no «Retry»).</summary>
+    public const string VersionNotInHistory = "This change is not in the history of the note.";
+    public const string VersionCopyNotKept = "The copy of this version is no longer kept.";
+
+    /// <summary>Whether the error of a version is for good (it is not kept, it is not there), not a failure to read it.</summary>
+    public static bool IsPermanentVersionError(string message) =>
+        !string.IsNullOrEmpty(message) && (message.Contains(VersionCopyNotKept) || message.Contains(VersionNotInHistory));
+
+    /// <summary>
+    /// Whether «See this version» can show something for a row of a list of changes (H28): a row of a note; not its deletion without
+    /// its copy when the note doesn't exist (emptied by the trash or «Remove permanently», H27), nor the removal itself.
+    /// </summary>
+    public static bool CanSeeVersion(KLogDto row, bool noteExists)
+    {
+        if (row?.EntityName != HistoryEntities.Note || row.ActionType == nameof(EnumHistoryAction.Removed))
+            return false;
+        return !(row.ActionType == nameof(EnumHistoryAction.Deleted) && !row.HasPreviousContent && !noteExists);
     }
 
     /// <summary>Where the note as it was after a change of its history comes from (VersionAfter).</summary>

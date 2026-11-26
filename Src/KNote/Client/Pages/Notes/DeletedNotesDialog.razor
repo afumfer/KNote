@@ -79,8 +79,11 @@
 
 @code {
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+    // The note to select when the list is read the first time (opened from a deletion of «Repository changes»), if it is in it.
+    [Parameter] public Guid? SelectedNoteId { get; set; }
 
     private List<DeletedNoteDto>? notes;
+    private bool firstLoad = true;
     private IList<DeletedNoteDto> selected = new List<DeletedNoteDto>();
     private NoteRecoverResultDto? recovered;
     private bool anyRecovered;
@@ -120,6 +123,9 @@
         }
         notes = result.Value.Entity;
         selected = new List<DeletedNoteDto>();
+        if (firstLoad && SelectedNoteId is Guid noteId && notes?.FirstOrDefault(n => n.NoteId == noteId) is DeletedNoteDto wanted)
+            selected = new List<DeletedNoteDto> { wanted };
+        firstLoad = false;
     }
 
     private async Task SeeVersionAsync()

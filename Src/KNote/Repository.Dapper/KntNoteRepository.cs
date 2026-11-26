@@ -1803,6 +1803,27 @@ public class KntNoteRepository : KntRepositoryDapperBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<Guid>>> GetExistingNoteIdsAsync(IReadOnlyCollection<Guid> noteIds)
+    {
+        try
+        {
+            var existing = new List<Guid>();
+            if (noteIds == null || noteIds.Count == 0)
+                return new Result<List<Guid>> { Entity = existing };
+
+            var db = GetOpenConnection();
+            // 500 ids per query (SQL Server allows 2100 parameters).
+            foreach (var ids in noteIds.Distinct().Chunk(500))
+                existing.AddRange(await db.QueryAsync<Guid>("SELECT NoteId FROM Notes WHERE NoteId IN @ids", new { ids }));
+            await CloseIsTempConnection(db);
+            return new Result<List<Guid>> { Entity = existing };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId)
     {
         try

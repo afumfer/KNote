@@ -237,6 +237,8 @@ public static class NoteChangeDescriber
     {
         var parts = new List<string>();
 
+        if (d.RemovedPermanently == true)
+            parts.Add("Removed permanently from the deleted notes");
         if (d.Restored?.Recovered == true)
             parts.Add(d.Restored.VersionOf is DateTime deletedAt
                 ? $"Recovered from the deleted notes (deleted {HistoryRules.MomentText(deletedAt)})"

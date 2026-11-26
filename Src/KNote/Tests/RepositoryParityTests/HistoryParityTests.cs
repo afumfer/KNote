@@ -183,6 +183,55 @@ public class HistoryParityTests
             (await writer.History.GetLastAsync(HistoryEntities.Note, deletedToday.NoteId)).Entity.KLogId)).Entity);
     }
 
+    [TestMethod]
+    [DataRow("Dapper", "EntityFramework")]
+    [DataRow("EntityFramework", "Dapper")]
+    public async Task TheChangesOfAPeriod_ComeFilteredAndInPages(string writerOrm, string readerOrm)
+    {
+        using var db = new RepositoryTestDatabase();
+        using var writer = db.CreateRepository(writerOrm);
+        using var reader = db.CreateRepository(readerOrm);
+        var folderId = await AddFolderAsync(writer);
+
+        var note = NewNote(folderId, "Changes");
+        Assert.IsTrue((await writer.Notes.AddAsync(note)).IsValid);
+        var rows = new List<KLogDto>();
+        for (int i = 0; i < 4; i++)
+        {
+            var row = Row(note.NoteId, i == 0 ? EnumHistoryAction.Created : EnumHistoryAction.Updated, Start.AddHours(i));
+            row.UserName = i % 2 == 0 ? "armando" : "marta";
+            row.Origin = i == 3 ? EnumHistoryOrigin.Assistant.ToString() : EnumHistoryOrigin.Desktop.ToString();
+            rows.Add(row);
+            Assert.IsTrue((await writer.Notes.UpdateAsync(note, history: new KLogWriteDto { Row = row })).IsValid);
+        }
+        var folderRow = Row(folderId, EnumHistoryAction.Updated, Start.AddHours(2).AddMinutes(30));
+        folderRow.EntityName = HistoryEntities.Folder;
+        Assert.IsTrue((await writer.History.WriteAsync(new KLogWriteDto { Row = folderRow })).IsValid);
+        var yesterday = Row(note.NoteId, EnumHistoryAction.Updated, Start.AddDays(-1));
+        Assert.IsTrue((await writer.Notes.UpdateAsync(note, history: new KLogWriteDto { Row = yesterday })).IsValid);
+
+        var day = Start.Date;
+        var all = (await reader.History.GetChangesAsync(day, day.AddDays(1), null, null, null, null, 0, 10)).Entity;
+        Assert.AreEqual(5, all.Total, "the day's rows, not yesterday's");
+        CollectionAssert.AreEqual(new[] { rows[3].KLogId, folderRow.KLogId, rows[2].KLogId, rows[1].KLogId, rows[0].KLogId },
+            all.Rows.Select(r => r.KLogId).ToArray(), "the newest first");
+
+        var page = (await reader.History.GetChangesAsync(day, day.AddDays(1), null, null, null, null, 1, 2)).Entity;
+        CollectionAssert.AreEqual(new[] { folderRow.KLogId, rows[2].KLogId }, page.Rows.Select(r => r.KLogId).ToArray());
+        Assert.AreEqual(5, page.Total);
+
+        var notes = (await reader.History.GetChangesAsync(day, day.AddDays(1), new[] { HistoryEntities.Note }, null, null, null, 0, 10)).Entity;
+        Assert.AreEqual(4, notes.Total);
+        Assert.AreEqual(2, (await reader.History.GetChangesAsync(day, day.AddDays(1), null, null, "marta", null, 0, 10)).Entity.Total);
+        Assert.AreEqual(1, (await reader.History.GetChangesAsync(day, day.AddDays(1), null, "Created", null, null, 0, 10)).Entity.Total);
+        Assert.AreEqual(rows[3].KLogId, (await reader.History.GetChangesAsync(day, day.AddDays(1), null, null, null, "Assistant", 0, 10)).Entity.Rows.Single().KLogId);
+
+        CollectionAssert.AreEqual(new[] { "armando", "marta" },
+            (await reader.History.GetChangeUserNamesAsync(day, day.AddDays(1), null)).Entity);
+        CollectionAssert.AreEquivalent(new[] { note.NoteId },
+            (await reader.Notes.GetExistingNoteIdsAsync(new[] { note.NoteId, Guid.NewGuid() })).Entity);
+    }
+
     private static KLogDto Row(Guid noteId, EnumHistoryAction action, DateTime when) => new()
     {
         KLogId = Guid.NewGuid(),

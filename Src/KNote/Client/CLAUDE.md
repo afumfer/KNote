@@ -394,6 +394,10 @@ Patrones ya establecidos que hay que seguir:
   JustifyContent="JustifyContent.End" Gap="0.5rem">`, sin clases de margen. Para maquetar,
   `RadzenStack`/`RadzenRow`/`RadzenColumn`/`RadzenCard`; si hace falta una utilidad CSS, las de Radzen
   (`rz-p-*`, `rz-m-*`, `rz-mx-*`...), no las de Bootstrap.
+- **`Data` de un `RadzenDataGrid`: siempre una lista nueva cuando cambia** (`rows = ....ToList()`), nunca la misma vaciada y
+  rellenada (`Clear` + `AddRange`): el grid solo vuelve a leer `Data` si es otra instancia, y con la misma seguía mostrando las
+  filas de antes aunque la cabecera ya dijera otra cosa (los filtros de «Repository changes» y «Refresh»/«Show more» de la
+  pestaña «History» no cambiaban nada en pantalla).
 - **Listas**: `RadzenDataGrid` (normalmente `Density.Compact`, `AllowColumnResize`) dentro de
   `Shared/EntityList` (que pinta "cargando"/"sin registros" y, si la página no pudo leer la lista, el error con Retry:
   `LoadFailed`, `Retry`; sin él, una lectura fallida dejaba "cargando" para siempre; `Loading` y `NotRecordsFound`
@@ -624,7 +628,16 @@ Patrones ya establecidos que hay que seguir:
   `ClientWin`; nunca en el menú lateral): las opciones menores sobre las notas, con el rol comprobado al elegirlas (`KntAccess`). Por ahora
   «Recover deleted notes ...» (H24, Staff): `DeletedNotesDialog` (`Large`) con las notas borradas que aún se pueden recuperar, «See this version»
   (`NoteVersionDialog` con su fila `Deleted`), «Recover» (dice lo que no volvió y ofrece abrirla en su ventana) y, para Admin, «Remove
-  permanently» (H27); se cierra con `true` si recuperó alguna y la página vuelve a leer su lista (`Changed`).
+  permanently» (H27); se cierra con `true` si recuperó alguna y la página vuelve a leer su lista (`Changed`). Y «Repository changes ...»
+  (H28, cualquier usuario): `RepositoryChangesDialog` (`Large`) con los filtros arriba (periodo, «What» de `HistoryRules.ChangeKinds` según
+  `StructureIncluded`, acción, usuario y origen; cada cambio vuelve a leer la primera página con `KntLatestRequest`), la lista con «Show
+  more», «Open note» (en su ventana, `kntWindows`), «See this version» en cualquier línea de una nota salvo donde se sabe que no queda
+  copia (`HistoryRules.CanSeeVersion`, con el texto de ayuda «Its copy is no longer kept»; `NoteVersionDialog` enseña el motivo del `Server` y,
+  si es definitivo, sin «Retry») y «Recover deleted
+  notes ...», que abre `DeletedNotesDialog` con `SelectedNoteId` (la nota de la línea de borrado elegida, seleccionada si está en la lista);
+  sin «Recover» propio. También se cierra con `true` si recuperó alguna. Ocupa el alto de la ventana
+  (`KntDialogFrame Fill`): los filtros y los botones quedan a la vista y **solo la lista tiene scroll** (`knt-changes-layout`, el grid con
+  `height: 100%` en un hueco `flex: 1`), como en las páginas de notas.
 - **Retención del historial** (H25): la pestaña «History» del panel Admin (`Notes/HistoryRetentionSettings`, `KntSections.HistoryRetention`),
   con los límites de `HistoryRetentionDto` antes de guardar y, si se acorta algo, el aviso de `HistoryRules.RetentionReductions`.
 - **Notificaciones**: para errores de la API ya salen solas (ver arriba); para validaciones de la propia

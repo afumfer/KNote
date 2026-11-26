@@ -21,6 +21,8 @@ public class NoteChangeDetailsDto
     public HistoryDeletedDto Deleted { get; set; }
     /// <summary>A version restored (H23): the row ActionType Restored, with what it changed in the other members.</summary>
     public HistoryRestoredDto Restored { get; set; }
+    /// <summary>A deleted note removed for good (H27): the row ActionType Removed; its versions were emptied.</summary>
+    public bool? RemovedPermanently { get; set; }
 
     public HistoryValueChangeDto Topic { get; set; }
     public HistoryTextChangeDto Text { get; set; }

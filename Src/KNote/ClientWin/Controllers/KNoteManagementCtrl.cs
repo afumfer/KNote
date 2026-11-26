@@ -1433,6 +1433,33 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             await ForceRefreshListNotes();
     }
 
+    /// <summary>
+    /// «Repository changes» (the history, H28): the changes of the repository selected in the tree, in a modal window; if some note
+    /// was recovered from it, the notes list is read again.
+    /// </summary>
+    public async Task RepositoryChanges()
+    {
+        var serviceRef = SelectedServiceRef ?? Store.GetActiveOrDefaultServiceRef();
+        if (serviceRef == null)
+        {
+            View.ShowInfo("There is no repository selected.");
+            return;
+        }
+
+        var changesCtrl = new RepositoryChangesCtrl(Store, serviceRef.Service);
+        if (!changesCtrl.CheckAccess())
+            return;
+        if (!await changesCtrl.LoadAsync())
+        {
+            View.ShowInfo(changesCtrl.Error);
+            changesCtrl.Finalize();
+            return;
+        }
+        changesCtrl.RunModal();
+        if (changesCtrl.AnyRecovered)
+            await ForceRefreshListNotes();
+    }
+
     public async Task MoveSelectedNotes()
     {                
         var selectedNotes = NotesSelectorCtrl.GetSelectedListNotesMinimal().ToList();

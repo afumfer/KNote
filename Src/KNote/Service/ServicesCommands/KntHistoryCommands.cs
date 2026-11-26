@@ -54,8 +54,8 @@ public class KntHistoryGetNoteHistoryAsyncCommand : KntCommandServiceBase<(Guid 
 [KntAuthorize(EnumRoles.Guest)]
 public class KntHistoryGetNoteVersionAsyncCommand : KntCommandServiceBase<(Guid NoteId, Guid KLogId), Result<NoteVersionViewDto>>
 {
-    public const string NotInHistory = "This change is not in the history of the note.";
-    public const string CopyNotKept = "The copy of this version is no longer kept.";
+    public const string NotInHistory = HistoryRules.VersionNotInHistory;
+    public const string CopyNotKept = HistoryRules.VersionCopyNotKept;
 
     public KntHistoryGetNoteVersionAsyncCommand(IKntService service, Guid noteId, Guid klogId) : base(service, (noteId, klogId))
     {
@@ -497,6 +497,36 @@ public class KntHistoryRemoveDeletedNoteAsyncCommand : KntCommandServiceBase<Gui
         if (!cleared.IsValid)
             return cleared;
         Service.Logger?.LogInformation("History: the versions of the deleted note {title} were removed by {user}.", last.EntityTitle, Service.UserIdentityName);
+
+        // A row of its own (Removed), so that the history says who removed it and when: «History», «Repository changes». Just after
+        // (the versions are already gone), and never failing it: an error goes to the log (H10, as the structure).
+        try
+        {
+            var now = HistoryRules.Timestamp(DateTime.Now);
+            var details = new NoteChangeDetailsDto { RemovedPermanently = true };
+            await Repository.History.WriteAsync(new KLogWriteDto
+            {
+                Row = new KLogDto
+                {
+                    KLogId = Guid.NewGuid(),
+                    EntityName = HistoryEntities.Note,
+                    EntityId = Param,
+                    RegistryDateTime = now,
+                    LastDateTime = now,
+                    ActionType = nameof(EnumHistoryAction.Removed),
+                    UserName = HistoryRules.Truncate(Service.UserIdentityName, KLogDto.MaxUserNameLength),
+                    Origin = KntHistoryOrigin.Current(Service).ToString(),
+                    Fields = EnumHistoryFields.None,
+                    ChangeDetails = details.ToJson(),
+                    RegistryMessage = NoteChangeDescriber.Render(details),
+                    EntityTitle = last.EntityTitle
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Service.Logger?.LogError(ex, "Removing the deleted note {title} permanently could not be noted in the history.", last.EntityTitle);
+        }
         return result;
     }
 }
@@ -571,6 +601,110 @@ public class KntHistorySaveRetentionAsyncCommand : KntCommandServiceBase<History
             StructureChangeDescriber.HistoryRetention(before, retention));
         result.Entity = retention;
         return result;
+    }
+}
+
+/// <summary>
+/// «Repository changes» (H28, H29): a page of the rows of the repository whose last change is in the period (whole days), the
+/// newest first, with the filters asked for. The changes of the notes, for any user; those of the structure, for ProjectManager
+/// and up (checked here with the user's role, also in the Server, which doesn't enforce the commands' roles). It says which notes
+/// of the page exist («Open note»); a deleted one is recovered from «Recover deleted notes» (H28).
+/// </summary>
+[KntAuthorize(EnumRoles.Guest)]
+public class KntHistoryGetRepositoryChangesAsyncCommand : KntCommandServiceBase<RepositoryChangesQueryDto, Result<RepositoryChangesPageDto>>
+{
+    public KntHistoryGetRepositoryChangesAsyncCommand(IKntService service, RepositoryChangesQueryDto query) : base(service, query)
+    {
+
+    }
+
+    public override async Task<Result<RepositoryChangesPageDto>> Execute()
+    {
+        var result = new Result<RepositoryChangesPageDto>();
+        var query = Param ?? new RepositoryChangesQueryDto();
+        var structure = await KntHistoryChanges.SeesStructureAsync(Service);
+        var page = new RepositoryChangesPageDto { StructureIncluded = structure, Skip = Math.Max(0, query.Skip) };
+
+        var entities = KntHistoryChanges.Entities(query.EntityName, structure);
+        if (entities == null)
+        {
+            result.Entity = page;
+            return result;
+        }
+
+        var (from, toExclusive) = KntHistoryChanges.Period(query);
+        var take = query.Take <= 0 ? NoteHistoryPageDto.PageSize : Math.Min(query.Take, NoteHistoryPageDto.PageSize);
+        var rows = await Repository.History.GetChangesAsync(from, toExclusive, entities, Clean(query.ActionType), Clean(query.UserName),
+            Clean(query.Origin), page.Skip, take);
+        if (!rows.IsValid)
+        {
+            result.AddListErrorMessage(rows.ListErrorMessage);
+            return result;
+        }
+        page.Rows = rows.Entity.Rows;
+        page.Total = rows.Entity.Total;
+
+        var noteIds = page.Rows.Where(r => r.EntityName == HistoryEntities.Note).Select(r => r.EntityId).Distinct().ToList();
+        page.ExistingNotes = (await Repository.Notes.GetExistingNoteIdsAsync(noteIds)).Entity ?? new();
+
+        result.Entity = page;
+        return result;
+    }
+
+    private static string Clean(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+}
+
+/// <summary>The users that appear in «Repository changes» in a period (in the rows the user can see, H29), for its filter.</summary>
+[KntAuthorize(EnumRoles.Guest)]
+public class KntHistoryGetRepositoryChangesUsersAsyncCommand : KntCommandServiceBase<RepositoryChangesQueryDto, Result<List<string>>>
+{
+    public KntHistoryGetRepositoryChangesUsersAsyncCommand(IKntService service, RepositoryChangesQueryDto query) : base(service, query)
+    {
+
+    }
+
+    public override async Task<Result<List<string>>> Execute()
+    {
+        var query = Param ?? new RepositoryChangesQueryDto();
+        var entities = KntHistoryChanges.Entities(null, await KntHistoryChanges.SeesStructureAsync(Service));
+        var (from, toExclusive) = KntHistoryChanges.Period(query);
+        return await Repository.History.GetChangeUserNamesAsync(from, toExclusive, entities);
+    }
+}
+
+/// <summary>What the commands of «Repository changes» share: who sees the structure and which entities are asked for.</summary>
+internal static class KntHistoryChanges
+{
+    /// <summary>The entities of the structure of the repository (all but the notes).</summary>
+    public static readonly string[] StructureEntities =
+    {
+        HistoryEntities.Folder, HistoryEntities.NoteType, HistoryEntities.KAttribute, HistoryEntities.TraceNoteType,
+        HistoryEntities.User, HistoryEntities.SystemValue
+    };
+
+    /// <summary>ProjectManager and up see the changes of the structure (H29); without a user (KNote itself), too.</summary>
+    public static async Task<bool> SeesStructureAsync(IKntService service) =>
+        string.IsNullOrWhiteSpace(service.UserIdentityName) || await service.GetCurrentUserRoleAsync() >= EnumRoles.ProjectManager;
+
+    /// <summary>The entities to ask for: one (if the user can see it), or all the user can see (null for all); null array: none.</summary>
+    public static IReadOnlyCollection<string> Entities(string entityName, bool structure)
+    {
+        if (!string.IsNullOrWhiteSpace(entityName))
+        {
+            var name = entityName.Trim();
+            if (name == HistoryEntities.Note)
+                return new[] { name };
+            return structure && StructureEntities.Contains(name) ? new[] { name } : null;
+        }
+        return structure ? Array.Empty<string>() : new[] { HistoryEntities.Note };
+    }
+
+    /// <summary>The period of the query by whole days: [From, To + 1 day).</summary>
+    public static (DateTime From, DateTime ToExclusive) Period(RepositoryChangesQueryDto query)
+    {
+        var from = query.From.Date;
+        var to = query.To.Date < from ? from : query.To.Date;
+        return (from, to.AddDays(1));
     }
 }
 

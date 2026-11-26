@@ -134,6 +134,66 @@ public class KntHistoryRepository : KntRepositoryEFBase, IKntHistoryRepository
         }
     }
 
+    public async Task<Result<KLogPageDto>> GetChangesAsync(DateTime from, DateTime toExclusive, IReadOnlyCollection<string> entityNames,
+        string actionType, string userName, string origin, int skip, int take)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var query = ChangesQuery(ctx, from, toExclusive, entityNames, actionType, userName, origin);
+            var total = await query.CountAsync();
+            var rows = await query
+                .OrderByDescending(l => l.LastDateTime).ThenByDescending(l => l.RegistryDateTime).ThenBy(l => l.KLogId)
+                .Skip(Math.Max(skip, 0)).Take(Math.Max(take, 1))
+                .ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<KLogPageDto> { Entity = new KLogPageDto { Rows = rows.Select(ToDto).ToList(), Total = total } };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    public async Task<Result<List<string>>> GetChangeUserNamesAsync(DateTime from, DateTime toExclusive, IReadOnlyCollection<string> entityNames)
+    {
+        try
+        {
+            var ctx = GetOpenConnection();
+            var names = await ChangesQuery(ctx, from, toExclusive, entityNames, null, null, null)
+                .Where(l => l.UserName != null && l.UserName != "")
+                .Select(l => l.UserName)
+                .Distinct()
+                .OrderBy(n => n)
+                .ToListAsync();
+            await CloseIsTempConnection(ctx);
+            return new Result<List<string>> { Entity = names };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
+    // The conditions of «Repository changes»: the period by LastDateTime (its index) and the optional filters.
+    private static IQueryable<KLog> ChangesQuery(KntDbContext ctx, DateTime from, DateTime toExclusive, IReadOnlyCollection<string> entityNames,
+        string actionType, string userName, string origin)
+    {
+        var query = ctx.KLogs.AsNoTracking().Where(l => l.LastDateTime >= from && l.LastDateTime < toExclusive);
+        if (entityNames?.Count > 0)
+        {
+            var names = entityNames.ToList();
+            query = query.Where(l => names.Contains(l.EntityName));
+        }
+        if (!string.IsNullOrEmpty(actionType))
+            query = query.Where(l => l.ActionType == actionType);
+        if (!string.IsNullOrEmpty(userName))
+            query = query.Where(l => l.UserName == userName);
+        if (!string.IsNullOrEmpty(origin))
+            query = query.Where(l => l.Origin == origin);
+        return query;
+    }
+
     public async Task<Result> ClearEntityContentAsync(string entityName, Guid entityId)
     {
         try

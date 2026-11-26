@@ -13,6 +13,8 @@ public interface IHistoryWebApiService
     Task<Result<List<DeletedNoteDto>>> GetDeletedNotesAsync(CancellationToken cancellationToken = default);
     Task<Result<NoteRecoverResultDto>> RecoverNoteAsync(Guid noteId);
     Task<Result> RemoveDeletedNoteAsync(Guid noteId);
+    Task<Result<RepositoryChangesPageDto>> GetRepositoryChangesAsync(RepositoryChangesQueryDto query, CancellationToken cancellationToken = default);
+    Task<Result<List<string>>> GetRepositoryChangesUsersAsync(RepositoryChangesQueryDto query, CancellationToken cancellationToken = default);
     Task<Result<HistoryRetentionInfoDto>> GetRetentionAsync(CancellationToken cancellationToken = default);
     Task<Result<HistoryRetentionDto>> SaveRetentionAsync(HistoryRetentionDto retention);
 }

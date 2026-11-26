@@ -265,6 +265,42 @@ public class HistoryRulesTests
     }
 
     [TestMethod]
+    public void TheSummaryOfTheChanges_SaysWhenTheHistoryStarts()
+    {
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+        var since = new DateTime(2026, 11, 25, 9, 30, 0);
+
+        Assert.AreEqual("37 changes from 25/11/2026 to 26/11/2026",
+            HistoryRules.ChangesSummary(37, new DateTime(2026, 11, 25), new DateTime(2026, 11, 26), since, culture));
+        Assert.AreEqual("1 change from 1/11/2026 to 26/11/2026 (the history starts on 25/11/2026)",
+            HistoryRules.ChangesSummary(1, new DateTime(2026, 11, 1), new DateTime(2026, 11, 26), since, culture),
+            "a period before the history shows nothing more: it says why");
+        Assert.AreEqual("No changes from 20/11/2026 to 26/11/2026",
+            HistoryRules.ChangesSummary(0, new DateTime(2026, 11, 20), new DateTime(2026, 11, 26), null, culture));
+    }
+
+    [TestMethod]
+    public void AVersion_CanBeSeenUnlessItsCopyIsGoneForGood()
+    {
+        KLogDto NoteRow(string action, bool copy) => new()
+        {
+            KLogId = Guid.NewGuid(), EntityName = HistoryEntities.Note, ActionType = action, PreviousContentSize = copy ? 10 : null
+        };
+
+        Assert.IsTrue(HistoryRules.CanSeeVersion(NoteRow("Updated", copy: false), noteExists: false), "a later row may keep it");
+        Assert.IsTrue(HistoryRules.CanSeeVersion(NoteRow("Deleted", copy: true), noteExists: false), "as it was deleted");
+        Assert.IsTrue(HistoryRules.CanSeeVersion(NoteRow("Deleted", copy: false), noteExists: true), "recovered since: the note now");
+        Assert.IsFalse(HistoryRules.CanSeeVersion(NoteRow("Deleted", copy: false), noteExists: false), "emptied by the trash or removed");
+        Assert.IsFalse(HistoryRules.CanSeeVersion(NoteRow("Removed", copy: false), noteExists: false));
+        Assert.IsFalse(HistoryRules.CanSeeVersion(new KLogDto { EntityName = HistoryEntities.Folder, ActionType = "Updated" }, false));
+
+        Assert.IsTrue(HistoryRules.IsPermanentVersionError(HistoryRules.VersionCopyNotKept));
+        Assert.IsTrue(HistoryRules.IsPermanentVersionError("Error.\n" + HistoryRules.VersionNotInHistory));
+        Assert.IsFalse(HistoryRules.IsPermanentVersionError("Error. The web server could not be reached."), "this one, «Retry»");
+        Assert.AreEqual("Removed permanently from the deleted notes", NoteChangeDescriber.Render(new NoteChangeDetailsDto { RemovedPermanently = true }));
+    }
+
+    [TestMethod]
     public void ARecovery_SaysWhenTheNoteWasDeleted()
     {
         var details = new NoteChangeDetailsDto { Restored = new HistoryRestoredDto { Recovered = true, VersionOf = new DateTime(2026, 11, 20, 9, 0, 0) } };

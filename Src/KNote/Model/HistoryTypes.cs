@@ -24,7 +24,9 @@ public enum EnumHistoryAction
     Created,
     Updated,
     Deleted,
-    Restored
+    Restored,
+    /// <summary>A deleted note removed for good from the deleted notes (H27): its versions were emptied.</summary>
+    Removed
 }
 
 /// <summary>The parts of an entity a change touched (KLogs.Fields).</summary>

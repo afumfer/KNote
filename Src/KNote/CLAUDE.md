@@ -307,12 +307,26 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   que la vuelve a crear **por el guardado de siempre** dentro de `KntHistory.Restoring` con `Recovered`: el mismo id (su historial sigue), su
   número si está libre (`HistoryRules.NoteNumberOf` del título; si no, otro y lo dice), su carpeta o Home, su tipo y los atributos que existan,
   creada cuando dice su fila `Created` (H26) y una fila `Restored` («Recovered from the deleted notes», sin copia); sus partes no vuelven (H8, lo
-  dice). `RemoveDeletedNoteAsync` (Admin, H27) vacía sus copias como la purga. La retención (H25): `GetRetentionAsync` (Guest, con
+  dice). `RemoveDeletedNoteAsync` (Admin, H27) vacía sus copias como la purga y lo anota justo después, sin hacerlo fallar, en una fila
+  `Removed` («Removed permanently from the deleted notes», `NoteChangeDetailsDto.RemovedPermanently`). Una versión que ya no existe da
+  `HistoryRules.VersionCopyNotKept` (o `VersionNotInHistory`): las apps lo enseñan sin «Retry» (`IsPermanentVersionError`) y no ofrecen «See
+  this version» donde se sabe que no hay nada (`HistoryRules.CanSeeVersion`). La retención (H25): `GetRetentionAsync` (Guest, con
   `HISTORY_START`) y `SaveRetentionAsync` (Admin, validada, anotada como ajuste con sus valores, `StructureChangeDescriber.HistoryRetention`);
   antes de guardar, las apps avisan con `HistoryRules.RetentionReductions` y `RetentionApplies`. Web: menú «Utils» de las páginas de notas
   (`NotesUtilsMenu`, `DeletedNotesDialog`) y la pestaña «History» del panel Admin (`HistoryRetentionSettings`); `ClientWin`: *Edit* › «Recover
   deleted notes ...» (`DeletedNotesCtrl`/`DeletedNotesForm`) y la pestaña «History» del editor del repositorio. Tests en
   `ServiceTests/NoteHistoryRecoverServiceTests`, `HistoryRulesTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/DeletedNotesCtrlTests`.
+  **Cambios del repositorio** (H.5a, CU-45): `GetRepositoryChangesAsync` (Guest; `RepositoryChangesQueryDto` → `RepositoryChangesPageDto`):
+  las filas cuyo último cambio está en el periodo (días enteros, por defecto los últimos 7), la más nueva primero, 100 cada vez, filtradas por
+  entidad, acción, usuario y origen (`IKntHistoryRepository.GetChangesAsync`, por el índice de `LastDateTime`; paridad en `HistoryParityTests`).
+  **La estructura solo para ProjectManager o superior** (H29): lo comprueba el comando con `GetCurrentUserRoleAsync` (también en el `Server`,
+  que no aplica los roles de los comandos); para los demás, solo las notas, y `StructureIncluded = false`. La página dice qué notas existen
+  (`IKntNoteRepository.GetExistingNoteIdsAsync`, «Open note»); una borrada **no se recupera aquí**: «Recover deleted notes ...» abre esa ventana
+  con la nota de la línea de borrado elegida ya seleccionada. `GetRepositoryChangesUsersAsync`
+  da los usuarios del periodo. `HistoryRules.WhatText` y `ChangeKinds` son la columna «What» y el filtro de las dos apps. Web: «Utils» ›
+  «Repository changes ...» (`RepositoryChangesDialog`); `ClientWin`: *Edit* › «Repository changes ...» (`RepositoryChangesCtrl`/`RepositoryChangesForm`).
+  Tests en `ServiceTests/RepositoryChangesServiceTests`, `HistoryParityTests`, `InProcessIntegrationTests/HistoryInProcessTests` y
+  `ClientWin.Tests/RepositoryChangesCtrlTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

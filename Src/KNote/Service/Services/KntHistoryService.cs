@@ -37,6 +37,12 @@ public class KntHistoryService : KntServiceBase, IKntHistoryService
     public async Task<Result> RemoveDeletedNoteAsync(Guid noteId) =>
         await ExecuteCommand(new KntHistoryRemoveDeletedNoteAsyncCommand(Service, noteId));
 
+    public async Task<Result<RepositoryChangesPageDto>> GetRepositoryChangesAsync(RepositoryChangesQueryDto query) =>
+        await ExecuteCommand(new KntHistoryGetRepositoryChangesAsyncCommand(Service, query));
+
+    public async Task<Result<List<string>>> GetRepositoryChangesUsersAsync(RepositoryChangesQueryDto query) =>
+        await ExecuteCommand(new KntHistoryGetRepositoryChangesUsersAsyncCommand(Service, query));
+
     public async Task<Result<HistoryRetentionInfoDto>> GetRetentionAsync() =>
         await ExecuteCommand(new KntHistoryGetRetentionAsyncCommand(Service));
 

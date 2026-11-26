@@ -797,6 +797,15 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   `DeletedNotesForm`, en código: la lista, «See this version» (`NoteVersionCtrl` con la fila `Deleted`), «Recover» (dice lo que no volvió y
   ofrece abrir la nota) y, para un Admin del repositorio, «Remove permanently». Al cerrar, si recuperó alguna, la ventana principal vuelve a
   leer su lista. Tests en `DeletedNotesCtrlTests`.
+- **Cambios del repositorio** (H28): *Edit* › «Repository changes ...», debajo de la anterior, abre `RepositoryChangesCtrl` (`[KntAuthorize(Guest)]`
+  en el repositorio seleccionado, modal) con `RepositoryChangesForm`, en código: los filtros arriba (cada cambio vuelve a leer la lista; gana
+  la última petición), la lista con «Show more» y, al pie (`FooterButtons`), «Open note» (también doble clic), «See this version» (cualquier
+  línea de una nota salvo donde se sabe que no queda copia, `HistoryRules.CanSeeVersion`) y «Recover deleted notes ...», que abre `DeletedNotesCtrl` con `SelectedNoteId` (`RepositoryChangesCtrl.DeletedNoteOf`:
+  la nota de la línea de borrado elegida; `DeletedNotesForm` la selecciona al abrir si está). Sin «Recover» propio. La estructura solo sale para ProjectManager o superior: la deja fuera el
+  `Service`. Tests en `RepositoryChangesCtrlTests`.
+- **Botones al pie de las ventanas hechas en código** (`Views/FooterButtons`): 75 × 29 como los del Designer, escalados con el formulario,
+  y más anchos (`FitTexts` en `OnLoad`) solo si su texto no cabe. **No `AutoSize`**: se medía a la escala de Windows y el formulario lo volvía a
+  escalar (al 200 %, 96 de alto en lugar de 62).
 - **Retención del historial** (H25): la pestaña «History» de *Edit repository properties* (`RepositoryEditorForm.CreateHistoryTab`, en
   código; solo en modo `Management`, que pide Admin). `RepositoryEditorCtrl` la lee con las demás pestañas de administración y la guarda con
   «Accept», tras sus validaciones y, si se acorta algo, el aviso de `HistoryRules.RetentionReductions` (Sí/No).

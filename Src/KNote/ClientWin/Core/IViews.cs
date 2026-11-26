@@ -170,6 +170,10 @@ public interface IViewDeletedNotes : IViewBase
 {
 }
 
+public interface IViewRepositoryChanges : IViewBase
+{
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();

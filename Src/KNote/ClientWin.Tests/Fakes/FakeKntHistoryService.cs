@@ -28,6 +28,15 @@ internal class FakeKntHistoryService : IKntHistoryService
     public Func<Task<Result<List<DeletedNoteDto>>>>? GetDeletedNotesAsyncImpl { get; set; }
     public Func<Guid, Task<Result<NoteRecoverResultDto>>>? RecoverNoteAsyncImpl { get; set; }
     public Func<Guid, Task<Result>>? RemoveDeletedNoteAsyncImpl { get; set; }
+    public Func<RepositoryChangesQueryDto, Task<Result<RepositoryChangesPageDto>>>? GetRepositoryChangesAsyncImpl { get; set; }
+    public Func<RepositoryChangesQueryDto, Task<Result<List<string>>>>? GetRepositoryChangesUsersAsyncImpl { get; set; }
+
+    public Task<Result<RepositoryChangesPageDto>> GetRepositoryChangesAsync(RepositoryChangesQueryDto query) =>
+        (GetRepositoryChangesAsyncImpl ?? throw new NotSupportedException($"{nameof(GetRepositoryChangesAsync)} not configured for this test"))(query);
+
+    public Task<Result<List<string>>> GetRepositoryChangesUsersAsync(RepositoryChangesQueryDto query) =>
+        (GetRepositoryChangesUsersAsyncImpl ?? throw new NotSupportedException($"{nameof(GetRepositoryChangesUsersAsync)} not configured for this test"))(query);
+
     public Func<Task<Result<HistoryRetentionInfoDto>>>? GetRetentionAsyncImpl { get; set; }
     public Func<HistoryRetentionDto, Task<Result<HistoryRetentionDto>>>? SaveRetentionAsyncImpl { get; set; }
 
