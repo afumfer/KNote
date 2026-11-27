@@ -243,6 +243,17 @@
                 </ChildContent>
             </RadzenTabsItem>
 
+            @* The history of the note (H.3): read when the tab is shown (only the chosen tab is drawn). *@
+            <RadzenTabsItem Icon="history">
+                <Template Context="tab">
+                    <span class="knt-tab-text">History</span>
+                </Template>
+                <ChildContent>
+                    <NoteHistory NoteId="Note.NoteId" NoteIsNew="Note.IsNew()" NoteTitle="@($"#{Note.NoteNumber} · {Note.Topic}")"
+                                 RestoreVersion="RestoreVersion" NoteIsDirty="Note.IsDirty()" />
+                </ChildContent>
+            </RadzenTabsItem>
+
         </Tabs>
     </RadzenTabs>
 
@@ -258,6 +269,8 @@
     [Parameter] public EventCallback OnExit { get; set; }
     // Being saved (NoteEdit): the buttons wait for it.
     [Parameter] public bool Saving { get; set; }
+    // «Restore» of the History tab (H23, NoteEdit): it saves the changes first, restores and reads the note again.
+    [Parameter] public Func<KLogDto, Task<bool>>? RestoreVersion { get; set; }
 
     // The button that saved: the one that shows it is busy.
     private bool savingAndNew;
@@ -302,6 +315,7 @@
 
     // The note whose path, resources and tasks are loaded (another one after "Save and new").
     private Guid? loadedNoteId;
+    private NoteDto? loadedNote;
     private string folderPath = "";
 
     private int tabsSelectedIndex { get; set; } = 0;
@@ -330,6 +344,17 @@
     // tasks and trace notes (the tabs show how many there are).
     protected override async Task OnParametersSetAsync()
     {
+        // The same note read again (saved, or a version restored, H23): its folder may be another one.
+        if (Note.NoteId == loadedNoteId && !ReferenceEquals(Note, loadedNote))
+        {
+            var restored = loadedNote != null && loadedNote.FolderId != Note.FolderId;
+            loadedNote = Note;
+            oldNoteType = Note.NoteTypeId;
+            if (restored)
+                await LoadFolderPathAsync();
+            return;
+        }
+        loadedNote = Note;
         if (Note.NoteId == loadedNoteId)
             return;
 

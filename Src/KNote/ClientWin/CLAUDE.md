@@ -779,6 +779,39 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   veces, dos búsquedas a la vez). El árbol de carpetas sigue con el cursor de espera. `Core/WaitCursor` cuenta los vivos: el
   árbol (`FoldersSelectorForm.RefreshView`, `async void`) acababa después del de `OnInitialized` y, al restaurar «el valor anterior»,
   dejaba el cursor de espera para siempre.
+- **Historia de la nota** (H.3): la última pestaña de `NoteEditorForm`, «History», creada en código (`CreateHistoryTab`, con el icono
+  `KntIcon.History`, el suyo: no el de «Undo»): los cambios, el más nuevo primero, 100 cada vez con «Show more» (`NoteEditorCtrl.GetHistoryAsync`), leída al mostrar la
+  pestaña y tras guardar con ella abierta (gana la última petición). «See this version» (doble clic, Enter) abre `NoteVersionCtrl`
+  (incluido, sin `[KntAuthorize]`) con `NoteVersionForm`, también creada en código: la versión de solo lectura, con el aviso si incluye
+  cambios posteriores y la descripción en un `KntEditView` con las reglas de la nota (saneada, sin scripts salvo los de sus diagramas),
+  que arranca en `OnShown`. Tests en `NoteVersionCtrlTests`. «Compare» (H22) abre `NoteCompareCtrl` (incluido) con `NoteCompareForm`, en
+  código: la casilla «Compare with the current note» y la comparación del `Service` como HTML (`NoteCompareCtrl.Html`: **todo texto escapado**,
+  sin scripts) en un `KntEditView`. «Restore» (H23; también en `NoteVersionForm`, si el editor se lo da) solo en la ventana propia del editor
+  (`NoteEditorCtrl.CanRestoreVersions`: `EditMode` y no consulta) y en las filas de `NoteHistoryPageDto.Restorable`:
+  `NoteEditorCtrl.RestoreVersionAsync` pregunta, guarda antes los cambios con `SaveModel` (si no puede, no restaura), restaura, vuelve a
+  cargar la nota (`LoadModelById` + `OnSavedEntity`, que avisa a las listas) y muestra los avisos. Tests en `NoteCompareCtrlTests`.
+  `ModelToControls` olvida la carpeta elegida a mano en el editor (`_changedFolder`): era de la nota mostrada antes y, tras restaurar
+  una versión de otra carpeta, guardar volvía a dejar la nota en la elegida.
+- **Notas borradas** (H24, H27): *Edit* › «Recover deleted notes ...» (debajo de «Delete note», creado en código en `KNoteManagementForm`;
+  el nombre no se lee como «Delete note») abre `DeletedNotesCtrl` (`[KntAuthorize(Staff)]` en el repositorio seleccionado, modal) con
+  `DeletedNotesForm`, en código: la lista, «See this version» (`NoteVersionCtrl` con la fila `Deleted`), «Recover» (dice lo que no volvió y
+  ofrece abrir la nota) y, para un Admin del repositorio, «Remove permanently». Al cerrar, si recuperó alguna, la ventana principal vuelve a
+  leer su lista. Tests en `DeletedNotesCtrlTests`.
+- **Cambios del repositorio** (H28): *Edit* › «Repository changes ...», debajo de la anterior, abre `RepositoryChangesCtrl` (`[KntAuthorize(Guest)]`
+  en el repositorio seleccionado, modal) con `RepositoryChangesForm`, en código: los filtros arriba (cada cambio vuelve a leer la lista; gana
+  la última petición), la lista con «Show more» y, al pie (`FooterButtons`), «Open note» (también doble clic), «See this version» (cualquier
+  línea de una nota salvo donde se sabe que no queda copia, `HistoryRules.CanSeeVersion`) y «Recover deleted notes ...», que abre `DeletedNotesCtrl` con `SelectedNoteId` (`RepositoryChangesCtrl.DeletedNoteOf`:
+  la nota de la línea de borrado elegida; `DeletedNotesForm` la selecciona al abrir si está). Sin «Recover» propio. «Recover deleted notes ...» solo para Staff+
+  (`RepositoryChangesCtrl.CanRecover`). **El estado de cada línea** (H31, también en la pestaña «History» del editor): la columna «State»
+  (`StateText`), el color de la fila (`Utils/HistoryRowColors`, con su versión oscura) y la leyenda debajo (`Views/HistoryStatesLegend`, solo
+  los estados que aparecen); los estados los da el `Service`. La estructura solo sale para ProjectManager o superior: la deja fuera el
+  `Service`. Tests en `RepositoryChangesCtrlTests`.
+- **Botones al pie de las ventanas hechas en código** (`Views/FooterButtons`): 75 × 29 como los del Designer, escalados con el formulario,
+  y más anchos (`FitTexts` en `OnLoad`) solo si su texto no cabe. **No `AutoSize`**: se medía a la escala de Windows y el formulario lo volvía a
+  escalar (al 200 %, 96 de alto en lugar de 62).
+- **Retención del historial** (H25): la pestaña «History» de *Edit repository properties* (`RepositoryEditorForm.CreateHistoryTab`, en
+  código; solo en modo `Management`, que pide Admin). `RepositoryEditorCtrl` la lee con las demás pestañas de administración y la guarda con
+  «Accept», tras sus validaciones y, si se acorta algo, el aviso de `HistoryRules.RetentionReductions` (Sí/No).
 - **Notas parecidas**: tercera lista «Similar notes» en la pestaña «Trace notes» de `NoteEditorForm`, debajo de las
   relaciones (creada en código, envuelve el `SplitContainer` del Designer), plegada si no hay índice utilizable o la nota
   es nueva; se calcula al abrir la pestaña y al cambiar de nota o de relaciones con ella abierta.

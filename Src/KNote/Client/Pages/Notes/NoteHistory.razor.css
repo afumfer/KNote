@@ -1,0 +1,13 @@
+/* The «History» tab of the note editor: the line of each change goes on as many lines as it needs (the span is drawn by
+   this component's template, so it carries its scope). */
+
+.knt-history-change {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* The same for the columns of the tab (When, Who, From, State: 580px): «Change» keeps at least 320px; the list scrolls sideways
+   in a narrow window instead of squeezing it. */
+.knt-history-grid ::deep .rz-grid-table {
+    min-width: 900px;
+}

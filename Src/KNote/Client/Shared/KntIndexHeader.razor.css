@@ -163,4 +163,10 @@
         margin: 0;
         font-size: 1rem;
     }
+
+    /* A button with a dropdown and a short text («Utils», «Folder») is as wide as its text: the arrow beside the icon covered
+       it. As wide at least as the icon with room for the arrow on each side (the icon stays centred). */
+    .knt-section-header-tools ::deep .rz-menu > .rz-navigation-item > .rz-navigation-item-wrapper > .rz-navigation-item-link:has(.rz-navigation-item-icon-children) {
+        min-width: 4.5rem;
+    }
 }

@@ -169,6 +169,17 @@ public class KntService : IKntService, IDisposable
         }
     }
 
+    private IKntHistoryService _history;
+    public IKntHistoryService History
+    {
+        get
+        {
+            if (_history == null)
+                _history = new KntHistoryService(this);
+            return _history;
+        }
+    }
+
     private IKntAtlasContextService _atlasContext;
     public IKntAtlasContextService AtlasContext
     {
@@ -200,6 +211,8 @@ public class KntService : IKntService, IDisposable
     }
 
     public string UserIdentityName { get; set; }
+
+    public EnumHistoryOrigin HistoryOrigin { get; set; } = EnumHistoryOrigin.KNote;
 
     public bool EnforceAuthorization { get; set; }
 
@@ -531,7 +544,9 @@ public class KntService : IKntService, IDisposable
             r.ContentInDB = Repository.RepositoryRef.ResourceContentInDB;
         }
         
-        Task.Run(() => Notes.SaveExtendedAsync(noteInput)).Wait();
+        // A note merged from another installation, for the history (H11).
+        using (KntHistoryOrigin.Begin(EnumHistoryOrigin.Broker))
+            Task.Run(() => Notes.SaveExtendedAsync(noteInput)).Wait();
     }
 
     #endregion

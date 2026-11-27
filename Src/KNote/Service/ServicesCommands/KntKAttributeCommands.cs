@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
@@ -81,18 +82,30 @@ public class KntKAttributesSaveAsyncCommand : KntCommandSaveServiceBase<KAttribu
         if (Param.KAttributeId == Guid.Empty)
         {
             Param.KAttributeId = Guid.NewGuid();
-            return await Repository.KAttributes.AddAsync(Param);
+            return await Repository.KAttributes.AddAsync(Param, await PrepareHistoryAsync(null));
         }
         else
         {
             var resOld = await Repository.KAttributes.GetAsync(Param.KAttributeId);
-            var res = await Repository.KAttributes.UpdateAsync(Param);
+            // Its history goes in the transaction of the attribute and its values (H10).
+            var res = await Repository.KAttributes.UpdateAsync(Param, await PrepareHistoryAsync(resOld.IsValid ? resOld.Entity : null));
             // Its name is in the fragment of data of the notes that have it.
             if (res.IsValid && resOld.Entity is { } old && old.Name != Param.Name)
                 await KntSemanticIndexer.MarkStaleAsync(Service, r => r.MarkStaleByKAttributeAsync(Param.KAttributeId));
             return res;
         }
     }
+
+    private async Task<KLogWriteDto> PrepareHistoryAsync(KAttributeDto before)
+    {
+        var names = await KntHistory.NoteTypeNamesForHistoryAsync(Service);
+        return await KntHistory.PrepareStructureAsync(Service, HistoryEntities.KAttribute, Param.KAttributeId,
+            KAttributeTitle(Param, names), StructureChangeDescriber.KAttribute(before, Param, names));
+    }
+
+    // An attribute is known by its name and, if it is of a note type, the type: «Status (Computer)».
+    internal static string KAttributeTitle(KAttributeInfoDto attribute, HistoryNames names) =>
+        attribute.NoteTypeId == null ? attribute.Name : $"{attribute.Name} ({names.NoteType(attribute.NoteTypeId)})";
 }
 
 [KntAuthorize(EnumRoles.Admin)]
@@ -127,7 +140,10 @@ public class KntKAttributesDeleteAsyncCommand : KntCommandServiceBase<Guid, Resu
             return result;
         }
 
-        var resDelEntity = await Repository.KAttributes.DeleteAsync(Param);
+        var names = await KntHistory.NoteTypeNamesForHistoryAsync(Service);
+        var history = await KntHistory.PrepareStructureAsync(Service, HistoryEntities.KAttribute, Param,
+            KntKAttributesSaveAsyncCommand.KAttributeTitle(resGetEntity.Entity, names), StructureChangeDescriber.KAttribute(resGetEntity.Entity, null, names));
+        var resDelEntity = await Repository.KAttributes.DeleteAsync(Param, history);
         if (resDelEntity.IsValid)
             result.Entity = resGetEntity.Entity;
         else

@@ -3,6 +3,7 @@ using KNote.ClientWin.Core;
 using KNote.ClientWin.Core.Reports;
 using KNote.ClientWin.Views;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Reports;
 using KNote.Service.Core;
@@ -653,6 +654,99 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         return result;
     }
 
+    /// <summary>
+    /// The history of the note (H.3), a page of its rows, the newest first (H20: 100 at a time, from skip). Null for a new note
+    /// (it has none yet).
+    /// </summary>
+    public async Task<Result<NoteHistoryPageDto>> GetHistoryAsync(int skip = 0)
+    {
+        if (Service == null || Model == null || Model.IsNew())
+            return null;
+        return await Service.History.GetNoteHistoryAsync(Model.NoteId, skip);
+    }
+
+    /// <summary>«See this version» (H18): the note as it was after that change, in a window of its own (NoteVersionCtrl).</summary>
+    public async Task ShowVersionAsync(KLogDto row, bool canRestore = false)
+    {
+        if (row == null || Service == null || Model == null)
+            return;
+        var versionCtrl = new NoteVersionCtrl(Store, Service, Model.NoteId, row, HistoryNoteTitle,
+            canRestore && CanRestoreVersions ? () => RestoreVersionAsync(row) : null);
+        if (await versionCtrl.LoadAsync())
+            versionCtrl.Run();
+        else
+        {
+            View.ShowInfo(versionCtrl.Error);
+            versionCtrl.Finalize();
+        }
+    }
+
+    /// <summary>«Compare» (H22): what that change did, or that version against the note now, in a window of its own (NoteCompareCtrl).</summary>
+    public async Task CompareAsync(KLogDto row)
+    {
+        if (row == null || Service == null || Model == null || !HistoryRules.CanCompare(row))
+            return;
+        var compareCtrl = new NoteCompareCtrl(Store, Service, Model.NoteId, row, HistoryNoteTitle);
+        if (await compareCtrl.LoadAsync(withCurrentNote: false))
+            compareCtrl.Run();
+        else
+        {
+            View.ShowInfo(compareCtrl.Error);
+            compareCtrl.Finalize();
+        }
+    }
+
+    /// <summary>The editor can restore versions: in its own window (not the read-only one embedded in the main window).</summary>
+    public bool CanRestoreVersions => EditMode && !ConsultMode;
+
+    /// <summary>
+    /// «Restore» (H23): after confirming, the changes not saved are saved first (if they can't be, nothing is restored); then the
+    /// version is restored and the note read again. What couldn't be restored is told. True if the note changed.
+    /// </summary>
+    public async Task<bool> RestoreVersionAsync(KLogDto row)
+    {
+        if (row == null || Service == null || Model == null || Model.IsNew())
+            return false;
+        if (!CanRestoreVersions)
+        {
+            View.ShowInfo(ConsultMode ? $"{ConsultModeMessage} The note can't be restored." : "Open the note in its editor to restore a version.");
+            return false;
+        }
+
+        View.RefreshModel();
+        var who = string.IsNullOrEmpty(row.UserName) ? "" : $" by {row.UserName}";
+        var question = $"Restore the note as it was after the change of {HistoryRules.WhenText(row)}{who}?"
+            + (Model.IsDirty() ? " Your unsaved changes are saved first." : "")
+            + " The note as it is now stays in its history: restoring can be undone.";
+        if (View.ShowInfo(question, "Restore this version", MessageBoxButtons.YesNo) != DialogResult.Yes)
+            return false;
+
+        if (Model.IsDirty() && !await SaveModel())
+            return false;
+
+        try
+        {
+            var result = await Service.History.RestoreNoteVersionAsync(Model.NoteId, row.KLogId);
+            if (!result.IsValid)
+            {
+                View.ShowInfo(result.ErrorMessage);
+                return false;
+            }
+            if (result.Entity.Changed && await LoadModelById(Service, Model.NoteId))
+                OnSavedEntity(Model);
+            if (result.Entity.Notices.Count > 0)
+                View.ShowInfo(string.Join(Environment.NewLine, result.Entity.Notices));
+            return result.Entity.Changed;
+        }
+        catch (Exception ex)
+        {
+            View.ShowInfo(ex.Message);
+            return false;
+        }
+    }
+
+    private string HistoryNoteTitle => $"#{Model.NoteNumber} · {Model.Topic}";
+
     // A relation from this note to a similar one, in the editor of relations with that note already chosen (saved with
     // the note, as the others).
     public Task<TraceNoteDto> RelateSimilarNoteAsync(NoteSearchHitDto note) =>
@@ -1174,7 +1268,8 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
         try
         {
-            kntScript.Run(assistantScript);
+            using (KNote.Service.Core.KntHistoryOrigin.Begin(EnumHistoryOrigin.Script)) // its changes are the script's (history, H11)
+                kntScript.Run(assistantScript);
         }
         catch (Exception ex)
         {

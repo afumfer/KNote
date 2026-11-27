@@ -29,6 +29,7 @@
                 <RadzenMenuItem Text="Delete folder ..." Icon="delete" Disabled="@(folder == null || folderAction.IsBusy)" Click="@(() => OnDeleteFolder(folder!))" />
                 <RadzenMenuItem Text="Refresh tree" Icon="refresh" Click="RefreshTreeFolders" />
             </RadzenMenuItem>
+            <NotesUtilsMenu Changed="OnNotesRecovered" />
             <NotesViewOptionsMenu Grid="notesGrid" Changed="StateHasChanged" />
             <NotesPrintExportMenu Grid="notesGrid" Request="ReportRequest" DefaultOrder="FolderOrder()" ListName="@folder?.Name" />
         </RadzenMenu>
@@ -263,6 +264,9 @@
     {
         _ = InvokeAsync(() => notesGrid?.RefreshAsync() ?? Task.CompletedTask);
     }
+
+    // A deleted note recovered (Utils, H24): it may be in this folder again.
+    private Task OnNotesRecovered() => notesGrid?.ReloadAsync() ?? Task.CompletedTask;
 
     // One delete at a time: a click or the Delete key repeated asks and deletes once.
     private readonly KntSingleFlight deleting = new();

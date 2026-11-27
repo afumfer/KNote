@@ -144,31 +144,31 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteDto>> AddAsync(NoteDto entity)
+    public async Task<Result<NoteDto>> AddAsync(NoteDto entity, KLogWriteDto history = null)
     {
         try
         {
             var result = new Result<NoteDto>();
 
             // NoteNumber is generated from an ORDER BY NoteNumber DESC query, which is not atomic:
-            // two concurrent inserts can compute the same number. EF Core's Sqlite provider does not
-            // even support the ambient TransactionScope below (see the comment in
-            // KntRepositoryEFBase.GetOpenConnection), so the unique index on NoteNumber is the real
-            // guard; on that specific failure we regenerate the number and retry, bounded to a few
-            // attempts.
+            // two concurrent inserts can compute the same number. The unique index on NoteNumber is the
+            // real guard; on that specific failure we regenerate the number and retry, bounded to a few
+            // attempts. The note, its attributes and its row of the history go in one transaction of the
+            // context (an ambient TransactionScope does nothing in Sqlite: its connections don't enlist).
             var autoNumber = entity.NoteNumber == 0;
             const int maxAttempts = 10;
             Exception lastConflict = null;
 
             for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                using TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 var ctx = GetOpenConnection();
                 var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
                 var newEntity = new Note();
+                var writingHistory = false;
 
                 try
                 {
+                    await using var transaction = await ctx.Database.BeginTransactionAsync();
                     UpdateStandardValuesToNewEntity(notes, entity);
                     newEntity.SetSimpleDto(entity);
 
@@ -187,16 +187,20 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                         atr.NoteKAttributeId = res.NoteKAttributeId;
                     }
 
+                    history?.TitleNewNote(entity.NoteNumber, entity.Topic);
+                    writingHistory = true;
+                    await KntHistoryWriter.WriteAsync(ctx, history);
+
+                    await transaction.CommitAsync();
+
                     result.Entity = entity;
                     result.AddListErrorMessage(resRep.ListErrorMessage);
 
-                    scope.Complete();
-
                     return result;
                 }
-                catch (Exception ex) when (autoNumber && ex.IsUniqueConstraintViolation())
+                catch (Exception ex) when (autoNumber && !writingHistory && ex.IsUniqueConstraintViolation())
                 {
-                    // Lost the race for this NoteNumber. Detach the failed entity so it is not
+                    // Lost the race for this NoteNumber (not a row of the history that can't be written). Detach the failed entity so it is not
                     // resubmitted alongside the next attempt when ctx is a long-lived singleton
                     // context. Caught even on the last attempt so the loop always falls through to
                     // the descriptive exception below instead of letting the raw provider exception
@@ -219,17 +223,19 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false)
+    public async Task<Result<NoteDto>> UpdateAsync(NoteDto entity, bool keepModificationDate = false, KLogWriteDto history = null)
     {
         try
         {
             var result = new Result<NoteDto>();
             Result<Note> resRep = null;
 
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            // The note, its attributes and its row of the history, in one transaction (see AddAsync).
+            var ctx = GetOpenConnection();
+            try
             {
-                var ctx = GetOpenConnection();
-                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);                
+                await using var transaction = await ctx.Database.BeginTransactionAsync();
+                var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
                 var entityU = await notes.DbSet.Where(n => n.NoteId == entity.NoteId)
                     .Include(n => n.KAttributes).ThenInclude(n => n.KAttribute)
@@ -266,8 +272,11 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                     result.Entity.KAttributesDto.Add(res.Entity);
                 }
 
-                scope.Complete();
-
+                await KntHistoryWriter.WriteAsync(ctx, history);
+                await transaction.CommitAsync();
+            }
+            finally
+            {
                 await CloseIsTempConnection(ctx);
             }
             result.AddListErrorMessage(resRep.ListErrorMessage);
@@ -279,7 +288,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }               
     }
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result> DeleteAsync(Guid id, KLogWriteDto history = null)
     {
         try
         {
@@ -288,9 +297,18 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
-            var resGenRep = await notes.DeleteAsync(id);
-            if (!resGenRep.IsValid)
-                result.AddListErrorMessage(resGenRep.ListErrorMessage);
+            // The note and its row of the history (with its last version: the trash), in one transaction.
+            await using (var transaction = await ctx.Database.BeginTransactionAsync())
+            {
+                var resGenRep = await notes.DeleteAsync(id);
+                if (!resGenRep.IsValid)
+                    result.AddListErrorMessage(resGenRep.ListErrorMessage);
+                else
+                {
+                    await KntHistoryWriter.WriteAsync(ctx, history);
+                    await transaction.CommitAsync();
+                }
+            }
 
             await CloseIsTempConnection(ctx);
             
@@ -388,7 +406,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity)
+    public async Task<Result<ResourceDto>> AddResourceAsync(ResourceDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -404,7 +422,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             else
                 newEntity.ContentArrayBytes = null;
 
-            var resGenRep = await resources.AddAsync(newEntity);
+            var resGenRep = await NotedAsync(ctx, history, () => resources.AddAsync(newEntity));
 
             result.Entity = resGenRep.Entity?.GetSimpleDto<ResourceDto>();
             if (result.Entity != null)
@@ -422,7 +440,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity)
+    public async Task<Result<ResourceDto>> UpdateResourceAsync(ResourceDto entity, KLogWriteDto history = null)
     {
 
         try
@@ -446,7 +464,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 else
                     entityForUpdate.ContentArrayBytes = null;
 
-                resGenRep = await resources.UpdateAsync(entityForUpdate);
+                resGenRep = await NotedAsync(ctx, history, () => resources.UpdateAsync(entityForUpdate));
             }
             else
             {
@@ -672,7 +690,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result> DeleteResourceAsync(Guid id)
+    public async Task<Result> DeleteResourceAsync(Guid id, KLogWriteDto history = null)
     {
         try
         {
@@ -681,7 +699,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var ctx = GetOpenConnection();
             var resources = new GenericRepositoryEF<KntDbContext, Resource>(ctx);
 
-            var resGenRep = await resources.DeleteAsync(id);
+            var resGenRep = await NotedAsync(ctx, history, () => resources.DeleteAsync(id));
             if (!resGenRep.IsValid)
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
@@ -956,7 +974,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity)
+    public async Task<Result<NoteTaskDto>> AddNoteTaskAsync(NoteTaskDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -969,8 +987,8 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             newEntity.SetSimpleDto(entity);                
             newEntity.CreationDateTime = DateTime.Now;
             newEntity.ModificationDateTime = DateTime.Now;
-            
-            var resGenRep = await noteTasks.AddAsync(newEntity);
+
+            var resGenRep = await NotedAsync(ctx, history, () => noteTasks.AddAsync(newEntity));
 
             result.Entity = resGenRep.Entity?.GetSimpleDto<NoteTaskDto>();
             if (result.Entity != null)
@@ -988,7 +1006,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity)
+    public async Task<Result<NoteTaskDto>> UpdateNoteTaskAsync(NoteTaskDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -1005,7 +1023,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
                 entityForUpdate = resGenRepGet.Entity;
                 entityForUpdate.SetSimpleDto(entity);
                 entityForUpdate.ModificationDateTime = DateTime.Now;
-                resGenRep = await noteTasks.UpdateAsync(entityForUpdate);
+                resGenRep = await NotedAsync(ctx, history, () => noteTasks.UpdateAsync(entityForUpdate));
             }
             else
             {
@@ -1028,16 +1046,16 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result> DeleteNoteTaskAsync(Guid id)
+    public async Task<Result> DeleteNoteTaskAsync(Guid id, KLogWriteDto history = null)
     {
         try
-        {        
+        {
             var result = new Result();
 
             var ctx = GetOpenConnection();
             var noteTasks = new GenericRepositoryEF<KntDbContext, NoteTask>(ctx);
 
-            var resGenRep = await noteTasks.DeleteAsync(id);
+            var resGenRep = await NotedAsync(ctx, history, () => noteTasks.DeleteAsync(id));
             if (!resGenRep.IsValid)
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
@@ -1112,7 +1130,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity)
+    public async Task<Result<KMessageDto>> AddMessageAsync(KMessageDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -1124,7 +1142,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var newEntity = new KMessage();
             newEntity.SetSimpleDto(entity);
 
-            var resGenRep = await kmessages.AddAsync(newEntity);
+            var resGenRep = await NotedAsync(ctx, history, () => kmessages.AddAsync(newEntity));
 
             result.Entity = resGenRep.Entity?.GetSimpleDto<KMessageDto>();
             result.AddListErrorMessage(resGenRep.ListErrorMessage);
@@ -1139,7 +1157,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity)
+    public async Task<Result<KMessageDto>> UpdateMessageAsync(KMessageDto entity, KLogWriteDto history = null)
     {
         try
         {
@@ -1156,7 +1174,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             {
                 entityForUpdate = resGenRepGet.Entity;
                 entityForUpdate.SetSimpleDto(entity);
-                resGenRep = await kmessages.UpdateAsync(entityForUpdate);
+                resGenRep = await NotedAsync(ctx, history, () => kmessages.UpdateAsync(entityForUpdate));
             }
             else
             {
@@ -1178,7 +1196,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
 
     }
 
-    public async Task<Result> DeleteMessageAsync(Guid messageId)
+    public async Task<Result> DeleteMessageAsync(Guid messageId, KLogWriteDto history = null)
     {
         try
         {
@@ -1187,7 +1205,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var ctx = GetOpenConnection();
             var kmessages = new GenericRepositoryEF<KntDbContext, KMessage>(ctx);
 
-            var resGenRep = await kmessages.DeleteAsync(messageId);
+            var resGenRep = await NotedAsync(ctx, history, () => kmessages.DeleteAsync(messageId));
             if (!resGenRep.IsValid)
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 
@@ -1451,6 +1469,29 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
+    public async Task<Result<List<Guid>>> GetExistingNoteIdsAsync(IReadOnlyCollection<Guid> noteIds)
+    {
+        try
+        {
+            var existing = new List<Guid>();
+            if (noteIds == null || noteIds.Count == 0)
+                return new Result<List<Guid>> { Entity = existing };
+
+            var ctx = GetOpenConnection();
+            foreach (var chunk in noteIds.Distinct().Chunk(500))
+            {
+                var ids = chunk.ToList();
+                existing.AddRange(await ctx.Notes.AsNoTracking().Where(n => ids.Contains(n.NoteId)).Select(n => n.NoteId).ToListAsync());
+            }
+            await CloseIsTempConnection(ctx);
+            return new Result<List<Guid>> { Entity = existing };
+        }
+        catch (Exception ex)
+        {
+            throw new KntRepositoryException($"KNote repository error. ({MethodBase.GetCurrentMethod().DeclaringType})", ex);
+        }
+    }
+
     public async Task<Result<List<Guid>>> GetVisibleNotesIdAsync(Guid userId)
     {
         try
@@ -1594,7 +1635,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId)
+    public async Task<Result<bool>> PatchFolderAsync(Guid noteId, Guid folderId, KLogWriteDto history = null)
     {
         try
         {
@@ -1604,25 +1645,35 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
-            var entityForUpdate = await notes.DbSet.Where(n => n.NoteId == noteId).SingleOrDefaultAsync();                
-
-            if (entityForUpdate != null)
-            {                    
-                // Moving a note modifies it (KNote Atlas, stage 2, D6).
-                entityForUpdate.FolderId = folderId;
-                entityForUpdate.ModificationDateTime = DateTime.Now;
-                resRep = await notes.UpdateAsync(entityForUpdate);
-                result.Entity = resRep.IsValid;
-            }
-            else
+            // The note and its row of the history, in one transaction.
+            await using (var transaction = await ctx.Database.BeginTransactionAsync())
             {
-                result.Entity = false;
-                result.AddErrorMessage("Can't find entity for update.");
+                var entityForUpdate = await notes.DbSet.Where(n => n.NoteId == noteId).SingleOrDefaultAsync();
+
+                if (entityForUpdate != null)
+                {
+                    // Moving a note modifies it (KNote Atlas, stage 2, D6).
+                    entityForUpdate.FolderId = folderId;
+                    entityForUpdate.ModificationDateTime = DateTime.Now;
+                    resRep = await notes.UpdateAsync(entityForUpdate);
+                    result.Entity = resRep.IsValid;
+                    if (resRep.IsValid)
+                    {
+                        await KntHistoryWriter.WriteAsync(ctx, history);
+                        await transaction.CommitAsync();
+                    }
+                }
+                else
+                {
+                    result.Entity = false;
+                    result.AddErrorMessage("Can't find entity for update.");
+                }
             }
 
             await CloseIsTempConnection(ctx);
 
-            result.AddListErrorMessage(resRep.ListErrorMessage);
+            if (resRep != null)
+                result.AddListErrorMessage(resRep.ListErrorMessage);
             return result;
         }
         catch (Exception ex)
@@ -1631,7 +1682,7 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
         }
     }
 
-    public async Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag)
+    public async Task<Result<bool>> PatchChangeTagsAsync(Guid noteId, string oldTag, string newTag, KLogWriteDto history = null)
     {
         try
         {
@@ -1648,33 +1699,35 @@ public class KntNoteRepository: KntRepositoryEFBase, IKntNoteRepository
             var ctx = GetOpenConnection();
             var notes = new GenericRepositoryEF<KntDbContext, Note>(ctx);
 
-            var entityForUpdate = await notes.DbSet.Where(n => n.NoteId == noteId).SingleOrDefaultAsync();
-
-            if (entityForUpdate != null)
+            // The note and its row of the history, in one transaction.
+            await using (var transaction = await ctx.Database.BeginTransactionAsync())
             {
-                if (string.IsNullOrEmpty(oldTag))
+                var entityForUpdate = await notes.DbSet.Where(n => n.NoteId == noteId).SingleOrDefaultAsync();
+
+                if (entityForUpdate != null)
                 {
-                    if (!(entityForUpdate.Tags?.IndexOf(newTag) >= 0))
-                        entityForUpdate.Tags += " " + newTag;
+                    entityForUpdate.Tags = NoteChangeRules.ChangeTag(entityForUpdate.Tags, oldTag, newTag);
+                    // Changing its tags modifies the note (KNote Atlas, stage 2, D6).
+                    entityForUpdate.ModificationDateTime = DateTime.Now;
+                    resRep = await notes.UpdateAsync(entityForUpdate);
+                    result.Entity = resRep.IsValid;
+                    if (resRep.IsValid)
+                    {
+                        await KntHistoryWriter.WriteAsync(ctx, history);
+                        await transaction.CommitAsync();
+                    }
                 }
                 else
-                    entityForUpdate.Tags = entityForUpdate.Tags?.Replace(oldTag, newTag);
-
-                entityForUpdate.Tags = entityForUpdate.Tags?.Trim();
-                // Changing its tags modifies the note (KNote Atlas, stage 2, D6).
-                entityForUpdate.ModificationDateTime = DateTime.Now;
-                resRep = await notes.UpdateAsync(entityForUpdate);
-                result.Entity = resRep.IsValid;
-            }
-            else
-            {
-                result.Entity = false;
-                result.AddErrorMessage("Can't find entity for update.");
+                {
+                    result.Entity = false;
+                    result.AddErrorMessage("Can't find entity for update.");
+                }
             }
 
             await CloseIsTempConnection(ctx);
 
-            result.AddListErrorMessage(resRep.ListErrorMessage);
+            if (resRep != null)
+                result.AddListErrorMessage(resRep.ListErrorMessage);
             return result;
         }
         catch (Exception ex)

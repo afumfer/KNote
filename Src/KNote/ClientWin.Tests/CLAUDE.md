@@ -244,6 +244,19 @@ $env:KNOTE_LONGDOC_MEASURE_PAGES = "20"
 dotnet test KNoteTest.slnx --filter "FullyQualifiedName~LongDocumentMeasure.Translate"
 ```
 
+**El historial de las notas (H30)**: `Tests/ServiceTests/HistoryMeasure` no usa IA, pero tampoco corre sin su variable (Inconclusive). Contra una
+**copia** de un repositorio real (`KNOTE_HISTORY_MEASURE_DB`: un SQLite o una cadena de SQL Server; opcionales `KNOTE_HISTORY_MEASURE_NOTES`, la
+muestra, 250, y `_SEED`, 1), con Dapper y EF: guardar las notas más grandes y una mediana con historial y sin él (`KntHistory.NotNoted`), 20
+autoguardados de una sesión (las filas que deja), las lecturas de las apps tras una carga (4 sesiones de 4 usuarios en cada nota de la muestra),
+lo que ocupa `KLogs` (las copias en UTF-8 y lo guardado: en SQL Server, el doble, `nvarchar`) y lo que vaciaría la retención en la copia y
+simulada. No toca las notas de la copia: las copia en una carpeta suya y al final las borra y las quita de las notas borradas (sus filas quedan,
+sin copias, y la carpeta se borra). El informe va a `results\history-measure-*.md` bajo `KNOTE_RESOURCE_MEASURE_FOLDER`:
+```powershell
+$env:KNOTE_HISTORY_MEASURE_DB = "Server=.\sqlexpress;Database=KNoteTareasDB;Trusted_Connection=True;TrustServerCertificate=True"
+$env:KNOTE_RESOURCE_MEASURE_FOLDER = "C:\Dev\KNote-Atlas\Medidas-Historial"
+dotnet test KNoteTest.slnx --filter "FullyQualifiedName~HistoryMeasure"
+```
+
 ## Cómo configurar las ApiKeys para correr la Capa 2
 
 `Helpers/AiTestConfig.cs` resuelve cada proveedor con la misma precedencia que usa producción

@@ -124,17 +124,32 @@ public class KntFoldersSaveAsyncCommand : KntCommandSaveServiceBase<FolderDto, R
         {
             Param.FolderId = Guid.NewGuid();
             var res = await Repository.Folders.AddAsync(Param);
+            if (res.IsValid)
+                await NoteAsync(null, Param, null);
             return res;
         }
         else
         {
             var resOld = await Repository.Folders.GetAsync(Param.FolderId);
+            var old = resOld.IsValid ? resOld.Entity : null;
+            var parentPathBefore = old == null ? null : await KntHistory.FolderPathAsync(Service, old.ParentId);
             var res = await Repository.Folders.UpdateAsync(Param);
             // Its path is in the fragment of data of the notes of the folder and of its subfolders.
-            if (res.IsValid && resOld.Entity is { } old && (old.Name != Param.Name || old.ParentId != Param.ParentId))
+            if (res.IsValid && old != null && (old.Name != Param.Name || old.ParentId != Param.ParentId))
                 await KntSemanticIndexer.MarkFolderStaleAsync(Service, Param.FolderId);
+            if (res.IsValid)
+                await NoteAsync(old, Param, parentPathBefore);
             return res;
         }
+    }
+
+    // Its history (H.2b): one row for the folder, never one per note whose path changes.
+    private async Task NoteAsync(FolderDto before, FolderDto after, string parentPathBefore)
+    {
+        var parentPathAfter = await KntHistory.FolderPathAsync(Service, after.ParentId);
+        var path = await KntHistory.FolderPathAsync(Service, after.FolderId) ?? after.Name;
+        await KntHistory.NoteStructureAsync(Service, HistoryEntities.Folder, after.FolderId, path,
+            StructureChangeDescriber.Folder(before, after, parentPathBefore, parentPathAfter));
     }
 }
 
@@ -194,9 +209,14 @@ public class KntFoldersDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<F
                 return result;
 
             // Is OK then delete entity
+            var path = await KntHistory.FolderPathAsync(Service, Param) ?? resGetEntity.Entity.Name;
             var resDelEntity = await Repository.Folders.DeleteAsync(Param);
             if (resDelEntity.IsValid)
+            {
                 result.Entity = resGetEntity.Entity;
+                await KntHistory.NoteStructureAsync(Service, HistoryEntities.Folder, Param, path,
+                    StructureChangeDescriber.Folder(resGetEntity.Entity, null, null, null));
+            }
             else
                 result.AddListErrorMessage(resDelEntity.ListErrorMessage);
         }

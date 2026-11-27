@@ -107,14 +107,7 @@ public class NoteInfoDto : NoteMinimalDto
 
     #region Util ContentTypeExt
 
-    public ContentTypeExt GetContentTypeExt()
-    {        
-        if (ContentTypeExtJsonHelper.TryDeserialize(ContentType, out var tryDes))
-            return tryDes;
-        
-        // Transformation from old format  
-        return new ContentTypeExt { ForDescription = ContentType?.Replace("#", ""), ForScript = "knt", DescriptionBlocked = (bool) ContentType?.Contains("#") };        
-    }
+    public ContentTypeExt GetContentTypeExt() => ContentTypeExtJsonHelper.Read(ContentType);
 
     public void SetContentTypeExt(ContentTypeExt value)
     {     
@@ -154,6 +147,17 @@ public static class ContentTypeExtJsonHelper
     {
         if (string.IsNullOrWhiteSpace(json)) throw new ArgumentNullException(nameof(json));
         return JsonSerializer.Deserialize<ContentTypeExt>(json, Options);
+    }
+
+    /// <summary>The content type of a note, in JSON or in the old format (plain text: markdown, html, navigation#...).</summary>
+    public static ContentTypeExt Read(string contentType)
+    {
+        if (TryDeserialize(contentType, out var result))
+            return result;
+
+        // Transformation from old format
+        contentType ??= "";
+        return new ContentTypeExt { ForDescription = contentType.Replace("#", ""), ForScript = "knt", DescriptionBlocked = contentType.Contains('#') };
     }
 
     public static bool TryDeserialize(string json, out ContentTypeExt result)

@@ -25,6 +25,25 @@
     --rz-layout-body-padding: 0.5rem;
 }
 
+/* The tones of the rows of the lists of the history (Model/Core/HistoryRowStates): soft amber (it can still be brought back,
+   with a limit), soft orange (it can't) and soft grey (only information). Translucent tints of the theme's colors, so they read
+   on a light or a dark theme and the selected row still shows under them (Shared/KntHistoryStates paints them on the cells). */
+:root {
+    --knt-history-amber: color-mix(in srgb, var(--rz-warning) 18%, transparent);
+    --knt-history-orange: color-mix(in srgb, color-mix(in srgb, var(--rz-warning) 45%, var(--rz-danger)) 18%, transparent);
+    --knt-history-grey: color-mix(in srgb, var(--rz-text-color) 7%, transparent);
+}
+
+/* The column «State» of those lists (Shared/KntHistoryState): the icon as tall as the text, and the text on as many lines as it needs. */
+.knt-history-state {
+    white-space: normal;
+}
+
+    .knt-history-state .rzi {
+        font-size: 1rem;
+        flex: none;
+    }
+
 /* Soft neutral background (a tint of the text color), for blocks that stand out from the page in any theme.
    Use it instead of rz-background-color-base-*: the base palette is not inverted by the dark themes. */
 .knt-background-subtle {

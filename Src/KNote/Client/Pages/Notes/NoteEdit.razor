@@ -28,7 +28,8 @@
 }
 @if (showForm)
 {
-    <NoteForm Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" Saving="saving.IsBusy" NoteTypes="noteTypes"></NoteForm>
+    <NoteForm Note="note" OnValidSubmit="OnSave" OnValidSubmitWithNew="OnSaveAndNew" OnExit="OnExit" Saving="saving.IsBusy" NoteTypes="noteTypes"
+              RestoreVersion="RestoreVersionAsync"></NoteForm>
 }
 else if (loadFailed)
 {
@@ -186,6 +187,37 @@ else
         if (await SaveNote())
             await GetNewNote(note!.FolderDto);
     });
+
+    // «Restore» of the History tab (H23): the changes not saved are saved first (if they can't be, nothing is restored), then the
+    // version is restored and the note read again. What couldn't be restored is told.
+    private async Task<bool> RestoreVersionAsync(KLogDto row)
+    {
+        var restored = false;
+        await saving.RunAsync(async () =>
+        {
+            if (note == null || note.IsNew() || !await SaveNote())
+                return;
+
+            var result = await store.History.RestoreNoteVersionAsync(note.NoteId, row.KLogId);
+            if (!result.IsValid)
+                return;
+
+            restored = result.Entity.Changed;
+            if (restored)
+            {
+                await GetNote(note.NoteId);
+                changedElsewhere = false;
+                // Called from the History tab (a delegate, not an EventCallback): this page draws the note read again now,
+                // not at its next event.
+                StateHasChanged();
+                await kntWindows.NotifyNoteSavedAsync(note.NoteId);
+            }
+            if (result.Entity.Notices.Count > 0)
+                await dialogService.Alert(string.Join(" ", result.Entity.Notices), restored ? "Version restored" : "Restore",
+                    new AlertOptions { OkButtonText = "Ok" });
+        });
+        return restored;
+    }
 
     private async Task OnExit()
     {

@@ -48,6 +48,26 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     private List<NoteSearchHitDto> _similarNotes = new();
     private int _similarNotesVersion;
 
+    // The history of the note (H.3), its own tab (CreateHistoryTab), read each time it is shown and after a save while it is;
+    // 100 rows at a time (H20), the last request wins (_historyVersion).
+    private const int HistoryPrimaryColumnIndex = 3;   // Change (columns: When, Who, From, Change, State)
+    private TabPage tabHistory;
+    private ListView listViewHistory;
+    private Label labelHistoryStatus;
+    private Button buttonSeeVersion;
+    private Button buttonCompareVersion;
+    private Button buttonRestoreVersion;
+    private Button buttonMoreHistory;
+    private List<KLogDto> _historyRows = new();
+    // The rows whose version can be restored (H23), of every page read.
+    private readonly HashSet<Guid> _historyRestorable = new();
+    // The state of each row read that has one (HistoryRowStates.ForNoteHistory, given by the Service): its column «State», its tone
+    // and the legend under the list.
+    private readonly Dictionary<Guid, KNote.Model.Core.EnumHistoryRowState> _historyStates = new();
+    private HistoryStatesLegend _historyLegend;
+    private int _historyTotal;
+    private int _historyVersion;
+
     // The relations are read (awaited) before they are shown; with two refreshes at once, both cleared the lists before
     // either filled them and every relation was shown twice. The last refresh wins (ModelToControlsTraceNotes).
     private int _traceNotesVersion;
@@ -87,8 +107,11 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _traceNoteToSorter = ListViewSortHelper.Attach(listViewTraceNoteTo);
 
         CreateSimilarNotesSection();
+        CreateHistoryTab();
         tabNoteData.SelectedIndexChanged += async (s, e) =>
         {
+            if (tabNoteData.SelectedTab == tabHistory)
+                await RefreshHistoryAsync();
             if (tabNoteData.SelectedTab == tabTraceNotes)
                 await RefreshSimilarNotesAsync();
         };
@@ -189,10 +212,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
 
         // Same order as the tabs' ImageIndex (Designer): basic data, attributes, resources, activities,
-        // alarms, code, trace notes.
+        // alarms, code, trace notes; then history (CreateHistoryTab).
         imageListTabNoteData.SetKntIcons(KntIconProvider.DefaultSize, DeviceDpi,
             KntIcon.BasicData, KntIcon.Attributes, KntIcon.Resources, KntIcon.Activities,
-            KntIcon.Alarm, KntIcon.Script, KntIcon.TraceNotes);
+            KntIcon.Alarm, KntIcon.Script, KntIcon.TraceNotes, KntIcon.History);
     }
 
     private static void AlignButtonsRight(Control header, int rightMargin, int spacing, params Control[] buttonsLeftToRight)
@@ -273,6 +296,14 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _similarNotes = new();
         listViewSimilarNotes.Items.Clear();
         labelSimilarNotesStatus.Text = "";
+        _historyVersion++;
+        _historyRows = new();
+        _historyRestorable.Clear();
+        listViewHistory.Items.Clear();
+        labelHistoryStatus.Text = "";
+        _historyStates.Clear();
+        _historyLegend.SetStates(_historyStates.Values);
+        UpdateHistoryButtons();
     }
 
     public void RefreshViewOnlyRequiredCtrl()
@@ -1279,6 +1310,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     {
         var ct = _ctrl.Model.GetContentTypeExt();
 
+        // The folder chosen in this editor was for the note shown before: the one loaded now (another note, or the same one read
+        // again after restoring a version, H23) is where the model says. Without this, saving put it back in the chosen one.
+        _changedFolder = null;
+
         // Basic data
         textTopic.Text = _ctrl.Model.Topic;
         textNoteNumber.Text = "#" + _ctrl.Model.NoteNumber.ToString();
@@ -1358,6 +1393,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         // Script
         textScriptCode.Text = _ctrl.Model.Script;
         SetScriptTypeCombo(ct.ForScript);
+
+        // History: another note, or the same one just saved (its new row).
+        if (tabNoteData.SelectedTab == tabHistory)
+            await RefreshHistoryAsync();
 
         this.Update();
         this.Refresh();
@@ -1631,6 +1670,182 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             await ModelToControlsTraceNotes();
             ListViewSelectionHelper.SelectByKey(listViewTraceNoteTo, added.TraceNoteId.ToString(), _traceNoteToSorter);
+        }
+    }
+
+    #endregion
+
+    #region History (H.3)
+
+    // The last tab, built here and not in the Designer: who changed what and when, the newest first; «See this version» (and
+    // double click, Enter) opens the note as it was after the selected change (H18). Each row says in «State», with the tone of its
+    // row and the legend under the list, why its version can't be restored or how (HistoryRowStates).
+    private void CreateHistoryTab()
+    {
+        listViewHistory = new ListView { Dock = DockStyle.Fill, MultiSelect = false, HideSelection = false, ShowItemToolTips = true };
+        ListViewStyle.ApplyStandard(listViewHistory);
+        listViewHistory.Columns.Add("When", LogicalToDeviceUnits(170), HorizontalAlignment.Left);
+        listViewHistory.Columns.Add("Who", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
+        listViewHistory.Columns.Add("From", LogicalToDeviceUnits(80), HorizontalAlignment.Left);
+        listViewHistory.Columns.Add("Change", LogicalToDeviceUnits(400), HorizontalAlignment.Left);
+        listViewHistory.Columns.Add("State", LogicalToDeviceUnits(160), HorizontalAlignment.Left);
+        listViewHistory.Resize += (s, e) => ListViewColumnResizer.Resize(listViewHistory, HistoryPrimaryColumnIndex);
+        listViewHistory.DoubleClick += async (s, e) => await SeeVersionAsync();
+        listViewHistory.KeyDown += async (s, e) =>
+        {
+            if (e.KeyCode == Keys.Enter)
+                await SeeVersionAsync();
+        };
+
+        labelHistoryStatus = new Label { AutoSize = true, ForeColor = SystemColors.GrayText, Location = new Point(LogicalToDeviceUnits(5), LogicalToDeviceUnits(12)) };
+        buttonSeeVersion = new Button { Text = "See this version", Dock = DockStyle.Right, AutoSize = true, UseVisualStyleBackColor = true };
+        buttonSeeVersion.Click += async (s, e) => await SeeVersionAsync();
+        var buttonRefreshHistory = new Button { Text = "Refresh", Dock = DockStyle.Right, AutoSize = true, UseVisualStyleBackColor = true };
+        buttonRefreshHistory.Click += async (s, e) => await RefreshHistoryAsync();
+        buttonMoreHistory = new Button { Text = "Show more", Dock = DockStyle.Right, AutoSize = true, UseVisualStyleBackColor = true, Visible = false };
+        buttonMoreHistory.Click += async (s, e) => await LoadHistoryPageAsync(_historyRows.Count);
+        var panelHistoryHeader = new Panel { Dock = DockStyle.Top, Height = LogicalToDeviceUnits(34), Padding = new Padding(0, LogicalToDeviceUnits(4), LogicalToDeviceUnits(4), LogicalToDeviceUnits(4)) };
+        panelHistoryHeader.Controls.Add(labelHistoryStatus);
+        panelHistoryHeader.Controls.Add(buttonMoreHistory);
+        panelHistoryHeader.Controls.Add(buttonRefreshHistory);
+        panelHistoryHeader.Controls.Add(buttonSeeVersion);
+        buttonCompareVersion = new Button { Text = "Compare", Dock = DockStyle.Right, AutoSize = true, UseVisualStyleBackColor = true, Enabled = false };
+        buttonCompareVersion.Click += async (s, e) => await CompareVersionAsync();
+        panelHistoryHeader.Controls.Add(buttonCompareVersion);
+        buttonRestoreVersion = new Button { Text = "Restore", Dock = DockStyle.Right, AutoSize = true, UseVisualStyleBackColor = true, Enabled = false };
+        buttonRestoreVersion.Click += async (s, e) => await RestoreVersionAsync();
+        panelHistoryHeader.Controls.Add(buttonRestoreVersion);
+        listViewHistory.SelectedIndexChanged += (s, e) => UpdateHistoryButtons();
+        var toolTip = new ToolTip();
+        toolTip.SetToolTip(buttonSeeVersion, "The note as it was after the selected change");
+        toolTip.SetToolTip(buttonCompareVersion, "What the selected change did, or that version against the note now");
+        toolTip.SetToolTip(buttonRestoreVersion, "The note as it was after the selected change (in the note's own window)");
+        toolTip.SetToolTip(buttonMoreHistory, "The older changes");
+
+        tabHistory = new TabPage("History  ") { ImageIndex = 7, Padding = tabTraceNotes.Padding, UseVisualStyleBackColor = false };
+        tabHistory.Controls.Add(listViewHistory);
+        // What the states of the rows mean (the tones of their rows), under the list.
+        _historyLegend = new HistoryStatesLegend { Dock = DockStyle.Bottom, Padding = new Padding(LogicalToDeviceUnits(4), LogicalToDeviceUnits(4), LogicalToDeviceUnits(4), LogicalToDeviceUnits(2)) };
+        tabHistory.Controls.Add(_historyLegend);
+        tabHistory.Controls.Add(panelHistoryHeader);
+        tabNoteData.TabPages.Add(tabHistory);
+    }
+
+    private Task RefreshHistoryAsync() => LoadHistoryPageAsync(0);
+
+    // From skip 0, the list again; from the rows shown, the next page («Show more»).
+    private async Task LoadHistoryPageAsync(int skip)
+    {
+        var version = skip == 0 ? ++_historyVersion : _historyVersion;
+        if (skip == 0)
+        {
+            _historyRows = new();
+            _historyRestorable.Clear();
+            _historyStates.Clear();
+            _historyLegend.SetStates(_historyStates.Values);
+            listViewHistory.Items.Clear();
+            UpdateHistoryButtons();
+        }
+        labelHistoryStatus.Text = "Loading the history…";
+        buttonMoreHistory.Visible = false;
+
+        Result<NoteHistoryPageDto> result;
+        try
+        {
+            result = await _ctrl.GetHistoryAsync(skip);
+        }
+        catch (Exception ex)
+        {
+            result = new Result<NoteHistoryPageDto>();
+            result.AddErrorMessage(ex.Message);
+        }
+        if (IsDisposed || version != _historyVersion)
+            return; // another note, or asked again meanwhile
+
+        if (result == null)
+        {
+            labelHistoryStatus.Text = "Save the note to start its history.";
+            return;
+        }
+        if (!result.IsValid)
+        {
+            labelHistoryStatus.Text = result.ErrorMessage;
+            return;
+        }
+
+        _historyTotal = result.Entity.Total;
+        _historyRestorable.UnionWith(result.Entity.Restorable ?? new());
+        foreach (var state in result.Entity.States ?? new())
+            _historyStates.TryAdd(state.KLogId, state.State);
+        listViewHistory.BeginUpdate();
+        foreach (var row in result.Entity.Rows.Where(r => _historyRows.All(k => k.KLogId != r.KLogId)))
+        {
+            _historyRows.Add(row);
+            var item = new ListViewItem(KNote.Model.Core.HistoryRules.WhenText(row)) { Name = row.KLogId.ToString(), ToolTipText = row.RegistryMessage };
+            item.SubItems.Add(row.UserName ?? "");
+            item.SubItems.Add(row.Origin ?? "");
+            item.SubItems.Add(row.RegistryMessage ?? "");
+            var rowState = _historyStates.GetValueOrDefault(row.KLogId);
+            item.SubItems.Add(KNote.Model.Core.HistoryRowStates.Text(rowState));
+            HistoryRowColors.Paint(item, rowState);
+            listViewHistory.Items.Add(item);
+        }
+        listViewHistory.EndUpdate();
+        _historyLegend.SetStates(_historyStates.Values);
+        labelHistoryStatus.Text = _historyTotal == 0
+            ? "No changes noted yet: the history starts the day it was installed."
+            : _historyTotal == 1 ? "1 change" : $"{_historyTotal} changes";
+        buttonMoreHistory.Visible = _historyRows.Count < _historyTotal;
+        ListViewColumnResizer.Resize(listViewHistory, HistoryPrimaryColumnIndex);
+    }
+
+    private KLogDto SelectedHistoryRow() => listViewHistory.SelectedItems.Count == 0
+        ? null
+        : _historyRows.FirstOrDefault(r => r.KLogId.ToString() == listViewHistory.SelectedItems[0].Name);
+
+    private bool CanRestoreHistoryRow(KLogDto row) => row != null && _ctrl.CanRestoreVersions && _historyRestorable.Contains(row.KLogId);
+
+    private void UpdateHistoryButtons()
+    {
+        var row = SelectedHistoryRow();
+        buttonCompareVersion.Enabled = KNote.Model.Core.HistoryRules.CanCompare(row);
+        buttonRestoreVersion.Enabled = CanRestoreHistoryRow(row);
+    }
+
+    // Not gated on _ctrl.EditMode: it only reads («Restore» in its window, only in edit mode).
+    private async Task SeeVersionAsync()
+    {
+        var row = SelectedHistoryRow();
+        if (row == null)
+        {
+            ShowInfo("Select the change whose version you want to see.");
+            return;
+        }
+        await _ctrl.ShowVersionAsync(row, CanRestoreHistoryRow(row));
+    }
+
+    private async Task CompareVersionAsync()
+    {
+        var row = SelectedHistoryRow();
+        if (KNote.Model.Core.HistoryRules.CanCompare(row))
+            await _ctrl.CompareAsync(row);
+    }
+
+    // H23: the controller asks, saves the changes first, restores and reads the note again (the list then too).
+    private async Task RestoreVersionAsync()
+    {
+        var row = SelectedHistoryRow();
+        if (!CanRestoreHistoryRow(row))
+            return;
+        buttonRestoreVersion.Enabled = false;
+        try
+        {
+            await _ctrl.RestoreVersionAsync(row);
+        }
+        finally
+        {
+            if (!IsDisposed)
+                UpdateHistoryButtons();
         }
     }
 

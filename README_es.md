@@ -14,6 +14,7 @@ Funcionalidades principales:
 - Descripciones escritas en HTML o en Markdown, con diagramas [Mermaid](https://mermaid.js.org/).
 - Varios repositorios (bases de datos) abiertos a la vez en la aplicación de escritorio, cada uno con sus propios usuarios y roles (Guest, Staff, Project manager, Admin).
 - Informes imprimibles (lista de notas, libro, detalle de una nota) y exportación a CSV.
+- Historial de las notas: quién cambió qué y cuándo, las versiones anteriores de cada nota (verlas, compararlas y restaurarlas), las notas borradas que se pueden recuperar y los cambios de todo el repositorio en un periodo.
 - Un asistente de IA (OpenAI, Anthropic u Ollama) que puede buscar en tus notas y crear tareas, con sus conversaciones guardadas como notas.
 - Búsqueda por significado (con un modelo de embeddings de Ollama u OpenAI): encuentra las notas por lo que cuentan y muestra las notas parecidas a cada nota.
 - Un chat room compartido por la aplicación de escritorio y la aplicación Web.

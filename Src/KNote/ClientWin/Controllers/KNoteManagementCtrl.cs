@@ -829,7 +829,8 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
             // open the note's alarm list - no retry.
             message.Comment = KntAlarmEmail.FailedComment(message, ex.Message);
             message.SetIsDirty(true);
-            await service.Notes.SaveMessageAsync(message, false);
+            using (KNote.Service.Core.KntHistory.NotNoted()) // KNote's own upkeep, not a change of a person's (history)
+                await service.Notes.SaveMessageAsync(message, false);
         }
     }
 
@@ -1402,6 +1403,61 @@ public class KNoteManagementCtrl : CtrlViewBase<IViewKNoteManagement>
     public async Task RefreshNotesList()
     {
         await ForceRefreshListNotes();
+    }
+
+    /// <summary>
+    /// «Recover deleted notes» (the history, H24): the deleted notes of the repository selected in the tree, in a modal window; if
+    /// some note was recovered, the notes list is read again (it may be in it).
+    /// </summary>
+    public async Task RecoverDeletedNotes()
+    {
+        var serviceRef = SelectedServiceRef ?? Store.GetActiveOrDefaultServiceRef();
+        if (serviceRef == null)
+        {
+            View.ShowInfo("There is no repository selected.");
+            return;
+        }
+
+        // Refused (it tells why) before anything is read.
+        var deletedNotesCtrl = new DeletedNotesCtrl(Store, serviceRef.Service);
+        if (!deletedNotesCtrl.CheckAccess())
+            return;
+        if (!await deletedNotesCtrl.LoadAsync())
+        {
+            View.ShowInfo(deletedNotesCtrl.Error);
+            deletedNotesCtrl.Finalize();
+            return;
+        }
+        deletedNotesCtrl.RunModal();
+        if (deletedNotesCtrl.AnyRecovered)
+            await ForceRefreshListNotes();
+    }
+
+    /// <summary>
+    /// «Repository changes» (the history, H28): the changes of the repository selected in the tree, in a modal window; if some note
+    /// was recovered from it, the notes list is read again.
+    /// </summary>
+    public async Task RepositoryChanges()
+    {
+        var serviceRef = SelectedServiceRef ?? Store.GetActiveOrDefaultServiceRef();
+        if (serviceRef == null)
+        {
+            View.ShowInfo("There is no repository selected.");
+            return;
+        }
+
+        var changesCtrl = new RepositoryChangesCtrl(Store, serviceRef.Service);
+        if (!changesCtrl.CheckAccess())
+            return;
+        if (!await changesCtrl.LoadAsync())
+        {
+            View.ShowInfo(changesCtrl.Error);
+            changesCtrl.Finalize();
+            return;
+        }
+        changesCtrl.RunModal();
+        if (changesCtrl.AnyRecovered)
+            await ForceRefreshListNotes();
     }
 
     public async Task MoveSelectedNotes()

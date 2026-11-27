@@ -1,0 +1,307 @@
+@using KNote.Model.Core
+@inject IStore webApiService
+@inject DialogService dialogService
+@inject TooltipService tooltipService
+@inject KntWindows kntWindows
+
+@implements IDisposable
+
+@* «Repository changes» (H28, menu Utils of the notes pages): the changes of the repository in a period, the newest first, 100 at a
+   time, filtered by what changed, the action, the user and the origin (the period: the last 7 days at first). The structure only for
+   ProjectManager and up (H29: Server leaves it out, and its kinds are not offered). «Open note» opens a note that exists in its
+   window; «See this version», the note as it was after any change of it; a deleted note is recovered in «Recover deleted notes ...»,
+   which opens with the note of the row chosen already selected (if it is still there; only for Staff and up, a Guest is told who can
+   in the column «State»). Each row says in «State», with the tone of its row and the legend under the list, what can be brought
+   back of it (HistoryRowStates: in the deleted notes until a day, can't be recovered, only noted). It closes with true if a note was recovered
+   (the page reads its list again). The dialog takes the window's height (Fill): the filters and the buttons stay in view and only
+   the list scrolls. *@
+
+<KntDialogFrame Icon="manage_history" Title="Repository changes" Subtitle="Who changed what, and when" OnClose="Close" Fill="true">
+    <ChildContent>
+        @* The filters, the notice and the buttons always in view; only the list scrolls, as in the notes pages. *@
+        <div class="knt-changes-layout">
+            <div class="knt-changes-filters">
+                <KntField Label="Period from" Component="ChangesFrom">
+                    <RadzenDatePicker TValue="DateTime" Name="ChangesFrom" Value="@query.From" ValueChanged="@(v => SetFilter(() => query.From = v.Date))"
+                                      DateFormat="d" ShowTime="false" />
+                </KntField>
+                <KntField Label="To" Component="ChangesTo">
+                    <RadzenDatePicker TValue="DateTime" Name="ChangesTo" Value="@query.To" ValueChanged="@(v => SetFilter(() => query.To = v.Date))"
+                                      DateFormat="d" ShowTime="false" />
+                </KntField>
+                <KntField Label="What" Component="ChangesWhat">
+                    <RadzenDropDown TValue="string" Name="ChangesWhat" Data="@kinds" TextProperty="Text" ValueProperty="Value"
+                                    Value="@(query.EntityName ?? "")" ValueChanged="@(v => SetFilter(() => query.EntityName = Empty(v)))" />
+                </KntField>
+                <KntField Label="Action" Component="ChangesAction">
+                    <RadzenDropDown TValue="string" Name="ChangesAction" Data="@Actions" TextProperty="Text" ValueProperty="Value"
+                                    Value="@(query.ActionType ?? "")" ValueChanged="@(v => SetFilter(() => query.ActionType = Empty(v)))" />
+                </KntField>
+                <KntField Label="Who" Component="ChangesWho">
+                    <RadzenDropDown TValue="string" Name="ChangesWho" Data="@users" TextProperty="Text" ValueProperty="Value"
+                                    Value="@(query.UserName ?? "")" ValueChanged="@(v => SetFilter(() => query.UserName = Empty(v)))" />
+                </KntField>
+                <KntField Label="From" Component="ChangesOrigin">
+                    <RadzenDropDown TValue="string" Name="ChangesOrigin" Data="@Origins" TextProperty="Text" ValueProperty="Value"
+                                    Value="@(query.Origin ?? "")" ValueChanged="@(v => SetFilter(() => query.Origin = Empty(v)))" />
+                </KntField>
+            </div>
+
+            <div class="knt-list-header">
+                <span>@(page == null || loading ? "Loading the changes ..." : HistoryRules.ChangesSummary(page.Total, query.From, query.To, since))</span>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                    <RadzenButton Text="Open note" Icon="open_in_new" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                  Disabled="@(!CanOpen(Selected))" Click="() => OpenAsync(Selected)" />
+                    <RadzenButton Text="See this version" Icon="history" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Disabled="@(!CanSeeVersion(Selected))" Click="SeeVersionAsync"
+                                  MouseEnter="@(args => tooltipService.Open(args, VersionTip(Selected)))" />
+                    @if (page?.CanRecover != false)
+                    {
+                        <RadzenButton Text="Recover deleted notes ..." Icon="restore_from_trash" ButtonStyle="ButtonStyle.Base"
+                                  Size="ButtonSize.Small" Click="DeletedNotesAsync" />
+                    }
+                    <RadzenButton Text="Refresh" Icon="refresh" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="ReloadAsync" />
+                </RadzenStack>
+            </div>
+
+            @if (loadFailed)
+            {
+                <div class="knt-load-error">
+                    <span class="knt-load-error-text">The changes could not be loaded.</span>
+                    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="ReloadAsync" />
+                </div>
+            }
+            else if (page != null && rows.Count == 0 && !loading)
+            {
+                <div class="knt-empty-state">No changes in this period.</div>
+            }
+            else if (page != null)
+            {
+                @if (loading)
+                {
+                    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" ShowValue="false" Style="height: 3px; flex: none" />
+                }
+                <div class="@(loading ? "knt-changes-grid knt-changes-loading" : "knt-changes-grid")">
+                <RadzenDataGrid TItem="KLogDto" Data="@rows" Density="Density.Compact" AllowColumnResize="true" class="knt-list" Style="height: 100%" AllowAlternatingRows="false"
+                                SelectionMode="DataGridSelectionMode.Single" @bind-Value="@selected" RowDoubleClick="args => OpenAsync(args.Data)"
+                                CellRender="@(args => KntHistoryStates.PaintCell(args, StateOf))">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="KLogDto" Title="When" Width="170px">
+                            <Template Context="row">@HistoryRules.WhenText(row)</Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="KLogDto" Property="UserName" Title="Who" Width="110px" />
+                        <RadzenDataGridColumn TItem="KLogDto" Property="Origin" Title="From" Width="90px" />
+                        <RadzenDataGridColumn TItem="KLogDto" Title="What" Width="220px">
+                            <Template Context="row"><span class="knt-changes-text">@HistoryRules.WhatText(row)</span></Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="KLogDto" Property="RegistryMessage" Title="Change">
+                            <Template Context="row"><span class="knt-changes-text">@row.RegistryMessage</span></Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="KLogDto" Title="State" Width="170px">
+                            <Template Context="row"><KntHistoryState State="@StateOf(row)" Until="@UntilOf(row)" /></Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+                </div>
+
+                @if (page.HasMore)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Style="flex: none">
+                        <RadzenButton Text="Show more" Icon="expand_more" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base"
+                                      IsBusy="@loadingMore" Click="ShowMoreAsync" />
+                    </RadzenStack>
+                }
+
+                <div class="knt-changes-legend"><KntHistoryStatesLegend States="@states.Values.Select(s => s.State)" /></div>
+            }
+        </div>
+    </ChildContent>
+    <Footer>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="Close" />
+        </RadzenStack>
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    private record Choice(string Value, string Text);
+
+    private static readonly List<Choice> Actions = new()
+    {
+        new("", "All"), new(nameof(EnumHistoryAction.Created), "Created"), new(nameof(EnumHistoryAction.Updated), "Updated"),
+        new(nameof(EnumHistoryAction.Deleted), "Deleted"), new(nameof(EnumHistoryAction.Restored), "Restored"),
+        new(nameof(EnumHistoryAction.Removed), "Removed")
+    };
+
+    private static readonly List<Choice> Origins = new[] { new Choice("", "Any") }
+        .Concat(Enum.GetNames<EnumHistoryOrigin>().Select(o => new Choice(o, o))).ToList();
+
+    private readonly RepositoryChangesQueryDto query = new();
+    private List<Choice> kinds = Kinds(false);
+    private List<Choice> users = new() { new("", "Everybody") };
+
+    private RepositoryChangesPageDto? page;
+    // Always a new list when it changes: RadzenDataGrid only reads its Data again when it is another instance (the same list,
+    // cleared and filled, kept showing the rows it had).
+    private List<KLogDto> rows = new();
+    private readonly HashSet<Guid> existingNotes = new();
+    // The state of each row read that has one (HistoryRowStates.ForChange, given by the Service): its column, its tone and the legend.
+    private Dictionary<Guid, HistoryRowStateDto> states = new();
+    private IList<KLogDto> selected = new List<KLogDto>();
+    private bool anyRecovered;
+    private bool loadFailed;
+    private bool loadingMore;
+    // The list being read again (a filter changed): it is dimmed and the header says so.
+    private bool loading;
+    // The day the history started (HISTORY_START): a period before it shows nothing more, and the header says so.
+    private DateTime? since;
+
+    // The first page asked for last wins (a filter changed meanwhile).
+    private readonly KntLatestRequest request = new();
+    private readonly CancellationTokenSource disposal = new();
+
+    private KLogDto? Selected => selected.FirstOrDefault();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var retention = await webApiService.History.GetRetentionAsync(disposal.Token);
+        if (retention.IsValid)
+            since = retention.Entity?.Since;
+        await ReloadAsync();
+    }
+
+    public void Dispose()
+    {
+        disposal.Cancel();
+        request.Dispose();
+    }
+
+    private static List<Choice> Kinds(bool structure) =>
+        new[] { new Choice("", "All") }.Concat(HistoryRules.ChangeKinds(structure).Select(k => new Choice(k.EntityName, k.Text))).ToList();
+
+    private static string? Empty(string? value) => string.IsNullOrEmpty(value) ? null : value;
+
+    private Task SetFilter(Action change)
+    {
+        change();
+        return ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        loadFailed = false;
+        loading = true;
+        query.Skip = 0;
+        var asked = Copy(query);
+        var result = await request.RunAsync(ct => webApiService.History.GetRepositoryChangesAsync(asked, ct));
+        if (result.Canceled)
+            return;
+        loading = false;
+        if (!result.Value.IsValid)
+        {
+            loadFailed = true;
+            return;
+        }
+        page = result.Value.Entity;
+        rows = new List<KLogDto>();
+        existingNotes.Clear();
+        states = new();
+        Add(page);
+        selected = new List<KLogDto>();
+        kinds = Kinds(page.StructureIncluded);
+        await LoadUsersAsync(asked);
+    }
+
+    private async Task LoadUsersAsync(RepositoryChangesQueryDto asked)
+    {
+        var result = await webApiService.History.GetRepositoryChangesUsersAsync(asked, disposal.Token);
+        if (!result.IsValid || result.Entity == null)
+            return;
+        users = new[] { new Choice("", "Everybody") }.Concat(result.Entity.Select(u => new Choice(u, u))).ToList();
+        // The user chosen still appears in the list, though it changed nothing in this period.
+        if (!string.IsNullOrEmpty(query.UserName) && users.All(u => u.Value != query.UserName))
+            users.Add(new Choice(query.UserName, query.UserName));
+    }
+
+    private async Task ShowMoreAsync()
+    {
+        if (page == null || loadingMore)
+            return;
+        loadingMore = true;
+        try
+        {
+            var asked = Copy(query);
+            asked.Skip = rows.Count;
+            var result = await webApiService.History.GetRepositoryChangesAsync(asked, disposal.Token);
+            if (result.IsValid && result.Entity != null)
+            {
+                page = result.Entity;
+                Add(page);
+                page.Skip = 0;
+                page.Rows = rows;
+            }
+        }
+        finally
+        {
+            loadingMore = false;
+        }
+    }
+
+    private void Add(RepositoryChangesPageDto added)
+    {
+        rows = rows.Concat(added.Rows.Where(r => rows.All(k => k.KLogId != r.KLogId))).ToList();
+        existingNotes.UnionWith(added.ExistingNotes);
+        foreach (var state in added.States)
+            states[state.KLogId] = state;
+    }
+
+    private static RepositoryChangesQueryDto Copy(RepositoryChangesQueryDto q) => new()
+    {
+        From = q.From, To = q.To, EntityName = q.EntityName, ActionType = q.ActionType, UserName = q.UserName, Origin = q.Origin, Skip = q.Skip
+    };
+
+    private EnumHistoryRowState StateOf(KLogDto row) => states.TryGetValue(row.KLogId, out var s) ? s.State : EnumHistoryRowState.None;
+
+    private DateTime? UntilOf(KLogDto row) => states.TryGetValue(row.KLogId, out var s) ? s.Until : null;
+
+    private bool CanOpen(KLogDto? row) => row?.EntityName == HistoryEntities.Note && existingNotes.Contains(row.EntityId);
+
+    // Any change of a note: the note as it was after it (H18), also of a note deleted or recovered since; not a deletion whose copy
+    // is gone when the note doesn't exist (the trash emptied it, or «Remove permanently»), nor that removal.
+    private bool CanSeeVersion(KLogDto? row) => row != null && HistoryRules.CanSeeVersion(row, CanOpen(row));
+
+    private string VersionTip(KLogDto? row) =>
+        row?.EntityName == HistoryEntities.Note && !CanSeeVersion(row) ? "Its copy is no longer kept" : "The note as it was after the selected change";
+
+    private async Task OpenAsync(KLogDto? row)
+    {
+        if (CanOpen(row))
+            await kntWindows.OpenEditAsync(row!.EntityId);
+    }
+
+    private async Task SeeVersionAsync()
+    {
+        var row = Selected;
+        if (!CanSeeVersion(row))
+            return;
+        await dialogService.OpenAsync<NoteVersionDialog>("Version",
+            new Dictionary<string, object?> { { "NoteId", row!.EntityId }, { "Row", row }, { "NoteTitle", row.EntityTitle } },
+            KntDialogs.Framed(KntDialogs.Large()));
+    }
+
+    // With the note of the row chosen already selected, if it is the deletion of a note (the dialog selects it if it can still be
+    // recovered).
+    private async Task DeletedNotesAsync()
+    {
+        var row = Selected;
+        var noteId = row?.EntityName == HistoryEntities.Note && row.ActionType == nameof(EnumHistoryAction.Deleted) ? row.EntityId : (Guid?)null;
+        if (await dialogService.OpenAsync<DeletedNotesDialog>("Recover deleted notes", new Dictionary<string, object?> { { "SelectedNoteId", noteId } },
+                KntDialogs.Framed(KntDialogs.Large())) is true)
+        {
+            anyRecovered = true;
+            await ReloadAsync();
+        }
+    }
+
+    private void Close() => dialogService.Close(anyRecovered ? true : null);
+}

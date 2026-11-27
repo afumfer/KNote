@@ -14,6 +14,7 @@ Main features:
 - Descriptions written in HTML or Markdown, with [Mermaid](https://mermaid.js.org/) diagrams.
 - Several repositories (databases) open at the same time in the desktop app, each one with its own users and roles (Guest, Staff, Project manager, Admin).
 - Printable reports (notes list, book, note details) and CSV export.
+- Note history: who changed what and when, the earlier versions of each note (see, compare and restore them), deleted notes that can be recovered, and the changes of the whole repository in a period.
 - An AI assistant (OpenAI, Anthropic or Ollama) that can search your notes and create tasks, with its conversations saved as notes.
 - Search by meaning (with an embedding model of Ollama or OpenAI): find notes by what they talk about, and see the notes similar to each note.
 - A chat room shared by the desktop and web apps.

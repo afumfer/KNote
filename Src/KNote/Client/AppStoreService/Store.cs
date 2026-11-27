@@ -73,6 +73,17 @@ public class Store : IStore, IDisposable
         }
     }
 
+    private IHistoryWebApiService? _history;
+    public IHistoryWebApiService History
+    {
+        get
+        {
+            if (_history == null)
+                _history = new HistoryWebApiService(AppState, _httpClient);
+            return _history;
+        }
+    }
+
     private ITraceNoteTypeWebApiService? _traceNoteTypes;
     public ITraceNoteTypeWebApiService TraceNoteTypes
     {

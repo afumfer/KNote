@@ -185,7 +185,9 @@ internal static class KntSystemNotes
 
             try
             {
-                return await create();
+                // What KNote creates by itself (H16): its rows of the history say so.
+                using (KntHistoryOrigin.Begin(EnumHistoryOrigin.KNote))
+                    return await create();
             }
             catch (Exception)
             {

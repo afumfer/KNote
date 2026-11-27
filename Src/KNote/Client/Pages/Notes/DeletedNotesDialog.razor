@@ -1,0 +1,169 @@
+@using KNote.Model.Core
+@inject IStore webApiService
+@inject DialogService dialogService
+@inject KntWindows kntWindows
+
+@implements IDisposable
+
+@* «Recover deleted notes» (H24, menu Utils of the notes pages): the notes deleted that still keep their last version (the trash,
+   emptied DeletedNotesDays after), the newest first. «See this version» shows the note as it was deleted; «Recover» creates it
+   again (its own data: Server says what didn't come back, and the window offers to open it); an Admin can «Remove permanently»
+   (H27). It closes with true if a note was recovered (the page reads its list again). *@
+
+<KntDialogFrame Icon="restore_from_trash" Title="Recover deleted notes" Subtitle="@Subtitle" OnClose="Close">
+    <ChildContent>
+        <RadzenStack Gap="0.75rem">
+            @if (recovered != null)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                    <div>Recovered: #@recovered.NoteNumber @recovered.Topic</div>
+                    @foreach (var notice in recovered.Notices)
+                    {
+                        <div class="knt-deleted-notice">@notice</div>
+                    }
+                    <RadzenButton Text="Open the note" Icon="open_in_new" Size="ButtonSize.Small" Variant="Variant.Text"
+                                  Click="() => kntWindows.OpenEditAsync(recovered.NoteId)" />
+                </RadzenAlert>
+            }
+
+            <div class="knt-list-header">
+                <span>@(notes == null ? "Loading the deleted notes ..." : notes.Count == 1 ? "1 deleted note" : $"{notes.Count} deleted notes")</span>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                    <RadzenButton Text="See this version" Icon="history" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                  Disabled="@(Selected == null)" Click="SeeVersionAsync" />
+                    <RadzenButton Text="Recover" Icon="restore_from_trash" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                  Disabled="@(Selected == null)" IsBusy="@working.IsBusy" Click="RecoverAsync" />
+                    @if (isAdmin)
+                    {
+                        <RadzenButton Text="Remove permanently" Icon="delete_forever" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                                      Size="ButtonSize.Small" Disabled="@(Selected == null || working.IsBusy)" Click="RemoveAsync" />
+                    }
+                    <RadzenButton Text="Refresh" Icon="refresh" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Click="LoadAsync" />
+                </RadzenStack>
+            </div>
+
+            @if (loadFailed)
+            {
+                <div class="knt-load-error">
+                    <span class="knt-load-error-text">The deleted notes could not be loaded.</span>
+                    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="LoadAsync" />
+                </div>
+            }
+            else if (notes != null && notes.Count == 0)
+            {
+                <div class="knt-empty-state">No deleted notes to recover.</div>
+            }
+            else if (notes != null)
+            {
+                <RadzenDataGrid TItem="DeletedNoteDto" Data="@notes" Density="Density.Compact" AllowColumnResize="true" AllowSorting="true"
+                                SelectionMode="DataGridSelectionMode.Single" @bind-Value="@selected" RowDoubleClick="_ => SeeVersionAsync()">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="DeletedNoteDto" Property="NoteNumber" Title="#" Width="70px" />
+                        <RadzenDataGridColumn TItem="DeletedNoteDto" Property="Topic" Title="Topic" />
+                        <RadzenDataGridColumn TItem="DeletedNoteDto" Property="FolderPath" Title="Folder" Width="200px" />
+                        <RadzenDataGridColumn TItem="DeletedNoteDto" Property="DeletedAt" Title="Deleted" Width="160px">
+                            <Template Context="note">@note.DeletedAt.ToString("g")</Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="DeletedNoteDto" Property="DeletedBy" Title="By" Width="110px" />
+                    </Columns>
+                </RadzenDataGrid>
+            }
+        </RadzenStack>
+    </ChildContent>
+    <Footer>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="Close" />
+        </RadzenStack>
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+    // The note to select when the list is read the first time (opened from a deletion of «Repository changes»), if it is in it.
+    [Parameter] public Guid? SelectedNoteId { get; set; }
+
+    private List<DeletedNoteDto>? notes;
+    private bool firstLoad = true;
+    private IList<DeletedNoteDto> selected = new List<DeletedNoteDto>();
+    private NoteRecoverResultDto? recovered;
+    private bool anyRecovered;
+    private bool loadFailed;
+    private bool isAdmin;
+    private int keptDays = new HistoryRetentionDto().DeletedNotesDays;
+
+    // One recovery or removal at a time; the list asked for last wins.
+    private readonly KntSingleFlight working = new();
+    private readonly KntLatestRequest request = new();
+
+    private DeletedNoteDto? Selected => selected.FirstOrDefault();
+
+    private string Subtitle => $"Deleted notes are kept {keptDays} days. Their tasks, resources, alarms and relations are not recovered.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        isAdmin = (await AuthenticationState).User.IsInRole("Admin");
+        var retention = await webApiService.History.GetRetentionAsync();
+        if (retention.IsValid && retention.Entity?.Retention != null)
+            keptDays = retention.Entity.Retention.DeletedNotesDays;
+        await LoadAsync();
+    }
+
+    public void Dispose() => request.Dispose();
+
+    private async Task LoadAsync()
+    {
+        loadFailed = false;
+        var result = await request.RunAsync(ct => webApiService.History.GetDeletedNotesAsync(ct));
+        if (result.Canceled)
+            return;
+        if (!result.Value.IsValid)
+        {
+            loadFailed = true;
+            return;
+        }
+        notes = result.Value.Entity;
+        selected = new List<DeletedNoteDto>();
+        if (firstLoad && SelectedNoteId is Guid noteId && notes?.FirstOrDefault(n => n.NoteId == noteId) is DeletedNoteDto wanted)
+            selected = new List<DeletedNoteDto> { wanted };
+        firstLoad = false;
+    }
+
+    private async Task SeeVersionAsync()
+    {
+        var note = Selected;
+        if (note?.Row == null)
+            return;
+        await dialogService.OpenAsync<NoteVersionDialog>("Version",
+            new Dictionary<string, object?> { { "NoteId", note.NoteId }, { "Row", note.Row }, { "NoteTitle", $"#{note.NoteNumber} · {note.Topic}" } },
+            KntDialogs.Framed(KntDialogs.Large()));
+    }
+
+    private Task RecoverAsync() => working.RunAsync(async () =>
+    {
+        var note = Selected;
+        if (note == null)
+            return;
+        var result = await webApiService.History.RecoverNoteAsync(note.NoteId);
+        if (!result.IsValid)
+            return;
+        recovered = result.Entity;
+        anyRecovered = true;
+        await LoadAsync();
+    });
+
+    private Task RemoveAsync() => working.RunAsync(async () =>
+    {
+        var note = Selected;
+        if (note == null || !isAdmin)
+            return;
+        var confirmed = await dialogService.Confirm(
+            $"Remove #{note.NoteNumber} {note.Topic} permanently? Its versions are emptied and it can no longer be recovered.",
+            "Remove permanently", new ConfirmOptions { OkButtonText = "Remove", CancelButtonText = "Cancel" });
+        if (confirmed != true)
+            return;
+        if ((await webApiService.History.RemoveDeletedNoteAsync(note.NoteId)).IsValid)
+            await LoadAsync();
+    });
+
+    private void Close() => dialogService.Close(anyRecovered ? true : null);
+}

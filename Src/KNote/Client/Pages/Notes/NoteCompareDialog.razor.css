@@ -1,0 +1,113 @@
+/* «Compare» (H12): the fields that differ and the text by lines, the words that changed marked. Only theme variables, so it
+   follows the light/dark theme. */
+
+.knt-compare-fields {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+    .knt-compare-fields th,
+    .knt-compare-fields td {
+        padding: 0.25rem 0.5rem;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+
+    .knt-compare-fields thead th {
+        font-weight: 600;
+        color: var(--rz-text-secondary-color);
+    }
+
+    .knt-compare-fields tbody th {
+        width: 10rem;
+        font-weight: 500;
+        color: var(--rz-text-secondary-color);
+    }
+
+.knt-compare-before {
+    background: color-mix(in srgb, var(--rz-danger) 10%, transparent);
+}
+
+.knt-compare-after {
+    background: color-mix(in srgb, var(--rz-success) 10%, transparent);
+}
+
+.knt-compare-text-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.knt-compare-legend {
+    font-weight: 400;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-compare-text {
+    font-family: var(--rz-font-family-monospace, ui-monospace, SFMono-Regular, Consolas, monospace);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 12%, transparent);
+    border-radius: var(--rz-border-radius, 4px);
+    overflow-x: auto;
+}
+
+.knt-compare-line {
+    display: grid;
+    grid-template-columns: 3.5em 3.5em 1.5em 1fr;
+    min-width: 0;
+}
+
+.knt-compare-num {
+    padding-right: 0.5em;
+    text-align: right;
+    color: var(--rz-text-disabled-color, var(--rz-text-secondary-color));
+    user-select: none;
+}
+
+.knt-compare-sign {
+    text-align: center;
+    user-select: none;
+}
+
+.knt-compare-code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding-right: 0.5em;
+    min-width: 0;
+}
+
+.knt-compare-removed {
+    background: color-mix(in srgb, var(--rz-danger) 12%, transparent);
+}
+
+.knt-compare-added {
+    background: color-mix(in srgb, var(--rz-success) 12%, transparent);
+}
+
+.knt-compare-folded {
+    color: var(--rz-text-secondary-color);
+    background: color-mix(in srgb, var(--rz-text-color) 4%, transparent);
+    font-style: italic;
+}
+
+.knt-compare-word {
+    color: inherit;
+    border-radius: 2px;
+    padding: 0;
+}
+
+.knt-compare-removed .knt-compare-word {
+    background: color-mix(in srgb, var(--rz-danger) 35%, transparent);
+}
+
+.knt-compare-added .knt-compare-word {
+    background: color-mix(in srgb, var(--rz-success) 35%, transparent);
+}

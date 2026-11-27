@@ -92,6 +92,7 @@ public class RepositoryIdentityServiceTests
     [DataRow("DB_VERSION")]
     [DataRow("DB_REPOSITORYID")]
     [DataRow("DB_REPOSITORYNAME")]
+    [DataRow("HISTORY_START")]
     public async Task GenericSystemValueCommands_CannotChangeOrDeleteTheProtectedRows(string key)
     {
         using var db = new RepositoryTestDatabase();

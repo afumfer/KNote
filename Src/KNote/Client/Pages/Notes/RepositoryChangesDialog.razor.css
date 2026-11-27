@@ -1,0 +1,54 @@
+/* «Repository changes»: the filters side by side as wide as they fit; the texts of a row go on as many lines as they need. */
+
+/* The body takes the room the dialog leaves (KntDialogFrame Fill, without a scroll of its own): the filters, the notice and the
+   buttons keep their height and the list takes the rest, with its own scroll. */
+.knt-changes-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    height: 100%;
+    min-height: 0;
+}
+
+    /* Its own elements; the Radzen components in it (the notice, the progress bar, «Show more») carry flex: none themselves. */
+    .knt-changes-layout > * {
+        flex: none;
+    }
+
+    .knt-changes-layout > .knt-changes-grid {
+        flex: 1 1 0;
+        min-height: 8rem;
+    }
+
+.knt-changes-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0 0.75rem;
+}
+
+    .knt-changes-filters ::deep .rz-datepicker,
+    .knt-changes-filters ::deep .rz-dropdown {
+        width: 100%;
+    }
+
+/* The list while it is read again: what it showed, dimmed, until the new one arrives. */
+.knt-changes-loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.knt-changes-text {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.knt-changes-legend {
+    padding-top: 0.25rem;
+}
+
+/* The columns with a width (When, Who, From, What, State: 760px) leave «Change» what remains: in a narrow dialog nearly nothing,
+   and its text, broken anywhere, made each row so tall that the list looked empty. Never narrower than this: the list scrolls
+   sideways instead, and «Change» keeps at least 320px. */
+.knt-changes-grid ::deep .rz-grid-table {
+    min-width: 1080px;
+}

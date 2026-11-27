@@ -89,7 +89,8 @@ public class KntRepositories
         if (string.IsNullOrEmpty(repositoryRef.ResourcesContainerRootUrl) && request != null)
             repositoryRef.ResourcesContainerRootUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
 
-        return new KntService(KntRepositoryFactory.Create(repositoryRef)) { UserIdentityName = userName };
+        // The changes of the requests are the Web's, for the history (H11); its background work sets KNote.
+        return new KntService(KntRepositoryFactory.Create(repositoryRef)) { UserIdentityName = userName, HistoryOrigin = EnumHistoryOrigin.Web };
     }
 
     #region Startup
@@ -203,6 +204,10 @@ public class KntRepositories
 
             opened.Add((config, repositoryId));
             logger.LogInformation("Repository {repository} ({id}) opened.", label, repositoryId);
+
+            // The trash of the history, when the repository is opened (H9). It never fails: an error goes to the log.
+            using (var service = new KntService(KntRepositoryFactory.Create(config)) { Logger = logger })
+                await KntHistory.PurgeDeletedNotesAsync(service);
         }
 
         if (opened.Count == 0)

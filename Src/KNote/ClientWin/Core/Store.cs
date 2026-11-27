@@ -876,7 +876,8 @@ public class Store
 
         var inOutDevice = new InOutDeviceForm();
         var kntScript = new KntSEngine(inOutDevice, new KNoteScriptLibrary(this), false);
-        kntScript.Run(code);
+        using (KNote.Service.Core.KntHistoryOrigin.Begin(EnumHistoryOrigin.Script)) // its changes are the script's (history, H11)
+            kntScript.Run(code);
         inOutDevice.Close();
     }
 

@@ -46,6 +46,7 @@ internal static class KntIconCatalog
         [KntIcon.Save] = new(0xEA43, 0xF67F, Neutral),                // save
         [KntIcon.Undo] = new(0xE126, 0xF199, Neutral),                // arrow_undo
         [KntIcon.Redo] = new(0xE0E4, 0xF16E, Neutral),                // arrow_redo
+        [KntIcon.History] = new(0xE705, 0xF47E, Neutral),             // history
         [KntIcon.Print] = new(0xF6FA, 0xF62A, Neutral),               // print
         [KntIcon.Settings] = new(0xF6A8, 0xF6A9, Neutral),            // settings
         [KntIcon.Search] = new(0xEA7C, 0xF68F, Neutral),              // search

@@ -242,6 +242,102 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   editores cargan la nota con `SetEmptyTextsForEditing` antes de `SetIsDirty(false)`; el editor de `ClientWin` no
   devuelve el estado al modelo. Tests en `Tests/NoteChangeRulesTests`, `Tests/RepositoryParityTests/NoteDatesParityTests`,
   `Tests/ServiceTests/NoteModificationDateServiceTests` y `ClientWin.Tests/NoteEditorsModificationDateTests`.
+- **Historial de las notas** (especificación en `C:\Dev\KNote-Atlas\03-Historial.md`; entrega H.1: las notas, sin UI). Una sola
+  tabla, `KLogs` (revisión 11 del esquema): una fila por cambio o por **sesión** (el mismo usuario, nota y origen en 10 minutos
+  actualizan la última fila: el autoguardado deja una, `HistoryRules.CanGroup`), con quién (`UserName`), desde dónde (`Origin`,
+  `EnumHistoryOrigin`), qué partes (`Fields`), el detalle (`ChangeDetails`, `NoteChangeDetailsDto`) y la línea legible
+  (`RegistryMessage`, en inglés, `Model/Core/NoteChangeDescriber`, el texto comparado por líneas con `LineDiff`). Si el cambio tocó los
+  datos propios de la nota (los mismos que deciden su fecha de modificación), la fila guarda **cómo estaba antes** (`PreviousContent`,
+  `NoteVersionDto` en JSON: la versión), **fuera del modelo de EF** como `ExtractedText`: solo la leen `IKntHistoryRepository.GetPreviousContentAsync`
+  y el escritor de cada ORM. **Un único punto**: `Service/Core/KntHistory`, que llaman los cinco comandos que escriben una nota (guardar,
+  borrar, `PatchFolder`, `PatchChangeTags`); compara con lo guardado y da al repositorio un `KLogWriteDto`, que este escribe **en la misma
+  transacción** que la nota y sus atributos (H10): si no se puede anotar, no se guarda nada. Esas transacciones son **explícitas de la
+  conexión** (`BeginTransaction`): en Sqlite un `TransactionScope` no protege nada (sus conexiones no se enlistan; comprobado). Las fechas
+  del historial van al milisegundo (`HistoryRules.Timestamp`; Dapper las envía como `datetime2`). El origen lo pone el host
+  (`IKntService.HistoryOrigin`: `ServiceRef` Desktop, el `Server` Web, sus trabajos KNote) y lo cambia un ámbito (`KntHistoryOrigin.Begin`:
+  el ejecutor de acciones y `create_task` del asistente, KntScript, el broker, los trabajos de `ClientWin`). Borrar guarda la última
+  versión (la papelera, `DeletedNotesDays`); después del cambio, sin hacerlo fallar, la retención de esa nota (`HistoryRules.CopiesToEmpty`)
+  y la papelera (`KntHistory.PurgeDeletedNotesAsync`, también al abrir el repositorio: `ServiceRef` y `KntRepositories.OpenAsync`).
+  Retención: `SYSTEM/HISTORY_RETENTION` (`HistoryRetentionDto`, valores por defecto si no existe); `SYSTEM/HISTORY_START`, el día que
+  empezó. Nada de las notas que escribe KNote (`KntConst.HistoryExcludedNoteTypeNames`). Tests en `Tests/LineDiffTests`,
+  `NoteChangeDescriberTests`, `HistoryRulesTests`, `RepositoryParityTests/HistoryParityTests`, `SchemaUpdateTests/SchemaUpdaterRevision11Tests`
+  y `ServiceTests/NoteHistoryServiceTests`.
+  **Las partes de una nota** (H.2a: tareas, recursos, alarmas, relaciones) son filas **de su nota** (H3), en la de su sesión, sin versión
+  (no son datos propios): `Model/Core/NotePartChangeDescriber` (qué cambió, con la descripción anterior de una tarea hasta 4 KB; cómo se
+  suman en una sesión, `MergeList`; añadido y quitado en la misma sesión no queda) y `NoteChangeDetailsDto.Tasks/Resources/Alarms/Relations`.
+  Los comandos de cada parte (guardar y borrar) comparan con lo guardado y pasan la fila al repositorio, que la escribe en la transacción de
+  la parte (`ExecuteNotedAsync` en Dapper, `NotedAsync` en EF); una relación, una fila en cada nota. Un recurso «sustituido» es uno que llega
+  con un contenido distinto del guardado (los editores lo reenvían en cada guardado). **No se anotan**: lo que escribe la IA en los recursos
+  (otros métodos del repositorio), el orden de un recurso, las relaciones `@DerivedFrom`, las ventanas, el estado de la nota, y lo que hace
+  KNote solo dentro de `KntHistory.NotNoted()` (el correo de una alarma que no se pudo enviar, en `KntAlarms` y `KNoteManagementCtrl`).
+  Borrar una nota con sus partes (`KntHistory.DeletingNote`, en `KntNotesDeleteExtendedAsyncCommand`) no las anota sueltas: la fila
+  `Deleted` dice cuántas tenía y cada nota relacionada anota que perdió la relación (H14). Un comando nuevo que cambie una parte tiene que
+  pasar su fila. Tests en `Tests/NotePartChangeDescriberTests` y `ServiceTests/NotePartsHistoryServiceTests`.
+  **La estructura del repositorio** (H.2b): carpetas, tipos de nota, atributos y sus valores de lista, tipos de relación, usuarios y
+  ajustes (`EntityName` = la entidad; los ajustes, `SystemValue` con un id fijo por ajuste, `HistoryRules.SettingId`), una fila por sesión,
+  sin versiones: `Model/Core/StructureChangeDescriber` y `StructureChangeDetailsDto`. Los atributos se anotan en su transacción (Dapper y
+  EF, ya sin `TransactionScope`, que en Sqlite no guardaba juntos el atributo y sus valores); el resto **justo después**
+  (`KntHistory.NoteStructureAsync`, `IKntHistoryRepository.WriteAsync`): si no se puede anotar, el cambio se queda y el error va al log
+  (H10). Nunca una contraseña ni un hash (`StructureChangeDescriber.Password` solo dice cómo cambió); el correo de un usuario y el valor de
+  un ajuste genérico, sin sus valores (H15). El registro y «Olvidé mi contraseña», sin usuario en el servicio, se anotan con el del propio
+  usuario. Lo que crea `KntSystemNotes` lleva el origen `KNote` (H16). No se anotan el orden de las notas de una carpeta (H17) ni los
+  estados que KNote escribe solo. Un comando nuevo que cambie la estructura tiene que anotarlo. Tests en `Tests/StructureChangeDescriberTests`
+  y `ServiceTests/StructureHistoryServiceTests`.
+  **Lo que se ve** (H.3): `IKntService.History` (`KntHistoryCommands.cs`, Guest): `GetNoteHistoryAsync` (una página de las filas de una
+  nota, la más nueva primero, 100 como mucho, `NoteHistoryPageDto`) y `GetNoteVersionAsync` («See this version», `NoteVersionViewDto`):
+  **la nota tal como quedó tras ese cambio** (H18, `HistoryRules.VersionAfter`): la copia de la primera fila posterior que la tenga o, sin
+  ninguna, la nota actual; si entre medias hay un cambio de sus datos propios sin copia, `Exact = false` y un aviso (`VersionNotice`).
+  Con los nombres resueltos (ruta de la carpeta, tipo, atributos), sin el script (H21). `HistoryRules.WhenText` es el «cuándo» de las dos
+  apps. `Server`: `HistoryController` (`api/history`); la pestaña «History» del editor en la Web (`Client/Pages/Notes/NoteHistory`,
+  `NoteVersionDialog`) y en `ClientWin` (`NoteEditorForm`, `NoteVersionCtrl`/`NoteVersionForm`). Tests en `Tests/HistoryRulesTests`,
+  `ServiceTests/NoteHistoryViewServiceTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/NoteVersionCtrlTests`.
+  **Comparar y restaurar** (H.4a): `GetNoteComparisonAsync` (Guest, H22): lo que hizo un cambio (la copia de su fila o, la de creación,
+  una nota vacía, frente a la versión de después) o esa versión frente a la nota actual, lo único posible si la copia ya no está (lo dice);
+  `HistoryRules.CanCompare` (no en las filas que solo tocaron sus partes ni en el borrado). La comparación la calcula `Model/Core/NoteComparer`
+  (campos con sus nombres, sin el script; el texto por líneas con `LineDiff`, 3 líneas de contexto, lo demás plegado, 3.000 líneas como mucho)
+  con el resaltado por palabras de `WordDiff` (cada línea quitada con la añadida que la sustituye, si se parecen; si no, la línea entera): las
+  apps solo la dibujan. `RestoreNoteVersionAsync` (Staff, H23): la nota tal como quedó tras ese cambio, **por el guardado de siempre**
+  (`KntNotesSaveAsyncCommand`, dentro de `KntHistory.Restoring`): una fila `Restored` aparte (nunca se agrupa, `NoteChangeDetailsDto.Restored`)
+  con su copia, así que deshacer es restaurar la fila anterior. Se puede restaurar una fila con una copia posterior en una nota que existe
+  (`HistoryRules.Restorable`, `NoteHistoryPageDto.Restorable`); una carpeta, un tipo o un atributo que ya no existen dejan lo actual y el
+  resultado lo dice (`NoteRestoreResultDto.Notices`). Los editores guardan antes sus cambios. Tests en `Tests/NoteComparerTests`,
+  `HistoryRulesTests`, `ServiceTests/NoteHistoryRestoreServiceTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/NoteCompareCtrlTests`.
+  **Notas borradas y retención** (H.4b): «Recover deleted notes» (H24): `GetDeletedNotesAsync` (Staff; `IKntHistoryRepository.GetDeletedAsync`,
+  paridad en `HistoryParityTests`: la fila `Deleted` de las notas cuya última fila es su borrado y aún tiene copia) y `RecoverNoteAsync` (Staff),
+  que la vuelve a crear **por el guardado de siempre** dentro de `KntHistory.Restoring` con `Recovered`: el mismo id (su historial sigue), su
+  número si está libre (`HistoryRules.NoteNumberOf` del título; si no, otro y lo dice), su carpeta o Home, su tipo y los atributos que existan,
+  creada cuando dice su fila `Created` (H26) y una fila `Restored` («Recovered from the deleted notes», sin copia); sus partes no vuelven (H8, lo
+  dice). `RemoveDeletedNoteAsync` (Admin, H27) vacía sus copias como la purga y lo anota justo después, sin hacerlo fallar, en una fila
+  `Removed` («Removed permanently from the deleted notes», `NoteChangeDetailsDto.RemovedPermanently`). Una versión que ya no existe da
+  `HistoryRules.VersionCopyNotKept` (o `VersionNotInHistory`): las apps lo enseñan sin «Retry» (`IsPermanentVersionError`) y no ofrecen «See
+  this version» donde se sabe que no hay nada (`HistoryRules.CanSeeVersion`). La retención (H25): `GetRetentionAsync` (Guest, con
+  `HISTORY_START`) y `SaveRetentionAsync` (Admin, validada, anotada como ajuste con sus valores, `StructureChangeDescriber.HistoryRetention`);
+  antes de guardar, las apps avisan con `HistoryRules.RetentionReductions` y `RetentionApplies`. Web: menú «Utils» de las páginas de notas
+  (`NotesUtilsMenu`, `DeletedNotesDialog`) y la pestaña «History» del panel Admin (`HistoryRetentionSettings`); `ClientWin`: *Edit* › «Recover
+  deleted notes ...» (`DeletedNotesCtrl`/`DeletedNotesForm`) y la pestaña «History» del editor del repositorio. Tests en
+  `ServiceTests/NoteHistoryRecoverServiceTests`, `HistoryRulesTests`, `InProcessIntegrationTests/HistoryInProcessTests` y `ClientWin.Tests/DeletedNotesCtrlTests`.
+  **Cambios del repositorio** (H.5a, CU-45): `GetRepositoryChangesAsync` (Guest; `RepositoryChangesQueryDto` → `RepositoryChangesPageDto`):
+  las filas cuyo último cambio está en el periodo (días enteros, por defecto los últimos 7), la más nueva primero, 100 cada vez, filtradas por
+  entidad, acción, usuario y origen (`IKntHistoryRepository.GetChangesAsync`, por el índice de `LastDateTime`; paridad en `HistoryParityTests`).
+  **La estructura solo para ProjectManager o superior** (H29): lo comprueba el comando con `GetCurrentUserRoleAsync` (también en el `Server`,
+  que no aplica los roles de los comandos); para los demás, solo las notas, y `StructureIncluded = false`. La página dice qué notas existen
+  (`IKntNoteRepository.GetExistingNoteIdsAsync`, «Open note»); una borrada **no se recupera aquí**: «Recover deleted notes ...» abre esa ventana
+  con la nota de la línea de borrado elegida ya seleccionada. `GetRepositoryChangesUsersAsync`
+  da los usuarios del periodo. `HistoryRules.WhatText` y `ChangeKinds` son la columna «What» y el filtro de las dos apps. Web: «Utils» ›
+  «Repository changes ...» (`RepositoryChangesDialog`); `ClientWin`: *Edit* › «Repository changes ...» (`RepositoryChangesCtrl`/`RepositoryChangesForm`).
+  Tests en `ServiceTests/RepositoryChangesServiceTests`, `HistoryParityTests`, `InProcessIntegrationTests/HistoryInProcessTests` y
+  `ClientWin.Tests/RepositoryChangesCtrlTests`.
+  **El estado de cada línea** (H31, en «Repository changes» y en la pestaña «History»): qué se puede recuperar o restaurar de ella, en vez de un
+  botón que no hace nada. Regla pura, `Model/Core/HistoryRowStates` (`ForChange`: la nota existe, está en las notas borradas hasta un día
+  —`DeletedNotesDays` desde su borrado—, para un Guest «Recoverable by Staff and up», ya sin copia, o la estructura «Only noted»;
+  `ForNoteHistory`: restaurable, con cambios posteriores, la nota actual o no restaurable), con su tono (ámbar, naranja, gris), su texto y su
+  leyenda, comunes a las dos apps. El `Service` lo da en cada página (`States`, solo las filas con estado, y `RepositoryChangesPageDto.CanRecover`,
+  Staff+: sin él, las apps no ofrecen «Recover deleted notes ...»). Tests en `Tests/HistoryRowStatesTests`, `RepositoryChangesServiceTests` y
+  `NoteHistoryViewServiceTests`.
+  **La medida** (H30): `Tests/ServiceTests/HistoryMeasure`, contra una **copia** de un repositorio (`KNOTE_HISTORY_MEASURE_DB`; sin ella,
+  Inconclusive), con Dapper y EF: el coste de guardar con y sin historial (`KntHistory.NotNoted`), el autoguardado, las lecturas de las apps
+  con carga, lo que ocupa `KLogs` y lo que vaciaría la retención. Nunca toca las notas de la copia: trabaja con copias suyas en una carpeta
+  propia y al final las borra (sus filas quedan, sin copias). Ver `ClientWin.Tests/CLAUDE.md`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

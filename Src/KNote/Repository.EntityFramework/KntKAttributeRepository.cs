@@ -150,15 +150,17 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
         }
     }
 
-    public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity)
+    // The attribute, its tabulated values and its row of the history, in one transaction of the context: an ambient
+    // TransactionScope does nothing in Sqlite (its connections don't enlist), so they weren't saved together there.
+    public async Task<Result<KAttributeDto>> AddAsync(KAttributeDto entity, KLogWriteDto history = null)
     {
         try
         {
             var result = new Result<KAttributeDto>();
 
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var ctx = GetOpenConnection();
+            await using (var transaction = await ctx.Database.BeginTransactionAsync())
             {
-                var ctx = GetOpenConnection();
                 var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var newEntity = new KAttribute();
@@ -170,19 +172,23 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
                 await PopulateNoteTypeDtoAsync(ctx, result.Entity);
 
-                foreach (var value in entity.KAttributeValues)
+                if (result.Entity != null)
+                    foreach (var value in entity.KAttributeValues)
+                    {
+                        var res = await SaveTabulateValueAsync(ctx, result.Entity.KAttributeId, value);
+                        if (!res.IsValid)
+                            result.AddErrorMessage(res.ErrorMessage);
+                        result.Entity.KAttributeValues.Add(res.Entity);
+                    }
+
+                if (result.IsValid)
                 {
-                    var res = await SaveTabulateValueAsync(ctx, result.Entity.KAttributeId, value);
-                    if (!res.IsValid)
-                        result.AddErrorMessage(res.ErrorMessage);
-                    result.Entity.KAttributeValues.Add(res.Entity);
+                    await KntHistoryWriter.WriteAsync(ctx, history);
+                    await transaction.CommitAsync();
                 }
-
-                scope.Complete();
-
-                await CloseIsTempConnection(ctx);
             }
-    
+            await CloseIsTempConnection(ctx);
+
             return result;
         }
         catch (Exception ex)
@@ -191,7 +197,7 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
         }
     }
 
-    public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity)
+    public async Task<Result<KAttributeDto>> UpdateAsync(KAttributeDto entity, KLogWriteDto history = null)
     {
 
         try
@@ -199,9 +205,9 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
             var result = new Result<KAttributeDto>();
             var resGenRep = new Result<KAttribute>();
 
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var ctx = GetOpenConnection();
+            await using (var transaction = await ctx.Database.BeginTransactionAsync())
             {
-                var ctx = GetOpenConnection();
                 var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
                 var resGenRepGet = await kattributes.GetAsync(entity.KAttributeId);
@@ -247,12 +253,15 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
                     result.Entity = entity;
                     result.AddErrorMessage("Can't find entity for update.");
                 }
-                                                       
-                scope.Complete();
 
-                await CloseIsTempConnection(ctx);
+                if (result.IsValid)
+                {
+                    await KntHistoryWriter.WriteAsync(ctx, history);
+                    await transaction.CommitAsync();
+                }
             }
-    
+            await CloseIsTempConnection(ctx);
+
             return result;
         }
         catch (Exception ex)
@@ -261,7 +270,7 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
         }
     }
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result> DeleteAsync(Guid id, KLogWriteDto history = null)
     {
         try
         {
@@ -270,7 +279,7 @@ public class KntKAttributeRepository : KntRepositoryEFBase, IKntKAttributeReposi
             var ctx = GetOpenConnection();
             var kattributes = new GenericRepositoryEF<KntDbContext, KAttribute>(ctx);
 
-            var resGenRep = await kattributes.DeleteAsync(id);
+            var resGenRep = await NotedAsync(ctx, history, () => kattributes.DeleteAsync(id));
             if (!resGenRep.IsValid)
                 result.AddListErrorMessage(resGenRep.ListErrorMessage);
 

@@ -1,0 +1,196 @@
+@using KNote.Model.Core
+@inject IStore webApiService
+@inject DialogService dialogService
+
+@implements IDisposable
+
+@* «Compare» (H12, H22): what a change of the note's history did (the note before that row and after it) or, with «Compare with
+   the current note», that version against the note now; the only one possible when the copy before the change is gone (the
+   Server says so). The fields that differ and the text as it is kept (Markdown or HTML, not drawn), the equal lines far from a
+   change folded and the words that changed marked. *@
+
+<KntDialogFrame Icon="difference" Title="@Title" Subtitle="@Subtitle" OnClose="() => dialogService.Close(null)">
+    <ChildContent>
+        <RadzenStack Gap="1rem">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox TValue="bool" Value="@withCurrentNote" ValueChanged="OnWithCurrentNoteChanged" Name="withCurrentNote"
+                                Disabled="@(comparison != null && !comparison.CanCompareChange)" />
+                <RadzenLabel Text="Compare with the current note" Component="withCurrentNote" />
+            </RadzenStack>
+
+            @if (loadFailed)
+            {
+                <div class="knt-load-error">
+                    <span class="knt-load-error-text">@(error ?? "The comparison could not be loaded.")</span>
+                    <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="LoadAsync" />
+                </div>
+            }
+            else if (comparison == null)
+            {
+                <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" ShowValue="false" Size="ProgressBarCircularSize.Small" />
+            }
+            else
+            {
+                @if (!string.IsNullOrEmpty(comparison.Notice))
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">
+                        @comparison.Notice
+                    </RadzenAlert>
+                }
+
+                @if (comparison.Same)
+                {
+                    <div class="knt-empty-state">No differences.</div>
+                }
+
+                @if (comparison.Fields.Count > 0)
+                {
+                    <table class="knt-compare-fields">
+                        <thead>
+                            <tr><th></th><th>@comparison.BeforeLabel</th><th>@comparison.AfterLabel</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var field in comparison.Fields)
+                            {
+                                <tr>
+                                    <th scope="row">@field.Name</th>
+                                    <td class="knt-compare-before">@(field.Before ?? "—")</td>
+                                    <td class="knt-compare-after">@(field.After ?? "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                @if (!comparison.Text.Same)
+                {
+                    <div class="knt-compare-text-header">
+                        Text: @TextSummary(comparison.Text)
+                        <span class="knt-compare-legend">− @comparison.BeforeLabel · + @comparison.AfterLabel</span>
+                    </div>
+                    <div class="knt-compare-text">
+                        @foreach (var line in comparison.Text.Lines)
+                        {
+                            @if (line.Kind == EnumComparisonLine.Folded)
+                            {
+                                <div class="knt-compare-line knt-compare-folded">
+                                    <span class="knt-compare-num"></span><span class="knt-compare-num"></span><span class="knt-compare-sign"></span>
+                                    <span class="knt-compare-code">@(line.Skipped == 1 ? "… 1 unchanged line" : $"… {line.Skipped} unchanged lines")</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="knt-compare-line @LineClass(line.Kind)">
+                                    <span class="knt-compare-num">@(line.BeforeNumber > 0 ? line.BeforeNumber : "")</span>
+                                    <span class="knt-compare-num">@(line.AfterNumber > 0 ? line.AfterNumber : "")</span>
+                                    <span class="knt-compare-sign">@Sign(line.Kind)</span>
+                                    <span class="knt-compare-code">@if (line.Segments == null)
+                                        {
+                                            @line.Text
+                                        }
+                                        else
+                                        {
+                                            @foreach (var segment in line.Segments)
+                                            {
+                                                @if (segment.Changed)
+                                                {
+                                                    <mark class="knt-compare-word">@segment.Text</mark>
+                                                }
+                                                else
+                                                {
+                                                    @segment.Text
+                                                }
+                                            }
+                                        }</span>
+                                </div>
+                            }
+                        }
+                        @if (comparison.Text.Truncated)
+                        {
+                            <div class="knt-compare-line knt-compare-folded">
+                                <span class="knt-compare-num"></span><span class="knt-compare-num"></span><span class="knt-compare-sign"></span>
+                                <span class="knt-compare-code">… too many lines: the rest are not shown.</span>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </RadzenStack>
+    </ChildContent>
+    <Footer>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Click="() => dialogService.Close(null)" />
+        </RadzenStack>
+    </Footer>
+</KntDialogFrame>
+
+@code {
+    [Parameter][EditorRequired] public Guid NoteId { get; set; }
+    [Parameter][EditorRequired] public KLogDto Row { get; set; } = null!;
+    // The note's "#123 · Topic".
+    [Parameter] public string? NoteTitle { get; set; }
+
+    private NoteComparisonDto? comparison;
+    private bool withCurrentNote;
+    private bool loadFailed;
+    private string? error;
+
+    // The comparison asked for last: switching meanwhile leaves the previous one out of date.
+    private readonly KntLatestRequest request = new();
+
+    private string Title => string.IsNullOrEmpty(NoteTitle) ? "Compare versions of the note" : $"Compare versions of {NoteTitle}";
+    private string Subtitle => $"The change of {HistoryRules.WhenText(Row)}" + (string.IsNullOrEmpty(Row.UserName) ? "" : $" by {Row.UserName}");
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    public void Dispose() => request.Dispose();
+
+    private async Task OnWithCurrentNoteChanged(bool value)
+    {
+        withCurrentNote = value;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        loadFailed = false;
+        error = null;
+        comparison = null;
+        var asked = withCurrentNote;
+        var result = await request.RunAsync(ct => webApiService.History.GetNoteComparisonAsync(NoteId, Row.KLogId, asked, ct));
+        if (result.Canceled)
+            return;
+        if (!result.Value.IsValid)
+        {
+            loadFailed = true;
+            error = result.Value.ErrorMessage;
+            return;
+        }
+        comparison = result.Value.Entity;
+        // Without the copy before the change, the Server compared with the note now.
+        withCurrentNote = comparison.WithCurrentNote;
+    }
+
+    private static string TextSummary(NoteTextComparisonDto text)
+    {
+        var counts = new List<string>();
+        if (text.Added > 0) counts.Add($"+{text.Added}");
+        if (text.Removed > 0) counts.Add($"−{text.Removed}");
+        var lines = text.Added + text.Removed == 1 ? "line" : "lines";
+        return (text.Replaced ? "replaced " : "") + $"({string.Join(" ", counts)} {lines})";
+    }
+
+    private static string LineClass(EnumComparisonLine kind) => kind switch
+    {
+        EnumComparisonLine.Removed => "knt-compare-removed",
+        EnumComparisonLine.Added => "knt-compare-added",
+        _ => "knt-compare-equal"
+    };
+
+    private static string Sign(EnumComparisonLine kind) => kind switch
+    {
+        EnumComparisonLine.Removed => "−",
+        EnumComparisonLine.Added => "+",
+        _ => ""
+    };
+}

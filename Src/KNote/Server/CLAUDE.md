@@ -471,6 +471,19 @@ Los hilos los guarda `IKntService.ChatRooms` (ver `CLAUDE.md` raíz).
   (la URL, de la petición de la conexión). Con `MountResourceContainerOnStartup` la URL de los recursos puede ser
   relativa (`/Ruta`): la Web la resuelve sola y ClientWin con un `<base href>` del servidor.
 
+## Historial de las notas (`HistoryController`, `api/history`)
+
+La pestaña «History» del editor de la Web (H.3, ver «Historial de las notas» en el `CLAUDE.md` raíz), para cualquier usuario con sesión
+(los comandos son Guest): `GET notes/{noteId}?skip=` (una página de sus filas, `NoteHistoryPageDto`) y `GET notes/{noteId}/versions/{klogId}`
+(la nota tal como quedó tras ese cambio, `NoteVersionViewDto`; su descripción pasa por `UtilUpdateResourceInDescriptionForRead`, como al
+leer una nota). Desde la H.4a: `GET notes/{noteId}/compare/{klogId}?withCurrentNote=` (Guest, `NoteComparisonDto`; el texto como se guarda,
+sin `UtilUpdateResourceInDescriptionForRead`: no se dibuja) y `POST notes/{noteId}/versions/{klogId}/restore` (`Admin, Staff, ProjectManager`,
+`NoteRestoreResultDto`; la Web vuelve a leer la nota). Desde la H.4b: `GET deleted` y `POST deleted/{noteId}/recover` («Recover deleted notes»,
+`Admin, Staff, ProjectManager`), `DELETE deleted/{noteId}` («Remove permanently», `Admin`), `GET retention` (con sesión) y `PUT retention`
+(`Admin`). Desde la H.5a: `POST changes` y `POST changes/users` («Repository changes», con sesión; la consulta en el cuerpo,
+`RepositoryChangesQueryDto`): **la estructura la deja fuera el propio comando** para quien no es ProjectManager o superior, porque el
+`Server` no aplica los roles de los comandos. Tests en `Tests/InProcessIntegrationTests/HistoryInProcessTests`.
+
 ## Calendario de alarmas y panel de tareas (`NotesController`)
 
 Dos lecturas para la Web, de cualquier usuario con sesión (Guest+, como las tareas y alarmas de una nota):

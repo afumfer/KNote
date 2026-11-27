@@ -17,6 +17,8 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
     // The user's details, above the status bar (see ToolStripItemToolTip: the bar's own tooltip flashed there).
     private readonly ToolStripItemToolTip _userToolTip;
     private readonly ToolStripStatusLabel _statusLabelSemanticIndex;
+    private readonly ToolStripMenuItem menuRecoverDeletedNotes;
+    private readonly ToolStripMenuItem menuRepositoryChanges;
 
     #endregion
 
@@ -47,6 +49,15 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
 #endif
 
         SetIcons();
+
+        // «Recover deleted notes» (the history, H24): under «Delete note», with a name that isn't read as it.
+        menuRecoverDeletedNotes = new ToolStripMenuItem { Name = "menuRecoverDeletedNotes", Text = "Recover deleted notes ..." };
+        menuRecoverDeletedNotes.Click += menu_Click;
+        menuEdit.DropDownItems.Insert(menuEdit.DropDownItems.IndexOf(menuDeleteNote) + 1, menuRecoverDeletedNotes);
+        // «Repository changes» (H28), next to it.
+        menuRepositoryChanges = new ToolStripMenuItem { Name = "menuRepositoryChanges", Text = "Repository changes ..." };
+        menuRepositoryChanges.Click += menu_Click;
+        menuEdit.DropDownItems.Insert(menuEdit.DropDownItems.IndexOf(menuRecoverDeletedNotes) + 1, menuRepositoryChanges);
 
         // The user in the status bar: its details above it, and its profile with a double-click.
         _userToolTip = new ToolStripItemToolTip(statusLabelUser, () => _ctrl.SessionUserDetail);
@@ -320,6 +331,14 @@ public partial class KNoteManagementForm : KntForm, IViewKNoteManagement
         else if (menuSel == menuDeleteNote)
         {
             await _ctrl.DeleteNote();
+        }
+        else if (menuSel == menuRecoverDeletedNotes)
+        {
+            await _ctrl.RecoverDeletedNotes();
+        }
+        else if (menuSel == menuRepositoryChanges)
+        {
+            await _ctrl.RepositoryChanges();
         }
         else if (menuSel == menuKntScriptConsole)
         {

@@ -18,6 +18,16 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     /// </summary>
     public bool AdministrationAvailable => EditorMode == EnumRepositoryEditorMode.Management;
 
+    /// <summary>
+    /// The retention of the history of the notes (H25), the «History» tab: as the view edits it (null until it is read, only in
+    /// Management mode), the day the history started, and as it is kept. Saved with «Accept», after saying what a shorter one shortens.
+    /// </summary>
+    public HistoryRetentionDto Retention { get; private set; }
+    public DateTime? HistorySince { get; private set; }
+    private HistoryRetentionDto _storedRetention;
+
+    public bool RetentionChanged => Retention != null && _storedRetention != null && Retention.ToJson() != _storedRetention.ToJson();
+
     // Each mode is a different use case: linking a repository is open to anybody who signed in; creating
     // one takes an Admin somewhere (the application role); managing one takes an Admin in that repository.
     protected override KntAuthorizeAttribute RequiredAuthorization => EditorMode switch
@@ -102,6 +112,14 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
                 await KAttributesManageCtrl.LoadEntitiesAsync(service);
                 await UsersManageCtrl.LoadEntitiesAsync(service);
                 await TraceNoteTypesManageCtrl.LoadEntitiesAsync(service);
+
+                var retention = await service.History.GetRetentionAsync();
+                if (retention.IsValid && retention.Entity?.Retention != null)
+                {
+                    _storedRetention = retention.Entity.Retention;
+                    Retention = HistoryRetentionDto.FromJson(_storedRetention.ToJson());
+                    HistorySince = retention.Entity.Since;
+                }
             }
 
             if (refreshView)
@@ -127,6 +145,30 @@ public class RepositoryEditorCtrl : CtrlEditorBase<IViewEditor<RepositoryRef>, R
     public async override Task<bool> SaveModel()
     {
         View.RefreshModel();
+
+        // The retention of the history (H25): checked and, if shorter, confirmed before anything is saved.
+        if (EditorMode == EnumRepositoryEditorMode.Management && RetentionChanged)
+        {
+            var retentionError = Retention.GetErrorMessage();
+            if (!string.IsNullOrEmpty(retentionError))
+            {
+                View.ShowInfo(retentionError);
+                return false;
+            }
+            var reductions = KNote.Model.Core.HistoryRules.RetentionReductions(_storedRetention, Retention);
+            if (reductions.Count > 0 && View.ShowInfo(string.Join(Environment.NewLine, reductions) + Environment.NewLine + Environment.NewLine
+                    + KNote.Model.Core.HistoryRules.RetentionApplies + Environment.NewLine + Environment.NewLine + "Save the shorter retention?",
+                    "A shorter retention", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                return false;
+            var resRetention = await Service.History.SaveRetentionAsync(Retention);
+            if (!resRetention.IsValid)
+            {
+                View.ShowInfo(resRetention.ErrorMessage);
+                return false;
+            }
+            _storedRetention = resRetention.Entity;
+            Retention = HistoryRetentionDto.FromJson(_storedRetention.ToJson());
+        }
 
         if (!Model.IsDirty())
             return true;

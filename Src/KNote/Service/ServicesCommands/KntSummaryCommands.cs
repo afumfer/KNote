@@ -406,6 +406,7 @@ public class KntSummarySaveNoisePolicyAsyncCommand : KntCommandServiceBase<Noise
     {
         var result = new Result<NoisePolicyDto>();
         var context = await KntNoisePolicy.LoadContextAsync(Service);
+        var before = context.Clean(await KntNoisePolicy.ReadAsync(Service));
         var policy = context.Clean(Param);
         var written = await KntNoisePolicy.WriteAsync(Service, policy);
         if (!written.IsValid)
@@ -414,6 +415,16 @@ public class KntSummarySaveNoisePolicyAsyncCommand : KntCommandServiceBase<Noise
             return result;
         }
         result.Entity = policy;
+
+        // Its history (H.2b): the types and folders that entered it or left it, by their names.
+        var types = (await Repository.NoteTypes.GetAllAsync()).Entity ?? new();
+        var folders = (await Repository.Folders.GetAllAsync()).Entity ?? new();
+        var folderPaths = new Dictionary<Guid, string>();
+        foreach (var id in before.ExcludedFolderIds.Concat(policy.ExcludedFolderIds).Distinct())
+            folderPaths[id] = await KntHistory.FolderPathAsync(Service, id) ?? folders.FirstOrDefault(f => f.FolderId == id)?.Name;
+        await KntHistory.NoteStructureAsync(Service, HistoryEntities.SystemValue, HistoryRules.SettingId(KntConst.AiScope, KntConst.AiNoisePolicyKey),
+            KntHistory.NoisePolicyTitle, StructureChangeDescriber.NoisePolicy(before, policy,
+                id => types.FirstOrDefault(t => t.NoteTypeId == id)?.Name, id => folderPaths.TryGetValue(id, out var path) ? path : null));
         return result;
     }
 }

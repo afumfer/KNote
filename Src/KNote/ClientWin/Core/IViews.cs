@@ -157,6 +157,23 @@ public interface IViewReviewSelection : IViewBase
 {
 }
 
+// A version of a note (NoteVersionCtrl, the history, H.3): a window of its own, read only.
+public interface IViewNoteVersion : IViewBase
+{
+}
+
+public interface IViewNoteCompare : IViewBase
+{
+}
+
+public interface IViewDeletedNotes : IViewBase
+{
+}
+
+public interface IViewRepositoryChanges : IViewBase
+{
+}
+
 public interface IViewKNoteManagement : IViewBase
 {
     void HideView();

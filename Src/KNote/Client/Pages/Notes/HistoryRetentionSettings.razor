@@ -1,0 +1,115 @@
+@using KNote.Model.Core
+@inject IStore store
+@inject DialogService dialogService
+
+@attribute [Authorize(Roles = "Admin")]
+
+@* The retention of the history of the notes (H7, H25), a tab of the admin panel: how long the versions of the notes are kept and
+   the deleted notes can be recovered. Before saving a shorter one it says what it shortens and when it applies
+   (HistoryRules.RetentionReductions): reducing a period empties versions. *@
+
+<KntIndexHeader Section="KntSections.HistoryRetention" Subtitle="How long the versions of the notes are kept" />
+
+<div class="rz-pt-2 knt-history-retention">
+    <KntFormSection Icon="history" Title="Retention of the versions"
+                    Description="@Description">
+        @if (loadFailed)
+        {
+            <div class="knt-load-error">
+                <span class="knt-load-error-text">The retention could not be loaded.</span>
+                <RadzenButton Text="Retry" Icon="refresh" ButtonStyle="ButtonStyle.Base" Click="LoadAsync" />
+            </div>
+        }
+        else if (edited == null)
+        {
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Small" />
+        }
+        else
+        {
+            <div class="knt-retention-fields">
+                <KntField Label="Months with all the versions" Component="KeepAllMonths">
+                    <RadzenNumeric Name="KeepAllMonths" TValue="int" @bind-Value="@edited.KeepAllMonths" Min="0" Max="@HistoryRetentionDto.MaxMonths" />
+                </KntField>
+                <KntField Label="Months with one version a day" Component="DailyUntilMonths" Help="Then, one a month.">
+                    <RadzenNumeric Name="DailyUntilMonths" TValue="int" @bind-Value="@edited.DailyUntilMonths" Min="0" Max="@HistoryRetentionDto.MaxMonths" />
+                </KntField>
+                <KntField Label="Versions per note" Component="MaxCopiesPerNote" Help="The oldest ones go first.">
+                    <RadzenNumeric Name="MaxCopiesPerNote" TValue="int" @bind-Value="@edited.MaxCopiesPerNote" Min="1" Max="@HistoryRetentionDto.MaxCopiesLimit" />
+                </KntField>
+                <KntField Label="Largest note copied (MB)" Component="MaxContentSizeMB" Help="A bigger note is noted without its copy.">
+                    <RadzenNumeric Name="MaxContentSizeMB" TValue="int" @bind-Value="@edited.MaxContentSizeMB" Min="0" Max="@HistoryRetentionDto.MaxContentSizeLimitMB" />
+                </KntField>
+                <KntField Label="Days in the deleted notes" Component="DeletedNotesDays" Help="Then a deleted note can no longer be recovered.">
+                    <RadzenNumeric Name="DeletedNotesDays" TValue="int" @bind-Value="@edited.DeletedNotesDays" Min="0" Max="@HistoryRetentionDto.MaxDeletedNotesDays" />
+                </KntField>
+            </div>
+            @if (Error is string error)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" AllowClose="false">@error</RadzenAlert>
+            }
+            <div class="knt-retention-actions">
+                <RadzenButton Text="Save" Icon="save" Size="ButtonSize.Small" Click="SaveAsync" IsBusy="@saving.IsBusy"
+                              Disabled="@(!Changed || Error != null)" />
+                <RadzenButton Text="Default values" Icon="settings_backup_restore" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base"
+                              Variant="Variant.Text" Click="Defaults" />
+            </div>
+        }
+    </KntFormSection>
+</div>
+
+@code {
+    private HistoryRetentionDto? stored;
+    private HistoryRetentionDto? edited;
+    private DateTime? since;
+    private bool loadFailed;
+    private readonly KntSingleFlight saving = new();
+
+    private string Description => since is DateTime day
+        ? $"KNote keeps the history of the notes since {day:d}. Reducing a period empties versions."
+        : "Reducing a period empties versions.";
+
+    private bool Changed => stored != null && edited != null && stored.ToJson() != edited.ToJson();
+
+    // The limits of HistoryRetentionDto (its validations), said before saving.
+    private string? Error => edited == null ? null : string.IsNullOrEmpty(edited.GetErrorMessage()) ? null : edited.GetErrorMessage();
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loadFailed = false;
+        var result = await store.History.GetRetentionAsync();
+        if (!result.IsValid || result.Entity?.Retention == null)
+        {
+            loadFailed = true;
+            return;
+        }
+        since = result.Entity.Since;
+        stored = result.Entity.Retention;
+        edited = HistoryRetentionDto.FromJson(stored.ToJson());
+    }
+
+    private void Defaults() => edited = new HistoryRetentionDto();
+
+    private Task SaveAsync() => saving.RunAsync(async () =>
+    {
+        if (stored == null || edited == null || Error != null)
+            return;
+
+        var reductions = HistoryRules.RetentionReductions(stored, edited);
+        if (reductions.Count > 0)
+        {
+            var confirmed = await dialogService.Confirm(string.Join(" ", reductions) + " " + HistoryRules.RetentionApplies,
+                "A shorter retention", new ConfirmOptions { OkButtonText = "Save", CancelButtonText = "Cancel" });
+            if (confirmed != true)
+                return;
+        }
+
+        var result = await store.History.SaveRetentionAsync(edited);
+        if (result.IsValid && result.Entity != null)
+        {
+            stored = result.Entity;
+            edited = HistoryRetentionDto.FromJson(stored.ToJson());
+        }
+    });
+}

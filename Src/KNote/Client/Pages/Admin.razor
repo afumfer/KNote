@@ -43,6 +43,10 @@
                     <AttributesIndex></AttributesIndex>
                 </RadzenTabsItem>
 
+                <RadzenTabsItem Text="@TabText(KntSections.HistoryRetention)" Icon="@KntSections.HistoryRetention.Icon">
+                    <KNote.Client.Pages.Notes.HistoryRetentionSettings></KNote.Client.Pages.Notes.HistoryRetentionSettings>
+                </RadzenTabsItem>
+
                 @if (localAdmin)
                 {
                     <RadzenTabsItem Text="@TabText(KntSections.ThisComputer)" Icon="@KntSections.ThisComputer.Icon">

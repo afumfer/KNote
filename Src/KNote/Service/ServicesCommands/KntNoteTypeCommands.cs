@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KNote.Model.Dto;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Service.Core;
 
 namespace KNote.Service.ServicesCommands;
@@ -48,7 +49,10 @@ public class KntNoteTypeSaveAsyncCommand : KntCommandSaveServiceBase<NoteTypeDto
         if (Param.NoteTypeId == Guid.Empty)
         {
             Param.NoteTypeId = Guid.NewGuid();
-            return await Repository.NoteTypes.AddAsync(Param);
+            var added = await Repository.NoteTypes.AddAsync(Param);
+            if (added.IsValid)
+                await NoteAsync(null);
+            return added;
         }
         else
         {
@@ -57,9 +61,15 @@ public class KntNoteTypeSaveAsyncCommand : KntCommandSaveServiceBase<NoteTypeDto
             // Its name is in the fragment of data of its notes.
             if (res.IsValid && resOld.Entity is { } old && old.Name != Param.Name)
                 await KntSemanticIndexer.MarkStaleAsync(Service, r => r.MarkStaleByNoteTypeAsync(Param.NoteTypeId));
+            if (res.IsValid)
+                await NoteAsync(resOld.IsValid ? resOld.Entity : null);
             return res;
         }
     }
+
+    private async Task NoteAsync(NoteTypeDto before) =>
+        await KntHistory.NoteStructureAsync(Service, HistoryEntities.NoteType, Param.NoteTypeId, Param.Name,
+            StructureChangeDescriber.NoteType(before, Param, await KntHistory.NoteTypeNamesForHistoryAsync(Service)));
 }
 
 [KntAuthorize(EnumRoles.Admin)]
@@ -95,7 +105,11 @@ public class KntNoteTypeDeleteAsyncCommand : KntCommandServiceBase<Guid, Result<
 
         var resDelEntity = await Repository.NoteTypes.DeleteAsync(Param);
         if (resDelEntity.IsValid)
+        {
             result.Entity = resGetEntity.Entity;
+            await KntHistory.NoteStructureAsync(Service, HistoryEntities.NoteType, Param, resGetEntity.Entity.Name,
+                StructureChangeDescriber.NoteType(resGetEntity.Entity, null, null));
+        }
         else
             result.AddListErrorMessage(resDelEntity.ListErrorMessage);
 

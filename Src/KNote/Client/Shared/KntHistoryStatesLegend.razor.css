@@ -1,0 +1,29 @@
+/* The legend of the states of a list of the history: one line each, the swatch with the tone and the icon of its rows. */
+
+.knt-history-legend {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--rz-text-secondary-color);
+}
+
+.knt-history-legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.knt-history-legend-swatch {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.25rem;
+    border-radius: 3px;
+    border: 1px solid color-mix(in srgb, var(--rz-text-color) 15%, transparent);
+}
+
+    .knt-history-legend-swatch ::deep .rzi {
+        font-size: 0.9375rem;
+    }

@@ -35,6 +35,27 @@ namespace KNote.Repository.EntityFramework.Entities
         [MaxLength(64)]
         public string ActionType { get; set; }
 
+        // The history of the notes (KntSchemaUpdater revision 11; KLogDto says what each one is). PreviousContent, the
+        // version, is not in the model on purpose, as Resources.ExtractedText: the repositories read and write it with SQL
+        // of their own, so EF never loads it with the rows.
+
+        public DateTime LastDateTime { get; set; }
+
+        [MaxLength(256)]
+        public string UserName { get; set; }
+
+        [MaxLength(32)]
+        public string Origin { get; set; }
+
+        public int Fields { get; set; }
+
+        public string ChangeDetails { get; set; }
+
+        [MaxLength(512)]
+        public string EntityTitle { get; set; }
+
+        public int? PreviousContentSize { get; set; }
+
         #endregion
 
         #region Validations
