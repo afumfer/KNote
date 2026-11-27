@@ -334,6 +334,10 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   leyenda, comunes a las dos apps. El `Service` lo da en cada página (`States`, solo las filas con estado, y `RepositoryChangesPageDto.CanRecover`,
   Staff+: sin él, las apps no ofrecen «Recover deleted notes ...»). Tests en `Tests/HistoryRowStatesTests`, `RepositoryChangesServiceTests` y
   `NoteHistoryViewServiceTests`.
+  **La medida** (H30): `Tests/ServiceTests/HistoryMeasure`, contra una **copia** de un repositorio (`KNOTE_HISTORY_MEASURE_DB`; sin ella,
+  Inconclusive), con Dapper y EF: el coste de guardar con y sin historial (`KntHistory.NotNoted`), el autoguardado, las lecturas de las apps
+  con carga, lo que ocupa `KLogs` y lo que vaciaría la retención. Nunca toca las notas de la copia: trabaja con copias suyas en una carpeta
+  propia y al final las borra (sus filas quedan, sin copias). Ver `ClientWin.Tests/CLAUDE.md`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

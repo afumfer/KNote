@@ -42,7 +42,7 @@ public class RepositoryChangesCtrlTests
         var removed = Row(HistoryEntities.Note, "Removed");
         var folder = Row(HistoryEntities.Folder, "Updated");
         var folderDeleted = Row(HistoryEntities.Folder, "Deleted");
-        RepositoryChangesQueryDto asked = null;
+        RepositoryChangesQueryDto? asked = null;
         service.HistoryFake.GetRepositoryChangesAsyncImpl = query =>
         {
             asked = new RepositoryChangesQueryDto { UserName = query.UserName, ActionType = query.ActionType, Skip = query.Skip };
@@ -59,7 +59,7 @@ public class RepositoryChangesCtrlTests
 
         Assert.IsTrue(await ctrl.LoadAsync());
 
-        Assert.AreEqual("armando", asked.UserName);
+        Assert.AreEqual("armando", asked!.UserName);
         Assert.AreEqual("Deleted", asked.ActionType);
         Assert.AreEqual(6, ctrl.Rows.Count);
         Assert.IsTrue(ctrl.StructureIncluded);
