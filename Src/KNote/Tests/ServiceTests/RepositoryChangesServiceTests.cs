@@ -1,4 +1,5 @@
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 using KNote.Service.Core;
 using KNote.Tests.Helpers;
@@ -26,7 +27,7 @@ public class RepositoryChangesServiceTests
             HistoryOrigin = EnumHistoryOrigin.Desktop
         };
         home = (await service.Repository.Folders.GetAsync(KntConst.DefaultFolderNumber)).Entity;
-        foreach (var (name, role) in new[] { ("armando", "Admin"), ("staff", "Staff"), ("pm", "ProjectManager") })
+        foreach (var (name, role) in new[] { ("armando", "Admin"), ("staff", "Staff"), ("pm", "ProjectManager"), ("guest", "Guest") })
             Assert.IsTrue((await service.Repository.Users.AddAsync(new UserDto
             {
                 UserId = Guid.NewGuid(), UserName = name, EMail = $"{name}@knote.tests", FullName = name, RoleDefinition = role
@@ -117,6 +118,47 @@ public class RepositoryChangesServiceTests
         Assert.IsTrue(forPm.StructureIncluded);
         Assert.IsTrue(forPm.Rows.Any(r => r.EntityName == HistoryEntities.Folder));
         StringAssert.EndsWith(foldersForPm.Rows.Single().EntityTitle, "Projects", "the title of a folder is its path");
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
+    public async Task EachRow_SaysWhatCanBeBroughtBack(string orm)
+    {
+        await OpenAsync(orm);
+        var kept = await StoredNoteAsync("Kept", "armando");
+        var deleted = await StoredNoteAsync("Deleted", "armando");
+        var removed = await StoredNoteAsync("Removed", "armando");
+        service.UserIdentityName = "armando";
+        service.ResetCurrentUser();
+        Assert.IsTrue((await service.Notes.DeleteExtendedAsync(deleted.NoteId)).IsValid);
+        Assert.IsTrue((await service.Notes.DeleteExtendedAsync(removed.NoteId)).IsValid);
+        Assert.IsTrue((await service.History.RemoveDeletedNoteAsync(removed.NoteId)).IsValid);
+        Assert.IsTrue((await service.Folders.SaveAsync(new FolderDto { FolderId = Guid.Empty, Name = "Projects", ParentId = home.FolderId })).IsValid);
+        var days = (await service.History.GetRetentionAsync()).Entity.Retention.DeletedNotesDays;
+
+        var forAdmin = (await service.History.GetRepositoryChangesAsync(new RepositoryChangesQueryDto())).Entity;
+        service.UserIdentityName = "guest";
+        service.ResetCurrentUser();
+        var forGuest = (await service.History.GetRepositoryChangesAsync(new RepositoryChangesQueryDto())).Entity;
+
+        static EnumHistoryRowState StateOf(RepositoryChangesPageDto page, KLogDto row) =>
+            page.States.SingleOrDefault(s => s.KLogId == row.KLogId)?.State ?? EnumHistoryRowState.None;
+        var keptRow = forAdmin.Rows.Single(r => r.EntityId == kept.NoteId);
+        var deletedRows = forAdmin.Rows.Where(r => r.EntityId == deleted.NoteId).ToList();
+        var removedRows = forAdmin.Rows.Where(r => r.EntityId == removed.NoteId).ToList();
+        var folderRow = forAdmin.Rows.Single(r => r.EntityName == HistoryEntities.Folder);
+
+        Assert.IsTrue(forAdmin.CanRecover);
+        Assert.AreEqual(EnumHistoryRowState.None, StateOf(forAdmin, keptRow), "a note that exists: nothing to say");
+        Assert.IsTrue(deletedRows.Count >= 2 && deletedRows.All(r => StateOf(forAdmin, r) == EnumHistoryRowState.Recoverable),
+            "all the rows of the note");
+        Assert.AreEqual(DateTime.Today.AddDays(days), forAdmin.States.First(s => s.KLogId == deletedRows[0].KLogId).Until);
+        Assert.IsTrue(removedRows.All(r => StateOf(forAdmin, r) == EnumHistoryRowState.NotRecoverable));
+        Assert.AreEqual(EnumHistoryRowState.OnlyNoted, StateOf(forAdmin, folderRow));
+
+        Assert.IsFalse(forGuest.CanRecover, "a Guest can't recover");
+        Assert.IsTrue(forGuest.Rows.Where(r => r.EntityId == deleted.NoteId).All(r => StateOf(forGuest, r) == EnumHistoryRowState.RecoverableByStaff));
     }
 
     // The topic of a note's row: its title without the number.

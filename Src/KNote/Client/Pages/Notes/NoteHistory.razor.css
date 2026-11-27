@@ -5,3 +5,9 @@
     white-space: normal;
     overflow-wrap: anywhere;
 }
+
+/* The same for the columns of the tab (When, Who, From, State: 580px): «Change» keeps at least 320px; the list scrolls sideways
+   in a narrow window instead of squeezing it. */
+.knt-history-grid ::deep .rz-grid-table {
+    min-width: 900px;
+}

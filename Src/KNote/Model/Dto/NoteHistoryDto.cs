@@ -15,6 +15,8 @@ public class NoteHistoryPageDto
     public int Skip { get; set; }
     /// <summary>The rows of this page whose version can be restored (H23, HistoryRules.Restorable).</summary>
     public List<Guid> Restorable { get; set; } = new();
+    /// <summary>The state of each row of the page that has one (HistoryRowStates.ForNoteHistory): why it can't be restored, or how.</summary>
+    public List<HistoryRowStateDto> States { get; set; } = new();
 
     public bool HasMore => Skip + Rows.Count < Total;
 
@@ -52,10 +54,22 @@ public class RepositoryChangesPageDto
     public int Skip { get; set; }
     public bool StructureIncluded { get; set; }
     public List<Guid> ExistingNotes { get; set; } = new();
+    /// <summary>The state of each row of the page that has one (HistoryRowStates.ForChange): what can be brought back of it.</summary>
+    public List<HistoryRowStateDto> States { get; set; } = new();
+    /// <summary>The user can recover deleted notes (Staff and up): «Recover deleted notes ...» is offered.</summary>
+    public bool CanRecover { get; set; }
 
     public bool HasMore => Skip + Rows.Count < Total;
 
     public bool NoteExists(KLogDto row) => row?.EntityName == HistoryEntities.Note && ExistingNotes?.Contains(row.EntityId) == true;
+}
+
+/// <summary>The state of a row of a list of the history (HistoryRowStates), and the day it stops being recoverable, if it has one.</summary>
+public class HistoryRowStateDto
+{
+    public Guid KLogId { get; set; }
+    public Core.EnumHistoryRowState State { get; set; }
+    public DateTime? Until { get; set; }
 }
 
 /// <summary>A page of the rows of the history (the repository's query): the rows and how many there are in all.</summary>

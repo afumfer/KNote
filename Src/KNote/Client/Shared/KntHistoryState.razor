@@ -1,0 +1,20 @@
+@using KNote.Model.Core
+@inject TooltipService tooltipService
+
+@* The column «State» of a list of the history (Model/Core/HistoryRowStates): its icon and its short text; the tooltip says why
+   (its line of the legend). Nothing for a row without a state. *@
+
+@if (State != EnumHistoryRowState.None)
+{
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" class="knt-history-state"
+                 MouseEnter="@(args => tooltipService.Open(args, HistoryRowStates.Legend(State)))">
+        <RadzenIcon Icon="@KntHistoryStates.Icon(State)" />
+        <span>@HistoryRowStates.Text(State, Until)</span>
+    </RadzenStack>
+}
+
+@code {
+    [Parameter] public EnumHistoryRowState State { get; set; }
+    // The day a note in the deleted notes stops being recoverable.
+    [Parameter] public DateTime? Until { get; set; }
+}

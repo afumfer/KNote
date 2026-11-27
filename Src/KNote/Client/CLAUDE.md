@@ -635,7 +635,14 @@ Patrones ya establecidos que hay que seguir:
   copia (`HistoryRules.CanSeeVersion`, con el texto de ayuda «Its copy is no longer kept»; `NoteVersionDialog` enseña el motivo del `Server` y,
   si es definitivo, sin «Retry») y «Recover deleted
   notes ...», que abre `DeletedNotesDialog` con `SelectedNoteId` (la nota de la línea de borrado elegida, seleccionada si está en la lista);
-  sin «Recover» propio. También se cierra con `true` si recuperó alguna. Ocupa el alto de la ventana
+  sin «Recover» propio (solo Staff+: `RepositoryChangesPageDto.CanRecover`). También se cierra con `true` si recuperó alguna. **El estado de cada
+  línea** (H31, también en `NoteHistory`): la columna «State» (`Shared/KntHistoryState`: icono, texto de `HistoryRowStates.Text` y la leyenda
+  como tooltip), el tono de la fila (`KntHistoryStates.PaintCell` en `CellRender`: una sombra interior translúcida con las variables
+  `--knt-history-amber`/`-orange`/`-grey` de `knt-theme.css`, para que la fila seleccionada se siga viendo) y la leyenda debajo
+  (`Shared/KntHistoryStatesLegend`, solo los estados que aparecen); los estados los da el `Service` (`States` de cada página). Las dos listas,
+  sin rayado (`AllowAlternatingRows="false"`: el gris de las filas pares se confundía con el de «Only noted») y con un ancho mínimo de la
+  tabla (`.rz-grid-table`, que Radzen pinta con `table-layout: fixed`): las columnas con ancho dejaban a «Change», la única sin él, casi
+  nada, y su texto partido en cualquier carácter hacía cada fila tan alta que la lista parecía vacía hasta ensanchar el diálogo. Ocupa el alto de la ventana
   (`KntDialogFrame Fill`): los filtros y los botones quedan a la vista y **solo la lista tiene scroll** (`knt-changes-layout`, el grid con
   `height: 100%` en un hueco `flex: 1`), como en las páginas de notas.
 - **Retención del historial** (H25): la pestaña «History» del panel Admin (`Notes/HistoryRetentionSettings`, `KntSections.HistoryRetention`),

@@ -41,3 +41,14 @@
     white-space: normal;
     overflow-wrap: anywhere;
 }
+
+.knt-changes-legend {
+    padding-top: 0.25rem;
+}
+
+/* The columns with a width (When, Who, From, What, State: 760px) leave «Change» what remains: in a narrow dialog nearly nothing,
+   and its text, broken anywhere, made each row so tall that the list looked empty. Never narrower than this: the list scrolls
+   sideways instead, and «Change» keeps at least 320px. */
+.knt-changes-grid ::deep .rz-grid-table {
+    min-width: 1080px;
+}

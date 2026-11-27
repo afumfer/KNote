@@ -1,0 +1,27 @@
+@using KNote.Model.Core
+
+@* The legend under a list of the history (Model/Core/HistoryRowStates): the states that appear in it, once each, with the tone of
+   their rows, their icon and why. Nothing if no row has one. *@
+
+@if (shown.Count > 0)
+{
+    <div class="knt-history-legend">
+        @foreach (var state in shown)
+        {
+            <div class="knt-history-legend-item">
+                <span class="knt-history-legend-swatch" style="background: @KntHistoryStates.ToneVariable(state)">
+                    <RadzenIcon Icon="@KntHistoryStates.Icon(state)" />
+                </span>
+                <span><b>@HistoryRowStates.Text(state).</b> @HistoryRowStates.Legend(state)</span>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IEnumerable<EnumHistoryRowState>? States { get; set; }
+
+    private List<EnumHistoryRowState> shown = new();
+
+    protected override void OnParametersSet() => shown = HistoryRowStates.InLegend(States);
+}

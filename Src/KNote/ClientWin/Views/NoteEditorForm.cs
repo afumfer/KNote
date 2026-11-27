@@ -50,7 +50,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     // The history of the note (H.3), its own tab (CreateHistoryTab), read each time it is shown and after a save while it is;
     // 100 rows at a time (H20), the last request wins (_historyVersion).
-    private const int HistoryPrimaryColumnIndex = 3;   // Change (columns: When, Who, From, Change)
+    private const int HistoryPrimaryColumnIndex = 3;   // Change (columns: When, Who, From, Change, State)
     private TabPage tabHistory;
     private ListView listViewHistory;
     private Label labelHistoryStatus;
@@ -61,6 +61,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     private List<KLogDto> _historyRows = new();
     // The rows whose version can be restored (H23), of every page read.
     private readonly HashSet<Guid> _historyRestorable = new();
+    // The state of each row read that has one (HistoryRowStates.ForNoteHistory, given by the Service): its column «State», its tone
+    // and the legend under the list.
+    private readonly Dictionary<Guid, KNote.Model.Core.EnumHistoryRowState> _historyStates = new();
+    private HistoryStatesLegend _historyLegend;
     private int _historyTotal;
     private int _historyVersion;
 
@@ -297,6 +301,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _historyRestorable.Clear();
         listViewHistory.Items.Clear();
         labelHistoryStatus.Text = "";
+        _historyStates.Clear();
+        _historyLegend.SetStates(_historyStates.Values);
         UpdateHistoryButtons();
     }
 
@@ -1672,7 +1678,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     #region History (H.3)
 
     // The last tab, built here and not in the Designer: who changed what and when, the newest first; «See this version» (and
-    // double click, Enter) opens the note as it was after the selected change (H18).
+    // double click, Enter) opens the note as it was after the selected change (H18). Each row says in «State», with the tone of its
+    // row and the legend under the list, why its version can't be restored or how (HistoryRowStates).
     private void CreateHistoryTab()
     {
         listViewHistory = new ListView { Dock = DockStyle.Fill, MultiSelect = false, HideSelection = false, ShowItemToolTips = true };
@@ -1681,6 +1688,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         listViewHistory.Columns.Add("Who", LogicalToDeviceUnits(100), HorizontalAlignment.Left);
         listViewHistory.Columns.Add("From", LogicalToDeviceUnits(80), HorizontalAlignment.Left);
         listViewHistory.Columns.Add("Change", LogicalToDeviceUnits(400), HorizontalAlignment.Left);
+        listViewHistory.Columns.Add("State", LogicalToDeviceUnits(160), HorizontalAlignment.Left);
         listViewHistory.Resize += (s, e) => ListViewColumnResizer.Resize(listViewHistory, HistoryPrimaryColumnIndex);
         listViewHistory.DoubleClick += async (s, e) => await SeeVersionAsync();
         listViewHistory.KeyDown += async (s, e) =>
@@ -1716,6 +1724,9 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         tabHistory = new TabPage("History  ") { ImageIndex = 7, Padding = tabTraceNotes.Padding, UseVisualStyleBackColor = false };
         tabHistory.Controls.Add(listViewHistory);
+        // What the states of the rows mean (the tones of their rows), under the list.
+        _historyLegend = new HistoryStatesLegend { Dock = DockStyle.Bottom, Padding = new Padding(LogicalToDeviceUnits(4), LogicalToDeviceUnits(4), LogicalToDeviceUnits(4), LogicalToDeviceUnits(2)) };
+        tabHistory.Controls.Add(_historyLegend);
         tabHistory.Controls.Add(panelHistoryHeader);
         tabNoteData.TabPages.Add(tabHistory);
     }
@@ -1730,6 +1741,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             _historyRows = new();
             _historyRestorable.Clear();
+            _historyStates.Clear();
+            _historyLegend.SetStates(_historyStates.Values);
             listViewHistory.Items.Clear();
             UpdateHistoryButtons();
         }
@@ -1762,6 +1775,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
         _historyTotal = result.Entity.Total;
         _historyRestorable.UnionWith(result.Entity.Restorable ?? new());
+        foreach (var state in result.Entity.States ?? new())
+            _historyStates.TryAdd(state.KLogId, state.State);
         listViewHistory.BeginUpdate();
         foreach (var row in result.Entity.Rows.Where(r => _historyRows.All(k => k.KLogId != r.KLogId)))
         {
@@ -1770,9 +1785,13 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             item.SubItems.Add(row.UserName ?? "");
             item.SubItems.Add(row.Origin ?? "");
             item.SubItems.Add(row.RegistryMessage ?? "");
+            var rowState = _historyStates.GetValueOrDefault(row.KLogId);
+            item.SubItems.Add(KNote.Model.Core.HistoryRowStates.Text(rowState));
+            HistoryRowColors.Paint(item, rowState);
             listViewHistory.Items.Add(item);
         }
         listViewHistory.EndUpdate();
+        _historyLegend.SetStates(_historyStates.Values);
         labelHistoryStatus.Text = _historyTotal == 0
             ? "No changes noted yet: the history starts the day it was installed."
             : _historyTotal == 1 ? "1 change" : $"{_historyTotal} changes";

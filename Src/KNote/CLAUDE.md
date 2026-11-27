@@ -327,6 +327,13 @@ independientes. Se configuran en `Server/appsettings.json` → sección `Reposit
   «Repository changes ...» (`RepositoryChangesDialog`); `ClientWin`: *Edit* › «Repository changes ...» (`RepositoryChangesCtrl`/`RepositoryChangesForm`).
   Tests en `ServiceTests/RepositoryChangesServiceTests`, `HistoryParityTests`, `InProcessIntegrationTests/HistoryInProcessTests` y
   `ClientWin.Tests/RepositoryChangesCtrlTests`.
+  **El estado de cada línea** (H31, en «Repository changes» y en la pestaña «History»): qué se puede recuperar o restaurar de ella, en vez de un
+  botón que no hace nada. Regla pura, `Model/Core/HistoryRowStates` (`ForChange`: la nota existe, está en las notas borradas hasta un día
+  —`DeletedNotesDays` desde su borrado—, para un Guest «Recoverable by Staff and up», ya sin copia, o la estructura «Only noted»;
+  `ForNoteHistory`: restaurable, con cambios posteriores, la nota actual o no restaurable), con su tono (ámbar, naranja, gris), su texto y su
+  leyenda, comunes a las dos apps. El `Service` lo da en cada página (`States`, solo las filas con estado, y `RepositoryChangesPageDto.CanRecover`,
+  Staff+: sin él, las apps no ofrecen «Recover deleted notes ...»). Tests en `Tests/HistoryRowStatesTests`, `RepositoryChangesServiceTests` y
+  `NoteHistoryViewServiceTests`.
 - **Ruta de una carpeta** (`IKntFolderService.GetPathAsync`, p. ej. `Home\Proyectos\KNote`): la usan
   `ClientWin` (`Store.GetKNoteFolerPath`) y la Web (`api/folders/{id}/path`).
 - **Nombre de un recurso**: único en su nota (índice único `NoteId + Name`). `KntNotesSaveResourceAsyncCommand`, por donde

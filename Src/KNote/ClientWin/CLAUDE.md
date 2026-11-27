@@ -801,7 +801,10 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   en el repositorio seleccionado, modal) con `RepositoryChangesForm`, en código: los filtros arriba (cada cambio vuelve a leer la lista; gana
   la última petición), la lista con «Show more» y, al pie (`FooterButtons`), «Open note» (también doble clic), «See this version» (cualquier
   línea de una nota salvo donde se sabe que no queda copia, `HistoryRules.CanSeeVersion`) y «Recover deleted notes ...», que abre `DeletedNotesCtrl` con `SelectedNoteId` (`RepositoryChangesCtrl.DeletedNoteOf`:
-  la nota de la línea de borrado elegida; `DeletedNotesForm` la selecciona al abrir si está). Sin «Recover» propio. La estructura solo sale para ProjectManager o superior: la deja fuera el
+  la nota de la línea de borrado elegida; `DeletedNotesForm` la selecciona al abrir si está). Sin «Recover» propio. «Recover deleted notes ...» solo para Staff+
+  (`RepositoryChangesCtrl.CanRecover`). **El estado de cada línea** (H31, también en la pestaña «History» del editor): la columna «State»
+  (`StateText`), el color de la fila (`Utils/HistoryRowColors`, con su versión oscura) y la leyenda debajo (`Views/HistoryStatesLegend`, solo
+  los estados que aparecen); los estados los da el `Service`. La estructura solo sale para ProjectManager o superior: la deja fuera el
   `Service`. Tests en `RepositoryChangesCtrlTests`.
 - **Botones al pie de las ventanas hechas en código** (`Views/FooterButtons`): 75 × 29 como los del Designer, escalados con el formulario,
   y más anchos (`FitTexts` en `OnLoad`) solo si su texto no cabe. **No `AutoSize`**: se medía a la escala de Windows y el formulario lo volvía a

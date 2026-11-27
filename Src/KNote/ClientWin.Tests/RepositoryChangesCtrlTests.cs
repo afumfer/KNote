@@ -1,7 +1,9 @@
 using KNote.ClientWin.Controllers;
 using KNote.ClientWin.Tests.Fakes;
 using KNote.ClientWin.Tests.Helpers;
+using KNote.ClientWin.Utils;
 using KNote.Model;
+using KNote.Model.Core;
 using KNote.Model.Dto;
 
 namespace KNote.ClientWin.Tests;
@@ -119,5 +121,40 @@ public class RepositoryChangesCtrlTests
 
         Assert.IsFalse(await ctrl.LoadAsync());
         StringAssert.Contains(ctrl.Error, "not available");
+    }
+
+    [TestMethod]
+    public async Task EachRow_HasTheStateTheServiceGives_AndAGuestCantRecover()
+    {
+        var service = NewService();
+        var alive = Row(HistoryEntities.Note, "Updated");
+        var deleted = Row(HistoryEntities.Note, "Deleted");
+        var folder = Row(HistoryEntities.Folder, "Updated");
+        var until = new DateTime(2026, 12, 27);
+        service.HistoryFake.GetRepositoryChangesAsyncImpl = _ => Task.FromResult(new Result<RepositoryChangesPageDto>(new RepositoryChangesPageDto
+        {
+            Rows = { alive, deleted, folder }, Total = 3, ExistingNotes = { alive.EntityId }, CanRecover = false,
+            States =
+            {
+                new HistoryRowStateDto { KLogId = deleted.KLogId, State = EnumHistoryRowState.RecoverableByStaff, Until = until },
+                new HistoryRowStateDto { KLogId = folder.KLogId, State = EnumHistoryRowState.OnlyNoted }
+            }
+        }));
+        service.HistoryFake.GetRepositoryChangesUsersAsyncImpl = _ => Task.FromResult(new Result<List<string>>(new List<string>()));
+        var ctrl = new RepositoryChangesCtrl(TestStoreFactory.CreateEmpty(), service);
+
+        Assert.IsTrue(await ctrl.LoadAsync());
+
+        Assert.IsFalse(ctrl.CanRecover, "no «Recover deleted notes ...»");
+        Assert.AreEqual(EnumHistoryRowState.None, ctrl.StateOf(alive));
+        Assert.AreEqual("", ctrl.StateText(alive));
+        Assert.AreEqual(EnumHistoryRowState.RecoverableByStaff, ctrl.StateOf(deleted));
+        Assert.AreEqual("Recoverable by Staff and up", ctrl.StateText(deleted));
+        Assert.AreEqual(EnumHistoryRowState.OnlyNoted, ctrl.StateOf(folder));
+        CollectionAssert.AreEquivalent(new[] { EnumHistoryRowState.RecoverableByStaff, EnumHistoryRowState.OnlyNoted }, ctrl.States.ToList());
+        Assert.AreEqual(EnumHistoryRowTone.Grey, HistoryRowStates.Tone(ctrl.StateOf(folder)));
+        Assert.AreNotEqual(HistoryRowColors.For(EnumHistoryRowTone.Amber, dark: false), HistoryRowColors.For(EnumHistoryRowTone.Amber, dark: true),
+            "each tone has its colour for the dark mode");
+        Assert.IsTrue(HistoryRowColors.For(EnumHistoryRowTone.None).IsEmpty);
     }
 }

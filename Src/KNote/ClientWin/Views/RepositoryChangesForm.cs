@@ -10,7 +10,8 @@ namespace KNote.ClientWin.Views;
 // «Repository changes» (RepositoryChangesCtrl, the history, H28): a modal window built here and not in the Designer. On top the
 // filters (the period, what changed, the action, the user and the origin: any change reads the list again); in the middle the
 // changes (when, who, from, what and the change), 100 at a time with «Show more»; at the foot «Open note» (also a double click),
-// «See this version» (any change of a note) and «Recover deleted notes ...», with the note of the row chosen selected there.
+// «See this version» (any change of a note) and «Recover deleted notes ...» (Staff and up), with the note of the row chosen selected
+// there. Each row says in «State», with the tone of its row and the legend under the list, what can be brought back of it.
 public class RepositoryChangesForm : KntForm, IViewRepositoryChanges
 {
     private sealed record Choice(string Value, string Text)
@@ -32,6 +33,8 @@ public class RepositoryChangesForm : KntForm, IViewRepositoryChanges
     private readonly Button _open;
     private readonly Button _seeVersion;
     private readonly Button _more;
+    private readonly Button _deletedNotes;
+    private readonly HistoryStatesLegend _legend;
     private bool _settingControls;
     private int _version;
     private const int ChangeColumnIndex = 4;
@@ -94,6 +97,7 @@ public class RepositoryChangesForm : KntForm, IViewRepositoryChanges
         _list.Columns.Add("From", 80, HorizontalAlignment.Left);
         _list.Columns.Add("What", 230, HorizontalAlignment.Left);
         _list.Columns.Add("Change", 400, HorizontalAlignment.Left);
+        _list.Columns.Add("State", 170, HorizontalAlignment.Left);
         _list.Resize += (s, e) => ListViewColumnResizer.Resize(_list, ChangeColumnIndex);
         _list.SelectedIndexChanged += (s, e) => UpdateButtons();
         _list.DoubleClick += async (s, e) => await _ctrl.OpenNoteAsync(Selected());
@@ -101,7 +105,7 @@ public class RepositoryChangesForm : KntForm, IViewRepositoryChanges
         var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, FlowDirection = FlowDirection.RightToLeft, AutoSize = true, Padding = new Padding(6) };
         var close = FooterButtons.Create("Close");
         close.DialogResult = DialogResult.OK;
-        var deletedNotes = FooterButtons.Create("Recover deleted notes ...");
+        _deletedNotes = FooterButtons.Create("Recover deleted notes ...");
         var refresh = FooterButtons.Create("Refresh");
         _more = FooterButtons.Create("Show more");
         _seeVersion = FooterButtons.Create("See this version");
@@ -112,9 +116,9 @@ public class RepositoryChangesForm : KntForm, IViewRepositoryChanges
         _more.Click += async (s, e) => await MoreAsync();
         refresh.Click += async (s, e) => await ReloadAsync();
         // With the note of the row chosen selected there, if it is a deletion.
-        deletedNotes.Click += async (s, e) => await _ctrl.OpenDeletedNotesAsync(Selected());
+        _deletedNotes.Click += async (s, e) => await _ctrl.OpenDeletedNotesAsync(Selected());
         buttons.Controls.Add(close);
-        buttons.Controls.Add(deletedNotes);
+        buttons.Controls.Add(_deletedNotes);
         buttons.Controls.Add(refresh);
         buttons.Controls.Add(_more);
         buttons.Controls.Add(_seeVersion);
@@ -122,7 +126,11 @@ public class RepositoryChangesForm : KntForm, IViewRepositoryChanges
         buttons.Controls.Add(_status);
         CancelButton = close;
 
+        // What the states of the rows mean (the tones of their rows), between the list and the buttons.
+        _legend = new HistoryStatesLegend { Dock = DockStyle.Bottom, Padding = new Padding(10, 2, 8, 2) };
+
         Controls.Add(_list);
+        Controls.Add(_legend);
         Controls.Add(buttons);
         Controls.Add(filters);
         ResumeLayout(true);
@@ -160,11 +168,15 @@ public class RepositoryChangesForm : KntForm, IViewRepositoryChanges
             item.SubItems.Add(row.Origin ?? "");
             item.SubItems.Add(HistoryRules.WhatText(row));
             item.SubItems.Add(row.RegistryMessage ?? "");
+            item.SubItems.Add(_ctrl.StateText(row));
+            HistoryRowColors.Paint(item, _ctrl.StateOf(row));
             _list.Items.Add(item);
         }
         _list.EndUpdate();
         _status.Text = _ctrl.Summary;
         _more.Visible = _ctrl.HasMore;
+        _deletedNotes.Visible = _ctrl.CanRecover;
+        _legend.SetStates(_ctrl.States);
         ListViewColumnResizer.Resize(_list, ChangeColumnIndex);
         UpdateButtons();
     }

@@ -104,6 +104,28 @@ public class NoteHistoryViewServiceTests
     [TestMethod]
     [DataRow("Dapper")]
     [DataRow("EntityFramework")]
+    public async Task EachRow_SaysHowItsVersionCanBeRestored(string orm)
+    {
+        await OpenAsync(orm);
+        var noteId = await StoredNoteAsync("A");
+        foreach (var (user, topic) in new[] { ("u1", "B"), ("u2", "C"), ("u3", "D") })
+            await EditAsync(noteId, user, n => n.Topic = topic);
+        var rows = (await service.History.GetNoteHistoryAsync(noteId)).Entity.Rows;
+        await service.Repository.History.ClearPreviousContentAsync(new List<Guid> { rows.Single(r => r.UserName == "u2").KLogId });
+
+        var page = (await service.History.GetNoteHistoryAsync(noteId)).Entity;
+        Model.Core.EnumHistoryRowState StateOf(string user) =>
+            page.States.SingleOrDefault(s => s.KLogId == page.Rows.Single(r => r.UserName == user).KLogId)?.State ?? Model.Core.EnumHistoryRowState.None;
+
+        Assert.AreEqual(Model.Core.EnumHistoryRowState.LaterChanges, StateOf("u1"), "the copy after it was emptied");
+        Assert.AreEqual(Model.Core.EnumHistoryRowState.None, StateOf("u2"), "restorable, exact");
+        Assert.AreEqual(Model.Core.EnumHistoryRowState.CurrentVersion, StateOf("u3"), "the last change: the note now");
+        Assert.IsTrue(page.States.All(s => s.State != Model.Core.EnumHistoryRowState.None), "only the rows with a state");
+    }
+
+    [TestMethod]
+    [DataRow("Dapper")]
+    [DataRow("EntityFramework")]
     public async Task AVersion_HasTheNamesOfItsTypeAndAttributes(string orm)
     {
         await OpenAsync(orm);

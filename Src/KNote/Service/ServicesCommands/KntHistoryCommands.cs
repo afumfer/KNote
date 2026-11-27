@@ -40,7 +40,12 @@ public class KntHistoryGetNoteHistoryAsyncCommand : KntCommandServiceBase<(Guid 
             Rows = page,
             Total = all.Count,
             Skip = skip,
-            Restorable = page.Where(r => restorable.Contains(r.KLogId)).Select(r => r.KLogId).ToList()
+            Restorable = page.Where(r => restorable.Contains(r.KLogId)).Select(r => r.KLogId).ToList(),
+            // What each row can bring back, said in the list (the state and its legend) instead of a «Restore» that is just disabled.
+            States = page
+                .Select(r => new HistoryRowStateDto { KLogId = r.KLogId, State = HistoryRowStates.ForNoteHistory(all, r, restorable) })
+                .Where(s => s.State != EnumHistoryRowState.None)
+                .ToList()
         };
         return result;
     }
@@ -646,6 +651,28 @@ public class KntHistoryGetRepositoryChangesAsyncCommand : KntCommandServiceBase<
 
         var noteIds = page.Rows.Where(r => r.EntityName == HistoryEntities.Note).Select(r => r.EntityId).Distinct().ToList();
         page.ExistingNotes = (await Repository.Notes.GetExistingNoteIdsAsync(noteIds)).Entity ?? new();
+
+        // What can be brought back of each row, by its note as it is now: in the deleted notes (until DeletedNotesDays after its
+        // deletion), gone, or there; the structure is only noted. Recovering is for Staff and up.
+        page.CanRecover = string.IsNullOrWhiteSpace(Service.UserIdentityName) || await Service.GetCurrentUserRoleAsync() >= EnumRoles.Staff;
+        var deletedUntil = new Dictionary<Guid, DateTime>();
+        if (noteIds.Count > page.ExistingNotes.Count)
+        {
+            var days = (await KntHistory.RetentionAsync(Service)).DeletedNotesDays;
+            foreach (var deleted in (await Repository.History.GetDeletedAsync(HistoryEntities.Note)).Entity ?? new())
+                deletedUntil[deleted.EntityId] = deleted.LastDateTime.Date.AddDays(days);
+        }
+        var existing = page.ExistingNotes.ToHashSet();
+        page.States = page.Rows
+            .Select(r => new HistoryRowStateDto
+            {
+                KLogId = r.KLogId,
+                State = HistoryRowStates.ForChange(r, existing.Contains(r.EntityId),
+                    deletedUntil.TryGetValue(r.EntityId, out var until) ? until : null, page.CanRecover),
+                Until = deletedUntil.TryGetValue(r.EntityId, out var day) ? day : null
+            })
+            .Where(s => s.State != EnumHistoryRowState.None)
+            .ToList();
 
         result.Entity = page;
         return result;

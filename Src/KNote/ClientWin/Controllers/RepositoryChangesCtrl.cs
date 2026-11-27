@@ -11,7 +11,9 @@ namespace KNote.ClientWin.Controllers;
 /// first, 100 at a time, with its filters (the period: the last 7 days at first). The structure only for ProjectManager and up (H29:
 /// the Service leaves it out and its kinds are not offered). «Open note» opens a note that exists; «See this version», the note as
 /// it was after any change of it; a deleted note is recovered in «Recover deleted notes ...», which opens with the note of the row
-/// chosen already selected (if it is still there). Guest, as reading the notes.
+/// chosen already selected (if it is still there). Each row has its state (HistoryRowStates: in the
+/// deleted notes until a day, can't be recovered, only noted); «Recover deleted notes ...» only for Staff and up (CanRecover). Guest,
+/// as reading the notes.
 /// </summary>
 [KntAuthorize(EnumRoles.Guest)]
 public class RepositoryChangesCtrl : CtrlViewBase<IViewRepositoryChanges>
@@ -41,6 +43,9 @@ public class RepositoryChangesCtrl : CtrlViewBase<IViewRepositoryChanges>
     public bool StructureIncluded { get; private set; }
     public List<string> Users { get; private set; } = new();
 
+    /// <summary>The user can recover deleted notes (Staff and up): if not, no «Recover deleted notes ...», and the rows say who can.</summary>
+    public bool CanRecover { get; private set; } = true;
+
     /// <summary>Some note was recovered while the window was open: the main window reads its list again.</summary>
     public bool AnyRecovered { get; private set; }
 
@@ -57,6 +62,9 @@ public class RepositoryChangesCtrl : CtrlViewBase<IViewRepositoryChanges>
     private bool _sinceRead;
 
     private readonly HashSet<Guid> _existingNotes = new();
+
+    // The state of each row read that has one (HistoryRowStates.ForChange, given by the Service).
+    private readonly Dictionary<Guid, HistoryRowStateDto> _states = new();
 
     #endregion
 
@@ -88,6 +96,7 @@ public class RepositoryChangesCtrl : CtrlViewBase<IViewRepositoryChanges>
         }
         Rows.Clear();
         _existingNotes.Clear();
+        _states.Clear();
         Add(result.Entity);
         StructureIncluded = result.Entity.StructureIncluded;
 
@@ -113,6 +122,17 @@ public class RepositoryChangesCtrl : CtrlViewBase<IViewRepositoryChanges>
         Add(result.Entity);
         return true;
     }
+
+    /// <summary>What can be brought back of a row (its column «State», the tone of its row and the legend).</summary>
+    public EnumHistoryRowState StateOf(KLogDto row) =>
+        row != null && _states.TryGetValue(row.KLogId, out var state) ? state.State : EnumHistoryRowState.None;
+
+    /// <summary>The column «State» of a row: «Recoverable until 4/12/2026», «Can't be recovered»...</summary>
+    public string StateText(KLogDto row) =>
+        row != null && _states.TryGetValue(row.KLogId, out var state) ? HistoryRowStates.Text(state.State, state.Until) : "";
+
+    /// <summary>The states of the rows read, for the legend.</summary>
+    public IEnumerable<EnumHistoryRowState> States => _states.Values.Select(s => s.State);
 
     public bool CanOpen(KLogDto row) => row?.EntityName == HistoryEntities.Note && _existingNotes.Contains(row.EntityId);
 
@@ -184,5 +204,8 @@ public class RepositoryChangesCtrl : CtrlViewBase<IViewRepositoryChanges>
         Rows.AddRange(page.Rows.Where(r => Rows.All(k => k.KLogId != r.KLogId)));
         Total = page.Total;
         _existingNotes.UnionWith(page.ExistingNotes ?? new());
+        foreach (var state in page.States ?? new())
+            _states[state.KLogId] = state;
+        CanRecover = page.CanRecover;
     }
 }
