@@ -306,9 +306,11 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         UpdateHistoryButtons();
     }
 
+    // After a save (also the autosave): nothing left to discard.
     public void RefreshViewOnlyRequiredCtrl()
     {
         ModelToControlsOnlyRequiredComponents();
+        buttonUndo.Enabled = false;
     }
 
     public Task RefreshTraceNotesDisplayAsync() => ModelToControlsTraceNotes();
@@ -418,7 +420,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         }
         else if (menuSel == buttonUndo)
         {
-            UndoChanges();
+            await UndoChanges();
         }
         else if (menuSel == buttonPostIt)
         {
@@ -480,12 +482,12 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
     private void NoteEditorForm_KeyUp(object sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
-            buttonUndo.Enabled = true;
+            MarkUnsaved();
     }
 
     private void NoteEditorForm_KeyPress(object sender, KeyPressEventArgs e)
     {
-        buttonUndo.Enabled = true;
+        MarkUnsaved();
     }
 
     private void buttonEditMarkdown_Click(object sender, EventArgs e)
@@ -713,7 +715,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             textFolder.Text = await _ctrl.Store.GetKNoteFolerPath(_ctrl.ServiceRef, _changedFolder.FolderId);
             textFolderNumber.Text = "#" + _changedFolder.FolderNumber.ToString();
 
-            buttonUndo.Enabled = true;
+            MarkUnsaved();
         }
     }
 
@@ -725,6 +727,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             textNoteType.Text = _ctrl.Model.NoteTypeDto?.Name;
             ModelToControlsAttributes();
+            MarkUnsaved();
         }
     }
 
@@ -735,6 +738,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             textNoteType.Text = _ctrl.Model.NoteTypeDto?.Name;
             ModelToControlsAttributes();
+            MarkUnsaved();
         }
     }
 
@@ -800,6 +804,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             listViewAlarms.Items.Add(MessageDtoToListViewItem(message));
             ListViewSelectionHelper.SelectByKey(listViewAlarms, message.KMessageId.ToString(), _alarmsSorter);
+            MarkUnsaved();
         }
     }
 
@@ -821,6 +826,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             listViewAlarms.Items[messageId.ToString()].Remove();
             ListViewSelectionHelper.SelectFirst(listViewAlarms, _alarmsSorter);
+            MarkUnsaved();
         }
     }
 
@@ -855,6 +861,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         bool res = _ctrl.DeleteTask(Guid.Parse(delTsk));
         if (res)
         {
+            MarkUnsaved();
             listViewTasks.Items[delTsk].Remove();
             if (listViewTasks.Items.Count > 0)
                 // Triggers listViewTasks_SelectedIndexChanged, which refreshes the task description
@@ -1313,6 +1320,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         // The folder chosen in this editor was for the note shown before: the one loaded now (another note, or the same one read
         // again after restoring a version, H23) is where the model says. Without this, saving put it back in the chosen one.
         _changedFolder = null;
+        // What is drawn now is the note as the model has it: nothing to discard yet.
+        buttonUndo.Enabled = false;
 
         // Basic data
         textTopic.Text = _ctrl.Model.Topic;
@@ -1668,6 +1677,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var added = await _ctrl.RelateSimilarNoteAsync(note);
         if (added != null)
         {
+            MarkUnsaved();
             await ModelToControlsTraceNotes();
             ListViewSelectionHelper.SelectByKey(listViewTraceNoteTo, added.TraceNoteId.ToString(), _traceNoteToSorter);
         }
@@ -1872,6 +1882,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var added = await _ctrl.NewTraceNote(ownerIsFromSide: false);
         if (added != null)
         {
+            MarkUnsaved();
             await ModelToControlsTraceNotes();
             ListViewSelectionHelper.SelectByKey(listViewTraceNoteFrom, added.TraceNoteId.ToString(), _traceNoteFromSorter);
         }
@@ -1892,6 +1903,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var added = await _ctrl.NewTraceNote(ownerIsFromSide: true);
         if (added != null)
         {
+            MarkUnsaved();
             await ModelToControlsTraceNotes();
             ListViewSelectionHelper.SelectByKey(listViewTraceNoteTo, added.TraceNoteId.ToString(), _traceNoteToSorter);
         }
@@ -1938,6 +1950,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var edited = await _ctrl.EditTraceNote(traceNoteId, ownerIsFromSide);
         if (edited != null)
         {
+            MarkUnsaved();
             await ModelToControlsTraceNotes();
             ListViewSelectionHelper.SelectByKey(listView, edited.TraceNoteId.ToString(), TraceNoteSorterFor(listView));
         }
@@ -1954,6 +1967,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var res = _ctrl.DeleteTraceNote(traceNoteId, ownerIsFromSide);
         if (res)
         {
+            MarkUnsaved();
             await ModelToControlsTraceNotes();
             ListViewSelectionHelper.SelectFirst(listView, TraceNoteSorterFor(listView));
         }
@@ -2030,10 +2044,13 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         _ctrl.Model.Script = textScriptCode.Text;
     }
 
+    // A save that fails keeps the changes, and «Undo» can still discard them.
     private async Task<bool> SaveModel()
     {
-        buttonUndo.Enabled = false;
-        return await _ctrl.SaveModel();
+        var saved = await _ctrl.SaveModel();
+        if (saved)
+            buttonUndo.Enabled = false;
+        return saved;
     }
 
     private async Task DeleteModel()
@@ -2043,14 +2060,18 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
             _ctrl.Finalize();
     }
 
-    private void UndoChanges()
+    // «Undo»: discards everything not saved yet (NoteEditorCtrl.DiscardChangesAsync reads the note again, or a new one back to blank,
+    // and redraws the editor, which disables the button).
+    private async Task UndoChanges()
     {
-        var res = KntMessageBox.Show("Are you sure you want to undo changes?", KntConst.AppName, MessageBoxButtons.YesNo);
-        if (res == DialogResult.Yes)
-        {
-            ModelToControls();
-            buttonUndo.Enabled = false;
-        }
+        await _ctrl.DiscardChangesAsync();
+    }
+
+    // Something of the note changed in the editor and is not saved yet: «Undo» can discard it. Disabled again when the note is
+    // saved or drawn again (ModelToControls: another note, discarded, restored).
+    private void MarkUnsaved()
+    {
+        buttonUndo.Enabled = true;
     }
 
     private async Task<bool> PostItEdit()
@@ -2243,7 +2264,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var messageId = Guid.Parse(listViewAlarms.SelectedItems[0].Name);
         var message = _ctrl.EditMessage(messageId);
         if (message != null)
+        {
             UpdateMessage(message);
+            MarkUnsaved();
+        }
     }
 
     private void UpdateMessage(KMessageDto message)
@@ -2269,7 +2293,10 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var idTask = Guid.Parse(listViewTasks.SelectedItems[0].Name);
         var task = _ctrl.EditTask(idTask);
         if (task != null)
+        {
+            MarkUnsaved();
             await UpdateTask(task);
+        }
     }
 
     private async Task UpdateTask(NoteTaskDto task)
@@ -2305,7 +2332,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             _selectedResource = resource;
             UpdateResource(resource);
-            buttonUndo.Enabled = true;
+            MarkUnsaved();
         }
     }
 
@@ -2323,7 +2350,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         {
             // Refrescar listView
             UpdateNoteAttribute(noteAttributeEdited);
-            buttonUndo.Enabled = true;
+            MarkUnsaved();
         }
     }
 
@@ -2383,6 +2410,8 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
 
     private void AddItemToListViewResources(ResourceDto resource)
     {
+        // Only for a resource added in the editor (the three Add* above): not saved until the note is.
+        MarkUnsaved();
         listViewResources.Items.Add(ResourceDtoToListViewItem(resource));
         _selectedResource = resource;
         ListViewSelectionHelper.SelectByKey(listViewResources, resource.ResourceId.ToString(), _resourcesSorter);
@@ -2673,6 +2702,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         NoteTaskDto task = await _ctrl.NewTask(defaultDescription, listViewTasks.Items.Count);
         if (task != null)
         {
+            MarkUnsaved();
             listViewTasks.Items.Add(NoteTaskDtoToListViewItem(task));
             ListViewSelectionHelper.SelectByKey(listViewTasks, task.NoteTaskId.ToString(), _tasksSorter);
             await UpdateTaskDescription(task.Description);
@@ -2692,6 +2722,7 @@ public partial class NoteEditorForm : KntForm, IViewNoteEditorEmbeddable<NoteExt
         var res = _ctrl.DeleteResource(Guid.Parse(delRes));
         if (res)
         {
+            MarkUnsaved();
             listViewResources.Items[delRes].Remove();
             _selectedResource = null;
             await webViewResource.ClearWebView();

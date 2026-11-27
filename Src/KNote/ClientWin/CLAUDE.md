@@ -792,6 +792,13 @@ estado, del progreso y de las preguntas son los de `Model/Core/SemanticIndexText
   cargar la nota (`LoadModelById` + `OnSavedEntity`, que avisa a las listas) y muestra los avisos. Tests en `NoteCompareCtrlTests`.
   `ModelToControls` olvida la carpeta elegida a mano en el editor (`_changedFolder`): era de la nota mostrada antes y, tras restaurar
   una versión de otra carpeta, guardar volvía a dejar la nota en la elegida.
+- **«Undo» del editor de notas** («Discard the unsaved changes»): `NoteEditorCtrl.DiscardChangesAsync` pregunta y **vuelve a leer la nota**
+  (`LoadModelById`; una nota nueva vuelve a quedar en blanco en su carpeta, `NewModelCoreAsync` sin redibujar y un solo `RefreshView`). Antes
+  solo repintaba la nota en memoria, donde ya están las tareas, recursos (editados sobre el mismo objeto), alarmas, relaciones, atributos y el
+  tipo hasta guardar la nota: no deshacía casi nada. El botón se activa con cualquier cambio sin guardar (`NoteEditorForm.MarkUnsaved`, en
+  cada alta, edición o borrado de esas partes, la carpeta, el tipo y al escribir) y se desactiva al dibujar la nota (`ModelToControls`) y
+  tras un guardado correcto, también el autoguardado (`RefreshViewOnlyRequiredCtrl`). `LoadModelById` dice el error del servicio si la
+  nota ya no se puede leer. Tests en `NoteEditorCtrlDiscardChangesTests`.
 - **Notas borradas** (H24, H27): *Edit* › «Recover deleted notes ...» (debajo de «Delete note», creado en código en `KNoteManagementForm`;
   el nombre no se lee como «Delete note») abre `DeletedNotesCtrl` (`[KntAuthorize(Staff)]` en el repositorio seleccionado, modal) con
   `DeletedNotesForm`, en código: la lista, «See this version» (`NoteVersionCtrl` con la fila `Deleted`), «Recover» (dice lo que no volvió y

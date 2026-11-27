@@ -244,7 +244,7 @@
             buttonUndo.Size = new Size(23, 22);
             buttonUndo.Text = "Undo  ";
             buttonUndo.TextImageRelation = TextImageRelation.TextBeforeImage;
-            buttonUndo.ToolTipText = "Undo changes";
+            buttonUndo.ToolTipText = "Discard the unsaved changes";
             buttonUndo.Click += buttonToolBar_Click;
             // 
             // toolStripS1

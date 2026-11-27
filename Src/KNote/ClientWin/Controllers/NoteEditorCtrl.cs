@@ -160,7 +160,14 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         {                
             Service = service;
 
-            Model = (await Service.Notes.GetExtendedAsync(noteId)).Entity;
+            // A note that can't be read (deleted in another window, say): its error, not a null reference.
+            var result = await Service.Notes.GetExtendedAsync(noteId);
+            if (!result.IsValid || result.Entity == null)
+            {
+                View.ShowInfo(string.IsNullOrEmpty(result.ErrorMessage) ? "The note could not be read." : result.ErrorMessage);
+                return false;
+            }
+            Model = result.Entity;
             Model.SetEmptyTextsForEditing();
             Model.SetIsDirty(false);
             if(refreshView)
@@ -174,12 +181,16 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
         }
     }
         
-    public override async Task<bool> NewModel(IKntService service)
+    public override Task<bool> NewModel(IKntService service) => NewModelCoreAsync(service, refreshView: true);
+
+    // A new note; with refreshView false, for who sets something more before drawing it (DiscardChangesAsync): two refreshes at
+    // once (ModelToControls is async void) drew some lists twice.
+    private async Task<bool> NewModelCoreAsync(IKntService service, bool refreshView)
     {
         try
         {
             Service = service;
-                
+
             // Refused for a user who can't create notes in this repository (a Guest): said before any editor opens.
             var response = await Service.Notes.NewExtendedAsync();
             if (!response.IsValid)
@@ -212,15 +223,52 @@ public class NoteEditorCtrl : CtrlNoteEditorEmbeddableBase<IViewNoteEditorEmbedd
 
             Model.SetIsDirty(false);
 
-            View.RefreshView();
-                
+            if (refreshView)
+                View.RefreshView();
+
             return true;
         }
         catch (Exception ex)
         {
-            View.ShowInfo(ex.Message);                
+            View.ShowInfo(ex.Message);
         }
         return false;
+    }
+
+    public const string DiscardChangesQuestion =
+        "Discard the changes not saved yet? The note goes back to how it was last saved. Earlier versions are in the History tab.";
+    public const string DiscardNewNoteQuestion = "Discard the changes of this new note? It goes back to blank.";
+
+    /// <summary>
+    /// «Undo»: after confirming, everything not saved yet is discarded (its text and data, and the resources, tasks, alarms,
+    /// relations, attributes, type and folder changed in the editor, which only go to the database with the note): a note that
+    /// exists is read again from the database; a new one goes back to blank, in its folder. Nothing changes in the database.
+    /// True if the changes were discarded.
+    /// </summary>
+    public async Task<bool> DiscardChangesAsync()
+    {
+        if (Service == null || Model == null)
+            return false;
+
+        var isNew = Model.NoteId == Guid.Empty;
+        if (View.ShowInfo(isNew ? DiscardNewNoteQuestion : DiscardChangesQuestion, "Discard changes", MessageBoxButtons.YesNo) != DialogResult.Yes)
+            return false;
+
+        if (!isNew)
+            return await LoadModelById(Service, Model.NoteId);
+
+        var folderId = Model.FolderId;
+        var folder = Model.FolderDto;
+        if (!await NewModelCoreAsync(Service, refreshView: false))
+            return false;
+        if (folder != null)
+        {
+            Model.FolderId = folderId;
+            Model.FolderDto = folder;
+            Model.SetIsDirty(false);
+        }
+        View.RefreshView();
+        return true;
     }
 
     protected override Result<EControllerResult> OnInitialized()
